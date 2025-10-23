@@ -11,6 +11,41 @@ import { sendPushNotificationToUsers } from '@/app/actions/push-notifications'
 // ================================
 
 /**
+ * Send push notification when new meeting is scheduled
+ */
+export async function notifyMeetingScheduled(
+  clientId: string,
+  meetingTitle: string,
+  meetingDate: string,
+  trainerName: string,
+) {
+  return await sendPushNotificationToUsers(
+    [clientId],
+    '🗓️ New Meeting Scheduled',
+    `${trainerName} has scheduled "${meetingTitle}" for ${meetingDate}`,
+    '/fitspace/my-trainer',
+  )
+}
+
+/**
+ * Send push notification when meeting details are updated
+ */
+export async function notifyMeetingUpdated(
+  clientId: string,
+  meetingTitle: string,
+  changedFields: string,
+  meetingDate: string,
+  trainerName: string,
+) {
+  return await sendPushNotificationToUsers(
+    [clientId],
+    '🔄 Meeting Updated',
+    `${trainerName} updated "${meetingTitle}" (${changedFields}) - ${meetingDate}`,
+    '/fitspace/my-trainer',
+  )
+}
+
+/**
  * Send push notification for meeting reminder
  */
 export async function notifyMeetingReminder(

@@ -6,11 +6,15 @@ import {
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
+import {
+  notifyMeetingScheduled,
+  notifyMeetingUpdated,
+} from '@/lib/notifications/push-notification-service'
 import { GQLContext } from '@/types/gql-context'
 
 import Meeting from './model'
 
-// Helper function to send meeting notification via messenger
+// Helper function to send meeting notification via messenger and push
 async function sendMeetingNotification(
   trainerId: string,
   traineeId: string,
@@ -25,6 +29,30 @@ async function sendMeetingNotification(
   },
 ) {
   try {
+    // Get trainer info and trainee's time format preference
+    const [trainer, trainee] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: trainerId },
+        select: {
+          profile: {
+            select: { firstName: true, lastName: true },
+          },
+        },
+      }),
+      prisma.user.findUnique({
+        where: { id: traineeId },
+        select: {
+          profile: {
+            select: { timeFormat: true },
+          },
+        },
+      }),
+    ])
+
+    const trainerName = trainer?.profile?.firstName
+      ? `${trainer.profile.firstName}${trainer.profile.lastName ? ` ${trainer.profile.lastName}` : ''}`
+      : 'Your trainer'
+
     // Get or create chat between trainer and trainee
     let chat = await prisma.chat.findFirst({
       where: {
@@ -42,9 +70,11 @@ async function sendMeetingNotification(
       })
     }
 
-    // Format meeting details message
+    // Format meeting details message using trainee's preferred time format
+    const timeFormat =
+      trainee?.profile?.timeFormat === 'h12' ? 'h:mm a' : 'HH:mm'
     const meetingDate = format(meeting.scheduledAt, 'EEEE, MMMM d, yyyy')
-    const meetingTime = format(meeting.scheduledAt, 'h:mm a')
+    const meetingTime = format(meeting.scheduledAt, timeFormat)
 
     const meetingTypeLabels: Record<string, string> = {
       INITIAL_CONSULTATION: 'Initial Consultation',
@@ -87,9 +117,148 @@ Looking forward to seeing you!`
       where: { id: chat.id },
       data: { updatedAt: new Date() },
     })
+
+    // Send push notification
+    const shortTimeFormat =
+      trainee?.profile?.timeFormat === 'h12' ? 'h:mm a' : 'HH:mm'
+    const shortDate = format(meeting.scheduledAt, `MMM d, ${shortTimeFormat}`)
+    await notifyMeetingScheduled(
+      traineeId,
+      meeting.title,
+      shortDate,
+      trainerName,
+    )
   } catch (error) {
     // Log error but don't fail the meeting creation
     console.error('Failed to send meeting notification:', error)
+  }
+}
+
+// Helper function to send meeting update notification via messenger and push
+async function sendMeetingUpdateNotification(
+  trainerId: string,
+  traineeId: string,
+  meeting: {
+    title: string
+    type: string
+    scheduledAt: Date
+    duration: number
+    locationType: string
+    address: string | null
+    meetingLink: string | null
+  },
+  changedFields: string[],
+) {
+  try {
+    // Get trainer info and trainee's time format preference
+    const [trainer, trainee] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: trainerId },
+        select: {
+          profile: {
+            select: { firstName: true, lastName: true },
+          },
+        },
+      }),
+      prisma.user.findUnique({
+        where: { id: traineeId },
+        select: {
+          profile: {
+            select: { timeFormat: true },
+          },
+        },
+      }),
+    ])
+
+    const trainerName = trainer?.profile?.firstName
+      ? `${trainer.profile.firstName}${trainer.profile.lastName ? ` ${trainer.profile.lastName}` : ''}`
+      : 'Your trainer'
+
+    // Get or create chat between trainer and trainee
+    let chat = await prisma.chat.findFirst({
+      where: {
+        trainerId,
+        clientId: traineeId,
+      },
+    })
+
+    if (!chat) {
+      chat = await prisma.chat.create({
+        data: {
+          trainerId,
+          clientId: traineeId,
+        },
+      })
+    }
+
+    // Format meeting details message using trainee's preferred time format
+    const timeFormat =
+      trainee?.profile?.timeFormat === 'h12' ? 'h:mm a' : 'HH:mm'
+    const meetingDate = format(meeting.scheduledAt, 'EEEE, MMMM d, yyyy')
+    const meetingTime = format(meeting.scheduledAt, timeFormat)
+
+    const meetingTypeLabels: Record<string, string> = {
+      INITIAL_CONSULTATION: 'Initial Consultation',
+      IN_PERSON_TRAINING: 'In-Person Training',
+      CHECK_IN: 'Check-In',
+      PLAN_REVIEW: 'Plan Review',
+    }
+
+    let locationInfo = ''
+    if (meeting.locationType === 'VIRTUAL' && meeting.meetingLink) {
+      locationInfo = `📍 Location: Virtual Meeting\n🔗 Join here: ${meeting.meetingLink}`
+    } else if (meeting.address) {
+      locationInfo = `📍 Location: ${meeting.address}`
+    }
+
+    // Create a more specific message based on what changed
+    const changesList = changedFields.join(', ')
+    const messageContent = `🔄 Meeting Updated
+
+Your trainer has updated the following meeting details:
+
+${meeting.title}
+${meetingTypeLabels[meeting.type] || meeting.type}
+
+Updated: ${changesList}
+
+📅 Date: ${meetingDate}
+⏰ Time: ${meetingTime}
+⏱️ Duration: ${meeting.duration} minutes
+
+${locationInfo}
+
+Please check the updated details!`
+
+    // Send the message
+    await prisma.message.create({
+      data: {
+        chatId: chat.id,
+        senderId: trainerId,
+        content: messageContent,
+      },
+    })
+
+    // Update chat's updatedAt timestamp
+    await prisma.chat.update({
+      where: { id: chat.id },
+      data: { updatedAt: new Date() },
+    })
+
+    // Send push notification
+    const shortTimeFormat =
+      trainee?.profile?.timeFormat === 'h12' ? 'h:mm a' : 'HH:mm'
+    const shortDate = format(meeting.scheduledAt, `MMM d, ${shortTimeFormat}`)
+    await notifyMeetingUpdated(
+      traineeId,
+      meeting.title,
+      changesList,
+      shortDate,
+      trainerName,
+    )
+  } catch (error) {
+    // Log error but don't fail the meeting update
+    console.error('Failed to send meeting update notification:', error)
   }
 }
 
@@ -234,21 +403,62 @@ export async function updateMeeting(
   }
 
   const updateData: Prisma.MeetingUpdateInput = {}
+  const changedFields: string[] = []
 
   // Coach can update all fields
-  if (existingMeeting.coachId === currentUserId) {
-    if (input.type) updateData.type = input.type
-    if (input.status) updateData.status = input.status
-    if (input.scheduledAt) updateData.scheduledAt = new Date(input.scheduledAt)
-    if (input.duration) updateData.duration = input.duration
+  const isCoachUpdate = existingMeeting.coachId === currentUserId
+  if (isCoachUpdate) {
+    if (input.type && input.type !== existingMeeting.type) {
+      updateData.type = input.type
+      changedFields.push('meeting type')
+    }
+    if (input.status && input.status !== existingMeeting.status) {
+      updateData.status = input.status
+    }
+    if (input.scheduledAt) {
+      const newDate = new Date(input.scheduledAt)
+      if (newDate.getTime() !== existingMeeting.scheduledAt.getTime()) {
+        updateData.scheduledAt = newDate
+        changedFields.push('date/time')
+      }
+    }
+    if (input.duration && input.duration !== existingMeeting.duration) {
+      updateData.duration = input.duration
+      changedFields.push('duration')
+    }
     if (input.timezone) updateData.timezone = input.timezone
-    if (input.locationType) updateData.locationType = input.locationType
-    if (input.address !== undefined) updateData.address = input.address
-    if (input.meetingLink !== undefined)
+    if (
+      input.locationType &&
+      input.locationType !== existingMeeting.locationType
+    ) {
+      updateData.locationType = input.locationType
+      changedFields.push('location type')
+    }
+    if (
+      input.address !== undefined &&
+      input.address !== existingMeeting.address
+    ) {
+      updateData.address = input.address
+      changedFields.push('address')
+    }
+    if (
+      input.meetingLink !== undefined &&
+      input.meetingLink !== existingMeeting.meetingLink
+    ) {
       updateData.meetingLink = input.meetingLink
-    if (input.title) updateData.title = input.title
-    if (input.description !== undefined)
+      changedFields.push('meeting link')
+    }
+    if (input.title && input.title !== existingMeeting.title) {
+      updateData.title = input.title
+      changedFields.push('title')
+    }
+    if (
+      input.description !== undefined &&
+      input.description !== existingMeeting.description
+    ) {
       updateData.description = input.description
+      changedFields.push('description')
+    }
     if (input.notes !== undefined) updateData.notes = input.notes
   } else {
     // Trainee can only update limited fields (status confirmation, etc.)
@@ -289,6 +499,24 @@ export async function updateMeeting(
       serviceTask: true,
     },
   })
+
+  // Send notification to trainee if coach made significant changes
+  if (isCoachUpdate && changedFields.length > 0) {
+    await sendMeetingUpdateNotification(
+      existingMeeting.coachId,
+      existingMeeting.traineeId,
+      {
+        title: meeting.title,
+        type: meeting.type,
+        scheduledAt: meeting.scheduledAt,
+        duration: meeting.duration,
+        locationType: meeting.locationType,
+        address: meeting.address,
+        meetingLink: meeting.meetingLink,
+      },
+      changedFields,
+    )
+  }
 
   return new Meeting(meeting, context)
 }
