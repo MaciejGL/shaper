@@ -11,7 +11,6 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export default function Error({
   error,
-  reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
@@ -20,6 +19,11 @@ export default function Error({
     // Capture error with PostHog
     posthog.captureException(error)
   }, [error])
+
+  const handleTryAgain = () => {
+    // Full page reload to clear all state
+    window.location.reload()
+  }
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background">
@@ -55,7 +59,7 @@ export default function Error({
 
           <div className="flex flex-col sm:flex-row gap-3 w-full">
             <Button
-              onClick={reset}
+              onClick={handleTryAgain}
               className="flex-1"
               iconStart={<RefreshCw />}
             >

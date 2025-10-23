@@ -1,13 +1,14 @@
 'use client'
 
+import { RefreshCw } from 'lucide-react'
 import posthog from 'posthog-js'
 import { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 
 export default function ErrorPage({
   error,
-  reset,
 }: {
   error: Error
   reset: () => void
@@ -17,8 +18,13 @@ export default function ErrorPage({
     posthog.captureException(error)
   }, [error])
 
+  const handleTryAgain = () => {
+    // Full page reload to clear all state
+    window.location.reload()
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-screen space-y-4 p-4">
       <h1 className="text-2xl font-bold">Something went wrong</h1>
       {process.env.NODE_ENV === 'development' ? (
         <p className="text-sm text-muted-foreground">{error.message}</p>
@@ -28,9 +34,14 @@ export default function ErrorPage({
           support.
         </p>
       )}
-      <Button onClick={reset} className="mt-4">
-        Reset
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={handleTryAgain} iconStart={<RefreshCw />}>
+          Try Again
+        </Button>
+        <ButtonLink href="/fitspace/workout" variant="secondary">
+          Go To Workout
+        </ButtonLink>
+      </div>
     </div>
   )
 }
