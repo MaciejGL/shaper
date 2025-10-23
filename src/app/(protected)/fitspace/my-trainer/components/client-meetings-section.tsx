@@ -75,14 +75,6 @@ export function ClientMeetingsSection() {
           <div className="flex items-center gap-2">
             <SectionIcon icon={Calendar} size="xs" />
             <CardTitle>Meetings</CardTitle>
-            <Button
-              variant="ghost"
-              size="xs"
-              className="ml-auto"
-              onClick={() => setShowAllMeetings(true)}
-            >
-              View All
-            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -92,7 +84,25 @@ export function ClientMeetingsSection() {
     )
   }
 
-  if (meetings.length === 0) {
+  if (meetings.length === 0 && allMeetings.length === 0) {
+    return (
+      <Card borderless>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <SectionIcon icon={Calendar} size="xs" />
+            <CardTitle>Meetings</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            No meetings scheduled with your trainer.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (meetings.length === 0 && allMeetings.length > 0) {
     return (
       <Card borderless>
         <CardHeader>
@@ -111,7 +121,7 @@ export function ClientMeetingsSection() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            No upcoming meetings scheduled with your trainer.
+            No upcoming meetings. View past meetings.
           </p>
         </CardContent>
       </Card>
