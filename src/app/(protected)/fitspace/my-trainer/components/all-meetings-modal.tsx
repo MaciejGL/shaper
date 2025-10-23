@@ -16,6 +16,7 @@ import {
   GQLGetAllClientMeetingsQuery,
   useGetAllClientMeetingsQuery,
 } from '@/generated/graphql-client'
+import { useTimeFormatting } from '@/hooks/use-time-formatting'
 import { cn } from '@/lib/utils'
 import { addToCalendar } from '@/utils/calendar-utils'
 
@@ -50,6 +51,8 @@ export function AllMeetingsDrawer({
   isOpen,
   onOpenChange,
 }: AllMeetingsDrawerProps) {
+  const { formatTime } = useTimeFormatting()
+
   const { data, isLoading } = useGetAllClientMeetingsQuery(
     {},
     {
@@ -79,6 +82,20 @@ export function AllMeetingsDrawer({
     const meetingDate = new Date(meeting.scheduledAt)
     const isPastMeeting = !isToday(meetingDate) && isPast(meetingDate)
 
+    // Determine status label: show "Upcoming" for future PENDING/CONFIRMED meetings
+    const getStatusDisplay = () => {
+      const now = new Date()
+      if (
+        meetingDate > now &&
+        (meeting.status === 'PENDING' || meeting.status === 'CONFIRMED')
+      ) {
+        return 'Upcoming'
+      }
+      return meeting.status
+    }
+
+    const statusLabel = getStatusDisplay()
+
     return (
       <Card
         key={meeting.id}
@@ -100,7 +117,7 @@ export function AllMeetingsDrawer({
                     STATUS_COLORS[meeting.status],
                   )}
                 >
-                  {meeting.status.toLowerCase()}
+                  {statusLabel.toLowerCase()}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -120,7 +137,7 @@ export function AllMeetingsDrawer({
             <div className="flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-xs">
-                {format(meetingDate, 'h:mm a')} • {meeting.duration}min
+                {formatTime(meetingDate)} • {meeting.duration}min
               </span>
             </div>
           </div>

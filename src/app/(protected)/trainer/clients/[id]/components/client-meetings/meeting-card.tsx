@@ -26,6 +26,7 @@ import {
   useGetTraineeMeetingsQuery,
   useUpdateMeetingMutation,
 } from '@/generated/graphql-client'
+import { useTimeFormatting } from '@/hooks/use-time-formatting'
 import { cn } from '@/lib/utils'
 import { addToCalendar } from '@/utils/calendar-utils'
 
@@ -65,6 +66,7 @@ export function MeetingCard({
   const [isUpdating, setIsUpdating] = useState(false)
   const queryClient = useQueryClient()
   const { openModal } = useConfirmationModalContext()
+  const { formatTime } = useTimeFormatting()
 
   const updateMutation = useUpdateMeetingMutation()
   const cancelMutation = useCancelMeetingMutation()
@@ -132,6 +134,20 @@ export function MeetingCard({
   const meetingDate = new Date(meeting.scheduledAt)
   const isUpcoming = meetingDate >= new Date() && meeting.status !== 'CANCELLED'
 
+  // Determine status label: show "Upcoming" for future PENDING/CONFIRMED meetings
+  const getStatusDisplay = () => {
+    const now = new Date()
+    if (
+      meetingDate > now &&
+      (meeting.status === 'PENDING' || meeting.status === 'CONFIRMED')
+    ) {
+      return 'Upcoming'
+    }
+    return meeting.status
+  }
+
+  const statusLabel = getStatusDisplay()
+
   return (
     <Card borderless className={cn('py-3', isPast && 'opacity-75')}>
       <CardContent className="space-y-2">
@@ -145,11 +161,11 @@ export function MeetingCard({
               <Badge
                 variant="secondary"
                 className={cn(
-                  'text-xs shrink-0',
+                  'text-xs shrink-0 capitalize',
                   STATUS_COLORS[meeting.status],
                 )}
               >
-                {meeting.status}
+                {statusLabel.toLowerCase()}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -201,7 +217,7 @@ export function MeetingCard({
           <div className="flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-xs">
-              {format(meetingDate, 'h:mm a')} • {meeting.duration}min
+              {formatTime(meetingDate)} • {meeting.duration}min
             </span>
           </div>
         </div>
