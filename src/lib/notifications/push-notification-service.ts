@@ -21,7 +21,7 @@ export async function notifyMeetingScheduled(
 ) {
   return await sendPushNotificationToUsers(
     [clientId],
-    '🗓️ New Meeting Scheduled',
+    'New Meeting Scheduled',
     `${trainerName} has scheduled "${meetingTitle}" for ${meetingDate}`,
     '/fitspace/my-trainer',
   )
@@ -39,8 +39,8 @@ export async function notifyMeetingUpdated(
 ) {
   return await sendPushNotificationToUsers(
     [clientId],
-    '🔄 Meeting Updated',
-    `${trainerName} updated "${meetingTitle}" (${changedFields}) - ${meetingDate}`,
+    'Meeting Updated',
+    `${trainerName} updated "${meetingTitle}" - ${meetingDate}`,
     '/fitspace/my-trainer',
   )
 }
