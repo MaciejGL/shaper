@@ -111,6 +111,44 @@ export async function handleSubscriptionCreated(
 
     // Create support chat for user after successful subscription
     await createSupportChatForUser(user.id)
+
+    // If new subscription is coaching, pause any existing yearly premium
+    const isCoaching = lookupKey === 'premium_coaching'
+
+    if (isCoaching) {
+      const existingYearly = await prisma.userSubscription.findFirst({
+        where: {
+          userId: user.id,
+          status: SubscriptionStatus.ACTIVE,
+          package: {
+            stripeLookupKey: 'premium_yearly',
+            duration: 'YEARLY',
+          },
+        },
+      })
+
+      if (existingYearly?.stripeSubscriptionId) {
+        try {
+          await stripe.subscriptions.update(
+            existingYearly.stripeSubscriptionId,
+            {
+              pause_collection: {
+                behavior: 'void',
+              },
+              metadata: {
+                pausedForCoaching: 'true',
+                pausedAt: new Date().toISOString(),
+              },
+            },
+          )
+          console.info(
+            `✅ Paused yearly subscription ${existingYearly.stripeSubscriptionId}`,
+          )
+        } catch (error) {
+          console.error('Failed to pause yearly subscription:', error)
+        }
+      }
+    }
   } catch (error) {
     console.error('Error handling subscription created:', error)
   }

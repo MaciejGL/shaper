@@ -1195,6 +1195,7 @@ export type GQLMutation = {
   markWorkoutAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   moderateReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   moveExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  pauseClientCoachingSubscription: EntireFieldWrapper<GQLPauseCoachingResult>;
   pausePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   removeAllExercisesFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1219,6 +1220,7 @@ export type GQLMutation = {
   reorderNutritionPlanDayMeals: EntireFieldWrapper<Array<GQLNutritionPlanMeal>>;
   resetUserLogs: EntireFieldWrapper<Scalars['Boolean']['output']>;
   respondToTeamInvitation: EntireFieldWrapper<GQLTeamInvitation>;
+  resumeClientCoachingSubscription: EntireFieldWrapper<GQLResumeCoachingResult>;
   sendMessage: EntireFieldWrapper<GQLMessage>;
   setMacroTargets: EntireFieldWrapper<GQLMacroTarget>;
   shareNutritionPlanWithClient: EntireFieldWrapper<GQLNutritionPlan>;
@@ -1694,6 +1696,11 @@ export type GQLMutationMoveExerciseArgs = {
 };
 
 
+export type GQLMutationPauseClientCoachingSubscriptionArgs = {
+  clientId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationPausePlanArgs = {
   planId: Scalars['ID']['input'];
 };
@@ -1808,6 +1815,11 @@ export type GQLMutationReorderNutritionPlanDayMealsArgs = {
 
 export type GQLMutationRespondToTeamInvitationArgs = {
   input: GQLRespondToTeamInvitationInput;
+};
+
+
+export type GQLMutationResumeClientCoachingSubscriptionArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -2210,6 +2222,14 @@ export type GQLPackageTemplate = {
   trainer?: EntireFieldWrapper<Maybe<GQLUser>>;
   trainerId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export type GQLPauseCoachingResult = {
+  __typename?: 'PauseCoachingResult';
+  message: EntireFieldWrapper<Scalars['String']['output']>;
+  pausedUntil?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  subscription?: EntireFieldWrapper<Maybe<GQLUserSubscription>>;
+  success: EntireFieldWrapper<Scalars['Boolean']['output']>;
 };
 
 export type GQLPersonalRecord = {
@@ -2779,6 +2799,13 @@ export enum GQLRepFocus {
 export type GQLRespondToTeamInvitationInput = {
   accept: Scalars['Boolean']['input'];
   invitationId: Scalars['ID']['input'];
+};
+
+export type GQLResumeCoachingResult = {
+  __typename?: 'ResumeCoachingResult';
+  message: EntireFieldWrapper<Scalars['String']['output']>;
+  subscription?: EntireFieldWrapper<Maybe<GQLUserSubscription>>;
+  success: EntireFieldWrapper<Scalars['Boolean']['output']>;
 };
 
 export type GQLReview = {
@@ -3903,6 +3930,7 @@ export type GQLResolversTypes = {
   OptimizedImage: ResolverTypeWrapper<GQLOptimizedImage>;
   PackageSummaryItem: ResolverTypeWrapper<GQLPackageSummaryItem>;
   PackageTemplate: ResolverTypeWrapper<GQLPackageTemplate>;
+  PauseCoachingResult: ResolverTypeWrapper<GQLPauseCoachingResult>;
   PersonalRecord: ResolverTypeWrapper<GQLPersonalRecord>;
   PersonalRecordHistory: ResolverTypeWrapper<GQLPersonalRecordHistory>;
   PlanDurationRange: ResolverTypeWrapper<GQLPlanDurationRange>;
@@ -3920,6 +3948,7 @@ export type GQLResolversTypes = {
   ReorderMealIngredientsInput: GQLReorderMealIngredientsInput;
   RepFocus: GQLRepFocus;
   RespondToTeamInvitationInput: GQLRespondToTeamInvitationInput;
+  ResumeCoachingResult: ResolverTypeWrapper<GQLResumeCoachingResult>;
   Review: ResolverTypeWrapper<GQLReview>;
   SendMessageInput: GQLSendMessageInput;
   ServiceDelivery: ResolverTypeWrapper<GQLServiceDelivery>;
@@ -4128,6 +4157,7 @@ export type GQLResolversParentTypes = {
   OptimizedImage: GQLOptimizedImage;
   PackageSummaryItem: GQLPackageSummaryItem;
   PackageTemplate: GQLPackageTemplate;
+  PauseCoachingResult: GQLPauseCoachingResult;
   PersonalRecord: GQLPersonalRecord;
   PersonalRecordHistory: GQLPersonalRecordHistory;
   PlanDurationRange: GQLPlanDurationRange;
@@ -4144,6 +4174,7 @@ export type GQLResolversParentTypes = {
   ReorderDayMealsInput: GQLReorderDayMealsInput;
   ReorderMealIngredientsInput: GQLReorderMealIngredientsInput;
   RespondToTeamInvitationInput: GQLRespondToTeamInvitationInput;
+  ResumeCoachingResult: GQLResumeCoachingResult;
   Review: GQLReview;
   SendMessageInput: GQLSendMessageInput;
   ServiceDelivery: GQLServiceDelivery;
@@ -4820,6 +4851,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   markWorkoutAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkWorkoutAsCompletedArgs, 'dayId'>>;
   moderateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationModerateReviewArgs, 'input'>>;
   moveExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationMoveExerciseArgs, 'input'>>;
+  pauseClientCoachingSubscription?: Resolver<GQLResolversTypes['PauseCoachingResult'], ParentType, ContextType, RequireFields<GQLMutationPauseClientCoachingSubscriptionArgs, 'clientId'>>;
   pausePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationPausePlanArgs, 'planId'>>;
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
   removeAllExercisesFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveAllExercisesFromDayArgs, 'input'>>;
@@ -4844,6 +4876,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   reorderNutritionPlanDayMeals?: Resolver<Array<GQLResolversTypes['NutritionPlanMeal']>, ParentType, ContextType, RequireFields<GQLMutationReorderNutritionPlanDayMealsArgs, 'input'>>;
   resetUserLogs?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   respondToTeamInvitation?: Resolver<GQLResolversTypes['TeamInvitation'], ParentType, ContextType, RequireFields<GQLMutationRespondToTeamInvitationArgs, 'input'>>;
+  resumeClientCoachingSubscription?: Resolver<GQLResolversTypes['ResumeCoachingResult'], ParentType, ContextType, RequireFields<GQLMutationResumeClientCoachingSubscriptionArgs, 'clientId'>>;
   sendMessage?: Resolver<GQLResolversTypes['Message'], ParentType, ContextType, RequireFields<GQLMutationSendMessageArgs, 'input'>>;
   setMacroTargets?: Resolver<GQLResolversTypes['MacroTarget'], ParentType, ContextType, RequireFields<GQLMutationSetMacroTargetsArgs, 'input'>>;
   shareNutritionPlanWithClient?: Resolver<GQLResolversTypes['NutritionPlan'], ParentType, ContextType, RequireFields<GQLMutationShareNutritionPlanWithClientArgs, 'id'>>;
@@ -5031,6 +5064,14 @@ export type GQLPackageTemplateResolvers<ContextType = GQLContext, ParentType ext
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLPauseCoachingResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PauseCoachingResult'] = GQLResolversParentTypes['PauseCoachingResult']> = {
+  message?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  pausedUntil?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  subscription?: Resolver<Maybe<GQLResolversTypes['UserSubscription']>, ParentType, ContextType>;
+  success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLPersonalRecordResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PersonalRecord'] = GQLResolversParentTypes['PersonalRecord']> = {
   estimated1RM?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -5193,6 +5234,13 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   userExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, Partial<GQLQueryUserExercisesArgs>>;
   userPublic?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType, RequireFields<GQLQueryUserPublicArgs, 'id'>>;
   workoutExerciseNotes?: Resolver<Array<GQLResolversTypes['WorkoutExerciseNotes']>, ParentType, ContextType, RequireFields<GQLQueryWorkoutExerciseNotesArgs, 'exerciseNames'>>;
+};
+
+export type GQLResumeCoachingResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ResumeCoachingResult'] = GQLResolversParentTypes['ResumeCoachingResult']> = {
+  message?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  subscription?: Resolver<Maybe<GQLResolversTypes['UserSubscription']>, ParentType, ContextType>;
+  success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLReviewResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Review'] = GQLResolversParentTypes['Review']> = {
@@ -5682,6 +5730,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   OptimizedImage?: GQLOptimizedImageResolvers<ContextType>;
   PackageSummaryItem?: GQLPackageSummaryItemResolvers<ContextType>;
   PackageTemplate?: GQLPackageTemplateResolvers<ContextType>;
+  PauseCoachingResult?: GQLPauseCoachingResultResolvers<ContextType>;
   PersonalRecord?: GQLPersonalRecordResolvers<ContextType>;
   PersonalRecordHistory?: GQLPersonalRecordHistoryResolvers<ContextType>;
   PlanDurationRange?: GQLPlanDurationRangeResolvers<ContextType>;
@@ -5689,6 +5738,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   PublicTrainer?: GQLPublicTrainerResolvers<ContextType>;
   PushSubscription?: GQLPushSubscriptionResolvers<ContextType>;
   Query?: GQLQueryResolvers<ContextType>;
+  ResumeCoachingResult?: GQLResumeCoachingResultResolvers<ContextType>;
   Review?: GQLReviewResolvers<ContextType>;
   ServiceDelivery?: GQLServiceDeliveryResolvers<ContextType>;
   ServiceTask?: GQLServiceTaskResolvers<ContextType>;

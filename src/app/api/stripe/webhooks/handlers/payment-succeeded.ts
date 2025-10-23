@@ -61,6 +61,62 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     console.info(
       `✅ Payment processed for subscription ${subscriptionId} (invoice: ${invoice.id})`,
     )
+
+    // If this is a coaching payment, check if user has paused yearly to extend pause
+    if (subscription) {
+      const coachingSub = await prisma.userSubscription.findFirst({
+        where: { stripeSubscriptionId: subscriptionId },
+        include: { package: true },
+      })
+
+      const isCoachingPayment =
+        coachingSub?.package.stripeLookupKey === 'premium_coaching'
+
+      if (isCoachingPayment) {
+        // Find any paused yearly subscriptions for this user
+        const pausedYearly = await prisma.userSubscription.findMany({
+          where: {
+            userId: coachingSub.userId,
+            status: SubscriptionStatus.ACTIVE,
+            package: { stripeLookupKey: 'premium_yearly' },
+          },
+        })
+
+        for (const yearly of pausedYearly) {
+          if (!yearly.stripeSubscriptionId) continue
+
+          try {
+            const { stripe } = await import('@/lib/stripe/stripe')
+            const stripeSub = await stripe.subscriptions.retrieve(
+              yearly.stripeSubscriptionId,
+            )
+
+            // If paused for coaching, ensure pause continues
+            if (
+              stripeSub.pause_collection?.behavior === 'void' &&
+              stripeSub.metadata?.pausedForCoaching === 'true'
+            ) {
+              // Update metadata to track latest coaching payment
+              await stripe.subscriptions.update(yearly.stripeSubscriptionId, {
+                metadata: {
+                  ...stripeSub.metadata,
+                  lastCoachingPayment: new Date().toISOString(),
+                },
+              })
+
+              console.info(
+                `✅ Extended pause for yearly subscription ${yearly.stripeSubscriptionId}`,
+              )
+            }
+          } catch (error) {
+            console.error(
+              `Failed to extend pause for ${yearly.stripeSubscriptionId}:`,
+              error,
+            )
+          }
+        }
+      }
+    }
   } catch (error) {
     console.error('Error handling payment succeeded:', error)
   }

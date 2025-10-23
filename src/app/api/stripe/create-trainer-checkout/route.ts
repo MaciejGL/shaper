@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
+import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { COMMISSION_CONFIG } from '@/lib/stripe/config'
 import {
@@ -173,6 +174,83 @@ export async function POST(request: NextRequest) {
       (item) =>
         item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
     )
+
+    // Check for existing premium subscriptions and handle proration for monthly
+    if (hasPremiumCoaching) {
+      const existingPremium = await prisma.userSubscription.findFirst({
+        where: {
+          userId: user.id,
+          status: SubscriptionStatus.ACTIVE,
+          package: {
+            stripeLookupKey: { in: ['premium_monthly', 'premium_yearly'] },
+          },
+        },
+        include: { package: true },
+      })
+
+      if (existingPremium?.stripeSubscriptionId) {
+        const isMonthly = existingPremium.package.duration === 'MONTHLY'
+
+        if (isMonthly) {
+          // MONTHLY: Modify existing subscription (proration)
+          try {
+            const existingStripeSubscription =
+              await stripe.subscriptions.retrieve(
+                existingPremium.stripeSubscriptionId,
+              )
+            const subscriptionItemId =
+              existingStripeSubscription.items.data[0].id
+
+            const coachingPrices = await stripe.prices.list({
+              lookup_keys: [STRIPE_LOOKUP_KEYS.PREMIUM_COACHING],
+              limit: 1,
+            })
+
+            if (coachingPrices.data.length === 0) {
+              throw new Error('Coaching price not found')
+            }
+
+            const coachingPriceId = coachingPrices.data[0].id
+
+            // Update subscription to coaching with proration
+            await stripe.subscriptions.update(
+              existingPremium.stripeSubscriptionId,
+              {
+                items: [{ id: subscriptionItemId, price: coachingPriceId }],
+                proration_behavior: 'create_prorations',
+                metadata: {
+                  trainerId: offer.trainerId,
+                  offerToken,
+                  switchedFromMonthly: 'true',
+                },
+              },
+            )
+
+            console.info(
+              `✅ Modified monthly subscription ${existingPremium.stripeSubscriptionId} to coaching with proration`,
+            )
+
+            // Mark offer as completed
+            await prisma.trainerOffer.update({
+              where: { id: offer.id },
+              data: { status: 'COMPLETED', completedAt: new Date() },
+            })
+
+            // Return early - subscription.updated webhook will handle DB update
+            return NextResponse.json({
+              success: true,
+              subscriptionId: existingPremium.stripeSubscriptionId,
+              message: 'Subscription updated with proration',
+              prorated: true,
+            })
+          } catch (error) {
+            console.error('Failed to prorate monthly subscription:', error)
+            // Continue with normal checkout if proration fails
+          }
+        }
+        // If yearly, continue with normal checkout - webhook will pause it
+      }
+    }
 
     // Filter out standalone premium subscriptions if premium coaching is present
     const checkoutItems = offer_items.filter((item) => {

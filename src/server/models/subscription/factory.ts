@@ -5,8 +5,10 @@ import {
   GQLQueryGetMyServiceDeliveriesArgs,
   GQLQueryGetTrainerDeliveriesArgs,
 } from '@/generated/graphql-server'
+import { ensureTrainerClientAccess } from '@/lib/access-control'
 import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
+import { stripe } from '@/lib/stripe/stripe'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
 
@@ -468,4 +470,132 @@ export async function removeUserSubscription(userId: string) {
   })
 
   return result.count > 0
+}
+
+/**
+ * Trainer: Pause client's coaching subscription
+ */
+export async function pauseClientCoachingSubscription(
+  clientId: string,
+  context: GQLContext,
+) {
+  const userId = context.user?.user.id
+  if (!userId) {
+    throw new Error('Authentication required')
+  }
+
+  // Verify trainer has permission to pause this client's subscription
+  await ensureTrainerClientAccess(userId, clientId)
+
+  // Find client's coaching subscription
+  const coachingSubscription = await prisma.userSubscription.findFirst({
+    where: {
+      userId: clientId,
+      trainerId: userId,
+      status: 'ACTIVE',
+      package: {
+        stripeLookupKey: 'premium_coaching',
+      },
+    },
+    include: { package: true },
+  })
+
+  if (!coachingSubscription?.stripeSubscriptionId) {
+    throw new Error('No active coaching subscription found for this client')
+  }
+
+  // Check if already paused in Stripe
+  const stripeSubscription = await stripe.subscriptions.retrieve(
+    coachingSubscription.stripeSubscriptionId,
+  )
+
+  if (stripeSubscription.pause_collection) {
+    throw new Error('Coaching subscription is already paused')
+  }
+
+  // Pause the coaching subscription in Stripe
+  await stripe.subscriptions.update(coachingSubscription.stripeSubscriptionId, {
+    pause_collection: {
+      behavior: 'mark_uncollectible', // Don't charge during pause
+    },
+    metadata: {
+      ...stripeSubscription.metadata,
+      manuallyPausedByTrainer: 'true',
+      pausedAt: new Date().toISOString(),
+      trainerId: userId,
+    },
+  })
+
+  console.info(
+    `✅ Trainer ${userId} paused coaching subscription ${coachingSubscription.stripeSubscriptionId} for client ${clientId}`,
+  )
+
+  return {
+    success: true,
+    message: 'Coaching subscription paused successfully',
+    pausedUntil: null, // Indefinite pause
+    subscription: new UserSubscription(coachingSubscription, context),
+  }
+}
+
+/**
+ * Trainer: Resume client's coaching subscription
+ */
+export async function resumeClientCoachingSubscription(
+  clientId: string,
+  context: GQLContext,
+) {
+  const userId = context.user?.user.id
+  if (!userId) {
+    throw new Error('Authentication required')
+  }
+
+  // Verify trainer has permission
+  await ensureTrainerClientAccess(userId, clientId)
+
+  // Find client's coaching subscription
+  const coachingSubscription = await prisma.userSubscription.findFirst({
+    where: {
+      userId: clientId,
+      trainerId: userId,
+      status: 'ACTIVE',
+      package: {
+        stripeLookupKey: 'premium_coaching',
+      },
+    },
+    include: { package: true },
+  })
+
+  if (!coachingSubscription?.stripeSubscriptionId) {
+    throw new Error('No active coaching subscription found for this client')
+  }
+
+  // Check if paused in Stripe
+  const stripeSubscription = await stripe.subscriptions.retrieve(
+    coachingSubscription.stripeSubscriptionId,
+  )
+
+  if (!stripeSubscription.pause_collection) {
+    throw new Error('Coaching subscription is not paused')
+  }
+
+  // Resume the coaching subscription in Stripe
+  await stripe.subscriptions.update(coachingSubscription.stripeSubscriptionId, {
+    pause_collection: null, // Resume billing
+    metadata: {
+      ...stripeSubscription.metadata,
+      manuallyPausedByTrainer: null, // Remove pause flag
+      resumedAt: new Date().toISOString(),
+    },
+  })
+
+  console.info(
+    `✅ Trainer ${userId} resumed coaching subscription ${coachingSubscription.stripeSubscriptionId} for client ${clientId}`,
+  )
+
+  return {
+    success: true,
+    message: 'Coaching subscription resumed successfully',
+    subscription: new UserSubscription(coachingSubscription, context),
+  }
 }

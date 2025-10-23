@@ -1193,6 +1193,7 @@ export type GQLMutation = {
   markWorkoutAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   moderateReview: Scalars['Boolean']['output'];
   moveExercise: Scalars['Boolean']['output'];
+  pauseClientCoachingSubscription: GQLPauseCoachingResult;
   pausePlan: Scalars['Boolean']['output'];
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   removeAllExercisesFromDay: Scalars['Boolean']['output'];
@@ -1217,6 +1218,7 @@ export type GQLMutation = {
   reorderNutritionPlanDayMeals: Array<GQLNutritionPlanMeal>;
   resetUserLogs: Scalars['Boolean']['output'];
   respondToTeamInvitation: GQLTeamInvitation;
+  resumeClientCoachingSubscription: GQLResumeCoachingResult;
   sendMessage: GQLMessage;
   setMacroTargets: GQLMacroTarget;
   shareNutritionPlanWithClient: GQLNutritionPlan;
@@ -1692,6 +1694,11 @@ export type GQLMutationMoveExerciseArgs = {
 };
 
 
+export type GQLMutationPauseClientCoachingSubscriptionArgs = {
+  clientId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationPausePlanArgs = {
   planId: Scalars['ID']['input'];
 };
@@ -1806,6 +1813,11 @@ export type GQLMutationReorderNutritionPlanDayMealsArgs = {
 
 export type GQLMutationRespondToTeamInvitationArgs = {
   input: GQLRespondToTeamInvitationInput;
+};
+
+
+export type GQLMutationResumeClientCoachingSubscriptionArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -2208,6 +2220,14 @@ export type GQLPackageTemplate = {
   trainer?: Maybe<GQLUser>;
   trainerId?: Maybe<Scalars['ID']['output']>;
   updatedAt: Scalars['String']['output'];
+};
+
+export type GQLPauseCoachingResult = {
+  __typename?: 'PauseCoachingResult';
+  message: Scalars['String']['output'];
+  pausedUntil?: Maybe<Scalars['String']['output']>;
+  subscription?: Maybe<GQLUserSubscription>;
+  success: Scalars['Boolean']['output'];
 };
 
 export type GQLPersonalRecord = {
@@ -2777,6 +2797,13 @@ export enum GQLRepFocus {
 export type GQLRespondToTeamInvitationInput = {
   accept: Scalars['Boolean']['input'];
   invitationId: Scalars['ID']['input'];
+};
+
+export type GQLResumeCoachingResult = {
+  __typename?: 'ResumeCoachingResult';
+  message: Scalars['String']['output'];
+  subscription?: Maybe<GQLUserSubscription>;
+  success: Scalars['Boolean']['output'];
 };
 
 export type GQLReview = {
@@ -4401,6 +4428,20 @@ export type GQLCancelMeetingMutationVariables = Exact<{
 
 
 export type GQLCancelMeetingMutation = { __typename?: 'Mutation', cancelMeeting: { __typename?: 'Meeting', id: string, status: GQLMeetingStatus, notes?: string | undefined | null } };
+
+export type GQLPauseClientCoachingSubscriptionMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLPauseClientCoachingSubscriptionMutation = { __typename?: 'Mutation', pauseClientCoachingSubscription: { __typename?: 'PauseCoachingResult', success: boolean, message: string, pausedUntil?: string | undefined | null, subscription?: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string } | undefined | null } };
+
+export type GQLResumeClientCoachingSubscriptionMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLResumeClientCoachingSubscriptionMutation = { __typename?: 'Mutation', resumeClientCoachingSubscription: { __typename?: 'ResumeCoachingResult', success: boolean, message: string, subscription?: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string } | undefined | null } };
 
 export type GQLGetTrainerServiceDeliveriesQueryVariables = Exact<{
   trainerId: Scalars['ID']['input'];
@@ -10610,6 +10651,73 @@ useCancelMeetingMutation.getKey = () => ['CancelMeeting'];
 
 
 useCancelMeetingMutation.fetcher = (variables: GQLCancelMeetingMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelMeetingMutation, GQLCancelMeetingMutationVariables>(CancelMeetingDocument, variables, options);
+
+export const PauseClientCoachingSubscriptionDocument = `
+    mutation PauseClientCoachingSubscription($clientId: ID!) {
+  pauseClientCoachingSubscription(clientId: $clientId) {
+    success
+    message
+    pausedUntil
+    subscription {
+      id
+      status
+      startDate
+      endDate
+    }
+  }
+}
+    `;
+
+export const usePauseClientCoachingSubscriptionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLPauseClientCoachingSubscriptionMutation, TError, GQLPauseClientCoachingSubscriptionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLPauseClientCoachingSubscriptionMutation, TError, GQLPauseClientCoachingSubscriptionMutationVariables, TContext>(
+      {
+    mutationKey: ['PauseClientCoachingSubscription'],
+    mutationFn: (variables?: GQLPauseClientCoachingSubscriptionMutationVariables) => fetchData<GQLPauseClientCoachingSubscriptionMutation, GQLPauseClientCoachingSubscriptionMutationVariables>(PauseClientCoachingSubscriptionDocument, variables)(),
+    ...options
+  }
+    )};
+
+usePauseClientCoachingSubscriptionMutation.getKey = () => ['PauseClientCoachingSubscription'];
+
+
+usePauseClientCoachingSubscriptionMutation.fetcher = (variables: GQLPauseClientCoachingSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLPauseClientCoachingSubscriptionMutation, GQLPauseClientCoachingSubscriptionMutationVariables>(PauseClientCoachingSubscriptionDocument, variables, options);
+
+export const ResumeClientCoachingSubscriptionDocument = `
+    mutation ResumeClientCoachingSubscription($clientId: ID!) {
+  resumeClientCoachingSubscription(clientId: $clientId) {
+    success
+    message
+    subscription {
+      id
+      status
+      startDate
+      endDate
+    }
+  }
+}
+    `;
+
+export const useResumeClientCoachingSubscriptionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLResumeClientCoachingSubscriptionMutation, TError, GQLResumeClientCoachingSubscriptionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLResumeClientCoachingSubscriptionMutation, TError, GQLResumeClientCoachingSubscriptionMutationVariables, TContext>(
+      {
+    mutationKey: ['ResumeClientCoachingSubscription'],
+    mutationFn: (variables?: GQLResumeClientCoachingSubscriptionMutationVariables) => fetchData<GQLResumeClientCoachingSubscriptionMutation, GQLResumeClientCoachingSubscriptionMutationVariables>(ResumeClientCoachingSubscriptionDocument, variables)(),
+    ...options
+  }
+    )};
+
+useResumeClientCoachingSubscriptionMutation.getKey = () => ['ResumeClientCoachingSubscription'];
+
+
+useResumeClientCoachingSubscriptionMutation.fetcher = (variables: GQLResumeClientCoachingSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLResumeClientCoachingSubscriptionMutation, GQLResumeClientCoachingSubscriptionMutationVariables>(ResumeClientCoachingSubscriptionDocument, variables, options);
 
 export const GetTrainerServiceDeliveriesDocument = `
     query GetTrainerServiceDeliveries($trainerId: ID!) {

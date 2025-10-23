@@ -8,6 +8,8 @@ import { handleSubscriptionCreated } from '@/app/api/stripe/webhooks/handlers/su
 // Import mocked modules
 const mockPrisma = await import('@/lib/db')
 const mockStripe = await import('@/lib/stripe/stripe')
+const mockWebhookUtils = await import('@/app/api/stripe/webhooks/utils/shared')
+const mockLookupKeys = await import('@/lib/stripe/lookup-keys')
 
 // Mock factories
 const createMockCheckoutSession = (overrides: any = {}) => ({
@@ -76,7 +78,7 @@ describe('Stripe Webhook Handlers', () => {
       const session = createMockCheckoutSession()
       const user = createMockUser()
 
-      vi.mocked(mockPrisma.prisma.user.findUnique).mockResolvedValue(
+      vi.mocked(mockWebhookUtils.findUserByStripeCustomerId).mockResolvedValue(
         user as any,
       )
       vi.mocked(mockStripe.stripe.paymentIntents.retrieve).mockResolvedValue({
@@ -89,10 +91,9 @@ describe('Stripe Webhook Handlers', () => {
       await handleCheckoutCompleted(session as any)
 
       // Assert - Should find user by customer ID
-      expect(mockPrisma.prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { stripeCustomerId: 'cus_test123' },
-        include: { profile: true },
-      })
+      expect(mockWebhookUtils.findUserByStripeCustomerId).toHaveBeenCalledWith(
+        'cus_test123',
+      )
     })
 
     it('should handle missing customer gracefully', async () => {
@@ -114,7 +115,7 @@ describe('Stripe Webhook Handlers', () => {
       })
       const user = createMockUser()
 
-      vi.mocked(mockPrisma.prisma.user.findUnique).mockResolvedValue(
+      vi.mocked(mockWebhookUtils.findUserByStripeCustomerId).mockResolvedValue(
         user as any,
       )
       vi.mocked(mockStripe.stripe.paymentIntents.retrieve).mockResolvedValue({
@@ -150,11 +151,14 @@ describe('Stripe Webhook Handlers', () => {
         lookup_key: 'test_lookup_key',
       } as any)
 
-      vi.mocked(mockPrisma.prisma.user.findUnique).mockResolvedValue(
+      vi.mocked(mockWebhookUtils.findUserByStripeCustomerId).mockResolvedValue(
         user as any,
       )
-      vi.mocked(mockPrisma.prisma.packageTemplate.findFirst).mockResolvedValue(
+      vi.mocked(mockWebhookUtils.findPackageByStripePriceId).mockResolvedValue(
         packageTemplate as any,
+      )
+      vi.mocked(mockLookupKeys.resolvePriceIdToLookupKey).mockResolvedValue(
+        'test_lookup_key',
       )
       vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
         null,
@@ -199,11 +203,14 @@ describe('Stripe Webhook Handlers', () => {
         lookup_key: 'test_lookup_key',
       } as any)
 
-      vi.mocked(mockPrisma.prisma.user.findUnique).mockResolvedValue(
+      vi.mocked(mockWebhookUtils.findUserByStripeCustomerId).mockResolvedValue(
         user as any,
       )
-      vi.mocked(mockPrisma.prisma.packageTemplate.findFirst).mockResolvedValue(
+      vi.mocked(mockWebhookUtils.findPackageByStripePriceId).mockResolvedValue(
         packageTemplate as any,
+      )
+      vi.mocked(mockLookupKeys.resolvePriceIdToLookupKey).mockResolvedValue(
+        'test_lookup_key',
       )
       vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
         null,

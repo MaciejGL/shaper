@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 
+import { ClientSubscriptionManagement } from '../client-subscription-management/client-subscription-management'
+
 import { SimplifiedOfferCard } from './offer-card-simplified'
 import { OfferHistory } from './offer-history'
 import { SendOfferForm } from './send-offer-form'
@@ -46,6 +48,7 @@ export function ClientServices({
 
   return (
     <div className="space-y-6">
+      <ClientSubscriptionManagement clientId={clientId} />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold">Services & Offers</h2>

@@ -1,0 +1,26 @@
+mutation PauseClientCoachingSubscription($clientId: ID!) {
+  pauseClientCoachingSubscription(clientId: $clientId) {
+    success
+    message
+    pausedUntil
+    subscription {
+      id
+      status
+      startDate
+      endDate
+    }
+  }
+}
+
+mutation ResumeClientCoachingSubscription($clientId: ID!) {
+  resumeClientCoachingSubscription(clientId: $clientId) {
+    success
+    message
+    subscription {
+      id
+      status
+      startDate
+      endDate
+    }
+  }
+}

@@ -7,6 +7,7 @@ import { handleSubscriptionUpdated } from '@/app/api/stripe/webhooks/handlers/su
 
 // Import mocked modules
 const mockPrisma = await import('@/lib/db')
+const mockStripe = await import('@/lib/stripe/stripe')
 const mockSendEmail = await import('@/lib/email/send-mail')
 
 // Mock the email module
@@ -24,6 +25,9 @@ const createMockSubscription = (overrides: any = {}) => ({
   items: {
     data: [
       {
+        price: {
+          id: 'price_test123',
+        },
         current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30, // 30 days
       },
     ],
@@ -75,20 +79,28 @@ describe('Advanced Stripe Webhook Handlers', () => {
         status: 'active',
       })
 
-      vi.mocked(
-        mockPrisma.prisma.userSubscription.updateMany,
-      ).mockResolvedValue({
-        count: 1,
+      const dbSubscription = {
+        id: 'user_sub_123',
+        stripeSubscriptionId: 'sub_test123',
+        package: { stripeLookupKey: 'premium_monthly' },
+      }
+
+      vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
+        dbSubscription as any,
+      )
+      vi.mocked(mockStripe.stripe.prices.list).mockResolvedValue({
+        data: [{ id: 'price_test123' }],
       } as any)
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        {} as any,
+      )
 
       // Act
       await handleSubscriptionUpdated(subscription as any)
 
       // Assert
-      expect(
-        mockPrisma.prisma.userSubscription.updateMany,
-      ).toHaveBeenCalledWith({
-        where: { stripeSubscriptionId: 'sub_test123' },
+      expect(mockPrisma.prisma.userSubscription.update).toHaveBeenCalledWith({
+        where: { id: 'user_sub_123' },
         data: {
           status: 'ACTIVE',
           endDate: expect.any(Date),
@@ -102,20 +114,28 @@ describe('Advanced Stripe Webhook Handlers', () => {
         status: 'canceled',
       })
 
-      vi.mocked(
-        mockPrisma.prisma.userSubscription.updateMany,
-      ).mockResolvedValue({
-        count: 1,
+      const dbSubscription = {
+        id: 'user_sub_123',
+        stripeSubscriptionId: 'sub_test123',
+        package: { stripeLookupKey: 'premium_monthly' },
+      }
+
+      vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
+        dbSubscription as any,
+      )
+      vi.mocked(mockStripe.stripe.prices.list).mockResolvedValue({
+        data: [{ id: 'price_test123' }],
       } as any)
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        {} as any,
+      )
 
       // Act
       await handleSubscriptionUpdated(subscription as any)
 
       // Assert
-      expect(
-        mockPrisma.prisma.userSubscription.updateMany,
-      ).toHaveBeenCalledWith({
-        where: { stripeSubscriptionId: 'sub_test123' },
+      expect(mockPrisma.prisma.userSubscription.update).toHaveBeenCalledWith({
+        where: { id: 'user_sub_123' },
         data: {
           status: 'CANCELLED',
           endDate: expect.any(Date),
@@ -129,20 +149,28 @@ describe('Advanced Stripe Webhook Handlers', () => {
         status: 'past_due',
       })
 
-      vi.mocked(
-        mockPrisma.prisma.userSubscription.updateMany,
-      ).mockResolvedValue({
-        count: 1,
+      const dbSubscription = {
+        id: 'user_sub_123',
+        stripeSubscriptionId: 'sub_test123',
+        package: { stripeLookupKey: 'premium_monthly' },
+      }
+
+      vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
+        dbSubscription as any,
+      )
+      vi.mocked(mockStripe.stripe.prices.list).mockResolvedValue({
+        data: [{ id: 'price_test123' }],
       } as any)
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        {} as any,
+      )
 
       // Act
       await handleSubscriptionUpdated(subscription as any)
 
       // Assert
-      expect(
-        mockPrisma.prisma.userSubscription.updateMany,
-      ).toHaveBeenCalledWith({
-        where: { stripeSubscriptionId: 'sub_test123' },
+      expect(mockPrisma.prisma.userSubscription.update).toHaveBeenCalledWith({
+        where: { id: 'user_sub_123' },
         data: {
           status: 'PENDING',
           endDate: expect.any(Date),
@@ -156,20 +184,28 @@ describe('Advanced Stripe Webhook Handlers', () => {
         status: 'unknown_status',
       })
 
-      vi.mocked(
-        mockPrisma.prisma.userSubscription.updateMany,
-      ).mockResolvedValue({
-        count: 1,
+      const dbSubscription = {
+        id: 'user_sub_123',
+        stripeSubscriptionId: 'sub_test123',
+        package: { stripeLookupKey: 'premium_monthly' },
+      }
+
+      vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
+        dbSubscription as any,
+      )
+      vi.mocked(mockStripe.stripe.prices.list).mockResolvedValue({
+        data: [{ id: 'price_test123' }],
       } as any)
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        {} as any,
+      )
 
       // Act
       await handleSubscriptionUpdated(subscription as any)
 
       // Assert
-      expect(
-        mockPrisma.prisma.userSubscription.updateMany,
-      ).toHaveBeenCalledWith({
-        where: { stripeSubscriptionId: 'sub_test123' },
+      expect(mockPrisma.prisma.userSubscription.update).toHaveBeenCalledWith({
+        where: { id: 'user_sub_123' },
         data: {
           status: 'ACTIVE',
           endDate: expect.any(Date),

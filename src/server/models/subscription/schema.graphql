@@ -146,7 +146,24 @@ type Mutation {
     notes: String
   ): ServiceDelivery!
 
+  # Coaching subscription management
+  pauseClientCoachingSubscription(clientId: ID!): PauseCoachingResult!
+  resumeClientCoachingSubscription(clientId: ID!): ResumeCoachingResult!
+
   # Admin subscription management
   giveLifetimePremium(userId: ID!): UserSubscription!
   removeUserSubscription(userId: ID!): Boolean!
+}
+
+type PauseCoachingResult {
+  success: Boolean!
+  message: String!
+  pausedUntil: String
+  subscription: UserSubscription
+}
+
+type ResumeCoachingResult {
+  success: Boolean!
+  message: String!
+  subscription: UserSubscription
 }

@@ -12,6 +12,11 @@ vi.mock('@/lib/stripe/stripe', () => ({
       retrieve: vi.fn(),
       list: vi.fn(),
     },
+    subscriptions: {
+      retrieve: vi.fn(),
+      update: vi.fn(),
+      create: vi.fn(),
+    },
     checkout: {
       sessions: {
         create: vi.fn(),
@@ -89,4 +94,37 @@ vi.mock('@/lib/email/send-mail', () => ({
     disputeAlert: vi.fn(),
     offerExpired: vi.fn(),
   },
+}))
+
+// Mock auth config
+vi.mock('@lib/auth/config', () => ({
+  authOptions: {},
+}))
+
+// Mock support chat
+vi.mock('@/lib/support-chat', () => ({
+  updateUserInSupportChat: vi.fn(),
+  createSupportChatForUser: vi.fn(),
+}))
+
+// Mock lookup keys
+vi.mock('@/lib/stripe/lookup-keys', () => ({
+  STRIPE_LOOKUP_KEYS: {
+    PREMIUM_MONTHLY: 'premium_monthly',
+    PREMIUM_YEARLY: 'premium_yearly',
+    PREMIUM_COACHING: 'premium_coaching',
+  },
+  getPremiumLookupKeys: vi.fn(() => [
+    'premium_monthly',
+    'premium_yearly',
+    'premium_coaching',
+  ]),
+  resolvePriceIdToLookupKey: vi.fn(),
+}))
+
+// Mock webhook utils
+vi.mock('@/app/api/stripe/webhooks/utils/shared', () => ({
+  findUserByStripeCustomerId: vi.fn(),
+  findPackageByStripePriceId: vi.fn(),
+  resolvePriceIdToLookupKey: vi.fn(),
 }))

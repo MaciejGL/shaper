@@ -37,6 +37,68 @@ export async function handleSubscriptionDeleted(
 
     // Send cancellation email
     await sendCancellationEmail(userSubscription)
+
+    // If coaching ended, resume any paused yearly subscription
+    const wasCoaching =
+      userSubscription.package.stripeLookupKey === 'premium_coaching'
+
+    if (wasCoaching) {
+      console.info(`Coaching ended for user ${userSubscription.userId}`)
+
+      // Find paused yearly subscriptions
+      const allYearly = await prisma.userSubscription.findMany({
+        where: {
+          userId: userSubscription.userId,
+          status: SubscriptionStatus.ACTIVE,
+          package: { stripeLookupKey: 'premium_yearly' },
+        },
+      })
+
+      for (const yearly of allYearly) {
+        if (!yearly.stripeSubscriptionId) continue
+
+        try {
+          const { stripe } = await import('@/lib/stripe/stripe')
+          const stripeSub = await stripe.subscriptions.retrieve(
+            yearly.stripeSubscriptionId,
+          )
+
+          // Resume paused yearly subscription
+          if (
+            stripeSub.pause_collection?.behavior === 'void' &&
+            stripeSub.metadata?.pausedForCoaching === 'true'
+          ) {
+            await stripe.subscriptions.update(yearly.stripeSubscriptionId, {
+              pause_collection: null,
+              metadata: {
+                ...stripeSub.metadata,
+                resumedAt: new Date().toISOString(),
+                pausedForCoaching: null, // Remove flag
+              },
+            })
+
+            console.info(
+              `✅ Resumed yearly subscription ${yearly.stripeSubscriptionId}`,
+            )
+            break
+          }
+        } catch (error) {
+          console.error(
+            `Failed to resume subscription ${yearly.stripeSubscriptionId}:`,
+            error,
+          )
+        }
+      }
+
+      // Remove trainer assignment
+      if (userSubscription.trainerId) {
+        await prisma.user.update({
+          where: { id: userSubscription.userId },
+          data: { trainerId: null },
+        })
+        console.info(`Removed trainer for user ${userSubscription.userId}`)
+      }
+    }
   } catch (error) {
     console.error('Error handling subscription deleted:', error)
   }

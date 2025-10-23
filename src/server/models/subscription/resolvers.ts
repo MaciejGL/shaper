@@ -11,7 +11,9 @@ import {
   getSubscriptionStats,
   getTrainerDeliveries,
   giveLifetimePremium,
+  pauseClientCoachingSubscription,
   removeUserSubscription,
+  resumeClientCoachingSubscription,
   updateServiceDelivery,
 } from './factory'
 
@@ -37,6 +39,13 @@ export const Query: GQLQueryResolvers = {
 export const Mutation: GQLMutationResolvers = {
   updateServiceDelivery: async (_, args, context) =>
     updateServiceDelivery(args.deliveryId, args.status, args.notes, context),
+
+  // Coaching subscription management
+  pauseClientCoachingSubscription: async (_, args, context) =>
+    pauseClientCoachingSubscription(args.clientId, context),
+
+  resumeClientCoachingSubscription: async (_, args, context) =>
+    resumeClientCoachingSubscription(args.clientId, context),
 
   // Admin subscription management
   giveLifetimePremium: async (_, args, context) =>
