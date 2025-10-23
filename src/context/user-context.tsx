@@ -33,24 +33,23 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const session = useSession()
   const queryClient = useQueryClient()
 
-  // Automatically sync timezone when user logs in
-
-  // Enable queries based on actual session data, NOT status string
-  // Status can be 'loading' while session.data already exists (mobile webview issue)
   const hasSessionData = Boolean(session.data?.user?.email)
   const isDefinitelyLoggedOut = useMemo(
     () => session.status === 'unauthenticated',
     [session.status],
   )
 
+  const shouldEnableQuery = hasSessionData && !isDefinitelyLoggedOut
+
   const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
     {},
     {
       initialData,
-      enabled: hasSessionData && !isDefinitelyLoggedOut,
-      staleTime: 20 * 60 * 1000, // 20 minutes
-      refetchOnWindowFocus: true, // Refetch when window regains focus
-      placeholderData: (previousData) => previousData, // Keep data visible during session transitions
+      enabled: shouldEnableQuery,
+      staleTime: 20 * 60 * 1000,
+      refetchOnWindowFocus: true,
+      placeholderData: (previousData) => previousData,
+      refetchOnMount: false,
     },
   )
 
@@ -63,9 +62,9 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   } = useGetMySubscriptionStatusQuery(
     {},
     {
-      enabled: hasSessionData && !isDefinitelyLoggedOut,
-      staleTime: 10 * 60 * 1000, // 10 minutes
-      refetchOnWindowFocus: true, // Refetch when window regains focus
+      enabled: shouldEnableQuery,
+      staleTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: true,
     },
   )
 
@@ -109,13 +108,13 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const subscription = subscriptionData?.getMySubscriptionStatus
   const hasPremium = subscription?.hasPremium ?? true
 
-  // Return cached data even during loading state to prevent UI flickering
-  // Only clear data when explicitly unauthenticated
-  const shouldShowData = session.status !== 'unauthenticated'
+  const userData = data?.userBasic ?? initialData?.userBasic
+  const shouldShowData =
+    session.status !== 'unauthenticated' && Boolean(userData)
 
   const contextValue: UserContextType = {
     session,
-    user: shouldShowData ? data?.userBasic : undefined,
+    user: shouldShowData ? userData : undefined,
     subscription: shouldShowData ? subscription : undefined,
     hasPremium: shouldShowData ? hasPremium : false,
     isLoading:
