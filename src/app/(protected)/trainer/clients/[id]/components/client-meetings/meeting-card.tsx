@@ -7,6 +7,7 @@ import {
   CalendarPlus,
   CheckCircle2,
   Clock,
+  Edit,
   MapPin,
   RotateCcw,
   Video,
@@ -20,6 +21,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
   GQLGetTraineeMeetingsQuery,
   GQLMeetingStatus,
   useCancelMeetingMutation,
@@ -29,6 +36,8 @@ import {
 import { useTimeFormatting } from '@/hooks/use-time-formatting'
 import { cn } from '@/lib/utils'
 import { addToCalendar } from '@/utils/calendar-utils'
+
+import { EditMeetingModal } from './edit-meeting-modal'
 
 type Meeting = NonNullable<
   GQLGetTraineeMeetingsQuery['getTraineeMeetings']
@@ -64,6 +73,7 @@ export function MeetingCard({
   isPast = false,
 }: MeetingCardProps) {
   const [isUpdating, setIsUpdating] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const queryClient = useQueryClient()
   const { openModal } = useConfirmationModalContext()
   const { formatTime } = useTimeFormatting()
@@ -149,172 +159,211 @@ export function MeetingCard({
   const statusLabel = getStatusDisplay()
 
   return (
-    <Card borderless className={cn('py-3', isPast && 'opacity-75')}>
-      <CardContent className="space-y-2">
-        {/* Header Row */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <h4 className="font-semibold text-sm truncate">
-                {meeting.title}
-              </h4>
-              <Badge
-                variant="secondary"
-                className={cn(
-                  'text-xs shrink-0 capitalize',
-                  STATUS_COLORS[meeting.status],
-                )}
+    <>
+      <Card borderless className={cn('py-3', isPast && 'opacity-75')}>
+        <CardContent className="space-y-2">
+          {/* Header Row */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h4 className="font-semibold text-sm truncate">
+                  {meeting.title}
+                </h4>
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    'text-xs shrink-0 capitalize',
+                    STATUS_COLORS[meeting.status],
+                  )}
+                >
+                  {statusLabel.toLowerCase()}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {MEETING_TYPE_LABELS[meeting.type]}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            {isUpcoming && meeting.status !== 'CANCELLED' && (
+              <div className="flex gap-1 shrink-0">
+                <TooltipProvider>
+                  {meeting.status === 'COMPLETED' ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="icon-sm"
+                          variant="ghost"
+                          onClick={handleReopen}
+                          disabled={isUpdating}
+                          iconOnly={<RotateCcw />}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>Reopen meeting</TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => setIsEditModalOpen(true)}
+                            disabled={isUpdating}
+                            iconOnly={<Edit />}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>Edit meeting</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={handleComplete}
+                            disabled={isUpdating}
+                            iconOnly={<CheckCircle2 />}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>Mark as completed</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={handleCancel}
+                            disabled={isUpdating}
+                            iconOnly={<XCircle />}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>Cancel meeting</TooltipContent>
+                      </Tooltip>
+                    </>
+                  )}
+                </TooltipProvider>
+              </div>
+            )}
+          </div>
+
+          {/* Date & Time combined */}
+          <div className="flex items-center gap-3 text-sm">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs">
+                {format(meetingDate, 'MMM d, yyyy')}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs">
+                {formatTime(meetingDate)} • {meeting.duration}min
+              </span>
+            </div>
+          </div>
+
+          {/* Location */}
+          {meeting.locationType === 'VIRTUAL' && meeting.meetingLink && (
+            <div className="flex items-center gap-1.5 text-sm">
+              <Video className="h-3.5 w-3.5 text-muted-foreground" />
+              <a
+                href={meeting.meetingLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary hover:underline truncate"
               >
-                {statusLabel.toLowerCase()}
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {MEETING_TYPE_LABELS[meeting.type]}
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          {isUpcoming && meeting.status !== 'CANCELLED' && (
-            <div className="flex gap-1 shrink-0">
-              {meeting.status === 'COMPLETED' ? (
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  onClick={handleReopen}
-                  disabled={isUpdating}
-                  iconOnly={<RotateCcw />}
-                />
-              ) : (
-                <>
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={handleComplete}
-                    disabled={isUpdating}
-                    iconOnly={<CheckCircle2 />}
-                  />
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={handleCancel}
-                    disabled={isUpdating}
-                    iconOnly={<XCircle />}
-                  />
-                </>
-              )}
+                Join Virtual Meeting
+              </a>
             </div>
           )}
-        </div>
 
-        {/* Date & Time combined */}
-        <div className="flex items-center gap-3 text-sm">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs">
-              {format(meetingDate, 'MMM d, yyyy')}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs">
-              {formatTime(meetingDate)} • {meeting.duration}min
-            </span>
-          </div>
-        </div>
+          {meeting.locationType !== 'VIRTUAL' && meeting.address && (
+            <div className="flex items-center gap-1.5 text-sm">
+              <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meeting.address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary hover:underline truncate"
+              >
+                {meeting.address}
+              </a>
+            </div>
+          )}
 
-        {/* Location */}
-        {meeting.locationType === 'VIRTUAL' && meeting.meetingLink && (
-          <div className="flex items-center gap-1.5 text-sm">
-            <Video className="h-3.5 w-3.5 text-muted-foreground" />
-            <a
-              href={meeting.meetingLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-primary hover:underline truncate"
-            >
-              Join Virtual Meeting
-            </a>
-          </div>
-        )}
-
-        {meeting.locationType !== 'VIRTUAL' && meeting.address && (
-          <div className="flex items-center gap-1.5 text-sm">
-            <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meeting.address)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-primary hover:underline truncate"
-            >
-              {meeting.address}
-            </a>
-          </div>
-        )}
-
-        {/* Description */}
-        {meeting.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            {meeting.description}
-          </p>
-        )}
-
-        {/* Notes */}
-        {meeting.notes && (
-          <div className="p-2 bg-muted/50 rounded">
+          {/* Description */}
+          {meeting.description && (
             <p className="text-xs text-muted-foreground line-clamp-2">
-              {meeting.notes}
+              {meeting.description}
             </p>
-          </div>
-        )}
-
-        {/* Linked Service */}
-        {meeting.serviceDelivery && (
-          <p className="text-xs text-muted-foreground pt-1 border-t">
-            {meeting.serviceDelivery.packageName}
-            {meeting.serviceTask && ` • ${meeting.serviceTask.title}`}
-          </p>
-        )}
-      </CardContent>
-
-      {/* Footer with Add to Calendar button */}
-      <CardFooter className="gap-2">
-        {/* Add to Calendar Button */}
-        <Button
-          size="sm"
-          variant="outline"
-          className="flex-1"
-          iconStart={<CalendarPlus />}
-          onClick={() =>
-            addToCalendar({
-              title: meeting.title,
-              description: meeting.description,
-              scheduledAt: meeting.scheduledAt,
-              duration: meeting.duration,
-              address: meeting.address,
-              meetingLink: meeting.meetingLink,
-              locationType: meeting.locationType,
-            })
-          }
-        >
-          Add to Calendar
-        </Button>
-
-        {/* Join Button for Virtual Meetings */}
-        {isUpcoming &&
-          meeting.status !== 'CANCELLED' &&
-          meeting.locationType === 'VIRTUAL' &&
-          meeting.meetingLink && (
-            <Button
-              size="sm"
-              variant="default"
-              className="flex-1"
-              iconStart={<Video />}
-              onClick={() => window.open(meeting.meetingLink!, '_blank')}
-            >
-              Join
-            </Button>
           )}
-      </CardFooter>
-    </Card>
+
+          {/* Notes */}
+          {meeting.notes && (
+            <div className="p-2 bg-muted/50 rounded">
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {meeting.notes}
+              </p>
+            </div>
+          )}
+
+          {/* Linked Service */}
+          {meeting.serviceDelivery && (
+            <p className="text-xs text-muted-foreground pt-1 border-t">
+              {meeting.serviceDelivery.packageName}
+              {meeting.serviceTask && ` • ${meeting.serviceTask.title}`}
+            </p>
+          )}
+        </CardContent>
+
+        {/* Footer with Add to Calendar button */}
+        <CardFooter className="gap-2">
+          {/* Add to Calendar Button */}
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1"
+            iconStart={<CalendarPlus />}
+            onClick={() =>
+              addToCalendar({
+                title: meeting.title,
+                description: meeting.description,
+                scheduledAt: meeting.scheduledAt,
+                duration: meeting.duration,
+                address: meeting.address,
+                meetingLink: meeting.meetingLink,
+                locationType: meeting.locationType,
+              })
+            }
+          >
+            Add to Calendar
+          </Button>
+
+          {/* Join Button for Virtual Meetings */}
+          {isUpcoming &&
+            meeting.status !== 'CANCELLED' &&
+            meeting.locationType === 'VIRTUAL' &&
+            meeting.meetingLink && (
+              <Button
+                size="sm"
+                variant="default"
+                className="flex-1"
+                iconStart={<Video />}
+                onClick={() => window.open(meeting.meetingLink!, '_blank')}
+              >
+                Join
+              </Button>
+            )}
+        </CardFooter>
+      </Card>
+
+      {/* Edit Meeting Modal */}
+      <EditMeetingModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        meeting={meeting}
+        clientId={clientId}
+      />
+    </>
   )
 }
