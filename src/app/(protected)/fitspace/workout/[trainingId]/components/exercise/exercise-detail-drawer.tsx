@@ -25,7 +25,7 @@ interface ExerciseDetailDrawerProps {
 
 export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
   const videoUrl = exercise.videoUrl
-  const images = exercise.images.slice(0, 2)
+  const images = exercise.images
   return (
     <Drawer>
       <DrawerTrigger asChild>
@@ -125,11 +125,11 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
 
               {/* Exercise Images */}
               {images && images.length > 0 && videoUrl && (
-                <div className="grid grid-cols-2 -mx-4">
+                <div className="grid grid-cols-2 gap-1 -mx-3">
                   {images.map((image, index) => (
                     <div
                       key={index}
-                      className="relative aspect-[4/5] overflow-hidden shadow-xs"
+                      className="relative aspect-[4/5] overflow-hidden shadow-xs rounded-md"
                     >
                       <Image
                         src={image.medium || '/placeholder.svg'}
