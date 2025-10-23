@@ -59,6 +59,17 @@ export function createWebUrl(
   path: string,
   queryParams?: Record<string, string>,
 ): string {
+  // Guard against SSR
+  if (typeof window === 'undefined') {
+    // Fallback for server-side (shouldn't happen, but safe)
+    const cleanPath = path.startsWith('/') ? path : `/${path}`
+    if (queryParams && Object.keys(queryParams).length > 0) {
+      const searchParams = new URLSearchParams(queryParams)
+      return `${cleanPath}?${searchParams.toString()}`
+    }
+    return cleanPath
+  }
+
   const cleanPath = path.startsWith('/') ? path : `/${path}`
   let url = `${window.location.origin}${cleanPath}`
 

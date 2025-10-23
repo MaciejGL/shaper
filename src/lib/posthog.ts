@@ -82,6 +82,9 @@ export function resetUser() {
 }
 
 export function capturePageView(path?: string) {
+  // Guard against SSR
+  if (typeof window === 'undefined') return
+
   const posthog = getPostHogInstance()
   if (posthog) {
     posthog.capture('$pageview', {

@@ -3,7 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
-import { Suspense, use, useMemo } from 'react'
+import { Suspense, use, useEffect, useMemo } from 'react'
 
 import { WorkoutProvider } from '@/context/workout-context/workout-context'
 import {
@@ -209,9 +209,12 @@ const WorkoutDay = ({
 
   const isLoadingNewDay = isFetching && !hasDataForCurrentDay && !isRestDay
 
-  if (!isFetching && !hasDataForCurrentDay && !isRestDay && !dayDataQuery) {
-    router.replace('/fitspace/workout')
-  }
+  // Redirect to workout home if no valid data (client-side only)
+  useEffect(() => {
+    if (!isFetching && !hasDataForCurrentDay && !isRestDay && !dayDataQuery) {
+      router.replace('/fitspace/workout')
+    }
+  }, [isFetching, hasDataForCurrentDay, isRestDay, dayDataQuery, router])
 
   return (
     <WorkoutProvider
