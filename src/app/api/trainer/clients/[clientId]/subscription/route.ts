@@ -8,7 +8,7 @@ import { stripe } from '@/lib/stripe/stripe'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { clientId: string } },
+  { params }: { params: Promise<{ clientId: string }> },
 ) {
   try {
     const user = await getCurrentUser()
@@ -17,7 +17,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { clientId } = params
+    const { clientId } = await params
 
     // Verify trainer has permission
     try {
