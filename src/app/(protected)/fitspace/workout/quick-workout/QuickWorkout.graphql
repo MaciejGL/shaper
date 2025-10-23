@@ -34,7 +34,6 @@ query FitspaceGetQuickWorkoutDay($dayId: ID) {
       startedAt
       completedAt
       scheduledAt
-      duration
       exercises {
         id
         name
