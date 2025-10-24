@@ -36,17 +36,11 @@ export async function handleCheckoutCompleted(
 
     const offerToken = session.metadata?.offerToken
     const trainerId = session.metadata?.trainerId
-    const isUpgrade = session.metadata?.isUpgrade === 'true'
-    const oldSubscriptionId = session.metadata?.oldSubscriptionId
+    const hasCoachingUpgrade = session.metadata?.hasCoachingUpgrade === 'true'
 
-    // Handle subscription upgrade: refund old subscription and cancel it
-    // Only run once per session (idempotency check)
-    if (isUpgrade && oldSubscriptionId && session.subscription) {
-      await handleSubscriptionUpgradeCleanup(
-        oldSubscriptionId,
-        session.subscription as string,
-        session.id, // Pass session ID for idempotency
-      )
+    // Handle subscription upgrade cleanup: cancel old premium subscriptions with auto-refund
+    if (hasCoachingUpgrade) {
+      await cancelOldPremiumSubscriptions(user.id)
     }
 
     // Use invoice-first approach for both subscription and payment modes
@@ -535,59 +529,80 @@ async function handleTrainerPayout(
 }
 
 /**
- * Handles cleanup after subscription upgrade
- * Cancels old subscription and lets Stripe automatically handle proration
- * Stripe will create a credit balance that applies to future invoices
+ * Cancels all active premium subscriptions (monthly/yearly) for a user
+ * Called after successful coaching subscription purchase
+ * Stripe automatically calculates and applies proration credit
  */
-async function handleSubscriptionUpgradeCleanup(
-  oldSubscriptionId: string,
-  newSubscriptionId: string,
-  sessionId: string,
-) {
+async function cancelOldPremiumSubscriptions(userId: string) {
   try {
     console.info(
-      `🔄 Processing upgrade cleanup: ${oldSubscriptionId} → ${newSubscriptionId} (session: ${sessionId})`,
+      `🔄 Checking for old premium subscriptions to cancel for user: ${userId}`,
     )
 
-    // Retrieve the old subscription
-    const oldSubscription =
-      await stripe.subscriptions.retrieve(oldSubscriptionId)
-
-    // Idempotency check: if subscription is already canceled, skip
-    if (oldSubscription.status === 'canceled') {
-      console.info(
-        `✅ Old subscription ${oldSubscriptionId} already canceled, skipping cleanup`,
-      )
-      return
-    }
-
-    if (oldSubscription.status !== 'active') {
-      console.info(
-        `⚠️ Old subscription ${oldSubscriptionId} is not active (status: ${oldSubscription.status}), skipping cleanup`,
-      )
-      return
-    }
-
-    // Cancel the old subscription with proration
-    // Stripe automatically:
-    // 1. Calculates unused time credit
-    // 2. Adds credit to customer balance
-    // 3. Applies credit to next invoice (the new coaching subscription)
-    await stripe.subscriptions.cancel(oldSubscriptionId, {
-      prorate: true, // Stripe calculates and applies proration credit
-      invoice_now: true, // Create invoice immediately to apply credit
+    // Find all active premium subscriptions (monthly or yearly)
+    const oldSubscriptions = await prisma.userSubscription.findMany({
+      where: {
+        userId,
+        status: 'ACTIVE',
+        package: {
+          stripeLookupKey: { in: ['premium_monthly', 'premium_yearly'] },
+        },
+      },
+      include: { package: true },
     })
 
-    console.info(`✅ Cancelled old subscription: ${oldSubscriptionId}`)
+    if (oldSubscriptions.length === 0) {
+      console.info(`No old premium subscriptions found for user ${userId}`)
+      return
+    }
+
     console.info(
-      `💰 Stripe automatically calculated proration and added credit to customer balance`,
+      `Found ${oldSubscriptions.length} old premium subscription(s) to cancel`,
     )
+
+    // Cancel each old subscription with proration
+    for (const oldSub of oldSubscriptions) {
+      if (!oldSub.stripeSubscriptionId) continue
+
+      try {
+        // Check if already canceled
+        const stripeSubscription = await stripe.subscriptions.retrieve(
+          oldSub.stripeSubscriptionId,
+        )
+
+        if (stripeSubscription.status === 'canceled') {
+          console.info(
+            `✅ Subscription ${oldSub.stripeSubscriptionId} already canceled`,
+          )
+          continue
+        }
+
+        // Cancel with automatic proration
+        await stripe.subscriptions.cancel(oldSub.stripeSubscriptionId, {
+          prorate: true, // Stripe calculates and applies proration credit
+          invoice_now: true, // Create invoice immediately to apply credit
+        })
+
+        console.info(
+          `✅ Cancelled ${oldSub.package.stripeLookupKey} subscription: ${oldSub.stripeSubscriptionId}`,
+        )
+        console.info(
+          `💰 Stripe automatically calculated proration and added credit to customer balance`,
+        )
+      } catch (error) {
+        console.error(
+          `Failed to cancel subscription ${oldSub.stripeSubscriptionId}:`,
+          error,
+        )
+        // Continue with other subscriptions
+      }
+    }
+
     console.info(
-      `🎉 Upgrade complete: User now has coaching premium with trainer revenue sharing`,
+      `🎉 Upgrade complete: Old premium subscriptions cancelled with proration`,
     )
   } catch (error) {
-    console.error('Error handling subscription upgrade cleanup:', error)
+    console.error('Error cancelling old premium subscriptions:', error)
     // Don't throw - new subscription is already created and paid
-    // We can handle this manually if needed
   }
 }

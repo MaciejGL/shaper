@@ -14,13 +14,10 @@ import { CheckoutRequest } from './types'
 import {
   buildSessionMetadata,
   calculateBundleDiscounts,
-  checkExistingPremiumForUpgrade,
   ensureStripeCustomer,
   fetchAndValidateOffer,
-  filterOfferItems,
   findOrCreateUser,
   formatCheckoutResponse,
-  handleSubscriptionReplacement,
   parseOfferPackages,
   prepareCheckoutItems,
   prepareLineItems,
@@ -29,13 +26,8 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
-    const {
-      offerToken,
-      clientEmail,
-      successUrl,
-      cancelUrl,
-      itemFilter = 'all',
-    } = (await request.json()) as CheckoutRequest
+    const { offerToken, clientEmail, successUrl, cancelUrl } =
+      (await request.json()) as CheckoutRequest
 
     if (!offerToken || !clientEmail) {
       return NextResponse.json(
@@ -61,39 +53,9 @@ export async function POST(request: NextRequest) {
     // Validate package Stripe configuration
     validatePackageStripeKeys(offerItems)
 
-    // Filter items based on request (all, coaching-only, addons-only)
-    const filteredItems = filterOfferItems(offerItems, itemFilter)
-
-    if (filteredItems.length === 0) {
-      return NextResponse.json(
-        { error: 'No items match the requested filter' },
-        { status: 400 },
-      )
-    }
-
     // Prepare checkout items and determine mode
     const { checkoutItems, hasPremiumCoaching, mode } =
-      prepareCheckoutItems(filteredItems)
-
-    // Check if user has existing premium subscription that needs upgrading
-    const existingPremiumSub = await checkExistingPremiumForUpgrade(
-      user.id,
-      hasPremiumCoaching,
-    )
-
-    // Handle subscription replacement when upgrading from premium to coaching
-    if (existingPremiumSub && hasPremiumCoaching) {
-      const upgradeResult = await handleSubscriptionReplacement(
-        user,
-        existingPremiumSub,
-        offer,
-        offerToken,
-        itemFilter,
-        successUrl,
-        cancelUrl,
-      )
-      return NextResponse.json(upgradeResult)
-    }
+      prepareCheckoutItems(offerItems)
 
     // Prepare line items with Stripe prices
     const lineItems = await prepareLineItems(checkoutItems)

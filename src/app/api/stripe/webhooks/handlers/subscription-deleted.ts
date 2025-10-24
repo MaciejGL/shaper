@@ -9,6 +9,7 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { stripe } from '@/lib/stripe/stripe'
 
 export async function handleSubscriptionDeleted(
   subscription: Stripe.Subscription,
@@ -58,7 +59,6 @@ export async function handleSubscriptionDeleted(
         if (!yearly.stripeSubscriptionId) continue
 
         try {
-          const { stripe } = await import('@/lib/stripe/stripe')
           const stripeSub = await stripe.subscriptions.retrieve(
             yearly.stripeSubscriptionId,
           )
@@ -90,14 +90,14 @@ export async function handleSubscriptionDeleted(
         }
       }
 
-      // Remove trainer assignment
-      if (userSubscription.trainerId) {
-        await prisma.user.update({
-          where: { id: userSubscription.userId },
-          data: { trainerId: null },
-        })
-        console.info(`Removed trainer for user ${userSubscription.userId}`)
-      }
+      // // Remove trainer assignment
+      // if (userSubscription.trainerId) {
+      //   await prisma.user.update({
+      //     where: { id: userSubscription.userId },
+      //     data: { trainerId: null },
+      //   })
+      //   console.info(`Removed trainer for user ${userSubscription.userId}`)
+      // }
     }
   } catch (error) {
     console.error('Error handling subscription deleted:', error)
