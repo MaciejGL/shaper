@@ -192,6 +192,7 @@ export function ExerciseProgressChart({
         {/* Chart Display */}
         <div className="w-full">
           <ChartContainer
+            id={`exercise-progress-${exercise.baseExercise?.id}`}
             config={chartConfig}
             className="w-full h-[200px] bg-card dark:bg-black/40 p-2"
           >

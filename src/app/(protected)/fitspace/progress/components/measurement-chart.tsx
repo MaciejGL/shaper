@@ -92,6 +92,7 @@ export function MeasurementChart({
 
   return (
     <ChartContainer
+      id={`measurement-${field}`}
       config={chartConfig}
       className={cn(
         'h-[200px] w-full bg-black/90 dark:bg-black/20 rounded-lg p-2',

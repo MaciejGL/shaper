@@ -71,6 +71,7 @@ export function MuscleGroupRadarChart({
 
   return (
     <ChartContainer
+      id="muscle-group-radar"
       config={chartConfig}
       className={cn(
         'h-full w-full min-h-0 bg-card dark:bg-black/20 rounded-lg p-2',

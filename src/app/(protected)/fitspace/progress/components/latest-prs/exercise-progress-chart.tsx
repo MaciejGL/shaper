@@ -128,7 +128,7 @@ export function ExerciseProgressChart({
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0 bg-black/90 dark:bg-black/20 -mx-4 py-2 mt-4 mb-2">
-        <ChartContainer config={chartConfig}>
+        <ChartContainer id={`exercise-pr-${exerciseId}`} config={chartConfig}>
           <LineChart
             accessibilityLayer
             data={chartData}
