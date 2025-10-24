@@ -22,6 +22,10 @@ import {
   GQLTrainerOfferStatus,
   useFitGetMyTrainerOffersQuery,
 } from '@/generated/graphql-client'
+import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
+
+import { OfferPaymentButtons } from './offer-payment-buttons'
 
 interface ClientServiceDeliveriesSectionProps {
   trainerId: string
@@ -31,6 +35,15 @@ export function ClientServiceDeliveriesSection({
   trainerId,
 }: ClientServiceDeliveriesSectionProps) {
   const { user } = useUser()
+
+  // Check if user has premium subscription (monthly or yearly, not coaching)
+  const { data: subscriptionData } = useCurrentSubscription(user?.id)
+
+  const userHasPremiumSubscription =
+    subscriptionData?.subscription?.package.stripeLookupKey ===
+      STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY ||
+    subscriptionData?.subscription?.package.stripeLookupKey ===
+      STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY
 
   // Query for pending AND processing offers (need payment or in checkout)
   const { data: pendingData, isLoading: pendingLoading } =
@@ -92,7 +105,10 @@ export function ClientServiceDeliveriesSection({
           </CardContent>
         </Card>
       ) : (
-        <PendingOffersCard offers={pendingOffers} />
+        <PendingOffersCard
+          offers={pendingOffers}
+          userHasPremiumSubscription={userHasPremiumSubscription || false}
+        />
       )}
 
       {/* Paid Offers Section */}
@@ -171,9 +187,13 @@ function PurchasedOffersCard({
 
 interface PendingOffersCardProps {
   offers: GQLFitGetMyTrainerOffersQuery['getClientTrainerOffers']
+  userHasPremiumSubscription: boolean
 }
 
-function PendingOffersCard({ offers }: PendingOffersCardProps) {
+function PendingOffersCard({
+  offers,
+  userHasPremiumSubscription,
+}: PendingOffersCardProps) {
   const { isNativeApp } = useMobileApp()
 
   const handleOpenOffer = async (offerUrl: string) => {
@@ -309,14 +329,10 @@ function PendingOffersCard({ offers }: PendingOffersCardProps) {
                       </div>
                     )}
 
-                    <div className="pt-2">
-                      <Button
-                        onClick={() => handleOpenOffer(`/offer/${offer.token}`)}
-                        className="w-full"
-                      >
-                        Proceed to Payment
-                      </Button>
-                    </div>
+                    <OfferPaymentButtons
+                      offer={offer}
+                      userHasPremiumSubscription={userHasPremiumSubscription}
+                    />
                   </div>
                 </AccordionContent>
               </AccordionItem>

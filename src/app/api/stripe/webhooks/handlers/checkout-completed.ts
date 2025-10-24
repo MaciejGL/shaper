@@ -36,6 +36,18 @@ export async function handleCheckoutCompleted(
 
     const offerToken = session.metadata?.offerToken
     const trainerId = session.metadata?.trainerId
+    const isUpgrade = session.metadata?.isUpgrade === 'true'
+    const oldSubscriptionId = session.metadata?.oldSubscriptionId
+
+    // Handle subscription upgrade: refund old subscription and cancel it
+    // Only run once per session (idempotency check)
+    if (isUpgrade && oldSubscriptionId && session.subscription) {
+      await handleSubscriptionUpgradeCleanup(
+        oldSubscriptionId,
+        session.subscription as string,
+        session.id, // Pass session ID for idempotency
+      )
+    }
 
     // Use invoice-first approach for both subscription and payment modes
     if (session.invoice) {
@@ -519,5 +531,63 @@ async function handleTrainerPayout(
   } catch (error) {
     console.error('Failed to create trainer payout:', error)
     // Don't throw - payment already succeeded, we'll handle payout manually if needed
+  }
+}
+
+/**
+ * Handles cleanup after subscription upgrade
+ * Cancels old subscription and lets Stripe automatically handle proration
+ * Stripe will create a credit balance that applies to future invoices
+ */
+async function handleSubscriptionUpgradeCleanup(
+  oldSubscriptionId: string,
+  newSubscriptionId: string,
+  sessionId: string,
+) {
+  try {
+    console.info(
+      `🔄 Processing upgrade cleanup: ${oldSubscriptionId} → ${newSubscriptionId} (session: ${sessionId})`,
+    )
+
+    // Retrieve the old subscription
+    const oldSubscription =
+      await stripe.subscriptions.retrieve(oldSubscriptionId)
+
+    // Idempotency check: if subscription is already canceled, skip
+    if (oldSubscription.status === 'canceled') {
+      console.info(
+        `✅ Old subscription ${oldSubscriptionId} already canceled, skipping cleanup`,
+      )
+      return
+    }
+
+    if (oldSubscription.status !== 'active') {
+      console.info(
+        `⚠️ Old subscription ${oldSubscriptionId} is not active (status: ${oldSubscription.status}), skipping cleanup`,
+      )
+      return
+    }
+
+    // Cancel the old subscription with proration
+    // Stripe automatically:
+    // 1. Calculates unused time credit
+    // 2. Adds credit to customer balance
+    // 3. Applies credit to next invoice (the new coaching subscription)
+    await stripe.subscriptions.cancel(oldSubscriptionId, {
+      prorate: true, // Stripe calculates and applies proration credit
+      invoice_now: true, // Create invoice immediately to apply credit
+    })
+
+    console.info(`✅ Cancelled old subscription: ${oldSubscriptionId}`)
+    console.info(
+      `💰 Stripe automatically calculated proration and added credit to customer balance`,
+    )
+    console.info(
+      `🎉 Upgrade complete: User now has coaching premium with trainer revenue sharing`,
+    )
+  } catch (error) {
+    console.error('Error handling subscription upgrade cleanup:', error)
+    // Don't throw - new subscription is already created and paid
+    // We can handle this manually if needed
   }
 }

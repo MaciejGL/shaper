@@ -1,3 +1,5 @@
+import Stripe from 'stripe'
+
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import {
@@ -5,6 +7,7 @@ import {
   createMealTrainingBundleDiscountIfEligible,
 } from '@/lib/stripe/discount-utils'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
+import { getPayoutDestination } from '@/lib/stripe/revenue-sharing-utils'
 import { stripe } from '@/lib/stripe/stripe'
 
 import {
@@ -12,7 +15,6 @@ import {
   CheckoutPreparation,
   CheckoutResult,
   OfferWithTrainer,
-  SubscriptionUpgradeResult,
 } from './types'
 
 /**
@@ -171,18 +173,41 @@ export function validatePackageStripeKeys(items: BundleItem[]): void {
 }
 
 /**
- * Handles upgrading existing premium subscription to coaching with proration
- * Returns true if upgrade was successful and checkout should be skipped
+ * Filters offer items based on requested item type
  */
-export async function handleExistingPremiumUpgrade(
+export function filterOfferItems(
+  items: BundleItem[],
+  filter: 'all' | 'coaching-only' | 'addons-only',
+): BundleItem[] {
+  if (filter === 'all') {
+    return items
+  }
+
+  if (filter === 'coaching-only') {
+    return items.filter(
+      (item) =>
+        item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+    )
+  }
+
+  // addons-only: exclude coaching
+  return items.filter(
+    (item) =>
+      item.package.stripeLookupKey !== STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+  )
+}
+
+/**
+ * Checks if user has existing premium subscription that needs upgrading
+ * Returns full subscription details if found, null otherwise
+ */
+export async function checkExistingPremiumForUpgrade(
   userId: string,
   hasPremiumCoaching: boolean,
-  trainerId: string,
-  offerToken: string,
-  offerId: string,
-): Promise<SubscriptionUpgradeResult> {
+) {
+  // Only check for upgrades when offer contains coaching premium
   if (!hasPremiumCoaching) {
-    return { upgraded: false }
+    return null
   }
 
   const existingPremium = await prisma.userSubscription.findFirst({
@@ -197,61 +222,14 @@ export async function handleExistingPremiumUpgrade(
   })
 
   if (!existingPremium?.stripeSubscriptionId) {
-    return { upgraded: false }
+    return null
   }
 
-  const isMonthly = existingPremium.package.duration === 'MONTHLY'
+  console.info(
+    `Found existing ${existingPremium.package.duration.toLowerCase()} premium subscription ${existingPremium.stripeSubscriptionId} - needs upgrade`,
+  )
 
-  if (!isMonthly) {
-    // Yearly subscription - continue with normal checkout, webhook will pause it
-    return { upgraded: false }
-  }
-
-  // Monthly subscription - upgrade with proration
-  try {
-    const existingStripeSubscription = await stripe.subscriptions.retrieve(
-      existingPremium.stripeSubscriptionId,
-    )
-    const subscriptionItemId = existingStripeSubscription.items.data[0].id
-
-    const coachingPrices = await stripe.prices.list({
-      lookup_keys: [STRIPE_LOOKUP_KEYS.PREMIUM_COACHING],
-      limit: 1,
-    })
-
-    if (coachingPrices.data.length === 0) {
-      throw new Error('Coaching price not found')
-    }
-
-    const coachingPriceId = coachingPrices.data[0].id
-
-    await stripe.subscriptions.update(existingPremium.stripeSubscriptionId, {
-      items: [{ id: subscriptionItemId, price: coachingPriceId }],
-      proration_behavior: 'create_prorations',
-      metadata: {
-        trainerId,
-        offerToken,
-        switchedFromMonthly: 'true',
-      },
-    })
-
-    console.info(
-      `✅ Modified monthly subscription ${existingPremium.stripeSubscriptionId} to coaching with proration`,
-    )
-
-    await prisma.trainerOffer.update({
-      where: { id: offerId },
-      data: { status: 'COMPLETED', completedAt: new Date() },
-    })
-
-    return {
-      upgraded: true,
-      subscriptionId: existingPremium.stripeSubscriptionId,
-    }
-  } catch (error) {
-    console.error('Failed to prorate monthly subscription:', error)
-    return { upgraded: false }
-  }
+  return existingPremium
 }
 
 /**
@@ -424,5 +402,118 @@ export function formatCheckoutResponse(
       hasPremiumCoaching && discounts.length > 0
         ? '50% off In-Person Sessions'
         : null,
+  }
+}
+
+/**
+ * Creates a Checkout Session for upgrading to coaching premium
+ *
+ * Flow:
+ * 1. User subscribes to NEW coaching subscription (doesn't cancel old one)
+ * 2. Payment succeeds in Checkout
+ * 3. Webhook cancels old subscription with prorate: true
+ * 4. Stripe automatically credits unused time to customer balance
+ * 5. Credit applies to next invoice (the new coaching subscription)
+ *
+ * This ensures user always has active service and payment is confirmed first
+ */
+export async function handleSubscriptionReplacement(
+  user: { id: string; email: string | null; stripeCustomerId: string | null },
+  existingPremiumSub: any,
+  offer: OfferWithTrainer,
+  offerToken: string,
+  itemFilter: 'all' | 'coaching-only' | 'addons-only',
+  successUrl?: string,
+  cancelUrl?: string,
+) {
+  try {
+    // Get coaching price
+    const coachingPrices = await stripe.prices.list({
+      lookup_keys: [STRIPE_LOOKUP_KEYS.PREMIUM_COACHING],
+      limit: 1,
+    })
+
+    if (coachingPrices.data.length === 0) {
+      throw new Error('Coaching price not found')
+    }
+
+    const coachingPrice = coachingPrices.data[0]
+
+    // Get trainer's payout configuration
+    const payout = await getPayoutDestination(offer.trainerId)
+    if (!payout.connectedAccountId) {
+      throw new Error(
+        'Trainer has no connected Stripe account. Cannot process upgrade.',
+      )
+    }
+
+    console.info(
+      `💰 Revenue sharing: ${payout.displayName} → ${payout.platformFeePercent}% platform fee`,
+    )
+
+    // Create Checkout Session for NEW coaching subscription
+    // The webhook will handle refunding and canceling the old subscription after payment
+    const session = await stripe.checkout.sessions.create({
+      customer: user.stripeCustomerId!,
+      mode: 'subscription',
+      line_items: [
+        {
+          price: coachingPrice.id,
+          quantity: 1,
+        },
+      ],
+      subscription_data: {
+        application_fee_percent: payout.platformFeePercent,
+        transfer_data: {
+          destination: payout.connectedAccountId,
+        },
+        metadata: {
+          userId: user.id,
+          trainerId: offer.trainerId,
+          offerToken,
+          source: 'trainer_offer_upgrade',
+          isUpgrade: 'true',
+          oldSubscriptionId: existingPremiumSub.stripeSubscriptionId,
+          oldPlan: existingPremiumSub.package.stripeLookupKey || 'unknown',
+          itemFilter,
+        },
+      },
+      metadata: {
+        userId: user.id,
+        trainerId: offer.trainerId,
+        offerToken,
+        source: 'trainer_offer_upgrade',
+        isUpgrade: 'true',
+        oldSubscriptionId: existingPremiumSub.stripeSubscriptionId,
+        oldPlan: existingPremiumSub.package.stripeLookupKey || 'unknown',
+        itemFilter,
+      },
+      success_url:
+        successUrl ||
+        `${process.env.NEXT_PUBLIC_BASE_URL}/fitspace/my-trainer?payment=success`,
+      cancel_url:
+        cancelUrl ||
+        `${process.env.NEXT_PUBLIC_BASE_URL}/fitspace/my-trainer?payment=cancelled`,
+      payment_method_collection: 'if_required',
+    })
+
+    console.info(`✅ Created upgrade Checkout session: ${session.id}`)
+    console.info(
+      `   Old subscription ${existingPremiumSub.stripeSubscriptionId} will be cancelled with proration credit after payment`,
+    )
+
+    return {
+      checkoutUrl: session.url,
+      sessionId: session.id,
+      message: 'Checkout session created for coaching premium upgrade',
+      revenueSharing: {
+        trainerPercentage: 100 - payout.platformFeePercent,
+        platformPercentage: payout.platformFeePercent,
+        destination: payout.displayName,
+      },
+    }
+  } catch (error) {
+    console.error('Error creating upgrade checkout:', error)
+    throw error
   }
 }

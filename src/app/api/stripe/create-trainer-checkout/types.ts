@@ -5,6 +5,7 @@ export interface CheckoutRequest {
   clientEmail: string
   successUrl?: string
   cancelUrl?: string
+  itemFilter?: 'all' | 'coaching-only' | 'addons-only'
 }
 
 export interface OfferWithTrainer {
