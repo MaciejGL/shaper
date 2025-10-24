@@ -8,13 +8,8 @@ import { createSchema } from './schema'
 
 const schema = await createSchema()
 
-export const config = {
-  api: {
-    // Disable body parsing (required for file uploads)
-    bodyParser: false,
-  },
-}
-
+// Note: In App Router, body parsing is handled by GraphQL Yoga directly.
+// No need for bodyParser config like in Pages Router.
 const yoga = createYoga<{
   req: NextRequest
 }>({

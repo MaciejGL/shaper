@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifySessionToken } from '@/lib/auth/session-token'
 
 /**
- * Middleware for Session Token Authentication
+ * Proxy for Session Token Authentication
  *
  * Intercepts requests to external pages with session_token parameter.
  * Verifies token and restores the original JWT cookie in a single step.
@@ -19,9 +19,7 @@ import { verifySessionToken } from '@/lib/auth/session-token'
  * - /account-management
  */
 
-export const runtime = 'nodejs'
-
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   const sessionToken = searchParams.get('session_token')
 
@@ -44,7 +42,7 @@ export async function middleware(request: NextRequest) {
   const tokenData = verifySessionToken(sessionToken)
   if (!tokenData) {
     // Invalid token - redirect to error page
-    console.error('[MIDDLEWARE] Invalid or expired session token')
+    console.error('[PROXY] Invalid or expired session token')
     return NextResponse.redirect(
       new URL('/auth/error?error=SessionExpired', request.url),
     )
@@ -54,7 +52,7 @@ export async function middleware(request: NextRequest) {
     // Already has a cookie - check if it's the SAME JWT
     if (existingCookie.value === tokenData.originalJwt) {
       // Same JWT, just clean URL without setting cookie again
-      console.info('[MIDDLEWARE] JWT already set, skipping restore')
+      console.info('[PROXY] JWT already set, skipping restore')
       const cleanUrl = new URL(request.url)
       cleanUrl.searchParams.delete('session_token')
       return NextResponse.redirect(cleanUrl)
@@ -66,7 +64,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  console.warn('🔓 [MIDDLEWARE] Restoring session JWT:', {
+  console.warn('🔓 [PROXY] Restoring session JWT:', {
     email: tokenData.email,
     pathname,
   })

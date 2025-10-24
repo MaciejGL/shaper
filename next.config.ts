@@ -7,6 +7,7 @@ const withBundleAnalyzerExt = withBundleAnalyzer({
 })
 
 const nextConfig: NextConfig = {
+  reactCompiler: true,
   redirects: async () => {
     return [
       {
