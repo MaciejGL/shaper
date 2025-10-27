@@ -4,7 +4,6 @@ export interface MobileBridgeMessage {
     | 'NATIVE_PUSH_REGISTER'
     | 'NATIVE_SHARE'
     | 'REQUEST_EXPO_PUSH_TOKEN'
-    | 'back_button_handled'
   data?: any
 }
 
@@ -29,11 +28,6 @@ export interface CameraResponse {
 export interface PushTokenResponse {
   type: 'EXPO_PUSH_TOKEN_RESPONSE'
   expoPushToken: string
-}
-
-export interface BackButtonHandledResponse {
-  type: 'back_button_handled'
-  handled: boolean
 }
 
 // Window interface extensions for native bridge

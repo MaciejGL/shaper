@@ -115,24 +115,16 @@ function HyproAppContent({ authToken }: HyproAppProps) {
     undefined,
   )
 
-  // Handle Android back button to close modals/drawers instead of exiting app
+  // Handle Android back button - let WebView handle history (including URL-based modal state)
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
-        // Ask WebView to handle the back button
-        if (webViewRef.current?.handleBackButton) {
-          webViewRef.current.handleBackButton().then((handled) => {
-            if (!handled) {
-              // If WebView didn't handle it (no modal open), allow default behavior
-              // This will navigate back in history or exit app
-              if (webViewRef.current?.goBack) {
-                webViewRef.current.goBack()
-              }
-            }
-          })
-          // Always prevent default while we check with WebView
-          return true
+        // Simply navigate back in WebView history
+        // URL-based modal state will handle closing modals automatically
+        if (webViewRef.current?.goBack) {
+          webViewRef.current.goBack()
+          return true // Prevent default app exit
         }
         // If WebView ref not ready, allow default behavior
         return false

@@ -4,6 +4,7 @@ import * as React from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
+import { useModalHistory } from '@/hooks/use-modal-history'
 import { cn } from '@/lib/utils'
 
 function Drawer({
@@ -15,14 +16,23 @@ function Drawer({
 }) {
   const [internalOpen, setInternalOpen] = React.useState(false)
 
+  // Use external open prop if provided (controlled), otherwise use internal state
+  const isControlled = open !== undefined
+  const currentOpen = isControlled ? open : internalOpen
+
   const handleOpenChange = (newOpen: boolean) => {
     setInternalOpen(newOpen)
     onOpenChange?.(newOpen)
   }
 
-  // Use external open prop if provided (controlled), otherwise use internal state
-  const isControlled = open !== undefined
-  const currentOpen = isControlled ? open : internalOpen
+  // Handle back button for modal
+  useModalHistory(currentOpen, () => {
+    if (isControlled) {
+      onOpenChange?.(false)
+    } else {
+      setInternalOpen(false)
+    }
+  })
 
   return (
     <RemoveScroll enabled={currentOpen}>
@@ -30,7 +40,7 @@ function Drawer({
         repositionInputs={false}
         data-slot="drawer"
         modal={true}
-        open={open}
+        open={currentOpen}
         onOpenChange={handleOpenChange}
         {...props}
       />
