@@ -1,0 +1,217 @@
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  CheckCircle,
+  ClipboardCheck,
+  Package,
+  Salad,
+  UserPlus,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+
+import {
+  GQLNotificationType,
+  useAcceptCoachingRequestMutation,
+  useGetMyTrainerQuery,
+  useMyCoachingRequestsQuery,
+} from '@/generated/graphql-client'
+import { useOpenUrl } from '@/hooks/use-open-url'
+
+import { NotificationData, PromotionalToastConfig } from './types'
+
+export function usePromotionalToastConfigs(): Record<
+  GQLNotificationType,
+  PromotionalToastConfig | undefined
+> {
+  const router = useRouter()
+  const { openUrl } = useOpenUrl()
+  const queryClient = useQueryClient()
+
+  const { mutateAsync: acceptCoachingRequest, isPending: isAcceptingCoaching } =
+    useAcceptCoachingRequestMutation({
+      onSuccess: () => {
+        // Invalidate queries to refresh my-trainer page
+        queryClient.invalidateQueries({
+          queryKey: useGetMyTrainerQuery.getKey(),
+        })
+        queryClient.invalidateQueries({
+          queryKey: useMyCoachingRequestsQuery.getKey(),
+        })
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Failed to accept coaching request')
+      },
+    })
+
+  return {
+    [GQLNotificationType.TrainerOfferReceived]: {
+      id: 'trainer-offer',
+      notificationType: GQLNotificationType.TrainerOfferReceived,
+      title: 'New Training Offer',
+      getSubtitle: (data) => `From ${data.trainerName || 'your trainer'}`,
+      icon: Package,
+      iconVariant: 'orange',
+      primaryAction: {
+        label: 'View Offer',
+        handler: (data) => {
+          if (data.token) {
+            openUrl(`/offer/${data.token}`)
+          }
+        },
+      },
+      extractData: (notification) => {
+        const trainerName =
+          notification.message.split(' created a training offer')[0] ||
+          'Your Trainer'
+        return {
+          notificationId: notification.id,
+          trainerName,
+          token: notification.relatedItemId || undefined,
+          message: notification.message,
+        }
+      },
+    },
+
+    [GQLNotificationType.CoachingRequest]: {
+      id: 'coaching-request',
+      notificationType: GQLNotificationType.CoachingRequest,
+      title: 'New Coaching Request',
+      getSubtitle: (data) => `From ${data.trainerName || 'someone'}`,
+      icon: UserPlus,
+      iconVariant: 'blue',
+      primaryAction: {
+        label: 'Accept Coaching',
+        isLoading: isAcceptingCoaching,
+        handler: async (data) => {
+          if (!data.requestId) {
+            toast.error('Request ID not found')
+            return
+          }
+
+          try {
+            await acceptCoachingRequest({ id: data.requestId })
+            router.push('/fitspace/my-trainer')
+          } catch (error) {
+            // Error toast handled by mutation onError
+            console.error('Failed to accept coaching request:', error)
+          }
+        },
+      },
+      extractData: (notification) => {
+        // Extract trainer name from message "You have a new coaching request from X."
+        const match = notification.message.match(/from (.+)\.$/)
+        const trainerName = match ? match[1] : 'someone'
+        return {
+          notificationId: notification.id,
+          trainerName,
+          requestId: notification.relatedItemId || undefined,
+          message: notification.message,
+        }
+      },
+    },
+
+    [GQLNotificationType.CoachingRequestAccepted]: {
+      id: 'coaching-accepted',
+      notificationType: GQLNotificationType.CoachingRequestAccepted,
+      title: 'Coaching Request Accepted',
+      getSubtitle: (data) =>
+        `${data.trainerName || 'Your request'} has been accepted`,
+      icon: CheckCircle,
+      iconVariant: 'green',
+      primaryAction: {
+        label: 'View Trainer',
+        handler: () => {
+          router.push('/fitspace/my-trainer')
+        },
+      },
+      extractData: (notification) => {
+        // Extract name from message "X has accepted your request to start coaching."
+        const match = notification.message.match(/^(.+) has accepted/)
+        const trainerName = match ? match[1] : 'Someone'
+        return {
+          notificationId: notification.id,
+          trainerName,
+          message: notification.message,
+        }
+      },
+    },
+
+    [GQLNotificationType.NewTrainingPlanAssigned]: {
+      id: 'training-plan',
+      notificationType: GQLNotificationType.NewTrainingPlanAssigned,
+      title: 'New Training Plan',
+      getSubtitle: (data) =>
+        data.planTitle
+          ? `"${data.planTitle}" assigned by ${data.trainerName || 'your trainer'}`
+          : `Assigned by ${data.trainerName || 'your trainer'}`,
+      icon: ClipboardCheck,
+      iconVariant: 'purple',
+      primaryAction: {
+        label: 'View Plan',
+        handler: () => {
+          router.push('/fitspace/my-plans?tab=available')
+        },
+      },
+      extractData: (notification) => {
+        // Extract plan title and trainer name from message:
+        // 'New training plan "X" has been assigned to you by Y.'
+        const planMatch = notification.message.match(/"(.+?)"/)
+        const trainerMatch = notification.message.match(/by (.+)\.$/)
+
+        return {
+          notificationId: notification.id,
+          planTitle: planMatch ? planMatch[1] : undefined,
+          trainerName: trainerMatch ? trainerMatch[1] : undefined,
+          message: notification.message,
+        }
+      },
+    },
+
+    [GQLNotificationType.NewMealPlanAssigned]: {
+      id: 'meal-plan',
+      notificationType: GQLNotificationType.NewMealPlanAssigned,
+      title: 'New Meal Plan',
+      getSubtitle: (data) =>
+        data.planTitle
+          ? `"${data.planTitle}" assigned by ${data.trainerName || 'your trainer'}`
+          : `Assigned by ${data.trainerName || 'your trainer'}`,
+      icon: Salad,
+      iconVariant: 'green',
+      primaryAction: {
+        label: 'View Plan',
+        handler: () => {
+          router.push('/fitspace/nutrition')
+        },
+      },
+      extractData: (notification) => {
+        // Extract plan title and trainer name from message:
+        // '"X" nutrition plan has been shared with you by Y'
+        const planMatch = notification.message.match(/"(.+?)"/)
+        const trainerMatch = notification.message.match(/by (.+)$/)
+
+        return {
+          notificationId: notification.id,
+          planTitle: planMatch ? planMatch[1] : undefined,
+          trainerName: trainerMatch ? trainerMatch[1] : undefined,
+          message: notification.message,
+        }
+      },
+    },
+
+    // Placeholder for other notification types
+    [GQLNotificationType.CoachingRequestRejected]: undefined,
+    [GQLNotificationType.CoachingCancelled]: undefined,
+    [GQLNotificationType.WorkoutCompleted]: undefined,
+    [GQLNotificationType.PlanCompleted]: undefined,
+    [GQLNotificationType.ExerciseNoteAdded]: undefined,
+    [GQLNotificationType.ExerciseNoteReply]: undefined,
+    [GQLNotificationType.TrainerNoteShared]: undefined,
+    [GQLNotificationType.TrainerWorkoutCompleted]: undefined,
+    [GQLNotificationType.TeamInvitation]: undefined,
+    [GQLNotificationType.BodyProgressShared]: undefined,
+    [GQLNotificationType.MeetingReminder]: undefined,
+    [GQLNotificationType.Reminder]: undefined,
+    [GQLNotificationType.System]: undefined,
+    [GQLNotificationType.Message]: undefined,
+  }
+}

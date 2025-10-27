@@ -19,6 +19,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       closeButton
       position="top-right"
+      toastOptions={{
+        style: {
+          zIndex: 9999,
+        },
+      }}
       {...props}
     />
   )

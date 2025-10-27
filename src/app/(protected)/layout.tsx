@@ -5,6 +5,7 @@ import { MobileAppAuthSync } from '@/components/mobile-app-auth-sync'
 import { MobileAppThemeSync } from '@/components/mobile-app-theme-sync'
 import { OnboardingProvider } from '@/components/onboarding/onboarding-provider'
 import { PostHogProvider } from '@/components/posthog-provider'
+import { PromotionalToastManager } from '@/components/promotional-toast'
 import { SimplePullToRefresh } from '@/components/simple-pull-to-refresh'
 import { ThemeProvider } from '@/components/theme-provider'
 import { UserProvider } from '@/context/user-context'
@@ -44,6 +45,7 @@ export default async function ProtectedLayout({
             <MobileAppThemeSync />
             <AnnouncementBanner />
             <OnboardingProvider />
+            <PromotionalToastManager />
             {children}
           </ThemeProvider>
         </UserPreferencesProvider>
