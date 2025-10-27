@@ -90,14 +90,16 @@ export async function handleSubscriptionDeleted(
         }
       }
 
-      // // Remove trainer assignment
-      // if (userSubscription.trainerId) {
-      //   await prisma.user.update({
-      //     where: { id: userSubscription.userId },
-      //     data: { trainerId: null },
-      //   })
-      //   console.info(`Removed trainer for user ${userSubscription.userId}`)
-      // }
+      // Remove trainer assignment when coaching subscription ends
+      if (userSubscription.trainerId) {
+        await prisma.user.update({
+          where: { id: userSubscription.userId },
+          data: { trainerId: null },
+        })
+        console.info(
+          `Removed trainer assignment for user ${userSubscription.userId}`,
+        )
+      }
     }
   } catch (error) {
     console.error('Error handling subscription deleted:', error)
