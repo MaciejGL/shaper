@@ -265,7 +265,7 @@ export function OfferPage({
     <div className="dark bg-background min-h-screen w-full flex-center">
       <div className="container-hypertro mx-auto max-w-lg">
         {/* Header */}
-        <div className="pt-8 pb-4 px-4 text-center">
+        <div className="pt-20 pb-4 px-4 text-center">
           <h1 className="text-2xl font-bold text-foreground">Training Offer</h1>
           <p className="text-muted-foreground">from {trainerName}</p>
         </div>
@@ -313,7 +313,7 @@ export function OfferPage({
           </Card>
 
           {/* Premium Subscription Refund Notice */}
-          {shouldShowRefundNotice && (
+          {!shouldShowRefundNotice && (
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem
                 value="subscription-info"
