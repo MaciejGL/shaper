@@ -38,6 +38,7 @@ export default async function TrainerOfferPage({
     <OfferPage
       offer={offer}
       clientEmail={awaitedSearchParams.client || offer.clientEmail}
+      userId={serverSession.user.id}
     />
   )
 }

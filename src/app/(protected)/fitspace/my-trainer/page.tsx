@@ -32,6 +32,7 @@ import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { ClientMeetingsSection } from './components/client-meetings-section'
 import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'
+import { PendingOffersBanner } from './components/pending-offers-banner'
 import { SubscriptionInfoSection } from './components/subscription-info-section'
 import { TrainerSharedNotesSection } from './components/trainer-shared-notes-section'
 
@@ -156,6 +157,9 @@ function TrainerView({ trainer }: TrainerViewProps) {
         onClose={() => setIsDrawerOpen(false)}
         showRequestCoaching={false}
       />
+
+      <PendingOffersBanner trainerId={trainer.id} />
+
       <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
         <div className="flex items-center justify-between mb-2">
           <TabsList>

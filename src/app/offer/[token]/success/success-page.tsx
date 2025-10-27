@@ -236,10 +236,10 @@ export function SuccessPage({
               <p className="text-sm text-muted-foreground">
                 Questions? Contact {trainerName} directly or email{' '}
                 <a
-                  href="mailto:support@hypertro.com"
+                  href="mailto:support@hypro.app"
                   className="text-blue-600 hover:underline"
                 >
-                  support@hypertro.com
+                  support@hypro.app
                 </a>
               </p>
 

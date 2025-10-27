@@ -4,7 +4,6 @@ import { formatDate } from 'date-fns'
 import { Package } from 'lucide-react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
-import { useMobileApp } from '@/components/mobile-app-bridge'
 import {
   Accordion,
   AccordionContent,
@@ -12,7 +11,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
@@ -23,8 +21,6 @@ import {
   useFitGetMyTrainerOffersQuery,
 } from '@/generated/graphql-client'
 
-import { OfferPaymentButtons } from './offer-payment-buttons'
-
 interface ClientServiceDeliveriesSectionProps {
   trainerId: string
 }
@@ -34,25 +30,7 @@ export function ClientServiceDeliveriesSection({
 }: ClientServiceDeliveriesSectionProps) {
   const { user } = useUser()
 
-  // Query for pending AND processing offers (need payment or in checkout)
-  const { data: pendingData, isLoading: pendingLoading } =
-    useFitGetMyTrainerOffersQuery(
-      {
-        clientEmail: user?.email || '',
-        trainerId,
-        status: [
-          GQLTrainerOfferStatus.Pending,
-          GQLTrainerOfferStatus.Processing,
-        ],
-      },
-      {
-        enabled: !!user?.email,
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        refetchOnWindowFocus: true, // Refetch when window regains focus
-      },
-    )
-
-  // Query for paid offers
+  // Query for paid offers only
   const { data: paidData, isLoading: paidLoading } =
     useFitGetMyTrainerOffersQuery(
       {
@@ -67,60 +45,31 @@ export function ClientServiceDeliveriesSection({
       },
     )
 
-  const pendingOffers = pendingData?.getClientTrainerOffers || []
   const paidOffers = paidData?.getClientTrainerOffers || []
 
-  const isLoading = pendingLoading || paidLoading
+  if (paidLoading) {
+    return (
+      <Card borderless>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SectionIcon icon={Package} size="xs" variant="green" />
+            Purchased Training Packages
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full flex flex-col gap-2"
+          >
+            <LoadingSkeleton count={3} cardVariant="tertiary" variant="sm" />
+          </Accordion>
+        </CardContent>
+      </Card>
+    )
+  }
 
-  return (
-    <div className="space-y-4">
-      {/* Pending Offers Section */}
-      {isLoading ? (
-        <Card borderless>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <SectionIcon icon={Package} size="xs" variant="orange" />
-              New Offers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Accordion
-              type="single"
-              collapsible
-              className="w-full flex flex-col gap-2"
-            >
-              <LoadingSkeleton count={1} cardVariant="tertiary" variant="sm" />
-            </Accordion>
-          </CardContent>
-        </Card>
-      ) : (
-        <PendingOffersCard offers={pendingOffers} />
-      )}
-
-      {/* Paid Offers Section */}
-      {isLoading ? (
-        <Card borderless>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <SectionIcon icon={Package} size="xs" variant="green" />
-              Purchased Training Packages
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Accordion
-              type="single"
-              collapsible
-              className="w-full flex flex-col gap-2"
-            >
-              <LoadingSkeleton count={3} cardVariant="tertiary" variant="sm" />
-            </Accordion>
-          </CardContent>
-        </Card>
-      ) : (
-        <PurchasedOffersCard offers={paidOffers} />
-      )}
-    </div>
-  )
+  return <PurchasedOffersCard offers={paidOffers} />
 }
 
 function PurchasedOffersCard({
@@ -165,158 +114,6 @@ function PurchasedOffersCard({
           {offers.map((offer) => (
             <TrainerOfferItem key={offer.id} offer={offer} />
           ))}
-        </Accordion>
-      </CardContent>
-    </Card>
-  )
-}
-
-interface PendingOffersCardProps {
-  offers: GQLFitGetMyTrainerOffersQuery['getClientTrainerOffers']
-}
-
-function PendingOffersCard({ offers }: PendingOffersCardProps) {
-  const { isNativeApp } = useMobileApp()
-
-  const handleOpenOffer = async (offerUrl: string) => {
-    let finalOfferUrl = offerUrl
-
-    // If in native app, fetch session token and append to URL
-    if (isNativeApp) {
-      try {
-        const response = await fetch('/api/auth/generate-session-token', {
-          method: 'POST',
-        })
-
-        if (response.ok) {
-          const { sessionToken } = await response.json()
-          const separator = offerUrl.includes('?') ? '&' : '?'
-          finalOfferUrl = `${offerUrl}${separator}session_token=${encodeURIComponent(sessionToken)}`
-        }
-      } catch (error) {
-        console.error('Failed to generate session token:', error)
-        // Continue without token - user may need to login
-      }
-
-      // Force external browser opening for native app
-      const opened = window.open(
-        finalOfferUrl,
-        '_blank',
-        'noopener,noreferrer,external=true',
-      )
-
-      if (!opened) {
-        // Fallback: create link element
-        const link = document.createElement('a')
-        link.href = finalOfferUrl
-        link.target = '_blank'
-        link.rel = 'noopener noreferrer external'
-        link.style.display = 'none'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      }
-    } else {
-      window.open(finalOfferUrl, '_blank', 'noopener,noreferrer')
-    }
-  }
-
-  if (offers.length === 0) {
-    return null
-  }
-
-  return (
-    <Card borderless>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SectionIcon icon={Package} size="xs" variant="orange" />
-          New Offers
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full flex flex-col gap-2"
-        >
-          {offers.map((offer) => {
-            const packageName =
-              offer.packageSummary.length === 1
-                ? offer.packageSummary[0].name
-                : 'Training Package'
-
-            return (
-              <AccordionItem
-                key={offer.id}
-                value={offer.id}
-                className="bg-card-on-card px-4 rounded-md border-none"
-              >
-                <AccordionTrigger className="hover:no-underline flex justify-between items-center">
-                  <div className="flex items-center justify-between w-full pr-4">
-                    <div className="flex items-center gap-3">
-                      <div className="text-left">
-                        <h3 className="font-medium text-base">
-                          {packageName.replaceAll('[TEST]', ' ')}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          <Badge variant="primary" className="mr-2">
-                            Pending Payment
-                          </Badge>
-                          Created{' '}
-                          <span className="font-medium">
-                            {formatDate(
-                              new Date(offer.createdAt),
-                              'd. MMM yyyy',
-                            )}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </AccordionTrigger>
-
-                <AccordionContent>
-                  <div className="space-y-4 pb-4">
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground mb-3">
-                        What's included in this package:
-                      </h4>
-
-                      {offer.packageSummary.map((item) => {
-                        const showQuantity = item.quantity > 1
-                        return (
-                          <div key={item.packageId} className="mb-2">
-                            <h5 className="font-medium text-sm">
-                              {item.name.replaceAll('[TEST]', ' ')}
-                              {showQuantity && (
-                                <span className="text-muted-foreground font-normal">
-                                  {' '}
-                                  (×{item.quantity})
-                                </span>
-                              )}
-                            </h5>
-                          </div>
-                        )
-                      })}
-                    </div>
-
-                    {offer.personalMessage && (
-                      <div className="mt-4 p-3 bg-muted/30 rounded-lg">
-                        <p className="text-sm text-muted-foreground font-medium mb-1">
-                          Message from your trainer:
-                        </p>
-                        <p className="text-sm italic">
-                          "{offer.personalMessage}"
-                        </p>
-                      </div>
-                    )}
-
-                    <OfferPaymentButtons offer={offer} />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            )
-          })}
         </Accordion>
       </CardContent>
     </Card>
