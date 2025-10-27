@@ -3,6 +3,7 @@
  * Replaces basic WebView with full functionality
  */
 import { useNetInfo } from '@react-native-community/netinfo'
+import * as SplashScreen from 'expo-splash-screen'
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { WebView } from 'react-native-webview'
@@ -10,7 +11,6 @@ import { WebView } from 'react-native-webview'
 import { APP_CONFIG } from '../config/app-config'
 
 import { OfflineScreen } from './offline-screen'
-import { WebViewLoading } from './webview-loading'
 
 /**
  * Creates clean, readable injected JavaScript for the WebView
@@ -248,7 +248,6 @@ export const EnhancedWebView = forwardRef<
     ref,
   ) => {
     const webViewRef = useRef<WebView>(null)
-    const [loadingProgress, setLoadingProgress] = useState(0)
     const [showOfflineScreen, setShowOfflineScreen] = useState(false)
 
     // Prevent infinite loops with debouncing and refs
@@ -378,6 +377,12 @@ export const EnhancedWebView = forwardRef<
       }
     }, [])
 
+    // Handle webview load - hide splash screen
+    const handleLoad = React.useCallback(() => {
+      SplashScreen.hideAsync()
+      onLoad?.()
+    }, [onLoad])
+
     // Generate the injected JavaScript in a clean, readable way
     const injectedJavaScript = createWebViewScript()
 
@@ -490,16 +495,11 @@ export const EnhancedWebView = forwardRef<
           style={styles.webview}
           javaScriptEnabled={true}
           domStorageEnabled={true}
-          startInLoadingState={true}
-          renderLoading={() => <WebViewLoading progress={loadingProgress} />}
-          onLoadProgress={(event) => {
-            setLoadingProgress(event.nativeEvent.progress)
-          }}
           userAgent={APP_CONFIG.USER_AGENT}
           injectedJavaScript={injectedJavaScript}
           onMessage={handleMessage}
           onNavigationStateChange={onNavigationStateChange}
-          onLoad={onLoad}
+          onLoad={handleLoad}
           onError={handleWebViewError}
           onHttpError={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent
