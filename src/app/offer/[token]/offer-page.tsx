@@ -313,7 +313,7 @@ export function OfferPage({
           </Card>
 
           {/* Premium Subscription Refund Notice */}
-          {!shouldShowRefundNotice && (
+          {shouldShowRefundNotice && (
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem
                 value="subscription-info"
