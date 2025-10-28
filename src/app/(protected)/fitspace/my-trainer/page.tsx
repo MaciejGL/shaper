@@ -292,7 +292,10 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
   // If there's a pending outgoing request, show card with withdraw option
   if (pendingOutgoingRequest) {
     const trainerName =
-      pendingOutgoingRequest.recipient.name || 'Your selected trainer'
+      pendingOutgoingRequest.recipient.profile?.firstName &&
+      pendingOutgoingRequest.recipient.profile?.lastName
+        ? `${pendingOutgoingRequest.recipient.profile.firstName} ${pendingOutgoingRequest.recipient.profile.lastName}`
+        : pendingOutgoingRequest.recipient.name || 'Your selected trainer'
 
     return (
       <div className="space-y-4">
@@ -307,9 +310,6 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <h3 className="font-semibold text-base">{trainerName}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {pendingOutgoingRequest.recipient.email}
-                </p>
               </div>
               <Badge variant="secondary">Pending</Badge>
             </div>

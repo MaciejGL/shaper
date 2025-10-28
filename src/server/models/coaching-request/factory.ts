@@ -64,8 +64,22 @@ export async function getCoachingRequest({
       OR: [{ senderId: user?.user?.id }, { recipientId: user?.user?.id }],
     },
     include: {
-      sender: { select: { id: true, name: true, email: true } },
-      recipient: { select: { id: true, name: true, email: true } },
+      sender: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profile: { select: { firstName: true, lastName: true } },
+        },
+      },
+      recipient: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profile: { select: { firstName: true, lastName: true } },
+        },
+      },
     },
   })
 
@@ -87,8 +101,22 @@ export async function getCoachingRequests({
       createdAt: 'desc',
     },
     include: {
-      sender: { select: { id: true, name: true, email: true } },
-      recipient: { select: { id: true, name: true, email: true } },
+      sender: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profile: { select: { firstName: true, lastName: true } },
+        },
+      },
+      recipient: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profile: { select: { firstName: true, lastName: true } },
+        },
+      },
     },
   })
 

@@ -55,8 +55,10 @@ export function IncomingCoachingRequestCard({
       },
     })
 
-  const trainerName = request.sender.name || 'A trainer'
-  const trainerEmail = request.sender.email
+  const trainerName =
+    request.sender.profile?.firstName && request.sender.profile?.lastName
+      ? `${request.sender.profile.firstName} ${request.sender.profile.lastName}`
+      : request.sender.name || 'A trainer'
 
   return (
     <Card>
@@ -80,7 +82,6 @@ export function IncomingCoachingRequestCard({
           </Avatar>
           <div className="flex-1">
             <h3 className="font-semibold text-base">{trainerName}</h3>
-            <p className="text-sm text-muted-foreground">{trainerEmail}</p>
           </div>
           <Badge variant="primary">Pending</Badge>
         </div>

@@ -9,11 +9,19 @@ query MyCoachingRequests {
       id
       name
       email
+      profile {
+        firstName
+        lastName
+      }
     }
     sender {
       id
       name
       email
+      profile {
+        firstName
+        lastName
+      }
     }
   }
 }
@@ -30,11 +38,19 @@ query MyCoachingRequest($id: ID!) {
       id
       name
       email
+      profile {
+        firstName
+        lastName
+      }
     }
     sender {
       id
       name
       email
+      profile {
+        firstName
+        lastName
+      }
     }
   }
 }
