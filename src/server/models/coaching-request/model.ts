@@ -5,6 +5,7 @@ import {
 import {
   CoachingRequest as PrismaCoachingRequest,
   User as PrismaUser,
+  UserProfile as PrismaUserProfile,
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
@@ -12,8 +13,16 @@ import { GQLContext } from '@/types/gql-context'
 import User from '../user/model'
 
 type CoachingRequestWithRelations = PrismaCoachingRequest & {
-  sender?: Pick<PrismaUser, 'id' | 'name' | 'email'> | null
-  recipient?: Pick<PrismaUser, 'id' | 'name' | 'email'> | null
+  sender?:
+    | (Pick<PrismaUser, 'id' | 'email'> & {
+        profile?: Pick<PrismaUserProfile, 'firstName' | 'lastName'> | null
+      })
+    | null
+  recipient?:
+    | (Pick<PrismaUser, 'id' | 'email'> & {
+        profile?: Pick<PrismaUserProfile, 'firstName' | 'lastName'> | null
+      })
+    | null
 }
 
 export default class CoachingRequest implements GQLCoachingRequest {

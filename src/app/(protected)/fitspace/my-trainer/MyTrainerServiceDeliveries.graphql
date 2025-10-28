@@ -53,3 +53,10 @@ query FitGetMyTrainerOffers(
     completedAt
   }
 }
+
+mutation RejectTrainerOffer($offerId: ID!, $reason: String) {
+  rejectTrainerOffer(offerId: $offerId, reason: $reason) {
+    id
+    status
+  }
+}

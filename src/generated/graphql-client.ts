@@ -1196,6 +1196,7 @@ export type GQLMutation = {
   pauseClientCoachingSubscription: GQLPauseCoachingResult;
   pausePlan: Scalars['Boolean']['output'];
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
+  rejectTrainerOffer: GQLTrainerOffer;
   removeAllExercisesFromDay: Scalars['Boolean']['output'];
   removeExerciseFromDay: Scalars['Boolean']['output'];
   removeExerciseFromWorkout: Scalars['Boolean']['output'];
@@ -1706,6 +1707,12 @@ export type GQLMutationPausePlanArgs = {
 
 export type GQLMutationRejectCoachingRequestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRejectTrainerOfferArgs = {
+  offerId: Scalars['ID']['input'];
+  reason?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3913,6 +3920,14 @@ export type GQLFitGetMyTrainerOffersQueryVariables = Exact<{
 
 
 export type GQLFitGetMyTrainerOffersQuery = { __typename?: 'Query', getClientTrainerOffers: Array<{ __typename?: 'TrainerOffer', id: string, token: string, trainerId: string, clientEmail: string, personalMessage?: string | undefined | null, status: GQLTrainerOfferStatus, createdAt: string, updatedAt: string, expiresAt: string, completedAt?: string | undefined | null, packageSummary: Array<{ __typename?: 'PackageSummaryItem', packageId: string, quantity: number, name: string }>, serviceDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, updatedAt: string, tasks: Array<{ __typename?: 'ServiceTask', id: string, title: string, taskType: GQLTaskType, status: GQLTaskStatus, isRequired: boolean, requiresScheduling: boolean, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, notes?: string | undefined | null, order: number }> }>, trainer: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
+
+export type GQLRejectTrainerOfferMutationVariables = Exact<{
+  offerId: Scalars['ID']['input'];
+  reason?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GQLRejectTrainerOfferMutation = { __typename?: 'Mutation', rejectTrainerOffer: { __typename?: 'TrainerOffer', id: string, status: GQLTrainerOfferStatus } };
 
 export type GQLGetAllClientMeetingsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6785,6 +6800,33 @@ useInfiniteFitGetMyTrainerOffersQuery.getKey = (variables: GQLFitGetMyTrainerOff
 
 
 useFitGetMyTrainerOffersQuery.fetcher = (variables: GQLFitGetMyTrainerOffersQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitGetMyTrainerOffersQuery, GQLFitGetMyTrainerOffersQueryVariables>(FitGetMyTrainerOffersDocument, variables, options);
+
+export const RejectTrainerOfferDocument = `
+    mutation RejectTrainerOffer($offerId: ID!, $reason: String) {
+  rejectTrainerOffer(offerId: $offerId, reason: $reason) {
+    id
+    status
+  }
+}
+    `;
+
+export const useRejectTrainerOfferMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRejectTrainerOfferMutation, TError, GQLRejectTrainerOfferMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRejectTrainerOfferMutation, TError, GQLRejectTrainerOfferMutationVariables, TContext>(
+      {
+    mutationKey: ['RejectTrainerOffer'],
+    mutationFn: (variables?: GQLRejectTrainerOfferMutationVariables) => fetchData<GQLRejectTrainerOfferMutation, GQLRejectTrainerOfferMutationVariables>(RejectTrainerOfferDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRejectTrainerOfferMutation.getKey = () => ['RejectTrainerOffer'];
+
+
+useRejectTrainerOfferMutation.fetcher = (variables: GQLRejectTrainerOfferMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRejectTrainerOfferMutation, GQLRejectTrainerOfferMutationVariables>(RejectTrainerOfferDocument, variables, options);
 
 export const GetAllClientMeetingsDocument = `
     query GetAllClientMeetings {

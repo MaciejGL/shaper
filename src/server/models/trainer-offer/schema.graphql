@@ -47,3 +47,7 @@ type Query {
     status: [TrainerOfferStatus!]
   ): [TrainerOffer!]!
 }
+
+type Mutation {
+  rejectTrainerOffer(offerId: ID!, reason: String): TrainerOffer!
+}

@@ -225,20 +225,34 @@ export async function acceptCoachingRequest({
       throw new GraphQLError('This request is no longer pending')
     }
 
-    // Create new accepted record
-    const coachingRequest = await prisma.coachingRequest.create({
+    // Update existing request to accepted status
+    const coachingRequest = await prisma.coachingRequest.update({
+      where: { id },
       data: {
-        senderId: originalRequest.senderId,
-        recipientId: originalRequest.recipientId,
-        message: originalRequest.message,
-        interestedServices: originalRequest.interestedServices,
         status: GQLCoachingRequestStatus.Accepted,
       },
       include: {
-        sender: { select: { id: true, name: true, email: true } },
-        recipient: { select: { id: true, name: true, email: true } },
+        sender: {
+          select: {
+            id: true,
+            email: true,
+            profile: { select: { firstName: true, lastName: true } },
+          },
+        },
+        recipient: {
+          select: {
+            id: true,
+            email: true,
+            profile: { select: { firstName: true, lastName: true } },
+          },
+        },
       },
     })
+
+    const senderName =
+      coachingRequest.sender?.profile?.firstName &&
+      coachingRequest.sender?.profile?.lastName &&
+      `${coachingRequest.sender?.profile?.firstName} ${coachingRequest.sender?.profile?.lastName}`
 
     // Connect trainer and client relationship
     if (recipientRole === GQLUserRole.Trainer) {
@@ -282,7 +296,7 @@ export async function acceptCoachingRequest({
     await createNotification(
       {
         userId: coachingRequest.senderId,
-        message: `${coachingRequest.sender?.name ?? 'Someone'} has accepted your request to start coaching.`,
+        message: `${senderName ?? 'Someone'} has accepted your request to start coaching.`,
         type: GQLNotificationType.CoachingRequestAccepted,
         createdBy: recipientId,
         relatedItemId: coachingRequest.id,
@@ -292,7 +306,7 @@ export async function acceptCoachingRequest({
 
     await notifyCoachingRequestAccepted(
       coachingRequest.senderId,
-      coachingRequest.sender?.name || 'Someone',
+      senderName || 'Someone',
     )
 
     // Invalidate access control cache and trainer cache for both users
@@ -351,13 +365,10 @@ export async function cancelCoachingRequest({
       throw new GraphQLError('This request is no longer pending')
     }
 
-    // Create new cancelled record
-    const coachingRequest = await prisma.coachingRequest.create({
+    // Update existing request to cancelled status
+    const coachingRequest = await prisma.coachingRequest.update({
+      where: { id },
       data: {
-        senderId: originalRequest.senderId,
-        recipientId: originalRequest.recipientId,
-        message: originalRequest.message,
-        interestedServices: originalRequest.interestedServices,
         status: GQLCoachingRequestStatus.Cancelled,
       },
       include: {
@@ -409,25 +420,38 @@ export async function rejectCoachingRequest({
       throw new GraphQLError('This request is no longer pending')
     }
 
-    // Create new rejected record
-    const coachingRequest = await prisma.coachingRequest.create({
+    // Update existing request to rejected status
+    const coachingRequest = await prisma.coachingRequest.update({
+      where: { id },
       data: {
-        senderId: originalRequest.senderId,
-        recipientId: originalRequest.recipientId,
-        message: originalRequest.message,
-        interestedServices: originalRequest.interestedServices,
         status: GQLCoachingRequestStatus.Rejected,
       },
       include: {
-        sender: { select: { id: true, name: true, email: true } },
-        recipient: { select: { id: true, name: true, email: true } },
+        sender: {
+          select: {
+            id: true,
+            email: true,
+            profile: { select: { firstName: true, lastName: true } },
+          },
+        },
+        recipient: {
+          select: {
+            id: true,
+            email: true,
+            profile: { select: { firstName: true, lastName: true } },
+          },
+        },
       },
     })
 
+    const senderName =
+      coachingRequest.sender?.profile?.firstName &&
+      coachingRequest.sender?.profile?.lastName &&
+      `${coachingRequest.sender?.profile?.firstName} ${coachingRequest.sender?.profile?.lastName}`
     await createNotification(
       {
         userId: coachingRequest.senderId,
-        message: `${coachingRequest.sender?.name ?? 'Someone'} has rejected your request to start coaching.`,
+        message: `${senderName ?? 'Someone'} has rejected your request to start coaching.`,
         type: GQLNotificationType.CoachingRequestRejected,
         createdBy: recipientId,
         relatedItemId: coachingRequest.id,
@@ -437,7 +461,7 @@ export async function rejectCoachingRequest({
 
     await notifyCoachingRequestRejected(
       coachingRequest.senderId,
-      coachingRequest.sender?.name || 'Someone',
+      senderName || 'Someone',
     )
 
     return new CoachingRequest(coachingRequest, context)
