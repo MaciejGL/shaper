@@ -90,7 +90,9 @@ export function SimplePullToRefresh() {
         // Radix dialogs, sheets, popovers, alert dialogs
         document.querySelector('[data-state="open"]') !== null ||
         // General accessibility check
-        document.querySelector('[role="dialog"]') !== null
+        document.querySelector('[role="dialog"]') !== null ||
+        // Sonner toasts (promotional notifications)
+        document.querySelector('[data-sonner-toast]') !== null
       )
     }
 
@@ -244,13 +246,10 @@ export function SimplePullToRefresh() {
 
     // Touch end
     const handleTouchEnd = () => {
-      // Always re-enable scroll when touch ends
-      if (isPulling) {
-        enableScroll()
-      }
-
       // Don't refresh if any modal/drawer is open
       if (isAnyModalOpen()) {
+        // CRITICAL: Always re-enable scroll before returning
+        enableScroll()
         isPulling = false
         currentPullDistance = 0
         resetState()
@@ -272,6 +271,8 @@ export function SimplePullToRefresh() {
           window.location.reload()
         }, 500)
       } else {
+        // CRITICAL: Always re-enable scroll when touch ends
+        enableScroll()
         // Reset state
         isPulling = false
         currentPullDistance = 0

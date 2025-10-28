@@ -1,5 +1,6 @@
 'use client'
 
+import { Bell } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
@@ -56,6 +57,7 @@ export function PromotionalToastManager() {
       {
         duration: Infinity,
         position: 'top-center',
+        className: 'max-w-lg w-full',
       },
     )
 
