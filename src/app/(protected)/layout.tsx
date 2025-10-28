@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 
-import { AnnouncementBanner } from '@/components/announcement-banner'
 import { MobileAppAuthSync } from '@/components/mobile-app-auth-sync'
 import { MobileAppThemeSync } from '@/components/mobile-app-theme-sync'
 import { OnboardingProvider } from '@/components/onboarding/onboarding-provider'
@@ -43,7 +42,6 @@ export default async function ProtectedLayout({
             <SimplePullToRefresh />
             <MobileAppAuthSync />
             <MobileAppThemeSync />
-            <AnnouncementBanner />
             <OnboardingProvider />
             <PromotionalToastManager />
             {children}

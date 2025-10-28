@@ -4,7 +4,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { XIcon } from 'lucide-react'
 import * as React from 'react'
 
-import { useModalHistory } from '@/hooks/use-modal-history'
+// import { useModalHistory } from '@/hooks/use-modal-history'
 import { cn } from '@/lib/utils'
 
 function Dialog({
@@ -13,7 +13,8 @@ function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   // Handle back button for modal
-  useModalHistory(open ?? false, () => onOpenChange?.(false))
+  // TEMPORARILY DISABLED: Testing if this causes iOS scroll lock
+  // useModalHistory(open ?? false, () => onOpenChange?.(false))
 
   return (
     <DialogPrimitive.Root

@@ -4,7 +4,7 @@ import * as React from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
-import { useModalHistory } from '@/hooks/use-modal-history'
+// import { useModalHistory } from '@/hooks/use-modal-history'
 import { cn } from '@/lib/utils'
 
 function Drawer({
@@ -26,13 +26,14 @@ function Drawer({
   }
 
   // Handle back button for modal
-  useModalHistory(currentOpen, () => {
-    if (isControlled) {
-      onOpenChange?.(false)
-    } else {
-      setInternalOpen(false)
-    }
-  })
+  // TEMPORARILY DISABLED: Testing if this causes iOS scroll lock
+  // useModalHistory(currentOpen, () => {
+  //   if (isControlled) {
+  //     onOpenChange?.(false)
+  //   } else {
+  //     setInternalOpen(false)
+  //   }
+  // })
 
   return (
     <RemoveScroll enabled={currentOpen}>
