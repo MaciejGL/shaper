@@ -11,6 +11,7 @@ export interface NotificationData {
   planTitle?: string
   token?: string
   requestId?: string
+  link?: string
   message: string
 }
 
