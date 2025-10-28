@@ -84,7 +84,8 @@ const useNotifications = (
     }
 
     if (notification.type === GQLNotificationType.CoachingRequest) {
-      router.push('/fitspace/my-trainer')
+      // Use the link from notification if available, fallback to client view
+      router.push(notification.link || '/fitspace/my-trainer')
     }
   }
 

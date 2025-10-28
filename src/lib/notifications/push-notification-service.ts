@@ -88,12 +88,13 @@ export async function notifyNewMessage(
 export async function notifyCoachingRequest(
   recipientId: string,
   senderName: string,
+  link?: string,
 ) {
   return await sendPushNotificationToUsers(
     [recipientId],
     'New coaching request',
     `You have a new coaching request${senderName ? ` from ${senderName}` : ''}.`,
-    '/fitspace/my-trainer',
+    link || '/fitspace/my-trainer',
   )
 }
 

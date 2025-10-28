@@ -2,6 +2,7 @@ query MyCoachingRequests {
   coachingRequests {
     id
     message
+    interestedServices
     createdAt
     updatedAt
     status

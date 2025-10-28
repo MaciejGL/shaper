@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
@@ -14,6 +15,7 @@ import {
   useGetClientsQuery,
   useGetTrainerServiceDeliveriesQuery,
   useGetTrainerTasksQuery,
+  useMyCoachingRequestsQuery,
   useMyTeamsQuery,
 } from '@/generated/graphql-client'
 import { FEATURE_FLAGS, useFeatureFlag } from '@/hooks/use-feature-flag'
@@ -21,6 +23,7 @@ import { smartSearch } from '@/lib/smart-search'
 import { cn } from '@/lib/utils'
 
 import ClientCard from './client-card'
+import { PendingCoachingRequests } from './pending-coaching-requests'
 
 export type Client = NonNullable<GQLGetClientsQuery['myClients']>[number]
 
@@ -40,13 +43,18 @@ interface TaskWithDelivery {
 export function ClientsTabs() {
   const { user } = useUser()
   const { isEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.teams)
-  const [selectedTeamTab, setSelectedTeamTab] = useState<string | null>(null)
+  // Tab query parameter from URL
+  const [tabParam, setTabParam] = useQueryState('tab')
   // State for selected team member
   const [selectedTeamMember, setSelectedTeamMember] = useState<{
     memberId: string
     memberName: string
     teamId: string
   } | null>(null)
+
+  // Fetch coaching requests
+  const { data: requestsData, isLoading: isLoadingRequests } =
+    useMyCoachingRequestsQuery()
 
   // Fetch teams
   const { data: teamsData, isLoading: teamsLoading } = useMyTeamsQuery(
@@ -87,6 +95,12 @@ export function ClientsTabs() {
   const clients = data?.myClients ?? []
   const teams = teamsData?.myTeams ?? []
   const isLoadingTeams = isLoading || teamsLoading
+
+  // Filter for incoming coaching requests (where current user is the recipient/trainer)
+  const coachingRequests = requestsData?.coachingRequests || []
+  const incomingRequests = coachingRequests.filter(
+    (req) => req.recipient.id === user?.id && req.status === 'PENDING',
+  )
 
   // Group tasks by client
   const tasksByClient = useMemo(() => {
@@ -131,16 +145,27 @@ export function ClientsTabs() {
   return (
     <AnimatedPageTransition id="clients-tabs">
       <Tabs
-        value={selectedTeamTab || 'my-clients'}
+        value={tabParam || 'my-clients'}
         className="w-full"
         onValueChange={(value) => {
           if (value === 'my-clients') {
             setSelectedTeamMember(null)
           }
-          setSelectedTeamTab(value)
+          setTabParam(value)
         }}
       >
         <TabsList className="mb-4">
+          <TabsTrigger value="requests" className="relative">
+            Requests
+            {incomingRequests.length > 0 && (
+              <Badge
+                variant="primary"
+                className="ml-2 size-5 rounded-full p-0 flex-center text-xs"
+              >
+                {incomingRequests.length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="my-clients">My Clients</TabsTrigger>
           {isLoadingTeams && (
             <TabsTrigger value="loading" disabled className="animate-pulse">
@@ -154,6 +179,19 @@ export function ClientsTabs() {
               </TabsTrigger>
             ))}
         </TabsList>
+
+        {/* Coaching Requests Tab */}
+        <TabsContent value="requests" className="space-y-4">
+          {isLoadingRequests ? (
+            <LoadingSkeleton count={2} variant="lg" />
+          ) : incomingRequests.length > 0 ? (
+            <PendingCoachingRequests requests={incomingRequests} />
+          ) : (
+            <div className="bg-foreground/20 p-6 rounded-md text-center text-sm">
+              No pending coaching requests
+            </div>
+          )}
+        </TabsContent>
 
         {/* My Clients Tab */}
         <TabsContent value="my-clients" className="space-y-4">

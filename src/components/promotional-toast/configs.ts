@@ -57,8 +57,9 @@ export function usePromotionalToastConfigs(): Record<
       iconVariant: 'blue',
       primaryAction: {
         label: 'View Request',
-        handler: () => {
-          router.push('/fitspace/my-trainer')
+        handler: (data) => {
+          // Use the link from notification data (set based on user role)
+          router.push(data.link || '/fitspace/my-trainer')
         },
       },
       extractData: (notification) => {
@@ -69,6 +70,7 @@ export function usePromotionalToastConfigs(): Record<
           notificationId: notification.id,
           trainerName,
           requestId: notification.relatedItemId || undefined,
+          link: notification.link || undefined,
           message: notification.message,
         }
       },
@@ -79,7 +81,7 @@ export function usePromotionalToastConfigs(): Record<
       notificationType: GQLNotificationType.CoachingRequestAccepted,
       title: 'Coaching Request Accepted',
       getSubtitle: (data) =>
-        `${data.trainerName || 'Your request'} has been accepted`,
+        `${data.trainerName || 'Someone'} accepted your request`,
       icon: CheckCircle,
       iconVariant: 'green',
       primaryAction: {
@@ -89,8 +91,10 @@ export function usePromotionalToastConfigs(): Record<
         },
       },
       extractData: (notification) => {
-        // Extract name from message "X has accepted your request to start coaching."
-        const match = notification.message.match(/^(.+) has accepted/)
+        // Extract name from message "X accepted your coaching request."
+        const match = notification.message.match(
+          /^(.+?) accepted your coaching request/,
+        )
         const trainerName = match ? match[1] : 'Someone'
         return {
           notificationId: notification.id,

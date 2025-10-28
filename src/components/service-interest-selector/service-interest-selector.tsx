@@ -81,10 +81,10 @@ export function ServiceInterestSelector({
     onConfirm(selectedServices, message)
   }
 
-  // Check if meal+training bundle selected
-  const hasMealTrainingBundle =
-    selectedServices.includes('meal_plan') &&
-    selectedServices.includes('workout_plan')
+  // Check if coaching+in-person bundle selected (50% off in-person sessions)
+  const hasCoachingInPersonBundle =
+    selectedServices.includes('coaching_complete') &&
+    selectedServices.includes('in_person_meeting')
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -141,7 +141,7 @@ export function ServiceInterestSelector({
             </div>
 
             <AnimatePresence>
-              {hasMealTrainingBundle && (
+              {hasCoachingInPersonBundle && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -158,15 +158,15 @@ export function ServiceInterestSelector({
                   <div className="p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-md">
                     <div className="flex items-center gap-2">
                       <Badge className="bg-green-600">
-                        Save {DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE}%
+                        Save {DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO}%
                       </Badge>
                       <span className="text-sm font-medium text-green-900 dark:text-green-100">
-                        Meal + Training Bundle eligible!
+                        Coaching + In-Person Bundle eligible!
                       </span>
                     </div>
                     <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                      Get {DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE}% off when
-                      purchasing both plans together
+                      Get {DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO}% off
+                      in-person training sessions with Premium Coaching
                     </p>
                   </div>
                 </motion.div>

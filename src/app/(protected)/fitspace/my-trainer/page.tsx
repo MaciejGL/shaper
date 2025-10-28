@@ -47,7 +47,6 @@ type CoachingRequest = GQLMyCoachingRequestsQuery['coachingRequests'][0]
 
 export default function MyTrainerPage() {
   const { data: requestsData } = useMyCoachingRequestsQuery()
-  console.log(requestsData)
   const coachingRequests = requestsData?.coachingRequests || []
 
   const { data: trainerData, isLoading: isLoadingTrainer } =
@@ -299,7 +298,7 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
 
     return (
       <div className="space-y-4">
-        <Card>
+        <Card borderless>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="size-4" />

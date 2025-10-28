@@ -5015,7 +5015,7 @@ export type GQLGetSubscriptionStatsQuery = { __typename?: 'Query', getSubscripti
 export type GQLMyCoachingRequestsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLMyCoachingRequestsQuery = { __typename?: 'Query', coachingRequests: Array<{ __typename?: 'CoachingRequest', id: string, message?: string | undefined | null, createdAt: string, updatedAt: string, status: GQLCoachingRequestStatus, recipient: { __typename?: 'User', id: string, name?: string | undefined | null, email: string, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null }, sender: { __typename?: 'User', id: string, name?: string | undefined | null, email: string, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null } }> };
+export type GQLMyCoachingRequestsQuery = { __typename?: 'Query', coachingRequests: Array<{ __typename?: 'CoachingRequest', id: string, message?: string | undefined | null, interestedServices?: Array<string> | undefined | null, createdAt: string, updatedAt: string, status: GQLCoachingRequestStatus, recipient: { __typename?: 'User', id: string, name?: string | undefined | null, email: string, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null }, sender: { __typename?: 'User', id: string, name?: string | undefined | null, email: string, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null } }> };
 
 export type GQLMyCoachingRequestQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -13992,6 +13992,7 @@ export const MyCoachingRequestsDocument = `
   coachingRequests {
     id
     message
+    interestedServices
     createdAt
     updatedAt
     status
