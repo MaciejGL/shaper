@@ -526,7 +526,7 @@ export const EnhancedWebView = forwardRef<
           mixedContentMode="compatibility"
           allowsFullscreenVideo={false}
           allowsProtectedMedia={false}
-          scrollEnabled={false}
+          scrollEnabled={true}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
         />
