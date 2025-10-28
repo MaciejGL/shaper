@@ -54,30 +54,134 @@ export function TrialEndingEmail({
         </EmailText>
 
         <EmailCard>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          <table
+            cellPadding="0"
+            cellSpacing="0"
+            border={0}
+            style={{ width: '100%', borderCollapse: 'collapse' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Unlimited workout plans and programs</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Advanced progress tracking and analytics</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Complete exercise library with instructions</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Personalized meal planning tools</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Priority customer support</span>
-            </div>
-          </div>
+            <tbody>
+              <tr>
+                <td style={{ paddingBottom: '12px' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>Unlimited training plans</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '12px' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>Premium training plans library</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '12px' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>
+                            Advanced tracking and logging in progress page
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '12px' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>
+                            Access to exercise videos and instructions
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '0' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>AI-powered workout generator</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </EmailCard>
 
         <div style={{ textAlign: 'center', margin: '32px 0' }}>
@@ -321,7 +425,7 @@ export function WelcomeEmail({
   const greeting = isReactivation ? 'Welcome back!' : 'Welcome to Premium!'
   const message = isReactivation
     ? `Welcome back! Your ${packageName} subscription has been reactivated and you now have full access to all premium features.`
-    : `Thank you for subscribing to ${packageName}! Your premium access is now active and ready to elevate your fitness journey.`
+    : `Thank you for subscribing to ${packageName}! Your premium access is now active and ready to take your fitness journey to the next level.`
 
   return (
     <EmailWrapper
@@ -348,30 +452,134 @@ export function WelcomeEmail({
         </EmailText>
 
         <EmailCard>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          <table
+            cellPadding="0"
+            cellSpacing="0"
+            border={0}
+            style={{ width: '100%', borderCollapse: 'collapse' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Unlimited workout plans and programs</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Advanced progress tracking and analytics</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Complete exercise library with video instructions</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Personalized meal planning and nutrition tools</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
-              <span>Priority customer support and guidance</span>
-            </div>
-          </div>
+            <tbody>
+              <tr>
+                <td style={{ paddingBottom: '12px' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>Unlimited training plans</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '12px' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>Premium training plans library</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '12px' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>
+                            Advanced tracking and logging in progress page
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '12px' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>
+                            Access to exercise videos and instructions
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style={{ paddingBottom: '0' }}>
+                  <table cellPadding="0" cellSpacing="0" border={0}>
+                    <tbody>
+                      <tr>
+                        <td
+                          style={{
+                            paddingRight: '8px',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                            ✓
+                          </span>
+                        </td>
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span>AI-powered workout generator</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </EmailCard>
 
         <div style={{ textAlign: 'center', margin: '32px 0' }}>
