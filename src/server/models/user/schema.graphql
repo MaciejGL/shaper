@@ -112,6 +112,9 @@ type Query {
   getFeaturedTrainers(limit: Int): [PublicTrainer!]!
   getMyTrainer: PublicTrainer
 
+  # Coaching queries
+  clientHasActiveCoachingSubscription(clientId: ID!): Boolean!
+
   # Admin-only queries
   adminUserStats: AdminUserStats!
   adminUserList(
@@ -138,4 +141,5 @@ type Mutation {
 
   # Coaching management
   cancelCoaching: Boolean!
+  removeClient(clientId: ID!): Boolean!
 }

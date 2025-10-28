@@ -1200,6 +1200,7 @@ export type GQLMutation = {
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   rejectTrainerOffer: EntireFieldWrapper<GQLTrainerOffer>;
   removeAllExercisesFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  removeClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeExerciseFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeExerciseFromWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeFavouriteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1720,6 +1721,11 @@ export type GQLMutationRejectTrainerOfferArgs = {
 
 export type GQLMutationRemoveAllExercisesFromDayArgs = {
   input: GQLRemoveAllExercisesFromDayInput;
+};
+
+
+export type GQLMutationRemoveClientArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -2315,6 +2321,7 @@ export type GQLQuery = {
   checkinStatus: EntireFieldWrapper<GQLCheckinStatus>;
   clientBodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
   clientBodyProgressLogs: EntireFieldWrapper<Array<GQLBodyProgressLog>>;
+  clientHasActiveCoachingSubscription: EntireFieldWrapper<Scalars['Boolean']['output']>;
   clientNutritionPlans: EntireFieldWrapper<Array<GQLNutritionPlan>>;
   clientSharedNotes: EntireFieldWrapper<Array<GQLNote>>;
   coachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
@@ -2427,6 +2434,11 @@ export type GQLQueryClientBodyMeasuresArgs = {
 
 export type GQLQueryClientBodyProgressLogsArgs = {
   clientId: Scalars['String']['input'];
+};
+
+
+export type GQLQueryClientHasActiveCoachingSubscriptionArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -4866,6 +4878,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
   rejectTrainerOffer?: Resolver<GQLResolversTypes['TrainerOffer'], ParentType, ContextType, RequireFields<GQLMutationRejectTrainerOfferArgs, 'offerId'>>;
   removeAllExercisesFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveAllExercisesFromDayArgs, 'input'>>;
+  removeClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveClientArgs, 'clientId'>>;
   removeExerciseFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromDayArgs, 'exerciseId'>>;
   removeExerciseFromWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromWorkoutArgs, 'exerciseId'>>;
   removeFavouriteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveFavouriteExerciseArgs, 'exerciseId'>>;
@@ -5155,6 +5168,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   checkinStatus?: Resolver<GQLResolversTypes['CheckinStatus'], ParentType, ContextType>;
   clientBodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType, RequireFields<GQLQueryClientBodyMeasuresArgs, 'clientId'>>;
   clientBodyProgressLogs?: Resolver<Array<GQLResolversTypes['BodyProgressLog']>, ParentType, ContextType, RequireFields<GQLQueryClientBodyProgressLogsArgs, 'clientId'>>;
+  clientHasActiveCoachingSubscription?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLQueryClientHasActiveCoachingSubscriptionArgs, 'clientId'>>;
   clientNutritionPlans?: Resolver<Array<GQLResolversTypes['NutritionPlan']>, ParentType, ContextType>;
   clientSharedNotes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType, RequireFields<GQLQueryClientSharedNotesArgs, 'clientId'>>;
   coachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLQueryCoachingRequestArgs, 'id'>>;

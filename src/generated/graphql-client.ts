@@ -1198,6 +1198,7 @@ export type GQLMutation = {
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   rejectTrainerOffer: GQLTrainerOffer;
   removeAllExercisesFromDay: Scalars['Boolean']['output'];
+  removeClient: Scalars['Boolean']['output'];
   removeExerciseFromDay: Scalars['Boolean']['output'];
   removeExerciseFromWorkout: Scalars['Boolean']['output'];
   removeFavouriteExercise: Scalars['Boolean']['output'];
@@ -1718,6 +1719,11 @@ export type GQLMutationRejectTrainerOfferArgs = {
 
 export type GQLMutationRemoveAllExercisesFromDayArgs = {
   input: GQLRemoveAllExercisesFromDayInput;
+};
+
+
+export type GQLMutationRemoveClientArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -2313,6 +2319,7 @@ export type GQLQuery = {
   checkinStatus: GQLCheckinStatus;
   clientBodyMeasures: Array<GQLUserBodyMeasure>;
   clientBodyProgressLogs: Array<GQLBodyProgressLog>;
+  clientHasActiveCoachingSubscription: Scalars['Boolean']['output'];
   clientNutritionPlans: Array<GQLNutritionPlan>;
   clientSharedNotes: Array<GQLNote>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
@@ -2425,6 +2432,11 @@ export type GQLQueryClientBodyMeasuresArgs = {
 
 export type GQLQueryClientBodyProgressLogsArgs = {
   clientId: Scalars['String']['input'];
+};
+
+
+export type GQLQueryClientHasActiveCoachingSubscriptionArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -4416,6 +4428,20 @@ export type GQLClientBodyProgressLogsQueryVariables = Exact<{
 
 
 export type GQLClientBodyProgressLogsQuery = { __typename?: 'Query', clientBodyProgressLogs: Array<{ __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string, image1?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image2?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image3?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null }> };
+
+export type GQLClientHasActiveCoachingSubscriptionQueryVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLClientHasActiveCoachingSubscriptionQuery = { __typename?: 'Query', clientHasActiveCoachingSubscription: boolean };
+
+export type GQLRemoveClientMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveClientMutation = { __typename?: 'Mutation', removeClient: boolean };
 
 export type GQLGetTraineeMeetingsQueryVariables = Exact<{
   traineeId: Scalars['ID']['input'];
@@ -10530,6 +10556,78 @@ useInfiniteClientBodyProgressLogsQuery.getKey = (variables: GQLClientBodyProgres
 
 
 useClientBodyProgressLogsQuery.fetcher = (variables: GQLClientBodyProgressLogsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLClientBodyProgressLogsQuery, GQLClientBodyProgressLogsQueryVariables>(ClientBodyProgressLogsDocument, variables, options);
+
+export const ClientHasActiveCoachingSubscriptionDocument = `
+    query ClientHasActiveCoachingSubscription($clientId: ID!) {
+  clientHasActiveCoachingSubscription(clientId: $clientId)
+}
+    `;
+
+export const useClientHasActiveCoachingSubscriptionQuery = <
+      TData = GQLClientHasActiveCoachingSubscriptionQuery,
+      TError = unknown
+    >(
+      variables: GQLClientHasActiveCoachingSubscriptionQueryVariables,
+      options?: Omit<UseQueryOptions<GQLClientHasActiveCoachingSubscriptionQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLClientHasActiveCoachingSubscriptionQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLClientHasActiveCoachingSubscriptionQuery, TError, TData>(
+      {
+    queryKey: ['ClientHasActiveCoachingSubscription', variables],
+    queryFn: fetchData<GQLClientHasActiveCoachingSubscriptionQuery, GQLClientHasActiveCoachingSubscriptionQueryVariables>(ClientHasActiveCoachingSubscriptionDocument, variables),
+    ...options
+  }
+    )};
+
+useClientHasActiveCoachingSubscriptionQuery.getKey = (variables: GQLClientHasActiveCoachingSubscriptionQueryVariables) => ['ClientHasActiveCoachingSubscription', variables];
+
+export const useInfiniteClientHasActiveCoachingSubscriptionQuery = <
+      TData = InfiniteData<GQLClientHasActiveCoachingSubscriptionQuery>,
+      TError = unknown
+    >(
+      variables: GQLClientHasActiveCoachingSubscriptionQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLClientHasActiveCoachingSubscriptionQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLClientHasActiveCoachingSubscriptionQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLClientHasActiveCoachingSubscriptionQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['ClientHasActiveCoachingSubscription.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLClientHasActiveCoachingSubscriptionQuery, GQLClientHasActiveCoachingSubscriptionQueryVariables>(ClientHasActiveCoachingSubscriptionDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteClientHasActiveCoachingSubscriptionQuery.getKey = (variables: GQLClientHasActiveCoachingSubscriptionQueryVariables) => ['ClientHasActiveCoachingSubscription.infinite', variables];
+
+
+useClientHasActiveCoachingSubscriptionQuery.fetcher = (variables: GQLClientHasActiveCoachingSubscriptionQueryVariables, options?: RequestInit['headers']) => fetchData<GQLClientHasActiveCoachingSubscriptionQuery, GQLClientHasActiveCoachingSubscriptionQueryVariables>(ClientHasActiveCoachingSubscriptionDocument, variables, options);
+
+export const RemoveClientDocument = `
+    mutation RemoveClient($clientId: ID!) {
+  removeClient(clientId: $clientId)
+}
+    `;
+
+export const useRemoveClientMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveClientMutation, TError, GQLRemoveClientMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveClientMutation, TError, GQLRemoveClientMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveClient'],
+    mutationFn: (variables?: GQLRemoveClientMutationVariables) => fetchData<GQLRemoveClientMutation, GQLRemoveClientMutationVariables>(RemoveClientDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveClientMutation.getKey = () => ['RemoveClient'];
+
+
+useRemoveClientMutation.fetcher = (variables: GQLRemoveClientMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveClientMutation, GQLRemoveClientMutationVariables>(RemoveClientDocument, variables, options);
 
 export const GetTraineeMeetingsDocument = `
     query GetTraineeMeetings($traineeId: ID!) {
