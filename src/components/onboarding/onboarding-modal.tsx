@@ -380,7 +380,7 @@ export function OnboardingModal({
   )
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} modal={false} onOpenChange={() => {}}>
       <DialogContent
         fullScreen
         dialogTitle="Welcome to Hypro"

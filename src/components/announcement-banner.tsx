@@ -18,6 +18,7 @@ export function AnnouncementBanner() {
   return (
     <Dialog
       open={true}
+      modal={false}
       onOpenChange={() => {
         dismissAnnouncement(currentAnnouncement.id)
       }}
