@@ -106,7 +106,8 @@ export function SimplePullToRefresh() {
 
     // Re-enable scroll
     const enableScroll = () => {
-      document.body.style.overflow = originalBodyOverflow
+      // CRITICAL: On iOS, explicitly set to empty string or 'auto' to ensure scroll works
+      document.body.style.overflow = originalBodyOverflow || 'auto'
     }
 
     // Handle scroll position changes
@@ -208,7 +209,16 @@ export function SimplePullToRefresh() {
     // Touch move
     const handleTouchMove = (e: TouchEvent) => {
       // Don't continue if any modal/drawer is open
-      if (isAnyModalOpen()) return
+      // CRITICAL: If modal appears mid-gesture, cancel the pull and re-enable scroll
+      if (isAnyModalOpen()) {
+        if (isPulling) {
+          isPulling = false
+          currentPullDistance = 0
+          enableScroll()
+          resetState()
+        }
+        return
+      }
 
       const touchY = e.touches[0].clientY
       const touchDiff = touchY - touchstartY
