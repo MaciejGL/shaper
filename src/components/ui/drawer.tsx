@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { RemoveScroll } from 'react-remove-scroll'
+// import { RemoveScroll } from 'react-remove-scroll'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
 // import { useModalHistory } from '@/hooks/use-modal-history'
@@ -36,16 +36,17 @@ function Drawer({
   // })
 
   return (
-    <RemoveScroll enabled={currentOpen}>
-      <DrawerPrimitive.Root
-        repositionInputs={false}
-        data-slot="drawer"
-        modal={true}
-        open={currentOpen}
-        onOpenChange={handleOpenChange}
-        {...props}
-      />
-    </RemoveScroll>
+    // TEMPORARILY DISABLED: RemoveScroll conflicts with iOS scroll lock
+    // <RemoveScroll enabled={currentOpen}>
+    <DrawerPrimitive.Root
+      repositionInputs={false}
+      data-slot="drawer"
+      modal={true}
+      open={currentOpen}
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+    // </RemoveScroll>
   )
 }
 
