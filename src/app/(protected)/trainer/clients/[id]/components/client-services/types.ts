@@ -46,8 +46,10 @@ export interface SelectedPackageItem {
 
 export interface SendOfferFormProps {
   trainerId: string
+  clientId: string
   clientEmail: string
   clientName: string
+  hasCoachingSubscription: boolean
   onSuccess: () => void
 }
 
@@ -68,6 +70,7 @@ export interface PackageCardProps {
   onUpdateQuantity: (packageId: string, quantity: number) => void
   bundleDiscount?: number
   mealTrainingDiscount?: number
+  hasCoachingSubscription?: boolean
 }
 
 export interface PackageSelectionProps {
@@ -81,6 +84,7 @@ export interface PackageSelectionProps {
   clientName: string
   bundleDiscount?: number
   mealTrainingDiscount?: number
+  hasCoachingSubscription?: boolean
 }
 
 export interface OfferSuccessProps {

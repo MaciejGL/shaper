@@ -31,8 +31,8 @@ export function CancellationInfo() {
               hours after purchase if service hasn't been delivered
             </li>
             <li>
-              <strong>Monthly coaching:</strong> Cancel anytime before your next
-              billing cycle with no penalty
+              <strong>Premium Coaching:</strong> Discuss duration with your
+              coach. He will prepare a suitable package for you.
             </li>
             <li>
               <strong>In-person sessions:</strong> Cancel at least 24 hours

@@ -1,5 +1,6 @@
 import { Package } from 'lucide-react'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -26,6 +27,7 @@ export function PackageSelection({
   clientName,
   bundleDiscount = 0,
   mealTrainingDiscount = 0,
+  hasCoachingSubscription = false,
 }: PackageSelectionProps) {
   const isPackageSelected = (packageId: string): boolean => {
     return selectedPackages.some((item) => item.packageId === packageId)
@@ -42,6 +44,11 @@ export function PackageSelection({
         <CardDescription>
           Choose the services you want to include in the bundle for {clientName}
         </CardDescription>
+        {hasCoachingSubscription && (
+          <Badge variant="premium" className="w-fit mt-2" size="lg">
+            Client has Premium Coaching
+          </Badge>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -78,6 +85,7 @@ export function PackageSelection({
                   onUpdateQuantity={onUpdateQuantity}
                   bundleDiscount={bundleDiscount}
                   mealTrainingDiscount={mealTrainingDiscount}
+                  hasCoachingSubscription={hasCoachingSubscription}
                 />
               )
             })}

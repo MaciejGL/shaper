@@ -72,20 +72,13 @@ export function useOfferPrices(): OfferPrices {
           const priceData = await getStripePriceData(lookupKey)
           if (!priceData) return { offerId, price: null }
 
-          // Get localized price if available
-          const currencyOptions = priceData.price.currency_options
-          if (currencyOptions?.[currency.toLowerCase()]) {
-            const amount = currencyOptions[currency.toLowerCase()].unit_amount
-            const localPrice = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: currency,
-            }).format(amount / 100)
+          // Use formatted prices from Stripe
+          const formattedPrice =
+            priceData.formatted[
+              currency.toLowerCase() as keyof typeof priceData.formatted
+            ] || priceData.formatted.primary
 
-            return { offerId, price: localPrice }
-          }
-
-          // Fallback to primary price
-          return { offerId, price: priceData.formatted.primary }
+          return { offerId, price: formattedPrice }
         } catch {
           return { offerId, price: null }
         }

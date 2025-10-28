@@ -8,12 +8,20 @@ import { stripe } from './stripe'
 import { CheckoutItem, PackageWithDiscount } from './types'
 
 /**
- * Finds the in-person discount percentage from packages in a bundle
- * Looks for packages with 'coaching_complete' serviceType that have discount metadata
+ * Finds the in-person discount percentage from packages in a bundle OR user subscription status
+ * Looks for packages with 'coaching_complete' serviceType OR if user has active coaching subscription
+ * Returns configured discount if EITHER condition is true
  */
 export function findInPersonDiscountPercentage(
   packages: PackageWithDiscount[],
+  hasCoachingSubscription: boolean = false,
 ): number {
+  // Check if user has coaching subscription
+  if (hasCoachingSubscription) {
+    return DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO
+  }
+
+  // Check if bundle contains coaching package
   for (const pkg of packages) {
     // Check if this is a coaching_complete package with discount metadata
     if (pkg.serviceType === 'coaching_complete') {
@@ -54,10 +62,10 @@ export function isMealOrTrainingPackage(pkg: PackageWithDiscount): boolean {
 }
 
 /**
- * Calculates the discounted amount based on bundle context
+ * Calculates the discounted amount based on bundle context and subscription status
  *
  * Applies discount if:
- * 1. Package contains 'in_person_meeting' service type + coaching_complete bundle
+ * 1. Package contains 'in_person_meeting' service type + (coaching in bundle OR user has coaching subscription)
  * 2. Package is meal_plan or workout_plan + both are in bundle (20% off)
  */
 export function getDiscountedAmount(
@@ -65,13 +73,18 @@ export function getDiscountedAmount(
   originalAmount: number,
   bundleDiscount: number = 0,
   mealTrainingDiscount: number = 0,
+  hasCoachingSubscription: boolean = false,
 ): number {
   // Check if package has IN_PERSON_MEETING service type
   const hasInPersonService = pkg.serviceType === 'in_person_meeting'
 
-  // Apply in-person discount if package has in-person service and bundle has discount
-  if (hasInPersonService && bundleDiscount > 0) {
-    const discountMultiplier = (100 - bundleDiscount) / 100
+  // Apply in-person discount if package has in-person service and user qualifies
+  // Qualification: bundleDiscount > 0 OR hasCoachingSubscription
+  const qualifiesForInPersonDiscount =
+    bundleDiscount > 0 || hasCoachingSubscription
+  if (hasInPersonService && qualifiesForInPersonDiscount) {
+    const discountMultiplier =
+      (100 - DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO) / 100
     return Math.round(originalAmount * discountMultiplier)
   }
 
@@ -85,16 +98,17 @@ export function getDiscountedAmount(
 }
 
 /**
- * Checks if a package qualifies for in-person discount in the current bundle
+ * Checks if a package qualifies for in-person discount in the current bundle or via subscription
  */
 export function hasInPersonDiscount(
   pkg: PackageWithDiscount,
   bundleDiscount: number = 0,
+  hasCoachingSubscription: boolean = false,
 ): boolean {
   if (!pkg.serviceType) return false
   const hasInPersonService = pkg.serviceType === 'in_person_meeting'
 
-  return hasInPersonService && bundleDiscount > 0
+  return hasInPersonService && (bundleDiscount > 0 || hasCoachingSubscription)
 }
 
 /**

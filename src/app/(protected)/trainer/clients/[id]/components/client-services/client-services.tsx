@@ -21,6 +21,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
+import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 import { ClientSubscriptionManagement } from '../client-subscription-management/client-subscription-management'
 
@@ -43,6 +45,17 @@ export function ClientServices({
   const [activeView, setActiveView] = useState<
     'overview' | 'send-offer' | 'history'
   >('overview')
+
+  // Fetch client's coaching subscription status
+  const { data: subscriptionData } = useCurrentSubscription(clientId, {
+    lookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+  })
+
+  const hasCoachingSubscription =
+    subscriptionData?.subscription?.package?.stripeLookupKey ===
+      STRIPE_LOOKUP_KEYS.PREMIUM_COACHING &&
+    (subscriptionData?.status === 'ACTIVE' ||
+      subscriptionData?.status === 'CANCELLED_ACTIVE')
 
   if (!user) return null
 
@@ -94,8 +107,10 @@ export function ClientServices({
       {activeView === 'send-offer' && (
         <SendOfferForm
           trainerId={user.id}
+          clientId={clientId}
           clientEmail={clientEmail}
           clientName={clientName}
+          hasCoachingSubscription={hasCoachingSubscription}
           onSuccess={() => setActiveView('history')}
         />
       )}
