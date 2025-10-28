@@ -72,9 +72,9 @@ function getNotificationTitle(
     case GQLNotificationType.CoachingRequest:
       return 'Coaching Request'
     case GQLNotificationType.CoachingRequestAccepted:
-      return 'Coaching Accepted'
+      return 'Request Accepted'
     case GQLNotificationType.CoachingRequestRejected:
-      return 'Coaching Rejected'
+      return 'Request Declined'
     case GQLNotificationType.Message:
       return 'New Message'
     case GQLNotificationType.Reminder:
@@ -87,6 +87,12 @@ function getNotificationTitle(
       return 'New Meal Plan'
     case GQLNotificationType.TrainerOfferReceived:
       return 'New Training Offer'
+    case GQLNotificationType.TrainerOfferDeclined:
+      return 'Offer Declined'
+    case GQLNotificationType.PaymentReceived:
+      return 'Payment Received'
+    case GQLNotificationType.SubscriptionPaymentReceived:
+      return 'Subscription Renewed'
 
     default:
       return null

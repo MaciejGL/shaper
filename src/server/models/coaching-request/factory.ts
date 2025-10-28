@@ -249,10 +249,11 @@ export async function acceptCoachingRequest({
       },
     })
 
-    const senderName =
-      coachingRequest.sender?.profile?.firstName &&
-      coachingRequest.sender?.profile?.lastName &&
-      `${coachingRequest.sender?.profile?.firstName} ${coachingRequest.sender?.profile?.lastName}`
+    // Get the recipient's name (the person who accepted the request)
+    const recipientName =
+      coachingRequest.recipient?.profile?.firstName &&
+      coachingRequest.recipient?.profile?.lastName &&
+      `${coachingRequest.recipient?.profile?.firstName} ${coachingRequest.recipient?.profile?.lastName}`
 
     // Connect trainer and client relationship
     if (recipientRole === GQLUserRole.Trainer) {
@@ -296,7 +297,7 @@ export async function acceptCoachingRequest({
     await createNotification(
       {
         userId: coachingRequest.senderId,
-        message: `${senderName ?? 'Someone'} has accepted your request to start coaching.`,
+        message: `${recipientName ?? 'Someone'} accepted your coaching request.`,
         type: GQLNotificationType.CoachingRequestAccepted,
         createdBy: recipientId,
         relatedItemId: coachingRequest.id,
@@ -306,7 +307,7 @@ export async function acceptCoachingRequest({
 
     await notifyCoachingRequestAccepted(
       coachingRequest.senderId,
-      senderName || 'Someone',
+      recipientName || 'Someone',
     )
 
     // Invalidate access control cache and trainer cache for both users

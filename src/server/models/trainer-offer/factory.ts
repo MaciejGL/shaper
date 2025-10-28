@@ -221,7 +221,7 @@ export async function rejectTrainerOffer(
       {
         userId: offer.trainerId,
         createdBy: currentUserId,
-        type: GQLNotificationType.System, // Using SYSTEM for now, could add OFFER_DECLINED
+        type: GQLNotificationType.TrainerOfferDeclined,
         message: notificationMessage,
         link: '/trainer/dashboard',
         relatedItemId: offerId,

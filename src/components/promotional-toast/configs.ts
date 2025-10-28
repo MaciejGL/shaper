@@ -177,5 +177,8 @@ export function usePromotionalToastConfigs(): Record<
     [GQLNotificationType.Reminder]: undefined,
     [GQLNotificationType.System]: undefined,
     [GQLNotificationType.Message]: undefined,
+    [GQLNotificationType.TrainerOfferDeclined]: undefined,
+    [GQLNotificationType.PaymentReceived]: undefined,
+    [GQLNotificationType.SubscriptionPaymentReceived]: undefined,
   }
 }

@@ -161,7 +161,7 @@ export function PendingOffersList({ trainerId }: PendingOffersListProps) {
                 >
                   Decline Offer
                 </Button>
-                <Button onClick={() => handleOpenOffer(offer.token)} size="lg">
+                <Button onClick={() => handleOpenOffer(offer.token)}>
                   View Offer
                 </Button>
               </CardFooter>
