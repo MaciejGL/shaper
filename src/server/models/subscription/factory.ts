@@ -8,6 +8,7 @@ import {
 import { ensureTrainerClientAccess } from '@/lib/access-control'
 import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
@@ -494,7 +495,7 @@ export async function pauseClientCoachingSubscription(
       trainerId: userId,
       status: 'ACTIVE',
       package: {
-        stripeLookupKey: 'premium_coaching',
+        stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
       },
     },
     include: { package: true },
@@ -560,7 +561,7 @@ export async function resumeClientCoachingSubscription(
       trainerId: userId,
       status: 'ACTIVE',
       package: {
-        stripeLookupKey: 'premium_coaching',
+        stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
       },
     },
     include: { package: true },

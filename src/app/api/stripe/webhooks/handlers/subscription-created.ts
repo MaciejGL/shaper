@@ -8,7 +8,10 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
-import { resolvePriceIdToLookupKey } from '@/lib/stripe/lookup-keys'
+import {
+  STRIPE_LOOKUP_KEYS,
+  resolvePriceIdToLookupKey,
+} from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 import { createSupportChatForUser } from '@/lib/support-chat'
 
@@ -113,7 +116,7 @@ export async function handleSubscriptionCreated(
     await createSupportChatForUser(user.id)
 
     // If new subscription is coaching, pause any existing yearly premium
-    const isCoaching = lookupKey === 'premium_coaching'
+    const isCoaching = lookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING
 
     if (isCoaching) {
       const existingYearly = await prisma.userSubscription.findFirst({

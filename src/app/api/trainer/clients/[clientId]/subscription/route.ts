@@ -4,6 +4,7 @@ import { SubscriptionStatus } from '@/generated/prisma/client'
 import { ensureTrainerClientAccess } from '@/lib/access-control'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/getUser'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 
 export async function GET(
@@ -36,7 +37,7 @@ export async function GET(
         trainerId: user.user.id,
         status: SubscriptionStatus.ACTIVE,
         package: {
-          stripeLookupKey: 'premium_coaching',
+          stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
         },
       },
       include: { package: true },

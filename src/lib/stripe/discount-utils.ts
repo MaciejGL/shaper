@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { GQLServiceType } from '@/generated/graphql-client'
 
 import { DISCOUNT_CONFIG, DISCOUNT_TYPES } from './discount-config'
+import { STRIPE_LOOKUP_KEYS } from './lookup-keys'
 import { getStripePricingInfo } from './pricing-utils'
 import { stripe } from './stripe'
 import { CheckoutItem, PackageWithDiscount } from './types'
@@ -36,32 +37,6 @@ export function findInPersonDiscountPercentage(
 }
 
 /**
- * Checks if bundle contains both meal plan and training plan packages
- * Returns configured bundle discount percentage if both are present
- */
-export function findMealTrainingBundleDiscount(
-  packages: PackageWithDiscount[],
-): number {
-  const hasMealPlan = packages.some((pkg) => pkg.serviceType === 'meal_plan')
-  const hasTrainingPlan = packages.some(
-    (pkg) => pkg.serviceType === 'workout_plan',
-  )
-
-  if (hasMealPlan && hasTrainingPlan) {
-    return DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE
-  }
-
-  return 0
-}
-
-/**
- * Checks if a package qualifies for meal+training bundle discount
- */
-export function isMealOrTrainingPackage(pkg: PackageWithDiscount): boolean {
-  return pkg.serviceType === 'meal_plan' || pkg.serviceType === 'workout_plan'
-}
-
-/**
  * Calculates the discounted amount based on bundle context and subscription status
  *
  * Applies discount if:
@@ -85,12 +60,6 @@ export function getDiscountedAmount(
   if (hasInPersonService && qualifiesForInPersonDiscount) {
     const discountMultiplier =
       (100 - DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO) / 100
-    return Math.round(originalAmount * discountMultiplier)
-  }
-
-  // Apply meal+training bundle discount
-  if (isMealOrTrainingPackage(pkg) && mealTrainingDiscount > 0) {
-    const discountMultiplier = (100 - mealTrainingDiscount) / 100
     return Math.round(originalAmount * discountMultiplier)
   }
 
@@ -178,7 +147,7 @@ export function findInPersonPackages(
   checkoutItems: CheckoutItem[],
 ): CheckoutItem[] {
   return checkoutItems.filter((item) => {
-    return item.package.stripeLookupKey === 'in_person_session'
+    return item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
   })
 }
 
@@ -190,8 +159,8 @@ export function findMealAndTrainingPackages(
 ): CheckoutItem[] {
   return checkoutItems.filter((item) => {
     return (
-      item.package.stripeLookupKey === 'nutrition_plan' ||
-      item.package.stripeLookupKey === 'workout_plan'
+      item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.NUTRITION_PLAN ||
+      item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.WORKOUT_PLAN
     )
   })
 }
@@ -325,11 +294,12 @@ export async function createMealTrainingBundleDiscountIfEligible(
 
   // Check if we have both meal and training plans by lookup key
   const hasMealPlan = mealAndTrainingPackages.some(
-    (item) => item.package.stripeLookupKey === 'nutrition_plan',
+    (item) =>
+      item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.NUTRITION_PLAN,
   )
 
   const hasTrainingPlan = mealAndTrainingPackages.some(
-    (item) => item.package.stripeLookupKey === 'workout_plan',
+    (item) => item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.WORKOUT_PLAN,
   )
 
   if (!hasMealPlan || !hasTrainingPlan) {

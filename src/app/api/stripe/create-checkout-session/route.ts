@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 import { recordTermsAgreement } from '@/lib/terms-utils'
 
@@ -145,6 +146,32 @@ export async function POST(request: NextRequest) {
 
     const priceId = prices.data[0].id
 
+    // Check if this is a coaching upgrade
+    const isCoachingSubscription =
+      packageTemplate.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING
+
+    // If purchasing coaching, check if user has existing premium subscription to trigger refund
+    let hasCoachingUpgrade = false
+    if (isCoachingSubscription) {
+      const existingPremium = await prisma.userSubscription.findFirst({
+        where: {
+          userId,
+          status: {
+            in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING],
+          },
+          package: {
+            stripeLookupKey: {
+              in: [
+                STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY,
+                STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY,
+              ],
+            },
+          },
+        },
+      })
+      hasCoachingUpgrade = !!existingPremium
+    }
+
     // Create checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -164,6 +191,7 @@ export async function POST(request: NextRequest) {
         packageId,
         packageName: packageTemplate.name,
         isNewSubscription: 'true',
+        hasCoachingUpgrade: hasCoachingUpgrade.toString(),
       },
       subscription_data: {
         trial_period_days: hasUsedTrial
@@ -186,7 +214,7 @@ export async function POST(request: NextRequest) {
     })
 
     console.info(
-      `🛒 Checkout session created for user ${userId}, package ${packageId}${hasUsedTrial ? ' (no trial)' : ` (${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day trial)`}`,
+      `🛒 Checkout session created for user ${userId}, package ${packageId}${hasUsedTrial ? ' (no trial)' : ` (${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day trial)`}${hasCoachingUpgrade ? ' (coaching upgrade - will trigger refund)' : ''}`,
     )
 
     try {
