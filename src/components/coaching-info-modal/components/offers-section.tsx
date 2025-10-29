@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon, SectionIconProps } from '@/components/ui/section-icon'
 import { useOfferPrices } from '@/hooks/use-offer-prices'
-import { DISCOUNT_CONFIG, DISCOUNT_LABELS } from '@/lib/stripe/discount-config'
+import { DISCOUNT_CONFIG } from '@/lib/stripe/discount-config'
 import { cn } from '@/lib/utils'
 
 interface ServiceOffer {
@@ -20,7 +20,6 @@ interface ServiceOffer {
   title: string
   description: string
   features: string[]
-  duration: string
   icon: LucideIcon
   badge?: string
   popular?: boolean
@@ -29,7 +28,7 @@ interface ServiceOffer {
 
 const serviceOffers: ServiceOffer[] = [
   {
-    id: 'coaching-combo',
+    id: 'premium-coaching',
     title: 'Premium Coaching Package',
     description:
       'Premium Coaching experience with ongoing support, plan adjustments, and regular check-ins.',
@@ -42,27 +41,9 @@ const serviceOffers: ServiceOffer[] = [
       'Premium access',
       'Unlimited messaging support',
     ],
-    duration: 'Monthly',
     icon: Calendar,
     badge: 'Best Value',
     variant: 'amber',
-  },
-  {
-    id: 'meal-training-bundle',
-    title: 'Meal + Training Bundle',
-    description:
-      'Get both custom workout and nutrition plans together with a special discount.',
-    features: [
-      'Custom 4-week+ workout program',
-      '7-day meal plan with recipes',
-      'Fitness & nutrition assessment',
-      'Shopping list & macro guidelines',
-      `${DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE}% bundle discount`,
-    ],
-    duration: 'One-time',
-    icon: Notebook,
-    badge: DISCOUNT_LABELS.MEAL_TRAINING_BUNDLE,
-    variant: 'green',
   },
   {
     id: 'workout-plan',
@@ -70,12 +51,11 @@ const serviceOffers: ServiceOffer[] = [
     description:
       'Personalized training program designed specifically for your goals, experience level, and available equipment.',
     features: ['Initial fitness assessment', '4-week custom workout program'],
-    duration: 'One-time',
     icon: Notebook,
     variant: 'green',
   },
   {
-    id: 'meal-plan',
+    id: 'nutrition-plan',
     title: 'Nutrition Plan',
     description:
       'Customized meal plan with recipes, shopping lists, and macro guidelines to support your fitness goals.',
@@ -86,11 +66,9 @@ const serviceOffers: ServiceOffer[] = [
       'Macro and calorie guidelines',
       'Dietary preferences accommodated',
     ],
-    duration: 'One-time',
     icon: Utensils,
     variant: 'sky',
   },
-
   {
     id: 'in-person',
     title: 'In-Person Sessions',
@@ -102,7 +80,6 @@ const serviceOffers: ServiceOffer[] = [
       'Equipment familiarization',
       'Flexible scheduling',
     ],
-    duration: 'Per session',
     icon: CheckCircle,
     variant: 'indigo',
   },
@@ -114,8 +91,6 @@ export function OffersSection() {
   const cardVariant = (offer: ServiceOffer) => {
     if (offer.badge === 'Best Value')
       return cn('outline outline-amber-500 dark:outline-amber-500 shadow-lg')
-    if (offer.badge === DISCOUNT_LABELS.MEAL_TRAINING_BUNDLE)
-      return cn('outline outline-green-500 dark:outline-green-500 shadow-lg')
     return ''
   }
 
@@ -149,10 +124,6 @@ export function OffersSection() {
                         )}
                       >
                         {isLoading ? 'Loading...' : prices[offer.id] || ''}
-                      </span>
-
-                      <span className="text-xs text-muted-foreground">
-                        {offer.duration}
                       </span>
                     </div>
                   </div>

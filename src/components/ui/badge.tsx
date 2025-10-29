@@ -46,7 +46,7 @@ const badgeVariants = cva(
           'dark:bg-cyan-500/60',
         ),
         premium:
-          'bg-gradient-to-br from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0',
+          'bg-gradient-to-br from-yellow-600 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0',
       },
       size: {
         '2xs': cn(

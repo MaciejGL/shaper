@@ -1,4 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query'
 import {
   CheckCircle,
   ClipboardCheck,
@@ -7,14 +6,8 @@ import {
   UserPlus,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
 
-import {
-  GQLNotificationType,
-  useAcceptCoachingRequestMutation,
-  useGetMyTrainerQuery,
-  useMyCoachingRequestsQuery,
-} from '@/generated/graphql-client'
+import { GQLNotificationType } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
 
 import { NotificationData, PromotionalToastConfig } from './types'
@@ -25,23 +18,6 @@ export function usePromotionalToastConfigs(): Record<
 > {
   const router = useRouter()
   const { openUrl } = useOpenUrl()
-  const queryClient = useQueryClient()
-
-  const { mutateAsync: acceptCoachingRequest, isPending: isAcceptingCoaching } =
-    useAcceptCoachingRequestMutation({
-      onSuccess: () => {
-        // Invalidate queries to refresh my-trainer page
-        queryClient.invalidateQueries({
-          queryKey: useGetMyTrainerQuery.getKey(),
-        })
-        queryClient.invalidateQueries({
-          queryKey: useMyCoachingRequestsQuery.getKey(),
-        })
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Failed to accept coaching request')
-      },
-    })
 
   return {
     [GQLNotificationType.TrainerOfferReceived]: {
@@ -80,21 +56,10 @@ export function usePromotionalToastConfigs(): Record<
       icon: UserPlus,
       iconVariant: 'blue',
       primaryAction: {
-        label: 'Accept Coaching',
-        isLoading: isAcceptingCoaching,
-        handler: async (data) => {
-          if (!data.requestId) {
-            toast.error('Request ID not found')
-            return
-          }
-
-          try {
-            await acceptCoachingRequest({ id: data.requestId })
-            router.push('/fitspace/my-trainer')
-          } catch (error) {
-            // Error toast handled by mutation onError
-            console.error('Failed to accept coaching request:', error)
-          }
+        label: 'View Request',
+        handler: (data) => {
+          // Use the link from notification data (set based on user role)
+          router.push(data.link || '/fitspace/my-trainer')
         },
       },
       extractData: (notification) => {
@@ -105,6 +70,7 @@ export function usePromotionalToastConfigs(): Record<
           notificationId: notification.id,
           trainerName,
           requestId: notification.relatedItemId || undefined,
+          link: notification.link || undefined,
           message: notification.message,
         }
       },
@@ -115,7 +81,7 @@ export function usePromotionalToastConfigs(): Record<
       notificationType: GQLNotificationType.CoachingRequestAccepted,
       title: 'Coaching Request Accepted',
       getSubtitle: (data) =>
-        `${data.trainerName || 'Your request'} has been accepted`,
+        `${data.trainerName || 'Someone'} accepted your request`,
       icon: CheckCircle,
       iconVariant: 'green',
       primaryAction: {
@@ -125,8 +91,10 @@ export function usePromotionalToastConfigs(): Record<
         },
       },
       extractData: (notification) => {
-        // Extract name from message "X has accepted your request to start coaching."
-        const match = notification.message.match(/^(.+) has accepted/)
+        // Extract name from message "X accepted your coaching request."
+        const match = notification.message.match(
+          /^(.+?) accepted your coaching request/,
+        )
         const trainerName = match ? match[1] : 'Someone'
         return {
           notificationId: notification.id,
@@ -213,5 +181,8 @@ export function usePromotionalToastConfigs(): Record<
     [GQLNotificationType.Reminder]: undefined,
     [GQLNotificationType.System]: undefined,
     [GQLNotificationType.Message]: undefined,
+    [GQLNotificationType.TrainerOfferDeclined]: undefined,
+    [GQLNotificationType.PaymentReceived]: undefined,
+    [GQLNotificationType.SubscriptionPaymentReceived]: undefined,
   }
 }

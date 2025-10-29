@@ -1,6 +1,6 @@
 'use client'
 
-import { Camera, Images, Pen, Plus } from 'lucide-react'
+import { Camera, Eye, EyeOff, Images, Pen, Plus } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 
@@ -14,7 +14,9 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import { formatConditionalDate } from '@/lib/date-utils'
+import { cn } from '@/lib/utils'
 
 import { CreateProgressLogDialog } from '../body-progress/create-progress-log-dialog'
 
@@ -24,6 +26,7 @@ import { useSnapshots } from './use-snapshots'
 
 export function SnapshotsSection() {
   const { hasPremium } = useUser()
+  const { preferences, updatePreferences } = useUserPreferences()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCompareDrawerOpen, setIsCompareDrawerOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -45,7 +48,14 @@ export function SnapshotsSection() {
     shareWithTrainer: boolean
   } | null>(null)
 
+  console.log(preferences)
   const { latestSnapshot, previousSnapshot, isLoading } = useSnapshots()
+
+  const handleToggleBlur = () => {
+    updatePreferences({
+      blurProgressSnapshots: !preferences.blurProgressSnapshots,
+    })
+  }
 
   const handleCloseDialog = (open: boolean) => {
     setIsCreateDialogOpen(open)
@@ -81,20 +91,37 @@ export function SnapshotsSection() {
             <Camera className="h-5 w-5 text-purple-500" />
             Progress Snapshots
           </CardTitle>
-          <PremiumButtonWrapper
-            hasPremium={hasPremium}
-            tooltipText="Upgrade to add snapshots"
-          >
-            <Button
-              variant="default"
-              size="sm"
-              iconStart={<Plus />}
-              onClick={() => setIsCreateDialogOpen(true)}
-              disabled={!hasPremium}
+          <div className="flex items-center gap-2">
+            {(latestSnapshot || previousSnapshot) && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                iconOnly={
+                  preferences.blurProgressSnapshots ? <Eye /> : <EyeOff />
+                }
+                onClick={handleToggleBlur}
+                title={
+                  preferences.blurProgressSnapshots
+                    ? 'Show images'
+                    : 'Blur images'
+                }
+              />
+            )}
+            <PremiumButtonWrapper
+              hasPremium={hasPremium}
+              tooltipText="Upgrade to add snapshots"
             >
-              Add
-            </Button>
-          </PremiumButtonWrapper>
+              <Button
+                variant="default"
+                size="sm"
+                iconStart={<Plus />}
+                onClick={() => setIsCreateDialogOpen(true)}
+                disabled={!hasPremium}
+              >
+                Add
+              </Button>
+            </PremiumButtonWrapper>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -144,9 +171,15 @@ export function SnapshotsSection() {
                       <Image
                         src={latestSnapshot.image1Url}
                         alt="Latest progress snapshot"
-                        className="w-full h-full object-cover"
+                        className={cn(
+                          'w-full h-full object-cover transition-all select-none',
+                          preferences.blurProgressSnapshots ? 'blur-xl' : '',
+                        )}
                         width={300}
                         height={600}
+                        onContextMenu={(e) => e.preventDefault()}
+                        onDragStart={(e) => e.preventDefault()}
+                        draggable={false}
                       />
                     ) : (
                       <div className="text-center text-muted-foreground">
@@ -182,9 +215,15 @@ export function SnapshotsSection() {
                       <Image
                         src={previousSnapshot.image1Url}
                         alt="Previous progress snapshot"
-                        className="w-full h-full object-cover"
+                        className={cn(
+                          'w-full h-full object-cover transition-all select-none',
+                          preferences.blurProgressSnapshots ? 'blur-xl' : '',
+                        )}
                         width={300}
                         height={600}
+                        onContextMenu={(e) => e.preventDefault()}
+                        onDragStart={(e) => e.preventDefault()}
+                        draggable={false}
                       />
                     ) : (
                       <div className="text-center text-muted-foreground">

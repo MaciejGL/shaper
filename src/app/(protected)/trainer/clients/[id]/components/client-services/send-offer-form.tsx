@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
+
 import { BundleSummary } from './bundle-summary'
 import { PackageSelection } from './package-selection'
 import {
@@ -17,6 +20,7 @@ import {
 
 export function SendOfferForm({
   trainerId,
+  clientId,
   clientEmail,
   clientName,
   onSuccess,
@@ -31,6 +35,17 @@ export function SendOfferForm({
   const [packages, setPackages] = useState<TrainerPackage[]>([])
   const [packagesLoading, setPackagesLoading] = useState(false)
   const [packagesError, setPackagesError] = useState<string | null>(null)
+
+  // Fetch client's coaching subscription status
+  const { data: subscriptionData } = useCurrentSubscription(clientId, {
+    lookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+  })
+
+  const hasCoachingSubscription =
+    subscriptionData?.subscription?.package?.stripeLookupKey ===
+      STRIPE_LOOKUP_KEYS.PREMIUM_COACHING &&
+    (subscriptionData?.status === 'ACTIVE' ||
+      subscriptionData?.status === 'CANCELLED_ACTIVE')
 
   // Fetch packages on component mount
   useEffect(() => {
@@ -128,9 +143,10 @@ export function SendOfferForm({
     )
   }
 
-  // Calculate bundle discount from selected packages
+  // Calculate bundle discount from selected packages and subscription status
   const bundleDiscount = findInPersonDiscountPercentage(
     selectedPackages.map((item) => item.package),
+    hasCoachingSubscription,
   )
   const mealTrainingDiscount = findMealTrainingBundleDiscount(
     selectedPackages.map((item) => item.package),
@@ -161,6 +177,7 @@ export function SendOfferForm({
         clientName={clientName}
         bundleDiscount={bundleDiscount}
         mealTrainingDiscount={mealTrainingDiscount}
+        hasCoachingSubscription={hasCoachingSubscription}
       />
 
       {/* Bundle Summary & Send */}

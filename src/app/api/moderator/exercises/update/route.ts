@@ -21,6 +21,7 @@ interface ExerciseUpdate {
   equipment?: string
   isPublic?: boolean
   isPremium?: boolean
+  verified?: boolean
   version?: number
   videoUrl?: string | null
   images?: {
@@ -181,6 +182,7 @@ export async function PATCH(request: NextRequest) {
           equipment: true,
           isPublic: true,
           isPremium: true,
+          verified: true,
           version: true,
           videoUrl: true,
           images: {

@@ -6,7 +6,6 @@ import { Bell } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
-import { TrainingInvitationModal } from '@/components/invitation-modal'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -83,6 +82,11 @@ const useNotifications = (
     if (notification.type === GQLNotificationType.TrainerNoteShared) {
       router.push(createScrollUrl('/fitspace/my-trainer', 'trainer-notes'))
     }
+
+    if (notification.type === GQLNotificationType.CoachingRequest) {
+      // Use the link from notification if available, fallback to client view
+      router.push(notification.link || '/fitspace/my-trainer')
+    }
   }
 
   const onClearAll = async () => {
@@ -137,8 +141,6 @@ export function NotificationBell({
   notifications = [],
   user,
 }: NotificationBellProps) {
-  const [openInvitationId, setOpenInvitationId] = useState<string | null>(null)
-
   const {
     showBadge,
     isOpen,
@@ -148,19 +150,6 @@ export function NotificationBell({
     onClearAll,
     isMarkingAllNotificationsAsRead,
   } = useNotifications(notifications, user)
-
-  const handleOpenInvitation = (
-    notification: NotificationNavbar,
-    e: React.MouseEvent<HTMLDivElement>,
-  ) => {
-    if (
-      notification.type === GQLNotificationType.CoachingRequest &&
-      notification.relatedItemId
-    ) {
-      e.preventDefault()
-      setOpenInvitationId(notification.relatedItemId)
-    }
-  }
 
   return (
     <>
@@ -230,10 +219,7 @@ export function NotificationBell({
                   <React.Fragment key={notification.id}>
                     <DropdownMenuItem
                       key={notification.id}
-                      onClick={(e) => {
-                        handleOpenInvitation(notification, e)
-                        onNotificationClick(notification)
-                      }}
+                      onClick={() => onNotificationClick(notification)}
                       className="p-0"
                       asChild
                     >
@@ -249,12 +235,6 @@ export function NotificationBell({
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
-      {openInvitationId && (
-        <TrainingInvitationModal
-          relatedItemId={openInvitationId}
-          onClose={() => setOpenInvitationId(null)}
-        />
-      )}
     </>
   )
 }

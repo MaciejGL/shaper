@@ -36,7 +36,7 @@ interface ExerciseTableProps {
   onDelete: (exercise: Exercise) => void
   onExerciseUpdate?: (
     exerciseId: string,
-    field: 'isPublic' | 'isPremium',
+    field: 'isPublic' | 'isPremium' | 'verified',
     value: boolean,
   ) => void
   onNameUpdate?: (exerciseId: string, newName: string) => void
@@ -87,7 +87,7 @@ export function ExerciseTable({
   // Handle toggle changes with immediate save
   const handleToggleChange = async (
     exerciseId: string,
-    field: 'isPublic' | 'isPremium',
+    field: 'isPublic' | 'isPremium' | 'verified',
     newValue: boolean,
   ) => {
     const toggleKey = `${exerciseId}-${field}`
@@ -224,6 +224,7 @@ export function ExerciseTable({
               <TableHead className="w-[80px] text-center">Images</TableHead>
               <TableHead className="w-[100px] text-center">Public</TableHead>
               <TableHead className="w-[100px] text-center">Premium</TableHead>
+              <TableHead className="w-[100px] text-center">Verified</TableHead>
               <TableHead className="w-[120px]">Creator</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
               <TableHead
@@ -245,6 +246,9 @@ export function ExerciseTable({
               )
               const isPremiumLoading = loadingToggles.has(
                 `${exercise.id}-isPremium`,
+              )
+              const isVerifiedLoading = loadingToggles.has(
+                `${exercise.id}-verified`,
               )
 
               return (
@@ -350,6 +354,19 @@ export function ExerciseTable({
                     </div>
                   </TableCell>
 
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center">
+                      <Switch
+                        checked={exercise.verified}
+                        disabled={isVerifiedLoading}
+                        onCheckedChange={(checked) =>
+                          handleToggleChange(exercise.id, 'verified', checked)
+                        }
+                        className="data-[state=checked]:bg-blue-500"
+                      />
+                    </div>
+                  </TableCell>
+
                   <TableCell className="text-sm text-muted-foreground">
                     {exercise.createdBy
                       ? getCreatorDisplayName(exercise.createdBy)
@@ -401,7 +418,7 @@ export function ExerciseTable({
             {sortedExercises.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={9}
+                  colSpan={10}
                   className="text-center py-8 text-muted-foreground"
                 >
                   No exercises found matching your filters

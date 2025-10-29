@@ -168,13 +168,16 @@ export function ProgressImageGallery({
                       fill
                       sizes="(max-width: 768px) 33vw, 20vw"
                       className={cn(
-                        'object-cover cursor-pointer transition-opacity duration-150',
+                        'object-cover cursor-pointer transition-opacity duration-150 select-none',
                         imageStates[index] ? 'opacity-100' : 'opacity-0',
                       )}
                       onLoad={() =>
                         setImageStates((prev) => ({ ...prev, [index]: true }))
                       }
                       onClick={() => openGallery(index)}
+                      onContextMenu={(e) => e.preventDefault()}
+                      onDragStart={(e) => e.preventDefault()}
+                      draggable={false}
                       priority={index < 2} // Prioritize first 2 images
                     />
                   </>
@@ -231,7 +234,7 @@ export function ProgressImageGallery({
                           quality={100}
                           sizes="(max-width: 768px) 100vw, 90vw"
                           className={cn(
-                            'object-cover transition-opacity duration-300',
+                            'object-cover transition-opacity duration-300 select-none',
                             carouselImageStates[imageUrl]
                               ? 'opacity-100'
                               : 'opacity-0',
@@ -249,6 +252,9 @@ export function ProgressImageGallery({
                             )
                             // Show error state or retry logic could go here
                           }}
+                          onContextMenu={(e) => e.preventDefault()}
+                          onDragStart={(e) => e.preventDefault()}
+                          draggable={false}
                           priority={true} // High priority for carousel images
                         />
                         {!carouselImageStates[imageUrl] && (

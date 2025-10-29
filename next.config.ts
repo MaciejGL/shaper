@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
             value:
               process.env.NODE_ENV === 'development'
                 ? '*'
-                : 'https://www.hypro.app',
+                : process.env.NEXT_PUBLIC_SITE_URL || 'https://www.hypro.app',
           },
           {
             key: 'Access-Control-Allow-Methods',

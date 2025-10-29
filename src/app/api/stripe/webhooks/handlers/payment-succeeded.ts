@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
 
 import { generateTasks } from '@/constants/task-templates'
+import { GQLNotificationType } from '@/generated/graphql-server'
 import {
   Prisma,
   ServiceType,
@@ -8,6 +9,8 @@ import {
   UserSubscription,
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
+import { sendEmail } from '@/lib/email/send-mail'
+import { notifyTrainerSubscriptionPayment } from '@/lib/notifications/push-notification-service'
 
 import { StripeServiceType } from '../../enums'
 
@@ -61,6 +64,19 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     console.info(
       `✅ Payment processed for subscription ${subscriptionId} (invoice: ${invoice.id})`,
     )
+
+    // Notify trainer about subscription payment
+    if (
+      subscription.trainerId &&
+      invoice.billing_reason !== 'subscription_create'
+    ) {
+      await notifyTrainerAboutSubscriptionPayment({
+        trainerId: subscription.trainerId,
+        clientId: subscription.userId,
+        subscription,
+        invoice,
+      })
+    }
 
     // If this is a coaching payment, check if user has paused yearly to extend pause
     if (subscription) {
@@ -255,5 +271,116 @@ async function createRecurringServiceDelivery(
     })
   } catch (error) {
     console.error('Failed to create recurring service delivery:', error)
+  }
+}
+
+/**
+ * Notify trainer about successful subscription payment
+ * Sends email, push notification, and in-app notification
+ */
+async function notifyTrainerAboutSubscriptionPayment({
+  trainerId,
+  clientId,
+  subscription,
+  invoice,
+}: {
+  trainerId: string
+  clientId: string
+  subscription: UserSubscription
+  invoice: Stripe.Invoice
+}) {
+  try {
+    // Get trainer and client details
+    const [trainer, client, packageTemplate] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: trainerId },
+        include: { profile: true },
+      }),
+      prisma.user.findUnique({
+        where: { id: clientId },
+        include: { profile: true },
+      }),
+      prisma.packageTemplate.findUnique({
+        where: { id: subscription.packageId },
+      }),
+    ])
+
+    if (!trainer || !client || !packageTemplate) {
+      console.error('Missing trainer, client, or package data for notification')
+      return
+    }
+
+    const trainerName =
+      trainer.profile?.firstName && trainer.profile?.lastName
+        ? `${trainer.profile.firstName} ${trainer.profile.lastName}`
+        : trainer.name || 'Trainer'
+
+    const clientName =
+      client.profile?.firstName && client.profile?.lastName
+        ? `${client.profile.firstName} ${client.profile.lastName}`
+        : client.name || client.email
+
+    // Format amount
+    const amount = invoice.amount_paid
+      ? (invoice.amount_paid / 100).toFixed(2)
+      : '0.00'
+    const currency = invoice.currency || 'usd'
+
+    // Determine billing period
+    const billingPeriod = packageTemplate.stripeLookupKey?.includes('yearly')
+      ? 'yearly'
+      : 'monthly'
+
+    // Calculate next billing date
+    const nextBillingDate = invoice.period_end
+      ? new Date(invoice.period_end * 1000).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      : 'Unknown'
+
+    // Client profile URL
+    const clientProfileUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/trainer/clients/${clientId}`
+
+    // Send email notification
+    await sendEmail.subscriptionPaymentReceived(trainer.email, {
+      trainerName,
+      clientName,
+      clientEmail: client.email,
+      subscriptionType: packageTemplate.name,
+      amount,
+      currency,
+      billingPeriod,
+      nextBillingDate,
+      clientProfileUrl,
+    })
+
+    // Send push notification
+    await notifyTrainerSubscriptionPayment(
+      trainerId,
+      clientName,
+      packageTemplate.name,
+      clientId,
+    )
+
+    // Create in-app notification
+    await prisma.notification.create({
+      data: {
+        userId: trainerId,
+        createdBy: clientId,
+        type: GQLNotificationType.SubscriptionPaymentReceived,
+        message: `${clientName}'s ${packageTemplate.name} subscription has been renewed - ${amount} ${currency.toUpperCase()}`,
+        link: `/trainer/clients/${clientId}`,
+        relatedItemId: subscription.id,
+      },
+    })
+
+    console.info(
+      `✅ Trainer ${trainerName} notified about subscription payment from ${clientName}`,
+    )
+  } catch (error) {
+    console.error('Failed to notify trainer about subscription payment:', error)
+    // Don't throw - payment is already complete
   }
 }

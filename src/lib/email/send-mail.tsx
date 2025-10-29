@@ -6,6 +6,10 @@ import { DisputeAlertEmail } from './templates/dispute-alert-email'
 import { EmailChangeOtp } from './templates/email-change-otp'
 import { OfferExpiredEmail } from './templates/offer-expired-email'
 import { OtpEmail } from './templates/otp-email'
+import {
+  PaymentReceivedEmail,
+  PaymentReceivedEmailProps,
+} from './templates/payment-received-email'
 import { RefundNotificationEmail } from './templates/refund-notification-email'
 import {
   GracePeriodEndingEmail,
@@ -15,6 +19,10 @@ import {
   TrialEndingEmail,
   WelcomeEmail,
 } from './templates/subscription-emails'
+import {
+  SubscriptionPaymentReceivedEmail,
+  SubscriptionPaymentReceivedEmailProps,
+} from './templates/subscription-payment-received-email'
 import { TeamInvitationEmail } from './templates/team-invitation-email'
 import { TrainerOfferEmail } from './templates/trainer-offer-email'
 
@@ -443,6 +451,36 @@ export const sendEmail = {
       from: FROM_EMAIL,
       to,
       subject: `Offer expired - ${clientEmail} did not complete payment`,
+      html,
+    })
+  },
+
+  // Payment received notification (for trainers)
+  paymentReceived: async (
+    to: string,
+    props: PaymentReceivedEmailProps,
+  ): Promise<void> => {
+    const html = await render(<PaymentReceivedEmail {...props} />)
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Payment received from ${props.clientName} - ${props.totalAmount} ${props.currency.toUpperCase()}`,
+      html,
+    })
+  },
+
+  // Subscription payment received notification (for trainers)
+  subscriptionPaymentReceived: async (
+    to: string,
+    props: SubscriptionPaymentReceivedEmailProps,
+  ): Promise<void> => {
+    const html = await render(<SubscriptionPaymentReceivedEmail {...props} />)
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Subscription payment from ${props.clientName} - ${props.amount} ${props.currency.toUpperCase()}`,
       html,
     })
   },

@@ -63,7 +63,6 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     {},
     {
       enabled: shouldEnableQuery,
-      staleTime: 10 * 60 * 1000,
       refetchOnWindowFocus: true,
     },
   )

@@ -20,14 +20,15 @@ import {
   DialogFooter,
   DialogHeader,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
   useCreateCoachingRequestMutation,
   useGetClientsQuery,
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
-import { GQLUser } from '@/generated/graphql-client'
+import type { GQLSearchUserResult, GQLUser } from '@/generated/graphql-client'
+
+import { UserSearchCombobox } from './user-search-combobox'
 
 export function ActiveClientList() {
   const { data } = useGetClientsQuery(
@@ -84,7 +85,8 @@ function ClientCard({
 function AddNewClientButton() {
   const [isOpen, setIsOpen] = React.useState(false)
   const [message, setMessage] = React.useState('')
-  const [email, setEmail] = React.useState('')
+  const [selectedUser, setSelectedUser] =
+    React.useState<GQLSearchUserResult | null>(null)
   const queryClient = useQueryClient()
   const { mutate: createCoachingRequest, isPending } =
     useCreateCoachingRequestMutation({
@@ -95,7 +97,7 @@ function AddNewClientButton() {
         })
         toast.success('Request has been sent to the client.')
         setIsOpen(false)
-        setEmail('')
+        setSelectedUser(null)
         setMessage('')
       },
       onError: (error) => {
@@ -107,8 +109,20 @@ function AddNewClientButton() {
       },
     })
 
-  const handleSendRequest = () =>
-    createCoachingRequest({ recipientEmail: email, message: message })
+  const handleSendRequest = () => {
+    if (!selectedUser) {
+      toast.error('Please select a user')
+      return
+    }
+    createCoachingRequest({
+      recipientEmail: selectedUser.email,
+      message: message,
+    })
+  }
+
+  const handleUserSelected = (user: GQLSearchUserResult) => {
+    setSelectedUser(user)
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -121,28 +135,59 @@ function AddNewClientButton() {
         <DialogHeader>
           <DialogTitle>Send request to new client</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-1 gap-2">
-          <label htmlFor="email" className="text-sm">
-            Email
-          </label>
-          <Input
-            id="email"
-            placeholder="Email"
-            autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isPending}
-          />
-          <label htmlFor="message" className="text-sm">
-            Message
-          </label>
-          <Textarea
-            id="message"
-            placeholder="Message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            disabled={isPending}
-          />
+        <div className="grid grid-cols-1 gap-4">
+          <div className="space-y-2">
+            <label htmlFor="user-search" className="text-sm font-medium">
+              Select User
+            </label>
+            {selectedUser ? (
+              <div className="flex items-center justify-between rounded-md border border-border bg-muted p-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-8">
+                    <AvatarImage src={selectedUser.image || undefined} />
+                    <AvatarFallback>
+                      {selectedUser.name?.charAt(0).toUpperCase() ||
+                        selectedUser.email.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">
+                      {selectedUser.name || selectedUser.email}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {selectedUser.email}
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedUser(null)}
+                  disabled={isPending}
+                >
+                  Change
+                </Button>
+              </div>
+            ) : (
+              <UserSearchCombobox
+                onUserSelected={handleUserSelected}
+                placeholder="Search by email..."
+              />
+            )}
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="message" className="text-sm font-medium">
+              Message
+            </label>
+            <Textarea
+              id="message"
+              placeholder="Optional message for the client..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              disabled={isPending}
+              rows={4}
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button
@@ -152,8 +197,12 @@ function AddNewClientButton() {
           >
             Cancel
           </Button>
-          <Button onClick={handleSendRequest} loading={isPending}>
-            Send
+          <Button
+            onClick={handleSendRequest}
+            loading={isPending}
+            disabled={!selectedUser}
+          >
+            Send Request
           </Button>
         </DialogFooter>
       </DialogContent>

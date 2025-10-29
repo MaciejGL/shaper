@@ -1,13 +1,17 @@
 import Stripe from 'stripe'
 
 import { generateTasks } from '@/constants/task-templates'
+import { GQLNotificationType } from '@/generated/graphql-server'
 import { PackageTemplate, Prisma, ServiceType } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
+import { sendEmail } from '@/lib/email/send-mail'
 import { User } from '@/lib/getUser'
+import { notifyTrainerOfferPayment } from '@/lib/notifications/push-notification-service'
 import { resolvePriceIdToLookupKey } from '@/lib/stripe/lookup-keys'
 import { getPayoutDestination } from '@/lib/stripe/revenue-sharing-utils'
 import { stripe } from '@/lib/stripe/stripe'
 import { createSupportChatForUser } from '@/lib/support-chat'
+import { createNotification } from '@/server/models/notification/factory'
 
 import { StripeServiceType } from '../../enums'
 import {
@@ -99,6 +103,30 @@ async function handleInvoiceBasedCheckout(
 
   // Create support chat for user after successful payment
   await createSupportChatForUser(user.id)
+
+  // Notify trainer about successful payment
+  if (trainerId && deliveryTasks.length > 0) {
+    // Get full user details for notification
+    const fullUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { profile: true },
+    })
+
+    const clientName =
+      fullUser?.profile?.firstName && fullUser?.profile?.lastName
+        ? `${fullUser.profile.firstName} ${fullUser.profile.lastName}`
+        : user.email
+
+    await notifyTrainerAboutPayment({
+      trainerId,
+      clientId: user.id,
+      clientName,
+      clientEmail: user.email,
+      session,
+      deliveryTasks,
+      offerToken,
+    })
+  }
 }
 
 // Create deliveries from trainer offer package summary (most reliable approach)
@@ -267,6 +295,34 @@ async function handlePaymentCheckout(
 
   // Create support chat for user after successful payment
   await createSupportChatForUser(user.id)
+
+  // Notify trainer about successful payment
+  if (trainerId && deliveryTasks.length > 0) {
+    // Get full user details for notification
+    const fullUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { profile: true },
+    })
+
+    const clientName =
+      fullUser?.profile?.firstName && fullUser?.profile?.lastName
+        ? `${fullUser.profile.firstName} ${fullUser.profile.lastName}`
+        : user.email
+
+    await notifyTrainerAboutPayment({
+      trainerId,
+      clientId: user.id,
+      clientName,
+      clientEmail: user.email,
+      session: {
+        ...session,
+        amount_total: paymentIntent.amount,
+        currency: paymentIntent.currency,
+      } as Stripe.Checkout.Session,
+      deliveryTasks,
+      offerToken,
+    })
+  }
 }
 
 async function createServiceDeliveriesForPayment(
@@ -604,5 +660,109 @@ async function cancelOldPremiumSubscriptions(userId: string) {
   } catch (error) {
     console.error('Error cancelling old premium subscriptions:', error)
     // Don't throw - new subscription is already created and paid
+  }
+}
+
+/**
+ * Notify trainer about successful payment
+ * Sends email, push notification, and in-app notification
+ */
+async function notifyTrainerAboutPayment({
+  trainerId,
+  clientId,
+  clientName,
+  clientEmail,
+  session,
+  deliveryTasks,
+  offerToken,
+}: {
+  trainerId: string
+  clientId: string
+  clientName: string
+  clientEmail: string
+  session: Stripe.Checkout.Session
+  deliveryTasks: Awaited<ReturnType<typeof createSingleServiceDelivery>>[]
+  offerToken?: string
+}) {
+  try {
+    // Get trainer details
+    const trainer = await prisma.user.findUnique({
+      where: { id: trainerId },
+      include: { profile: true },
+    })
+
+    if (!trainer) {
+      console.error(`Trainer not found: ${trainerId}`)
+      return
+    }
+
+    const trainerName =
+      trainer.profile?.firstName && trainer.profile?.lastName
+        ? `${trainer.profile.firstName} ${trainer.profile.lastName}`
+        : trainer.name || 'Trainer'
+
+    // Get package names from delivery tasks
+    const packageNames = deliveryTasks
+      .filter((task) => task !== null)
+      .map((task) => task!.packageName)
+
+    const uniquePackageNames = Array.from(new Set(packageNames))
+
+    // Format amount
+    const totalAmount = session.amount_total
+      ? (session.amount_total / 100).toFixed(2)
+      : '0.00'
+    const currency = session.currency || 'usd'
+
+    // Determine payment type
+    const paymentType =
+      session.mode === 'subscription' ? 'subscription' : 'one-time'
+
+    // Client profile URL
+    const clientProfileUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/trainer/clients/${clientId}`
+
+    // Send email notification
+    await sendEmail.paymentReceived(trainer.email, {
+      trainerName,
+      clientName,
+      clientEmail,
+      packageNames: uniquePackageNames,
+      totalAmount,
+      currency,
+      paymentType,
+      clientProfileUrl,
+    })
+
+    // Send push notification
+    const packageSummary =
+      uniquePackageNames.length === 1
+        ? uniquePackageNames[0]
+        : `${uniquePackageNames.length} packages`
+    await notifyTrainerOfferPayment(
+      trainerId,
+      clientName,
+      packageSummary,
+      `${totalAmount} ${currency.toUpperCase()}`,
+      clientId,
+    )
+
+    // Create in-app notification (needs context, so we'll create it directly)
+    await prisma.notification.create({
+      data: {
+        userId: trainerId,
+        createdBy: clientId,
+        type: GQLNotificationType.PaymentReceived,
+        message: `${clientName} purchased ${packageSummary} - ${totalAmount} ${currency.toUpperCase()}`,
+        link: `/trainer/clients/${clientId}`,
+        relatedItemId: offerToken || session.id,
+      },
+    })
+
+    console.info(
+      `✅ Trainer ${trainerName} notified about payment from ${clientName}`,
+    )
+  } catch (error) {
+    console.error('Failed to notify trainer about payment:', error)
+    // Don't throw - payment is already complete
   }
 }

@@ -69,7 +69,7 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
                   className="relative aspect-[4/5] overflow-hidden shadow-xs"
                 >
                   <Image
-                    src={image.medium || '/placeholder.svg'}
+                    src={image.url || '/placeholder.svg'}
                     alt={`${exercise.name} - Step ${index + 1}`}
                     fill
                     className="object-cover"
@@ -132,7 +132,7 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
                       className="relative aspect-[4/5] overflow-hidden shadow-xs rounded-md"
                     >
                       <Image
-                        src={image.medium || '/placeholder.svg'}
+                        src={image.url || '/placeholder.svg'}
                         alt={`${exercise.name} - Step ${index + 1}`}
                         fill
                         className="object-cover"

@@ -36,6 +36,7 @@ fragment ProfileFragment on UserProfile {
     emailNotifications
     pushNotifications
   }
+  blurProgressSnapshots
 }
 
 query Profile {

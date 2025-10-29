@@ -34,6 +34,7 @@ export function PackageCard({
   onUpdateQuantity,
   bundleDiscount = 0,
   mealTrainingDiscount = 0,
+  hasCoachingSubscription = false,
 }: PackageCardProps) {
   return (
     <Card
@@ -104,7 +105,12 @@ export function PackageCard({
           </div>
         )}
         <div className="text-right ml-auto">
-          {hasAnyDiscount(pkg, bundleDiscount, mealTrainingDiscount) ? (
+          {hasAnyDiscount(
+            pkg,
+            bundleDiscount,
+            mealTrainingDiscount,
+            hasCoachingSubscription,
+          ) ? (
             <div className="flex flex-col items-end gap-1">
               <span className="text-xs text-muted-foreground line-through">
                 {formatOriginalPrice(pkg, selectedItem?.quantity || 1)}
@@ -118,6 +124,7 @@ export function PackageCard({
                     pkg,
                     bundleDiscount,
                     mealTrainingDiscount,
+                    hasCoachingSubscription,
                   )}
                   % off
                 </Badge>
@@ -127,6 +134,7 @@ export function PackageCard({
                     selectedItem?.quantity || 1,
                     bundleDiscount,
                     mealTrainingDiscount,
+                    hasCoachingSubscription,
                   )}
                 </span>
               </div>
@@ -138,6 +146,7 @@ export function PackageCard({
                 selectedItem?.quantity || 1,
                 bundleDiscount,
                 mealTrainingDiscount,
+                hasCoachingSubscription,
               )}
             </span>
           )}

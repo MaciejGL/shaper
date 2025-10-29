@@ -55,7 +55,7 @@ export function SubscriptionInfoSection() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={SparklesIcon} size="xs" variant="amber" />
-            Subscription
+            Coaching Access
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -68,8 +68,8 @@ export function SubscriptionInfoSection() {
   const getSubscriptionDisplayInfo = () => {
     if (!subscriptionData?.subscription) {
       return {
-        title: 'No Active Subscription',
-        description: 'You currently have no active subscription.',
+        title: 'No Active Coaching',
+        description: 'You currently have no active coaching access.',
         status: 'inactive' as const,
       }
     }
@@ -101,7 +101,7 @@ export function SubscriptionInfoSection() {
     // Default case - use package name as fallback
     return {
       title: subscriptionData.subscription.package.name,
-      description: 'Active subscription with premium features.',
+      description: 'Active coaching with premium features.',
       status: 'active' as const,
     }
   }
@@ -115,13 +115,8 @@ export function SubscriptionInfoSection() {
     // Check if subscription is still active
     if (endDate <= now) return null
 
-    const duration = subscriptionData.subscription.package.duration
-    const isMonthly = duration === 'MONTHLY'
-    const isYearly = duration === 'YEARLY'
-
     return {
       date: format(endDate, 'MMM d, yyyy'), // e.g., "Nov 3, 2025"
-      period: isMonthly ? 'Monthly' : isYearly ? 'Yearly' : duration,
     }
   }
 
@@ -164,12 +159,12 @@ export function SubscriptionInfoSection() {
                 <p className="text-sm font-medium text-foreground">
                   {subscriptionData?.status === 'CANCELLED_ACTIVE'
                     ? `Access expires: ${nextBilling.date}`
-                    : `Next billing: ${nextBilling.date}`}
+                    : `Next payment: ${nextBilling.date}`}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {subscriptionData?.status === 'CANCELLED_ACTIVE'
-                    ? 'Subscription cancelled - no further charges will occur'
-                    : `${nextBilling.period} subscription`}
+                    ? 'Coaching cancelled - no further charges will occur'
+                    : 'Recurring coaching access'}
                 </p>
               </div>
             )}
@@ -180,7 +175,7 @@ export function SubscriptionInfoSection() {
             {subscriptionData?.status === 'TRIAL' &&
               subscriptionData?.expiresAt && (
                 <p className="text-sm text-muted-foreground">
-                  Trial expires:{' '}
+                  Access expires:{' '}
                   {new Date(subscriptionData.expiresAt).toLocaleDateString()}
                 </p>
               )}
@@ -199,8 +194,8 @@ export function SubscriptionInfoSection() {
             iconStart={<CreditCard />}
           >
             {subscriptionData?.status === 'CANCELLED_ACTIVE'
-              ? 'Reactivate or Manage Subscription'
-              : 'Manage Account & Subscription'}
+              ? 'Reactivate or Manage Coaching'
+              : 'Manage Account & Billing'}
           </Button>
         )}
       </CardContent>

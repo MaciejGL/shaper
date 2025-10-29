@@ -45,13 +45,13 @@ export function NotificationItem({
           )}
         </div>
 
-        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5 line-clamp-4">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-0.5 line-clamp-4">
           {notification.message}
         </p>
 
         {notification.createdAt && (
           <div className="flex items-center mt-1.5 text-xs text-slate-500 dark:text-zinc-400">
-            <Clock className="h-3 w-3 mr-1" />
+            <Clock className="size-3 mr-1" />
             <span>
               {formatRelative(new Date(notification.createdAt), new Date(), {
                 weekStartsOn: 1,
@@ -72,9 +72,9 @@ function getNotificationTitle(
     case GQLNotificationType.CoachingRequest:
       return 'Coaching Request'
     case GQLNotificationType.CoachingRequestAccepted:
-      return 'Coaching Accepted'
+      return 'Request Accepted'
     case GQLNotificationType.CoachingRequestRejected:
-      return 'Coaching Rejected'
+      return 'Request Declined'
     case GQLNotificationType.Message:
       return 'New Message'
     case GQLNotificationType.Reminder:
@@ -87,7 +87,14 @@ function getNotificationTitle(
       return 'New Meal Plan'
     case GQLNotificationType.TrainerOfferReceived:
       return 'New Training Offer'
-
+    case GQLNotificationType.TrainerOfferDeclined:
+      return 'Offer Declined'
+    case GQLNotificationType.PaymentReceived:
+      return 'Payment Received'
+    case GQLNotificationType.SubscriptionPaymentReceived:
+      return 'Subscription Renewed'
+    case GQLNotificationType.MeetingReminder:
+      return 'Meeting Reminder'
     default:
       return null
   }

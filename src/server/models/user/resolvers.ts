@@ -3,6 +3,7 @@ import {
   GQLMutationResolvers,
   GQLNotificationType,
   GQLQueryResolvers,
+  GQLUserRole,
 } from '@/generated/graphql-server'
 import {
   Prisma,
@@ -182,6 +183,61 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       )
   },
 
+  searchUsers: async (
+    _,
+    { email, limit = 10 }: { email: string; limit?: number | null },
+    context,
+  ) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    if (user.user.role !== 'TRAINER') {
+      throw new Error('Only trainers can search for users')
+    }
+
+    // Search for users by email (case-insensitive)
+    const users = await prisma.user.findMany({
+      where: {
+        email: {
+          contains: email,
+          mode: 'insensitive',
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        role: true,
+        trainerId: true,
+      },
+      take: limit ?? 10,
+      orderBy: {
+        email: 'asc',
+      },
+    })
+
+    return users.map((u) => {
+      const gqlRole: GQLUserRole =
+        u.role === 'TRAINER'
+          ? GQLUserRole.Trainer
+          : u.role === 'ADMIN'
+            ? GQLUserRole.Admin
+            : GQLUserRole.Client
+
+      return {
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        image: u.image,
+        role: gqlRole,
+        hasTrainer: !!u.trainerId,
+      }
+    })
+  },
+
   // Public queries
   getFeaturedTrainers: async (_, { limit = 10 }, context) => {
     const cacheKey = `featured-trainers:${limit}`
@@ -214,6 +270,29 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     return featuredTrainers.map(
       (trainer) => new PublicTrainer(trainer, context),
     )
+  },
+
+  clientHasActiveCoachingSubscription: async (_, { clientId }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const trainerId = user.user.id
+
+    // Check if there's an active coaching subscription
+    const activeSubscription = await prisma.userSubscription.findFirst({
+      where: {
+        userId: clientId,
+        trainerId: trainerId,
+        status: 'ACTIVE',
+        package: {
+          stripeLookupKey: 'premium_coaching',
+        },
+      },
+    })
+
+    return !!activeSubscription
   },
 
   getMyTrainer: async (_, __, context) => {
@@ -917,6 +996,129 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     } catch (error) {
       console.error('Failed to cancel coaching:', error)
       throw new Error('Failed to cancel coaching relationship')
+    }
+  },
+
+  removeClient: async (_, { clientId }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const trainerId = user.user.id
+
+    try {
+      // Verify client exists and belongs to this trainer
+      const client = await prisma.user.findUnique({
+        where: { id: clientId },
+        include: {
+          profile: true,
+        },
+      })
+
+      if (!client) {
+        throw new Error('Client not found')
+      }
+
+      if (client.trainerId !== trainerId) {
+        throw new Error('This client does not belong to you')
+      }
+
+      // Check for active coaching subscription
+      const activeSubscription = await prisma.userSubscription.findFirst({
+        where: {
+          userId: clientId,
+          trainerId: trainerId,
+          status: {
+            in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING],
+          },
+          package: {
+            stripeLookupKey: 'premium_coaching',
+          },
+        },
+      })
+
+      if (activeSubscription) {
+        throw new Error(
+          'Cannot remove client with active coaching subscription. Please wait for their subscription to end or cancel their subscription first.',
+        )
+      }
+
+      // Get trainer info for notification
+      const trainer = await prisma.user.findUnique({
+        where: { id: trainerId },
+        include: { profile: true },
+      })
+
+      const trainerName =
+        trainer?.profile?.firstName && trainer?.profile?.lastName
+          ? `${trainer.profile.firstName} ${trainer.profile.lastName}`
+          : trainer?.name || 'Your trainer'
+
+      // Use transaction to ensure all operations succeed or fail together
+      await prisma.$transaction(async (tx) => {
+        // Disconnect trainer from client
+        await tx.user.update({
+          where: { id: clientId },
+          data: { trainerId: null },
+        })
+
+        // Remove client from trainer's clients list
+        await tx.user.update({
+          where: { id: trainerId },
+          data: {
+            clients: {
+              disconnect: { id: clientId },
+            },
+          },
+        })
+
+        // Find the latest coaching request between trainer and client for audit trail
+        const latestCoachingRequest = await tx.coachingRequest.findFirst({
+          where: {
+            OR: [
+              { senderId: clientId, recipientId: trainerId },
+              { senderId: trainerId, recipientId: clientId },
+            ],
+          },
+          orderBy: { createdAt: 'desc' },
+        })
+
+        // Create CANCELLED coaching request record for audit trail
+        if (latestCoachingRequest) {
+          await tx.coachingRequest.update({
+            where: { id: latestCoachingRequest.id },
+            data: {
+              status: GQLCoachingRequestStatus.Cancelled,
+            },
+          })
+        }
+      })
+
+      // Create notification for the client
+      await createNotification(
+        {
+          userId: clientId,
+          message: `${trainerName} has ended your coaching relationship. You still have access to all your training plans and data.`,
+          type: GQLNotificationType.CoachingCancelled,
+          createdBy: trainerId,
+        },
+        context,
+      )
+
+      // Invalidate access control cache for both users since their relationship ended
+      await Promise.all([
+        invalidateTrainerAccessCache(trainerId),
+        invalidateClientAccessCache(clientId),
+      ])
+
+      return true
+    } catch (error) {
+      console.error('Failed to remove client:', error)
+      if (error instanceof Error) {
+        throw error
+      }
+      throw new Error('Failed to remove client')
     }
   },
 }

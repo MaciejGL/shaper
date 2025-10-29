@@ -20,6 +20,34 @@ import { verifySessionToken } from '@/lib/auth/session-token'
  */
 
 export async function proxy(request: NextRequest) {
+  // Handle OPTIONS preflight requests for CORS
+  if (request.method === 'OPTIONS') {
+    const origin = request.headers.get('origin') || ''
+
+    // Whitelist of allowed origins
+    const allowedOrigins = [
+      'http://localhost:4000',
+      'https://www.hypro.app',
+      'https://staging.hypro.app',
+    ]
+
+    // Only allow CORS if origin is in whitelist
+    const isAllowedOrigin = allowedOrigins.includes(origin)
+    const allowOrigin = isAllowedOrigin ? origin : 'https://www.hypro.app'
+
+    return new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': allowOrigin,
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers':
+          'X-Requested-With, Content-Type, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400',
+      },
+    })
+  }
+
   const { pathname, searchParams } = request.nextUrl
   const sessionToken = searchParams.get('session_token')
 
@@ -86,5 +114,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/offer/:path*', '/account-management'],
+  matcher: [
+    '/offer/:path*',
+    '/account-management',
+    '/api/:path*', // Handle CORS for API routes
+  ],
 }

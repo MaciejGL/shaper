@@ -88,12 +88,13 @@ export async function notifyNewMessage(
 export async function notifyCoachingRequest(
   recipientId: string,
   senderName: string,
+  link?: string,
 ) {
   return await sendPushNotificationToUsers(
     [recipientId],
     'New coaching request',
     `You have a new coaching request${senderName ? ` from ${senderName}` : ''}.`,
-    '/fitspace/my-trainer',
+    link || '/fitspace/my-trainer',
   )
 }
 
@@ -406,6 +407,45 @@ export async function notifyTrainerOfferReceived(
     `Training offer from ${trainerName}`,
     `You have a new training offer from ${trainerName}.`,
     `/offer/${offerToken}`,
+  )
+}
+
+// ================================
+// PAYMENTS & BILLING
+// ================================
+
+/**
+ * Notify trainer when client pays for an offer
+ */
+export async function notifyTrainerOfferPayment(
+  trainerId: string,
+  clientName: string,
+  packageName: string,
+  amount: string,
+  clientId: string,
+) {
+  return await sendPushNotificationToUsers(
+    [trainerId],
+    'Payment Received',
+    `${clientName} purchased ${packageName} - ${amount}`,
+    `/trainer/clients/${clientId}`,
+  )
+}
+
+/**
+ * Notify trainer when coaching subscription payment succeeds
+ */
+export async function notifyTrainerSubscriptionPayment(
+  trainerId: string,
+  clientName: string,
+  subscriptionType: string,
+  clientId: string,
+) {
+  return await sendPushNotificationToUsers(
+    [trainerId],
+    'Subscription Payment Received',
+    `${clientName}'s ${subscriptionType} subscription has been renewed`,
+    `/trainer/clients/${clientId}`,
   )
 }
 

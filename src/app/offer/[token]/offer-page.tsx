@@ -82,6 +82,17 @@ export function OfferPage({
     type: 'platform',
   })
 
+  // Check if user has active coaching subscription for in-person discounts
+  const { data: coachingSubscriptionData } = useCurrentSubscription(userId, {
+    lookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+  })
+
+  const hasCoachingSubscription =
+    coachingSubscriptionData?.subscription?.package?.stripeLookupKey ===
+      STRIPE_LOOKUP_KEYS.PREMIUM_COACHING &&
+    (coachingSubscriptionData?.status === 'ACTIVE' ||
+      coachingSubscriptionData?.status === 'CANCELLED_ACTIVE')
+
   const packageSummary = offer.packageSummary as unknown as PackageSummaryItem[]
 
   const trainerName = offer.trainer.profile?.firstName
@@ -99,6 +110,10 @@ export function OfferPage({
   const offerIncludesCoaching = packageSummary.some(
     (item) => item.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
   )
+
+  // Check if user qualifies for in-person discount (either has subscription OR offer includes coaching)
+  const qualifiesForInPersonDiscount =
+    hasCoachingSubscription || offerIncludesCoaching
 
   // Show refund notice only when user has platform premium AND offer includes coaching
   const shouldShowRefundNotice =
@@ -285,29 +300,58 @@ export function OfferPage({
 
           <Card borderless variant="secondary" className="mb-8">
             <CardContent className="space-y-4">
+              {/* Show Premium Coaching badge if user qualifies for discount */}
+              {qualifiesForInPersonDiscount && (
+                <Badge variant="secondary" className="w-fit">
+                  Premium Coaching
+                </Badge>
+              )}
+
               {/* Package Items */}
               <div className="space-y-4">
-                {packageSummary.map((item) => (
-                  <div
-                    key={item.packageId}
-                    className="border-l-2 border-amber-500 pl-4 space-y-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold text-foreground text-base">
-                        {item.name.replaceAll('[TEST]', ' ')}
-                      </h4>
-                      {item.quantity > 1 && (
-                        <Badge variant="secondary">x{item.quantity}</Badge>
+                {packageSummary.map((item) => {
+                  // Check if this is an in-person item
+                  const isInPersonItem =
+                    item.stripeLookupKey ===
+                    STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
+                  const hasDiscount =
+                    isInPersonItem && qualifiesForInPersonDiscount
+
+                  return (
+                    <div
+                      key={item.packageId}
+                      className="border-l-2 border-amber-500 pl-4 space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-foreground text-base">
+                          {item.name.replaceAll('[TEST]', ' ')}
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          {hasDiscount && (
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-green-100 text-green-700"
+                            >
+                              50% off
+                            </Badge>
+                          )}
+                          {item.quantity > 1 && (
+                            <Badge variant="secondary">x{item.quantity}</Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      {item.description && (
+                        <p className="text-muted-foreground text-sm">
+                          {item.description.replaceAll(
+                            '[TEST ENVIRONMENT]',
+                            ' ',
+                          )}
+                        </p>
                       )}
                     </div>
-
-                    {item.description && (
-                      <p className="text-muted-foreground text-sm">
-                        {item.description.replaceAll('[TEST ENVIRONMENT]', ' ')}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </CardContent>
           </Card>

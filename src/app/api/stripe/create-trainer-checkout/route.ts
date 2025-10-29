@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
+import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { COMMISSION_CONFIG } from '@/lib/stripe/config'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import {
   type PayoutDestination,
   getPayoutDestination,
@@ -57,13 +59,30 @@ export async function POST(request: NextRequest) {
     const { checkoutItems, hasPremiumCoaching, mode } =
       prepareCheckoutItems(offerItems)
 
+    // Check if client has active coaching subscription
+    const clientCoachingSubscription = await prisma.userSubscription.findFirst({
+      where: {
+        userId: user.id,
+        status: SubscriptionStatus.ACTIVE,
+        package: {
+          stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+        },
+        endDate: {
+          gte: new Date(),
+        },
+      },
+      include: { package: true },
+    })
+
+    const hasCoachingSubscription = !!clientCoachingSubscription
+
     // Prepare line items with Stripe prices
     const lineItems = await prepareLineItems(checkoutItems)
 
-    // Calculate bundle discounts
+    // Calculate bundle discounts (considers both bundle contents and user subscription)
     const discounts = await calculateBundleDiscounts(
       checkoutItems,
-      hasPremiumCoaching,
+      hasPremiumCoaching || hasCoachingSubscription,
       offerToken,
     )
 

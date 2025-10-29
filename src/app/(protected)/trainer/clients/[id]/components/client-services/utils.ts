@@ -5,19 +5,24 @@ import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { SelectedPackageItem, TrainerPackage } from './types'
 
 /**
- * Finds the in-person discount percentage from packages in a bundle
- * Returns the discount if Premium Coaching package is present
+ * Finds the in-person discount percentage from packages in a bundle OR user subscription
+ * Returns the discount if EITHER:
+ * 1. Premium Coaching package is in the bundle, OR
+ * 2. User has active Premium Coaching subscription
  */
 export const findInPersonDiscountPercentage = (
   packages: TrainerPackage[],
+  hasCoachingSubscription: boolean = false,
 ): number => {
   // Check if bundle contains Premium Coaching package by lookup key
-  const hasCoaching = packages.some(
+  const hasCoachingInBundle = packages.some(
     (pkg) => pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
   )
 
-  // Return the configured discount if coaching is present
-  return hasCoaching ? DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO : 0
+  // Return the configured discount if coaching is present (either in bundle or as subscription)
+  return hasCoachingInBundle || hasCoachingSubscription
+    ? DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO
+    : 0
 }
 
 /**
@@ -52,16 +57,17 @@ export const isMealOrTrainingPackage = (pkg: TrainerPackage): boolean => {
 }
 
 /**
- * Calculates the discounted amount based on bundle context
+ * Calculates the discounted amount based on bundle context and subscription status
  *
  * Applies discount if:
- * 1. Package is in-person session + coaching package in bundle
+ * 1. Package is in-person session + (coaching in bundle OR user has coaching subscription)
  * 2. Package is meal/workout plan + both are in bundle
  */
 export const getDiscountedAmount = (
   pkg: TrainerPackage,
   bundleDiscount: number = 0,
   mealTrainingDiscount: number = 0,
+  hasCoachingSubscription: boolean = false,
 ): number => {
   if (!pkg.pricing) return 0
 
@@ -69,9 +75,13 @@ export const getDiscountedAmount = (
   const isInPersonSession =
     pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
 
-  // Apply in-person discount if package is in-person and bundle has discount
-  if (isInPersonSession && bundleDiscount > 0) {
-    const discountMultiplier = (100 - bundleDiscount) / 100
+  // Apply in-person discount if package is in-person and user qualifies
+  // Qualification: bundleDiscount > 0 OR hasCoachingSubscription
+  const qualifiesForInPersonDiscount =
+    bundleDiscount > 0 || hasCoachingSubscription
+  if (isInPersonSession && qualifiesForInPersonDiscount) {
+    const discountMultiplier =
+      (100 - DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO) / 100
     return Math.round(pkg.pricing.amount * discountMultiplier)
   }
 
@@ -86,13 +96,14 @@ export const getDiscountedAmount = (
 
 /**
  * Formats a price with currency symbol and handles different pricing types
- * Applies bundle discounts based on context
+ * Applies bundle discounts based on context and subscription status
  */
 export const formatPrice = (
   pkg: TrainerPackage,
   quantity: number = 1,
   bundleDiscount: number = 0,
   mealTrainingDiscount: number = 0,
+  hasCoachingSubscription: boolean = false,
 ): string => {
   if (!pkg.pricing) return 'Price TBD'
 
@@ -108,6 +119,7 @@ export const formatPrice = (
     pkg,
     bundleDiscount,
     mealTrainingDiscount,
+    hasCoachingSubscription,
   )
   const baseValue = (discountedAmount / 100).toFixed(2)
   const totalValue = ((discountedAmount * quantity) / 100).toFixed(2)
@@ -160,36 +172,38 @@ export const allowsQuantitySelection = (pkg: TrainerPackage): boolean => {
 }
 
 /**
- * Checks if a package qualifies for any discount in the current bundle
+ * Checks if a package qualifies for any discount in the current bundle or via subscription
  */
 export const hasAnyDiscount = (
   pkg: TrainerPackage,
   bundleDiscount: number = 0,
   mealTrainingDiscount: number = 0,
+  hasCoachingSubscription: boolean = false,
 ): boolean => {
   const isInPersonSession =
     pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
   const isMealOrTraining = isMealOrTrainingPackage(pkg)
 
   return (
-    (isInPersonSession && bundleDiscount > 0) ||
+    (isInPersonSession && (bundleDiscount > 0 || hasCoachingSubscription)) ||
     (isMealOrTraining && mealTrainingDiscount > 0)
   )
 }
 
 /**
- * Gets the applicable discount percentage for a package in the bundle context
+ * Gets the applicable discount percentage for a package in the bundle context or via subscription
  */
 export const getDiscountPercentage = (
   pkg: TrainerPackage,
   bundleDiscount: number = 0,
   mealTrainingDiscount: number = 0,
+  hasCoachingSubscription: boolean = false,
 ): number => {
   // Check if package is in-person session by lookup key
   const isInPersonSession =
     pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
-  if (isInPersonSession && bundleDiscount > 0) {
-    return bundleDiscount
+  if (isInPersonSession && (bundleDiscount > 0 || hasCoachingSubscription)) {
+    return DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO
   }
 
   // Check if package is meal or training plan
@@ -247,10 +261,11 @@ export const formatOriginalPrice = (
 
 /**
  * Calculates the total cost breakdown for a bundle of selected packages
- * Applies all applicable discounts (in-person, meal+training bundle)
+ * Applies all applicable discounts (in-person, meal+training bundle, subscription-based)
  */
 export const calculateBundleTotal = (
   selectedPackages: SelectedPackageItem[],
+  hasCoachingSubscription: boolean = false,
 ) => {
   let oneTimeTotal = 0
   let monthlyTotal = 0
@@ -261,6 +276,7 @@ export const calculateBundleTotal = (
   // Find applicable discounts from the bundle
   const bundleDiscount = findInPersonDiscountPercentage(
     selectedPackages.map((item) => item.package),
+    hasCoachingSubscription,
   )
   const mealTrainingDiscount = findMealTrainingBundleDiscount(
     selectedPackages.map((item) => item.package),
@@ -270,11 +286,12 @@ export const calculateBundleTotal = (
     const pricing = item.package.pricing
     if (!pricing) return
 
-    // Apply discount based on bundle context
+    // Apply discount based on bundle context and subscription
     const discountedAmount = getDiscountedAmount(
       item.package,
       bundleDiscount,
       mealTrainingDiscount,
+      hasCoachingSubscription,
     )
     const itemTotal = (discountedAmount * item.quantity) / 100 // Convert from cents
 
@@ -299,6 +316,7 @@ export const calculateBundleTotal = (
  */
 export const calculateDiscountAmount = (
   selectedPackages: SelectedPackageItem[],
+  hasCoachingSubscription: boolean = false,
 ): number => {
   let originalTotal = 0
   let discountedTotal = 0
@@ -306,6 +324,7 @@ export const calculateDiscountAmount = (
   // Find applicable discounts from the bundle
   const bundleDiscount = findInPersonDiscountPercentage(
     selectedPackages.map((item) => item.package),
+    hasCoachingSubscription,
   )
   const mealTrainingDiscount = findMealTrainingBundleDiscount(
     selectedPackages.map((item) => item.package),
@@ -324,6 +343,7 @@ export const calculateDiscountAmount = (
       item.package,
       bundleDiscount,
       mealTrainingDiscount,
+      hasCoachingSubscription,
     )
     const discountedAmountTotal = (discountedAmount * item.quantity) / 100
     discountedTotal += discountedAmountTotal

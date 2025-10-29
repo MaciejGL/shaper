@@ -47,6 +47,7 @@ interface UserPreferences {
   timezone?: string
   trainingView: TrainingView
   notifications: NotificationPreferences
+  blurProgressSnapshots?: boolean
 }
 
 interface UserPreferencesContextType {
@@ -82,6 +83,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   timeFormat: GQLTimeFormat.H24,
   trainingView: GQLTrainingView.Advanced,
   notifications: DEFAULT_NOTIFICATIONS,
+  blurProgressSnapshots: false,
 }
 
 export function useUserPreferences() {
@@ -120,6 +122,9 @@ export function UserPreferencesProvider({
     trainingView: profile?.trainingView ?? DEFAULT_PREFERENCES.trainingView,
     notifications:
       profile?.notificationPreferences ?? DEFAULT_PREFERENCES.notifications,
+    blurProgressSnapshots:
+      profile?.blurProgressSnapshots ??
+      DEFAULT_PREFERENCES.blurProgressSnapshots,
   })
 
   // Store current preferences to avoid stale closures without causing re-renders
@@ -174,6 +179,7 @@ export function UserPreferencesProvider({
           checkinReminders:
             profile.notificationPreferences?.checkinReminders ?? true,
         },
+        blurProgressSnapshots: profile.blurProgressSnapshots ?? false,
       }
 
       setPreferences(dbPreferences)
@@ -195,6 +201,9 @@ export function UserPreferencesProvider({
 
   const updatePreferences = useCallback(
     async (updates: Partial<UserPreferences>) => {
+      // Capture previous state for rollback on error
+      const previousPreferences = { ...preferences }
+
       // Optimistically update local state
       setPreferences((prev) => ({ ...prev, ...updates }))
 
@@ -238,23 +247,21 @@ export function UserPreferencesProvider({
           input.timezone = updates.timezone
         }
 
+        if (updates.blurProgressSnapshots !== undefined) {
+          input.blurProgressSnapshots = updates.blurProgressSnapshots
+        }
+
         // Update in database via GraphQL
         await updateProfile({
           input,
         })
       } catch (error) {
         console.error('Failed to update preferences:', error)
-        // Revert optimistic update on error
-        setPreferences((prev) => {
-          const reverted = { ...prev }
-          Object.keys(updates).forEach((key) => {
-            delete reverted[key as keyof UserPreferences]
-          })
-          return reverted
-        })
+        // Revert to previous state (before optimistic update)
+        setPreferences(previousPreferences)
       }
     },
-    [updateProfile],
+    [updateProfile, preferences],
   )
 
   const setWeekStartsOn = useCallback(
@@ -328,6 +335,7 @@ export function UserPreferencesProvider({
       setTrainingView,
       setNotifications,
       registerThemeSetter,
+      blurProgressSnapshots: preferences.blurProgressSnapshots,
     }),
     [
       preferences,

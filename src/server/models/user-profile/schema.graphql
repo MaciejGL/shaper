@@ -91,6 +91,7 @@ type UserProfile {
   trainingView: TrainingView!
   hasCompletedOnboarding: Boolean!
   notificationPreferences: NotificationPreferences!
+  blurProgressSnapshots: Boolean
 
   # Check-in preferences
   timezone: String
@@ -181,6 +182,7 @@ input UpdateProfileInput {
   timezone: String
   checkinReminders: Boolean
   checkinReminderTime: Int
+  blurProgressSnapshots: Boolean
 }
 
 input AddBodyMeasurementInput {

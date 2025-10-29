@@ -7,6 +7,7 @@ export interface Exercise {
   equipment: string
   isPublic: boolean
   isPremium: boolean
+  verified: boolean
   version: number
   createdAt: string
   updatedAt: string
@@ -54,6 +55,7 @@ export interface ExerciseUpdate {
   equipment?: string
   isPublic?: boolean
   isPremium?: boolean
+  verified?: boolean
   version?: number
   videoUrl?: string | null
   images?: {

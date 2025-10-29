@@ -280,7 +280,10 @@ function SnapshotSelectionStep({
                     src={log.image1.url}
                     alt={`Snapshot from ${new Date(log.loggedAt).toLocaleDateString()}`}
                     fill
-                    className="object-cover"
+                    className="object-cover select-none"
+                    onContextMenu={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
+                    draggable={false}
                   />
                 ) : (
                   <div className="w-full h-full bg-muted/20 flex items-center justify-center">
@@ -512,7 +515,10 @@ function ImageComparisonRow({
               src={image2Url}
               alt={`${label} - ${snapshot2Date}`}
               fill
-              className="object-cover"
+              className="object-cover select-none"
+              onContextMenu={(e) => e.preventDefault()}
+              onDragStart={(e) => e.preventDefault()}
+              draggable={false}
             />
           )}
 
@@ -526,7 +532,10 @@ function ImageComparisonRow({
                 src={image1Url}
                 alt={`${label} - ${snapshot1Date}`}
                 fill
-                className="object-cover"
+                className="object-cover select-none"
+                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
+                draggable={false}
               />
             </div>
           )}

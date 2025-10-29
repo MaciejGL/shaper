@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardFooter } from '@/components/ui/card'
 import { useExerciseUpdate } from '@/hooks/use-exercise-update'
-import { useVerifiedExercises } from '@/hooks/use-verified-exercises'
 
 import { ExerciseContentSection } from './exercise-content-section'
 import { ExerciseImagesVideoSection } from './exercise-images-video-section'
@@ -46,8 +45,6 @@ export function ExerciseCard({
     updateEndpoint,
     onSilentRefresh,
   })
-
-  const { isVerified, toggleVerified } = useVerifiedExercises()
 
   // Check if this non-public exercise has a similar public exercise
   const hasCollision = hasSimilarPublicExercise(currentExercise)
@@ -127,12 +124,12 @@ export function ExerciseCard({
 
           {/* Verified Badge */}
           <Badge
-            variant={isVerified(exercise.id) ? 'success' : 'secondary'}
+            variant={currentExercise.verified ? 'success' : 'secondary'}
             className="cursor-pointer transition-colors hover:bg-primary/90"
-            onClick={() => toggleVerified(exercise.id)}
+            onClick={() => updateField('verified', !currentExercise.verified)}
           >
             <CheckCircle className="h-3 w-3 mr-1" />
-            {isVerified(exercise.id) ? 'Verified' : 'Mark as Verified'}
+            {currentExercise.verified ? 'Verified' : 'Mark as Verified'}
           </Badge>
           {hasChanges && <Badge>Modified</Badge>}
           <Button

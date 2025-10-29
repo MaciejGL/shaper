@@ -103,14 +103,29 @@ type PublicTrainer {
   isAtCapacity: Boolean!
 }
 
+type SearchUserResult {
+  id: ID!
+  email: String!
+  name: String
+  image: String
+  role: UserRole!
+  hasTrainer: Boolean!
+}
+
 type Query {
   user: User
   userBasic: User
   myClients(limit: Int, offset: Int, trainerId: ID): [UserPublic!]!
 
+  # User search for trainers
+  searchUsers(email: String!, limit: Int): [SearchUserResult!]!
+
   # Public queries
   getFeaturedTrainers(limit: Int): [PublicTrainer!]!
   getMyTrainer: PublicTrainer
+
+  # Coaching queries
+  clientHasActiveCoachingSubscription(clientId: ID!): Boolean!
 
   # Admin-only queries
   adminUserStats: AdminUserStats!
@@ -138,4 +153,5 @@ type Mutation {
 
   # Coaching management
   cancelCoaching: Boolean!
+  removeClient(clientId: ID!): Boolean!
 }

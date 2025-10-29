@@ -1,0 +1,10 @@
+query SearchUsers($email: String!, $limit: Int) {
+  searchUsers(email: $email, limit: $limit) {
+    id
+    email
+    name
+    image
+    role
+    hasTrainer
+  }
+}

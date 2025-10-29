@@ -53,6 +53,7 @@ query FitspaceGetQuickWorkoutDay($dayId: ID) {
           id
           thumbnail
           medium
+          url
           order
         }
         completedAt
@@ -148,6 +149,7 @@ query QuickWorkoutExercises($where: ExerciseWhereInput) {
     images {
       id
       url
+      medium
       order
     }
     muscleGroups {
@@ -176,6 +178,7 @@ query QuickWorkoutExercises($where: ExerciseWhereInput) {
       id
       thumbnail
       medium
+      url
       order
     }
     muscleGroups {
@@ -222,6 +225,7 @@ query FitspaceGetUserQuickWorkoutPlan {
             id
             thumbnail
             medium
+            url
             order
           }
           muscleGroups {
@@ -270,6 +274,7 @@ mutation FitspaceCreateQuickWorkout($input: CreateQuickWorkoutInput!) {
             id
             thumbnail
             medium
+            url
             order
           }
           muscleGroups {
@@ -311,6 +316,7 @@ mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
             id
             thumbnail
             medium
+            url
             order
           }
           muscleGroups {
