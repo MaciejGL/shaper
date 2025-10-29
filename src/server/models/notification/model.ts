@@ -30,6 +30,7 @@ export default class Notification implements GQLNotification {
   }
 
   get type(): GQLNotificationType {
+    console.log('Unknown notification type:', this.data.type, this.data.message)
     switch (this.data.type) {
       case 'COACHING_REQUEST':
         return GQLNotificationType.CoachingRequest
@@ -63,6 +64,8 @@ export default class Notification implements GQLNotification {
         return GQLNotificationType.System
       case 'MESSAGE':
         return GQLNotificationType.Message
+      case 'MEETING_REMINDER':
+        return GQLNotificationType.MeetingReminder
     }
     return GQLNotificationType.System
   }
