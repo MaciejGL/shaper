@@ -7,7 +7,10 @@ import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { User } from '@/lib/getUser'
 import { notifyTrainerOfferPayment } from '@/lib/notifications/push-notification-service'
-import { resolvePriceIdToLookupKey } from '@/lib/stripe/lookup-keys'
+import {
+  STRIPE_LOOKUP_KEYS,
+  resolvePriceIdToLookupKey,
+} from '@/lib/stripe/lookup-keys'
 import { getPayoutDestination } from '@/lib/stripe/revenue-sharing-utils'
 import { stripe } from '@/lib/stripe/stripe'
 import { createSupportChatForUser } from '@/lib/support-chat'
@@ -43,6 +46,9 @@ export async function handleCheckoutCompleted(
     const hasCoachingUpgrade = session.metadata?.hasCoachingUpgrade === 'true'
 
     // Handle subscription upgrade cleanup: cancel old premium subscriptions with auto-refund
+    // This metadata is set when:
+    // 1. User directly subscribes to coaching AND has existing premium (checked in create-checkout-session)
+    // 2. User purchases coaching via trainer offer AND has existing premium (checked in create-trainer-checkout)
     if (hasCoachingUpgrade) {
       await cancelOldPremiumSubscriptions(user.id)
     }
@@ -588,6 +594,9 @@ async function handleTrainerPayout(
  * Cancels all active premium subscriptions (monthly/yearly) for a user
  * Called after successful coaching subscription purchase
  * Stripe automatically calculates and applies proration credit
+ *
+ * IMPORTANT: Only cancels premium_monthly and premium_yearly subscriptions.
+ * Never cancels premium_coaching subscriptions - this is enforced by the database query.
  */
 async function cancelOldPremiumSubscriptions(userId: string) {
   try {
@@ -596,12 +605,18 @@ async function cancelOldPremiumSubscriptions(userId: string) {
     )
 
     // Find all active premium subscriptions (monthly or yearly)
+    // SAFETY: This query explicitly excludes premium_coaching to prevent accidental cancellation
     const oldSubscriptions = await prisma.userSubscription.findMany({
       where: {
         userId,
         status: 'ACTIVE',
         package: {
-          stripeLookupKey: { in: ['premium_monthly', 'premium_yearly'] },
+          stripeLookupKey: {
+            in: [
+              STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY,
+              STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY,
+            ],
+          },
         },
       },
       include: { package: true },
@@ -633,7 +648,18 @@ async function cancelOldPremiumSubscriptions(userId: string) {
           continue
         }
 
+        // Add metadata to track this as an upgrade cancellation
+        await stripe.subscriptions.update(oldSub.stripeSubscriptionId, {
+          metadata: {
+            cancelReason: 'upgrade_to_coaching',
+            cancelledAt: new Date().toISOString(),
+            newSubscriptionType: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+            oldPackageName: oldSub.package.name,
+          },
+        })
+
         // Cancel with automatic proration
+        // This creates a credit on customer's Stripe balance that will be applied to next payment
         await stripe.subscriptions.cancel(oldSub.stripeSubscriptionId, {
           prorate: true, // Stripe calculates and applies proration credit
           invoice_now: true, // Create invoice immediately to apply credit
@@ -642,8 +668,21 @@ async function cancelOldPremiumSubscriptions(userId: string) {
         console.info(
           `✅ Cancelled ${oldSub.package.stripeLookupKey} subscription: ${oldSub.stripeSubscriptionId}`,
         )
+
+        // Retrieve the cancellation invoice to get the credit amount
+        const invoices = await stripe.invoices.list({
+          subscription: oldSub.stripeSubscriptionId,
+          limit: 1,
+        })
+
+        const creditAmount =
+          invoices.data[0]?.total && invoices.data[0].total < 0
+            ? Math.abs(invoices.data[0].total / 100)
+            : 0
+        const currency = invoices.data[0]?.currency?.toUpperCase() || 'USD'
+
         console.info(
-          `💰 Stripe automatically calculated proration and added credit to customer balance`,
+          `💰 Credit applied: ${creditAmount.toFixed(2)} ${currency} added to customer balance`,
         )
       } catch (error) {
         console.error(

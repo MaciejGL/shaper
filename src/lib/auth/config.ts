@@ -208,9 +208,9 @@ export const authOptions = {
       name: 'next-auth.pkce.code_verifier',
       options: {
         httpOnly: true,
-        sameSite: 'lax', // Changed from 'none' - works better with OAuth
+        sameSite: 'none',
         path: '/',
-        secure: process.env.NODE_ENV !== 'development',
+        secure: true, // Required when sameSite: 'none'
         maxAge: 900, // 15 minutes
       },
     },
@@ -223,6 +223,40 @@ export const authOptions = {
   },
 
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Handle mobile app OAuth redirects
+      try {
+        const urlObj = new URL(url, baseUrl)
+        const isMobile = urlObj.searchParams.get('mobile') === 'true'
+
+        if (isMobile) {
+          // Extract the callback URL from params
+          const callbackUrl =
+            urlObj.searchParams.get('callbackUrl') || '/fitspace/workout'
+
+          // Create deep link to return to mobile app
+          const deepLink = `hypertro://?url=${encodeURIComponent(callbackUrl)}`
+
+          console.info('📱 Mobile OAuth redirect to:', deepLink)
+          return deepLink
+        }
+      } catch (error) {
+        console.error('Error parsing redirect URL:', error)
+      }
+
+      // Default web behavior - relative URLs become absolute
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`
+      }
+
+      // If URL is on same origin, allow it
+      if (url.startsWith(baseUrl)) {
+        return url
+      }
+
+      // Otherwise redirect to base URL
+      return baseUrl
+    },
     async signIn({ account, profile }) {
       // Handle Google OAuth sign-in
       if (account?.provider === 'google' && profile) {

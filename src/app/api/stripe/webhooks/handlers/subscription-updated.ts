@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 
 export async function handleSubscriptionUpdated(
@@ -57,7 +58,7 @@ export async function handleSubscriptionUpdated(
 
         // Update user's trainer if switched to coaching
         const switchedToCoaching =
-          newPackage.stripeLookupKey === 'premium_coaching'
+          newPackage.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING
         const trainerId =
           subscription.metadata?.trainerId || newPackage.trainerId
 

@@ -11,6 +11,7 @@ import {
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { notifyTrainerSubscriptionPayment } from '@/lib/notifications/push-notification-service'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 import { StripeServiceType } from '../../enums'
 
@@ -86,7 +87,8 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       })
 
       const isCoachingPayment =
-        coachingSub?.package.stripeLookupKey === 'premium_coaching'
+        coachingSub?.package.stripeLookupKey ===
+        STRIPE_LOOKUP_KEYS.PREMIUM_COACHING
 
       if (isCoachingPayment) {
         // Find any paused yearly subscriptions for this user

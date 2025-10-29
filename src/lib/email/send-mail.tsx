@@ -19,6 +19,7 @@ import {
   TrialEndingEmail,
   WelcomeEmail,
 } from './templates/subscription-emails'
+import { SubscriptionUpgradeCreditEmail } from './templates/subscription-upgrade-credit-email'
 import {
   SubscriptionPaymentReceivedEmail,
   SubscriptionPaymentReceivedEmailProps,
@@ -481,6 +482,53 @@ export const sendEmail = {
       from: FROM_EMAIL,
       to,
       subject: `Subscription payment from ${props.clientName} - ${props.amount} ${props.currency.toUpperCase()}`,
+      html,
+    })
+  },
+
+  // Subscription upgrade credit notification (for users)
+  subscriptionUpgradeCredit: async (
+    to: string,
+    {
+      userName,
+      oldPackageName,
+      newPackageName,
+      creditAmount,
+      currency,
+      creditDate,
+      nextBillingDate,
+      newPlanPrice,
+      amountAfterCredit,
+    }: {
+      userName?: string | null
+      oldPackageName: string
+      newPackageName: string
+      creditAmount: string
+      currency: string
+      creditDate: string
+      nextBillingDate: string
+      newPlanPrice: string
+      amountAfterCredit: string
+    },
+  ): Promise<void> => {
+    const html = await render(
+      <SubscriptionUpgradeCreditEmail
+        userName={userName}
+        oldPackageName={oldPackageName}
+        newPackageName={newPackageName}
+        creditAmount={creditAmount}
+        currency={currency}
+        creditDate={creditDate}
+        nextBillingDate={nextBillingDate}
+        newPlanPrice={newPlanPrice}
+        amountAfterCredit={amountAfterCredit}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Credit applied from subscription upgrade - ${creditAmount} ${currency.toUpperCase()}`,
       html,
     })
   },

@@ -20,6 +20,7 @@ import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { notifyCoachingCancelled } from '@/lib/notifications/push-notification-service'
 import { getFromCache, setInCache } from '@/lib/redis'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 import { GQLContext } from '@/types/gql-context'
 
@@ -287,7 +288,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         trainerId: trainerId,
         status: 'ACTIVE',
         package: {
-          stripeLookupKey: 'premium_coaching',
+          stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
         },
       },
     })
@@ -1033,7 +1034,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
             in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING],
           },
           package: {
-            stripeLookupKey: 'premium_coaching',
+            stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
           },
         },
       })

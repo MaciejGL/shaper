@@ -9,6 +9,7 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 
 export async function handleSubscriptionDeleted(
@@ -36,12 +37,22 @@ export async function handleSubscriptionDeleted(
       `✅ Subscription ${subscription.id} deleted - immediate access revoked for user ${userSubscription.user.email}`,
     )
 
-    // Send cancellation email
-    await sendCancellationEmail(userSubscription)
+    // Check if this was an upgrade cancellation
+    const isUpgradeCancellation =
+      subscription.metadata?.cancelReason === 'upgrade_to_coaching'
+
+    if (isUpgradeCancellation) {
+      // Send upgrade credit email instead of normal cancellation email
+      await sendUpgradeCreditEmail(userSubscription, subscription)
+    } else {
+      // Send normal cancellation email
+      await sendCancellationEmail(userSubscription)
+    }
 
     // If coaching ended, resume any paused yearly subscription
     const wasCoaching =
-      userSubscription.package.stripeLookupKey === 'premium_coaching'
+      userSubscription.package.stripeLookupKey ===
+      STRIPE_LOOKUP_KEYS.PREMIUM_COACHING
 
     if (wasCoaching) {
       console.info(`Coaching ended for user ${userSubscription.userId}`)
@@ -51,7 +62,7 @@ export async function handleSubscriptionDeleted(
         where: {
           userId: userSubscription.userId,
           status: SubscriptionStatus.ACTIVE,
-          package: { stripeLookupKey: 'premium_yearly' },
+          package: { stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY },
         },
       })
 
@@ -144,5 +155,98 @@ async function sendCancellationEmail(
     } catch (emailError) {
       console.error('Failed to send cancellation email:', emailError)
     }
+  }
+}
+
+async function sendUpgradeCreditEmail(
+  userSubscription: UserSubscription & {
+    user: User & { profile?: UserProfile | null }
+    package: PackageTemplate
+  },
+  stripeSubscription: Stripe.Subscription,
+) {
+  if (!userSubscription.user.email) return
+
+  try {
+    // Retrieve the cancellation invoice to get the credit amount
+    const invoices = await stripe.invoices.list({
+      subscription: stripeSubscription.id,
+      limit: 1,
+    })
+
+    const creditAmount =
+      invoices.data[0]?.total && invoices.data[0].total < 0
+        ? Math.abs(invoices.data[0].total / 100)
+        : 0
+    const currency = invoices.data[0]?.currency?.toUpperCase() || 'USD'
+
+    // Find the new coaching subscription to get next billing details
+    const coachingSubscription = await prisma.userSubscription.findFirst({
+      where: {
+        userId: userSubscription.userId,
+        status: SubscriptionStatus.ACTIVE,
+        package: { stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING },
+      },
+      include: { package: true },
+    })
+
+    if (!coachingSubscription || !coachingSubscription.stripeSubscriptionId) {
+      console.warn(
+        `Could not find active coaching subscription for user ${userSubscription.userId}`,
+      )
+      return
+    }
+
+    // Retrieve the coaching subscription from Stripe to get pricing
+    const stripeCoachingSub = await stripe.subscriptions.retrieve(
+      coachingSubscription.stripeSubscriptionId,
+    )
+
+    const coachingPrice =
+      stripeCoachingSub.items?.data[0]?.price?.unit_amount || 0
+    const coachingPriceFormatted = (coachingPrice / 100).toFixed(2)
+    const amountAfterCredit = (coachingPrice / 100 - creditAmount).toFixed(2)
+
+    // Format next billing date - use items.data[0].current_period_end as per Stripe types
+    const nextBillingTimestamp =
+      (stripeCoachingSub.items?.data[0] as { current_period_end?: number })
+        ?.current_period_end || Math.floor(Date.now() / 1000)
+    const nextBillingDate = new Date(
+      nextBillingTimestamp * 1000,
+    ).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+
+    // Format credit date
+    const creditDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+
+    // Get old package name from metadata or fallback to database
+    const oldPackageName =
+      stripeSubscription.metadata?.oldPackageName ||
+      userSubscription.package.name
+
+    await sendEmail.subscriptionUpgradeCredit(userSubscription.user.email, {
+      userName: userSubscription.user.profile?.firstName,
+      oldPackageName,
+      newPackageName: coachingSubscription.package.name,
+      creditAmount: creditAmount.toFixed(2),
+      currency,
+      creditDate,
+      nextBillingDate,
+      newPlanPrice: coachingPriceFormatted,
+      amountAfterCredit,
+    })
+
+    console.info(
+      `📧 Subscription upgrade credit email sent to ${userSubscription.user.email} (${creditAmount.toFixed(2)} ${currency})`,
+    )
+  } catch (emailError) {
+    console.error('Failed to send upgrade credit email:', emailError)
   }
 }
