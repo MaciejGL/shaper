@@ -87,7 +87,7 @@ export function ExerciseTable({
   // Handle toggle changes with immediate save
   const handleToggleChange = async (
     exerciseId: string,
-    field: 'isPublic' | 'isPremium',
+    field: 'isPublic' | 'isPremium' | 'verified',
     newValue: boolean,
   ) => {
     const toggleKey = `${exerciseId}-${field}`
