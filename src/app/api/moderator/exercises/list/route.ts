@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     const muscleFilter = searchParams.get('muscle') || 'all'
     const creatorFilter = searchParams.get('creator') || 'all'
     const equipmentFilter = searchParams.get('equipment') || 'all'
+    const verifiedFilter = searchParams.get('verified') || 'all'
 
     // Build where clause
     const conditions: Prisma.BaseExerciseWhereInput[] = []
@@ -123,6 +124,14 @@ export async function GET(request: NextRequest) {
     }
     // 'all' means no equipment filter
 
+    // Verified filter
+    if (verifiedFilter === 'verified') {
+      conditions.push({ verified: true })
+    } else if (verifiedFilter === 'unverified') {
+      conditions.push({ verified: false })
+    }
+    // 'all' means no verified filter
+
     // Combine all conditions with AND
     const where: Prisma.BaseExerciseWhereInput =
       conditions.length > 0 ? { AND: conditions } : {}
@@ -144,6 +153,7 @@ export async function GET(request: NextRequest) {
         equipment: true,
         isPublic: true,
         isPremium: true,
+        verified: true,
         version: true,
         videoUrl: true,
         images: {

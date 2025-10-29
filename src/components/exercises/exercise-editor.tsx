@@ -33,7 +33,6 @@ import {
 import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useExerciseNames } from '@/hooks/use-exercise-names'
-import { useVerifiedExercises } from '@/hooks/use-verified-exercises'
 
 import { Skeleton } from '../ui/skeleton'
 
@@ -156,9 +155,6 @@ export function ExerciseEditor({
     { id: string; name: string; email: string }[]
   >([])
 
-  // Verified exercises hook (localStorage)
-  const { isVerified } = useVerifiedExercises()
-
   // Exercise names for duplicate detection
   const { hasSimilarPublicExercise } = useExerciseNames({
     includePrivate: true,
@@ -176,27 +172,6 @@ export function ExerciseEditor({
   const [totalItems, setTotalItems] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
-  // Apply verified filter to exercises
-  const applyVerifiedFilter = useCallback(
-    (exerciseList: Exercise[]) => {
-      if (filterVerified === 'verified') {
-        return exerciseList.filter((ex) => isVerified(ex.id))
-      } else if (filterVerified === 'unverified') {
-        return exerciseList.filter((ex) => !isVerified(ex.id))
-      }
-      return exerciseList
-    },
-    [filterVerified, isVerified],
-  )
-
-  // Re-filter exercises when verified filter or verified state changes
-  useEffect(() => {
-    if (allExercises.length > 0) {
-      const filteredExercises = applyVerifiedFilter(allExercises)
-      setExercises(filteredExercises)
-    }
-  }, [allExercises, applyVerifiedFilter])
-
   // Remove muscle group data - now handled by individual exercise hooks
 
   // Remove muscle group helper - now handled by individual exercise hooks
@@ -210,7 +185,11 @@ export function ExerciseEditor({
 
   // Handle optimistic updates for table toggles
   const handleExerciseUpdate = useCallback(
-    (exerciseId: string, field: 'isPublic' | 'isPremium', value: boolean) => {
+    (
+      exerciseId: string,
+      field: 'isPublic' | 'isPremium' | 'verified',
+      value: boolean,
+    ) => {
       setExercises((prev) =>
         prev.map((exercise) =>
           exercise.id === exerciseId
@@ -265,6 +244,7 @@ export function ExerciseEditor({
         video: filterVideo,
         description: filterDescription,
         muscle: filterMuscleGroup,
+        verified: filterVerified,
         creator: filterCreator,
         equipment: filterEquipment,
       })
@@ -276,8 +256,9 @@ export function ExerciseEditor({
 
       const data = await response.json()
 
-      // Store all exercises (filtering happens in useEffect)
+      // Store exercises and update display
       setAllExercises(data.exercises)
+      setExercises(data.exercises)
       setTotalPages(data.pagination.totalPages)
       setTotalItems(data.pagination.totalItems)
 
@@ -312,6 +293,7 @@ export function ExerciseEditor({
     filterVideo,
     filterDescription,
     filterMuscleGroup,
+    filterVerified,
     filterCreator,
     filterEquipment,
     itemsPerPage,
@@ -331,6 +313,7 @@ export function ExerciseEditor({
         video: filterVideo,
         description: filterDescription,
         muscle: filterMuscleGroup,
+        verified: filterVerified,
         creator: filterCreator,
         equipment: filterEquipment,
       })
@@ -342,8 +325,9 @@ export function ExerciseEditor({
 
       const data = await response.json()
 
-      // Store all exercises (filtering happens in useEffect)
+      // Store exercises and update display
       setAllExercises(data.exercises)
+      setExercises(data.exercises)
       setTotalPages(data.pagination.totalPages)
       setTotalItems(data.pagination.totalItems)
 
@@ -365,6 +349,7 @@ export function ExerciseEditor({
     filterVideo,
     filterDescription,
     filterMuscleGroup,
+    filterVerified,
     filterCreator,
     filterEquipment,
     itemsPerPage,

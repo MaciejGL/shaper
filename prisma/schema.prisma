@@ -472,6 +472,7 @@ model BaseExercise {
   difficulty                String?
   version                   Int                        @default(1)
   isPremium                 Boolean                    @default(false)
+  verified                  Boolean                    @default(false)
   instructions              String[]
   tips                      String[]
   createdBy                 User?                      @relation(fields: [createdById], references: [id])
@@ -487,6 +488,7 @@ model BaseExercise {
   @@index([version])
   @@index([difficulty])
   @@index([isPremium])
+  @@index([verified])
   @@index([createdById])
   @@index([isPublic])
   @@index([isPublic, isPremium])
