@@ -124,6 +124,7 @@ model UserProfile {
   hasCompletedOnboarding Boolean?          @default(false)
   checkinReminders       Boolean?          @default(true)
   timezone               String?           @default("UTC")
+  blurProgressSnapshots  Boolean?          @default(false)
   bodyProgressLogs       BodyProgressLog[]
   checkinSchedule        CheckinSchedule?
   bodyMeasures           UserBodyMeasure[]

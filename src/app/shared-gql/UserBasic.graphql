@@ -27,6 +27,7 @@ query UserBasic {
       timeFormat
       trainingView
       hasCompletedOnboarding
+      blurProgressSnapshots
       notificationPreferences {
         workoutReminders
         progressUpdates

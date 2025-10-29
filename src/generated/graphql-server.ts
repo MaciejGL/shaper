@@ -3408,6 +3408,7 @@ export type GQLUpdateProfileInput = {
   avatarUrl?: InputMaybe<Scalars['String']['input']>;
   bio?: InputMaybe<Scalars['String']['input']>;
   birthday?: InputMaybe<Scalars['String']['input']>;
+  blurProgressSnapshots?: InputMaybe<Scalars['Boolean']['input']>;
   checkinReminderTime?: InputMaybe<Scalars['Int']['input']>;
   checkinReminders?: InputMaybe<Scalars['Boolean']['input']>;
   credentials?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -3597,6 +3598,7 @@ export type GQLUserProfile = {
   avatarUrl?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   bio?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   birthday?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  blurProgressSnapshots?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
   checkinReminders?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -5601,6 +5603,7 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   avatarUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   bio?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   birthday?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  blurProgressSnapshots?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
   bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
   checkinReminders?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;

@@ -527,6 +527,8 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     if (rest.timezone !== undefined) updateData.timezone = rest.timezone
     if (rest.checkinReminders !== undefined)
       updateData.checkinReminders = rest.checkinReminders
+    if (rest.blurProgressSnapshots !== undefined)
+      updateData.blurProgressSnapshots = rest.blurProgressSnapshots
 
     // If email update was requested and User exists, update it separately
     if (user && email) {

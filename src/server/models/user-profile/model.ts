@@ -232,4 +232,8 @@ export default class UserProfile implements GQLUserProfile {
   get timezone() {
     return this.data.timezone
   }
+
+  get blurProgressSnapshots() {
+    return this.data.blurProgressSnapshots ?? false
+  }
 }

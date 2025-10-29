@@ -25,6 +25,8 @@ export default async function ProtectedLayout({
     {},
   )
 
+  console.log(data)
+
   if (!data) {
     return redirect('/login')
   }

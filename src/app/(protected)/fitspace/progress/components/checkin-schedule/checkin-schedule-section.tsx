@@ -119,7 +119,7 @@ export function CheckinScheduleSection() {
 
   return (
     <>
-      <Card borderless>
+      <Card borderless className="gap-2">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -145,33 +145,10 @@ export function CheckinScheduleSection() {
               </DropdownMenuContent>
             </DropdownMenu>
           </CardTitle>
-          <p className="text-sm">
-            {FREQUENCY_LABELS[schedule.frequency]}
-            {schedule.dayOfWeek !== null &&
-              schedule.dayOfWeek !== undefined && (
-                <span className="text-muted-foreground">
-                  {' '}
-                  on {DAY_OF_WEEK_LABELS[schedule.dayOfWeek]}
-                </span>
-              )}
-            {schedule.dayOfMonth !== null && (
-              <span className="text-muted-foreground">
-                {' '}
-                on the {schedule.dayOfMonth}
-                {schedule.dayOfMonth === 1
-                  ? 'st'
-                  : schedule.dayOfMonth === 2
-                    ? 'nd'
-                    : schedule.dayOfMonth === 3
-                      ? 'rd'
-                      : 'th'}
-              </span>
-            )}
-          </p>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Schedule Info */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between bg-card-on-card p-3 rounded-lg">
             <div>
               {nextDate && (
                 <p className="text-base text-muted-foreground flex items-center gap-2">
@@ -186,7 +163,12 @@ export function CheckinScheduleSection() {
                       Check-in ready!
                     </span>
                   ) : (
-                    <>Next check-in {formatRelativeTime(nextDate)}</>
+                    <>
+                      Next check-in{' '}
+                      <span className="text-foreground">
+                        {formatRelativeTime(nextDate)}
+                      </span>
+                    </>
                   )}
                 </p>
               )}
@@ -250,6 +232,29 @@ export function CheckinScheduleSection() {
               </PremiumButtonWrapper>
             </div>
           )}
+          <p className="text-xs">
+            {FREQUENCY_LABELS[schedule.frequency]}
+            {schedule.dayOfWeek !== null &&
+              schedule.dayOfWeek !== undefined && (
+                <span className="text-muted-foreground">
+                  {' '}
+                  on {DAY_OF_WEEK_LABELS[schedule.dayOfWeek]}
+                </span>
+              )}
+            {schedule.dayOfMonth !== null && (
+              <span className="text-muted-foreground">
+                {' '}
+                on the {schedule.dayOfMonth}
+                {schedule.dayOfMonth === 1
+                  ? 'st'
+                  : schedule.dayOfMonth === 2
+                    ? 'nd'
+                    : schedule.dayOfMonth === 3
+                      ? 'rd'
+                      : 'th'}
+              </span>
+            )}
+          </p>
         </CardContent>
       </Card>
 

@@ -3406,6 +3406,7 @@ export type GQLUpdateProfileInput = {
   avatarUrl?: InputMaybe<Scalars['String']['input']>;
   bio?: InputMaybe<Scalars['String']['input']>;
   birthday?: InputMaybe<Scalars['String']['input']>;
+  blurProgressSnapshots?: InputMaybe<Scalars['Boolean']['input']>;
   checkinReminderTime?: InputMaybe<Scalars['Int']['input']>;
   checkinReminders?: InputMaybe<Scalars['Boolean']['input']>;
   credentials?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -3595,6 +3596,7 @@ export type GQLUserProfile = {
   avatarUrl?: Maybe<Scalars['String']['output']>;
   bio?: Maybe<Scalars['String']['output']>;
   birthday?: Maybe<Scalars['String']['output']>;
+  blurProgressSnapshots?: Maybe<Scalars['Boolean']['output']>;
   bodyMeasures: Array<GQLUserBodyMeasure>;
   checkinReminders?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['String']['output'];
@@ -3988,12 +3990,12 @@ export type GQLGetMyNutritionPlanQueryVariables = Exact<{
 
 export type GQLGetMyNutritionPlanQuery = { __typename?: 'Query', nutritionPlan?: { __typename?: 'NutritionPlan', id: string, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'NutritionPlanDay', id: string, dayNumber: number, name: string, dailyMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredientOverrides: Array<{ __typename?: 'NutritionPlanMealIngredient', id: string, grams: number, createdAt: string, mealIngredient: { __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } } }>, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, totalMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, macros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> }> } | undefined | null };
 
-export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, hasCompletedOnboarding: boolean, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } };
+export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, hasCompletedOnboarding: boolean, blurProgressSnapshots?: boolean | undefined | null, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } };
 
 export type GQLProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLProfileQuery = { __typename?: 'Query', profile?: { __typename?: 'UserProfile', timezone?: string | undefined | null, id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, hasCompletedOnboarding: boolean, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } } | undefined | null, userBasic?: { __typename?: 'User', id: string, capacity?: number | undefined | null } | undefined | null };
+export type GQLProfileQuery = { __typename?: 'Query', profile?: { __typename?: 'UserProfile', timezone?: string | undefined | null, id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, hasCompletedOnboarding: boolean, blurProgressSnapshots?: boolean | undefined | null, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } } | undefined | null, userBasic?: { __typename?: 'User', id: string, capacity?: number | undefined | null } | undefined | null };
 
 export type GQLUpdateProfileMutationVariables = Exact<{
   input: GQLUpdateProfileInput;
@@ -5264,7 +5266,7 @@ export type GQLAssignTemplateToSelfMutation = { __typename?: 'Mutation', assignT
 export type GQLUserBasicQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLUserBasicQuery = { __typename?: 'Query', userBasic?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, capacity?: number | undefined | null, trainerId?: string | undefined | null, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, hasCompletedOnboarding: boolean, height?: number | undefined | null, weight?: number | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timezone?: string | undefined | null, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean, checkinReminders: boolean } } | undefined | null } | undefined | null };
+export type GQLUserBasicQuery = { __typename?: 'Query', userBasic?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, capacity?: number | undefined | null, trainerId?: string | undefined | null, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, hasCompletedOnboarding: boolean, height?: number | undefined | null, weight?: number | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timezone?: string | undefined | null, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, blurProgressSnapshots?: boolean | undefined | null, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean, checkinReminders: boolean } } | undefined | null } | undefined | null };
 
 export type GQLNotificationsQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -5409,6 +5411,7 @@ export const ProfileFragmentFragmentDoc = `
     emailNotifications
     pushNotifications
   }
+  blurProgressSnapshots
 }
     `;
 export const TrainingTemplateFragmentDoc = `
@@ -15655,6 +15658,7 @@ export const UserBasicDocument = `
       timeFormat
       trainingView
       hasCompletedOnboarding
+      blurProgressSnapshots
       notificationPreferences {
         workoutReminders
         progressUpdates
