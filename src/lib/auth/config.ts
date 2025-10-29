@@ -230,18 +230,22 @@ export const authOptions = {
         const isMobile = urlObj.searchParams.get('mobile') === 'true'
 
         if (isMobile) {
-          // Remove mobile flag from URL before creating deep link
+          // Remove mobile flag from URL
           urlObj.searchParams.delete('mobile')
 
           // Get clean callback path
           const callbackPath =
             urlObj.pathname + (urlObj.search ? urlObj.search : '')
 
-          // Create deep link to return to mobile app
-          const deepLink = `hypertro://?url=${encodeURIComponent(callbackPath || '/fitspace/workout')}`
+          // Redirect to mobile callback page (not deep link directly - NextAuth rejects those)
+          // The mobile callback page will then trigger the deep link
+          const mobileCallbackUrl = `${baseUrl}/auth/mobile-callback?url=${encodeURIComponent(callbackPath || '/fitspace/workout')}`
 
-          console.info('📱 Mobile OAuth redirect to:', deepLink)
-          return deepLink
+          console.info(
+            '📱 Mobile OAuth redirect to callback page:',
+            mobileCallbackUrl,
+          )
+          return mobileCallbackUrl
         }
       } catch (error) {
         console.error('Error parsing redirect URL:', error)

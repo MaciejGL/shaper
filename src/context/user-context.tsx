@@ -33,19 +33,11 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const session = useSession()
   const queryClient = useQueryClient()
 
-  const isDefinitelyLoggedOut = useMemo(
-    () => session.status === 'unauthenticated',
-    [session.status],
-  )
-
-  // Enable query when authenticated or loading (but not when unauthenticated)
-  const shouldEnableQuery = !isDefinitelyLoggedOut
-
   const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
     {},
     {
       initialData,
-      enabled: shouldEnableQuery,
+      enabled: session.status !== 'unauthenticated',
       staleTime: 20 * 60 * 1000,
       refetchOnWindowFocus: true,
       placeholderData: (previousData) => previousData,
@@ -62,7 +54,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   } = useGetMySubscriptionStatusQuery(
     {},
     {
-      enabled: shouldEnableQuery,
+      enabled: session.status !== 'unauthenticated',
       refetchOnWindowFocus: true,
     },
   )
