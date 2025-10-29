@@ -224,7 +224,7 @@ export function CalendarWeekSelector({
                 'outline-primary outline-offset-1 outline-2 rounded-full',
               ),
             }}
-            className="w-full max-w-sm mx-auto [&_button]:rounded-full [&_*]:font-medium [&_[data-selected=true]_button]:bg-primary bg-sidebar"
+            className="w-full max-w-sm mx-auto [&_button]:!rounded-full [&_*]:font-medium [&_[data-selected=true]_button]:bg-primary bg-sidebar"
           />
         </DrawerContent>
       </Drawer>
