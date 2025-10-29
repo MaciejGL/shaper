@@ -57,13 +57,12 @@ export const SubscriptionUpgradeCreditEmail = ({
         {/* Credit Amount Card - Prominent Display */}
         <EmailCard>
           <div style={{ textAlign: 'center', padding: '8px 0' }}>
-            <EmailText
-              size={6}
-              color="muted"
-              marginBottom="8px"
-              style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}
-            >
-              Credit Applied
+            <EmailText size={6} color="muted" marginBottom="8px">
+              <span
+                style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}
+              >
+                Credit Applied
+              </span>
             </EmailText>
             <div
               style={{
@@ -140,10 +139,10 @@ export const SubscriptionUpgradeCreditEmail = ({
                       alignItems: 'center',
                     }}
                   >
-                    <EmailText marginBottom="0" color="success">
+                    <EmailText marginBottom="0" color="primary">
                       Credit applied
                     </EmailText>
-                    <EmailText marginBottom="0" color="success">
+                    <EmailText marginBottom="0" color="primary">
                       -{creditAmount} {currency}
                     </EmailText>
                   </div>
@@ -199,4 +198,3 @@ export const SubscriptionUpgradeCreditEmail = ({
     </EmailWrapper>
   )
 }
-
