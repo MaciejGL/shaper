@@ -63,13 +63,13 @@ export default async function MobileCallbackPage({
   // Generate session token
   const sessionToken = generateSessionToken(user.user.email, rawJwt)
 
-  // Add session token to callback URL
-  const separator = callbackUrl.includes('?') ? '&' : '?'
-  const callbackUrlWithToken = `${callbackUrl}${separator}session_token=${encodeURIComponent(sessionToken)}`
+  // Redirect to session-restore page instead of directly to callback
+  // This ensures cookies are set properly in WebView context
+  const sessionRestoreUrl = `/auth/session-restore?session_token=${encodeURIComponent(sessionToken)}&redirect=${encodeURIComponent(callbackUrl)}`
 
   console.info('📱 [MOBILE-CALLBACK] Generated session token for:', {
     email: user.user.email,
-    callbackUrl: callbackUrlWithToken,
+    sessionRestoreUrl,
   })
 
   return (
@@ -81,7 +81,7 @@ export default async function MobileCallbackPage({
       <p className="text-sm text-muted-foreground animate-pulse">
         Returning to the app...
       </p>
-      <DeepLinkRedirect callbackUrl={callbackUrlWithToken} />
+      <DeepLinkRedirect callbackUrl={sessionRestoreUrl} />
     </div>
   )
 }
