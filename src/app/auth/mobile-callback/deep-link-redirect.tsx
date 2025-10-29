@@ -14,7 +14,11 @@ export function DeepLinkRedirect({ callbackUrl }: DeepLinkRedirectProps) {
     // Create deep link to return to mobile app
     const deepLink = `hypertro://?url=${encodeURIComponent(callbackUrl)}`
 
-    console.info('📱 Redirecting to mobile app:', deepLink)
+    console.info('📱 [DEEP-LINK] Redirecting to mobile app:', {
+      deepLink,
+      callbackUrl,
+      hasSessionToken: callbackUrl.includes('session_token'),
+    })
 
     // Trigger deep link immediately
     window.location.href = deepLink

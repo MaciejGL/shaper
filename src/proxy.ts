@@ -111,12 +111,22 @@ export async function proxy(request: NextRequest) {
   const response = NextResponse.redirect(cleanUrl)
 
   // Restore the original JWT cookie
-  response.cookies.set(cookieName, tokenData.originalJwt, {
+  // Use sameSite: 'none' for cross-context (external browser → WebView)
+  const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: true, // Required when sameSite: 'none'
+    sameSite: 'none' as const,
     path: '/',
+    maxAge: 60 * 60 * 24 * 30, // 30 days (match NextAuth default)
+  }
+
+  console.info('🔓 [PROXY] Setting session cookie with options:', {
+    cookieName,
+    secure: cookieOptions.secure,
+    sameSite: cookieOptions.sameSite,
   })
+
+  response.cookies.set(cookieName, tokenData.originalJwt, cookieOptions)
 
   return response
 }

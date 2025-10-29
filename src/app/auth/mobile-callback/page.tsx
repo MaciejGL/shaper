@@ -67,6 +67,11 @@ export default async function MobileCallbackPage({
   const separator = callbackUrl.includes('?') ? '&' : '?'
   const callbackUrlWithToken = `${callbackUrl}${separator}session_token=${encodeURIComponent(sessionToken)}`
 
+  console.info('📱 [MOBILE-CALLBACK] Generated session token for:', {
+    email: user.user.email,
+    callbackUrl: callbackUrlWithToken,
+  })
+
   return (
     <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
       <AnimatedLogo size={80} infinite={true} />
