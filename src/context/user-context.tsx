@@ -33,13 +33,13 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const session = useSession()
   const queryClient = useQueryClient()
 
-  const hasSessionData = Boolean(session.data?.user?.email)
   const isDefinitelyLoggedOut = useMemo(
     () => session.status === 'unauthenticated',
     [session.status],
   )
 
-  const shouldEnableQuery = hasSessionData && !isDefinitelyLoggedOut
+  // Enable query when authenticated or loading (but not when unauthenticated)
+  const shouldEnableQuery = !isDefinitelyLoggedOut
 
   const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
     {},
@@ -108,8 +108,10 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const hasPremium = subscription?.hasPremium ?? true
 
   const userData = data?.userBasic ?? initialData?.userBasic
-  const shouldShowData =
-    session.status !== 'unauthenticated' && Boolean(userData)
+
+  // Only hide user data if definitely logged out, not during loading states
+  const isDefinitelyNotAuthenticated = session.status === 'unauthenticated'
+  const shouldShowData = !isDefinitelyNotAuthenticated && Boolean(userData)
 
   const contextValue: UserContextType = {
     session,

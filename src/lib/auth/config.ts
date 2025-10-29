@@ -230,12 +230,15 @@ export const authOptions = {
         const isMobile = urlObj.searchParams.get('mobile') === 'true'
 
         if (isMobile) {
-          // Extract the callback URL from params
-          const callbackUrl =
-            urlObj.searchParams.get('callbackUrl') || '/fitspace/workout'
+          // Remove mobile flag from URL before creating deep link
+          urlObj.searchParams.delete('mobile')
+
+          // Get clean callback path
+          const callbackPath =
+            urlObj.pathname + (urlObj.search ? urlObj.search : '')
 
           // Create deep link to return to mobile app
-          const deepLink = `hypertro://?url=${encodeURIComponent(callbackUrl)}`
+          const deepLink = `hypertro://?url=${encodeURIComponent(callbackPath || '/fitspace/workout')}`
 
           console.info('📱 Mobile OAuth redirect to:', deepLink)
           return deepLink
