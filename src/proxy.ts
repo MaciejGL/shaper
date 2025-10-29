@@ -51,17 +51,9 @@ export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   const sessionToken = searchParams.get('session_token')
 
-  // Only process pages with session_token parameter (OAuth callback or external pages)
-  if (!sessionToken) {
-    return NextResponse.next()
-  }
-
-  // Allow session token on protected routes and external pages
+  // Only process external pages with session_token (offer pages and account-management)
   const isExternal =
-    pathname.startsWith('/offer/') ||
-    pathname === '/account-management' ||
-    pathname.startsWith('/fitspace/') ||
-    pathname.startsWith('/trainer/')
+    pathname.startsWith('/offer/') || pathname === '/account-management'
 
   if (!isExternal || !sessionToken) {
     return NextResponse.next()
@@ -111,22 +103,15 @@ export async function proxy(request: NextRequest) {
   const response = NextResponse.redirect(cleanUrl)
 
   // Restore the original JWT cookie
-  // Use sameSite: 'none' for cross-context (external browser → WebView)
-  const cookieOptions = {
+  response.cookies.set(cookieName, tokenData.originalJwt, {
     httpOnly: true,
-    secure: true, // Required when sameSite: 'none'
-    sameSite: 'none' as const,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 30, // 30 days (match NextAuth default)
-  }
-
-  console.info('🔓 [PROXY] Setting session cookie with options:', {
-    cookieName,
-    secure: cookieOptions.secure,
-    sameSite: cookieOptions.sameSite,
+    maxAge: 60 * 60 * 24 * 30, // 30 days
   })
 
-  response.cookies.set(cookieName, tokenData.originalJwt, cookieOptions)
+  console.info('🔓 [PROXY] Session cookie restored for:', tokenData.email)
 
   return response
 }
@@ -135,8 +120,6 @@ export const config = {
   matcher: [
     '/offer/:path*',
     '/account-management',
-    '/fitspace/:path*', // All fitspace routes (for OAuth callback)
-    '/trainer/:path*', // All trainer routes (for OAuth callback)
     '/api/:path*', // Handle CORS for API routes
   ],
 }
