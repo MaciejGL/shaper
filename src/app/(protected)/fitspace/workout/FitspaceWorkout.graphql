@@ -26,6 +26,7 @@ query FitspaceGetExercises {
         id
         thumbnail
         medium
+        url
         order
       }
       muscleGroups {
@@ -53,6 +54,7 @@ query FitspaceGetExercises {
         id
         thumbnail
         medium
+        url
         order
       }
       muscleGroups {
@@ -123,6 +125,7 @@ query FitspaceGetWorkoutDay($dayId: ID) {
           id
           thumbnail
           medium
+          url
           order
         }
         completedAt
