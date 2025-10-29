@@ -51,9 +51,17 @@ export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   const sessionToken = searchParams.get('session_token')
 
-  // Only process external pages
+  // Only process pages with session_token parameter (OAuth callback or external pages)
+  if (!sessionToken) {
+    return NextResponse.next()
+  }
+
+  // Allow session token on protected routes and external pages
   const isExternal =
-    pathname.startsWith('/offer/') || pathname === '/account-management'
+    pathname.startsWith('/offer/') ||
+    pathname === '/account-management' ||
+    pathname.startsWith('/fitspace/') ||
+    pathname.startsWith('/trainer/')
 
   if (!isExternal || !sessionToken) {
     return NextResponse.next()
@@ -117,6 +125,8 @@ export const config = {
   matcher: [
     '/offer/:path*',
     '/account-management',
+    '/fitspace/:path*', // All fitspace routes (for OAuth callback)
+    '/trainer/:path*', // All trainer routes (for OAuth callback)
     '/api/:path*', // Handle CORS for API routes
   ],
 }
