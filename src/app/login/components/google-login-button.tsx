@@ -23,9 +23,10 @@ export const GoogleLoginButton = ({
       setIsLoading(true)
 
       if (isNativeApp) {
-        // Native app: open OAuth in external browser
+        // Native app: open OAuth redirect page in external browser
+        // This page will auto-trigger the OAuth flow
         const callbackUrl = `${window.location.origin}/fitspace/workout`
-        const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}&mobile=true`
+        const oauthUrl = `/auth/oauth-redirect?provider=google&callbackUrl=${encodeURIComponent(callbackUrl)}&mobile=true`
 
         // Open in system browser (same pattern as account-management)
         const opened = window.open(
