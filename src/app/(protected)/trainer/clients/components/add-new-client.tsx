@@ -6,7 +6,7 @@ import type React from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { validateNewRequest } from '@/actions/validations/validate-new-request'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,17 +17,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
   useCreateCoachingRequestMutation,
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
+import type { GQLSearchUserResult } from '@/generated/graphql-client'
+
+import { UserSearchCombobox } from './user-search-combobox'
 
 export function AddClientModal() {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
+  const [selectedUser, setSelectedUser] = useState<GQLSearchUserResult | null>(
+    null,
+  )
+  const [message, setMessage] = useState('')
+
   const { mutateAsync: createCoachingRequest, isPending } =
     useCreateCoachingRequestMutation({
       onSuccess: () => {
@@ -38,46 +45,23 @@ export function AddClientModal() {
         toast.success('Coaching request sent')
       },
     })
-  const [errors, setErrors] = useState<{
-    email?: string[]
-    message?: string[]
-  }>({})
-  const [formData, setFormData] = useState({
-    email: '',
-    message: '',
-  })
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target
-    setErrors((prev) => ({
-      ...prev,
-      [name]: undefined,
-    }))
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!selectedUser) {
+      toast.error('Please select a user')
+      return
+    }
+
     try {
-      const { email, message, errors } = validateNewRequest(formData)
-
-      if (errors) {
-        setErrors(errors)
-        return
-      }
-
       await createCoachingRequest({
-        recipientEmail: email,
+        recipientEmail: selectedUser.email,
         message: message,
       })
 
-      setFormData({ email: '', message: '' })
+      setSelectedUser(null)
+      setMessage('')
       setOpen(false)
     } catch (error) {
       console.error('Error sending coaching request:', error)
@@ -90,12 +74,19 @@ export function AddClientModal() {
     }
   }
 
+  const handleUserSelected = (user: GQLSearchUserResult) => {
+    setSelectedUser(user)
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button iconStart={<UserPlus2Icon />}>Add New Client</Button>
       </DialogTrigger>
-      <DialogContent dialogTitle="Add New Client" className="sm:max-w-[425px]">
+      <DialogContent
+        dialogTitle="Add New Client"
+        className="sm:max-w-[600px] min-h-[500px]"
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Add New Client</DialogTitle>
@@ -105,31 +96,55 @@ export function AddClientModal() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="email" className="text-left">
-                Email
+              <Label htmlFor="user-search" className="text-left">
+                Select User
               </Label>
-              <Input
-                errorMessage={errors.email?.[0]}
-                id="email"
-                name="email"
-                type="email"
-                placeholder="client@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                disabled={isPending}
-              />
+              {selectedUser ? (
+                <div className="flex items-center justify-between rounded-md border border-border bg-muted p-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-8">
+                      <AvatarImage src={selectedUser.image || undefined} />
+                      <AvatarFallback>
+                        {selectedUser.name?.charAt(0).toUpperCase() ||
+                          selectedUser.email.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">
+                        {selectedUser.name || selectedUser.email}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {selectedUser.email}
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedUser(null)}
+                    disabled={isPending}
+                    type="button"
+                  >
+                    Change
+                  </Button>
+                </div>
+              ) : (
+                <UserSearchCombobox
+                  onUserSelected={handleUserSelected}
+                  placeholder="Search by email..."
+                />
+              )}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="message" className="text-left">
                 Invitation Message
               </Label>
               <Textarea
-                errorMessage={errors.message?.[0]}
                 id="message"
                 name="message"
                 placeholder="Write a personal message to your client..."
-                value={formData.message}
-                onChange={handleChange}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 className="min-h-[100px]"
                 disabled={isPending}
               />
@@ -144,7 +159,7 @@ export function AddClientModal() {
             >
               Cancel
             </Button>
-            <Button type="submit" loading={isPending}>
+            <Button type="submit" loading={isPending} disabled={!selectedUser}>
               Send Invitation
             </Button>
           </DialogFooter>

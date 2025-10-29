@@ -1,6 +1,5 @@
 'use client'
 
-import { Bell } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 

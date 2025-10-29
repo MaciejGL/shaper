@@ -2398,6 +2398,7 @@ export type GQLQuery = {
   pushSubscriptions: Array<GQLPushSubscription>;
   recentIngredients: Array<GQLIngredient>;
   searchIngredients: Array<GQLIngredient>;
+  searchUsers: Array<GQLSearchUserResult>;
   sentTeamInvitations: Array<GQLTeamInvitation>;
   team?: Maybe<GQLTeam>;
   teamInvitations: Array<GQLTeamInvitation>;
@@ -2723,6 +2724,12 @@ export type GQLQuerySearchIngredientsArgs = {
 };
 
 
+export type GQLQuerySearchUsersArgs = {
+  email: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type GQLQueryTeamArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2840,6 +2847,16 @@ export type GQLReview = {
   isHidden: Scalars['Boolean']['output'];
   rating: Scalars['Int']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type GQLSearchUserResult = {
+  __typename?: 'SearchUserResult';
+  email: Scalars['String']['output'];
+  hasTrainer: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
+  image?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  role: GQLUserRole;
 };
 
 export type GQLSendMessageInput = {
@@ -4486,6 +4503,14 @@ export type GQLResumeClientCoachingSubscriptionMutationVariables = Exact<{
 
 
 export type GQLResumeClientCoachingSubscriptionMutation = { __typename?: 'Mutation', resumeClientCoachingSubscription: { __typename?: 'ResumeCoachingResult', success: boolean, message: string, subscription?: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string } | undefined | null } };
+
+export type GQLSearchUsersQueryVariables = Exact<{
+  email: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLSearchUsersQuery = { __typename?: 'Query', searchUsers: Array<{ __typename?: 'SearchUserResult', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, hasTrainer: boolean }> };
 
 export type GQLGetTrainerServiceDeliveriesQueryVariables = Exact<{
   trainerId: Scalars['ID']['input'];
@@ -10861,6 +10886,61 @@ useResumeClientCoachingSubscriptionMutation.getKey = () => ['ResumeClientCoachin
 
 
 useResumeClientCoachingSubscriptionMutation.fetcher = (variables: GQLResumeClientCoachingSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLResumeClientCoachingSubscriptionMutation, GQLResumeClientCoachingSubscriptionMutationVariables>(ResumeClientCoachingSubscriptionDocument, variables, options);
+
+export const SearchUsersDocument = `
+    query SearchUsers($email: String!, $limit: Int) {
+  searchUsers(email: $email, limit: $limit) {
+    id
+    email
+    name
+    image
+    role
+    hasTrainer
+  }
+}
+    `;
+
+export const useSearchUsersQuery = <
+      TData = GQLSearchUsersQuery,
+      TError = unknown
+    >(
+      variables: GQLSearchUsersQueryVariables,
+      options?: Omit<UseQueryOptions<GQLSearchUsersQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLSearchUsersQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLSearchUsersQuery, TError, TData>(
+      {
+    queryKey: ['SearchUsers', variables],
+    queryFn: fetchData<GQLSearchUsersQuery, GQLSearchUsersQueryVariables>(SearchUsersDocument, variables),
+    ...options
+  }
+    )};
+
+useSearchUsersQuery.getKey = (variables: GQLSearchUsersQueryVariables) => ['SearchUsers', variables];
+
+export const useInfiniteSearchUsersQuery = <
+      TData = InfiniteData<GQLSearchUsersQuery>,
+      TError = unknown
+    >(
+      variables: GQLSearchUsersQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLSearchUsersQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLSearchUsersQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLSearchUsersQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['SearchUsers.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLSearchUsersQuery, GQLSearchUsersQueryVariables>(SearchUsersDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteSearchUsersQuery.getKey = (variables: GQLSearchUsersQueryVariables) => ['SearchUsers.infinite', variables];
+
+
+useSearchUsersQuery.fetcher = (variables: GQLSearchUsersQueryVariables, options?: RequestInit['headers']) => fetchData<GQLSearchUsersQuery, GQLSearchUsersQueryVariables>(SearchUsersDocument, variables, options);
 
 export const GetTrainerServiceDeliveriesDocument = `
     query GetTrainerServiceDeliveries($trainerId: ID!) {

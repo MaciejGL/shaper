@@ -2400,6 +2400,7 @@ export type GQLQuery = {
   pushSubscriptions: EntireFieldWrapper<Array<GQLPushSubscription>>;
   recentIngredients: EntireFieldWrapper<Array<GQLIngredient>>;
   searchIngredients: EntireFieldWrapper<Array<GQLIngredient>>;
+  searchUsers: EntireFieldWrapper<Array<GQLSearchUserResult>>;
   sentTeamInvitations: EntireFieldWrapper<Array<GQLTeamInvitation>>;
   team?: EntireFieldWrapper<Maybe<GQLTeam>>;
   teamInvitations: EntireFieldWrapper<Array<GQLTeamInvitation>>;
@@ -2725,6 +2726,12 @@ export type GQLQuerySearchIngredientsArgs = {
 };
 
 
+export type GQLQuerySearchUsersArgs = {
+  email: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type GQLQueryTeamArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2842,6 +2849,16 @@ export type GQLReview = {
   isHidden: EntireFieldWrapper<Scalars['Boolean']['output']>;
   rating: EntireFieldWrapper<Scalars['Int']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export type GQLSearchUserResult = {
+  __typename?: 'SearchUserResult';
+  email: EntireFieldWrapper<Scalars['String']['output']>;
+  hasTrainer: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  image?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  name?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  role: EntireFieldWrapper<GQLUserRole>;
 };
 
 export type GQLSendMessageInput = {
@@ -3972,6 +3989,7 @@ export type GQLResolversTypes = {
   RespondToTeamInvitationInput: GQLRespondToTeamInvitationInput;
   ResumeCoachingResult: ResolverTypeWrapper<GQLResumeCoachingResult>;
   Review: ResolverTypeWrapper<GQLReview>;
+  SearchUserResult: ResolverTypeWrapper<GQLSearchUserResult>;
   SendMessageInput: GQLSendMessageInput;
   ServiceDelivery: ResolverTypeWrapper<GQLServiceDelivery>;
   ServiceTask: ResolverTypeWrapper<GQLServiceTask>;
@@ -4198,6 +4216,7 @@ export type GQLResolversParentTypes = {
   RespondToTeamInvitationInput: GQLRespondToTeamInvitationInput;
   ResumeCoachingResult: GQLResumeCoachingResult;
   Review: GQLReview;
+  SearchUserResult: GQLSearchUserResult;
   SendMessageInput: GQLSendMessageInput;
   ServiceDelivery: GQLServiceDelivery;
   ServiceTask: GQLServiceTask;
@@ -5247,6 +5266,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   pushSubscriptions?: Resolver<Array<GQLResolversTypes['PushSubscription']>, ParentType, ContextType>;
   recentIngredients?: Resolver<Array<GQLResolversTypes['Ingredient']>, ParentType, ContextType, Partial<GQLQueryRecentIngredientsArgs>>;
   searchIngredients?: Resolver<Array<GQLResolversTypes['Ingredient']>, ParentType, ContextType, RequireFields<GQLQuerySearchIngredientsArgs, 'query'>>;
+  searchUsers?: Resolver<Array<GQLResolversTypes['SearchUserResult']>, ParentType, ContextType, RequireFields<GQLQuerySearchUsersArgs, 'email'>>;
   sentTeamInvitations?: Resolver<Array<GQLResolversTypes['TeamInvitation']>, ParentType, ContextType>;
   team?: Resolver<Maybe<GQLResolversTypes['Team']>, ParentType, ContextType, RequireFields<GQLQueryTeamArgs, 'id'>>;
   teamInvitations?: Resolver<Array<GQLResolversTypes['TeamInvitation']>, ParentType, ContextType>;
@@ -5279,6 +5299,16 @@ export type GQLReviewResolvers<ContextType = GQLContext, ParentType extends GQLR
   isHidden?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   rating?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLSearchUserResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SearchUserResult'] = GQLResolversParentTypes['SearchUserResult']> = {
+  email?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  hasTrainer?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  image?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5765,6 +5795,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   Query?: GQLQueryResolvers<ContextType>;
   ResumeCoachingResult?: GQLResumeCoachingResultResolvers<ContextType>;
   Review?: GQLReviewResolvers<ContextType>;
+  SearchUserResult?: GQLSearchUserResultResolvers<ContextType>;
   ServiceDelivery?: GQLServiceDeliveryResolvers<ContextType>;
   ServiceTask?: GQLServiceTaskResolvers<ContextType>;
   SetCompletionResult?: GQLSetCompletionResultResolvers<ContextType>;

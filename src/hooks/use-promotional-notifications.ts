@@ -1,9 +1,11 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 
 import { useUser } from '@/context/user-context'
 import {
   GQLNotification,
   GQLNotificationType,
+  useMarkNotificationAsReadMutation,
   useNotificationsQuery,
 } from '@/generated/graphql-client'
 
@@ -50,6 +52,9 @@ function markNotificationAsDismissed(notificationId: string): void {
 export function usePromotionalNotifications() {
   const { user } = useUser()
   const [currentIndex, setCurrentIndex] = useState(0)
+  const queryClient = useQueryClient()
+  const { mutateAsync: markNotificationAsRead } =
+    useMarkNotificationAsReadMutation()
 
   // Read from existing notifications query cache instead of creating a new query
   const queryKey = useNotificationsQuery.getKey({
@@ -80,8 +85,23 @@ export function usePromotionalNotifications() {
     promotionalNotifications[currentIndex] || null
 
   const dismissAndShowNext = useCallback(
-    (notificationId: string) => {
+    async (notificationId: string) => {
+      // Mark as dismissed in localStorage (for backup)
       markNotificationAsDismissed(notificationId)
+
+      // Mark as read in database
+      try {
+        await markNotificationAsRead({ id: notificationId })
+
+        // Invalidate notifications query to update unread count
+        if (user?.id) {
+          queryClient.invalidateQueries({
+            queryKey: useNotificationsQuery.getKey({ userId: user.id }),
+          })
+        }
+      } catch (error) {
+        console.error('Failed to mark notification as read:', error)
+      }
 
       // Move to next notification in queue
       const nextIndex = currentIndex + 1
@@ -91,7 +111,13 @@ export function usePromotionalNotifications() {
         setCurrentIndex(0)
       }
     },
-    [currentIndex, promotionalNotifications.length],
+    [
+      currentIndex,
+      promotionalNotifications.length,
+      markNotificationAsRead,
+      queryClient,
+      user?.id,
+    ],
   )
 
   return {

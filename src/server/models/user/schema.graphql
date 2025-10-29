@@ -103,10 +103,22 @@ type PublicTrainer {
   isAtCapacity: Boolean!
 }
 
+type SearchUserResult {
+  id: ID!
+  email: String!
+  name: String
+  image: String
+  role: UserRole!
+  hasTrainer: Boolean!
+}
+
 type Query {
   user: User
   userBasic: User
   myClients(limit: Int, offset: Int, trainerId: ID): [UserPublic!]!
+
+  # User search for trainers
+  searchUsers(email: String!, limit: Int): [SearchUserResult!]!
 
   # Public queries
   getFeaturedTrainers(limit: Int): [PublicTrainer!]!

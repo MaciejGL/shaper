@@ -3,6 +3,7 @@ import {
   GQLMutationResolvers,
   GQLNotificationType,
   GQLQueryResolvers,
+  GQLUserRole,
 } from '@/generated/graphql-server'
 import {
   Prisma,
@@ -180,6 +181,61 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             ? new Date(a.activePlan.updatedAt).getTime()
             : 0),
       )
+  },
+
+  searchUsers: async (
+    _,
+    { email, limit = 10 }: { email: string; limit?: number | null },
+    context,
+  ) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    if (user.user.role !== 'TRAINER') {
+      throw new Error('Only trainers can search for users')
+    }
+
+    // Search for users by email (case-insensitive)
+    const users = await prisma.user.findMany({
+      where: {
+        email: {
+          contains: email,
+          mode: 'insensitive',
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        role: true,
+        trainerId: true,
+      },
+      take: limit ?? 10,
+      orderBy: {
+        email: 'asc',
+      },
+    })
+
+    return users.map((u) => {
+      const gqlRole: GQLUserRole =
+        u.role === 'TRAINER'
+          ? GQLUserRole.Trainer
+          : u.role === 'ADMIN'
+            ? GQLUserRole.Admin
+            : GQLUserRole.Client
+
+      return {
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        image: u.image,
+        role: gqlRole,
+        hasTrainer: !!u.trainerId,
+      }
+    })
   },
 
   // Public queries
