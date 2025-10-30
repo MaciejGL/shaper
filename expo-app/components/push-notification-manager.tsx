@@ -98,6 +98,56 @@ export function PushNotificationManager({
         const parsed = Linking.parse(normalizedUrl)
         console.info('🔗 Parsed deep link:', parsed)
 
+        // Handle OAuth handoff: hypro://auth/handoff?code=XXX&next=...
+        if (parsed.path === 'auth/handoff') {
+          const code = parsed.queryParams?.code as string | undefined
+          const next = (parsed.queryParams?.next as string) || '/fitspace/workout'
+
+          if (!code) {
+            console.error('🔐 [OAUTH-HANDOFF] Missing code parameter')
+            return
+          }
+
+          console.info('🔐 [OAUTH-HANDOFF] Starting session exchange:', {
+            code: code.substring(0, 8) + '...',
+            next,
+          })
+
+          // Exchange handoff code for session cookies in the WebView
+          const exchangeUrl = `https://www.hypro.app/api/mobile-auth/exchange?code=${code}`
+
+          const attemptExchange = (attempt = 1) => {
+            if (isReady()) {
+              console.info(
+                `🔐 [OAUTH-HANDOFF] Exchange attempt ${attempt} - Loading exchange endpoint`,
+              )
+
+              // Navigate to exchange endpoint (this sets the session cookies)
+              navigateToPath(exchangeUrl)
+
+              // After a short delay, navigate to the final destination
+              setTimeout(() => {
+                console.info('🔐 [OAUTH-HANDOFF] Exchange complete, navigating to:', next)
+                navigateToPath(next)
+              }, 800)
+            } else {
+              console.warn(
+                `🔐 [OAUTH-HANDOFF] Exchange attempt ${attempt} - WebView not ready, retrying...`,
+              )
+              if (attempt < 10) {
+                setTimeout(() => attemptExchange(attempt + 1), 300 * attempt)
+              } else {
+                console.error(
+                  '🔐 [OAUTH-HANDOFF] Failed to exchange after 10 attempts',
+                )
+              }
+            }
+          }
+
+          attemptExchange()
+          return
+        }
+
         // Support pattern: hypertro://?url=https://... (open exact URL in WebView)
         const urlParam = (parsed.queryParams?.url as string) || undefined
         if (urlParam) {

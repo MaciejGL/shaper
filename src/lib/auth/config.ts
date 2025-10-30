@@ -189,6 +189,47 @@ export const authOptions = {
         }
       },
     }),
+    // Server-issued nonce provider for mobile OAuth handoff
+    CredentialsProvider({
+      id: 'server-nonce',
+      name: 'Server Nonce',
+      credentials: {
+        userId: {
+          label: 'User ID',
+          type: 'text',
+        },
+      },
+      async authorize(credentials) {
+        const { userId } = credentials ?? {}
+        if (!userId) return null
+
+        try {
+          // This provider is ONLY used by the mobile auth exchange endpoint
+          // It receives a userId that was validated via handoff code
+          const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+              profile: true,
+            },
+          })
+
+          if (!user) {
+            console.error('🔐 [SERVER-NONCE] User not found:', userId)
+            return null
+          }
+
+          console.info('🔐 [SERVER-NONCE] User authenticated via handoff:', {
+            userId: user.id,
+            email: user.email,
+          })
+
+          return user as UserWithSession['user']
+        } catch (error) {
+          console.error('🔐 [SERVER-NONCE] Authorization error:', error)
+          return null
+        }
+      },
+    }),
   ],
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
@@ -224,30 +265,6 @@ export const authOptions = {
 
   callbacks: {
     async redirect({ url, baseUrl }) {
-      console.info('📱 [NEXTAUTH] Redirect callback:', { url, baseUrl })
-
-      try {
-        const urlObj = new URL(url, baseUrl)
-        const authCode = urlObj.searchParams.get('auth_code')
-
-        console.info('📱 [NEXTAUTH] Parsed URL:', {
-          pathname: urlObj.pathname,
-          searchParams: Object.fromEntries(urlObj.searchParams.entries()),
-          hasAuthCode: !!authCode,
-        })
-
-        if (authCode) {
-          // Mobile OAuth flow - redirect to mobile-oauth page
-          console.info('📱 [NEXTAUTH] Mobile OAuth redirect with auth code:', {
-            authCode: authCode.substring(0, 8) + '...',
-            redirectTo: `${baseUrl}/auth/mobile-oauth?auth_code=${authCode}`,
-          })
-          return `${baseUrl}/auth/mobile-oauth?auth_code=${authCode}`
-        }
-      } catch (error) {
-        console.error('📱 [NEXTAUTH] Error parsing redirect URL:', error)
-      }
-
       // Default web behavior - relative URLs become absolute
       if (url.startsWith('/')) {
         console.info('📱 [NEXTAUTH] Relative URL redirect:', {

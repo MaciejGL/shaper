@@ -5,7 +5,6 @@ import { useState } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
-import { useOAuthPolling } from '@/hooks/use-oauth-polling'
 
 interface GoogleLoginButtonProps {
   className?: string
@@ -18,32 +17,21 @@ export const GoogleLoginButton = ({
 }: GoogleLoginButtonProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const { isNativeApp } = useMobileApp()
-  const { startPolling, isPolling } = useOAuthPolling()
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true)
 
       if (isNativeApp) {
-        // Generate unique auth code for this OAuth session
-        const authCode = crypto.randomUUID()
+        // Mobile OAuth flow with handoff
+        const deeplink = encodeURIComponent('hypro://auth/handoff')
+        const callbackUrl = `/auth/mobile/complete?mobile=1&deeplink=${deeplink}`
 
-        // Store in localStorage for polling resumption
-        localStorage.setItem('pending_auth_code', authCode)
+        console.info('📱 [GOOGLE-LOGIN] Starting mobile OAuth flow')
 
-        console.info('📱 [GOOGLE-LOGIN] Starting OAuth with polling', {
-          authCode: authCode.substring(0, 8) + '...',
-        })
-
-        // Start polling for session
-        startPolling(authCode)
-
-        // Open OAuth in external browser
-        // The auth_code must be in the callbackUrl so NextAuth preserves it
-        const callbackUrl = `/auth/mobile-oauth?auth_code=${authCode}`
+        // Open OAuth in system browser
         const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
 
-        // Open in system browser
         const opened = window.open(
           oauthUrl,
           '_blank',
@@ -62,10 +50,10 @@ export const GoogleLoginButton = ({
           document.body.removeChild(link)
         }
 
-        // Reset loading state after a delay (user is in external browser)
+        // Reset loading state after delay (user is in external browser)
         setTimeout(() => setIsLoading(false), 1000)
       } else {
-        // Regular web login
+        // Standard web OAuth flow
         await signIn('google', {
           callbackUrl: `${window.location.origin}/fitspace/workout`,
           redirect: true,
