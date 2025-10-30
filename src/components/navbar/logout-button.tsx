@@ -8,18 +8,20 @@ export const LogoutButton = () => {
 
   const handleLogout = async () => {
     try {
-      // Clear all query cache before logout to prevent stale data issues
+      // Clear query cache
       queryClient.clear()
 
-      // Force logout with no cache and redirect
+      // Let NextAuth handle cookie clearing (it knows how)
       await signOut({
         callbackUrl: '/login',
-        redirect: true,
+        redirect: false, // We'll handle redirect manually
       })
+
+      // Force full reload to clear WebView state
+      window.location.replace('/login')
     } catch (error) {
       console.error('Logout error:', error)
-      // Fallback: force page reload to clear all state
-      window.location.href = '/login'
+      window.location.replace('/login')
     }
   }
 

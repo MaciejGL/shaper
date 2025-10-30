@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
   LogInIcon,
@@ -218,6 +219,13 @@ function NavbarUser({ user }: { user?: UserContextType['user'] | null }) {
 function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const isProduction = process.env.NODE_ENV === 'production'
   const [isOpen, setIsOpen] = useState(false)
+  const queryClient = useQueryClient()
+
+  const handleLogout = async () => {
+    queryClient.clear()
+    await signOut({ callbackUrl: '/login', redirect: false })
+    window.location.replace('/login')
+  }
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -272,7 +280,7 @@ function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
           <DropdownMenuItem asChild>
             <NavLink
               href="#"
-              onClick={() => signOut({ callbackUrl: '/login', redirect: true })}
+              onClick={handleLogout}
               icon={<LogOutIcon className="size-4" />}
               label="Logout"
             />
@@ -298,6 +306,13 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const { isNativeApp } = useMobileApp()
   const [isOpen, setIsOpen] = useState(false)
   const isProduction = process.env.NODE_ENV === 'production'
+  const queryClient = useQueryClient()
+
+  const handleLogout = async () => {
+    queryClient.clear()
+    await signOut({ callbackUrl: '/login', redirect: false })
+    window.location.replace('/login')
+  }
 
   const handleOpenAccountManagement = () => {
     const accountManagementUrl = `${window.location.origin}/account-management`
@@ -394,7 +409,7 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
           <DropdownMenuItem asChild>
             <NavLink
               href="#"
-              onClick={() => signOut({ callbackUrl: '/login', redirect: true })}
+              onClick={handleLogout}
               icon={<LogOutIcon className="size-4" />}
               label="Logout"
             />
