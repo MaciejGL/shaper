@@ -110,15 +110,31 @@ export function PushNotificationManager({
             urlParam,
             fullUrl,
             hasSessionToken: fullUrl.includes('session_token'),
+            isReady: isReady(),
           })
 
-          if (isReady()) {
-            navigateToPath(fullUrl)
-          } else {
-            setTimeout(() => {
-              if (isReady()) navigateToPath(fullUrl)
-            }, 800)
+          // Retry navigation multiple times to ensure it works
+          const attemptNavigation = (attempt = 1) => {
+            if (isReady()) {
+              console.info(
+                `📱 [PUSH-MANAGER] Navigation attempt ${attempt} - WebView ready, navigating...`,
+              )
+              navigateToPath(fullUrl)
+            } else {
+              console.warn(
+                `📱 [PUSH-MANAGER] Navigation attempt ${attempt} - WebView not ready, retrying...`,
+              )
+              if (attempt < 10) {
+                setTimeout(() => attemptNavigation(attempt + 1), 300 * attempt) // Exponential backoff
+              } else {
+                console.error(
+                  '📱 [PUSH-MANAGER] Failed to navigate after 10 attempts',
+                )
+              }
+            }
           }
+
+          attemptNavigation()
           return
         }
 
@@ -233,18 +249,23 @@ export function PushNotificationManager({
         }
       })
 
-    // Set up deep linking listener
+    // Set up deep linking listener for hot start (app already running)
     const handleUrl = (event: { url: string }) => {
+      console.info(
+        '📱 [PUSH-MANAGER] Deep link received (hot start):',
+        event.url,
+      )
       handleDeepLink(event.url)
     }
 
-    // Listen for incoming deep links
+    // Listen for incoming deep links while app is running
     const linkingSubscription = Linking.addEventListener('url', handleUrl)
     linkingListener.current = () => linkingSubscription?.remove?.()
 
-    // Handle deep link if app was opened via URL
+    // Handle deep link on cold start (app opened from closed state)
     Linking.getInitialURL().then((url) => {
       if (url) {
+        console.info('📱 [PUSH-MANAGER] Deep link received (cold start):', url)
         handleDeepLink(url)
       }
     })
