@@ -252,7 +252,7 @@ export const EnhancedWebView = forwardRef<
 
     // Prevent infinite loops with debouncing and refs
     const lastConnectionState = useRef<boolean | null>(null)
-    const retryTimeoutRef = useRef<number | null>(null)
+    const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const isRetryingRef = useRef(false)
     const retryAttemptsRef = useRef(0)
 
@@ -306,10 +306,22 @@ export const EnhancedWebView = forwardRef<
     useImperativeHandle(ref, () => ({
       navigateToPath: (path: string) => {
         const target = JSON.stringify(path)
+        const hasSessionToken = path.includes('session_token')
+
         webViewRef.current?.injectJavaScript(`
           (function() {
             try {
               const target = ${target};
+              const hasSessionToken = ${hasSessionToken};
+              
+              // If URL contains session_token, ALWAYS do full navigation
+              // This ensures the page loads fresh and MobileSessionRestore can detect it
+              if (hasSessionToken) {
+                console.log('🔄 [NAVIGATION] Full navigation for session restore:', target);
+                window.location.href = target;
+                return true;
+              }
+              
               const isAbsolute = /^https?:\/\//i.test(target);
               if (isAbsolute) {
                 // If absolute URL is same-origin, use History API, else full navigation

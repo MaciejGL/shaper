@@ -3,7 +3,6 @@
  * Enhanced for bulletproof user switching
  * This component integrates all the functionality together
  */
-import * as Linking from 'expo-linking'
 import * as Notifications from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
@@ -135,8 +134,8 @@ function HyproAppContent({ authToken }: HyproAppProps) {
   }, [webViewRef])
 
   useEffect(() => {
-    const checkInitialNavigation = async () => {
-      // Check if app was opened from notification
+    // Only handle push notifications here - deep links are handled by PushNotificationManager
+    const checkNotificationNavigation = async () => {
       const lastNotificationResponse =
         await Notifications.getLastNotificationResponse()
       if (lastNotificationResponse?.notification.request.content.data?.url) {
@@ -151,26 +150,10 @@ function HyproAppContent({ authToken }: HyproAppProps) {
           ? notificationUrl
           : `https://www.hypro.app${notificationUrl.startsWith('/') ? '' : '/'}${notificationUrl}`
         setInitialWebUrl(fullNotificationUrl)
-        return // Don't check deep links if we have notification URL
       }
-
-      // Handle initial deep link at cold start: hypertro://?url=...
-      const url = await Linking.getInitialURL()
-      if (!url) return
-      try {
-        const parsed = Linking.parse(url)
-        const urlParam = (parsed.queryParams?.url as string) || undefined
-        if (urlParam) {
-          // Ensure we use the full URL with domain to prevent default redirects
-          const fullUrl = urlParam.startsWith('http')
-            ? urlParam
-            : `https://www.hypro.app${urlParam.startsWith('/') ? '' : '/'}${urlParam}`
-          setInitialWebUrl(fullUrl)
-        }
-      } catch {}
     }
 
-    checkInitialNavigation()
+    checkNotificationNavigation()
   }, [])
 
   return (
