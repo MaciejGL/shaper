@@ -98,24 +98,19 @@ export function PushNotificationManager({
         const parsed = Linking.parse(normalizedUrl)
         console.info('🔗 Parsed deep link:', parsed)
 
-        // Handle OAuth handoff: hypro://auth/handoff?code=XXX&next=...
-        if (parsed.path === 'auth/handoff') {
-          const code = parsed.queryParams?.code as string | undefined
+        // Handle OAuth handoff at root level: hypro://?oauth_code=XXX&next=/fitspace/workout
+        const oauthCode = parsed.queryParams?.oauth_code as string | undefined
+        if (oauthCode) {
           const next =
             (parsed.queryParams?.next as string) || '/fitspace/workout'
 
-          if (!code) {
-            console.error('🔐 [OAUTH-HANDOFF] Missing code parameter')
-            return
-          }
-
           console.info('🔐 [OAUTH-HANDOFF] Starting session exchange:', {
-            code: code.substring(0, 8) + '...',
+            code: oauthCode.substring(0, 8) + '...',
             next,
           })
 
           // Exchange handoff code for session cookies in the WebView
-          const exchangeUrl = `https://www.hypro.app/api/mobile-auth/exchange?code=${code}`
+          const exchangeUrl = `https://www.hypro.app/api/mobile-auth/exchange?code=${oauthCode}`
 
           const attemptExchange = (attempt = 1) => {
             if (isReady()) {

@@ -24,8 +24,7 @@ export const GoogleLoginButton = ({
 
       if (isNativeApp) {
         // Mobile OAuth flow with handoff
-        const deeplink = encodeURIComponent('hypro://auth/handoff')
-        const callbackUrl = `/auth/mobile/complete?mobile=1&deeplink=${deeplink}`
+        const callbackUrl = '/auth/mobile/complete?mobile=1'
 
         console.info('📱 [GOOGLE-LOGIN] Starting mobile OAuth flow')
 
