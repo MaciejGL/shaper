@@ -10,7 +10,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useAndroidBackButton } from '../hooks/use-android-back-button'
 import { useAuthTokenManagement } from '../hooks/use-auth-token-management'
-import { useDeepLinkNavigation } from '../hooks/use-deep-link-navigation'
 import { usePushNotificationSync } from '../hooks/use-push-notification-sync'
 import { useThemeManager } from '../hooks/use-theme-manager'
 
@@ -34,7 +33,6 @@ function HyproAppContent({ authToken }: HyproAppProps) {
 
   const { currentAuthToken, handleAuthToken } =
     useAuthTokenManagement(authToken)
-  const { initialWebUrl } = useDeepLinkNavigation()
   const { requestPermissions, checkAndSyncPermissions, disableNotifications } =
     useRequestPushPermissions(currentAuthToken)
 
@@ -52,7 +50,6 @@ function HyproAppContent({ authToken }: HyproAppProps) {
         />
         <EnhancedWebView
           ref={webViewRef}
-          initialUrl={initialWebUrl}
           onThemeChange={handleWebThemeChange}
           onAuthToken={handleAuthToken}
           onRequestPushPermission={requestPermissions}

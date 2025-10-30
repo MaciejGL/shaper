@@ -218,8 +218,40 @@ export function PushNotificationManager({
     [isReady, navigateToPath],
   )
 
+  // ALWAYS set up deep link listeners (even when not authenticated)
+  // This is critical for OAuth flow where user isn't authenticated yet
   useEffect(() => {
-    // Only initialize push notifications when user is authenticated
+    // Set up deep linking listener for hot start (app already running)
+    const handleUrl = (event: { url: string }) => {
+      console.info(
+        '📱 [PUSH-MANAGER] Deep link received (hot start):',
+        event.url,
+      )
+      handleDeepLink(event.url)
+    }
+
+    // Listen for incoming deep links while app is running
+    const linkingSubscription = Linking.addEventListener('url', handleUrl)
+    linkingListener.current = () => linkingSubscription?.remove?.()
+
+    // Handle deep link on cold start (app opened from closed state)
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        console.info('📱 [PUSH-MANAGER] Deep link received (cold start):', url)
+        handleDeepLink(url)
+      }
+    })
+
+    // Cleanup listeners on unmount
+    return () => {
+      if (linkingListener.current) {
+        linkingListener.current()
+      }
+    }
+  }, [handleDeepLink])
+
+  // Initialize push notifications only when authenticated
+  useEffect(() => {
     if (!authToken) {
       if (APP_CONFIG.IS_DEV) {
         console.info(
@@ -263,34 +295,10 @@ export function PushNotificationManager({
         }
       })
 
-    // Set up deep linking listener for hot start (app already running)
-    const handleUrl = (event: { url: string }) => {
-      console.info(
-        '📱 [PUSH-MANAGER] Deep link received (hot start):',
-        event.url,
-      )
-      handleDeepLink(event.url)
-    }
-
-    // Listen for incoming deep links while app is running
-    const linkingSubscription = Linking.addEventListener('url', handleUrl)
-    linkingListener.current = () => linkingSubscription?.remove?.()
-
-    // Handle deep link on cold start (app opened from closed state)
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        console.info('📱 [PUSH-MANAGER] Deep link received (cold start):', url)
-        handleDeepLink(url)
-      }
-    })
-
     // Cleanup listeners on unmount
     return () => {
       if (responseListener.current) {
         responseListener.current.remove()
-      }
-      if (linkingListener.current) {
-        linkingListener.current()
       }
     }
   }, [authToken, handleDeepLink, isReady, navigateToPath])
