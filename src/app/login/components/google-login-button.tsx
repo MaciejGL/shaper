@@ -29,11 +29,15 @@ export const GoogleLoginButton = ({
 
         console.info('📱 [GOOGLE-LOGIN] Starting mobile OAuth flow')
 
-        // Open OAuth in system browser
-        const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+        // Open mobile OAuth trigger page in system browser
+        // This page will auto-trigger Google OAuth without showing our login page
+        const fullCallbackUrl = `${window.location.origin}${callbackUrl}`
+        const triggerUrl = `${window.location.origin}/auth/mobile/start?callbackUrl=${encodeURIComponent(fullCallbackUrl)}`
+
+        console.info('📱 [GOOGLE-LOGIN] Opening trigger page:', triggerUrl)
 
         const opened = window.open(
-          oauthUrl,
+          triggerUrl,
           '_blank',
           'noopener,noreferrer,external=true',
         )
@@ -41,7 +45,7 @@ export const GoogleLoginButton = ({
         if (!opened) {
           // Fallback: create link element
           const link = document.createElement('a')
-          link.href = oauthUrl
+          link.href = triggerUrl
           link.target = '_blank'
           link.rel = 'noopener noreferrer external'
           link.style.display = 'none'
