@@ -9,6 +9,7 @@ import { StyleSheet, View } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import { APP_CONFIG } from '../config/app-config'
+import { shouldLoadUrlInWebView } from '../utils/webview-navigation'
 
 import { OfflineScreen } from './offline-screen'
 
@@ -252,7 +253,7 @@ export const EnhancedWebView = forwardRef<
 
     // Prevent infinite loops with debouncing and refs
     const lastConnectionState = useRef<boolean | null>(null)
-    const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const isRetryingRef = useRef(false)
     const retryAttemptsRef = useRef(0)
 
@@ -513,6 +514,9 @@ export const EnhancedWebView = forwardRef<
           onNavigationStateChange={onNavigationStateChange}
           onLoad={handleLoad}
           onError={handleWebViewError}
+          onShouldStartLoadWithRequest={(request) =>
+            shouldLoadUrlInWebView(request.url)
+          }
           onHttpError={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent
             console.error(
