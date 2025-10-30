@@ -224,21 +224,6 @@ export const authOptions = {
 
   callbacks: {
     async redirect({ url, baseUrl }) {
-      try {
-        const urlObj = new URL(url, baseUrl)
-        const authCode = urlObj.searchParams.get('auth_code')
-
-        if (authCode) {
-          // Mobile OAuth flow - redirect to mobile-oauth page
-          console.info('📱 [NEXTAUTH] Mobile OAuth redirect with auth code:', {
-            authCode: authCode.substring(0, 8) + '...',
-          })
-          return `${baseUrl}/auth/mobile-oauth?auth_code=${authCode}`
-        }
-      } catch (error) {
-        console.error('Error parsing redirect URL:', error)
-      }
-
       // Default web behavior - relative URLs become absolute
       if (url.startsWith('/')) {
         return `${baseUrl}${url}`

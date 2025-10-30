@@ -3,9 +3,7 @@
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 
-import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
-import { useOAuthPolling } from '@/hooks/use-oauth-polling'
 
 interface GoogleLoginButtonProps {
   className?: string
@@ -17,60 +15,15 @@ export const GoogleLoginButton = ({
   disabled = false,
 }: GoogleLoginButtonProps) => {
   const [isLoading, setIsLoading] = useState(false)
-  const { isNativeApp } = useMobileApp()
-  const { startPolling, isPolling } = useOAuthPolling()
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true)
 
-      if (isNativeApp) {
-        // Generate unique auth code for this OAuth session
-        const authCode = crypto.randomUUID()
-
-        // Store in localStorage for polling resumption
-        localStorage.setItem('pending_auth_code', authCode)
-
-        console.info('📱 [GOOGLE-LOGIN] Starting OAuth with polling', {
-          authCode: authCode.substring(0, 8) + '...',
-        })
-
-        // Start polling for session
-        startPolling(authCode)
-
-        // Open OAuth in external browser
-        // The auth_code must be in the callbackUrl so NextAuth preserves it
-        const callbackUrl = `/auth/mobile-oauth?auth_code=${authCode}`
-        const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
-
-        // Open in system browser
-        const opened = window.open(
-          oauthUrl,
-          '_blank',
-          'noopener,noreferrer,external=true',
-        )
-
-        if (!opened) {
-          // Fallback: create link element
-          const link = document.createElement('a')
-          link.href = oauthUrl
-          link.target = '_blank'
-          link.rel = 'noopener noreferrer external'
-          link.style.display = 'none'
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        }
-
-        // Reset loading state after a delay (user is in external browser)
-        setTimeout(() => setIsLoading(false), 1000)
-      } else {
-        // Regular web login
-        await signIn('google', {
-          callbackUrl: `${window.location.origin}/fitspace/workout`,
-          redirect: true,
-        })
-      }
+      await signIn('google', {
+        callbackUrl: `${window.location.origin}/fitspace/workout`,
+        redirect: true,
+      })
     } catch (error) {
       console.error('Google login error:', error)
       setIsLoading(false)
