@@ -14,7 +14,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "test:ci": "vitest run --reporter=verbose",
+    "test:ci": "vitest run --reporter=dot",
     "mobile:dev": "cd expo-app && npx expo start",
     "mobile:web": "cd expo-app && npx expo start --web",
     "mobile:android": "cd expo-app && npx expo run:android",
