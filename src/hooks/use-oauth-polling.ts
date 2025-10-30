@@ -12,11 +12,13 @@ export function useOAuthPolling() {
   const [isPolling, setIsPolling] = useState(false)
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const attemptsRef = useRef(0)
+  const currentAuthCodeRef = useRef<string | null>(null)
+  const hasResumedRef = useRef(false) // Prevent multiple auto-resumes
 
-  // Maximum polling attempts (30 attempts * 2 seconds = 60 seconds max)
-  const MAX_ATTEMPTS = 30
-  // Poll every 2 seconds
-  const POLL_INTERVAL = 2000
+  // Maximum polling attempts (20 attempts * 3 seconds = 60 seconds max)
+  const MAX_ATTEMPTS = 20
+  // Poll every 3 seconds (reduced spam)
+  const POLL_INTERVAL = 3000
 
   const stopPolling = useCallback(() => {
     if (pollingIntervalRef.current) {
@@ -25,6 +27,8 @@ export function useOAuthPolling() {
     }
     setIsPolling(false)
     attemptsRef.current = 0
+    currentAuthCodeRef.current = null
+    console.info('📱 [OAUTH-POLLING] Polling stopped')
   }, [])
 
   const checkSession = useCallback(
@@ -79,10 +83,24 @@ export function useOAuthPolling() {
 
   const startPolling = useCallback(
     (authCode: string) => {
+      // Prevent duplicate polling for the same auth code
+      if (currentAuthCodeRef.current === authCode && isPolling) {
+        console.info(
+          '📱 [OAUTH-POLLING] Already polling for this auth code, skipping',
+        )
+        return
+      }
+
+      // Stop any existing polling
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+      }
+
       console.info('📱 [OAUTH-POLLING] Starting polling for auth code:', {
         authCode: authCode.substring(0, 8) + '...',
       })
 
+      currentAuthCodeRef.current = authCode
       setIsPolling(true)
       attemptsRef.current = 0
 
@@ -116,14 +134,20 @@ export function useOAuthPolling() {
         }
       }, POLL_INTERVAL)
     },
-    [checkSession, stopPolling],
+    [checkSession, stopPolling, isPolling],
   )
 
-  // Resume polling if page was refreshed with pending auth
+  // Resume polling if page was refreshed with pending auth (only once)
   useEffect(() => {
+    // Only auto-resume once per session
+    if (hasResumedRef.current) {
+      return
+    }
+
     const pendingAuthCode = localStorage.getItem('pending_auth_code')
     if (pendingAuthCode && !isPolling) {
       console.info('📱 [OAUTH-POLLING] Resuming polling after page load')
+      hasResumedRef.current = true
       startPolling(pendingAuthCode)
     }
 
@@ -131,7 +155,8 @@ export function useOAuthPolling() {
     return () => {
       stopPolling()
     }
-  }, [startPolling, stopPolling, isPolling])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty deps - only run once on mount
 
   return {
     startPolling,

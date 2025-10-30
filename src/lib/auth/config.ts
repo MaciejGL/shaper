@@ -224,32 +224,47 @@ export const authOptions = {
 
   callbacks: {
     async redirect({ url, baseUrl }) {
+      console.info('📱 [NEXTAUTH] Redirect callback:', { url, baseUrl })
+
       try {
         const urlObj = new URL(url, baseUrl)
         const authCode = urlObj.searchParams.get('auth_code')
+
+        console.info('📱 [NEXTAUTH] Parsed URL:', {
+          pathname: urlObj.pathname,
+          searchParams: Object.fromEntries(urlObj.searchParams.entries()),
+          hasAuthCode: !!authCode,
+        })
 
         if (authCode) {
           // Mobile OAuth flow - redirect to mobile-oauth page
           console.info('📱 [NEXTAUTH] Mobile OAuth redirect with auth code:', {
             authCode: authCode.substring(0, 8) + '...',
+            redirectTo: `${baseUrl}/auth/mobile-oauth?auth_code=${authCode}`,
           })
           return `${baseUrl}/auth/mobile-oauth?auth_code=${authCode}`
         }
       } catch (error) {
-        console.error('Error parsing redirect URL:', error)
+        console.error('📱 [NEXTAUTH] Error parsing redirect URL:', error)
       }
 
       // Default web behavior - relative URLs become absolute
       if (url.startsWith('/')) {
+        console.info('📱 [NEXTAUTH] Relative URL redirect:', {
+          from: url,
+          to: `${baseUrl}${url}`,
+        })
         return `${baseUrl}${url}`
       }
 
       // If URL is on same origin, allow it
       if (url.startsWith(baseUrl)) {
+        console.info('📱 [NEXTAUTH] Same origin redirect:', { url })
         return url
       }
 
       // Otherwise redirect to base URL
+      console.info('📱 [NEXTAUTH] Fallback to base URL:', { baseUrl })
       return baseUrl
     },
     async signIn({ account, profile }) {

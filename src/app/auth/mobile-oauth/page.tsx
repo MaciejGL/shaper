@@ -35,13 +35,30 @@ export default async function MobileOAuthPage({
 
   // Get the session token from NextAuth cookie
   const cookieStore = await cookies()
+
+  // Log all cookies for debugging
+  const allCookies = cookieStore.getAll()
+  console.info('📱 [MOBILE-OAUTH] All cookies:', {
+    count: allCookies.length,
+    names: allCookies.map((c) => c.name),
+  })
+
   const cookieName =
     process.env.NODE_ENV === 'production'
       ? '__Secure-next-auth.session-token'
       : 'next-auth.session-token'
+
+  console.info('📱 [MOBILE-OAUTH] Looking for cookie:', { cookieName })
+
   const sessionToken = cookieStore.get(cookieName)?.value
 
   if (!sessionToken) {
+    console.error('📱 [MOBILE-OAUTH] Session cookie not found!', {
+      authCode: authCode.substring(0, 8) + '...',
+      cookieName,
+      availableCookies: allCookies.map((c) => c.name),
+    })
+
     return (
       <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
         <AnimatedLogo size={80} infinite={false} />
@@ -51,9 +68,17 @@ export default async function MobileOAuthPage({
         <p className="text-sm text-muted-foreground">
           Could not retrieve session. Please try again.
         </p>
+        <p className="text-xs text-muted-foreground/50 mt-4">
+          Missing: {cookieName}
+        </p>
       </div>
     )
   }
+
+  console.info('📱 [MOBILE-OAUTH] Session cookie found!', {
+    authCode: authCode.substring(0, 8) + '...',
+    tokenLength: sessionToken.length,
+  })
 
   // Store the session for polling
   storePendingSession(authCode, sessionToken)
