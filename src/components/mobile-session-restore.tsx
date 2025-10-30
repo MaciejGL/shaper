@@ -18,12 +18,25 @@ export function MobileSessionRestore() {
   const [isRestoring, setIsRestoring] = useState(false)
 
   useEffect(() => {
+    console.info(
+      '🔐 [SESSION-RESTORE] Component mounted, checking for session_token',
+    )
+    console.info('🔐 [SESSION-RESTORE] Current URL:', window.location.href)
+    console.info(
+      '🔐 [SESSION-RESTORE] Search params:',
+      Array.from(searchParams.entries()),
+    )
+
     // Prevent double execution
-    if (isRestoring) return
+    if (isRestoring) {
+      console.info('🔐 [SESSION-RESTORE] Already restoring, skipping')
+      return
+    }
 
     const sessionToken = searchParams.get('session_token')
 
     if (!sessionToken) {
+      console.info('🔐 [SESSION-RESTORE] No session_token found in URL')
       return // No session token to restore
     }
 

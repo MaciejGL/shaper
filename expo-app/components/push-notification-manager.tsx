@@ -106,6 +106,12 @@ export function PushNotificationManager({
             ? urlParam
             : `https://www.hypro.app${urlParam.startsWith('/') ? '' : '/'}${urlParam}`
 
+          console.info('📱 [PUSH-MANAGER] Navigating WebView to:', {
+            urlParam,
+            fullUrl,
+            hasSessionToken: fullUrl.includes('session_token'),
+          })
+
           if (isReady()) {
             navigateToPath(fullUrl)
           } else {
