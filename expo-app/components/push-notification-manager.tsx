@@ -101,7 +101,8 @@ export function PushNotificationManager({
         // Handle OAuth handoff: hypro://auth/handoff?code=XXX&next=...
         if (parsed.path === 'auth/handoff') {
           const code = parsed.queryParams?.code as string | undefined
-          const next = (parsed.queryParams?.next as string) || '/fitspace/workout'
+          const next =
+            (parsed.queryParams?.next as string) || '/fitspace/workout'
 
           if (!code) {
             console.error('🔐 [OAUTH-HANDOFF] Missing code parameter')
@@ -127,7 +128,10 @@ export function PushNotificationManager({
 
               // After a short delay, navigate to the final destination
               setTimeout(() => {
-                console.info('🔐 [OAUTH-HANDOFF] Exchange complete, navigating to:', next)
+                console.info(
+                  '🔐 [OAUTH-HANDOFF] Exchange complete, navigating to:',
+                  next,
+                )
                 navigateToPath(next)
               }, 800)
             } else {
