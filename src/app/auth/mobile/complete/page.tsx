@@ -3,10 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { AnimatedLogo } from '@/components/animated-logo'
 import { authOptions } from '@/lib/auth/config'
-import {
-  generateHandoffCode,
-  saveHandoffCode,
-} from '@/lib/auth/handoff-store'
+import { generateHandoffCode, saveHandoffCode } from '@/lib/auth/handoff-store'
 
 /**
  * Mobile OAuth Completion Page
@@ -66,10 +63,7 @@ export default async function MobileCompletePage({
         <p className="text-sm text-muted-foreground">
           Could not complete sign-in. Please try again.
         </p>
-        <a
-          href="/login"
-          className="mt-4 text-sm text-primary hover:underline"
-        >
+        <a href="/login" className="mt-4 text-sm text-primary hover:underline">
           Return to login
         </a>
       </div>
@@ -77,43 +71,21 @@ export default async function MobileCompletePage({
   }
 
   // Generate and save handoff code
-  try {
-    const code = generateHandoffCode()
-    await saveHandoffCode(code, session.user.id)
+  const code = generateHandoffCode()
+  await saveHandoffCode(code, session.user.id)
 
-    // Build the deep link with code and next URL
-    const nextUrl = encodeURIComponent(
-      'https://www.hypro.app/fitspace/workout',
-    )
-    const redirectUrl = `${deeplink}?code=${code}&next=${nextUrl}`
+  // Build the deep link with code and next URL
+  const nextUrl = encodeURIComponent('https://www.hypro.app/fitspace/workout')
+  const redirectUrl = `${deeplink}?code=${code}&next=${nextUrl}`
 
-    console.info('🔐 [MOBILE-COMPLETE] Redirecting to deep link:', {
-      userId: session.user.id,
-      email: session.user.email,
-      code: code.substring(0, 8) + '...',
-    })
+  console.info('🔐 [MOBILE-COMPLETE] Redirecting to deep link:', {
+    userId: session.user.id,
+    email: session.user.email,
+    code: code.substring(0, 8) + '...',
+    redirectUrl,
+  })
 
-    // Redirect to deep link (opens native app)
-    redirect(redirectUrl)
-  } catch (error) {
-    console.error('🔐 [MOBILE-COMPLETE] Failed to create handoff code:', error)
-    return (
-      <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
-        <AnimatedLogo size={80} infinite={false} />
-        <h1 className="text-xl font-semibold mt-6 mb-2 text-destructive">
-          Server Error
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Failed to complete authentication. Please try again.
-        </p>
-        <a
-          href="/login"
-          className="mt-4 text-sm text-primary hover:underline"
-        >
-          Return to login
-        </a>
-      </div>
-    )
-  }
+  // Redirect to deep link (opens native app)
+  // Note: redirect() throws a NEXT_REDIRECT error internally - this is expected behavior
+  redirect(redirectUrl)
 }
-
