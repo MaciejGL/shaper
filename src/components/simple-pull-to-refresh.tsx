@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -70,6 +71,8 @@ export function SimplePullToRefresh() {
     scale: 0.8,
     rotation: 0,
   })
+  const pathname = usePathname()
+  const isTrainer = pathname.startsWith('/trainer')
 
   useEffect(() => {
     setMounted(true)
@@ -314,7 +317,7 @@ export function SimplePullToRefresh() {
   }, [])
 
   // Only render after component is mounted to prevent hydration mismatch
-  if (!mounted) return null
+  if (!mounted || isTrainer) return null
 
   return createPortal(<PullToRefreshIndicator state={state} />, document.body)
 }
