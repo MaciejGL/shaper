@@ -44,6 +44,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
       refetchOnMount: false,
     },
   )
+  console.log('data', data)
 
   useSyncTimezone(data?.userBasic?.profile?.timezone ?? undefined)
 
@@ -100,6 +101,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const hasPremium = subscription?.hasPremium ?? true
 
   const userData = data?.userBasic ?? initialData?.userBasic
+  console.log('userData', userData)
 
   // Only hide user data if definitely logged out, not during loading states
   const isDefinitelyNotAuthenticated = session.status === 'unauthenticated'

@@ -96,6 +96,7 @@ export const Navbar = ({
   const pathname = usePathname()
   const { isVisible } = useScrollVisibility({ initialVisible: true })
   const { user: userContext } = useUser()
+  console.log('userContext', userContext)
   const { totalUnreadCount, notifications } = useUnreadMessageCount(userContext)
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
 
