@@ -11,10 +11,11 @@ interface DeepLinkRedirectProps {
  * User must click the button to open the app.
  */
 export function DeepLinkRedirect({ callbackUrl }: DeepLinkRedirectProps) {
-  const deepLink = `hypertro://?url=${encodeURIComponent(callbackUrl)}`
+  const deepLink = `hypro://?url=${encodeURIComponent(callbackUrl)}`
 
   const handleOpenApp = () => {
     console.info('📱 [DEEP-LINK] Opening app with URL:', callbackUrl)
+    console.info('📱 [DEEP-LINK] Full deep link:', deepLink)
     window.location.href = deepLink
   }
 
