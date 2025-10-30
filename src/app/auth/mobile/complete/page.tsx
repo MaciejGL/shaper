@@ -12,9 +12,10 @@ import { generateHandoffCode, saveHandoffCode } from '@/lib/auth/handoff-store'
  * 1. Verifies the user is authenticated
  * 2. Generates a one-time handoff code
  * 3. Saves it to Redis
- * 4. Redirects to deep link with the code
+ * 4. Redirects to root-level deep link: hypro://?oauth_code=XXX&next=/fitspace/workout
  *
- * The native app will catch the deep link and exchange the code for session cookies.
+ * The native app opens at root (no route matching issues) and PushNotificationManager
+ * exchanges the code for session cookies in the WebView.
  */
 export default async function MobileCompletePage({
   searchParams,
@@ -23,30 +24,11 @@ export default async function MobileCompletePage({
 }) {
   const params = await searchParams
   const mobile = params.mobile as string | undefined
-  const deeplink = params.deeplink as string | undefined
 
   // Validate this is a mobile OAuth flow
   if (mobile !== '1') {
     console.error('🔐 [MOBILE-COMPLETE] Not a mobile OAuth flow')
     redirect('/login')
-  }
-
-  // Validate deeplink parameter
-  if (!deeplink || !deeplink.startsWith('hypro://')) {
-    console.error('🔐 [MOBILE-COMPLETE] Invalid or missing deeplink:', {
-      deeplink,
-    })
-    return (
-      <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
-        <AnimatedLogo size={80} infinite={false} />
-        <h1 className="text-xl font-semibold mt-6 mb-2 text-destructive">
-          Invalid Request
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Missing or invalid deep link configuration.
-        </p>
-      </div>
-    )
   }
 
   // Get the authenticated session
@@ -74,9 +56,10 @@ export default async function MobileCompletePage({
   const code = generateHandoffCode()
   await saveHandoffCode(code, session.user.id)
 
-  // Build the deep link with code and next URL
-  const nextUrl = encodeURIComponent('https://www.hypro.app/fitspace/workout')
-  const redirectUrl = `${deeplink}?code=${code}&next=${nextUrl}`
+  // Use root-level deep link with query parameters to avoid Expo Router route matching
+  // Format: hypro://?oauth_code=XXX&next=/fitspace/workout
+  const nextPath = '/fitspace/workout'
+  const redirectUrl = `hypro://?oauth_code=${code}&next=${encodeURIComponent(nextPath)}`
 
   console.info('🔐 [MOBILE-COMPLETE] Redirecting to deep link:', {
     userId: session.user.id,
