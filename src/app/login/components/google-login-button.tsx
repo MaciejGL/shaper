@@ -3,6 +3,7 @@
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
 
 interface GoogleLoginButtonProps {
@@ -15,15 +16,49 @@ export const GoogleLoginButton = ({
   disabled = false,
 }: GoogleLoginButtonProps) => {
   const [isLoading, setIsLoading] = useState(false)
+  const { isNativeApp } = useMobileApp()
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true)
 
-      await signIn('google', {
-        callbackUrl: `${window.location.origin}/fitspace/workout`,
-        redirect: true,
-      })
+      if (isNativeApp) {
+        // Mobile OAuth flow with handoff
+        const deeplink = encodeURIComponent('hypro://auth/handoff')
+        const callbackUrl = `/auth/mobile/complete?mobile=1&deeplink=${deeplink}`
+
+        console.info('📱 [GOOGLE-LOGIN] Starting mobile OAuth flow')
+
+        // Open OAuth in system browser
+        const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+
+        const opened = window.open(
+          oauthUrl,
+          '_blank',
+          'noopener,noreferrer,external=true',
+        )
+
+        if (!opened) {
+          // Fallback: create link element
+          const link = document.createElement('a')
+          link.href = oauthUrl
+          link.target = '_blank'
+          link.rel = 'noopener noreferrer external'
+          link.style.display = 'none'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        }
+
+        // Reset loading state after delay (user is in external browser)
+        setTimeout(() => setIsLoading(false), 1000)
+      } else {
+        // Standard web OAuth flow
+        await signIn('google', {
+          callbackUrl: `${window.location.origin}/fitspace/workout`,
+          redirect: true,
+        })
+      }
     } catch (error) {
       console.error('Google login error:', error)
       setIsLoading(false)

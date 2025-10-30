@@ -189,6 +189,47 @@ export const authOptions = {
         }
       },
     }),
+    // Server-issued nonce provider for mobile OAuth handoff
+    CredentialsProvider({
+      id: 'server-nonce',
+      name: 'Server Nonce',
+      credentials: {
+        userId: {
+          label: 'User ID',
+          type: 'text',
+        },
+      },
+      async authorize(credentials) {
+        const { userId } = credentials ?? {}
+        if (!userId) return null
+
+        try {
+          // This provider is ONLY used by the mobile auth exchange endpoint
+          // It receives a userId that was validated via handoff code
+          const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+              profile: true,
+            },
+          })
+
+          if (!user) {
+            console.error('🔐 [SERVER-NONCE] User not found:', userId)
+            return null
+          }
+
+          console.info('🔐 [SERVER-NONCE] User authenticated via handoff:', {
+            userId: user.id,
+            email: user.email,
+          })
+
+          return user as UserWithSession['user']
+        } catch (error) {
+          console.error('🔐 [SERVER-NONCE] Authorization error:', error)
+          return null
+        }
+      },
+    }),
   ],
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
