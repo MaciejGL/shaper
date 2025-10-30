@@ -103,9 +103,9 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const userData = data?.userBasic ?? initialData?.userBasic
   console.log('userData', userData)
 
-  // Only hide user data if definitely logged out, not during loading states
-  const isDefinitelyNotAuthenticated = session.status === 'unauthenticated'
-  const shouldShowData = !isDefinitelyNotAuthenticated && Boolean(userData)
+  // Only show user data when session is definitely authenticated
+  const isAuthenticated = session.status === 'authenticated'
+  const shouldShowData = isAuthenticated && Boolean(userData)
 
   const contextValue: UserContextType = {
     session,
