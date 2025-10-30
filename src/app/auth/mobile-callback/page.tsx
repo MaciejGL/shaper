@@ -1,8 +1,6 @@
-import { getToken } from 'next-auth/jwt'
 import { cookies } from 'next/headers'
 
 import { AnimatedLogo } from '@/components/animated-logo'
-import { generateSessionToken } from '@/lib/auth/session-token'
 import { getCurrentUser } from '@/lib/getUser'
 
 import { DeepLinkRedirect } from './deep-link-redirect'
@@ -60,16 +58,14 @@ export default async function MobileCallbackPage({
     )
   }
 
-  // Generate session token
-  const sessionToken = generateSessionToken(user.user.email, rawJwt)
+  // Pass the raw JWT directly to the native app via deep link
+  // The native app will inject it as a cookie into the WebView
+  // This is more reliable than trying to set cookies via HTTP response
+  const deepLinkUrl = `${callbackUrl}${callbackUrl.includes('?') ? '&' : '?'}session_token=${encodeURIComponent(rawJwt)}`
 
-  // Redirect to session-restore page instead of directly to callback
-  // This ensures cookies are set properly in WebView context
-  const sessionRestoreUrl = `/auth/session-restore?session_token=${encodeURIComponent(sessionToken)}&redirect=${encodeURIComponent(callbackUrl)}`
-
-  console.info('📱 [MOBILE-CALLBACK] Generated session token for:', {
+  console.info('📱 [MOBILE-CALLBACK] Passing session to native app for:', {
     email: user.user.email,
-    sessionRestoreUrl,
+    callbackUrl,
   })
 
   return (
@@ -81,7 +77,7 @@ export default async function MobileCallbackPage({
       <p className="text-sm text-muted-foreground animate-pulse">
         Returning to the app...
       </p>
-      <DeepLinkRedirect callbackUrl={sessionRestoreUrl} />
+      <DeepLinkRedirect callbackUrl={deepLinkUrl} />
     </div>
   )
 }
