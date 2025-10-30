@@ -102,14 +102,28 @@ export function PushNotificationManager({
         const urlParam = (parsed.queryParams?.url as string) || undefined
         if (urlParam) {
           // Ensure we use the full URL with domain to prevent default redirects
-          const fullUrl = urlParam.startsWith('http')
+          let fullUrl = urlParam.startsWith('http')
             ? urlParam
             : `https://www.hypro.app${urlParam.startsWith('/') ? '' : '/'}${urlParam}`
+
+          // IMPORTANT: Check if session_token was parsed as a separate query param
+          // This happens if the URL wasn't properly encoded in the deep link
+          const sessionToken = parsed.queryParams?.session_token as
+            | string
+            | undefined
+          if (sessionToken && !fullUrl.includes('session_token')) {
+            console.warn(
+              '⚠️ [PUSH-MANAGER] session_token was parsed separately! Reconstructing URL...',
+            )
+            // Reconstruct the full URL with the session_token
+            fullUrl = `${fullUrl}${fullUrl.includes('?') ? '&' : '?'}session_token=${sessionToken}`
+          }
 
           console.info('📱 [PUSH-MANAGER] Navigating WebView to:', {
             urlParam,
             fullUrl,
             hasSessionToken: fullUrl.includes('session_token'),
+            sessionTokenLength: sessionToken?.length,
             isReady: isReady(),
           })
 
