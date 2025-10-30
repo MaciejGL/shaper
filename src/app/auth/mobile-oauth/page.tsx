@@ -1,55 +1,52 @@
 import { cookies } from 'next/headers'
 
 import { AnimatedLogo } from '@/components/animated-logo'
-import { getCurrentUser } from '@/lib/getUser'
+import { storePendingSession } from '@/lib/auth/pending-sessions'
 
-import { DeepLinkRedirect } from './deep-link-redirect'
+import { MobileOAuthRedirect } from './mobile-oauth-redirect'
 
 /**
- * Mobile OAuth Callback Page
+ * Mobile OAuth Success Page
  *
- * After successful OAuth in external browser, NextAuth redirects here.
- * This page generates a session token and passes it via deep link to restore session in WebView.
+ * Server component that stores the session for polling,
+ * then shows success message and auto-redirects to app.
  */
-export default async function MobileCallbackPage({
+export default async function MobileOAuthPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const params = await searchParams
-  const callbackUrl = (params.url as string) || '/fitspace/workout'
+  const authCode = params.auth_code as string | undefined
 
-  // Get authenticated user
-  const user = await getCurrentUser()
-
-  if (!user?.user?.email) {
+  if (!authCode) {
     return (
       <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
         <AnimatedLogo size={80} infinite={false} />
         <h1 className="text-xl font-semibold mt-6 mb-2 text-destructive">
-          Authentication Error
+          Missing auth code
         </h1>
         <p className="text-sm text-muted-foreground">
-          Could not verify your authentication. Please try again.
+          Please try logging in again.
         </p>
       </div>
     )
   }
 
-  // Get the raw JWT cookie to generate session token
+  // Get the session token from NextAuth cookie
   const cookieStore = await cookies()
   const cookieName =
     process.env.NODE_ENV === 'production'
       ? '__Secure-next-auth.session-token'
       : 'next-auth.session-token'
-  const rawJwt = cookieStore.get(cookieName)?.value
+  const sessionToken = cookieStore.get(cookieName)?.value
 
-  if (!rawJwt) {
+  if (!sessionToken) {
     return (
       <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
         <AnimatedLogo size={80} infinite={false} />
         <h1 className="text-xl font-semibold mt-6 mb-2 text-destructive">
-          Session Error
+          Session error
         </h1>
         <p className="text-sm text-muted-foreground">
           Could not retrieve session. Please try again.
@@ -58,15 +55,8 @@ export default async function MobileCallbackPage({
     )
   }
 
-  // Pass the raw JWT directly to the native app via deep link
-  // The native app will inject it as a cookie into the WebView
-  // This is more reliable than trying to set cookies via HTTP response
-  const deepLinkUrl = `${callbackUrl}${callbackUrl.includes('?') ? '&' : '?'}session_token=${encodeURIComponent(rawJwt)}`
-
-  console.info('📱 [MOBILE-CALLBACK] Passing session to native app for:', {
-    email: user.user.email,
-    callbackUrl,
-  })
+  // Store the session for polling
+  storePendingSession(authCode, sessionToken)
 
   return (
     <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
@@ -77,7 +67,12 @@ export default async function MobileCallbackPage({
       <p className="text-sm text-muted-foreground animate-pulse">
         Returning to the app...
       </p>
-      <DeepLinkRedirect callbackUrl={deepLinkUrl} />
+      {authCode && (
+        <p className="text-xs text-muted-foreground/50 mt-4">
+          Auth code: {authCode.substring(0, 8)}...
+        </p>
+      )}
+      <MobileOAuthRedirect />
     </div>
   )
 }

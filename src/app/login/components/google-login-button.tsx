@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
+import { useOAuthPolling } from '@/hooks/use-oauth-polling'
 
 interface GoogleLoginButtonProps {
   className?: string
@@ -17,18 +18,31 @@ export const GoogleLoginButton = ({
 }: GoogleLoginButtonProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const { isNativeApp } = useMobileApp()
+  const { startPolling, isPolling } = useOAuthPolling()
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true)
 
       if (isNativeApp) {
-        // Native app: open OAuth redirect page in external browser
-        // This page will auto-trigger the OAuth flow
-        const callbackUrl = `${window.location.origin}/fitspace/workout`
-        const oauthUrl = `/auth/oauth-redirect?provider=google&callbackUrl=${encodeURIComponent(callbackUrl)}&mobile=true`
+        // Generate unique auth code for this OAuth session
+        const authCode = crypto.randomUUID()
 
-        // Open in system browser (same pattern as account-management)
+        // Store in localStorage for polling resumption
+        localStorage.setItem('pending_auth_code', authCode)
+
+        console.info('📱 [GOOGLE-LOGIN] Starting OAuth with polling', {
+          authCode: authCode.substring(0, 8) + '...',
+        })
+
+        // Start polling for session
+        startPolling(authCode)
+
+        // Open OAuth in external browser with auth code
+        const callbackUrl = '/fitspace/workout'
+        const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}&auth_code=${authCode}`
+
+        // Open in system browser
         const opened = window.open(
           oauthUrl,
           '_blank',
