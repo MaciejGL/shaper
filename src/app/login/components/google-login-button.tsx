@@ -38,9 +38,10 @@ export const GoogleLoginButton = ({
         // Start polling for session
         startPolling(authCode)
 
-        // Open OAuth in external browser with auth code
-        const callbackUrl = '/fitspace/workout'
-        const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}&auth_code=${authCode}`
+        // Open OAuth in external browser
+        // The auth_code must be in the callbackUrl so NextAuth preserves it
+        const callbackUrl = `/auth/mobile-oauth?auth_code=${authCode}`
+        const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
 
         // Open in system browser
         const opened = window.open(
