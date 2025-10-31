@@ -9,11 +9,13 @@ interface MobileAppBannerProps {
   appName?: string
   appStoreUrl?: string
   playStoreUrl?: string
+  className?: string
 }
 
 export function MobileAppBanner({
   appStoreUrl = 'https://apps.apple.com/app/hypertro',
   playStoreUrl = 'https://play.google.com/store/apps/details?id=com.hypertro',
+  className,
 }: MobileAppBannerProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'other'>(
@@ -58,7 +60,7 @@ export function MobileAppBanner({
   }
 
   return (
-    <div>
+    <div className={className}>
       <div className="flex flex-col items-center gap-4">
         {deviceType === 'ios' && (
           <button onClick={handleDownload}>
