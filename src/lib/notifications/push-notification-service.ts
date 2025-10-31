@@ -76,7 +76,7 @@ export async function notifyNewMessage(
 ) {
   return await sendPushNotificationToUsers(
     [recipientId],
-    `New message${senderName ? ` from ${senderName}` : ''}`,
+    senderName || 'New message',
     message,
     '/fitspace/messages',
   )

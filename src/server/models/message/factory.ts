@@ -102,7 +102,11 @@ export async function sendMessage(
   const recipientId =
     chat.trainerId === currentUserId ? chat.clientId : chat.trainerId
 
-  const senderName = context.user?.user.profile?.firstName || 'Someone'
+  const senderName =
+    context.user?.user.profile?.firstName ||
+    context.user?.user.name ||
+    context.user?.user.email?.split('@')[0] ||
+    'User'
 
   // Only send push notification if user is not currently active
   // Check if user has been active in the last 2 minutes

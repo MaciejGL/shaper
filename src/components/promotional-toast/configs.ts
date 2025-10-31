@@ -52,7 +52,7 @@ export function usePromotionalToastConfigs(): Record<
       id: 'coaching-request',
       notificationType: GQLNotificationType.CoachingRequest,
       title: 'New Coaching Request',
-      getSubtitle: (data) => `From ${data.trainerName || 'someone'}`,
+      getSubtitle: (data) => `From ${data.trainerName || 'User'}`,
       icon: UserPlus,
       iconVariant: 'blue',
       primaryAction: {
@@ -65,7 +65,7 @@ export function usePromotionalToastConfigs(): Record<
       extractData: (notification) => {
         // Extract trainer name from message "You have a new coaching request from X."
         const match = notification.message.match(/from (.+)\.$/)
-        const trainerName = match ? match[1] : 'someone'
+        const trainerName = match ? match[1] : 'User'
         return {
           notificationId: notification.id,
           trainerName,
@@ -81,7 +81,7 @@ export function usePromotionalToastConfigs(): Record<
       notificationType: GQLNotificationType.CoachingRequestAccepted,
       title: 'Coaching Request Accepted',
       getSubtitle: (data) =>
-        `${data.trainerName || 'Someone'} accepted your request`,
+        `${data.trainerName || 'User'} accepted your request`,
       icon: CheckCircle,
       iconVariant: 'green',
       primaryAction: {
@@ -95,7 +95,7 @@ export function usePromotionalToastConfigs(): Record<
         const match = notification.message.match(
           /^(.+?) accepted your coaching request/,
         )
-        const trainerName = match ? match[1] : 'Someone'
+        const trainerName = match ? match[1] : 'User'
         return {
           notificationId: notification.id,
           trainerName,
