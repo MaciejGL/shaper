@@ -74,23 +74,14 @@ export function ExerciseCard({
         }
       >
         <CardContent className="p-0 flex items-center gap-3">
-          {exercise.images.length > 0 && (
+          {firstImage?.thumbnail && (
             <div className="size-20 overflow-hidden relative bg-white">
-              {firstImage?.thumbnail ? (
-                <Image
-                  src={firstImage.thumbnail}
-                  alt={exercise.name}
-                  width={100}
-                  height={100}
-                />
-              ) : (
-                <Image
-                  src={'/empty-rack.png'}
-                  alt={exercise.name}
-                  width={100}
-                  height={100}
-                />
-              )}
+              <Image
+                src={firstImage.thumbnail}
+                alt={exercise.name}
+                width={100}
+                height={100}
+              />
             </div>
           )}
 
