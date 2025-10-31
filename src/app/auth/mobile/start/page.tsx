@@ -1,10 +1,17 @@
+import { getServerSession } from 'next-auth'
+
+import { authOptions } from '@/lib/auth/config'
+
+import { ExistingSessionHandoff } from './existing-session-handoff'
 import { MobileOAuthTrigger } from './mobile-oauth-trigger'
 
 /**
  * Mobile OAuth Start Page
  *
  * This page is opened in the system browser from the mobile app.
- * It immediately triggers the Google OAuth flow without showing any UI.
+ * It checks if the user already has a session in the browser.
+ * If yes, shows a "Continue as [name]" button.
+ * If no, triggers the Google OAuth flow.
  */
 export default async function MobileStartPage({
   searchParams,
@@ -22,5 +29,18 @@ export default async function MobileStartPage({
     )
   }
 
+  // Check if user already has a session in this browser
+  const session = await getServerSession(authOptions)
+
+  if (session?.user?.email) {
+    // User already logged in! Show confirmation button instead of re-authenticating
+    const userName = session.user.name || session.user.email
+
+    return (
+      <ExistingSessionHandoff userName={userName} email={session.user.email} />
+    )
+  }
+
+  // No session, trigger OAuth flow
   return <MobileOAuthTrigger callbackUrl={callbackUrl} />
 }

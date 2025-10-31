@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import { createContext, useContext, useEffect, useMemo } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef } from 'react'
 
 import {
   GQLGetMySubscriptionStatusQuery,
@@ -33,18 +33,22 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const session = useSession()
   const queryClient = useQueryClient()
 
+  // Keep reference to last valid user data to prevent flashing to undefined
+  const lastValidUserRef = useRef<GQLUserBasicQuery['userBasic'] | undefined>(
+    undefined,
+  )
+
   const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
     {},
     {
       initialData,
       enabled: session.status !== 'unauthenticated',
       staleTime: 20 * 60 * 1000,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
       placeholderData: (previousData) => previousData,
       refetchOnMount: false,
     },
   )
-  console.log('data', data)
 
   useSyncTimezone(data?.userBasic?.profile?.timezone ?? undefined)
 
@@ -56,13 +60,12 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     {},
     {
       enabled: session.status !== 'unauthenticated',
-      refetchOnWindowFocus: true,
+      // Reduce aggressive refetching
+      refetchOnWindowFocus: false,
+      staleTime: 10 * 60 * 1000, // 10 minutes
     },
   )
 
-  if (subscriptionError) {
-    console.error('[UserContext] Subscription query error', subscriptionError)
-  }
   // Clear user query cache when user logs out
   useEffect(() => {
     if (session.status === 'unauthenticated') {
@@ -101,22 +104,42 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const hasPremium = subscription?.hasPremium ?? true
 
   const userData = data?.userBasic ?? initialData?.userBasic
-  console.log('userData', userData)
+
+  // Update ref with latest valid user data
+  if (userData) {
+    lastValidUserRef.current = userData
+  }
 
   // Only show user data when session is definitely authenticated
   const isAuthenticated = session.status === 'authenticated'
-  const shouldShowData = isAuthenticated && Boolean(userData)
 
-  const contextValue: UserContextType = {
-    session,
-    user: shouldShowData ? userData : undefined,
-    subscription: shouldShowData ? subscription : undefined,
-    hasPremium: shouldShowData ? hasPremium : false,
-    isLoading:
-      session.status === 'loading' ||
-      isLoadingUserBasic ||
+  // Use current data if available, otherwise use last valid data
+  // This prevents flashing to undefined during session transitions
+  const displayUser = isAuthenticated
+    ? userData || lastValidUserRef.current
+    : undefined
+
+  const contextValue: UserContextType = useMemo(
+    () => ({
+      session,
+      user: displayUser,
+      subscription: isAuthenticated ? subscription : undefined,
+      hasPremium: isAuthenticated ? hasPremium : false,
+      isLoading:
+        session.status === 'loading' ||
+        isLoadingUserBasic ||
+        isLoadingSubscription,
+    }),
+    [
+      session,
+      displayUser,
+      subscription,
+      hasPremium,
+      isAuthenticated,
+      isLoadingUserBasic,
       isLoadingSubscription,
-  }
+    ],
+  )
 
   return (
     <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>

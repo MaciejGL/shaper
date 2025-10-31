@@ -26,31 +26,45 @@ export const GoogleLoginButton = ({
         // Mobile OAuth flow with handoff
         const callbackUrl = '/auth/mobile/complete?mobile=1'
 
-        console.info('📱 [GOOGLE-LOGIN] Starting mobile OAuth flow')
-
         // Open mobile OAuth trigger page in system browser
         // This page will auto-trigger Google OAuth without showing our login page
         const fullCallbackUrl = `${window.location.origin}${callbackUrl}`
         const triggerUrl = `${window.location.origin}/auth/mobile/start?callbackUrl=${encodeURIComponent(fullCallbackUrl)}`
 
-        console.info('📱 [GOOGLE-LOGIN] Opening trigger page:', triggerUrl)
+        // Method 1: Try window.open first
+        let opened = false
+        try {
+          const windowRef = window.open(
+            triggerUrl,
+            '_blank',
+            'noopener,noreferrer,external=true',
+          )
+          opened = windowRef !== null && windowRef !== undefined
+        } catch (error) {
+          console.warn('📱 [GOOGLE-LOGIN] window.open threw error:', error)
+        }
 
-        const opened = window.open(
-          triggerUrl,
-          '_blank',
-          'noopener,noreferrer,external=true',
-        )
-
+        // Method 2: Fallback to link element
         if (!opened) {
-          // Fallback: create link element
-          const link = document.createElement('a')
-          link.href = triggerUrl
-          link.target = '_blank'
-          link.rel = 'noopener noreferrer external'
-          link.style.display = 'none'
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
+          try {
+            const link = document.createElement('a')
+            link.href = triggerUrl
+            link.target = '_blank'
+            link.rel = 'noopener noreferrer external'
+            link.style.display = 'none'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          } catch (error) {
+            console.error('📱 [GOOGLE-LOGIN] Link element failed:', error)
+          }
+        }
+
+        // Method 3: Final fallback - location.href (last resort)
+        if (!opened) {
+          setTimeout(() => {
+            window.location.href = triggerUrl
+          }, 100)
         }
 
         // Reset loading state after delay (user is in external browser)
