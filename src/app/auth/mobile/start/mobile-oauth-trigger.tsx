@@ -12,15 +12,16 @@ import { AnimatedLogo } from '@/components/animated-logo'
  * This runs in the system browser after the user clicks "Continue with Google" in the app.
  */
 export function MobileOAuthTrigger({ callbackUrl }: { callbackUrl: string }) {
-  const [mounted, setMounted] = useState(false)
+  const [triggered, setTriggered] = useState(false)
 
   useEffect(() => {
     // Prevent double-trigger in React Strict Mode
-    if (mounted) {
+    if (triggered) {
       return
     }
 
-    setMounted(true)
+    // Mark as triggered immediately
+    setTriggered(true)
 
     // Wait 1 second for everything to settle (URLs, query params, page load, etc.)
     const timer = setTimeout(() => {
@@ -31,7 +32,9 @@ export function MobileOAuthTrigger({ callbackUrl }: { callbackUrl: string }) {
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [callbackUrl, mounted])
+    // Only depend on callbackUrl, not triggered (to avoid re-running)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [callbackUrl])
 
   return (
     <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
