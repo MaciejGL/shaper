@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
+import { openSystemBrowser } from '@/lib/open-system-browser'
 
 interface GoogleLoginButtonProps {
   className?: string
@@ -29,43 +30,12 @@ export const GoogleLoginButton = ({
         // Open mobile OAuth trigger page in system browser
         // This page will auto-trigger Google OAuth without showing our login page
         const fullCallbackUrl = `${window.location.origin}${callbackUrl}`
-        const triggerUrl = `${window.location.origin}/auth/mobile/start?callbackUrl=${encodeURIComponent(fullCallbackUrl)}`
+        const triggerUrl = `/auth/mobile/start?callbackUrl=${encodeURIComponent(fullCallbackUrl)}`
 
-        // Method 1: Try window.open first
-        let opened = false
-        try {
-          const windowRef = window.open(
-            triggerUrl,
-            '_blank',
-            'noopener,noreferrer,external=true',
-          )
-          opened = windowRef !== null && windowRef !== undefined
-        } catch (error) {
-          console.warn('📱 [GOOGLE-LOGIN] window.open threw error:', error)
-        }
+        console.info('📱 [GOOGLE-LOGIN] Starting mobile OAuth flow')
 
-        // Method 2: Fallback to link element
-        if (!opened) {
-          try {
-            const link = document.createElement('a')
-            link.href = triggerUrl
-            link.target = '_blank'
-            link.rel = 'noopener noreferrer external'
-            link.style.display = 'none'
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-          } catch (error) {
-            console.error('📱 [GOOGLE-LOGIN] Link element failed:', error)
-          }
-        }
-
-        // Method 3: Final fallback - location.href (last resort)
-        if (!opened) {
-          setTimeout(() => {
-            window.location.href = triggerUrl
-          }, 100)
-        }
+        // Open in system browser (not WebView)
+        openSystemBrowser(triggerUrl)
 
         // Reset loading state after delay (user is in external browser)
         setTimeout(() => setIsLoading(false), 1000)
