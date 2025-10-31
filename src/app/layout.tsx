@@ -118,10 +118,6 @@ export default function RootLayout({
           rel="dns-prefetch"
           href="https://fitspace-prod.s3.eu-north-1.amazonaws.com"
         />
-        <link rel="dns-prefetch" href="https://accounts.google.com" />
-
-        {/* Google Identity Services for One Tap */}
-        <script src="https://accounts.google.com/gsi/client" async defer />
       </head>
       <body
         className={`${inter.variable} ${robotoMono.variable} antialiased min-h-svh`}
