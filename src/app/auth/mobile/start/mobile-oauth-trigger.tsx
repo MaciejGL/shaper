@@ -1,7 +1,7 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { AnimatedLogo } from '@/components/animated-logo'
 
@@ -12,17 +12,26 @@ import { AnimatedLogo } from '@/components/animated-logo'
  * This runs in the system browser after the user clicks "Continue with Google" in the app.
  */
 export function MobileOAuthTrigger({ callbackUrl }: { callbackUrl: string }) {
-  useEffect(() => {
-    console.info('🔐 [MOBILE-OAUTH-TRIGGER] Auto-triggering Google OAuth:', {
-      callbackUrl,
-    })
+  const [mounted, setMounted] = useState(false)
 
-    // Auto-trigger Google sign-in
-    signIn('google', {
-      callbackUrl,
-      redirect: true,
-    })
-  }, [callbackUrl])
+  useEffect(() => {
+    // Prevent double-trigger in React Strict Mode
+    if (mounted) {
+      return
+    }
+
+    setMounted(true)
+
+    // Wait 1 second for everything to settle (URLs, query params, page load, etc.)
+    const timer = setTimeout(() => {
+      signIn('google', {
+        callbackUrl,
+        redirect: true,
+      })
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [callbackUrl, mounted])
 
   return (
     <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
@@ -32,6 +41,9 @@ export function MobileOAuthTrigger({ callbackUrl }: { callbackUrl: string }) {
       </h1>
       <p className="text-sm text-muted-foreground animate-pulse">
         Redirecting to Google...
+      </p>
+      <p className="text-xs text-muted-foreground/60 mt-4">
+        Please wait a moment...
       </p>
     </div>
   )
