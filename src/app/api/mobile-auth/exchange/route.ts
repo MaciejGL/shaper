@@ -13,23 +13,28 @@ import { consumeHandoffCode } from '@/lib/auth/handoff-store'
  * 1. Validate handoff code from query params
  * 2. Consume code from Redis (atomic, single-use)
  * 3. Call NextAuth's signin endpoint with server-nonce provider
- * 4. Forward session cookies to the WebView
+ * 4. Set session cookies and redirect to final destination
+ *
+ * Query params:
+ * - code: One-time handoff code
+ * - next: Where to redirect after setting cookies (default: /fitspace/workout)
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
+    const next = searchParams.get('next') || '/fitspace/workout'
 
     if (!code) {
       console.error('🔐 [EXCHANGE] Missing code parameter')
-      return NextResponse.json(
-        { error: 'Missing code parameter' },
-        { status: 400 },
+      return NextResponse.redirect(
+        new URL('/login?error=missing_code', request.url),
       )
     }
 
     console.info('🔐 [EXCHANGE] Exchange attempt:', {
       code: code.substring(0, 8) + '...',
+      next,
     })
 
     // Consume the handoff code (atomic get+delete)
@@ -39,9 +44,8 @@ export async function GET(request: NextRequest) {
       console.error('🔐 [EXCHANGE] Invalid or expired code:', {
         code: code.substring(0, 8) + '...',
       })
-      return NextResponse.json(
-        { error: 'Invalid or expired code' },
-        { status: 400 },
+      return NextResponse.redirect(
+        new URL('/login?error=invalid_code', request.url),
       )
     }
 
@@ -69,9 +73,8 @@ export async function GET(request: NextRequest) {
         status: signInResponse.status,
         userId: handoffData.userId,
       })
-      return NextResponse.json(
-        { error: 'Failed to create session' },
-        { status: 500 },
+      return NextResponse.redirect(
+        new URL('/login?error=session_failed', request.url),
       )
     }
 
@@ -80,19 +83,23 @@ export async function GET(request: NextRequest) {
 
     if (setCookieHeaders.length === 0) {
       console.error('🔐 [EXCHANGE] No session cookies received')
-      return NextResponse.json(
-        { error: 'Failed to set session cookies' },
-        { status: 500 },
+      return NextResponse.redirect(
+        new URL('/login?error=no_cookies', request.url),
       )
     }
 
-    console.info('🔐 [EXCHANGE] Session created successfully:', {
-      userId: handoffData.userId,
-      cookiesSet: setCookieHeaders.length,
-    })
+    console.info(
+      '🔐 [EXCHANGE] Session created successfully, redirecting to:',
+      {
+        userId: handoffData.userId,
+        cookiesSet: setCookieHeaders.length,
+        next,
+      },
+    )
 
-    // Return 204 with session cookies
-    const response = new NextResponse(null, { status: 204 })
+    // Redirect to the final destination with session cookies
+    const redirectUrl = new URL(next, request.nextUrl.origin)
+    const response = NextResponse.redirect(redirectUrl)
 
     // Forward all Set-Cookie headers to the client
     setCookieHeaders.forEach((cookie) => {
@@ -102,10 +109,8 @@ export async function GET(request: NextRequest) {
     return response
   } catch (error) {
     console.error('🔐 [EXCHANGE] Unexpected error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 },
+    return NextResponse.redirect(
+      new URL('/login?error=server_error', request.url),
     )
   }
 }
-

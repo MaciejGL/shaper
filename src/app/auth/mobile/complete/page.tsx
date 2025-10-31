@@ -11,11 +11,11 @@ import { generateHandoffCode, saveHandoffCode } from '@/lib/auth/handoff-store'
  * After successful OAuth in the external browser, this page:
  * 1. Verifies the user is authenticated
  * 2. Generates a one-time handoff code
- * 3. Saves it to Redis
- * 4. Redirects to root-level deep link: hypro://?oauth_code=XXX&next=/fitspace/workout
+ * 3. Saves it to Redis (60s TTL)
+ * 4. Redirects to: hypro://?oauth_code=XXX&next=/fitspace/workout
  *
- * The native app opens at root (no route matching issues) and PushNotificationManager
- * exchanges the code for session cookies in the WebView.
+ * The mobile app intercepts the deep link and loads the exchange endpoint
+ * in the WebView, which sets session cookies and redirects to the final destination.
  */
 export default async function MobileCompletePage({
   searchParams,
