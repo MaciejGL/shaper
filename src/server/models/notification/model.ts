@@ -30,7 +30,6 @@ export default class Notification implements GQLNotification {
   }
 
   get type(): GQLNotificationType {
-    console.log('Unknown notification type:', this.data.type, this.data.message)
     switch (this.data.type) {
       case 'COACHING_REQUEST':
         return GQLNotificationType.CoachingRequest
@@ -58,6 +57,16 @@ export default class Notification implements GQLNotification {
         return GQLNotificationType.TrainerWorkoutCompleted
       case 'TRAINER_OFFER_RECEIVED':
         return GQLNotificationType.TrainerOfferReceived
+      case 'TRAINER_OFFER_DECLINED':
+        return GQLNotificationType.TrainerOfferDeclined
+      case 'TEAM_INVITATION':
+        return GQLNotificationType.TeamInvitation
+      case 'BODY_PROGRESS_SHARED':
+        return GQLNotificationType.BodyProgressShared
+      case 'PAYMENT_RECEIVED':
+        return GQLNotificationType.PaymentReceived
+      case 'SUBSCRIPTION_PAYMENT_RECEIVED':
+        return GQLNotificationType.SubscriptionPaymentReceived
       case 'REMINDER':
         return GQLNotificationType.Reminder
       case 'SYSTEM':
@@ -66,8 +75,14 @@ export default class Notification implements GQLNotification {
         return GQLNotificationType.Message
       case 'MEETING_REMINDER':
         return GQLNotificationType.MeetingReminder
+      default:
+        console.log(
+          'Unknown notification type:',
+          this.data.type,
+          this.data.message,
+        )
+        return GQLNotificationType.System
     }
-    return GQLNotificationType.System
   }
 
   get read() {
