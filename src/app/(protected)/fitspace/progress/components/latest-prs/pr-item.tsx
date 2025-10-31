@@ -50,12 +50,13 @@ export function PRItem({ pr, onClick }: PRItemProps) {
           </div>
 
           <div className="text-right">
-            <div className="font-medium text-sm">
-              {toDisplayWeight(pr.estimated1RM)?.toFixed(1)} {weightUnit}
+            <div className="font-medium text-base">
+              {toDisplayWeight(pr.estimated1RM)?.toFixed(1).replace(/.0$/, '')}{' '}
+              {weightUnit}
             </div>
-            <div className="text-xs text-muted-foreground">
-              {toDisplayWeight(pr.weight)?.toFixed(1)} {weightUnit} × {pr.reps}{' '}
-              reps
+            <div className="text-xs text-muted-foreground whitespace-nowrap">
+              {toDisplayWeight(pr.weight)?.toFixed(1).replace(/.0$/, '')}{' '}
+              {weightUnit} × {pr.reps} reps
             </div>
           </div>
         </div>
