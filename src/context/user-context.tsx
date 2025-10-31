@@ -27,9 +27,14 @@ const UserContext = createContext<UserContextType | undefined>(undefined)
 interface UserProviderProps {
   children: React.ReactNode
   initialData?: GQLUserBasicQuery
+  initialSubscriptionData?: GQLGetMySubscriptionStatusQuery
 }
 
-export function UserProvider({ children, initialData }: UserProviderProps) {
+export function UserProvider({
+  children,
+  initialData,
+  initialSubscriptionData,
+}: UserProviderProps) {
   const session = useSession()
   const queryClient = useQueryClient()
 
@@ -38,11 +43,13 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     undefined,
   )
 
+  // Query is enabled if we have initialData OR session is authenticated
+  // This prevents disabling queries during session loading when we have server data
   const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
     {},
     {
       initialData,
-      enabled: session.status !== 'unauthenticated',
+      enabled: !!initialData || session.status === 'authenticated',
       staleTime: 20 * 60 * 1000,
       refetchOnWindowFocus: false,
       placeholderData: (previousData) => previousData,
@@ -59,7 +66,8 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   } = useGetMySubscriptionStatusQuery(
     {},
     {
-      enabled: session.status !== 'unauthenticated',
+      initialData: initialSubscriptionData,
+      enabled: !!initialSubscriptionData || session.status === 'authenticated',
       // Reduce aggressive refetching
       refetchOnWindowFocus: false,
       staleTime: 10 * 60 * 1000, // 10 minutes
@@ -110,12 +118,16 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     lastValidUserRef.current = userData
   }
 
-  // Only show user data when session is definitely authenticated
   const isAuthenticated = session.status === 'authenticated'
+  const isSessionLoading = session.status === 'loading'
 
-  // Use current data if available, otherwise use last valid data
+  // Show data if authenticated OR if we have initialData (server-provided) while session is loading
   // This prevents flashing to undefined during session transitions
-  const displayUser = isAuthenticated
+  const shouldShowData =
+    isAuthenticated ||
+    (isSessionLoading && (userData || lastValidUserRef.current))
+
+  const displayUser = shouldShowData
     ? userData || lastValidUserRef.current
     : undefined
 
@@ -123,8 +135,8 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     () => ({
       session,
       user: displayUser,
-      subscription: isAuthenticated ? subscription : undefined,
-      hasPremium: isAuthenticated ? hasPremium : false,
+      subscription: shouldShowData ? subscription : undefined,
+      hasPremium: shouldShowData ? hasPremium : false,
       isLoading:
         session.status === 'loading' ||
         isLoadingUserBasic ||
@@ -135,7 +147,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
       displayUser,
       subscription,
       hasPremium,
-      isAuthenticated,
+      shouldShowData,
       isLoadingUserBasic,
       isLoadingSubscription,
     ],
