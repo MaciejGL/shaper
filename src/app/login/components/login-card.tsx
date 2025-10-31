@@ -18,6 +18,7 @@ import { AppleLoginButton } from './apple-login-button'
 import { EmailForm } from './email-form'
 import { GoogleLoginButton } from './google-login-button'
 import { GoogleOneTap } from './google-one-tap'
+import { LoginAuthOverlay } from './login-auth-overlay'
 import { OtpForm } from './otp-form'
 import { useLoginForm } from './use-login-form.hook'
 
@@ -39,7 +40,8 @@ export const LoginCard = () => {
   } = useLoginForm()
 
   return (
-    <Card borderless className="dark flex flex-col gap-8 w-full max-w-md">
+    <Card borderless className="dark flex flex-col gap-8 w-full max-w-md relative">
+      <LoginAuthOverlay />
       <CardHeader className="space-y-1">
         <CardTitle>Login</CardTitle>
         {showOtp ? (

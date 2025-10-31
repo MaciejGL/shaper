@@ -34,6 +34,9 @@ export const GoogleLoginButton = ({
 
         console.info('📱 [GOOGLE-LOGIN] Starting mobile OAuth flow')
 
+        // Mark that OAuth flow is in progress
+        sessionStorage.setItem('oauth_in_progress', 'true')
+
         // Open in system browser (not WebView)
         openSystemBrowser(triggerUrl)
 
