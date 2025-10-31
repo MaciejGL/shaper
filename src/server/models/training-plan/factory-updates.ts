@@ -1255,8 +1255,6 @@ export async function getQuickWorkoutPlan(context: GQLContext) {
 
   // Create plan only if it doesn't exist
   if (!quickWorkoutPlan) {
-    console.info('[getQuickWorkoutPlan] Creating new quick workout plan')
-
     const weekStart = getUTCWeekStart()
     const createdPlan = await prisma.trainingPlan.create({
       data: {

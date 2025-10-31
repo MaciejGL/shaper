@@ -48,7 +48,6 @@ export function SnapshotsSection() {
     shareWithTrainer: boolean
   } | null>(null)
 
-  console.log(preferences)
   const { latestSnapshot, previousSnapshot, isLoading } = useSnapshots()
 
   const handleToggleBlur = () => {

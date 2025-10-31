@@ -43,7 +43,6 @@ export function PendingCoachingRequests({
 function RequestCard({ request }: { request: CoachingRequest }) {
   const queryClient = useQueryClient()
   const router = useRouter()
-  console.log(request)
 
   const { mutate: acceptRequest, isPending: isAccepting } =
     useAcceptCoachingRequestMutation({

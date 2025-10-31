@@ -267,21 +267,15 @@ export const authOptions = {
     async redirect({ url, baseUrl }) {
       // Default web behavior - relative URLs become absolute
       if (url.startsWith('/')) {
-        console.info('📱 [NEXTAUTH] Relative URL redirect:', {
-          from: url,
-          to: `${baseUrl}${url}`,
-        })
         return `${baseUrl}${url}`
       }
 
       // If URL is on same origin, allow it
       if (url.startsWith(baseUrl)) {
-        console.info('📱 [NEXTAUTH] Same origin redirect:', { url })
         return url
       }
 
       // Otherwise redirect to base URL
-      console.info('📱 [NEXTAUTH] Fallback to base URL:', { baseUrl })
       return baseUrl
     },
     async signIn({ account, profile }) {
