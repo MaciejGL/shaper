@@ -308,17 +308,19 @@ export const EnhancedWebView = forwardRef<
       navigateToPath: (path: string) => {
         const target = JSON.stringify(path)
         const hasSessionToken = path.includes('session_token')
+        const isExchangeEndpoint = path.includes('/api/mobile-auth/exchange')
 
         webViewRef.current?.injectJavaScript(`
           (function() {
             try {
               const target = ${target};
               const hasSessionToken = ${hasSessionToken};
+              const isExchangeEndpoint = ${isExchangeEndpoint};
               
-              // If URL contains session_token, ALWAYS do full navigation
-              // This ensures the page loads fresh and MobileSessionRestore can detect it
-              if (hasSessionToken) {
-                console.log('🔄 [NAVIGATION] Full navigation for session restore:', target);
+              // If URL contains session_token OR is exchange endpoint, ALWAYS do full navigation
+              // This ensures the page loads fresh and server can set cookies
+              if (hasSessionToken || isExchangeEndpoint) {
+                console.log('🔄 [NAVIGATION] Full navigation for:', target);
                 window.location.href = target;
                 return true;
               }

@@ -96,10 +96,22 @@ export function PushNotificationManager({
 
         // Parse the normalized URL
         const parsed = Linking.parse(normalizedUrl)
-        console.info('🔗 Parsed deep link:', parsed)
+        console.info('🔗 Parsed deep link:', {
+          url: normalizedUrl,
+          hostname: parsed.hostname,
+          path: parsed.path,
+          queryParams: parsed.queryParams,
+        })
 
         // Handle OAuth handoff at root level: hypro://?oauth_code=XXX&next=/fitspace/workout
         const oauthCode = parsed.queryParams?.oauth_code as string | undefined
+        console.info('🔐 [OAUTH-CHECK] Checking for oauth_code:', {
+          oauthCode: oauthCode
+            ? oauthCode.substring(0, 8) + '...'
+            : 'NOT FOUND',
+          allParams: parsed.queryParams,
+        })
+
         if (oauthCode) {
           const next =
             (parsed.queryParams?.next as string) || '/fitspace/workout'
@@ -109,8 +121,9 @@ export function PushNotificationManager({
             next,
           })
 
-          // Exchange handoff code for session cookies in the WebView
-          const exchangeUrl = `https://www.hypro.app/api/mobile-auth/exchange?code=${oauthCode}`
+          // Navigate to exchange endpoint with code and next parameter
+          // The endpoint will set session cookies and redirect to the final destination
+          const exchangeUrl = `https://www.hypro.app/api/mobile-auth/exchange?code=${oauthCode}&next=${encodeURIComponent(next)}`
 
           const attemptExchange = (attempt = 1) => {
             if (isReady()) {
@@ -118,17 +131,8 @@ export function PushNotificationManager({
                 `🔐 [OAUTH-HANDOFF] Exchange attempt ${attempt} - Loading exchange endpoint`,
               )
 
-              // Navigate to exchange endpoint (this sets the session cookies)
+              // Navigate to exchange endpoint (it will set cookies and redirect)
               navigateToPath(exchangeUrl)
-
-              // After a short delay, navigate to the final destination
-              setTimeout(() => {
-                console.info(
-                  '🔐 [OAUTH-HANDOFF] Exchange complete, navigating to:',
-                  next,
-                )
-                navigateToPath(next)
-              }, 800)
             } else {
               console.warn(
                 `🔐 [OAUTH-HANDOFF] Exchange attempt ${attempt} - WebView not ready, retrying...`,
