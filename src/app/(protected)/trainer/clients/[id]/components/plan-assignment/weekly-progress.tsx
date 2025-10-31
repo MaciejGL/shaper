@@ -9,7 +9,8 @@ import {
   Reply,
   Send,
 } from 'lucide-react'
-import { useState } from 'react'
+import { parseAsInteger, parseAsString, useQueryState } from 'nuqs'
+import { useEffect, useMemo, useState } from 'react'
 
 import { dayNames } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Badge } from '@/components/ui/badge'
@@ -44,12 +45,28 @@ interface WeeklyProgressProps {
 }
 
 export function WeeklyProgress({ plan, clientId }: WeeklyProgressProps) {
+  // Read deep-link query params directly
+  const [week] = useQueryState('week', parseAsInteger)
+  const [day] = useQueryState('day', parseAsInteger)
+  const [exercise] = useQueryState('exercise', parseAsString)
+
   // Fetch all shared notes from the client in one call
   const { data: sharedNotesData } = useGetClientSharedNotesQuery({
     clientId,
   })
 
   const sharedNotes = sharedNotesData?.clientSharedNotes || []
+
+  // Find the week ID that matches the deep link weekNumber
+  const initialWeekId = useMemo(() => {
+    if (week !== null) {
+      const targetWeek = plan.weeks.find((w, index) => index + 1 === week)
+      return targetWeek?.id || plan.weeks[0]?.id
+    }
+    return plan.weeks[0]?.id
+  }, [week, plan.weeks])
+
+  const [selectedWeekId, setSelectedWeekId] = useState(initialWeekId)
 
   return (
     <div className="space-y-4">
@@ -61,7 +78,11 @@ export function WeeklyProgress({ plan, clientId }: WeeklyProgressProps) {
         </Badge>
       </div>
 
-      <Tabs defaultValue={plan.weeks[0]?.id} className="w-full">
+      <Tabs
+        value={selectedWeekId}
+        onValueChange={setSelectedWeekId}
+        className="w-full"
+      >
         <TabsList className="w-full">
           {plan.weeks.map((week, index) => (
             <TabsTrigger key={week.id} value={week.id}>
@@ -76,8 +97,14 @@ export function WeeklyProgress({ plan, clientId }: WeeklyProgressProps) {
         {plan.weeks.map((week) => (
           <TabsContent key={week.id} value={week.id} className="mt-1">
             <div className="space-y-3">
-              {week.days.map((day) => (
-                <DayCard key={day.id} day={day} sharedNotes={sharedNotes} />
+              {week.days.map((dayItem) => (
+                <DayCard
+                  key={dayItem.id}
+                  day={dayItem}
+                  sharedNotes={sharedNotes}
+                  shouldExpand={day !== null && dayItem.dayOfWeek === day}
+                  highlightExercise={exercise || undefined}
+                />
               ))}
             </div>
           </TabsContent>
@@ -90,13 +117,17 @@ export function WeeklyProgress({ plan, clientId }: WeeklyProgressProps) {
 const DayCard = ({
   day,
   sharedNotes,
+  shouldExpand,
+  highlightExercise,
 }: {
   day: NonNullable<
     GQLGetClientByIdQuery['getClientActivePlan']
   >['weeks'][number]['days'][number]
   sharedNotes: SharedNote[]
+  shouldExpand?: boolean
+  highlightExercise?: string
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(shouldExpand || false)
 
   const checkIcons = {
     completed: <CheckCircle className="size-4 text-green-600" />,
@@ -177,11 +208,12 @@ const DayCard = ({
             </p>
           ) : (
             <div className="space-y-4 overflow-x-auto">
-              {day.exercises.map((exercise) => (
+              {day.exercises.map((exerciseItem) => (
                 <ExerciseCard
-                  key={exercise.id}
-                  exercise={exercise}
+                  key={exerciseItem.id}
+                  exercise={exerciseItem}
                   sharedNotes={sharedNotes}
+                  shouldScroll={highlightExercise === exerciseItem.id}
                 />
               ))}
             </div>
@@ -195,11 +227,13 @@ const DayCard = ({
 const ExerciseCard = ({
   exercise,
   sharedNotes,
+  shouldScroll,
 }: {
   exercise: NonNullable<
     GQLGetClientByIdQuery['getClientActivePlan']
   >['weeks'][number]['days'][number]['exercises'][number]
   sharedNotes: SharedNote[]
+  shouldScroll?: boolean
 }) => {
   const hasLogs = exercise.sets.some((set) => set.log)
   const completedSets = exercise.sets.filter((set) => set.completedAt).length
@@ -212,8 +246,22 @@ const ExerciseCard = ({
     (note) => note.relatedTo && currentExerciseIds.includes(note.relatedTo),
   )
 
+  // Scroll to this exercise if it should be highlighted
+  useEffect(() => {
+    if (shouldScroll) {
+      // Delay scroll to ensure DOM is ready after tab/collapsible animations
+      setTimeout(() => {
+        const element = document.getElementById(`exercise-${exercise.id}`)
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 300)
+    }
+  }, [shouldScroll, exercise.id])
+
   return (
-    <div className="space-y-3 bg-card-on-card rounded-md p-4">
+    <div
+      id={`exercise-${exercise.id}`}
+      className="space-y-3 bg-card-on-card rounded-md p-4"
+    >
       {/* Exercise Header */}
       <div className="flex items-center justify-between">
         <h4 className="font-medium text-sm">{exercise.name}</h4>

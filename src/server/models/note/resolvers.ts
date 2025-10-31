@@ -489,7 +489,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       },
     })
 
-    // Send push notification to trainer if note is shared and user is a client
+    // Send notification to trainer if note is shared and user is a client
     if (shareWithTrainer && exercise.day.week.plan) {
       const plan = exercise.day.week.plan
       const isClientNote = plan.assignedToId === user.user.id
@@ -500,7 +500,31 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
             ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
             : user.user.name || 'Client'
 
-        await notifyTrainerExerciseNote(plan.createdBy.id, clientName, note)
+        const clientId = user.user.id
+        const weekNumber = exercise.day.week.weekNumber
+        const dayOfWeek = exercise.day.dayOfWeek
+        const deepLink = `/trainer/clients/${clientId}?tab=active-plan&week=${weekNumber}&day=${dayOfWeek}&exercise=${exerciseId}`
+
+        // Create in-app notification
+        await createNotification(
+          {
+            userId: plan.createdBy.id,
+            createdBy: clientId,
+            type: GQLNotificationType.ExerciseNoteAdded,
+            message: `${clientName} added a note to their exercise`,
+            link: deepLink,
+            relatedItemId: newNote.id,
+          },
+          context,
+        )
+
+        // Send push notification
+        await notifyTrainerExerciseNote(
+          plan.createdBy.id,
+          clientName,
+          note,
+          deepLink,
+        )
       }
     }
 

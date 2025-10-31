@@ -76,7 +76,7 @@ export default class Notification implements GQLNotification {
       case 'MEETING_REMINDER':
         return GQLNotificationType.MeetingReminder
       default:
-        console.log(
+        console.warn(
           'Unknown notification type:',
           this.data.type,
           this.data.message,

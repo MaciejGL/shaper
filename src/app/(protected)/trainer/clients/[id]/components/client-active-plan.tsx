@@ -1,4 +1,5 @@
 import { Edit } from 'lucide-react'
+import { parseAsInteger, parseAsString, useQueryState } from 'nuqs'
 
 import { ButtonLink } from '@/components/ui/button-link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -22,6 +23,12 @@ export function ClientActivePlan({
   activePlan?: GQLGetClientByIdQuery['getClientActivePlan'] | null
   hasAssignedPlans: boolean
 }) {
+  // Read deep-link query params directly
+  const [week] = useQueryState('week', parseAsInteger)
+  const [day] = useQueryState('day', parseAsInteger)
+  const [exercise] = useQueryState('exercise', parseAsString)
+
+  const hasDeepLink = week !== null && day !== null && exercise !== null
   return (
     <div>
       <ClientHeader
@@ -40,7 +47,7 @@ export function ClientActivePlan({
       />
 
       {activePlan ? (
-        <Tabs defaultValue="active-plan">
+        <Tabs defaultValue={hasDeepLink ? 'progress' : 'active-plan'}>
           <TabsList>
             <TabsTrigger value="active-plan">Details</TabsTrigger>
             <TabsTrigger value="progress">Progress</TabsTrigger>

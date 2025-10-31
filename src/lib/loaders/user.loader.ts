@@ -14,9 +14,6 @@ import { prisma } from '@/lib/db'
 export const createUserLoaders = () => ({
   // STANDARDIZED: Use same include pattern as userBasic for batching
   getCurrentUser: new DataLoader(async (emails: readonly string[]) => {
-    console.info(
-      `🔍 [USER-LOADER] getCurrentUser loading ${emails.length} users by email`,
-    )
     const users = await prisma.user.findMany({
       where: { email: { in: emails as string[] } },
     })
@@ -26,9 +23,6 @@ export const createUserLoaders = () => ({
   }),
 
   authSession: new DataLoader(async (emails: readonly string[]) => {
-    console.info(
-      `🔍 [USER-LOADER] authSession loading ${emails.length} users by email`,
-    )
     const user = await prisma.user.findMany({
       where: { email: { in: emails as string[] } },
       include: {
@@ -66,7 +60,6 @@ export const createUserLoaders = () => ({
 
   // STANDARDIZED: Standard user data by ID (profile + trainer) - PREFERRED for most use cases
   userBasic: new DataLoader(async (ids: readonly string[]) => {
-    console.info(`🔍 [USER-LOADER] userBasic loading ${ids.length} users by ID`)
     const users = await prisma.user.findMany({
       where: { id: { in: ids as string[] } },
       include: {
