@@ -10,7 +10,9 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { UserProvider } from '@/context/user-context'
 import { UserPreferencesProvider } from '@/context/user-preferences-context'
 import {
+  GQLGetMySubscriptionStatusQuery,
   GQLUserBasicQuery,
+  GetMySubscriptionStatusDocument,
   UserBasicDocument,
 } from '@/generated/graphql-client'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
@@ -20,19 +22,31 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { data } = await gqlServerFetch<GQLUserBasicQuery>(
-    UserBasicDocument,
-    {},
-  )
+  // Fetch user and subscription data in parallel with explicit cache control
+  const [userResult, subscriptionResult] = await Promise.all([
+    gqlServerFetch<GQLUserBasicQuery>(
+      UserBasicDocument,
+      {},
+      { cache: 'no-store' },
+    ),
+    gqlServerFetch<GQLGetMySubscriptionStatusQuery>(
+      GetMySubscriptionStatusDocument,
+      {},
+      { cache: 'no-store' },
+    ),
+  ])
 
-  if (!data) {
+  if (!userResult.data) {
     return redirect('/login')
   }
 
   return (
-    <UserProvider initialData={data}>
+    <UserProvider
+      initialData={userResult.data}
+      initialSubscriptionData={subscriptionResult.data ?? undefined}
+    >
       <PostHogProvider>
-        <UserPreferencesProvider initialData={data}>
+        <UserPreferencesProvider initialData={userResult.data}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
