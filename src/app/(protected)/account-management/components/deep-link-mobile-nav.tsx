@@ -8,16 +8,16 @@ import {
   TrendingUp,
   UserCheck,
 } from 'lucide-react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useMemo } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
-import { navigateToPath as navigateToDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
 
 export function DeepLinkMobileNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const { isNativeApp, navigateToPath } = useMobileApp()
   const isKeyboardVisible = useKeyboardVisible()
 
@@ -71,11 +71,11 @@ export function DeepLinkMobileNav() {
 
   const handleNavigation = (href: string) => {
     if (isNativeApp) {
-      // Use native navigation
+      // Use native app WebView navigation
       navigateToPath(href)
     } else {
-      // ✅ Use bulletproof deep link utility
-      navigateToDeepLink(href)
+      // Use Next.js router for SPA navigation
+      router.push(href)
     }
   }
 
