@@ -65,6 +65,13 @@ const useNotifications = (
       queryKey: useNotificationsQuery.getKey({ userId: user.id }),
     })
 
+    // Use notification.link if available (set by backend with proper tabs and params)
+    if (notification.link) {
+      router.push(notification.link)
+      return
+    }
+
+    // Fallback handling for notifications without link
     if (
       notification.type === GQLNotificationType.NewTrainingPlanAssigned &&
       notification.relatedItemId
@@ -72,20 +79,8 @@ const useNotifications = (
       router.push(`/fitspace/my-plans?tab=available`)
     }
 
-    if (
-      notification.type === GQLNotificationType.TrainerOfferReceived &&
-      notification.link
-    ) {
-      router.push(notification.link)
-    }
-
     if (notification.type === GQLNotificationType.TrainerNoteShared) {
       router.push(createScrollUrl('/fitspace/my-trainer', 'trainer-notes'))
-    }
-
-    if (notification.type === GQLNotificationType.CoachingRequest) {
-      // Use the link from notification if available, fallback to client view
-      router.push(notification.link || '/fitspace/my-trainer')
     }
   }
 

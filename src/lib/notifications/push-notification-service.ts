@@ -256,6 +256,7 @@ export async function notifyTrainerExerciseNote(
   trainerId: string,
   clientName: string,
   noteText: string,
+  link?: string,
 ) {
   const truncatedText =
     noteText.length > 50 ? `${noteText.substring(0, 50)}...` : noteText
@@ -263,7 +264,7 @@ export async function notifyTrainerExerciseNote(
     [trainerId],
     'Exercise note added',
     `${clientName} added a note to their exercise: "${truncatedText}"`,
-    '/trainer/clients',
+    link || '/trainer/clients',
   )
 }
 
