@@ -69,25 +69,25 @@ export async function sendPushForNotification(
       case GQLNotificationType.CoachingRequest:
         return await notifyCoachingRequest(
           userId,
-          additionalData?.senderName || 'Someone',
+          additionalData?.senderName || 'User',
         )
 
       case GQLNotificationType.CoachingRequestAccepted:
         return await notifyCoachingRequestAccepted(
           userId,
-          additionalData?.senderName || 'Someone',
+          additionalData?.senderName || 'User',
         )
 
       case GQLNotificationType.CoachingRequestRejected:
         return await notifyCoachingRequestRejected(
           userId,
-          additionalData?.senderName || 'Someone',
+          additionalData?.senderName || 'User',
         )
 
       case GQLNotificationType.CoachingCancelled:
         return await notifyCoachingCancelled(
           userId,
-          additionalData?.clientName || 'Someone',
+          additionalData?.clientName || 'User',
         )
 
       case GQLNotificationType.NewTrainingPlanAssigned:
@@ -124,7 +124,7 @@ export async function sendPushForNotification(
       case GQLNotificationType.ExerciseNoteReply:
         return await notifyExerciseCommentReply(
           userId,
-          additionalData?.senderName || 'Someone',
+          additionalData?.senderName || 'User',
           additionalData?.noteText || 'Replied to your exercise note',
         )
 
@@ -146,7 +146,7 @@ export async function sendPushForNotification(
       case GQLNotificationType.TeamInvitation:
         return await notifyTeamInvitation(
           userId,
-          additionalData?.senderName || 'Someone',
+          additionalData?.senderName || 'User',
           additionalData?.teamName || 'a team',
         )
       case GQLNotificationType.Message:

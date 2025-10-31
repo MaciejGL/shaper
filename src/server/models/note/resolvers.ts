@@ -684,9 +684,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     // Send push notification to the original note creator (if it's not the same person)
     if (parentNote.createdById !== user.user.id) {
       const senderName =
-        user.user.profile?.firstName && user.user.profile?.lastName
+        (user.user.profile?.firstName && user.user.profile?.lastName
           ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
-          : user.user.name || 'Someone'
+          : null) ||
+        user.user.profile?.firstName ||
+        user.user.name ||
+        user.user.email?.split('@')[0] ||
+        'User'
 
       await notifyExerciseCommentReply(parentNote.createdById, senderName, text)
     }

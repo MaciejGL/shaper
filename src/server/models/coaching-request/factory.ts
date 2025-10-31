@@ -198,9 +198,13 @@ export async function createCoachingRequest({
     })
 
     const senderName =
-      sender?.profile?.firstName &&
-      sender?.profile?.lastName &&
-      `${sender?.profile?.firstName} ${sender?.profile?.lastName}`
+      (sender?.profile?.firstName &&
+        sender?.profile?.lastName &&
+        `${sender?.profile?.firstName} ${sender?.profile?.lastName}`) ||
+      sender?.profile?.firstName ||
+      sender?.name ||
+      sender?.email?.split('@')[0] ||
+      'User'
 
     // Determine the appropriate link based on recipient role
     const notificationLink =
@@ -227,11 +231,7 @@ export async function createCoachingRequest({
     )
 
     // Send push notification
-    await notifyCoachingRequest(
-      recipient.id,
-      senderName || 'Someone',
-      notificationLink,
-    )
+    await notifyCoachingRequest(recipient.id, senderName, notificationLink)
 
     return new CoachingRequest(coachingRequest, context)
   } catch (error) {
@@ -306,7 +306,10 @@ export async function acceptCoachingRequest({
       (coachingRequest.recipient?.profile?.firstName &&
         coachingRequest.recipient?.profile?.lastName &&
         `${coachingRequest.recipient?.profile?.firstName} ${coachingRequest.recipient?.profile?.lastName}`) ||
-      coachingRequest.recipient?.name
+      coachingRequest.recipient?.profile?.firstName ||
+      coachingRequest.recipient?.name ||
+      coachingRequest.recipient?.email?.split('@')[0] ||
+      'User'
 
     // Connect trainer and client relationship
     if (recipientRole === GQLUserRole.Trainer) {
@@ -350,7 +353,7 @@ export async function acceptCoachingRequest({
     await createNotification(
       {
         userId: coachingRequest.senderId,
-        message: `${recipientName ?? 'Someone'} accepted your coaching request.`,
+        message: `${recipientName} accepted your coaching request.`,
         type: GQLNotificationType.CoachingRequestAccepted,
         createdBy: recipientId,
         relatedItemId: coachingRequest.id,
@@ -358,10 +361,7 @@ export async function acceptCoachingRequest({
       context,
     )
 
-    await notifyCoachingRequestAccepted(
-      coachingRequest.senderId,
-      recipientName || 'Someone',
-    )
+    await notifyCoachingRequestAccepted(coachingRequest.senderId, recipientName)
 
     // Invalidate access control cache and trainer cache for both users
     const trainerId =
@@ -504,11 +504,14 @@ export async function rejectCoachingRequest({
       (coachingRequest.recipient?.profile?.firstName &&
         coachingRequest.recipient?.profile?.lastName &&
         `${coachingRequest.recipient?.profile?.firstName} ${coachingRequest.recipient?.profile?.lastName}`) ||
-      coachingRequest.recipient?.name
+      coachingRequest.recipient?.profile?.firstName ||
+      coachingRequest.recipient?.name ||
+      coachingRequest.recipient?.email?.split('@')[0] ||
+      'User'
     await createNotification(
       {
         userId: coachingRequest.senderId,
-        message: `${recipientName ?? 'Someone'} has rejected your request to start coaching.`,
+        message: `${recipientName} has rejected your request to start coaching.`,
         type: GQLNotificationType.CoachingRequestRejected,
         createdBy: recipientId,
         relatedItemId: coachingRequest.id,
@@ -516,10 +519,7 @@ export async function rejectCoachingRequest({
       context,
     )
 
-    await notifyCoachingRequestRejected(
-      coachingRequest.senderId,
-      recipientName || 'Someone',
-    )
+    await notifyCoachingRequestRejected(coachingRequest.senderId, recipientName)
 
     return new CoachingRequest(coachingRequest, context)
   } catch (error) {

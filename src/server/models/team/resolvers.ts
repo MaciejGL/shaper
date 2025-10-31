@@ -369,9 +369,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Send all notifications (email, in-app, push)
     const inviterName =
-      user.user.profile?.firstName && user.user.profile?.lastName
+      (user.user.profile?.firstName && user.user.profile?.lastName
         ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
-        : user.user.name || 'Someone'
+        : null) ||
+      user.user.profile?.firstName ||
+      user.user.name ||
+      user.user.email?.split('@')[0] ||
+      'User'
 
     const locations = invitation.team.locations.map(
       (tl) => `${tl.location.city}, ${tl.location.country}`,
