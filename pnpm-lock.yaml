@@ -127,9 +127,6 @@ importers:
       '@tanstack/react-query':
         specifier: 5.84.1
         version: 5.84.1(react@19.1.1)
-      '@types/google-one-tap':
-        specifier: ^1.2.6
-        version: 1.2.6
       '@types/pg':
         specifier: ^8.15.5
         version: 8.15.5
@@ -3034,9 +3031,6 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
-
-  '@types/google-one-tap@1.2.6':
-    resolution: {integrity: sha512-REmJsXVHvKb/sgI8DF+7IesMbDbcsEokHBqxU01ENZ8d98UPWdRLhUCtxEm9bhNFFg6PJGy7PNFdvovp0hK3jA==}
 
   '@types/graphql@14.5.0':
     resolution: {integrity: sha512-MOkzsEp1Jk5bXuAsHsUi6BVv0zCO+7/2PTiZMXWDSsMXvNU6w/PLMQT2vHn8hy2i0JqojPz1Sz6rsFjHtsU0lA==}
@@ -10140,8 +10134,6 @@ snapshots:
       '@types/json-schema': 7.0.15
 
   '@types/estree@1.0.8': {}
-
-  '@types/google-one-tap@1.2.6': {}
 
   '@types/graphql@14.5.0':
     dependencies:
