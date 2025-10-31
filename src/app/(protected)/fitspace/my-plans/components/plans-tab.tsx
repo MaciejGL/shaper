@@ -13,11 +13,14 @@ import {
   AvailablePlan,
   CompletedPlan,
   PlanAction,
+  PlanStatus,
   UnifiedPlan,
+  getPlanStatus,
 } from '../types'
 
 import { PlanCard } from './plan-card'
 import { PlanDetailsDrawer } from './plan-details-drawer'
+import { FilterOption, PlanStatusFilter } from './plan-status-filter'
 
 interface PlansTabProps {
   activePlan: ActivePlan | null
@@ -33,6 +36,77 @@ interface PlansTabProps {
   loading: boolean
 }
 
+// Status priority for sorting (lower number = higher priority)
+const STATUS_PRIORITY: Record<PlanStatus, number> = {
+  [PlanStatus.Active]: 1,
+  [PlanStatus.Paused]: 2,
+  [PlanStatus.Template]: 3,
+  [PlanStatus.Completed]: 4,
+}
+
+// Helper function to get date for sorting
+function getPlanDate(plan: UnifiedPlan): Date {
+  if (plan && 'startDate' in plan && plan.startDate) {
+    return new Date(plan.startDate)
+  }
+  if (plan && 'updatedAt' in plan && plan.updatedAt) {
+    return new Date(plan.updatedAt)
+  }
+  return new Date(0) // Fallback to epoch
+}
+
+// Helper function to count plans by status
+function countPlansByStatus(
+  allPlans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[],
+): Record<FilterOption, number> {
+  const counts: Record<FilterOption, number> = {
+    all: allPlans.length,
+    [PlanStatus.Active]: 0,
+    [PlanStatus.Paused]: 0,
+    [PlanStatus.Template]: 0,
+    [PlanStatus.Completed]: 0,
+  }
+
+  allPlans.forEach(({ plan, isActive }) => {
+    const status = getPlanStatus(plan, isActive)
+    counts[status] = (counts[status] || 0) + 1
+  })
+
+  return counts
+}
+
+// Helper function to filter plans
+function filterPlans(
+  allPlans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[],
+  filter: FilterOption,
+): { plan: NonNullable<UnifiedPlan>; isActive: boolean }[] {
+  if (filter === 'all') return allPlans
+
+  return allPlans.filter(({ plan, isActive }) => {
+    const status = getPlanStatus(plan, isActive)
+    return status === filter
+  })
+}
+
+// Helper function to sort plans by status priority and date
+function sortPlans(
+  plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[],
+): { plan: NonNullable<UnifiedPlan>; isActive: boolean }[] {
+  return [...plans].sort((a, b) => {
+    const statusA = getPlanStatus(a.plan, a.isActive)
+    const statusB = getPlanStatus(b.plan, b.isActive)
+
+    // First sort by status priority
+    const priorityDiff = STATUS_PRIORITY[statusA] - STATUS_PRIORITY[statusB]
+    if (priorityDiff !== 0) return priorityDiff
+
+    // Then sort by date (newest first)
+    const dateA = getPlanDate(a.plan)
+    const dateB = getPlanDate(b.plan)
+    return dateB.getTime() - dateA.getTime()
+  })
+}
+
 export function PlansTab({
   activePlan,
   availablePlans = [],
@@ -42,6 +116,7 @@ export function PlansTab({
 }: PlansTabProps) {
   const [selectedPlan, setSelectedPlan] = useState<UnifiedPlan | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [selectedFilter, setSelectedFilter] = useState<FilterOption>('all')
 
   // Combine all plans into a single array
   const allPlans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[] = [
@@ -49,6 +124,13 @@ export function PlansTab({
     ...availablePlans.map((plan) => ({ plan, isActive: false })),
     ...completedPlans.map((plan) => ({ plan, isActive: false })),
   ]
+
+  // Count plans by status
+  const statusCounts = countPlansByStatus(allPlans)
+
+  // Filter and sort plans
+  const filteredPlans = filterPlans(allPlans, selectedFilter)
+  const sortedPlans = sortPlans(filteredPlans)
 
   const handlePlanClick = (plan: UnifiedPlan) => {
     setSelectedPlan(plan)
@@ -70,10 +152,17 @@ export function PlansTab({
 
   if (loading) {
     return (
-      <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <CardSkeleton key={index} />
-        ))}
+      <div className="space-y-4">
+        <PlanStatusFilter
+          selectedFilter={selectedFilter}
+          onFilterChange={setSelectedFilter}
+          counts={statusCounts}
+        />
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <CardSkeleton key={index} />
+          ))}
+        </div>
       </div>
     )
   }
@@ -84,34 +173,28 @@ export function PlansTab({
 
   return (
     <>
-      <div className="grid gap-8 grid-cols-1 md:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          {activePlan ? (
-            <>
-              <p className="text-base font-medium">Active Plan</p>
-              <PlanCard plan={activePlan} isActive onClick={handlePlanClick} />
-            </>
-          ) : (
-            <EmptyActivePlansState />
-          )}
-        </div>
+      <div className="space-y-4">
+        {/* Filter Chips */}
+        <PlanStatusFilter
+          selectedFilter={selectedFilter}
+          onFilterChange={setSelectedFilter}
+          counts={statusCounts}
+        />
 
-        {availablePlans.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <p className="text-base font-medium">Training Templates</p>
-            {availablePlans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} onClick={handlePlanClick} />
+        {/* Plans List */}
+        {sortedPlans.length > 0 ? (
+          <div className="space-y-2">
+            {sortedPlans.map(({ plan, isActive }) => (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                isActive={isActive}
+                onClick={handlePlanClick}
+              />
             ))}
           </div>
-        )}
-
-        {completedPlans.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <p className="text-base font-medium">Completed</p>
-            {completedPlans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} onClick={handlePlanClick} />
-            ))}
-          </div>
+        ) : (
+          <EmptyFilterState filter={selectedFilter} />
         )}
       </div>
 
@@ -127,12 +210,25 @@ export function PlansTab({
   )
 }
 
-function EmptyActivePlansState() {
-  const { user } = useUser()
-  const hasTrainer = user?.trainerId
+function EmptyFilterState({ filter }: { filter: FilterOption }) {
+  const getFilterLabel = () => {
+    switch (filter) {
+      case PlanStatus.Active:
+        return 'active'
+      case PlanStatus.Paused:
+        return 'paused'
+      case PlanStatus.Template:
+        return 'template'
+      case PlanStatus.Completed:
+        return 'completed'
+      default:
+        return ''
+    }
+  }
+
   return (
     <Card borderless>
-      <CardContent className="flex-center flex-col gap-4 py-6">
+      <CardContent className="flex-center flex-col gap-4 py-12">
         <div className="size-16 bg-muted rounded-full flex items-center justify-center mx-auto">
           <svg
             className="size-8 text-muted-foreground"
@@ -148,34 +244,10 @@ function EmptyActivePlansState() {
             />
           </svg>
         </div>
-        <h3 className="font-semibold">No Active Plan</h3>
-        {hasTrainer ? (
-          <p className="text-muted-foreground text-center max-w-md">
-            You don't have any active plan yet. Activate one of your template
-            plans or the one assigned by your trainer.
-          </p>
-        ) : (
-          <p className="text-muted-foreground text-center max-w-md">
-            You don't have any active plan yet. Activate one of your template
-            plans or find a plan that suits you best.
-          </p>
-        )}
-
-        {!hasTrainer && (
-          <ButtonLink
-            href="/fitspace/explore?tab=plans"
-            iconEnd={<ChevronRight />}
-          >
-            Explore Plans
-          </ButtonLink>
-        )}
-        {!hasTrainer && (
-          <TrainerDiscoveryCta
-            variant="compact"
-            title="Need Help Getting Started?"
-            subtitle="Connect with a trainer for personalized guidance"
-          />
-        )}
+        <h3 className="font-semibold">No {getFilterLabel()} plans</h3>
+        <p className="text-muted-foreground text-center max-w-md">
+          You don't have any {getFilterLabel()} plans at the moment.
+        </p>
       </CardContent>
     </Card>
   )

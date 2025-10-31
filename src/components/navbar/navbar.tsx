@@ -139,7 +139,7 @@ export const Navbar = ({
             ) : null}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {user ? (
               <NotificationBell
                 notifications={notifications}

@@ -40,9 +40,10 @@ export function FavouriteWorkoutsList({
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Custom Templates</h3>
-          <Button disabled iconOnly={<Plus />} />
+        <div className="flex justify-end items-center">
+          <Button disabled iconStart={<Plus />}>
+            Add Template
+          </Button>
         </div>
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, index) => (
@@ -57,14 +58,13 @@ export function FavouriteWorkoutsList({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Custom Templates</h3>
+      <div className="flex justify-end items-center">
         <Button
           onClick={() => setIsCreateModalOpen(true)}
-          iconOnly={<Plus />}
+          iconStart={<Plus />}
           disabled={hasReachedLimit}
         >
-          Create
+          Add Template
         </Button>
       </div>
 
