@@ -17,6 +17,8 @@ import {
 } from '@/generated/graphql-client'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProtectedLayout({
   children,
 }: {
