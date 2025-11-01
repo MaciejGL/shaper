@@ -15,6 +15,8 @@ export const ErrorContent = () => {
         return 'There was an issue linking your account. Please try signing in again.'
       case 'Configuration':
         return "There's a configuration issue. Please contact support if this persists."
+      case 'google':
+        return 'Google sign-in is temporarily unavailable. This usually means the OAuth provider is not properly configured. Please try again in a few moments or contact support if this persists.'
       case 'OAuthCallback':
       case 'OAuthSignin':
         return 'There was an issue with the sign-in process. Please try again.'
