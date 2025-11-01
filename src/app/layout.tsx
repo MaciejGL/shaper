@@ -71,9 +71,9 @@ export const metadata: Metadata = {
     images: ['/favicons/android-chrome-192x192.png'],
   },
   alternates: {
-    canonical: 'https://hypro.app',
+    canonical: 'https://www.hypro.app',
   },
-  metadataBase: new URL('https://hypro.app'),
+  metadataBase: new URL('https://www.hypro.app'),
   applicationName: 'Hypro',
   appleWebApp: {
     title: 'Hypro',
