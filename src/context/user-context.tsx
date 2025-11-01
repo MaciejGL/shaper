@@ -72,8 +72,19 @@ export function UserProvider({
     },
   )
 
+  // Refetch user data when session becomes authenticated (after login)
   // Clear user query cache when user logs out
   useEffect(() => {
+    if (session.status === 'authenticated') {
+      // Immediately refetch user data when authenticated
+      queryClient.invalidateQueries({
+        queryKey: useUserBasicQuery.getKey({}),
+      })
+      queryClient.invalidateQueries({
+        queryKey: useGetMySubscriptionStatusQuery.getKey({}),
+      })
+    }
+
     if (session.status === 'unauthenticated') {
       // Clear all user-related queries to prevent stale data
       queryClient.invalidateQueries({

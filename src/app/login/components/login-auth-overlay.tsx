@@ -13,7 +13,7 @@ import { AnimatedLogo } from '@/components/animated-logo'
  * Checks for URL parameter from OAuth success.
  */
 export function LoginAuthOverlay() {
-  const { status } = useSession()
+  const { status, update } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showOverlay, setShowOverlay] = useState(false)
@@ -32,6 +32,23 @@ export function LoginAuthOverlay() {
       }
     }
   }, [status, router, searchParams])
+
+  // Aggressively poll for session when OAuth completes
+  useEffect(() => {
+    const authSuccess = searchParams?.get('success') === 'true'
+
+    if (authSuccess && status !== 'authenticated') {
+      // Trigger immediate session check
+      update()
+
+      // Poll every 300ms for faster session detection
+      const interval = setInterval(() => {
+        update()
+      }, 300)
+
+      return () => clearInterval(interval)
+    }
+  }, [searchParams, status, update])
 
   if (!showOverlay) {
     return null
