@@ -6,10 +6,10 @@ import { getRedisClient } from '@/lib/redis'
  * OAuth Handoff Code Storage
  *
  * Manages one-time codes for mobile OAuth handoff flow.
- * Codes are stored in Redis with 60-second TTL and consumed atomically.
+ * Codes are stored in Redis with 120-second TTL and consumed atomically.
  */
 
-const HANDOFF_TTL_SECONDS = 60
+const HANDOFF_TTL_SECONDS = 120
 const CODE_BYTES = 32
 
 interface HandoffData {

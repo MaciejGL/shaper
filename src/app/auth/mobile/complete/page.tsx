@@ -7,13 +7,16 @@ import prisma from '@/lib/db'
 
 import { MobileCompleteRedirect } from './mobile-complete-redirect'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 /**
  * Mobile OAuth Completion Page
  *
  * After successful OAuth in the external browser, this page:
  * 1. Verifies the user is authenticated
  * 2. Generates a one-time handoff code
- * 3. Saves it to Redis (60s TTL)
+ * 3. Saves it to Redis (120s TTL)
  * 4. Redirects to: hypro://?oauth_code=XXX&next=/fitspace/workout
  *
  * The mobile app intercepts the deep link and loads the exchange endpoint

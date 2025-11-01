@@ -149,9 +149,9 @@ export const authOptions = {
       name: 'next-auth.pkce.code_verifier',
       options: {
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         path: '/',
-        secure: true, // Required when sameSite: 'none'
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 900, // 15 minutes
       },
     },

@@ -9,6 +9,7 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { getBaseUrl } from '@/lib/get-base-url'
 
 export async function handleCustomerDeleted(customer: Stripe.Customer) {
   console.info('🗑️ Customer deleted:', customer.id)
@@ -120,7 +121,7 @@ async function sendCustomerDeletionEmail(
           month: 'long',
           day: 'numeric',
         }),
-        reactivateUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+        reactivateUrl: `${getBaseUrl()}/fitspace/settings`,
       })
       console.info(
         `📧 Customer deletion notification email sent to ${user.email}`,

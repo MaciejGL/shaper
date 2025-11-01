@@ -1,4 +1,5 @@
 import { Currency, SubscriptionStatus } from '@/generated/prisma/client'
+import { getBaseUrl } from '@/lib/get-base-url'
 
 // Subscription Configuration
 export const SUBSCRIPTION_CONFIG = {
@@ -100,10 +101,13 @@ export const API_CONFIG = {
   MAX_PAGE_SIZE: 100,
 
   // Return URLs for customer portal
-  PORTAL_RETURN_URLS: {
-    DEFAULT: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
-    SUCCESS: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings?success=true`,
-    CANCELLED: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings?cancelled=true`,
+  get PORTAL_RETURN_URLS() {
+    const baseUrl = getBaseUrl()
+    return {
+      DEFAULT: `${baseUrl}/fitspace/settings`,
+      SUCCESS: `${baseUrl}/fitspace/settings?success=true`,
+      CANCELLED: `${baseUrl}/fitspace/settings?cancelled=true`,
+    }
   },
 } as const
 

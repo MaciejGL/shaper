@@ -47,6 +47,8 @@ export async function GET(request: NextRequest) {
     if (!handoffData) {
       console.error('🔐 [EXCHANGE] Invalid or expired code:', {
         code: code.substring(0, 8) + '...',
+        timestamp: Date.now(),
+        userAgent: request.headers.get('user-agent'),
       })
       return NextResponse.redirect(
         new URL('/login?error=invalid_code', request.url),
@@ -104,6 +106,9 @@ export async function GET(request: NextRequest) {
     // Redirect to the final destination with session cookie
     const redirectUrl = new URL(next, request.nextUrl.origin)
     const response = NextResponse.redirect(redirectUrl)
+
+    // Prevent caching of this endpoint
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
 
     // Set NextAuth session token cookie
     const cookieName =
