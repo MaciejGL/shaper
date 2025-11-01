@@ -31,7 +31,6 @@ export function LoginAuthOverlay() {
 
       // If session becomes authenticated, hide overlay and redirect
       if (status === 'authenticated') {
-        setShowOverlay(false)
         router.push('/fitspace/workout')
       }
     }
