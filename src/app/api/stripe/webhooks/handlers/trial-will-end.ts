@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { User, UserProfile, UserSubscription } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { getBaseUrl } from '@/lib/get-base-url'
 
 export async function handleTrialWillEnd(subscription: Stripe.Subscription) {
   console.info('\n\n⏰ Trial will end:\n\n', subscription)
@@ -67,7 +68,7 @@ async function sendTrialEndingEmail(
         userName: userSubscription.user.profile?.firstName,
         daysRemaining,
         packageName: packageTemplate.name,
-        upgradeUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+        upgradeUrl: `${getBaseUrl()}/fitspace/settings`,
       })
       console.info(
         `📧 Trial ending email sent to ${userSubscription.user.email}`,

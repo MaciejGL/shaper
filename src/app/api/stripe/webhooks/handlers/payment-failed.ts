@@ -9,6 +9,7 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { getBaseUrl } from '@/lib/get-base-url'
 import { SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
 
 // Extend Stripe Invoice type to include subscription field that exists in API
@@ -113,7 +114,7 @@ async function sendPaymentFailedEmail(
         userName: user.profile?.firstName,
         gracePeriodDays: SUBSCRIPTION_CONFIG.GRACE_PERIOD_DAYS,
         packageName: packageTemplate.name,
-        updatePaymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+        updatePaymentUrl: `${getBaseUrl()}/fitspace/settings`,
       })
       console.info(`📧 Payment failed email sent to ${user.email}`)
     } catch (emailError) {
@@ -153,7 +154,7 @@ async function handleGracePeriodWarning(
             userName: user.profile?.firstName,
             packageName: packageTemplate.name,
             daysRemaining: daysUntilCancellation,
-            updatePaymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+            updatePaymentUrl: `${getBaseUrl()}/fitspace/settings`,
           })
           console.info(`📧 Grace period ending email sent to ${user.email}`)
         } catch (emailError) {

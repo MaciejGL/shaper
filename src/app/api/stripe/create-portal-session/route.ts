@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
+import { getBaseUrl } from '@/lib/get-base-url'
 import { stripe } from '@/lib/stripe/stripe'
 
 export async function POST(request: NextRequest) {
@@ -43,8 +44,7 @@ export async function POST(request: NextRequest) {
     // Create customer portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: user.stripeCustomerId,
-      return_url:
-        returnUrl || `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+      return_url: returnUrl || `${getBaseUrl()}/fitspace/settings`,
     })
 
     return NextResponse.json({

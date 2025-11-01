@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { prisma } from '@/lib/db'
+import { getBaseUrl } from '@/lib/get-base-url'
 import { getCurrentUser } from '@/lib/getUser'
 import { stripe } from '@/lib/stripe/stripe'
 
@@ -79,10 +80,11 @@ export async function POST(request: NextRequest) {
     })
 
     // Create onboarding link
+    const baseUrl = getBaseUrl()
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/trainer/teams?refresh=true`,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/trainer/teams?connected=true`,
+      refresh_url: `${baseUrl}/trainer/teams?refresh=true`,
+      return_url: `${baseUrl}/trainer/teams?connected=true`,
       type: 'account_onboarding',
     })
 

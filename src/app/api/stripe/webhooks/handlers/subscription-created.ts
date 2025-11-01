@@ -8,6 +8,7 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { getBaseUrl } from '@/lib/get-base-url'
 import {
   STRIPE_LOOKUP_KEYS,
   resolvePriceIdToLookupKey,
@@ -278,7 +279,7 @@ async function sendWelcomeEmail(
         userName: user.profile?.firstName,
         packageName: packageTemplate.name,
         isReactivation,
-        dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+        dashboardUrl: `${getBaseUrl()}/dashboard`,
       })
       console.info(`📧 Welcome email sent to ${user.email}`)
     } catch (emailError) {

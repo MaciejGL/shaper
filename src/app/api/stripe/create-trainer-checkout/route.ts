@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
+import { getBaseUrl } from '@/lib/get-base-url'
 import { COMMISSION_CONFIG } from '@/lib/stripe/config'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import {
@@ -130,9 +131,8 @@ export async function POST(request: NextRequest) {
       ...(discounts.length === 0 && { allow_promotion_codes: true }),
       success_url:
         successUrl ||
-        `${process.env.NEXT_PUBLIC_APP_URL}/offer/${offerToken}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:
-        cancelUrl || `${process.env.NEXT_PUBLIC_APP_URL}/offer/${offerToken}`,
+        `${getBaseUrl()}/offer/${offerToken}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${getBaseUrl()}/offer/${offerToken}`,
       metadata: sessionMetadata,
       // Subscription revenue sharing
       ...(mode === 'subscription' &&
