@@ -23,15 +23,11 @@ export function MobileOAuthTrigger({ callbackUrl }: { callbackUrl: string }) {
     // Mark as triggered immediately
     setTriggered(true)
 
-    // Wait 1 second for everything to settle (URLs, query params, page load, etc.)
-    const timer = setTimeout(() => {
-      signIn('google', {
-        callbackUrl,
-        redirect: true,
-      })
-    }, 1000)
-
-    return () => clearTimeout(timer)
+    // Trigger OAuth immediately - no artificial delay needed
+    signIn('google', {
+      callbackUrl,
+      redirect: true,
+    })
     // Only depend on callbackUrl, not triggered (to avoid re-running)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callbackUrl])

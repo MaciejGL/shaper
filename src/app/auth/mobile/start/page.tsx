@@ -5,6 +5,9 @@ import { authOptions } from '@/lib/auth/config'
 import { ExistingSessionHandoff } from './existing-session-handoff'
 import { MobileOAuthTrigger } from './mobile-oauth-trigger'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 /**
  * Mobile OAuth Start Page
  *

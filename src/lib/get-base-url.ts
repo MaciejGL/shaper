@@ -9,7 +9,7 @@ export function getBaseUrl() {
   }
 
   if (isProd) {
-    return 'https://hypro.app'
+    return 'https://www.hypro.app'
   }
 
   // Running on the server — use production URL or fallback
