@@ -50,10 +50,9 @@ export function UserProvider({
     {
       initialData,
       enabled: !!initialData || session.status === 'authenticated',
-      staleTime: 20 * 60 * 1000,
+      staleTime: 0, // Always refetch - user data should be fresh
       refetchOnWindowFocus: false,
       placeholderData: (previousData) => previousData,
-      refetchOnMount: false,
     },
   )
 
@@ -68,9 +67,8 @@ export function UserProvider({
     {
       initialData: initialSubscriptionData,
       enabled: !!initialSubscriptionData || session.status === 'authenticated',
-      // Reduce aggressive refetching
+      staleTime: 0, // Always refetch - subscription status must be fresh
       refetchOnWindowFocus: false,
-      staleTime: 10 * 60 * 1000, // 10 minutes
     },
   )
 
