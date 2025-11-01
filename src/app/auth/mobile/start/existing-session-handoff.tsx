@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 interface ExistingSessionHandoffProps {
   userName: string
   email: string
+  callbackUrl: string
 }
 
 /**
@@ -18,9 +19,9 @@ interface ExistingSessionHandoffProps {
 export function ExistingSessionHandoff({
   userName,
   email,
+  callbackUrl,
 }: ExistingSessionHandoffProps) {
   const [loading, setLoading] = useState(false)
-  const [showLogoutMessage, setShowLogoutMessage] = useState(false)
 
   const handleContinue = () => {
     setLoading(true)
@@ -28,34 +29,14 @@ export function ExistingSessionHandoff({
   }
 
   const handleDifferentAccount = async () => {
-    // Sign out and automatically open mobile app to restart flow
+    setLoading(true)
+
+    // Sign out current session
     await signOut({ redirect: false })
 
-    // Deep link back to mobile app
-    // Using just 'hypro://' opens app at root (login page if not authenticated)
-    window.location.href = 'hypro://'
-
-    // Show fallback message in case deep link doesn't work
-    setTimeout(() => {
-      setShowLogoutMessage(true)
-    }, 1000)
-  }
-
-  if (showLogoutMessage) {
-    return (
-      <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
-        <AnimatedLogo size={80} infinite={false} />
-        <h1 className="text-xl font-semibold mt-6 mb-2 text-foreground">
-          Signed Out
-        </h1>
-        <p className="text-sm text-muted-foreground mb-2">
-          Opening the mobile app...
-        </p>
-        <p className="text-xs text-muted-foreground/60">
-          If the app doesn't open, please return to it manually.
-        </p>
-      </div>
-    )
+    // Reload the same page - this will trigger OAuth since session is now cleared
+    // The page will call getServerSession(), find no session, and trigger OAuth
+    window.location.href = `/auth/mobile/start?callbackUrl=${encodeURIComponent(callbackUrl)}`
   }
 
   return (
