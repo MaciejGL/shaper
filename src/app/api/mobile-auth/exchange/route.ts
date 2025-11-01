@@ -81,7 +81,9 @@ export async function GET(request: NextRequest) {
     })
 
     // Redirect to the final destination with session cookie
+    // Add success=true to show loading overlay during session establishment
     const redirectUrl = new URL(next, request.nextUrl.origin)
+    redirectUrl.searchParams.set('success', 'true')
     const response = NextResponse.redirect(redirectUrl)
 
     // Prevent caching of this endpoint

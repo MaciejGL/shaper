@@ -11,9 +11,6 @@ export const LogoutButton = () => {
       // Clear query cache
       queryClient.clear()
 
-      // Clear OAuth in progress flag to prevent overlay on login page
-      sessionStorage.removeItem('oauth_in_progress')
-
       // Let NextAuth handle cookie clearing (it knows how)
       await signOut({
         callbackUrl: '/login',
