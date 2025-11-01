@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth/config'
 
 import { ExistingSessionHandoff } from './existing-session-handoff'
 import { MobileOAuthTrigger } from './mobile-oauth-trigger'
+import { MobileStartError } from './mobile-start-error'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -24,48 +25,22 @@ export default async function MobileStartPage({
   const params = await searchParams
   const callbackUrl = params.callbackUrl as string | undefined
 
-  console.warn('🔐 [MOBILE-START] Page loaded with params:', {
-    callbackUrl,
-    allParams: params,
-    timestamp: new Date().toISOString(),
-  })
-
   if (!callbackUrl) {
-    console.warn('🔐 [MOBILE-START] ERROR: Missing callback URL')
-    return (
-      <div className="dark flex items-center justify-center min-h-screen bg-background">
-        <p className="text-destructive">Missing callback URL</p>
-      </div>
-    )
+    return <MobileStartError />
   }
 
   // Check if user already has a session in this browser
   const session = await getServerSession(authOptions)
 
-  console.warn('🔐 [MOBILE-START] Session check:', {
-    hasSession: !!session,
-    userEmail: session?.user?.email,
-    userName: session?.user?.name,
-  })
-
   if (session?.user?.email) {
     // User already logged in! Show confirmation button instead of re-authenticating
     const userName = session.user.name || session.user.email
 
-    console.warn(
-      '🔐 [MOBILE-START] Existing session found, showing handoff page for:',
-      userName,
-    )
-
     return (
-      <ExistingSessionHandoff userName={userName} email={session.user.email} />
+      <ExistingSessionHandoff userName={userName} callbackUrl={callbackUrl} />
     )
   }
 
   // No session - render client component that triggers Google OAuth
-  console.warn('🔐 [MOBILE-START] Rendering OAuth trigger component:', {
-    callbackUrl,
-  })
-
   return <MobileOAuthTrigger callbackUrl={callbackUrl} />
 }

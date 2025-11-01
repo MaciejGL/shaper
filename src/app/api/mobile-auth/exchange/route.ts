@@ -29,16 +29,7 @@ export async function GET(request: NextRequest) {
     const code = searchParams.get('code')
     const next = searchParams.get('next') || '/fitspace/workout'
 
-    console.warn('🔐 [EXCHANGE] API called with params:', {
-      hasCode: !!code,
-      codePreview: code ? code.substring(0, 8) + '...' : 'none',
-      next,
-      timestamp: new Date().toISOString(),
-      userAgent: request.headers.get('user-agent'),
-    })
-
     if (!code) {
-      console.warn('🔐 [EXCHANGE] ERROR: Missing code parameter')
       return NextResponse.redirect(
         new URL('/login?error=missing_code', request.url),
       )
@@ -47,17 +38,7 @@ export async function GET(request: NextRequest) {
     // Consume the handoff code (atomic get+delete)
     const handoffData = await consumeHandoffCode(code)
 
-    console.warn('🔐 [EXCHANGE] Handoff code consumption result:', {
-      codePreview: code.substring(0, 8) + '...',
-      consumed: !!handoffData,
-      userId: handoffData?.userId,
-    })
-
     if (!handoffData) {
-      console.warn('🔐 [EXCHANGE] ERROR: Invalid or expired code:', {
-        code: code.substring(0, 8) + '...',
-        timestamp: new Date().toISOString(),
-      })
       return NextResponse.redirect(
         new URL('/login?error=invalid_code', request.url),
       )
@@ -71,16 +52,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    console.warn('🔐 [EXCHANGE] User lookup result:', {
-      userId: handoffData.userId,
-      userFound: !!user,
-      email: user?.email,
-    })
-
     if (!user) {
-      console.warn('🔐 [EXCHANGE] ERROR: User not found:', {
-        userId: handoffData.userId,
-      })
       return NextResponse.redirect(
         new URL('/login?error=user_not_found', request.url),
       )
@@ -108,12 +80,6 @@ export async function GET(request: NextRequest) {
       maxAge: 365 * 24 * 60 * 60, // 365 days (same as NextAuth default)
     })
 
-    console.warn('🔐 [EXCHANGE] JWT token created:', {
-      userId: user.id,
-      email: user.email,
-      tokenLength: token.length,
-    })
-
     // Redirect to the final destination with session cookie
     const redirectUrl = new URL(next, request.nextUrl.origin)
     const response = NextResponse.redirect(redirectUrl)
@@ -137,16 +103,9 @@ export async function GET(request: NextRequest) {
       maxAge: 365 * 24 * 60 * 60, // 365 days
     })
 
-    console.warn('🔐 [EXCHANGE] SUCCESS: Session cookie set, redirecting to:', {
-      next,
-      cookieName,
-      redirectUrl: redirectUrl.toString(),
-      timestamp: new Date().toISOString(),
-    })
-
     return response
   } catch (error) {
-    console.warn('🔐 [EXCHANGE] ERROR: Unexpected error:', error)
+    console.error('🔐 [EXCHANGE] Unexpected error:', error)
     return NextResponse.redirect(
       new URL('/login?error=server_error', request.url),
     )

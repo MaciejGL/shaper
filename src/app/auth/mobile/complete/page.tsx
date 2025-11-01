@@ -30,15 +30,8 @@ export default async function MobileCompletePage({
   const params = await searchParams
   const mobile = params.mobile as string | undefined
 
-  console.warn('🔐 [MOBILE-COMPLETE] Page loaded with params:', {
-    mobile,
-    allParams: params,
-    timestamp: new Date().toISOString(),
-  })
-
   // Validate this is a mobile OAuth flow
   if (mobile !== '1') {
-    console.warn('🔐 [MOBILE-COMPLETE] ERROR: Not a mobile OAuth flow')
     return (
       <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
         <AnimatedLogo size={80} infinite={false} />
@@ -58,14 +51,7 @@ export default async function MobileCompletePage({
   // Get the authenticated session
   const session = await getServerSession(authOptions)
 
-  console.warn('🔐 [MOBILE-COMPLETE] Session check:', {
-    hasSession: !!session,
-    userEmail: session?.user?.email,
-    userName: session?.user?.name,
-  })
-
   if (!session?.user?.email) {
-    console.warn('🔐 [MOBILE-COMPLETE] ERROR: No session found')
     return (
       <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
         <AnimatedLogo size={80} infinite={false} />
@@ -90,9 +76,6 @@ export default async function MobileCompletePage({
   })
 
   if (!user) {
-    console.warn('🔐 [MOBILE-COMPLETE] ERROR: User not found:', {
-      email: session.user.email,
-    })
     return (
       <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
         <AnimatedLogo size={80} infinite={false} />
@@ -117,17 +100,6 @@ export default async function MobileCompletePage({
   // Format: hypro://?oauth_code=XXX&next=/fitspace/workout
   const nextPath = '/fitspace/workout'
   const redirectUrl = `hypro://?oauth_code=${code}&next=${encodeURIComponent(nextPath)}`
-
-  console.warn(
-    '🔐 [MOBILE-COMPLETE] SUCCESS: Handoff code generated, redirecting to deep link:',
-    {
-      userId: user.id,
-      email: session.user.email,
-      code: code.substring(0, 8) + '...',
-      redirectUrl,
-      timestamp: new Date().toISOString(),
-    },
-  )
 
   // Use client-side redirect for custom URL schemes
   // Server-side redirect() doesn't work with hypro:// schemes
