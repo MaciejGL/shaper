@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
+import { signIn } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 
 import { AnimatedLogo } from '@/components/animated-logo'
 
@@ -11,16 +12,32 @@ import { AnimatedLogo } from '@/components/animated-logo'
  * This runs in the system browser after the user clicks "Continue with Google" in the app.
  */
 export function MobileOAuthTrigger({ callbackUrl }: { callbackUrl: string }) {
+  const [triggered, setTriggered] = useState(false)
+
   useEffect(() => {
-    // Redirect to NextAuth's Google provider endpoint
-    // This ensures PKCE cookies are set properly before redirecting to Google
-    const authUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    // Prevent double-trigger in React Strict Mode
+    if (triggered) {
+      return
+    }
 
-    console.info('🔐 [OAUTH-TRIGGER] Redirecting to:', authUrl)
+    setTriggered(true)
 
-    // Use window.location.href for a full page redirect
-    // This ensures NextAuth can set cookies properly
-    window.location.href = authUrl
+    console.info(
+      '🔐 [OAUTH-TRIGGER] Starting Google OAuth with callback:',
+      callbackUrl,
+    )
+
+    // Use NextAuth's signIn - it handles PKCE setup correctly
+    // Small delay to ensure component is fully mounted and DOM is ready
+    const timer = setTimeout(() => {
+      signIn('google', {
+        callbackUrl,
+        redirect: true,
+      })
+    }, 300)
+
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callbackUrl])
 
   return (
