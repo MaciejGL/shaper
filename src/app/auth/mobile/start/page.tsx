@@ -1,9 +1,9 @@
 import { getServerSession } from 'next-auth'
+import { redirect } from 'next/navigation'
 
 import { authOptions } from '@/lib/auth/config'
 
 import { ExistingSessionHandoff } from './existing-session-handoff'
-import { MobileOAuthTrigger } from './mobile-oauth-trigger'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -14,7 +14,7 @@ export const revalidate = 0
  * This page is opened in the system browser from the mobile app.
  * It checks if the user already has a session in the browser.
  * If yes, shows a "Continue as [name]" button.
- * If no, triggers the Google OAuth flow.
+ * If no, triggers the Google OAuth flow via server-side redirect.
  */
 export default async function MobileStartPage({
   searchParams,
@@ -44,6 +44,11 @@ export default async function MobileStartPage({
     )
   }
 
-  // No session, trigger OAuth flow
-  return <MobileOAuthTrigger callbackUrl={callbackUrl} />
+  // No session - redirect directly to Google OAuth via NextAuth
+  // This is a server-side redirect, which ensures PKCE cookies are set properly
+  const authUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+
+  console.info('🔐 [MOBILE-START] Redirecting to Google OAuth:', authUrl)
+
+  redirect(authUrl)
 }
