@@ -24,41 +24,24 @@ export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
     if (hasTriggered.current) return
     hasTriggered.current = true
 
-    console.warn('🔐 [OAUTH-TRIGGER] Component mounted, preparing OAuth:', {
-      callbackUrl,
-    })
-
     // Small delay to ensure SessionProvider is ready
     const timer = setTimeout(async () => {
       try {
-        console.warn('🔐 [OAUTH-TRIGGER] Calling signIn("google")')
-
         // Use NextAuth's official signIn function
         const result = await signIn('google', {
           callbackUrl,
-          redirect: true, // This should trigger redirect to Google
+          redirect: true,
         })
 
-        // If we get here, signIn didn't redirect (shouldn't happen)
-        console.warn(
-          '🔐 [OAUTH-TRIGGER] signIn returned without redirect:',
-          result,
-        )
-
-        // Fallback: Direct navigation
+        // Fallback: Direct navigation if signIn doesn't redirect
         if (result?.error) {
-          console.error('🔐 [OAUTH-TRIGGER] signIn error:', result.error)
-          console.warn('🔐 [OAUTH-TRIGGER] Falling back to direct navigation')
           window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
         }
       } catch (err) {
-        console.error('🔐 [OAUTH-TRIGGER] Exception during signIn:', err)
-
         // Fallback: Direct navigation
-        console.warn('🔐 [OAUTH-TRIGGER] Falling back to direct navigation')
         window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
       }
-    }, 1000) // 1 second delay to ensure everything is ready
+    }, 1000)
 
     return () => clearTimeout(timer)
   }, [callbackUrl])

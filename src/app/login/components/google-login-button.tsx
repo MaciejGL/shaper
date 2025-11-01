@@ -26,13 +26,8 @@ export const GoogleLoginButton = ({
       if (isNativeApp) {
         // Mobile OAuth flow with handoff
         const callbackUrl = '/auth/mobile/complete?mobile=1'
-
-        // Open mobile OAuth trigger page in system browser
-        // This page will auto-trigger Google OAuth without showing our login page
         const fullCallbackUrl = `${window.location.origin}${callbackUrl}`
         const triggerUrl = `/auth/mobile/start?callbackUrl=${encodeURIComponent(fullCallbackUrl)}`
-
-        console.info('📱 [GOOGLE-LOGIN] Starting mobile OAuth flow')
 
         // Mark that OAuth flow is in progress
         sessionStorage.setItem('oauth_in_progress', 'true')
