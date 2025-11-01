@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth/config'
 
 import { ExistingSessionHandoff } from './existing-session-handoff'
 import { MobileOAuthTrigger } from './mobile-oauth-trigger'
+import { MobileStartError } from './mobile-start-error'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -25,11 +26,7 @@ export default async function MobileStartPage({
   const callbackUrl = params.callbackUrl as string | undefined
 
   if (!callbackUrl) {
-    return (
-      <div className="dark flex items-center justify-center min-h-screen bg-background">
-        <p className="text-destructive">Missing callback URL</p>
-      </div>
-    )
+    return <MobileStartError />
   }
 
   // Check if user already has a session in this browser

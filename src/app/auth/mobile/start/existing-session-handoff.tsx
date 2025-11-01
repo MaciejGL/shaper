@@ -40,15 +40,12 @@ export function ExistingSessionHandoff({
   return (
     <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
       <AnimatedLogo size={80} infinite={false} />
-      <h1 className="text-xl font-semibold mt-6 mb-2 text-foreground">
-        Continue to App
-      </h1>
-      <p className="text-sm text-muted-foreground mb-1">
+      <p className="text-sm text-muted-foreground mb-1 mt-6">
         You're already signed in as:
       </p>
-      <p className="text-base font-semibold text-foreground mb-6">{userName}</p>
+      <p className="text-xl font-semibold text-foreground mb-6">{userName}</p>
 
-      <div className="flex flex-col gap-3 w-full max-w-sm">
+      <div className="dark flex flex-col gap-3 w-full max-w-sm">
         <Button
           onClick={handleContinue}
           loading={loading}
@@ -59,7 +56,7 @@ export function ExistingSessionHandoff({
         </Button>
         <Button
           onClick={handleDifferentAccount}
-          variant="ghost"
+          variant="tertiary"
           size="lg"
           className="w-full"
         >
