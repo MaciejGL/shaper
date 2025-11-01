@@ -1,9 +1,9 @@
 import { getServerSession } from 'next-auth'
-import { redirect } from 'next/navigation'
 
 import { authOptions } from '@/lib/auth/config'
 
 import { ExistingSessionHandoff } from './existing-session-handoff'
+import { MobileOAuthTrigger } from './mobile-oauth-trigger'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -62,14 +62,10 @@ export default async function MobileStartPage({
     )
   }
 
-  // No session - redirect directly to Google OAuth via NextAuth
-  // Use relative path for server-side redirect
-  const authUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
-
-  console.warn('🔐 [MOBILE-START] Redirecting to Google OAuth:', {
-    authUrl,
+  // No session - render client component that triggers Google OAuth
+  console.warn('🔐 [MOBILE-START] Rendering OAuth trigger component:', {
     callbackUrl,
   })
 
-  redirect(authUrl)
+  return <MobileOAuthTrigger callbackUrl={callbackUrl} />
 }
