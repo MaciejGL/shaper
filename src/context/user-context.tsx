@@ -38,20 +38,18 @@ export function UserProvider({
   const session = useSession()
   const queryClient = useQueryClient()
 
-  // Keep reference to last valid user data to prevent flashing to undefined
-  const lastValidUserRef = useRef<GQLUserBasicQuery['userBasic'] | undefined>(
-    undefined,
-  )
-
   // Query is enabled if we have initialData OR session is authenticated
   // This prevents disabling queries during session loading when we have server data
   const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
     {},
     {
       initialData,
+      // If we have initialData, treat it as fresh for 30 seconds
+      initialDataUpdatedAt: initialData ? Date.now() : undefined,
       enabled: !!initialData || session.status === 'authenticated',
-      staleTime: 0, // Always refetch - user data should be fresh
+      staleTime: 30000, // Keep data fresh for 30 seconds
       refetchOnWindowFocus: false,
+      // Keep previous data while refetching to prevent flash
       placeholderData: (previousData) => previousData,
     },
   )
@@ -66,9 +64,13 @@ export function UserProvider({
     {},
     {
       initialData: initialSubscriptionData,
+      // If we have initialData, treat it as fresh for 30 seconds
+      initialDataUpdatedAt: initialSubscriptionData ? Date.now() : undefined,
       enabled: !!initialSubscriptionData || session.status === 'authenticated',
-      staleTime: 0, // Always refetch - subscription status must be fresh
+      staleTime: 30000, // Keep data fresh for 30 seconds
       refetchOnWindowFocus: false,
+      // Keep previous data while refetching to prevent flash
+      placeholderData: (previousData) => previousData,
     },
   )
 
@@ -119,33 +121,14 @@ export function UserProvider({
 
   const subscription = subscriptionData?.getMySubscriptionStatus
   const hasPremium = subscription?.hasPremium ?? true
-
-  const userData = data?.userBasic ?? initialData?.userBasic
-
-  // Update ref with latest valid user data
-  if (userData) {
-    lastValidUserRef.current = userData
-  }
-
-  const isAuthenticated = session.status === 'authenticated'
-  const isSessionLoading = session.status === 'loading'
-
-  // Show data if authenticated OR if we have initialData (server-provided) while session is loading
-  // This prevents flashing to undefined during session transitions
-  const shouldShowData =
-    isAuthenticated ||
-    (isSessionLoading && (userData || lastValidUserRef.current))
-
-  const displayUser = shouldShowData
-    ? userData || lastValidUserRef.current
-    : undefined
+  const user = data?.userBasic ?? initialData?.userBasic
 
   const contextValue: UserContextType = useMemo(
     () => ({
       session,
-      user: displayUser,
-      subscription: shouldShowData ? subscription : undefined,
-      hasPremium: shouldShowData ? hasPremium : false,
+      user,
+      subscription,
+      hasPremium,
       isLoading:
         session.status === 'loading' ||
         isLoadingUserBasic ||
@@ -153,10 +136,9 @@ export function UserProvider({
     }),
     [
       session,
-      displayUser,
+      user,
       subscription,
       hasPremium,
-      shouldShowData,
       isLoadingUserBasic,
       isLoadingSubscription,
     ],
