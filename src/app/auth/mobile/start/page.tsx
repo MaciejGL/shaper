@@ -40,11 +40,7 @@ export default async function MobileStartPage({
     const userName = session.user.name || session.user.email
 
     return (
-      <ExistingSessionHandoff
-        userName={userName}
-        email={session.user.email}
-        callbackUrl={callbackUrl}
-      />
+      <ExistingSessionHandoff userName={userName} callbackUrl={callbackUrl} />
     )
   }
 

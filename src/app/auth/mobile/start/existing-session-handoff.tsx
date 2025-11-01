@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 
 interface ExistingSessionHandoffProps {
   userName: string
-  email: string
   callbackUrl: string
 }
 
@@ -18,7 +17,6 @@ interface ExistingSessionHandoffProps {
  */
 export function ExistingSessionHandoff({
   userName,
-  email,
   callbackUrl,
 }: ExistingSessionHandoffProps) {
   const [loading, setLoading] = useState(false)
