@@ -36,7 +36,11 @@ export function PlanStatusFilter({
 
   return (
     <Select value={selectedFilter} onValueChange={onFilterChange}>
-      <SelectTrigger variant="tertiary" size="md" className="w-1/2 bg-card">
+      <SelectTrigger
+        variant="tertiary"
+        size="md"
+        className="p-6 w-full bg-card rounded-xl"
+      >
         <SelectValue>
           <p>{selectedOption?.label}</p>
           {selectedCount > 0 && (

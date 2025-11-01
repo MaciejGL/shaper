@@ -18,8 +18,11 @@ import { ButtonLink } from '@/components/ui/button-link'
 import {
   Drawer,
   DrawerClose,
-  SimpleDrawerContent,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
 } from '@/components/ui/drawer'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import {
   AvailablePlan,
@@ -32,6 +35,7 @@ import {
 
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'
+import { PlanPreviewTab } from './plan-preview-tab'
 
 interface PlanDetailsDrawerProps {
   plan: UnifiedPlan | null
@@ -59,169 +63,209 @@ export function PlanDetailsDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onClose}>
-      <SimpleDrawerContent
-        title={plan.title}
-        header={
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-lg font-medium">{plan.title}</h3>
-            {/* Plan Status and Basic Info */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <PlanStatusBadge status={status} plan={plan} />
-              {plan.difficulty && (
-                <Badge variant="secondary" className="capitalize">
-                  {plan.difficulty.toLowerCase()}
-                </Badge>
+      <DrawerContent dialogTitle={plan.title}>
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* Header */}
+          <DrawerHeader className="border-b flex-shrink-0">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-lg font-medium">{plan.title}</h3>
+                {/* Plan Status and Basic Info */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <PlanStatusBadge status={status} plan={plan} />
+                  {plan.difficulty && (
+                    <Badge variant="secondary" className="capitalize">
+                      {plan.difficulty.toLowerCase()}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              {/* Go to Plan button in header */}
+              {plan.startDate && plan.endDate && plan.active && (
+                <ButtonLink
+                  href={`/fitspace/workout/${plan.id}`}
+                  iconEnd={<ArrowRightIcon />}
+                >
+                  Go to Plan
+                </ButtonLink>
               )}
             </div>
-          </div>
-        }
-        footer={
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="destructive"
-              disabled={isButtonLoading}
-              onClick={() => onAction('delete', plan)}
-              className="mr-auto"
-              iconOnly={<Trash />}
-            >
-              Delete
-            </Button>
-            <DrawerClose asChild>
-              <Button variant="tertiary" disabled={isButtonLoading}>
-                Close
-              </Button>
-            </DrawerClose>
-            {!isCompleted && (
-              <Button
-                onClick={() => onAction(isActive ? 'pause' : 'activate', plan)}
-                variant={isActive ? 'secondary' : 'default'}
-                disabled={isButtonLoading}
-              >
-                {isActive ? 'Pause' : isPaused ? 'Resume' : 'Activate'}
-              </Button>
-            )}
-            {plan.startDate && plan.endDate && plan.active && (
-              <ButtonLink
-                href={`/fitspace/workout/${plan.id}`}
-                iconEnd={<ArrowRightIcon />}
-              >
-                Go to Plan
-              </ButtonLink>
-            )}
-          </div>
-        }
-      >
-        <div className="space-y-6">
-          {/* {plan.startDate && plan.endDate && plan.active ? (
-            <ButtonLink
-              href={`/fitspace/workout/${plan.id}`}
-              className="w-full"
-              iconEnd={<ArrowRightIcon />}
-            >
-              Go to Plan
-            </ButtonLink>
-          ) : (
-            <Button
-              onClick={() => onAction('activate', plan)}
-              disabled={isButtonLoading}
-              className="flex items-center gap-2 w-full"
-            >
-              {plan.startDate ? 'Resume' : 'Activate'}
-            </Button>
-          )} */}
-          {plan.startDate && plan.endDate && (
-            <div className="space-y-2">
-              {/* Progress Overview */}
-              {plan.completedWorkoutsDays > 0 || plan.adherence ? (
-                <CompletionStats
-                  completedWorkoutsDays={plan.completedWorkoutsDays}
-                  totalWorkouts={plan.totalWorkouts}
-                />
-              ) : null}
-              <div className="grid grid-cols-2 gap-2 empty:hidden">
-                <StatsItem
-                  label="Current Week"
-                  value={
-                    <p className="text-sm font-medium">
-                      {plan.currentWeekNumber} of {plan.weekCount}
-                    </p>
-                  }
-                  icon={<Loader className="text-muted-foreground" />}
-                />
+          </DrawerHeader>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <Tabs defaultValue="info" className="w-full">
+              <TabsList className="w-full">
+                <TabsTrigger value="info" className="flex-1">
+                  Info
+                </TabsTrigger>
+                <TabsTrigger value="preview" className="flex-1">
+                  Preview
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="info" className="space-y-6 mt-6">
                 {plan.startDate && plan.endDate && (
+                  <div className="space-y-2">
+                    {/* Progress Overview */}
+                    {plan.completedWorkoutsDays > 0 || plan.adherence ? (
+                      <CompletionStats
+                        completedWorkoutsDays={plan.completedWorkoutsDays}
+                        totalWorkouts={plan.totalWorkouts}
+                      />
+                    ) : null}
+                    <div className="grid grid-cols-2 gap-2 empty:hidden">
+                      <StatsItem
+                        label="Current Week"
+                        value={
+                          <p className="text-sm font-medium">
+                            {plan.currentWeekNumber} of {plan.weekCount}
+                          </p>
+                        }
+                        icon={<Loader className="text-muted-foreground" />}
+                      />
+                      {plan.startDate && plan.endDate && (
+                        <StatsItem
+                          label="Start Date"
+                          value={
+                            <p className="text-sm font-medium">
+                              {formatDate(new Date(plan.startDate), 'MMM d')} -{' '}
+                              {formatDate(new Date(plan.endDate), 'MMM d')}{' '}
+                            </p>
+                          }
+                          icon={<Calendar className="text-muted-foreground" />}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
+                {/* Plan Statistics */}
+                <div className="grid grid-cols-3 gap-2">
+                  <StatsItem value={plan.weekCount} label="Weeks" />
                   <StatsItem
-                    label="Start Date"
-                    value={
-                      <p className="text-sm font-medium">
-                        {formatDate(new Date(plan.startDate), 'MMM d')} -{' '}
-                        {formatDate(new Date(plan.endDate), 'MMM d')}{' '}
-                      </p>
-                    }
-                    icon={<Calendar className="text-muted-foreground" />}
+                    value={plan.totalWorkouts}
+                    label="Total workouts"
                   />
+                  <StatsItem
+                    value={Math.round(plan.totalWorkouts / plan.weekCount)}
+                    label="Days per week"
+                  />
+                </div>
+
+                {'focusTags' in plan && plan.focusTags.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium">Training Method</p>
+                    <div className="flex items-center gap-2">
+                      {plan.focusTags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="capitalize"
+                        >
+                          {tag.split('_').join(' ').toLowerCase()}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {'targetGoals' in plan && plan.targetGoals.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium">You'll Achieve</p>
+                    <div className="flex items-center gap-2">
+                      {plan.targetGoals.map((goal) => (
+                        <Badge
+                          key={goal}
+                          variant="secondary"
+                          className="capitalize"
+                        >
+                          {goal.split('_').join(' ').toLowerCase()}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Rating and Reviews */}
+                {plan.rating && plan.totalReviews > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <RatingStars rating={plan.rating} size="sm" />
+                    <span className="text-sm text-muted-foreground">
+                      {plan.rating.toFixed(1)} ({plan.totalReviews} reviews)
+                    </span>
+                  </div>
+                ) : null}
+
+                {/* Plan Description */}
+                {plan.description && (
+                  <div className="space-y-2">
+                    <h3 className="font-medium">Description</h3>
+                    <CollapsibleText text={plan.description} maxWords={80} />
+                  </div>
+                )}
+
+                {/* Plan Creator */}
+                {'createdBy' in plan && plan.createdBy && (
+                  <PlanAuthor createdBy={plan.createdBy} />
+                )}
+              </TabsContent>
+
+              <TabsContent value="preview" className="mt-6">
+                <PlanPreviewTab
+                  weeks={'weeks' in plan ? plan.weeks : null}
+                  planTitle={plan.title}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Footer */}
+          <DrawerFooter className="border-t flex-shrink-0">
+            <div className="flex items-center justify-between gap-2 w-full">
+              <Button
+                variant="destructive"
+                disabled={isButtonLoading}
+                onClick={() => onAction('delete', plan)}
+                iconOnly={<Trash />}
+              >
+                Delete
+              </Button>
+              <div className="flex items-center gap-2">
+                {!isCompleted && (
+                  <>
+                    {isActive && (
+                      <Button
+                        onClick={() => onAction('pause', plan)}
+                        variant="secondary"
+                        disabled={isButtonLoading}
+                      >
+                        Pause
+                      </Button>
+                    )}
+                    {!isActive && (
+                      <Button
+                        onClick={() => onAction('activate', plan)}
+                        variant="default"
+                        disabled={isButtonLoading}
+                      >
+                        {isPaused ? 'Resume' : 'Activate'}
+                      </Button>
+                    )}
+                    {(isActive || isPaused) && (
+                      <Button
+                        onClick={() => onAction('close', plan)}
+                        variant="default"
+                        disabled={isButtonLoading}
+                      >
+                        Complete
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
-          )}
-          {/* Plan Statistics */}
-          <div className="grid grid-cols-3 gap-2">
-            <StatsItem value={plan.weekCount} label="Weeks" />
-            <StatsItem value={plan.totalWorkouts} label="Total workouts" />
-            <StatsItem
-              value={Math.round(plan.totalWorkouts / plan.weekCount)}
-              label="Days per week"
-            />
-          </div>
-
-          {'focusTags' in plan && plan.focusTags.length > 0 && (
-            <div>
-              <p className="text-sm font-medium">Training Method</p>
-              <div className="flex items-center gap-2">
-                {plan.focusTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="capitalize">
-                    {tag.split('_').join(' ').toLowerCase()}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-          {'targetGoals' in plan && plan.targetGoals.length > 0 && (
-            <div>
-              <p className="text-sm font-medium">You'll Achieve</p>
-              <div className="flex items-center gap-2">
-                {plan.targetGoals.map((goal) => (
-                  <Badge key={goal} variant="secondary" className="capitalize">
-                    {goal.split('_').join(' ').toLowerCase()}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Rating and Reviews */}
-          {plan.rating && plan.totalReviews > 0 ? (
-            <div className="flex items-center gap-2">
-              <RatingStars rating={plan.rating} size="sm" />
-              <span className="text-sm text-muted-foreground">
-                {plan.rating.toFixed(1)} ({plan.totalReviews} reviews)
-              </span>
-            </div>
-          ) : null}
-
-          {/* Plan Description */}
-          {plan.description && (
-            <div className="space-y-2">
-              <h3 className="font-medium">Description</h3>
-              <CollapsibleText text={plan.description} maxWords={80} />
-            </div>
-          )}
-
-          {/* Plan Creator */}
-          {'createdBy' in plan && plan.createdBy && (
-            <PlanAuthor createdBy={plan.createdBy} />
-          )}
+          </DrawerFooter>
         </div>
-      </SimpleDrawerContent>
+      </DrawerContent>
     </Drawer>
   )
 }

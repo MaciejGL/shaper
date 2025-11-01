@@ -42,13 +42,6 @@ export default function MyPlansPage() {
 
   return (
     <div className="container-hypertro mx-auto grid grid-rows-[max-content_1fr] pt-2">
-      {/* <DashboardHeader
-        title="Training Plans"
-        icon={LayoutList}
-        variant="amber"
-        className="mb-6"
-      /> */}
-
       <Tabs
         value={tab ?? PlanTab.Plans}
         defaultValue={PlanTab.Plans}
