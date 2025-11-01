@@ -63,17 +63,11 @@ export default async function MobileStartPage({
   }
 
   // No session - redirect directly to Google OAuth via NextAuth
-  // Build FULL absolute URL so that NextAuth can correctly determine provider & callback
-  const baseUrl =
-    process.env.NEXTAUTH_URL ??
-    process.env.PUBLIC_URL ??
-    'https://www.hypro.app'
-
-  const authUrl = `${baseUrl}/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+  // Use relative path for server-side redirect
+  const authUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
 
   console.warn('🔐 [MOBILE-START] Redirecting to Google OAuth:', {
     authUrl,
-    baseUrl,
     callbackUrl,
   })
 
