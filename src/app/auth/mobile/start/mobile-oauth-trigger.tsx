@@ -4,75 +4,127 @@ import { signIn } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { AnimatedLogo } from '@/components/animated-logo'
+import { Button } from '@/components/ui/button'
 
 interface MobileOAuthTriggerProps {
   callbackUrl: string
 }
 
+const MAX_RETRIES = 3
+const RETRY_DELAY = 2000 // 2 seconds between retries
+
 /**
  * Mobile OAuth Trigger (Client Component)
  *
- * Automatically triggers Google OAuth sign-in using NextAuth's signIn() function.
- * Includes fallback to direct navigation if signIn() fails.
+ * Automatically triggers Google OAuth with multiple retry attempts.
  */
 export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
-  const [error, setError] = useState<string | null>(null)
+  const [showManualButton, setShowManualButton] = useState(false)
+  const [isManualLoading, setIsManualLoading] = useState(false)
   const hasTriggered = useRef(false)
+  const isRedirecting = useRef(false)
+
+  const triggerOAuth = async () => {
+    // Prevent multiple simultaneous redirects
+    if (isRedirecting.current) return
+    isRedirecting.current = true
+
+    try {
+      // Try NextAuth's signIn function first
+      const result = await signIn('google', {
+        callbackUrl,
+        redirect: true,
+      })
+
+      // If signIn doesn't redirect (result is not undefined), use fallback
+      if (result?.error) {
+        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      }
+    } catch (err) {
+      // Fallback: Direct navigation to Google OAuth
+      window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    }
+  }
+
+  const handleManualTrigger = async () => {
+    setIsManualLoading(true)
+    await triggerOAuth()
+  }
 
   useEffect(() => {
     // Prevent double-mounting in React Strict Mode
     if (hasTriggered.current) return
     hasTriggered.current = true
 
-    // Small delay to ensure SessionProvider is ready
-    const timer = setTimeout(async () => {
-      try {
-        // Use NextAuth's official signIn function
-        const result = await signIn('google', {
-          callbackUrl,
-          redirect: true,
-        })
+    let currentAttempt = 0
 
-        // Fallback: Direct navigation if signIn doesn't redirect
-        if (result?.error) {
-          window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
-        }
-      } catch (err) {
-        // Fallback: Direct navigation
-        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    const attemptOAuth = async () => {
+      // If we've already successfully redirected, stop
+      if (isRedirecting.current && currentAttempt > 0) return
+
+      currentAttempt++
+
+      await triggerOAuth()
+
+      // If still on this page after attempting, schedule retry
+      if (currentAttempt < MAX_RETRIES) {
+        setTimeout(() => {
+          // Only retry if we're still on this page (didn't redirect)
+          if (
+            !isRedirecting.current ||
+            document.visibilityState === 'visible'
+          ) {
+            isRedirecting.current = false // Reset for retry
+            attemptOAuth()
+          }
+        }, RETRY_DELAY)
+      } else {
+        // All retries exhausted, show manual button
+        setShowManualButton(true)
       }
-    }, 1000)
+    }
 
-    return () => clearTimeout(timer)
+    // Start first attempt after short delay (500ms to let page load)
+    const initialTimer = setTimeout(() => {
+      attemptOAuth()
+    }, 500)
+
+    return () => {
+      clearTimeout(initialTimer)
+    }
   }, [callbackUrl])
 
   return (
     <div className="dark flex flex-col items-center justify-center min-h-screen bg-background px-4 w-full">
-      <AnimatedLogo size={80} infinite={true} forceColor="text-white" />
+      <AnimatedLogo
+        size={80}
+        infinite={!showManualButton}
+        forceColor="text-white"
+      />
 
-      {error ? (
-        <div className="mt-6 text-center">
-          <h1 className="text-xl font-semibold text-destructive mb-2">
-            Sign-in Error
-          </h1>
-          <p className="text-sm text-muted-foreground">{error}</p>
-          <a
-            href="/login"
-            className="mt-4 inline-block text-sm text-primary hover:underline"
+      <div className="mt-6 text-center flex flex-col items-center gap-4">
+        <h1 className="text-xl font-semibold text-white">
+          {showManualButton
+            ? 'Waiting for Google Sign-In...'
+            : 'Starting Google Sign-In...'}
+        </h1>
+        <p className="text-sm text-zinc-400 animate-pulse">
+          {showManualButton
+            ? 'Not redirecting automatically?'
+            : 'Redirecting to Google'}
+        </p>
+
+        {showManualButton && (
+          <Button
+            onClick={handleManualTrigger}
+            loading={isManualLoading}
+            size="lg"
+            className="mt-4"
           >
-            Return to login
-          </a>
-        </div>
-      ) : (
-        <div className="mt-6 text-center">
-          <h1 className="text-xl font-semibold text-white mb-2">
-            Starting Google Sign-In...
-          </h1>
-          <p className="text-sm text-zinc-400 animate-pulse">
-            Redirecting to Google
-          </p>
-        </div>
-      )}
+            Start Google Sign-In
+          </Button>
+        )}
+      </div>
     </div>
   )
 }
