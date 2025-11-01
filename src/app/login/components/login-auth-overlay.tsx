@@ -1,6 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { AnimatedLogo } from '@/components/animated-logo'
@@ -13,33 +14,46 @@ import { AnimatedLogo } from '@/components/animated-logo'
  */
 export function LoginAuthOverlay() {
   const { status } = useSession()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  
   const [showOverlay, setShowOverlay] = useState(() => {
-    // Initialize state immediately from sessionStorage
-    const oauthInProgress =
-      typeof window !== 'undefined'
-        ? sessionStorage.getItem('oauth_in_progress') === 'true'
-        : false
-
-    return oauthInProgress
+    // Initialize state immediately from sessionStorage OR URL params
+    if (typeof window === 'undefined') return false
+    
+    const oauthInProgress = sessionStorage.getItem('oauth_in_progress') === 'true'
+    const hasAuthParams = window.location.search.includes('code=') || 
+                          window.location.search.includes('state=')
+    
+    return oauthInProgress || hasAuthParams
   })
 
   useEffect(() => {
-    // Check if OAuth flow is in progress
-    const oauthInProgress =
-      sessionStorage.getItem('oauth_in_progress') === 'true'
+    // Check if OAuth flow is in progress via sessionStorage
+    const oauthInProgress = sessionStorage.getItem('oauth_in_progress') === 'true'
+    
+    // Check if we have OAuth callback params in URL (returned from Google)
+    const hasAuthParams = searchParams?.has('code') || searchParams?.has('state')
 
-    if (oauthInProgress) {
+    if (oauthInProgress || hasAuthParams) {
+      console.info('🔐 [AUTH-OVERLAY] Showing overlay:', { oauthInProgress, hasAuthParams })
       setShowOverlay(true)
 
       // If session becomes authenticated, clear flag and hide overlay
       if (status === 'authenticated') {
+        console.info('🔐 [AUTH-OVERLAY] Session authenticated, hiding overlay')
         sessionStorage.removeItem('oauth_in_progress')
         setShowOverlay(false)
+        
+        // Redirect to fitspace if we're still on login page
+        if (window.location.pathname === '/login') {
+          router.push('/fitspace/workout')
+        }
       }
     } else {
       setShowOverlay(false)
     }
-  }, [status])
+  }, [status, searchParams, router])
 
   // Trigger immediate and frequent session checks when OAuth is in progress
   const { update } = useSession()
