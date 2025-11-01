@@ -196,7 +196,7 @@ export async function sendCheckinNotifications(): Promise<CheckinNotificationRes
             [user.id],
             'Check-in time!',
             "Share today's wins with a quick check-in.",
-            'https://hypro.app/fitspace/progress',
+            'https://www.hypro.app/fitspace/progress',
           )
 
           notificationsSent++
