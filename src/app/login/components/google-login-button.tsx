@@ -24,6 +24,11 @@ export const GoogleLoginButton = ({
       setIsLoading(true)
 
       if (isNativeApp) {
+        // Add oauth_in_progress to current URL to trigger loading overlay
+        const currentUrl = new URL(window.location.href)
+        currentUrl.searchParams.set('oauth_in_progress', 'true')
+        window.history.replaceState({}, '', currentUrl.toString())
+
         // Mobile OAuth flow with handoff
         const callbackUrl = '/auth/mobile/complete?mobile=1'
         const fullCallbackUrl = `${window.location.origin}${callbackUrl}`
