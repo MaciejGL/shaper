@@ -222,8 +222,6 @@ function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
 
   const handleLogout = async () => {
     queryClient.clear()
-    // Clear OAuth in progress flag to prevent overlay on login page
-    sessionStorage.removeItem('oauth_in_progress')
     await signOut({ callbackUrl: '/login', redirect: false })
     window.location.replace('/login')
   }
@@ -311,8 +309,6 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
 
   const handleLogout = async () => {
     queryClient.clear()
-    // Clear OAuth in progress flag to prevent overlay on login page
-    sessionStorage.removeItem('oauth_in_progress')
     await signOut({ callbackUrl: '/login', redirect: false })
     window.location.replace('/login')
   }

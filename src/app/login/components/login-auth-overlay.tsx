@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { AnimatedLogo } from '@/components/animated-logo'
@@ -9,30 +9,29 @@ import { AnimatedLogo } from '@/components/animated-logo'
 /**
  * Login Auth Overlay
  *
- * Shows a loading overlay when OAuth is in progress.
- * Simplified version that checks sessionStorage flag.
+ * Shows a loading overlay when OAuth is completing.
+ * Checks for URL parameter from OAuth success.
  */
 export function LoginAuthOverlay() {
   const { status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [showOverlay, setShowOverlay] = useState(false)
 
   useEffect(() => {
-    // Check if OAuth flow is in progress
-    const oauthInProgress =
-      sessionStorage.getItem('oauth_in_progress') === 'true'
+    // Check if OAuth completed successfully (from URL parameter)
+    const authSuccess = searchParams?.get('success') === 'true'
 
-    if (oauthInProgress) {
+    if (authSuccess) {
       setShowOverlay(true)
 
-      // If session becomes authenticated, clear flag and redirect
+      // If session becomes authenticated, hide overlay and redirect
       if (status === 'authenticated') {
-        sessionStorage.removeItem('oauth_in_progress')
         setShowOverlay(false)
         router.push('/fitspace/workout')
       }
     }
-  }, [status, router])
+  }, [status, router, searchParams])
 
   if (!showOverlay) {
     return null

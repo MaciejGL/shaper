@@ -29,9 +29,6 @@ export const GoogleLoginButton = ({
         const fullCallbackUrl = `${window.location.origin}${callbackUrl}`
         const triggerUrl = `/auth/mobile/start?callbackUrl=${encodeURIComponent(fullCallbackUrl)}`
 
-        // Mark that OAuth flow is in progress
-        sessionStorage.setItem('oauth_in_progress', 'true')
-
         // Open in system browser (not WebView)
         openSystemBrowser(triggerUrl)
 
