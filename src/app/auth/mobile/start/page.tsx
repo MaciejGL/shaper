@@ -24,7 +24,14 @@ export default async function MobileStartPage({
   const params = await searchParams
   const callbackUrl = params.callbackUrl as string | undefined
 
+  console.warn('🔐 [MOBILE-START] Page loaded with params:', {
+    callbackUrl,
+    allParams: params,
+    timestamp: new Date().toISOString(),
+  })
+
   if (!callbackUrl) {
+    console.warn('🔐 [MOBILE-START] ERROR: Missing callback URL')
     return (
       <div className="dark flex items-center justify-center min-h-screen bg-background">
         <p className="text-destructive">Missing callback URL</p>
@@ -35,9 +42,20 @@ export default async function MobileStartPage({
   // Check if user already has a session in this browser
   const session = await getServerSession(authOptions)
 
+  console.warn('🔐 [MOBILE-START] Session check:', {
+    hasSession: !!session,
+    userEmail: session?.user?.email,
+    userName: session?.user?.name,
+  })
+
   if (session?.user?.email) {
     // User already logged in! Show confirmation button instead of re-authenticating
     const userName = session.user.name || session.user.email
+
+    console.warn(
+      '🔐 [MOBILE-START] Existing session found, showing handoff page for:',
+      userName,
+    )
 
     return (
       <ExistingSessionHandoff userName={userName} email={session.user.email} />
@@ -45,10 +63,19 @@ export default async function MobileStartPage({
   }
 
   // No session - redirect directly to Google OAuth via NextAuth
-  // This is a server-side redirect, which ensures PKCE cookies are set properly
-  const authUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+  // Build FULL absolute URL so that NextAuth can correctly determine provider & callback
+  const baseUrl =
+    process.env.NEXTAUTH_URL ??
+    process.env.PUBLIC_URL ??
+    'https://www.hypro.app'
 
-  console.info('🔐 [MOBILE-START] Redirecting to Google OAuth:', authUrl)
+  const authUrl = `${baseUrl}/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+
+  console.warn('🔐 [MOBILE-START] Redirecting to Google OAuth:', {
+    authUrl,
+    baseUrl,
+    callbackUrl,
+  })
 
   redirect(authUrl)
 }
