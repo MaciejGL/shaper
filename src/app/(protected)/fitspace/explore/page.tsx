@@ -9,7 +9,7 @@ import {
 } from '@/generated/graphql-client'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
-import { DashboardHeader } from '../../trainer/components/dashboard-header'
+// import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { TrainersTab } from './components/trainers-tab'
 import { TrainingPlansTab } from './components/training-plans-tab'
@@ -44,21 +44,21 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const plansData = plansResult.data
 
   return (
-    <div className="container-hypertro mx-auto max-w-md">
-      <DashboardHeader
+    <div className="container-hypertro mx-auto max-w-md mt-6">
+      {/* <DashboardHeader
         title="Discover"
         icon={SearchIcon}
         variant="indigo"
         className="mb-6"
-      />
+      /> */}
 
       <Tabs defaultValue={defaultValue} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="plans">
+        <TabsList className="grid w-full grid-cols-2" size="xl">
+          <TabsTrigger value="plans" size="xl">
             <Calendar className="h-4 w-4 mr-2" />
             Plans
           </TabsTrigger>
-          <TabsTrigger value="trainers">
+          <TabsTrigger value="trainers" size="xl">
             <Users className="h-4 w-4 mr-2" />
             Trainers
           </TabsTrigger>

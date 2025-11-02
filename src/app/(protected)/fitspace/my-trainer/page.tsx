@@ -34,7 +34,7 @@ import {
 } from '@/generated/graphql-client'
 import { useScrollToFromParams } from '@/hooks/use-scroll-to'
 
-import { DashboardHeader } from '../../trainer/components/dashboard-header'
+// import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { ClientMeetingsSection } from './components/client-meetings-section'
 import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'
@@ -58,13 +58,13 @@ export default function MyTrainerPage() {
   useScrollToFromParams([isLoadingTrainer, trainer])
 
   return (
-    <div className="container-hypertro mx-auto max-w-md">
-      <DashboardHeader
+    <div className="container-hypertro mx-auto max-w-md mt-6">
+      {/* <DashboardHeader
         title="Coaching"
         icon={UserCheck}
         variant="blue"
         className="mb-6"
-      />
+      /> */}
       {isLoadingTrainer && (
         <div className="space-y-4">
           <LoadingSkeleton count={1} variant="sm" />
@@ -148,7 +148,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <TrainerCard
         trainer={trainer}
         showExperience={true}

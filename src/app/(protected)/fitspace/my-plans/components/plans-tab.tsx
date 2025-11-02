@@ -215,7 +215,7 @@ export function PlansTab({
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-8">
         {/* Filter Chips */}
         <PlanStatusFilter
           selectedFilter={selectedFilter}

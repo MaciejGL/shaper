@@ -127,6 +127,7 @@ export const Navbar = ({
             'data-[visible=false]:opacity-0 data-[visible=false]:translate-y-[-100px] transition-all duration-200',
             'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
             'py-3 px-4',
+            isFitspace && 'rounded-b-2xl',
           )}
         >
           <div className="flex items-center gap-2">

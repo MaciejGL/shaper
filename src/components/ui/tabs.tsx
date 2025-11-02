@@ -33,6 +33,7 @@ const tabsListVariants = cva(
         sm: 'h-8 rounded-lg',
         default: 'h-9 rounded-xl',
         lg: 'h-10 p-0.5 rounded-xl',
+        xl: 'h-11 p-0.5 rounded-xl',
       },
       rounded: {
         default: 'rounded-xl',
@@ -51,7 +52,7 @@ function TabsList({
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> & {
   variant?: 'default' | 'secondary'
-  size?: 'default' | 'sm' | 'lg'
+  size?: 'default' | 'sm' | 'lg' | 'xl'
   rounded?: 'default' | 'lg' | 'xl' | 'full'
 }) {
   return (
@@ -76,6 +77,7 @@ const tabsTriggerVariants = cva(
         sm: 'text-xs rounded-lg',
         default: 'text-sm rounded-xl',
         lg: 'text-sm px-3 py-1 rounded-xl',
+        xl: 'text-base px-4 py-1.5 rounded-xl',
       },
       rounded: {
         default: 'rounded-xl',
@@ -95,7 +97,7 @@ function TabsTrigger({
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger> & {
   variant?: 'default'
-  size?: 'default' | 'sm' | 'lg'
+  size?: 'default' | 'sm' | 'lg' | 'xl'
   rounded?: 'default' | 'lg' | 'xl' | 'full'
 }) {
   return (

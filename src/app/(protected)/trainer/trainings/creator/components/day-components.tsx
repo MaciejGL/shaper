@@ -4,9 +4,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import { GQLWorkoutType } from '@/generated/graphql-client'
+import { dayNames } from '@/lib/date-utils'
 
 import { TrainingDay } from '../../../types'
-import { dayNames } from '../utils'
 
 import { DayDropdownMenu } from './day-dropdown-menu'
 import { InsertionIndicator } from './insertion-indicators'

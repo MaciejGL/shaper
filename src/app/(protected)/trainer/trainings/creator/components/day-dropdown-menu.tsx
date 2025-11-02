@@ -17,8 +17,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import { GQLWorkoutType } from '@/generated/graphql-client'
+import { dayNames } from '@/lib/date-utils'
 
-import { dayNames, workoutTypeGroups } from '../utils'
+import { workoutTypeGroups } from '../utils'
 
 interface MoveExercisesDropdownProps {
   sourceDayId: string
