@@ -95,7 +95,7 @@ export function PlanDetailsDrawer({
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto p-4">
             <Tabs defaultValue="info" className="w-full">
-              <TabsList className="w-full">
+              <TabsList className="w-full shadow-md">
                 <TabsTrigger value="info" className="flex-1">
                   Info
                 </TabsTrigger>
@@ -104,7 +104,7 @@ export function PlanDetailsDrawer({
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="info" className="space-y-6 mt-6">
+              <TabsContent value="info" className="space-y-6">
                 {plan.startDate && plan.endDate && (
                   <div className="space-y-2">
                     {/* Progress Overview */}
@@ -140,17 +140,19 @@ export function PlanDetailsDrawer({
                   </div>
                 )}
                 {/* Plan Statistics */}
-                <div className="grid grid-cols-3 gap-2">
-                  <StatsItem value={plan.weekCount} label="Weeks" />
-                  <StatsItem
-                    value={plan.totalWorkouts}
-                    label="Total workouts"
-                  />
-                  <StatsItem
-                    value={Math.round(plan.totalWorkouts / plan.weekCount)}
-                    label="Days per week"
-                  />
-                </div>
+                {!plan.active && !isCompleted && (
+                  <div className="grid grid-cols-3 gap-2">
+                    <StatsItem value={plan.weekCount} label="Weeks" />
+                    <StatsItem
+                      value={plan.totalWorkouts}
+                      label="Total workouts"
+                    />
+                    <StatsItem
+                      value={Math.round(plan.totalWorkouts / plan.weekCount)}
+                      label="Days per week"
+                    />
+                  </div>
+                )}
 
                 {'focusTags' in plan && plan.focusTags.length > 0 && (
                   <div>
@@ -209,7 +211,7 @@ export function PlanDetailsDrawer({
                 )}
               </TabsContent>
 
-              <TabsContent value="preview" className="mt-6">
+              <TabsContent value="preview">
                 <PlanPreviewTab
                   weeks={'weeks' in plan ? plan.weeks : null}
                   isTemplate={status === PlanStatus.Template}
@@ -235,7 +237,7 @@ export function PlanDetailsDrawer({
                     {isActive && (
                       <Button
                         onClick={() => onAction('pause', plan)}
-                        variant="secondary"
+                        variant="tertiary"
                         disabled={isButtonLoading}
                       >
                         Pause

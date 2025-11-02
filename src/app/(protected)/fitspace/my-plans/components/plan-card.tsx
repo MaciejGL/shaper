@@ -1,13 +1,16 @@
 import { formatDate } from 'date-fns'
 import {
   BicepsFlexed,
+  Check,
   CheckCircle,
   ChevronRight,
+  FileIcon,
   FileText,
   PauseIcon,
+  PlayIcon,
 } from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
+import { Badge, BadgeProps } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 
 import {
@@ -35,7 +38,7 @@ export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
       onClick={() => onClick(plan)}
       className="cursor-pointer hover:bg-accent/50 transition-colors"
     >
-      <CardHeader className="py-0">
+      <CardHeader className="py-0 gap-0">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0 space-y-1.5">
             <CardTitle className="text-base font-medium line-clamp-2">
@@ -57,30 +60,36 @@ function PlanStatusBadge({
   status: PlanStatus
   plan: UnifiedPlan
 }) {
-  const getStatusConfig = (status: PlanStatus) => {
+  const getStatusConfig = (
+    status: PlanStatus,
+  ): {
+    variant: BadgeProps['variant']
+    label: string
+    icon: React.ReactNode
+  } => {
     switch (status) {
       case PlanStatus.Active:
         return {
           variant: 'primary' as const,
-          // icon: <BicepsFlexed className="size-3" />,
+          icon: <PlayIcon className="size-3" />,
           label: 'Active',
         }
       case PlanStatus.Paused:
         return {
           variant: 'warning' as const,
-          // icon: <PauseIcon className="size-3" />,
-          label: `Paused ${formatDate(new Date((plan as AvailablePlan).updatedAt), 'MMM d')}`,
+          icon: <PauseIcon className="size-3" />,
+          label: `Paused ${formatDate(new Date((plan as AvailablePlan).updatedAt), 'd. MMM yyyy')}`,
         }
       case PlanStatus.Completed:
         return {
-          variant: 'secondary' as const,
-          // icon: <CheckCircle className="size-3" />,
-          label: `Completed ${formatDate(new Date((plan as CompletedPlan).completedAt!), 'MMM d')}`,
+          variant: 'success',
+          icon: <Check className="size-3" />,
+          label: `Completed ${formatDate(new Date((plan as CompletedPlan).completedAt!), 'd. MMM yyyy')}`,
         }
       case PlanStatus.Template:
         return {
           variant: 'secondary' as const,
-          // icon: <FileText className="size-3" />,
+          icon: <FileIcon className="size-3" />,
           label: 'Template',
         }
     }
@@ -90,8 +99,8 @@ function PlanStatusBadge({
 
   return (
     <Badge variant={config.variant} className="w-fit">
-      {/* {config.icon} */}
-      <span className="ml-1">{config.label}</span>
+      {config.icon}
+      {config.label}
     </Badge>
   )
 }

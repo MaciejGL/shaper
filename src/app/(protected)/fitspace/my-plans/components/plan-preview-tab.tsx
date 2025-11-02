@@ -9,6 +9,7 @@ import { GQLFitspaceMyPlansQuery } from '@/generated/graphql-client'
 import { sortDaysForDisplay } from '@/lib/date-utils'
 
 import { PlanPreviewDay } from './plan-preview-day'
+import { WeekProgressCircle } from './week-progress-circle'
 
 type PlanWeeks = NonNullable<
   NonNullable<
@@ -49,10 +50,28 @@ export function PlanPreviewTab({
           preferences.weekStartsOn,
         )
 
+        // Calculate progress for the week
+        const totalExercises = week.days.reduce(
+          (sum, day) => sum + (day.exercises?.length || 0),
+          0,
+        )
+        const completedExercises = week.days.reduce(
+          (sum, day) =>
+            sum + (day.exercises?.filter((ex) => !!ex.completedAt).length || 0),
+          0,
+        )
+        const progress =
+          totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0
+
         return (
           <AccordionItem key={week.id} value={`week-${week.id}`}>
             <AccordionTrigger className="text-base font-semibold hover:no-underline">
-              Week {week.weekNumber}
+              <div className="flex items-center gap-2">
+                Week {week.weekNumber}
+                {!isTemplate && totalExercises > 0 && (
+                  <WeekProgressCircle progress={progress} size={20} />
+                )}
+              </div>
             </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-2 pb-2">

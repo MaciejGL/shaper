@@ -195,6 +195,46 @@ query FitspaceMyPlans {
       endDate
       completedAt
       updatedAt
+      weeks {
+        id
+        weekNumber
+        scheduledAt
+        completedAt
+        isExtra
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          workoutType
+          completedAt
+          scheduledAt
+          exercises {
+            id
+            restSeconds
+            videoUrl
+            instructions
+            name
+            warmupSets
+            images {
+              id
+              thumbnail
+              medium
+              url
+              order
+            }
+            muscleGroups {
+              id
+              name
+              alias
+            }
+            completedAt
+            sets {
+              id
+              order
+            }
+          }
+        }
+      }
 
       createdBy {
         id

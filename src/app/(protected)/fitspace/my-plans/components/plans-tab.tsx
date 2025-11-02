@@ -133,7 +133,7 @@ function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
         return (
           <div key={plan.id}>
             {showDivider && (
-              <div className="flex items-center gap-3 py-2">
+              <div className="flex items-center gap-3 pb-4 pt-2">
                 <div className="h-px flex-1 bg-border" />
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {currentStatus}
