@@ -1,12 +1,16 @@
 'use client'
 
+import { Download } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetMyNutritionPlanQuery } from '@/generated/graphql-client'
+import { downloadPDF, generateFilename } from '@/lib/pdf/pdf-generator'
 
 import { DayMealsAccordion, DayMealsHeader } from './day-meals-accordion'
+import { NutritionPlanPDF } from './pdf/nutrition-plan-pdf'
 import { ShoppingList } from './shopping-list'
 
 interface NutritionPlanViewerProps {
@@ -23,9 +27,29 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
   )
 
   const [activeDay, setActiveDay] = useState<string>('')
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
   const nutritionPlan = data?.nutritionPlan
   const days = useMemo(() => nutritionPlan?.days || [], [nutritionPlan])
+
+  const handleExportPDF = async () => {
+    if (!nutritionPlan) return
+
+    setIsGeneratingPDF(true)
+    try {
+      const filename = generateFilename(
+        `nutrition-plan-${nutritionPlan.name.toLowerCase().replace(/\s+/g, '-')}`,
+      )
+      await downloadPDF(
+        <NutritionPlanPDF nutritionPlan={nutritionPlan} />,
+        filename,
+      )
+    } catch (error) {
+      console.error('Failed to generate PDF:', error)
+    } finally {
+      setIsGeneratingPDF(false)
+    }
+  }
   useEffect(() => {
     if (days.length > 0 && !activeDay) {
       setActiveDay(days[0].dayNumber.toString())
@@ -53,6 +77,16 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
           {nutritionPlan.description}
         </p>
       )}
+
+      <Button
+        variant="outline"
+        iconStart={<Download />}
+        onClick={handleExportPDF}
+        loading={isGeneratingPDF}
+        disabled={isGeneratingPDF}
+      >
+        {isGeneratingPDF ? 'Generating PDF...' : 'Export to PDF'}
+      </Button>
 
       <Tabs value={activeDay} onValueChange={setActiveDay}>
         <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar">
