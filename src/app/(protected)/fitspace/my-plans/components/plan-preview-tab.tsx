@@ -4,7 +4,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLFitspaceMyPlansQuery } from '@/generated/graphql-client'
+import { sortDaysForDisplay } from '@/lib/date-utils'
 
 import { PlanPreviewDay } from './plan-preview-day'
 
@@ -23,6 +25,8 @@ export function PlanPreviewTab({
   weeks,
   isTemplate = false,
 }: PlanPreviewTabProps) {
+  const { preferences } = useUserPreferences()
+
   if (!weeks || weeks.length === 0) {
     return (
       <div className="py-12 text-center">
@@ -39,9 +43,10 @@ export function PlanPreviewTab({
   return (
     <Accordion type="multiple" className="w-full" data-vaul-no-drag>
       {sortedWeeks.map((week) => {
-        // Sort days by dayOfWeek
-        const sortedDays = [...week.days].sort(
-          (a, b) => a.dayOfWeek - b.dayOfWeek,
+        // Sort days according to user's week start preference
+        const sortedDays = sortDaysForDisplay(
+          week.days,
+          preferences.weekStartsOn,
         )
 
         return (

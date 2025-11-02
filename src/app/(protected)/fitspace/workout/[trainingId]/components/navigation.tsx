@@ -4,9 +4,8 @@ import { formatDate } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo } from 'react'
 
-import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { useUserPreferences } from '@/context/user-preferences-context'
-import { sortDaysForDisplay } from '@/lib/date-utils'
+import { getDayName, sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 import { useWorkoutPrefetch } from '../hooks/use-workout-prefetch'

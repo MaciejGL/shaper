@@ -1,5 +1,5 @@
-import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { GQLFitspaceMyPlansQuery } from '@/generated/graphql-client'
+import { getDayName } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 import { PlanPreviewExerciseRow } from './plan-preview-exercise-row'

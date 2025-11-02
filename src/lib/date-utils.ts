@@ -18,6 +18,47 @@ export type WeekStartDay = 0 | 1 // 0 = Sunday, 1 = Monday
 export const DEFAULT_WEEK_START: WeekStartDay = 1 // Monday
 
 /**
+ * Day names in Monday-first order (system uses 0=Monday, 1=Tuesday, ..., 6=Sunday)
+ */
+export const dayNames = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+]
+
+/**
+ * Get the localized day name for a given dayOfWeek index
+ * @param dayOfWeek - Day index where 0=Monday, 1=Tuesday, ..., 6=Sunday (system format)
+ * @param options - Configuration options
+ * @param options.short - Return abbreviated day name (e.g., "Mon" instead of "Monday")
+ * @returns Localized day name
+ */
+export function getDayName(
+  dayOfWeek: number,
+  options: {
+    short?: boolean
+  } = {},
+): string {
+  const { short = false } = options
+
+  // System uses Monday-based numbering: 0=Monday, 1=Tuesday, ..., 6=Sunday
+  // Convert to JavaScript's getDay() format: 0=Sunday, 1=Monday, ..., 6=Saturday
+  const jsDay = dayOfWeek === 6 ? 0 : dayOfWeek + 1
+
+  // Create a date and set it to the target day of week
+  const date = new Date()
+  const currentDay = date.getDay()
+  const diff = jsDay - currentDay
+  date.setDate(date.getDate() + diff)
+
+  return format(date, short ? 'EEE' : 'EEEE')
+}
+
+/**
  * Format a date as relative time (e.g., "2 hours ago", "3 days ago")
  * @param date - Date string or Date object
  * @returns Formatted relative time string
