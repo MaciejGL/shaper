@@ -135,6 +135,8 @@ export function MobileNav() {
                 onClick={() => {
                   setClickedItem(item.label)
                   setPendingNavigation(item.href)
+                  // Scroll the main content container to top
+                  document.getElementById('main-content')?.scrollTo(0, 0)
                   // Best-effort: try to open native app in parallel.
                   // Don't prevent default so Next.js preserves SPA navigation.
                   if (!isNativeApp) tryOpenAppDeepLink(item.href)
