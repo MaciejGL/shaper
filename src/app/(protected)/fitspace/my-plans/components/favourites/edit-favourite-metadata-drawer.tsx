@@ -76,19 +76,19 @@ export function EditFavouriteMetadataDrawer({
   return (
     <Drawer open={open} onOpenChange={handleClose}>
       <DrawerContent
-        dialogTitle="Edit Template Details"
+        dialogTitle="Edit Custom Day Details"
         className="max-h-[85vh]"
       >
         <DrawerHeader>
-          <DrawerTitle>Edit Template Details</DrawerTitle>
+          <DrawerTitle>Edit Custom Day</DrawerTitle>
           <DrawerDescription>
-            Update the name and description of your template
+            Update the name and description of your custom day
           </DrawerDescription>
         </DrawerHeader>
 
         <div className="space-y-4 px-4 pb-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-title">Template Name *</Label>
+            <Label htmlFor="edit-title">Day Name *</Label>
             <Input
               id="edit-title"
               placeholder="e.g., Upper Body Strength"
@@ -103,7 +103,7 @@ export function EditFavouriteMetadataDrawer({
             <Label htmlFor="edit-description">Description (optional)</Label>
             <Textarea
               id="edit-description"
-              placeholder="Add notes about this template..."
+              placeholder="Add notes about this custom day..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={500}
