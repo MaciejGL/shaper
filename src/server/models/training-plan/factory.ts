@@ -591,6 +591,7 @@ export async function getMyPlansOverviewFull(context: GQLContext) {
                     base: {
                       include: {
                         muscleGroups: true,
+                        images: true,
                       },
                     },
                     sets: {

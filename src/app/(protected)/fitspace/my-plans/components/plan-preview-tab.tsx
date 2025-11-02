@@ -4,37 +4,25 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { GQLFitspaceMyPlansQuery } from '@/generated/graphql-client'
 
 import { PlanPreviewDay } from './plan-preview-day'
 
+type PlanWeeks = NonNullable<
+  NonNullable<
+    GQLFitspaceMyPlansQuery['getMyPlansOverviewFull']['activePlan']
+  >['weeks']
+>
+
 interface PlanPreviewTabProps {
-  weeks?: Array<{
-    id: string
-    weekNumber: number
-    days: Array<{
-      id: string
-      dayOfWeek: number
-      isRestDay: boolean
-      exercises?: Array<{
-        id: string
-        name: string
-        videoUrl?: string | null
-        completedAt?: string | null
-        images?: Array<{
-          id: string
-          thumbnail?: string | null
-          medium?: string | null
-          url: string
-          order: number
-        }> | null
-      }> | null
-    }>
-  }> | null
-  planTitle: string
+  weeks?: PlanWeeks | null
   isTemplate?: boolean
 }
 
-export function PlanPreviewTab({ weeks, planTitle, isTemplate = false }: PlanPreviewTabProps) {
+export function PlanPreviewTab({
+  weeks,
+  isTemplate = false,
+}: PlanPreviewTabProps) {
   if (!weeks || weeks.length === 0) {
     return (
       <div className="py-12 text-center">
@@ -64,12 +52,11 @@ export function PlanPreviewTab({ weeks, planTitle, isTemplate = false }: PlanPre
             <AccordionContent>
               <div className="space-y-2 pb-2">
                 {sortedDays.map((day) => (
-              <PlanPreviewDay
-                key={day.id}
-                day={day}
-                weekNumber={week.weekNumber}
-                isTemplate={isTemplate}
-              />
+                  <PlanPreviewDay
+                    key={day.id}
+                    day={day}
+                    isTemplate={isTemplate}
+                  />
                 ))}
               </div>
             </AccordionContent>
