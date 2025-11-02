@@ -9,18 +9,21 @@ export function StatsItem({
   iconPosition = 'left',
   variant = 'default',
   loading = false,
+  classNameLabel = '',
 }: {
   value: number | string | React.ReactNode
   icon?: React.ReactNode
   label: string
   iconPosition?: 'left' | 'top'
-  variant?: 'default' | 'secondary'
+  variant?: 'default' | 'secondary' | 'outline'
   loading?: boolean
+  classNameLabel?: string
 }) {
   return (
     <div
       className={cn('text-center p-3 bg-card-on-card rounded-lg', {
         'bg-card': variant === 'secondary',
+        'bg-transparent border border-border': variant === 'outline',
         'masked-placeholder-text': loading,
       })}
     >
@@ -57,7 +60,9 @@ export function StatsItem({
       ) : (
         <>
           <div className="text-lg font-bold text-primary">{value}</div>
-          <div className="text-xs text-muted-foreground">{label}</div>
+          <div className={cn('text-xs text-muted-foreground', classNameLabel)}>
+            {label}
+          </div>
         </>
       )}
     </div>

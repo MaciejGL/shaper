@@ -21,17 +21,28 @@ export function PlanPreviewDay({
 }: PlanPreviewDayProps) {
   const dayName = getDayName(day.dayOfWeek)
   const exercises = day.exercises || []
+  const totalExercises = exercises.length
+  const completedExercises = exercises.filter(
+    (exercise) => exercise.completedAt,
+  ).length
 
   return (
     <div className="mb-8">
       <h4
         className={cn(
-          'text-base font-medium mb-2 bg-card-on-card p-4 rounded-md',
+          'text-base font-medium mb-2 bg-card-on-card p-4 rounded-md flex items-center justify-between',
           day.isRestDay ? 'text-muted-foreground' : '',
         )}
       >
-        {dayName}
-        {day.isRestDay && <span className="ml-2 text-xs">• Rest Day</span>}
+        <div>
+          {dayName}
+          {day.isRestDay && <span className="ml-2 text-xs">• Rest Day</span>}
+        </div>
+        {totalExercises > 0 && (
+          <div className="ml-auto text-xs">
+            {completedExercises} / {totalExercises} completed
+          </div>
+        )}
       </h4>
 
       {day.isRestDay && (

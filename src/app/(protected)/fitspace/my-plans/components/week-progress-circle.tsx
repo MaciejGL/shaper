@@ -6,22 +6,26 @@ interface WeekProgressCircleProps {
   progress: number // 0-100
   size?: number
   className?: string
+  strokeWidth?: number
 }
 
 export function WeekProgressCircle({
   progress,
   size = 20,
   className,
+  strokeWidth = 2,
 }: WeekProgressCircleProps) {
   const isComplete = progress === 100
-  const strokeWidth = 2
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference - (progress / 100) * circumference
 
   return (
     <div
-      className={cn('relative inline-flex items-center justify-center', className)}
+      className={cn(
+        'relative flex items-center justify-center mx-auto mb-1',
+        className,
+      )}
       style={{ width: size, height: size }}
     >
       {/* Background circle */}
@@ -38,7 +42,7 @@ export function WeekProgressCircle({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-muted/30"
+          className="text-muted-foreground/20"
         />
         {/* Progress circle */}
         <circle
@@ -60,9 +64,11 @@ export function WeekProgressCircle({
 
       {/* Check mark when complete */}
       {isComplete && (
-        <Check className="text-green-500" style={{ width: size * 0.6, height: size * 0.6 }} />
+        <Check
+          className="text-green-500"
+          style={{ width: size * 0.6, height: size * 0.6 }}
+        />
       )}
     </div>
   )
 }
-

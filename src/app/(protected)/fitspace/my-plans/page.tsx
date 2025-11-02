@@ -50,9 +50,7 @@ export default function MyPlansPage() {
       >
         <TabsList size="lg" className="w-full">
           <TabsTrigger value={PlanTab.Plans}>Plans</TabsTrigger>
-          <TabsTrigger value={PlanTab.QuickWorkout}>
-            Custom Workouts
-          </TabsTrigger>
+          <TabsTrigger value={PlanTab.QuickWorkout}>Custom Days</TabsTrigger>
         </TabsList>
 
         <TabsContent value={PlanTab.Plans} className="space-y-4 pt-4 pb-4">

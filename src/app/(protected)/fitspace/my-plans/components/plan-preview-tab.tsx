@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react'
+
 import {
   Accordion,
   AccordionContent,
@@ -20,13 +22,39 @@ type PlanWeeks = NonNullable<
 interface PlanPreviewTabProps {
   weeks?: PlanWeeks | null
   isTemplate?: boolean
+  selectedWeekId?: string | null
+  onAccordionChange?: () => void
 }
 
 export function PlanPreviewTab({
   weeks,
   isTemplate = false,
+  selectedWeekId = null,
+  onAccordionChange,
 }: PlanPreviewTabProps) {
   const { preferences } = useUserPreferences()
+  const weekRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const [accordionValue, setAccordionValue] = useState<string[]>([])
+
+  // When selectedWeekId changes from external source, update accordion
+  useEffect(() => {
+    if (selectedWeekId) {
+      setAccordionValue([`week-${selectedWeekId}`])
+
+      // Scroll to the selected week
+      setTimeout(() => {
+        weekRefs.current[selectedWeekId]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      }, 150) // Small delay to ensure accordion is open
+
+      // Notify parent that we've handled the selection
+      if (onAccordionChange) {
+        onAccordionChange()
+      }
+    }
+  }, [selectedWeekId, onAccordionChange])
 
   if (!weeks || weeks.length === 0) {
     return (
@@ -42,7 +70,13 @@ export function PlanPreviewTab({
   const sortedWeeks = [...weeks].sort((a, b) => a.weekNumber - b.weekNumber)
 
   return (
-    <Accordion type="multiple" className="w-full" data-vaul-no-drag>
+    <Accordion
+      type="multiple"
+      className="w-full"
+      data-vaul-no-drag
+      value={accordionValue}
+      onValueChange={setAccordionValue}
+    >
       {sortedWeeks.map((week) => {
         // Sort days according to user's week start preference
         const sortedDays = sortDaysForDisplay(
@@ -64,12 +98,22 @@ export function PlanPreviewTab({
           totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0
 
         return (
-          <AccordionItem key={week.id} value={`week-${week.id}`}>
+          <AccordionItem
+            key={week.id}
+            value={`week-${week.id}`}
+            ref={(el) => {
+              weekRefs.current[week.id] = el
+            }}
+          >
             <AccordionTrigger className="text-base font-semibold hover:no-underline">
               <div className="flex items-center gap-2">
                 Week {week.weekNumber}
                 {!isTemplate && totalExercises > 0 && (
-                  <WeekProgressCircle progress={progress} size={20} />
+                  <WeekProgressCircle
+                    progress={progress}
+                    size={20}
+                    strokeWidth={1.5}
+                  />
                 )}
               </div>
             </AccordionTrigger>

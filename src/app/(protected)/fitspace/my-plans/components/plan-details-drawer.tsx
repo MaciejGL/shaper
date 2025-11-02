@@ -8,11 +8,12 @@ import {
   Trash,
   Users,
 } from 'lucide-react'
+import { useState } from 'react'
 
 import { CollapsibleText } from '@/components/collapsible-text'
 import { RatingStars } from '@/components/rating-stars'
 import { StatsItem } from '@/components/stats-item'
-import { Badge } from '@/components/ui/badge'
+import { Badge, BadgeProps } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import {
@@ -36,6 +37,7 @@ import {
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'
 import { PlanPreviewTab } from './plan-preview-tab'
+import { WeekProgressCircle } from './week-progress-circle'
 
 interface PlanDetailsDrawerProps {
   plan: UnifiedPlan | null
@@ -54,12 +56,21 @@ export function PlanDetailsDrawer({
   onAction,
   isLoading = false,
 }: PlanDetailsDrawerProps) {
+  const [activeTab, setActiveTab] = useState('info')
+  const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
+
   if (!plan) return null
 
   const status = getPlanStatus(plan, isActive)
   const isCompleted = status === PlanStatus.Completed
   const isPaused = status === PlanStatus.Paused
   const isButtonLoading = isLoading || false
+  const hasWeeks = 'weeks' in plan && plan.weeks && plan.weeks.length > 0
+
+  const handleWeekClick = (weekId: string) => {
+    setSelectedWeekId(weekId)
+    setActiveTab('preview')
+  }
 
   return (
     <Drawer open={open} onOpenChange={onClose}>
@@ -94,7 +105,11 @@ export function PlanDetailsDrawer({
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto p-4">
-            <Tabs defaultValue="info" className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="w-full shadow-md">
                 <TabsTrigger value="info" className="flex-1">
                   Info
@@ -105,54 +120,63 @@ export function PlanDetailsDrawer({
               </TabsList>
 
               <TabsContent value="info" className="space-y-6">
-                {plan.startDate && plan.endDate && (
-                  <div className="space-y-2">
-                    {/* Progress Overview */}
-                    {plan.completedWorkoutsDays > 0 || plan.adherence ? (
-                      <CompletionStats
-                        completedWorkoutsDays={plan.completedWorkoutsDays}
-                        totalWorkouts={plan.totalWorkouts}
-                      />
-                    ) : null}
-                    <div className="grid grid-cols-2 gap-2 empty:hidden">
-                      <StatsItem
-                        label="Current Week"
-                        value={
-                          <p className="text-sm font-medium">
-                            {plan.currentWeekNumber} of {plan.weekCount}
-                          </p>
-                        }
-                        icon={<Loader className="text-muted-foreground" />}
-                      />
-                      {plan.startDate && plan.endDate && (
-                        <StatsItem
-                          label="Start Date"
-                          value={
-                            <p className="text-sm font-medium">
-                              {formatDate(new Date(plan.startDate), 'MMM d')} -{' '}
-                              {formatDate(new Date(plan.endDate), 'MMM d')}{' '}
-                            </p>
-                          }
-                          icon={<Calendar className="text-muted-foreground" />}
-                        />
-                      )}
+                <div className="space-y-4">
+                  {/* Progress Overview */}
+                  {plan.completedWorkoutsDays > 0 || plan.adherence ? (
+                    <CompletionStats
+                      completedWorkoutsDays={plan.completedWorkoutsDays}
+                      totalWorkouts={plan.totalWorkouts}
+                    />
+                  ) : null}
+
+                  {/* Weekly Progress Overview */}
+                  {hasWeeks && (
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-3 gap-2">
+                        {plan.weeks
+                          .slice()
+                          .sort((a, b) => a.weekNumber - b.weekNumber)
+                          .map((week) => {
+                            const totalExercises = week.days.reduce(
+                              (sum, day) => sum + (day.exercises?.length || 0),
+                              0,
+                            )
+                            const completedExercises = week.days.reduce(
+                              (sum, day) =>
+                                sum +
+                                (day.exercises?.filter((ex) => !!ex.completedAt)
+                                  .length || 0),
+                              0,
+                            )
+                            const progress =
+                              totalExercises > 0
+                                ? (completedExercises / totalExercises) * 100
+                                : 0
+
+                            return (
+                              <button
+                                key={week.id}
+                                onClick={() => handleWeekClick(week.id)}
+                                className="text-left hover:bg-accent/50 transition-colors rounded-lg"
+                              >
+                                <StatsItem
+                                  variant="outline"
+                                  label={`Week ${week.weekNumber}`}
+                                  classNameLabel="font-semibold h-"
+                                  value={
+                                    <WeekProgressCircle
+                                      progress={progress}
+                                      size={28}
+                                    />
+                                  }
+                                />
+                              </button>
+                            )
+                          })}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {/* Plan Statistics */}
-                {!plan.active && !isCompleted && (
-                  <div className="grid grid-cols-3 gap-2">
-                    <StatsItem value={plan.weekCount} label="Weeks" />
-                    <StatsItem
-                      value={plan.totalWorkouts}
-                      label="Total workouts"
-                    />
-                    <StatsItem
-                      value={Math.round(plan.totalWorkouts / plan.weekCount)}
-                      label="Days per week"
-                    />
-                  </div>
-                )}
+                  )}
+                </div>
 
                 {'focusTags' in plan && plan.focusTags.length > 0 && (
                   <div>
@@ -215,6 +239,8 @@ export function PlanDetailsDrawer({
                 <PlanPreviewTab
                   weeks={'weeks' in plan ? plan.weeks : null}
                   isTemplate={status === PlanStatus.Template}
+                  selectedWeekId={selectedWeekId}
+                  onAccordionChange={() => setSelectedWeekId(null)}
                 />
               </TabsContent>
             </Tabs>
@@ -279,29 +305,35 @@ function PlanStatusBadge({
   status: PlanStatus
   plan: UnifiedPlan
 }) {
-  const getStatusConfig = (status: PlanStatus) => {
+  const getStatusConfig = (
+    status: PlanStatus,
+  ): {
+    variant: BadgeProps['variant']
+    icon: React.ReactNode
+    label: string
+  } => {
     switch (status) {
       case PlanStatus.Active:
         return {
-          variant: 'primary' as const,
+          variant: 'primary',
           icon: <BicepsFlexed className="h-3 w-3" />,
           label: 'Active',
         }
       case PlanStatus.Paused:
         return {
-          variant: 'warning' as const,
+          variant: 'warning',
           icon: <Calendar className="h-3 w-3" />,
           label: `Paused ${formatDate(new Date((plan as AvailablePlan).updatedAt), 'MMM d, yyyy')}`,
         }
       case PlanStatus.Completed:
         return {
-          variant: 'secondary' as const,
+          variant: 'success',
           icon: <CheckCircle className="h-3 w-3" />,
           label: `Completed ${formatDate(new Date((plan as CompletedPlan).completedAt!), 'MMM d, yyyy')}`,
         }
       case PlanStatus.Template:
         return {
-          variant: 'outline' as const,
+          variant: 'secondary',
           icon: <Users className="h-3 w-3" />,
           label: 'Template',
         }
