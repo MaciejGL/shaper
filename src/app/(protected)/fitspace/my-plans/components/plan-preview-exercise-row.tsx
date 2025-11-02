@@ -1,21 +1,32 @@
 import Image from 'next/image'
 
 import { VideoPreview } from '@/components/video-preview'
-import { GQLFitspaceMyPlansQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
-type PlanExercise = NonNullable<
-  NonNullable<
-    NonNullable<
-      NonNullable<
-        GQLFitspaceMyPlansQuery['getMyPlansOverviewFull']['activePlan']
-      >['weeks']
-    >[number]['days'][number]['exercises']
-  >[number]
->
+// Flexible exercise type that works with different query types
+interface Exercise {
+  __typename?: string
+  id: string
+  name: string
+  videoUrl?: string | null
+  completedAt?: string | null
+  images?: Array<{
+    __typename?: string
+    id: string
+    thumbnail?: string | null
+    medium?: string | null
+    url: string
+    order: number
+  }>
+  // Optional fields from other query types (not used by this component)
+  muscleGroups?: any
+  sets?: any
+  restSeconds?: any
+  instructions?: any
+}
 
 interface PlanPreviewExerciseRowProps {
-  exercise?: PlanExercise
+  exercise?: Exercise
   isTemplate?: boolean
   isRestDay?: boolean
 }
@@ -29,7 +40,6 @@ export function PlanPreviewExerciseRow({
   const firstImage = exercise?.images?.[0]
   const imageUrl =
     firstImage?.url || firstImage?.medium || firstImage?.thumbnail
-  console.log(imageUrl, exercise)
 
   // Determine border color based on plan status and completion
   const getBorderColor = () => {

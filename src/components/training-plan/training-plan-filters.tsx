@@ -30,14 +30,14 @@ const focusTagLabels: Record<GQLFocusTag, string> = {
 
 const focusTagOptions: GQLFocusTag[] = [
   GQLFocusTag.Strength,
-  GQLFocusTag.Cardio,
+  // GQLFocusTag.Cardio,
   GQLFocusTag.BeginnerFriendly,
   GQLFocusTag.BodyRecomposition,
   GQLFocusTag.Powerlifting,
   GQLFocusTag.WeightLoss,
-  GQLFocusTag.Endurance,
-  GQLFocusTag.FunctionalFitness,
-  GQLFocusTag.Bodyweight,
+  // GQLFocusTag.Endurance,
+  // GQLFocusTag.FunctionalFitness,
+  // GQLFocusTag.Bodyweight,
 ]
 
 interface TrainingPlanFiltersProps {

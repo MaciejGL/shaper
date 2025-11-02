@@ -19,20 +19,13 @@ const badgeVariants = cva(
           'border-transparent bg-card/50 dark:bg-muted/30 text-secondary-foreground [a&]:hover:bg-card/70 dark:[a&]:hover:bg-muted/40',
         ),
 
-        success: cn(
-          'border-transparent bg-green-500/70 text-black [a&]:hover:bg-green-500/90 focus-visible:ring-green-500/20 dark:focus-visible:ring-green-500/40 dark:bg-green-500/60',
-          'dark:bg-green-500/60 dark:text-white',
-        ),
+        success:
+          'border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 [a&]:hover:bg-green-200 dark:[a&]:hover:bg-green-800',
 
-        info: cn(
-          'border-transparent bg-blue-500/70 text-black [a&]:hover:bg-blue-500/90 focus-visible:ring-blue-500/20 dark:focus-visible:ring-blue-500/40 dark:bg-blue-500/60',
-          'dark:bg-blue-500/60',
-        ),
+        info: 'border-transparent bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 [a&]:hover:bg-blue-200 dark:[a&]:hover:bg-blue-800',
 
-        warning: cn(
-          ' border-transparent bg-amber-500/70 text-black [a&]:hover:bg-amber-500/90 focus-visible:ring-amber-500/20 dark:focus-visible:ring-amber-500/40 dark:bg-amber-500/60',
-          'dark:bg-amber-500/60',
-        ),
+        warning:
+          'border-transparent bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 [a&]:hover:bg-yellow-200 dark:[a&]:hover:bg-yellow-800',
 
         destructive:
           'border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
@@ -47,6 +40,16 @@ const badgeVariants = cva(
         ),
         premium:
           'bg-gradient-to-br from-yellow-600 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0',
+
+        // Difficulty level variants - subtle, readable in both light/dark modes
+        beginner:
+          'border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 [a&]:hover:bg-green-200 dark:[a&]:hover:bg-green-800',
+        intermediate:
+          'border-transparent bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 [a&]:hover:bg-yellow-200 dark:[a&]:hover:bg-yellow-800',
+        advanced:
+          'border-transparent bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 [a&]:hover:bg-orange-200 dark:[a&]:hover:bg-orange-800',
+        expert:
+          'border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 [a&]:hover:bg-red-200 dark:[a&]:hover:bg-red-800',
       },
       size: {
         '2xs': cn(

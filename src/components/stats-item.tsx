@@ -14,7 +14,7 @@ export function StatsItem({
   value: number | string | React.ReactNode
   icon?: React.ReactNode
   label: string
-  iconPosition?: 'left' | 'top'
+  iconPosition?: 'left' | 'top' | 'right'
   variant?: 'default' | 'secondary' | 'outline'
   loading?: boolean
   classNameLabel?: string
@@ -31,12 +31,14 @@ export function StatsItem({
         <div
           className={cn('flex items-center gap-3', {
             'flex-col': iconPosition === 'top',
+            'flex-row-reverse justify-between': iconPosition === 'right',
           })}
         >
           <div className="[&_svg]:size-5">{icon}</div>
           <div
             className={cn('flex flex-col items-start', {
               'items-center': iconPosition === 'top',
+              'items-start': iconPosition === 'right',
             })}
           >
             {typeof value === 'number' ? (

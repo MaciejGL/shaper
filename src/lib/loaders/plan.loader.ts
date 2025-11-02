@@ -114,9 +114,13 @@ export const createPlanLoaders = () => ({
         },
       })
 
+      console.log('counts', counts)
+
       const map = new Map(
         counts.map((item) => [item.templateId, item._count.templateId]),
       )
+
+      console.log('map', map)
 
       return templateIds.map((id) => map.get(id) ?? 0)
     },

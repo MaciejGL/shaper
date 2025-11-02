@@ -1174,6 +1174,7 @@ export async function assignTrainingPlanToClient(
     data: {
       assignedToId: clientId,
       isTemplate: false,
+      templateId: planId, // Track which template this was created from
       startDate,
     },
   })
@@ -1321,6 +1322,7 @@ export async function assignTemplateToSelf(
     data: {
       assignedToId: userId,
       isTemplate: false,
+      templateId: planId, // Track which template this was created from
     },
   })
 
