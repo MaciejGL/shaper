@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { downloadPDF, generateFilename } from '@/lib/pdf/pdf-generator'
@@ -71,22 +72,12 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-8">
       {nutritionPlan?.description && (
         <p className="text-sm text-muted-foreground mt-1">
           {nutritionPlan.description}
         </p>
       )}
-
-      <Button
-        variant="outline"
-        iconStart={<Download />}
-        onClick={handleExportPDF}
-        loading={isGeneratingPDF}
-        disabled={isGeneratingPDF}
-      >
-        {isGeneratingPDF ? 'Generating PDF...' : 'Export to PDF'}
-      </Button>
 
       <Tabs value={activeDay} onValueChange={setActiveDay}>
         <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar">
@@ -106,9 +97,23 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
         {days.map((day) => (
           <TabsContent key={day.id} value={day.dayNumber.toString()}>
-            <div className="space-y-12 mt-8">
+            <div className="space-y-12">
               {/* Meals Accordion */}
-              <DayMealsAccordion day={day} />
+              <Card borderless>
+                <DayMealsAccordion day={day} />
+                <CardFooter>
+                  <Button
+                    variant="tertiary"
+                    iconStart={<Download />}
+                    onClick={handleExportPDF}
+                    loading={isGeneratingPDF}
+                    disabled={isGeneratingPDF}
+                    className="w-full"
+                  >
+                    Export to PDF
+                  </Button>
+                </CardFooter>
+              </Card>
               {/* Shopping List */}
               <ShoppingList day={day} planId={planId} />
             </div>
