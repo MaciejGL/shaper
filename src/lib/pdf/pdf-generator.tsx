@@ -110,7 +110,17 @@ export function formatPDFDate(date: Date | string): string {
 /**
  * Generate a unique filename with timestamp
  */
-export function generateFilename(prefix: string): string {
+type GenerateFilenameProps = {
+  prefix: string
+  skipTimestamp?: boolean
+}
+export function generateFilename({
+  prefix,
+  skipTimestamp,
+}: GenerateFilenameProps): string {
+  if (skipTimestamp) {
+    return `${prefix}`
+  }
   const timestamp = new Date().toISOString().split('T')[0]
   return `${prefix}-${timestamp}`
 }

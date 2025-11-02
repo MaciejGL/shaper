@@ -38,9 +38,11 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
     setIsGeneratingPDF(true)
     try {
-      const filename = generateFilename(
-        `nutrition-plan-${nutritionPlan.name.toLowerCase().replace(/\s+/g, '-')}`,
-      )
+      const filename = generateFilename({
+        prefix: `Nutrition Plan - ${nutritionPlan.name}`,
+        skipTimestamp: true,
+      })
+
       await downloadPDF(
         <NutritionPlanPDF nutritionPlan={nutritionPlan} />,
         filename,
@@ -126,7 +128,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
 export function NutritionPlanViewerLoading() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-4">
       <Tabs value="0">
         <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar">
           <TabsList>
