@@ -50,11 +50,6 @@ export default function NutritionPage() {
   return (
     <div className="container-hypertro mx-auto py-4">
       <div>
-        {hasMacroTargets && (
-          <div className="flex items-center gap-2 mb-2">
-            <h2 className="text-sm font-medium">Daily Macro Targets</h2>
-          </div>
-        )}
         {!hasMacroTargets && !hasPlans && (
           <EmptyStateCard
             title="Macro targets not set"
@@ -125,7 +120,7 @@ export default function NutritionPage() {
           </Card>
         )}
       </div>
-      <div className={cn('space-y-2', hasPlans && hasMacroTargets && 'mt-4')}>
+      <div className={cn(hasPlans && hasMacroTargets && 'mt-4')}>
         <NutritionPlanSelector
           onPlanSelect={handlePlanSelect}
           selectedPlanId={selectedPlanId}

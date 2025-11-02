@@ -54,7 +54,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                   <AccordionTrigger className="p-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full mr-4">
                       <div className="flex items-center gap-3">
-                        <span className="text-base font-normal text-left">
+                        <span className="text-left">
                           {`${index + 1}. ${meal.name}`}
                         </span>
                       </div>

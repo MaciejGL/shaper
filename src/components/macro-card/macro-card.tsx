@@ -20,12 +20,12 @@ export function MacroCard({
   return (
     <div
       className={cn(
-        'text-center p-4 bg-card rounded-lg flex-center flex-col',
+        'text-center p-2 bg-card rounded-lg flex-center flex-col',
         className,
       )}
     >
       <div
-        className={cn('text-base font-medium w-max', color, {
+        className={cn('text-base font-semibold w-max', color, {
           'masked-placeholder-text': isLoading,
         })}
       >

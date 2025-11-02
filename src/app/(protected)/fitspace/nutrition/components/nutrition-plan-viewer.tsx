@@ -72,7 +72,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
   }
 
   return (
-    <div className="space-y-4 mt-8">
+    <div className="space-y-4 mt-4">
       {nutritionPlan?.description && (
         <p className="text-sm text-muted-foreground mt-1">
           {nutritionPlan.description}
@@ -97,7 +97,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
         {days.map((day) => (
           <TabsContent key={day.id} value={day.dayNumber.toString()}>
-            <div className="space-y-12">
+            <div className="space-y-8">
               {/* Meals Accordion */}
               <Card borderless>
                 <DayMealsAccordion day={day} />
