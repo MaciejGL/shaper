@@ -118,7 +118,7 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar safe-area-bottom safe-area-x">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar safe-area-bottom safe-area-x rounded-t-2xl">
         <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -149,7 +149,7 @@ export function MobileNav() {
                 scroll
               >
                 <Icon className="size-4 mb-1" />
-                <span className="text-xs font-medium">{item.label}</span>
+                <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             )
           })}

@@ -281,7 +281,7 @@ export function ExerciseSets({
         {isAdvancedView && (
           <div
             className={cn(
-              'grid grid-cols-1 items-center justify-items-center gap-2 mt-2 border-t border-border',
+              'grid grid-cols-1 items-center justify-items-center mt-2 border-t border-border',
               exercise.sets.length > 1 &&
                 exercise.sets.some((set) => set.isExtra) &&
                 'grid-cols-[1fr_1px_1fr]',
@@ -294,7 +294,7 @@ export function ExerciseSets({
                     variant="ghost"
                     size="xs"
                     iconStart={<PlusIcon />}
-                    className="w-max my-2"
+                    className="w-full h-10"
                     loading={isRemovingSet}
                     disabled={isRemovingSet}
                     onClick={handleRemoveLastSet}
@@ -308,7 +308,7 @@ export function ExerciseSets({
               variant="ghost"
               size="xs"
               iconStart={<PlusIcon />}
-              className="w-max my-2"
+              className="w-full h-10"
               loading={isAddingSet}
               onClick={handleAddSet}
             >

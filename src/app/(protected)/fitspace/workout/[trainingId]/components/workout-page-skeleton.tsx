@@ -1,7 +1,6 @@
 import { formatDate } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -14,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { GQLWorkoutType } from '@/generated/graphql-client'
+import { getDayName } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 // Create dummy data structure matching the GraphQL schema

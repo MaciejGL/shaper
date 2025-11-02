@@ -1,7 +1,6 @@
 import { formatDate } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
-import { BicepsFlexed, BookmarkXIcon, Trash } from 'lucide-react'
-import { Pause } from 'lucide-react'
+import { BicepsFlexed, CheckCircle, Pause, Trash } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -76,27 +75,27 @@ export function PlanActionDialog({
     activate: {
       title: isPaused ? 'Resume Plan' : 'Activate Plan',
       description: isPaused
-        ? `"${plan.title}" will become your active training plan.`
-        : `"${plan.title}" will become your active training plan.`,
+        ? `Ready to continue? "${plan.title}" will become your active plan and you can pick up where you left off.`
+        : `Let's get started! "${plan.title}" will become your active training plan.`,
       confirmText: isPaused ? 'Resume Plan' : 'Activate Plan',
       icon: <BicepsFlexed className="size-4" />,
     },
     pause: {
       title: 'Pause Plan',
-      description: `Are you sure you want to pause "${plan.title}"? You can resume it later.`,
+      description: `Taking a break from "${plan.title}"? No problem - you can resume anytime and pick up right where you left off.`,
       confirmText: 'Pause Plan',
       icon: <Pause className="size-4" />,
     },
     close: {
-      title: 'Close Plan',
-      description: `Are you sure you want to close "${plan.title}"? This action cannot be undone and the plan will be moved to completed.`,
-      confirmText: 'Close Plan',
-      icon: <BookmarkXIcon className="size-4" />,
+      title: 'Complete Plan',
+      description: `Congratulations on finishing "${plan.title}"! Mark this plan as complete to review your progress and celebrate your achievement.`,
+      confirmText: 'Complete Plan',
+      icon: <CheckCircle className="size-4" />,
     },
     delete: {
-      title: 'Delete Plan',
-      description: `Are you sure you want to delete "${plan.title}"? This action cannot be undone and the plan will be deleted from your account.`,
-      confirmText: 'Delete Plan',
+      title: 'Remove Plan',
+      description: `Remove "${plan.title}" from your account? This will permanently delete the plan and cannot be undone.`,
+      confirmText: 'Remove Plan',
       icon: <Trash className="size-4" />,
     },
   }
@@ -111,7 +110,9 @@ export function PlanActionDialog({
             {config.icon}
             {config.title}
           </DialogTitle>
-          <DialogDescription>{config.description}</DialogDescription>
+          <DialogDescription className="my-4 leading-relaxed">
+            {config.description}
+          </DialogDescription>
         </DialogHeader>
 
         {action === 'activate' && !isPaused && (

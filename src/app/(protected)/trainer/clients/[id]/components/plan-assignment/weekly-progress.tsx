@@ -12,7 +12,6 @@ import {
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs'
 import { useEffect, useMemo, useState } from 'react'
 
-import { dayNames } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CardTitle } from '@/components/ui/card'
@@ -31,6 +30,7 @@ import {
   useGetClientSharedNotesQuery,
   useGetNoteRepliesQuery,
 } from '@/generated/graphql-client'
+import { dayNames } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 // Type definitions for notes and replies

@@ -232,18 +232,18 @@ export function FavouriteWorkoutCard({
                 )}
 
                 <Button
-                  size="icon-sm"
+                  size="sm"
                   onClick={onDelete}
-                  variant="ghost"
-                  iconOnly={<Trash2 />}
+                  variant="tertiary"
+                  iconStart={<Trash2 />}
                 >
-                  Delete
+                  Remove
                 </Button>
                 <Button
-                  size="icon-sm"
-                  variant="ghost"
+                  size="sm"
+                  variant="tertiary"
                   className="ml-auto"
-                  iconOnly={<Edit />}
+                  iconStart={<Edit />}
                   onClick={(e) => {
                     e.stopPropagation()
                     setShowEditMetadata(true)

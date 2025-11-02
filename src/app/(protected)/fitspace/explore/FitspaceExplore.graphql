@@ -26,6 +26,33 @@ query GetPublicTrainingPlans($limit: Int) {
   }
 }
 
+query GetPublicTrainingPlanWeeks($planId: ID!) {
+  getTrainingPlanById(id: $planId) {
+    id
+    weeks {
+      id
+      weekNumber
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        exercises {
+          id
+          name
+          videoUrl
+          images {
+            id
+            thumbnail
+            medium
+            url
+            order
+          }
+        }
+      }
+    }
+  }
+}
+
 query GetFeaturedTrainers($limit: Int) {
   getFeaturedTrainers(limit: $limit) {
     id

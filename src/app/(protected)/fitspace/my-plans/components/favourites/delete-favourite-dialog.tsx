@@ -33,9 +33,9 @@ export function DeleteFavouriteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent dialogTitle="Delete Template Workout">
+      <DialogContent dialogTitle="Remove Custom Day">
         <DialogHeader>
-          <DialogTitle>Delete Template Workout</DialogTitle>
+          <DialogTitle>Remove Custom Day</DialogTitle>
           <DialogDescription>
             Are you sure you want to delete "{favourite.title}"?
           </DialogDescription>
@@ -43,8 +43,8 @@ export function DeleteFavouriteDialog({
 
         <div className="bg-card-on-card p-4 rounded-lg">
           <p className="text-sm dark:text-muted-foreground">
-            This action cannot be undone. The template workout and all its
-            exercises will be permanently deleted.
+            This action cannot be undone. The custom day and all its exercises
+            will be permanently deleted.
           </p>
           {favourite.exercises.length > 0 && (
             <p className="text-sm dark:text-muted-foreground mt-2">
@@ -64,7 +64,7 @@ export function DeleteFavouriteDialog({
             disabled={isDeleting}
             loading={isDeleting}
           >
-            Delete Template
+            Remove Day
           </Button>
         </div>
       </DialogContent>

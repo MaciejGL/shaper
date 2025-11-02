@@ -42,7 +42,7 @@ export function FavouriteWorkoutsList({
       <div className="space-y-4">
         <div className="flex justify-end items-center">
           <Button disabled iconStart={<Plus />}>
-            Add Template
+            Add Day
           </Button>
         </div>
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
@@ -64,7 +64,7 @@ export function FavouriteWorkoutsList({
           iconStart={<Plus />}
           disabled={hasReachedLimit}
         >
-          Add Template
+          Add Day
         </Button>
       </div>
 
@@ -118,12 +118,10 @@ function EmptyFavouritesState({
         <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
           <Dumbbell className="w-6 h-6 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold mb-2">
-          Create first custom template
-        </h3>
+        <h3 className="text-lg font-semibold mb-2">Create first custom day</h3>
         <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-          Create your first custom template to quickly start your preferred
-          exercise routines.
+          Create your first custom day to quickly start your preferred exercise
+          routines.
         </p>
         {workoutStatus.status === 'active-plan-workout' && (
           <p className="text-sm text-muted-foreground my-4 max-w-sm mx-auto">

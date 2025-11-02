@@ -41,24 +41,19 @@ export default function MyPlansPage() {
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
 
   return (
-    <div className="container-hypertro mx-auto grid grid-rows-[max-content_1fr] pt-2">
-      {/* <DashboardHeader
-        title="Training Plans"
-        icon={LayoutList}
-        variant="amber"
-        className="mb-6"
-      /> */}
-
+    <div className="container-hypertro mx-auto grid grid-rows-[max-content_1fr] mt-6">
       <Tabs
         value={tab ?? PlanTab.Plans}
         defaultValue={PlanTab.Plans}
         onValueChange={(value) => setTab(value as PlanTab)}
         className="gap-0"
       >
-        <TabsList size="lg" className="w-full">
-          <TabsTrigger value={PlanTab.Plans}>Plans</TabsTrigger>
-          <TabsTrigger value={PlanTab.QuickWorkout}>
-            Custom Workouts
+        <TabsList size="xl" className="w-full">
+          <TabsTrigger value={PlanTab.Plans} size="xl">
+            Plans
+          </TabsTrigger>
+          <TabsTrigger value={PlanTab.QuickWorkout} size="xl">
+            Custom Days
           </TabsTrigger>
         </TabsList>
 

@@ -107,6 +107,48 @@ function sortPlans(
   })
 }
 
+// Plans list component with status dividers
+interface PlansListProps {
+  plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[]
+  selectedFilter: FilterOption
+  onPlanClick: (plan: UnifiedPlan) => void
+}
+
+function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
+  return (
+    <div className="space-y-2">
+      {plans.map(({ plan, isActive }, index) => {
+        const currentStatus = getPlanStatus(plan, isActive)
+        const previousStatus =
+          index > 0
+            ? getPlanStatus(plans[index - 1].plan, plans[index - 1].isActive)
+            : null
+
+        // Show divider when status changes and filter is 'all'
+        const showDivider =
+          selectedFilter === 'all' &&
+          previousStatus !== null &&
+          currentStatus !== previousStatus
+
+        return (
+          <div key={plan.id}>
+            {showDivider && (
+              <div className="flex items-center gap-3 pb-4 pt-2">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  {currentStatus}
+                </span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+            )}
+            <PlanCard plan={plan} isActive={isActive} onClick={onPlanClick} />
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export function PlansTab({
   activePlan,
   availablePlans = [],
@@ -173,7 +215,7 @@ export function PlansTab({
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-8">
         {/* Filter Chips */}
         <PlanStatusFilter
           selectedFilter={selectedFilter}
@@ -183,16 +225,11 @@ export function PlansTab({
 
         {/* Plans List */}
         {sortedPlans.length > 0 ? (
-          <div className="space-y-2">
-            {sortedPlans.map(({ plan, isActive }) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                isActive={isActive}
-                onClick={handlePlanClick}
-              />
-            ))}
-          </div>
+          <PlansList
+            plans={sortedPlans}
+            selectedFilter={selectedFilter}
+            onPlanClick={handlePlanClick}
+          />
         ) : (
           <EmptyFilterState filter={selectedFilter} />
         )}

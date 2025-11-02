@@ -179,18 +179,22 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   async assignmentCount() {
-    // Only count for templates (public plans)
-    if (!this.data.isTemplate) {
-      return 0
+    console.log(
+      'assignmentCount',
+      this.data.id,
+      this.data.isTemplate,
+      this.data.isPublic,
+    )
+    if (this.data.isTemplate && this.data.isPublic) {
+      const count =
+        await this.context.loaders.plan.assignmentCountByTemplateId.load(
+          this.data.id,
+        )
+
+      return count
     }
 
-    // Count how many duplicates (assigned plans) were created from this template
-    const count =
-      await this.context.loaders.plan.assignmentCountByTemplateId.load(
-        this.data.id,
-      )
-
-    return count
+    return 0
   }
 
   get isDemo() {

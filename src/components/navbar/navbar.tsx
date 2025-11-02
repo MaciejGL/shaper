@@ -112,9 +112,13 @@ export const Navbar = ({
     (user?.user?.role === GQLUserRole.Client && user?.user?.trainerId) ||
     isTrainer
 
+  const isWorkoutPage = pathname.startsWith('/fitspace/workout')
+
   return (
     <>
-      {user && !isTrainer && <motion.div className="h-[60px]" />}
+      {user && !isTrainer && (
+        <motion.div className={cn('h-[60px]', isWorkoutPage && 'bg-sidebar')} />
+      )}
 
       <div
         className={!isTrainer ? 'z-10 fixed top-0 left-0 right-0' : 'relative'}
@@ -127,6 +131,7 @@ export const Navbar = ({
             'data-[visible=false]:opacity-0 data-[visible=false]:translate-y-[-100px] transition-all duration-200',
             'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
             'py-3 px-4',
+            isFitspace && 'rounded-b-2xl',
           )}
         >
           <div className="flex items-center gap-2">

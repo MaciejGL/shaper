@@ -1,17 +1,15 @@
-import { HamIcon } from 'lucide-react'
+import { CoffeeIcon, HamIcon } from 'lucide-react'
+
+import { BiggyIcon } from '@/components/biggy-icon'
 
 export function RestDay() {
   return (
     <div className="text-center p-6 text-muted-foreground flex-center flex-col mt-12">
-      <div className="flex-center flex-col bg-primary/10 rounded-full p-4 mb-4">
-        <HamIcon className="h-12 w-12 text-muted-foreground" />
-      </div>
-      <p className="text-lg font-medium mb-2">
-        Time to recharge those batteries!
-      </p>
-      <p className="text-sm">
-        Grab some good food, catch those Z's, and let's crush it on another
-        workout!
+      <BiggyIcon icon={CoffeeIcon} />
+      <p className="text-lg font-medium mb-2 mt-6">Rest up today</p>
+      <p className="text-sm leading-relaxed">
+        This is when your body actually builds muscle. Focus on recovery - food,
+        hydration, sleep. See you next session.
       </p>
     </div>
   )

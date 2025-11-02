@@ -4,9 +4,8 @@ import { formatDate } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo } from 'react'
 
-import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { useUserPreferences } from '@/context/user-preferences-context'
-import { sortDaysForDisplay } from '@/lib/date-utils'
+import { getDayName, sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 import { useWorkoutPrefetch } from '../hooks/use-workout-prefetch'
@@ -25,10 +24,10 @@ export function Navigation({ plan }: NavigationProps) {
   return (
     <div
       className={cn(
-        'bg-sidebar rounded-b-xl',
+        'bg-sidebar rounded-b-2xl',
         // Counter Main padding
         '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
-        'px-2 py-4 md:px-4 lg:p-8',
+        'px-2 pt-4 pb-2 md:px-4 lg:p-8',
       )}
     >
       <div className="mx-auto max-w-sm">
