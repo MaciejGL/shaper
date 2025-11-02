@@ -209,12 +209,13 @@ export function PlanDetailsDrawer({
                 )}
               </TabsContent>
 
-              <TabsContent value="preview" className="mt-6">
-                <PlanPreviewTab
-                  weeks={'weeks' in plan ? plan.weeks : null}
-                  planTitle={plan.title}
-                />
-              </TabsContent>
+          <TabsContent value="preview" className="mt-6">
+            <PlanPreviewTab
+              weeks={'weeks' in plan ? plan.weeks : null}
+              planTitle={plan.title}
+              isTemplate={status === PlanStatus.Template}
+            />
+          </TabsContent>
             </Tabs>
           </div>
 

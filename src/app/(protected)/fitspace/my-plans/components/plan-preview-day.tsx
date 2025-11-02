@@ -1,4 +1,5 @@
 import { useWeekStartPreference } from '@/context/user-preferences-context'
+import { cn } from '@/lib/utils'
 
 import { PlanPreviewExerciseRow } from './plan-preview-exercise-row'
 
@@ -32,6 +33,7 @@ interface PlanPreviewDayProps {
       id: string
       name: string
       videoUrl?: string | null
+      completedAt?: string | null
       images?: Array<{
         id: string
         thumbnail?: string | null
@@ -42,46 +44,50 @@ interface PlanPreviewDayProps {
     }> | null
   }
   weekNumber: number
+  isTemplate?: boolean
 }
 
-export function PlanPreviewDay({ day, weekNumber }: PlanPreviewDayProps) {
+export function PlanPreviewDay({
+  day,
+  weekNumber,
+  isTemplate = false,
+}: PlanPreviewDayProps) {
   const weekStartsOn = useWeekStartPreference()
   const dayName = getDayName(day.dayOfWeek, weekStartsOn)
   const exercises = day.exercises || []
 
   return (
-    <div
-      className={`border-l-2 pl-4 py-3 ${
-        day.isRestDay
-          ? 'border-muted text-muted-foreground'
-          : 'border-primary/20'
-      }`}
-    >
+    <div className="mb-8">
       <h4
-        className={`text-sm font-medium mb-2 ${
-          day.isRestDay ? 'text-muted-foreground' : ''
-        }`}
+        className={cn(
+          'text-sm font-medium mb-2 bg-card-on-card p-4 rounded-md',
+          day.isRestDay ? 'text-muted-foreground' : '',
+        )}
       >
         {dayName}
         {day.isRestDay && <span className="ml-2 text-xs">• Rest Day</span>}
       </h4>
 
       {!day.isRestDay && exercises.length > 0 && (
-        <div className="space-y-1">
+        <div className="pl-0">
           {exercises.map((exercise, index) => (
             <PlanPreviewExerciseRow
               key={exercise.id}
               exercise={exercise}
               index={index}
+              isFirst={index === 0}
+              isLast={index === exercises.length - 1}
+              isTemplate={isTemplate}
             />
           ))}
         </div>
       )}
 
       {!day.isRestDay && exercises.length === 0 && (
-        <p className="text-xs text-muted-foreground">No exercises assigned</p>
+        <p className="text-xs text-muted-foreground pl-4">
+          No exercises assigned
+        </p>
       )}
     </div>
   )
 }
-

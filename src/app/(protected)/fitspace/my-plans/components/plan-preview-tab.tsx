@@ -19,6 +19,7 @@ interface PlanPreviewTabProps {
         id: string
         name: string
         videoUrl?: string | null
+        completedAt?: string | null
         images?: Array<{
           id: string
           thumbnail?: string | null
@@ -30,9 +31,10 @@ interface PlanPreviewTabProps {
     }>
   }> | null
   planTitle: string
+  isTemplate?: boolean
 }
 
-export function PlanPreviewTab({ weeks, planTitle }: PlanPreviewTabProps) {
+export function PlanPreviewTab({ weeks, planTitle, isTemplate = false }: PlanPreviewTabProps) {
   if (!weeks || weeks.length === 0) {
     return (
       <div className="py-12 text-center">
@@ -62,11 +64,12 @@ export function PlanPreviewTab({ weeks, planTitle }: PlanPreviewTabProps) {
             <AccordionContent>
               <div className="space-y-2 pb-2">
                 {sortedDays.map((day) => (
-                  <PlanPreviewDay
-                    key={day.id}
-                    day={day}
-                    weekNumber={week.weekNumber}
-                  />
+              <PlanPreviewDay
+                key={day.id}
+                day={day}
+                weekNumber={week.weekNumber}
+                isTemplate={isTemplate}
+              />
                 ))}
               </div>
             </AccordionContent>
