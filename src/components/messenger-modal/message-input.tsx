@@ -89,7 +89,7 @@ export function MessageInput({
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Aa"
-          className="flex-1 py-2.5 min-h-max resize-none rounded-lg"
+          className="flex-1 py-2.5 min-h-0 resize-none rounded-2xl max-h-24 focus-visible:ring-0 compact-scrollbar"
           autoComplete="off"
           variant="ghost"
           autoFocus={false}

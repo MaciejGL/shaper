@@ -29,6 +29,11 @@ query GetMyNutritionPlan($id: ID!) {
     id
     name
     description
+    trainer {
+      id
+      firstName
+      lastName
+    }
     days {
       id
       dayNumber

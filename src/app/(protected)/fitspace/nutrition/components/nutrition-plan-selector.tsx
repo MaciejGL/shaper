@@ -85,27 +85,25 @@ export function NutritionPlanSelector({
   const effectiveSelectedPlan = selectedPlanId || localSelectedPlan
 
   return (
-    <div className="space-y-2">
-      <Select
-        value={effectiveSelectedPlan || ''}
-        onValueChange={handlePlanChange}
+    <Select
+      value={effectiveSelectedPlan || ''}
+      onValueChange={handlePlanChange}
+    >
+      <SelectTrigger
+        className="w-full h-auto text-base py-4 rounded-lg"
+        variant="ghost"
       >
-        <SelectTrigger
-          className="w-full h-auto text-base py-4 rounded-lg"
-          variant="ghost"
-        >
-          <SelectValue placeholder="Select a nutrition plan" />
-        </SelectTrigger>
-        <SelectContent>
-          {sortedPlans.map((plan) => (
-            <SelectItem key={plan.id} value={plan.id}>
-              <div className="flex flex-col items-start w-full">
-                <span className="font-medium text-base">{plan.name}</span>
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+        <SelectValue placeholder="Select a nutrition plan" />
+      </SelectTrigger>
+      <SelectContent>
+        {sortedPlans.map((plan) => (
+          <SelectItem key={plan.id} value={plan.id}>
+            <div className="flex flex-col items-start w-full">
+              <span className="font-medium text-base">{plan.name}</span>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }

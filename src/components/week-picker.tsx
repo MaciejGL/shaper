@@ -2,7 +2,7 @@
 
 import { addWeeks, format, isSameWeek, startOfWeek } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -19,6 +19,7 @@ interface WeekPickerProps {
   onChange: (date: Date) => void
   className?: string
   placeholder?: string
+  defaultValue?: Date | 'current-week'
 }
 
 export function WeekPicker({
@@ -26,9 +27,24 @@ export function WeekPicker({
   onChange,
   className,
   placeholder = 'Select week',
+  defaultValue,
 }: WeekPickerProps) {
   const { preferences } = useUserPreferences()
   const [isOpen, setIsOpen] = useState(false)
+
+  // Set initial default value if provided and value is not set
+  useEffect(() => {
+    if (defaultValue && !value) {
+      if (defaultValue === 'current-week') {
+        const currentWeekStart = startOfWeek(new Date(), {
+          weekStartsOn: preferences.weekStartsOn,
+        })
+        onChange(currentWeekStart)
+      } else {
+        onChange(defaultValue)
+      }
+    }
+  }, [defaultValue, value, preferences.weekStartsOn, onChange])
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {

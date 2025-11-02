@@ -1,12 +1,17 @@
 'use client'
 
+import { Download } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetMyNutritionPlanQuery } from '@/generated/graphql-client'
+import { downloadPDF, generateFilename } from '@/lib/pdf/pdf-generator'
 
 import { DayMealsAccordion, DayMealsHeader } from './day-meals-accordion'
+import { NutritionPlanPDF } from './pdf/nutrition-plan-pdf'
 import { ShoppingList } from './shopping-list'
 
 interface NutritionPlanViewerProps {
@@ -23,9 +28,31 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
   )
 
   const [activeDay, setActiveDay] = useState<string>('')
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
   const nutritionPlan = data?.nutritionPlan
   const days = useMemo(() => nutritionPlan?.days || [], [nutritionPlan])
+
+  const handleExportPDF = async () => {
+    if (!nutritionPlan) return
+
+    setIsGeneratingPDF(true)
+    try {
+      const filename = generateFilename({
+        prefix: `Nutrition Plan - ${nutritionPlan.name}`,
+        skipTimestamp: true,
+      })
+
+      await downloadPDF(
+        <NutritionPlanPDF nutritionPlan={nutritionPlan} />,
+        filename,
+      )
+    } catch (error) {
+      console.error('Failed to generate PDF:', error)
+    } finally {
+      setIsGeneratingPDF(false)
+    }
+  }
   useEffect(() => {
     if (days.length > 0 && !activeDay) {
       setActiveDay(days[0].dayNumber.toString())
@@ -47,7 +74,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-4">
       {nutritionPlan?.description && (
         <p className="text-sm text-muted-foreground mt-1">
           {nutritionPlan.description}
@@ -72,9 +99,23 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
         {days.map((day) => (
           <TabsContent key={day.id} value={day.dayNumber.toString()}>
-            <div className="space-y-12 mt-8">
+            <div className="space-y-8">
               {/* Meals Accordion */}
-              <DayMealsAccordion day={day} />
+              <Card borderless>
+                <DayMealsAccordion day={day} />
+                <CardFooter>
+                  <Button
+                    variant="tertiary"
+                    iconStart={<Download />}
+                    onClick={handleExportPDF}
+                    loading={isGeneratingPDF}
+                    disabled={isGeneratingPDF}
+                    className="w-full"
+                  >
+                    Export to PDF
+                  </Button>
+                </CardFooter>
+              </Card>
               {/* Shopping List */}
               <ShoppingList day={day} planId={planId} />
             </div>
@@ -87,7 +128,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
 export function NutritionPlanViewerLoading() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-4">
       <Tabs value="0">
         <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar">
           <TabsList>

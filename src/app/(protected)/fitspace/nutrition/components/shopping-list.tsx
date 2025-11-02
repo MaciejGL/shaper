@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Collapsible,
@@ -131,125 +131,136 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
   ).length
 
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-2">
-        <SectionIcon icon={ShoppingCart} size="sm" variant="sky" />
-        <p className="text-base font-medium">Shopping List</p>
-      </div>
-      <Card
-        borderless
-        className="border-dashed border-border overflow-hidden py-0"
-      >
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleTrigger className="cursor-pointer hover:bg-muted/30 transition-colors w-full p-4">
-            <CardTitle className="flex items-center justify-between text-base">
-              <div className="text-sm font-normal text-muted-foreground">
-                {checkedCount}/{aggregatedIngredients.length} items
-              </div>
-              <ChevronDown
-                className={cn(
-                  'h-4 w-4 text-muted-foreground',
-                  isOpen && 'rotate-180',
-                )}
-              />
-            </CardTitle>
-          </CollapsibleTrigger>
+    <Card borderless>
+      <CardHeader>
+        <div className="flex items-center gap-2 mb-2">
+          <SectionIcon icon={ShoppingCart} size="sm" variant="sky" />
+          <p className="text-base font-medium">Shopping List</p>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Card
+          variant="tertiary"
+          className="p-0 bg-card dark:bg-card-on-card border dark:border-0"
+        >
+          <Collapsible
+            open={isOpen}
+            onOpenChange={setIsOpen}
+            className="overflow-hidden"
+          >
+            <CollapsibleTrigger className="cursor-pointer hover:bg-muted/30 transition-colors w-full p-4">
+              <CardTitle className="flex items-center justify-between text-base">
+                <div className="text-sm">
+                  Ingredients{' '}
+                  <span className="text-muted-foreground font-normal ml-2">
+                    {checkedCount}/{aggregatedIngredients.length} items
+                  </span>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    'h-4 w-4 text-muted-foreground',
+                    isOpen && 'rotate-180',
+                  )}
+                />
+              </CardTitle>
+            </CollapsibleTrigger>
 
-          <CollapsibleContent>
-            <CardContent className="pt-4">
-              <div className="space-y-3">
-                {/* Portion multiplier */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="secondary"
-                      size="icon-sm"
-                      onClick={decrementPortions}
-                      disabled={portionMultiplier <= 1}
-                      iconOnly={<Minus />}
-                    />
-
-                    <AnimateNumber
-                      value={portionMultiplier}
-                      duration={200}
-                      className="text-xl font-bold text-primary"
-                    />
-                    <Button
-                      variant="secondary"
-                      size="icon-sm"
-                      onClick={incrementPortions}
-                      iconOnly={<Plus />}
-                    />
-                  </div>
-                  {checkedCount > 0 && (
-                    <div className="flex justify-end">
+            <CollapsibleContent>
+              <CardContent className="py-4">
+                <div className="space-y-3">
+                  {/* Portion multiplier */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       <Button
                         variant="secondary"
-                        size="sm"
-                        onClick={clearAllChecked}
-                        className="text-xs"
-                      >
-                        Clear All
-                      </Button>
+                        size="icon-sm"
+                        onClick={decrementPortions}
+                        disabled={portionMultiplier <= 1}
+                        iconOnly={<Minus />}
+                      />
+
+                      <AnimateNumber
+                        value={portionMultiplier}
+                        duration={200}
+                        className="text-xl font-bold text-primary"
+                      />
+                      <Button
+                        variant="secondary"
+                        size="icon-sm"
+                        onClick={incrementPortions}
+                        iconOnly={<Plus />}
+                      />
                     </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  {aggregatedIngredients
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((ingredient) => {
-                      const isChecked = checkedItems.has(ingredient.id)
-                      return (
-                        <div
-                          key={ingredient.id}
-                          className={cn(
-                            'grid grid-cols-[24px_1fr_auto_auto] items-end gap-3 p-2 rounded-lg transition-all',
-                            isChecked
-                              ? 'bg-muted/50 opacity-60'
-                              : 'hover:bg-muted/30',
-                          )}
-                          onClick={() =>
-                            handleItemCheck(ingredient.id, !isChecked)
-                          }
+                    {checkedCount > 0 && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={clearAllChecked}
+                          className="text-xs"
                         >
-                          <Checkbox
-                            checked={isChecked}
-                            onCheckedChange={(checked) =>
-                              handleItemCheck(ingredient.id, Boolean(checked))
-                            }
-                            className="flex-shrink-0 self-center"
-                          />
-                          <span
-                            className={cn(
-                              'flex-1 grow-[2]',
-                              isChecked
-                                ? 'line-through text-muted-foreground'
-                                : '',
-                            )}
-                          >
-                            {ingredient.name}
-                          </span>
+                          Clear All
+                        </Button>
+                      </div>
+                    )}
+                  </div>
 
-                          <span
+                  <div className="space-y-2">
+                    {aggregatedIngredients
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((ingredient) => {
+                        const isChecked = checkedItems.has(ingredient.id)
+                        return (
+                          <div
+                            key={ingredient.id}
                             className={cn(
-                              'text-sm',
+                              'grid grid-cols-[24px_1fr_auto_auto] items-end gap-3 p-2 rounded-lg transition-all border',
                               isChecked
-                                ? 'line-through text-muted-foreground'
-                                : 'text-muted-foreground',
+                                ? 'bg-muted/50 opacity-60'
+                                : 'hover:bg-muted/30',
                             )}
+                            onClick={() =>
+                              handleItemCheck(ingredient.id, !isChecked)
+                            }
                           >
-                            {ingredient.formattedAmount}
-                          </span>
-                        </div>
-                      )
-                    })}
+                            <Checkbox
+                              checked={isChecked}
+                              onCheckedChange={(checked) =>
+                                handleItemCheck(ingredient.id, Boolean(checked))
+                              }
+                              className="flex-shrink-0 self-center"
+                            />
+                            <span
+                              className={cn(
+                                'flex-1 grow-[2]',
+                                isChecked
+                                  ? 'line-through text-muted-foreground'
+                                  : '',
+                              )}
+                            >
+                              {ingredient.name}
+                            </span>
+
+                            <span
+                              className={cn(
+                                'text-sm',
+                                isChecked
+                                  ? 'line-through text-muted-foreground'
+                                  : 'text-muted-foreground',
+                              )}
+                            >
+                              {ingredient.formattedAmount}
+                            </span>
+                          </div>
+                        )
+                      })}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Collapsible>
-      </Card>
-    </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+      </CardContent>
+    </Card>
   )
 }

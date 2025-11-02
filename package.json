@@ -69,6 +69,7 @@
     "@radix-ui/react-tabs": "1.1.12",
     "@radix-ui/react-tooltip": "1.2.7",
     "@react-email/render": "1.1.2",
+    "@react-pdf/renderer": "^4.3.1",
     "@savvywombat/tailwindcss-grid-areas": "4.0.0",
     "@stripe/stripe-js": "8.1.0",
     "@tailwindcss/container-queries": "0.1.1",
