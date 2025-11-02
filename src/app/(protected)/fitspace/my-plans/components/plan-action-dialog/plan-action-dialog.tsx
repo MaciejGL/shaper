@@ -124,6 +124,7 @@ export function PlanActionDialog({
                 value={startDate}
                 onChange={setStartDate}
                 placeholder="Select start week"
+                defaultValue="current-week"
               />
               {startDate && (
                 <div className="text-xs text-muted-foreground">
