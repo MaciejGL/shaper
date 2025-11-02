@@ -31,7 +31,7 @@ export default function Error({
       <h1 className="text-xl font-semibold mt-6 mb-2 text-foreground">
         Something went wrong...
       </h1>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground text-center mb-4">
         Please try again later. If the problem persists, please contact support.
       </p>
       <div className="flex flex-col gap-2">
