@@ -116,7 +116,7 @@ export function Exercises({
   // Main workout view
   return (
     <div>
-      <div className="flex flex-col py-3 space-y-2 w-full">
+      <div className="flex flex-col py-4 space-y-2 w-full">
         <div className="grid grid-flow-col gap-2 bg-background">
           {hasNamedWorkoutType && (
             <p className="text-lg">{formatWorkoutType(day.workoutType!)}</p>
@@ -144,7 +144,7 @@ export function Exercises({
         <Progress value={progressPercentage} />
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-6">
         {exercises.map((exercise) => (
           <Exercise
             key={exercise.id}

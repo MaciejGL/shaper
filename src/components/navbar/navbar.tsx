@@ -112,9 +112,13 @@ export const Navbar = ({
     (user?.user?.role === GQLUserRole.Client && user?.user?.trainerId) ||
     isTrainer
 
+  const isWorkoutPage = pathname.startsWith('/fitspace/workout')
+
   return (
     <>
-      {user && !isTrainer && <motion.div className="h-[60px]" />}
+      {user && !isTrainer && (
+        <motion.div className={cn('h-[60px]', isWorkoutPage && 'bg-sidebar')} />
+      )}
 
       <div
         className={!isTrainer ? 'z-10 fixed top-0 left-0 right-0' : 'relative'}

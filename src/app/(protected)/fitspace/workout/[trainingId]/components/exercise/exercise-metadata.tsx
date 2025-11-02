@@ -101,6 +101,9 @@ export function ExerciseMetadata({
     <div>
       <div className="flex gap-2 items-start pl-1">
         <p className="text-lg font-medium self-center line-clamp-2">
+          <span className="text-muted-foreground text-sm">
+            {exercise.order}.
+          </span>{' '}
           {exercise.name}
         </p>
 
