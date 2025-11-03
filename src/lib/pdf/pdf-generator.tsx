@@ -75,20 +75,40 @@ export async function downloadPDF(
   try {
     // Generate PDF blob
     const blob = await pdf(document).toBlob()
-
-    // Create download link
     const url = URL.createObjectURL(blob)
-    const link = window.document.createElement('a')
-    link.href = url
-    link.download = `${filename}.pdf`
 
-    // Trigger download
-    window.document.body.appendChild(link)
-    link.click()
+    // Check if running in mobile webview
+    const isNativeApp =
+      typeof window !== 'undefined' && (window as any).isNativeApp === true
 
-    // Cleanup
-    window.document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    if (isNativeApp) {
+      // Mobile webview: Open PDF in new window for native OS handling
+      // This allows iOS/Android to show PDF viewer with share/print options
+      const newWindow = window.open(url, '_blank')
+
+      if (!newWindow) {
+        // Fallback: Try to navigate to the PDF
+        window.location.href = url
+      }
+
+      // Cleanup after a delay to allow PDF to load
+      setTimeout(() => {
+        URL.revokeObjectURL(url)
+      }, 1000)
+    } else {
+      // Desktop browser: Standard download approach
+      const link = window.document.createElement('a')
+      link.href = url
+      link.download = `${filename}.pdf`
+
+      // Trigger download
+      window.document.body.appendChild(link)
+      link.click()
+
+      // Cleanup
+      window.document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    }
   } catch (error) {
     console.error('Error generating PDF:', error)
     throw new Error('Failed to generate PDF')
