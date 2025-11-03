@@ -279,7 +279,7 @@ async function sendWelcomeEmail(
         userName: user.profile?.firstName,
         packageName: packageTemplate.name,
         isReactivation,
-        dashboardUrl: `${getBaseUrl()}/dashboard`,
+        dashboardUrl: `${getBaseUrl()}/fitspace/workout`,
       })
       console.info(`📧 Welcome email sent to ${user.email}`)
     } catch (emailError) {
