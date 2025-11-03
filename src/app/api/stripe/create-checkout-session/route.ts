@@ -185,8 +185,10 @@ export async function POST(request: NextRequest) {
       ],
       mode: 'subscription',
       allow_promotion_codes: true,
-      success_url: `${returnUrl || getBaseUrl()}?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${cancelUrl || getBaseUrl()}?cancelled=true`,
+      success_url: returnUrl
+        ? `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}session_id={CHECKOUT_SESSION_ID}`
+        : `${getBaseUrl()}?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${getBaseUrl()}?cancelled=true`,
       metadata: {
         userId,
         packageId,
