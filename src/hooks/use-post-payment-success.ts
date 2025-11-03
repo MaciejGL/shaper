@@ -25,7 +25,8 @@ export function usePostPaymentSuccess(userId?: string) {
       url.searchParams.set('userId', userId)
 
       const response = await fetch(url.toString(), {
-        signal: AbortSignal.timeout(10000), // 10 second timeout
+        signal: AbortSignal.timeout(20000), // 20 second timeout
+        cache: 'no-store',
       })
       if (!response.ok) {
         throw new Error('Failed to fetch subscription status')
@@ -33,8 +34,7 @@ export function usePostPaymentSuccess(userId?: string) {
       return response.json()
     },
     enabled: isPostPayment && !!userId,
-    refetchInterval: isPostPayment && !isTimeout ? 2000 : false, // Poll every 2s
-    staleTime: 0, // Always treat as stale to enable aggressive polling
+    refetchInterval: 1000, // Poll every 1s
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     retry: 2,
@@ -46,7 +46,7 @@ export function usePostPaymentSuccess(userId?: string) {
     if (isPostPayment) {
       const timeout = setTimeout(() => {
         setIsTimeout(true)
-      }, 10000)
+      }, 20000)
       return () => clearTimeout(timeout)
     }
   }, [isPostPayment])
