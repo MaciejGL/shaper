@@ -87,13 +87,36 @@ export function generateICalFile(meeting: MeetingDetails): string {
 export function downloadICalFile(meeting: MeetingDetails) {
   const icsContent = generateICalFile(meeting)
   const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
-  link.download = `${meeting.title.replace(/[^a-z0-9]/gi, '_')}.ics`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(link.href)
+  const url = URL.createObjectURL(blob)
+  const filename = `${meeting.title.replace(/[^a-z0-9]/gi, '_')}.ics`
+
+  // Check if running in mobile webview
+  const isNativeApp =
+    typeof window !== 'undefined' && (window as any).isNativeApp === true
+
+  if (isNativeApp) {
+    // Mobile webview: Open file in new window for native OS handling
+    const newWindow = window.open(url, '_blank')
+
+    if (!newWindow) {
+      // Fallback: Try to navigate to the file
+      window.location.href = url
+    }
+
+    // Cleanup after a delay to allow file to load
+    setTimeout(() => {
+      URL.revokeObjectURL(url)
+    }, 1000)
+  } else {
+    // Desktop browser: Standard download approach
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
 }
 
 export function addToCalendar(meeting: MeetingDetails) {
