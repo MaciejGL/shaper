@@ -139,9 +139,9 @@ export const authOptions = {
       name: 'next-auth.state',
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'none',
         path: '/',
-        secure: process.env.NODE_ENV !== 'development',
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 900, // 15 minutes
       },
     },
@@ -151,7 +151,7 @@ export const authOptions = {
         httpOnly: true,
         sameSite: 'none',
         path: '/',
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 900, // 15 minutes
       },
     },

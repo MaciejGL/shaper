@@ -45,9 +45,9 @@ export function PostPaymentSuccessModal({
 
   const handleReturnToApp = () => {
     if (isNativeApp) {
-      navigateToPath('/fitspace/progress')
+      navigateToPath('/')
     } else {
-      window.location.href = '/fitspace/progress'
+      window.location.href = '/'
     }
   }
 
