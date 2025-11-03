@@ -37,6 +37,7 @@ interface NativeAppAPI {
   disableNotificationPermissions: () => void
   updateTheme: (theme: 'light' | 'dark') => void
   setAuthToken: (token: string) => void
+  openExternalUrl: (url: string) => void
 }
 
 declare global {
@@ -158,6 +159,21 @@ export function useMobileApp() {
   }
 
   /**
+   * Open URL in external browser
+   * Uses native bridge on iOS, JavaScript methods on Android/Web
+   */
+  const openExternalUrl = (url: string) => {
+    if (isNativeApp && platform === 'ios' && window.nativeApp?.openExternalUrl) {
+      console.info('📱 Opening external URL via native bridge (iOS)')
+      window.nativeApp.openExternalUrl(url)
+    } else {
+      console.info('📱 Opening external URL via JavaScript (Android/Web)')
+      // Fallback to standard methods for non-iOS platforms
+      window.open(url, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  /**
    * Get available capabilities in the mobile app
    */
   const getCapabilities = () => {
@@ -169,6 +185,7 @@ export function useMobileApp() {
       canNavigate: !!nativeAPI?.onNavigate,
       canUpdateTheme: !!nativeAPI?.updateTheme,
       canSetAuthToken: !!nativeAPI?.setAuthToken,
+      canOpenExternalUrl: !!nativeAPI?.openExternalUrl && platform === 'ios',
     }
   }
 
@@ -185,6 +202,7 @@ export function useMobileApp() {
     navigateToPath,
     updateTheme,
     setAuthToken,
+    openExternalUrl,
 
     // Convenience functions
     isIOS: platform === 'ios',

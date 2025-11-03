@@ -5,7 +5,7 @@
 import { useNetInfo } from '@react-native-community/netinfo'
 import * as SplashScreen from 'expo-splash-screen'
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { Linking, Platform, StyleSheet, View } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import { APP_CONFIG } from '../config/app-config'
@@ -36,7 +36,7 @@ function setupNativeAppGlobals(): string {
   return `
     // Make app aware it's running in native container
     window.isNativeApp = true;
-    window.mobilePlatform = 'expo';
+    window.mobilePlatform = '${Platform.OS}';
     window.appEnvironment = '${APP_CONFIG.ENVIRONMENT}';
   `
 }
@@ -98,6 +98,14 @@ function setupNativeAppAPI(): string {
         window.ReactNativeWebView?.postMessage(JSON.stringify({
           type: 'auth_token',
           token: token
+        }));
+      },
+      
+      // Open external URL in system browser (iOS)
+      openExternalUrl: function(url) {
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'open_external_url',
+          url: url
         }));
       }
     };
@@ -432,6 +440,14 @@ export const EnhancedWebView = forwardRef<
 
           case 'auth_token':
             onAuthToken?.(message.token)
+            break
+
+          case 'open_external_url':
+            // Open URL in system browser (iOS native bridge)
+            console.info('🌐 [WEBVIEW] Opening external URL:', message.url)
+            Linking.openURL(message.url).catch((err) => {
+              console.error('🌐 [WEBVIEW] Failed to open URL:', err)
+            })
             break
 
           default:

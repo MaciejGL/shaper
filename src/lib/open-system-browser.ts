@@ -8,13 +8,10 @@
 /**
  * Opens a URL in the system browser (not WebView)
  *
- * Uses multiple fallback methods to ensure the system browser opens:
- * 1. window.open() with '_system' target (WebView-specific)
- * 2. window.open() with extended attributes
- * 3. Link element click with 'external' rel attribute
- *
- * NOTE: Does NOT use window.location.href fallback as that would
- * navigate the WebView instead of opening an external browser.
+ * Platform-specific behavior:
+ * - iOS: Uses native bridge (reliable)
+ * - Android: Uses JavaScript methods (already working)
+ * - Web: Uses JavaScript methods (fallback)
  *
  * @param url - The URL to open (absolute or relative)
  * @returns true if opening was attempted, false if failed
@@ -37,14 +34,24 @@ export function openSystemBrowser(url: string): boolean {
 
     console.info('🌐 [SYSTEM-BROWSER] Opening URL:', absoluteUrl)
 
-    // Method 1: Try _system target (WebView-specific)
+    // iOS: Use native bridge (reliable on iOS)
+    if (
+      window.isNativeApp &&
+      window.mobilePlatform === 'ios' &&
+      window.nativeApp?.openExternalUrl
+    ) {
+      console.info('🌐 [SYSTEM-BROWSER] Using native bridge (iOS)')
+      window.nativeApp.openExternalUrl(absoluteUrl)
+      return true
+    }
+
+    // Android & Web: Use existing JavaScript methods (already working)
+    console.info('🌐 [SYSTEM-BROWSER] Using JavaScript methods (Android/Web)')
+
+    // Method 1: Try _system target (works on some platforms)
     let windowRef = window.open(absoluteUrl, '_system')
 
     if (!windowRef) {
-      console.warn(
-        '🌐 [SYSTEM-BROWSER] Method 1 (_system) failed, trying Method 2',
-      )
-
       // Method 2: Try _blank with extended attributes
       windowRef = window.open(
         absoluteUrl,
@@ -54,11 +61,7 @@ export function openSystemBrowser(url: string): boolean {
     }
 
     if (!windowRef) {
-      console.warn(
-        '🌐 [SYSTEM-BROWSER] Method 2 (extended attributes) failed, trying Method 3',
-      )
-
-      // Method 3: Fallback to link element click with external rel
+      // Method 3: Fallback to link element click
       const link = document.createElement('a')
       link.href = absoluteUrl
       link.target = '_blank'
