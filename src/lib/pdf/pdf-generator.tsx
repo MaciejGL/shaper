@@ -71,14 +71,13 @@ export async function downloadPDF(
     const blob = await pdf(document).toBlob()
 
     const isNativeApp =
-      typeof window !== 'undefined' && (window as any).isNativeApp === true
+      typeof window !== 'undefined' && window?.isNativeApp === true
     const hasNativeDownload =
-      isNativeApp &&
-      typeof (window as any).nativeApp?.downloadFile === 'function'
+      isNativeApp && typeof window?.nativeApp?.downloadFile === 'function'
 
     if (hasNativeDownload) {
       const base64Data = await blobToBase64(blob)
-      ;(window as any).nativeApp.downloadFile({
+      window?.nativeApp?.downloadFile({
         base64Data,
         filename: `${filename}.pdf`,
         mimeType: 'application/pdf',
