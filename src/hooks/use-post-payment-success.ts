@@ -13,11 +13,7 @@ export function usePostPaymentSuccess(userId?: string) {
   const [isTimeout, setIsTimeout] = useState(false)
 
   // Poll every 2 seconds if post-payment and not timed out
-  const {
-    data: subscriptionData,
-    isLoading,
-    refetch,
-  } = useQuery<CurrentSubscription>({
+  const { data: subscriptionData, refetch } = useQuery<CurrentSubscription>({
     queryKey: ['current-subscription', userId, 'post-payment'],
     queryFn: async () => {
       if (!userId) throw new Error('User ID required')
@@ -57,11 +53,17 @@ export function usePostPaymentSuccess(userId?: string) {
 
   const subscriptionReady = !!subscriptionData?.hasPremiumAccess
 
+  // Determine state: ready > timeout > polling (default)
+  let state: 'polling' | 'timeout' | 'ready' = 'polling'
+  if (subscriptionReady) {
+    state = 'ready'
+  } else if (isTimeout) {
+    state = 'timeout'
+  }
+
   return {
     isPostPayment,
-    isPolling: isPostPayment && isLoading && !subscriptionReady && !isTimeout,
-    isTimeout: isPostPayment && isTimeout && !subscriptionReady,
-    subscriptionReady: isPostPayment && subscriptionReady,
+    state,
     refetch,
   }
 }

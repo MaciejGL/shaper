@@ -1,7 +1,6 @@
 'use client'
 
 import { CheckCircle, Info, Loader2, Sparkles } from 'lucide-react'
-import { useEffect, useState } from 'react'
 
 import { BiggyIcon } from './biggy-icon'
 import { useMobileApp } from './mobile-app-bridge'
@@ -17,31 +16,16 @@ import {
 
 interface PostPaymentSuccessModalProps {
   open: boolean
-  isPolling: boolean
-  isTimeout: boolean
-  subscriptionReady: boolean
+  state: 'polling' | 'timeout' | 'ready'
   onRefresh: () => void
 }
 
 export function PostPaymentSuccessModal({
   open,
-  isPolling,
-  isTimeout,
-  subscriptionReady,
+  state,
   onRefresh,
 }: PostPaymentSuccessModalProps) {
   const { isNativeApp, navigateToPath } = useMobileApp()
-  const [showContent, setShowContent] = useState(false)
-
-  // Delay content appearance for smooth animation
-  useEffect(() => {
-    if (open) {
-      const timer = setTimeout(() => setShowContent(true), 100)
-      return () => clearTimeout(timer)
-    } else {
-      setShowContent(false)
-    }
-  }, [open])
 
   const handleReturnToApp = () => {
     if (isNativeApp) {
@@ -54,7 +38,7 @@ export function PostPaymentSuccessModal({
   // Prevent closing modal until ready or timeout
   const handleOpenChange = (newOpen: boolean) => {
     // Can only close after subscription is ready or timeout
-    if (!newOpen && (subscriptionReady || isTimeout)) {
+    if (!newOpen && (state === 'ready' || state === 'timeout')) {
       return
     }
   }
@@ -63,11 +47,11 @@ export function PostPaymentSuccessModal({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         dialogTitle="Payment Status"
-        withCloseButton={subscriptionReady || isTimeout}
+        withCloseButton={state === 'ready' || state === 'timeout'}
         className="sm:max-w-md"
       >
         {/* Loading State */}
-        {isPolling && showContent && (
+        {state === 'polling' && (
           <>
             <div className="flex justify-center mb-4">
               <BiggyIcon icon={CheckCircle} variant="success" />
@@ -90,7 +74,7 @@ export function PostPaymentSuccessModal({
         )}
 
         {/* Timeout State */}
-        {isTimeout && showContent && (
+        {state === 'timeout' && (
           <>
             <div className="flex justify-center mb-4">
               <BiggyIcon icon={Info} variant="default" />
@@ -119,7 +103,7 @@ export function PostPaymentSuccessModal({
         )}
 
         {/* Success/Ready State */}
-        {subscriptionReady && showContent && (
+        {state === 'ready' && (
           <>
             <div className="flex justify-center mb-4">
               <BiggyIcon icon={Sparkles} variant="amber" />

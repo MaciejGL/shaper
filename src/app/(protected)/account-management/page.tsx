@@ -13,17 +13,14 @@ import { SubscriptionManagementSection } from './components/subscription-managem
 
 export default function AccountManagementPage() {
   const { user } = useUser()
-  const { isPostPayment, isPolling, isTimeout, subscriptionReady, refetch } =
-    usePostPaymentSuccess(user?.id)
+  const { isPostPayment, state, refetch } = usePostPaymentSuccess(user?.id)
 
   return (
     <>
       {/* Success Modal */}
       <PostPaymentSuccessModal
         open={isPostPayment}
-        isPolling={isPolling}
-        isTimeout={isTimeout}
-        subscriptionReady={subscriptionReady}
+        state={state}
         onRefresh={() => refetch()}
       />
 
