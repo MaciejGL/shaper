@@ -20,6 +20,12 @@ export interface PushTokenData {
   userId: string
 }
 
+export interface FileDownloadData {
+  base64Data: string
+  filename: string
+  mimeType: string
+}
+
 export interface CameraResponse {
   type: 'CAMERA_PHOTO_RESPONSE'
   photoUri: string
