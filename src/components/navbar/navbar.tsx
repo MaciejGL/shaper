@@ -22,6 +22,7 @@ import {
   useGetTotalUnreadCountQuery,
   useNotificationsQuery,
 } from '@/generated/graphql-client'
+import { useOpenUrl } from '@/hooks/use-open-url'
 import { useScrollVisibility } from '@/hooks/use-scroll-visibility'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
@@ -312,6 +313,14 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const isProduction = process.env.NODE_ENV === 'production'
   const queryClient = useQueryClient()
 
+  // Use the hook to properly handle session tokens
+  const {
+    openUrl: openAccountManagement,
+    isLoading: isOpeningAccountManagement,
+  } = useOpenUrl({
+    errorMessage: 'Failed to open account management',
+  })
+
   const handleLogout = async () => {
     queryClient.clear()
     await signOut({ callbackUrl: '/login', redirect: false })
@@ -319,30 +328,7 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
   }
 
   const handleOpenAccountManagement = () => {
-    const accountManagementUrl = `${window.location.origin}/account-management`
-
-    if (isNativeApp) {
-      // Force external browser opening for native app
-      const opened = window.open(
-        accountManagementUrl,
-        '_blank',
-        'noopener,noreferrer,external=true',
-      )
-
-      if (!opened) {
-        // Fallback: create link element
-        const link = document.createElement('a')
-        link.href = accountManagementUrl
-        link.target = '_blank'
-        link.rel = 'noopener noreferrer external'
-        link.style.display = 'none'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      }
-    } else {
-      window.open(accountManagementUrl, '_blank', 'noopener,noreferrer')
-    }
+    openAccountManagement('/account-management')
   }
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>

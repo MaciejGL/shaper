@@ -4,12 +4,12 @@ import { format } from 'date-fns'
 import { CreditCard, SparklesIcon } from 'lucide-react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
-import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { useOpenUrl } from '@/hooks/use-open-url'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 export function SubscriptionInfoSection() {
@@ -20,33 +20,15 @@ export function SubscriptionInfoSection() {
       lookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING, // Show only Premium Coaching subscription
     },
   )
-  const { isNativeApp } = useMobileApp()
+  const {
+    openUrl: openAccountManagement,
+    isLoading: isOpeningAccountManagement,
+  } = useOpenUrl({
+    errorMessage: 'Failed to open account management',
+  })
 
   const handleManageSubscription = () => {
-    const accountManagementUrl = `${window.location.origin}/account-management`
-
-    if (isNativeApp) {
-      // Force external browser opening for native app
-      const opened = window.open(
-        accountManagementUrl,
-        '_blank',
-        'noopener,noreferrer,external=true',
-      )
-
-      if (!opened) {
-        // Fallback: create link element
-        const link = document.createElement('a')
-        link.href = accountManagementUrl
-        link.target = '_blank'
-        link.rel = 'noopener noreferrer external'
-        link.style.display = 'none'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      }
-    } else {
-      window.open(accountManagementUrl, '_blank', 'noopener,noreferrer')
-    }
+    openAccountManagement('/account-management')
   }
 
   if (isLoading) {
@@ -192,6 +174,8 @@ export function SubscriptionInfoSection() {
             }
             className="w-full"
             iconStart={<CreditCard />}
+            loading={isOpeningAccountManagement}
+            disabled={isOpeningAccountManagement}
           >
             {subscriptionData?.status === 'CANCELLED_ACTIVE'
               ? 'Reactivate or Manage Coaching'
