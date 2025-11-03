@@ -67,14 +67,21 @@ export function useCurrentSubscription(
         url.searchParams.set('lookupKey', options.lookupKey)
       }
 
-      const response = await fetch(url.toString())
+      const response = await fetch(url.toString(), {
+        // Add timeout to prevent hanging
+        signal: AbortSignal.timeout(10000), // 10 second timeout
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch subscription status')
       }
       return response.json()
     },
     enabled: !!userId,
-    refetchInterval: 1000 * 60 * 10, // 10 minutes
-    refetchOnWindowFocus: true,
+    staleTime: 10000, // Data is fresh for 10 seconds - prevents rapid refetches
+    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
+    refetchOnWindowFocus: true, // ✅ CRITICAL: Refetch when user returns from payment
+    refetchOnMount: true, // ✅ Refetch when component mounts (new page)
+    retry: 2, // Retry failed requests up to 2 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
   })
 }

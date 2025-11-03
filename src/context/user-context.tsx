@@ -64,11 +64,12 @@ export function UserProvider({
     {},
     {
       initialData: initialSubscriptionData,
-      // If we have initialData, treat it as fresh for 30 seconds
+      // If we have initialData, treat it as fresh for 10 seconds
       initialDataUpdatedAt: initialSubscriptionData ? Date.now() : undefined,
       enabled: !!initialSubscriptionData || session.status === 'authenticated',
-      staleTime: 30000, // Keep data fresh for 30 seconds
-      refetchOnWindowFocus: false,
+      staleTime: 10000, // Data is fresh for 10 seconds - prevents rapid refetches
+      refetchOnWindowFocus: true, // ✅ CRITICAL: Refetch when user returns from payment
+      refetchOnMount: true, // ✅ Refetch when component mounts
       // Keep previous data while refetching to prevent flash
       placeholderData: (previousData) => previousData,
     },

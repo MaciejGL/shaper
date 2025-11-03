@@ -17,16 +17,23 @@ import { useSubscriptionActions } from '../../fitspace/settings/hooks/use-subscr
 
 export function SubscriptionManagementSection() {
   const { user } = useUser()
-  const { data: subscriptionData, isLoading: isLoadingSubscription } =
-    useCurrentSubscription(user?.id)
+  const {
+    data: subscriptionData,
+    isLoading: isLoadingSubscription,
+    error: subscriptionError,
+  } = useCurrentSubscription(user?.id)
 
   // Fetch available packages for upgrade options
-  const { data: packagesData, isLoading: isLoadingPackages } =
-    useGetActivePackageTemplatesQuery({})
+  const {
+    data: packagesData,
+    isLoading: isLoadingPackages,
+    error: packagesError,
+  } = useGetActivePackageTemplatesQuery({})
   const availablePackages = packagesData?.getActivePackageTemplates || []
 
   // Combined loading state - wait for both queries
   const isLoading = isLoadingSubscription || isLoadingPackages
+  const hasError = subscriptionError || packagesError
 
   // Get monthly and yearly packages using lookup keys
   const monthlyPackage = availablePackages.find(
@@ -81,6 +88,25 @@ export function SubscriptionManagementSection() {
       <div className="space-y-4">
         <LoadingSkeleton count={2} withBorder variant="lg" />
       </div>
+    )
+  }
+
+  if (hasError) {
+    return (
+      <Card borderless className="bg-card-on-card">
+        <CardContent className="py-8 text-center space-y-4">
+          <p className="text-muted-foreground">
+            Failed to load subscription information
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="secondary"
+            size="sm"
+          >
+            Reload Page
+          </Button>
+        </CardContent>
+      </Card>
     )
   }
 
