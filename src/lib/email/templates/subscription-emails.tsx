@@ -584,7 +584,7 @@ export function WelcomeEmail({
 
         <div style={{ textAlign: 'center', margin: '32px 0' }}>
           <EmailButton href={dashboardUrl} size="lg">
-            Access Your Dashboard
+            Start Training Now
           </EmailButton>
         </div>
 
