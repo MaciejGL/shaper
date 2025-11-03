@@ -9,8 +9,9 @@
  * Opens a URL in the system browser (not WebView)
  *
  * Uses multiple fallback methods to ensure the system browser opens:
- * 1. window.open() with appropriate flags
- * 2. Link element click as fallback
+ * 1. window.open() with '_system' target (WebView-specific)
+ * 2. window.open() with extended attributes
+ * 3. Link element click with 'external' rel attribute
  *
  * NOTE: Does NOT use window.location.href fallback as that would
  * navigate the WebView instead of opening an external browser.
@@ -36,19 +37,32 @@ export function openSystemBrowser(url: string): boolean {
 
     console.info('🌐 [SYSTEM-BROWSER] Opening URL:', absoluteUrl)
 
-    // Method 1: Try window.open()
-    const windowRef = window.open(absoluteUrl, '_blank', 'noopener,noreferrer')
+    // Method 1: Try _system target (WebView-specific)
+    let windowRef = window.open(absoluteUrl, '_system')
 
     if (!windowRef) {
       console.warn(
-        '🌐 [SYSTEM-BROWSER] window.open returned null, trying link element',
+        '🌐 [SYSTEM-BROWSER] Method 1 (_system) failed, trying Method 2',
       )
 
-      // Method 2: Fallback to link element click
+      // Method 2: Try _blank with extended attributes
+      windowRef = window.open(
+        absoluteUrl,
+        '_blank',
+        'noopener,noreferrer,external=true',
+      )
+    }
+
+    if (!windowRef) {
+      console.warn(
+        '🌐 [SYSTEM-BROWSER] Method 2 (extended attributes) failed, trying Method 3',
+      )
+
+      // Method 3: Fallback to link element click with external rel
       const link = document.createElement('a')
       link.href = absoluteUrl
       link.target = '_blank'
-      link.rel = 'noopener noreferrer'
+      link.rel = 'external noopener noreferrer'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
