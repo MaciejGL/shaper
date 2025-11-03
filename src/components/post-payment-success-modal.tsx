@@ -3,7 +3,6 @@
 import { CheckCircle, Info, Loader2, Sparkles } from 'lucide-react'
 
 import { BiggyIcon } from './biggy-icon'
-import { useMobileApp } from './mobile-app-bridge'
 import { Button } from './ui/button'
 import {
   Dialog,
@@ -25,14 +24,10 @@ export function PostPaymentSuccessModal({
   state,
   onRefresh,
 }: PostPaymentSuccessModalProps) {
-  const { isNativeApp, navigateToPath } = useMobileApp()
-
   const handleReturnToApp = () => {
-    if (isNativeApp) {
-      navigateToPath('/')
-    } else {
-      window.location.href = '/'
-    }
+    // Simple window.location works for both native app and web
+    // WebView automatically detects URL changes through onNavigationStateChange
+    window.location.href = '/fitspace/workout'
   }
 
   // Prevent closing modal until ready or timeout
