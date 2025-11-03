@@ -266,7 +266,7 @@ describe('Webhook Security', () => {
       expect(response.status).toBe(200)
       expect(data.received).toBe(true)
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Unhandled event type: unknown.event.type',
+        '[WEBHOOK] ⚠️ Unhandled event type: unknown.event.type',
       )
 
       consoleSpy.mockRestore()
@@ -274,6 +274,7 @@ describe('Webhook Security', () => {
 
     it('should handle handler errors gracefully', async () => {
       // Arrange
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       vi.mocked(mockCheckoutHandlers.handleCheckoutCompleted).mockRejectedValue(
         new Error('Handler failed'),
       )
@@ -289,8 +290,16 @@ describe('Webhook Security', () => {
       const data = await response.json()
 
       // Assert
-      expect(response.status).toBe(500)
-      expect(data.error).toBe('Webhook handler failed')
+      // Handler errors should still return 200 to prevent Stripe retries
+      expect(response.status).toBe(200)
+      expect(data.received).toBe(true)
+      // But error should be logged
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('❌ Handler error for checkout.session.completed'),
+        expect.any(Error),
+      )
+
+      consoleSpy.mockRestore()
     })
   })
 
