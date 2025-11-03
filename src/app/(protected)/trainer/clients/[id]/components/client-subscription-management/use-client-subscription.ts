@@ -17,6 +17,10 @@ export function useClientSubscription(clientId: string) {
     queryFn: async () => {
       const response = await fetch(
         `/api/trainer/clients/${clientId}/subscription`,
+        {
+          // Add timeout to prevent hanging
+          signal: AbortSignal.timeout(10000), // 10 second timeout
+        },
       )
 
       if (!response.ok) {
@@ -28,7 +32,12 @@ export function useClientSubscription(clientId: string) {
 
       return response.json()
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 10000, // Data is fresh for 10 seconds - prevents rapid refetches
+    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
+    refetchOnWindowFocus: true, // ✅ CRITICAL: Refetch when user returns from payment
+    refetchOnMount: true, // ✅ Refetch when component mounts
+    retry: 2, // Retry failed requests up to 2 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
   })
 
   return {
