@@ -29,6 +29,23 @@
  */
 import { useEffect, useRef, useState } from 'react'
 
+/**
+ * Convert a Blob to base64 string
+ */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const base64 = reader.result as string
+      // Remove the data:*/*;base64, prefix
+      const base64Data = base64.split(',')[1]
+      resolve(base64Data)
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
 interface NativeAppAPI {
   onNavigate: (path: string) => void
   handleNotificationClick: (data: Record<string, unknown>) => void
@@ -38,6 +55,11 @@ interface NativeAppAPI {
   updateTheme: (theme: 'light' | 'dark') => void
   setAuthToken: (token: string) => void
   openExternalUrl: (url: string) => void
+  downloadFile: (data: {
+    base64Data: string
+    filename: string
+    mimeType: string
+  }) => void
 }
 
 declare global {
@@ -158,19 +180,33 @@ export function useMobileApp() {
     }
   }
 
-  /**
-   * Open URL in external browser
-   * Uses native bridge on iOS, JavaScript methods on Android/Web
-   */
   const openExternalUrl = (url: string) => {
-    if (isNativeApp && platform === 'ios' && window.nativeApp?.openExternalUrl) {
-      console.info('📱 Opening external URL via native bridge (iOS)')
+    if (
+      isNativeApp &&
+      platform === 'ios' &&
+      window.nativeApp?.openExternalUrl
+    ) {
       window.nativeApp.openExternalUrl(url)
     } else {
-      console.info('📱 Opening external URL via JavaScript (Android/Web)')
-      // Fallback to standard methods for non-iOS platforms
       window.open(url, '_blank', 'noopener,noreferrer')
     }
+  }
+
+  const downloadFile = async (
+    blob: Blob,
+    filename: string,
+    mimeType: string,
+  ) => {
+    if (!isNativeApp || !window.nativeApp?.downloadFile) {
+      return
+    }
+
+    const base64Data = await blobToBase64(blob)
+    window.nativeApp.downloadFile({
+      base64Data,
+      filename,
+      mimeType,
+    })
   }
 
   /**
@@ -186,6 +222,7 @@ export function useMobileApp() {
       canUpdateTheme: !!nativeAPI?.updateTheme,
       canSetAuthToken: !!nativeAPI?.setAuthToken,
       canOpenExternalUrl: !!nativeAPI?.openExternalUrl && platform === 'ios',
+      canDownloadFile: !!nativeAPI?.downloadFile,
     }
   }
 
@@ -203,6 +240,7 @@ export function useMobileApp() {
     updateTheme,
     setAuthToken,
     openExternalUrl,
+    downloadFile,
 
     // Convenience functions
     isIOS: platform === 'ios',

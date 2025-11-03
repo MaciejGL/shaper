@@ -84,31 +84,25 @@ export function generateICalFile(meeting: MeetingDetails): string {
   return icsContent
 }
 
-export function downloadICalFile(meeting: MeetingDetails) {
+export async function downloadICalFile(meeting: MeetingDetails) {
   const icsContent = generateICalFile(meeting)
   const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
   const filename = `${meeting.title.replace(/[^a-z0-9]/gi, '_')}.ics`
 
-  // Check if running in mobile webview
   const isNativeApp =
     typeof window !== 'undefined' && (window as any).isNativeApp === true
+  const hasNativeDownload =
+    isNativeApp && typeof (window as any).nativeApp?.downloadFile === 'function'
 
-  if (isNativeApp) {
-    // Mobile webview: Open file in new window for native OS handling
-    const newWindow = window.open(url, '_blank')
-
-    if (!newWindow) {
-      // Fallback: Try to navigate to the file
-      window.location.href = url
-    }
-
-    // Cleanup after a delay to allow file to load
-    setTimeout(() => {
-      URL.revokeObjectURL(url)
-    }, 1000)
+  if (hasNativeDownload) {
+    const base64Data = await blobToBase64(blob)
+    ;(window as any).nativeApp.downloadFile({
+      base64Data,
+      filename,
+      mimeType: 'text/calendar',
+    })
   } else {
-    // Desktop browser: Standard download approach
+    const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     link.download = filename
@@ -117,6 +111,19 @@ export function downloadICalFile(meeting: MeetingDetails) {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
   }
+}
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const base64 = reader.result as string
+      const base64Data = base64.split(',')[1]
+      resolve(base64Data)
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
 }
 
 export function addToCalendar(meeting: MeetingDetails) {

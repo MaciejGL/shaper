@@ -60,11 +60,6 @@ export const PDF_STYLES = {
   },
 } as const
 
-/**
- * Generate and download a PDF document
- * @param document - React PDF document component
- * @param filename - Name of the file to download (without .pdf extension)
- */
 export async function downloadPDF(
   document: ReactElement<
     DocumentProps,
@@ -73,39 +68,30 @@ export async function downloadPDF(
   filename: string,
 ): Promise<void> {
   try {
-    // Generate PDF blob
     const blob = await pdf(document).toBlob()
-    const url = URL.createObjectURL(blob)
 
-    // Check if running in mobile webview
     const isNativeApp =
       typeof window !== 'undefined' && (window as any).isNativeApp === true
+    const hasNativeDownload =
+      isNativeApp &&
+      typeof (window as any).nativeApp?.downloadFile === 'function'
 
-    if (isNativeApp) {
-      // Mobile webview: Open PDF in new window for native OS handling
-      // This allows iOS/Android to show PDF viewer with share/print options
-      const newWindow = window.open(url, '_blank')
-
-      if (!newWindow) {
-        // Fallback: Try to navigate to the PDF
-        window.location.href = url
-      }
-
-      // Cleanup after a delay to allow PDF to load
-      setTimeout(() => {
-        URL.revokeObjectURL(url)
-      }, 1000)
+    if (hasNativeDownload) {
+      const base64Data = await blobToBase64(blob)
+      ;(window as any).nativeApp.downloadFile({
+        base64Data,
+        filename: `${filename}.pdf`,
+        mimeType: 'application/pdf',
+      })
     } else {
-      // Desktop browser: Standard download approach
+      const url = URL.createObjectURL(blob)
       const link = window.document.createElement('a')
       link.href = url
       link.download = `${filename}.pdf`
 
-      // Trigger download
       window.document.body.appendChild(link)
       link.click()
 
-      // Cleanup
       window.document.body.removeChild(link)
       URL.revokeObjectURL(url)
     }
@@ -113,6 +99,19 @@ export async function downloadPDF(
     console.error('Error generating PDF:', error)
     throw new Error('Failed to generate PDF')
   }
+}
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const base64 = reader.result as string
+      const base64Data = base64.split(',')[1]
+      resolve(base64Data)
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
 }
 
 /**

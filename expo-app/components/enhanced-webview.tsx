@@ -3,9 +3,11 @@
  * Replaces basic WebView with full functionality
  */
 import { useNetInfo } from '@react-native-community/netinfo'
+import * as FileSystem from 'expo-file-system'
+import * as Sharing from 'expo-sharing'
 import * as SplashScreen from 'expo-splash-screen'
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
-import { Linking, Platform, StyleSheet, View } from 'react-native'
+import { Alert, Linking, Platform, StyleSheet, View } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import { APP_CONFIG } from '../config/app-config'
@@ -106,6 +108,14 @@ function setupNativeAppAPI(): string {
         window.ReactNativeWebView?.postMessage(JSON.stringify({
           type: 'open_external_url',
           url: url
+        }));
+      },
+      
+      // Download file via native bridge
+      downloadFile: function(data) {
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'download_file',
+          data: data
         }));
       }
     };
@@ -219,6 +229,51 @@ function setupHistoryOverrides(): string {
       setTimeout(() => window.nativeApp?.onNavigate(window.location.pathname), 100);
     };
   `
+}
+
+async function handleFileDownload(data: {
+  base64Data: string
+  filename: string
+  mimeType: string
+}) {
+  try {
+    const file = new FileSystem.File(FileSystem.Paths.cache, data.filename)
+
+    const binaryString = atob(data.base64Data)
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i)
+    }
+
+    const writer = file.writableStream().getWriter()
+    await writer.write(bytes)
+    await writer.close()
+
+    const isAvailable = await Sharing.isAvailableAsync()
+
+    if (isAvailable) {
+      await Sharing.shareAsync(file.uri, {
+        UTI: data.mimeType,
+        mimeType: data.mimeType,
+      })
+    } else if (Platform.OS === 'android') {
+      const destFile = new FileSystem.File(
+        FileSystem.Paths.document,
+        data.filename,
+      )
+      await file.copy(destFile)
+      Alert.alert('Download Complete', `File saved to: ${data.filename}`, [
+        { text: 'OK' },
+      ])
+    }
+  } catch (error) {
+    console.error('File download error:', error)
+    Alert.alert(
+      'Download Failed',
+      'Could not download the file. Please try again.',
+      [{ text: 'OK' }],
+    )
+  }
 }
 
 export interface EnhancedWebViewRef {
@@ -443,10 +498,14 @@ export const EnhancedWebView = forwardRef<
             break
 
           case 'open_external_url':
-            // Open URL in system browser (iOS native bridge)
-            console.info('🌐 [WEBVIEW] Opening external URL:', message.url)
             Linking.openURL(message.url).catch((err) => {
-              console.error('🌐 [WEBVIEW] Failed to open URL:', err)
+              console.error('Failed to open URL:', err)
+            })
+            break
+
+          case 'download_file':
+            handleFileDownload(message.data).catch((err) => {
+              console.error('File download failed:', err)
             })
             break
 
