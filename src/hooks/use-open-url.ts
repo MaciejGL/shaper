@@ -36,7 +36,7 @@ export function useOpenUrl(options: UseOpenUrlOptions = {}) {
   const { withSessionToken = true, errorMessage = 'Failed to open page' } =
     options
 
-  const { isNativeApp } = useMobileApp()
+  const { isNativeApp, openExternalUrl } = useMobileApp()
   const [isLoading, setIsLoading] = useState(false)
 
   const openUrl = async (path: string) => {
@@ -64,29 +64,10 @@ export function useOpenUrl(options: UseOpenUrlOptions = {}) {
           console.error('Failed to generate session token:', error)
           // Continue without token - user may need to login
         }
-
-        // Force external browser opening for native app
-        const opened = window.open(
-          targetUrl,
-          '_blank',
-          'noopener,noreferrer,external=true',
-        )
-
-        if (!opened) {
-          // Fallback: create link element
-          const link = document.createElement('a')
-          link.href = targetUrl
-          link.target = '_blank'
-          link.rel = 'noopener noreferrer external'
-          link.style.display = 'none'
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        }
-      } else {
-        // Regular web app - open in new tab
-        window.open(targetUrl, '_blank', 'noopener,noreferrer')
       }
+
+      // Use bridge's openExternalUrl for proper external browser handling
+      openExternalUrl(targetUrl)
     } catch (error) {
       console.error('Error opening URL:', error)
       toast.error(errorMessage)
