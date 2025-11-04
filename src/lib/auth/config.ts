@@ -158,7 +158,8 @@ export const authOptions = {
   },
 
   pages: {
-    signIn: '/login',
+    // TEMPORARILY DISABLED FOR TESTING - See if custom signIn page causes mobile OAuth issues
+    // signIn: '/login',
     signOut: '/login',
     error: '/auth/error',
   },
