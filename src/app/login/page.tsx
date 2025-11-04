@@ -6,12 +6,18 @@ import React, { Suspense } from 'react'
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
 import { authOptions } from '@/lib/auth/config'
 
+import { MobileOAuthTrigger } from '../auth/mobile/start/mobile-oauth-trigger'
+
 import { EmailChangeSuccess } from './components/email-change-success'
 import { LoginCard } from './components/login-card'
 
 export const dynamic = 'force-dynamic'
 
-export default async function RequestOtpPage() {
+export default async function RequestOtpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   let user
   try {
     user = await getServerSession(authOptions)
@@ -21,6 +27,15 @@ export default async function RequestOtpPage() {
 
   if (user?.user?.email) {
     return redirect('/fitspace/workout')
+  }
+
+  // Check for mobile OAuth flow
+  const params = await searchParams
+  const startProvider = params?.start as string | undefined
+  const callbackUrl = params?.callbackUrl as string | undefined
+
+  if (startProvider === 'google' && callbackUrl) {
+    return <MobileOAuthTrigger callbackUrl={callbackUrl} />
   }
 
   return (
