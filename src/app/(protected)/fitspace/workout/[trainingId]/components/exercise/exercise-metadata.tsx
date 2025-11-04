@@ -100,7 +100,7 @@ export function ExerciseMetadata({
   return (
     <div>
       <div className="flex gap-2 items-start pl-1">
-        <p className="text-lg font-medium self-center line-clamp-2">
+        <p className="text-base font-medium self-center">
           <span className="text-muted-foreground text-sm">
             {exercise.order}.
           </span>{' '}
