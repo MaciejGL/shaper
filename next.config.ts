@@ -83,6 +83,16 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // No caching for auth routes - OAuth requires fresh state tokens
+        source: '/api/auth/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, max-age=0',
+          },
+        ],
+      },
+      {
         // Cache API routes with short TTL for dynamic content
         source: '/api/:path*',
         headers: [
