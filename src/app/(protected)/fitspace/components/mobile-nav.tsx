@@ -146,7 +146,7 @@ export function MobileNav() {
                 prefetch={item.prefetch}
                 scroll
               >
-                <Icon className="size-4 mb-1" />
+                <Icon className="size-5 mb-1" />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             )
