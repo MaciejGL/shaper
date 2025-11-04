@@ -7,7 +7,6 @@ Short, descriptive title in imperative mood (max 72 chars)
 
 - Major change 1 described clearly
 - Major change 2 described clearly
-- Major change 3 described clearly
 ```
 
 ## Rules:
@@ -26,7 +25,7 @@ Short, descriptive title in imperative mood (max 72 chars)
 
 3. **Bullet Points**:
    - Start each with a dash and space (`- `)
-   - Focus on major changes only (3-7 bullets typically)
+   - Focus on major changes only (1-2 bullets typically)
    - Be specific but concise
    - Group related changes together
    - Order by importance/impact
@@ -40,8 +39,6 @@ Implement workout session tracking feature
 
 - Add session timer with pause/resume functionality
 - Create exercise logging interface with sets and reps
-- Integrate real-time progress updates with optimistic UI
-- Add session history view with past workouts
 ```
 
 ### Bad Commit Messages:

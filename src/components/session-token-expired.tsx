@@ -5,7 +5,7 @@ import { Clock } from 'lucide-react'
 import { BiggyIcon } from '@/components/biggy-icon'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { createDeepLink } from '@/lib/deep-links'
+import { getBaseUrl } from '@/lib/get-base-url'
 
 interface SessionTokenExpiredProps {
   message?: string
@@ -23,17 +23,9 @@ export function SessionTokenExpired({
   returnPath = 'fitspace',
 }: SessionTokenExpiredProps) {
   const handleReturnToApp = () => {
-    const deepLink = createDeepLink(returnPath)
-
-    try {
-      window.location.href = deepLink
-      // Fallback to web after delay
-      setTimeout(() => {
-        window.location.href = `${window.location.origin}/${returnPath}`
-      }, 1000)
-    } catch {
-      window.location.href = `${window.location.origin}/${returnPath}`
-    }
+    // Universal link - opens in app if installed, otherwise in browser
+    const url = `${getBaseUrl()}/${returnPath}`
+    window.location.href = url
   }
 
   return (

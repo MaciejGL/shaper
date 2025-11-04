@@ -15,7 +15,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { useFitspaceGetWorkoutNavigationQuery } from '@/generated/graphql-client'
 import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
-import { tryOpenAppDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
 
 import { getDefaultSelection } from '../workout/[trainingId]/components/navigation-utils'
@@ -137,9 +136,6 @@ export function MobileNav() {
                   setPendingNavigation(item.href)
                   // Scroll the main content container to top
                   document.getElementById('main-content')?.scrollTo(0, 0)
-                  // Best-effort: try to open native app in parallel.
-                  // Don't prevent default so Next.js preserves SPA navigation.
-                  if (!isNativeApp) tryOpenAppDeepLink(item.href)
                 }}
                 className={cn(
                   'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
@@ -150,7 +146,7 @@ export function MobileNav() {
                 prefetch={item.prefetch}
                 scroll
               >
-                <Icon className="size-4 mb-1" />
+                <Icon className="size-5 mb-1" />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             )
