@@ -40,8 +40,8 @@ export function PreferencesStep({ data, onChange }: PreferencesStepProps) {
           exit={{ opacity: 0 }}
         >
           {data.trainingView === GQLTrainingView.Advanced
-            ? 'With advanced logging and timers'
-            : 'No timers or detailed logging'}
+            ? 'With exercise reps and sets logging, best for tracking your progress'
+            : 'Simple check as you go without logging, minimum effort needed'}
         </motion.p>
         <TrainingViewPreview trainingView={data.trainingView} />
       </div>
