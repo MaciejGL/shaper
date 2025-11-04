@@ -581,7 +581,9 @@ export const EnhancedWebView = forwardRef<
       <View style={styles.container}>
         <WebView
           ref={webViewRef}
-          source={{ uri: initialUrl || APP_CONFIG.WEB_URL }}
+          source={{
+            uri: initialUrl || `${APP_CONFIG.WEB_URL}/fitspace/workout`,
+          }}
           style={styles.webview}
           javaScriptEnabled={true}
           domStorageEnabled={true}

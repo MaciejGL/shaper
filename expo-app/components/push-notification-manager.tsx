@@ -16,28 +16,6 @@ import {
 
 import { useWebViewNavigation } from './webview-navigation-manager'
 
-/**
- * Normalize deep link URLs
- * Handles HTTPS URLs and relative paths from push notifications
- */
-function normalizeDeepLink(url: string): string {
-  if (!url) return url
-
-  const normalized = url.trim()
-
-  // If it's already a full HTTPS URL, return as-is
-  if (normalized.startsWith('https://')) {
-    return normalized
-  }
-
-  // If it's a relative path, convert to full HTTPS URL
-  if (normalized.startsWith('/')) {
-    return `${APP_CONFIG.WEB_URL}${normalized}`
-  }
-
-  return normalized
-}
-
 interface PushNotificationManagerProps {
   children: React.ReactNode
   // Optional: pass user authentication token when available
@@ -53,67 +31,71 @@ export function PushNotificationManager({
   const { navigateToPath, isReady } = useWebViewNavigation()
 
   /**
+   * Helper to wait for WebView readiness before navigating
+   */
+  const waitForWebViewThenNavigate = useCallback(
+    (url: string) => {
+      const attemptNavigation = (attempt = 1) => {
+        if (isReady()) {
+          navigateToPath(url)
+        } else if (attempt < 10) {
+          setTimeout(() => attemptNavigation(attempt + 1), 300 * attempt)
+        }
+      }
+      attemptNavigation()
+    },
+    [isReady, navigateToPath],
+  )
+
+  /**
    * Handle deep linking - navigate to specific parts of the app
    */
   const handleDeepLink = useCallback(
     (url: string) => {
       try {
-        // Normalize URL (convert paths to full HTTPS URLs)
-        const normalizedUrl = normalizeDeepLink(url)
-
-        // Parse the normalized URL
-        const parsed = Linking.parse(normalizedUrl)
-
-        // Handle OAuth handoff: {baseUrl}/login?oauth_code=XXX&success=true&next=/fitspace/workout
+        // Parse URL to check for special cases
+        const parsed = Linking.parse(url)
         const oauthCode = parsed.queryParams?.oauth_code as string | undefined
 
+        // 1. OAuth handoff flow (has oauth_code param)
         if (oauthCode) {
           const next =
             (parsed.queryParams?.next as string) || '/fitspace/workout'
-
-          // Navigate to exchange endpoint with code and next parameter
-          // The endpoint will set session cookies and redirect to the final destination
           const exchangeUrl = `${APP_CONFIG.WEB_URL}/api/mobile-auth/exchange?code=${oauthCode}&next=${encodeURIComponent(next)}`
-
-          const attemptExchange = (attempt = 1) => {
-            if (isReady()) {
-              navigateToPath(exchangeUrl)
-            } else {
-              if (attempt < 10) {
-                setTimeout(() => attemptExchange(attempt + 1), 300 * attempt)
-              }
-            }
-          }
-
-          attemptExchange()
+          waitForWebViewThenNavigate(exchangeUrl)
           return
         }
 
-        // For HTTPS URLs, navigate directly
-        if (normalizedUrl.startsWith(APP_CONFIG.WEB_URL)) {
-          const attemptNavigation = (attempt = 1) => {
-            if (isReady()) {
-              navigateToPath(normalizedUrl)
-            } else {
-              if (attempt < 10) {
-                setTimeout(() => attemptNavigation(attempt + 1), 300 * attempt)
-              }
-            }
-          }
-
-          attemptNavigation()
+        // 2. Associated links (HTTPS URLs) - forward directly to WebView
+        if (url.startsWith('https://')) {
+          waitForWebViewThenNavigate(url)
           return
         }
+
+        // 3. Relative paths (from push notifications) - convert to full URL
+        if (url.startsWith('/')) {
+          const fullUrl = `${APP_CONFIG.WEB_URL}${url}`
+          console.info('📱 [PUSH] Notification URL:', fullUrl)
+          waitForWebViewThenNavigate(fullUrl)
+          return
+        }
+
+        // 4. Custom schemes (hypro://, hypertro://) - convert to HTTPS
+        if (url.startsWith('hypro://') || url.startsWith('hypertro://')) {
+          const path = url.replace(/^(hypro|hypertro):\/\//, '')
+          const httpsUrl = `${APP_CONFIG.WEB_URL}/${path}`
+          waitForWebViewThenNavigate(httpsUrl)
+          return
+        }
+
+        // 5. Fallback - try to navigate anyway
+        console.warn('⚠️ Unknown URL format, attempting navigation:', url)
+        waitForWebViewThenNavigate(url)
       } catch (error) {
-        console.error(
-          '❌ Error handling deep link:',
-          error,
-          'Original URL:',
-          url,
-        )
+        console.error('❌ Error handling deep link:', error, 'URL:', url)
       }
     },
-    [isReady, navigateToPath],
+    [waitForWebViewThenNavigate],
   )
 
   // ALWAYS set up deep link listeners (even when not authenticated)
@@ -173,23 +155,11 @@ export function PushNotificationManager({
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        const { notification } = response
-        const data = notification.request.content.data
-
-        // Handle deep linking from notification
-        if (data?.url) {
-          const url = data.url as string
-          // If it's already a full URL, handle as deep link
-          if (url.startsWith('http') || url.startsWith('hypertro://')) {
-            handleDeepLink(url)
-          } else {
-            // If it's just a path, navigate directly
-            if (isReady()) {
-              navigateToPath(url)
-            } else {
-              console.warn('⚠️ WebView not ready for notification navigation')
-            }
-          }
+        const url = response.notification.request.content.data?.url as
+          | string
+          | undefined
+        if (url) {
+          handleDeepLink(url)
         }
       })
 
@@ -200,76 +170,6 @@ export function PushNotificationManager({
       }
     }
   }, [authToken, handleDeepLink, isReady, navigateToPath])
-
-  /**
-   * Map deep link paths to web app routes
-   */
-  const mapDeepLinkToWebPath = (
-    path: string,
-    queryParams?: Record<string, string>,
-  ) => {
-    // Strip fitspace/ or trainer/ prefix for mapping lookup
-    let lookupPath = path
-    if (path.startsWith('fitspace/')) {
-      lookupPath = path.substring('fitspace/'.length)
-    } else if (path.startsWith('trainer/')) {
-      lookupPath = path.substring('trainer/'.length)
-    }
-
-    // Map common deep link patterns to web routes
-    const pathMappings: Record<string, string> = {
-      // Profile and settings
-      profile: '/fitspace/profile',
-      settings: '/fitspace/settings',
-
-      // Training
-      workout: '/fitspace/workout',
-      workouts: '/fitspace/workout',
-      training: '/fitspace/workout',
-      plans: '/fitspace/my-plans',
-      'my-plans': '/fitspace/my-plans',
-
-      // Nutrition
-      nutrition: '/fitspace/meal-plans',
-      meals: '/fitspace/meal-plans',
-      'meal-plans': '/fitspace/meal-plans',
-      'meal-plan': '/fitspace/meal-plan',
-
-      // Progress and social
-      progress: '/fitspace/progress',
-      'my-trainer': '/fitspace/my-trainer',
-      explore: '/fitspace/explore',
-      trainers: '/fitspace/explore',
-
-      // Trainer routes
-      clients: '/trainer/clients',
-      dashboard: '/trainer/dashboard',
-      exercises: '/trainer/exercises',
-      trainings: '/trainer/trainings',
-      teams: '/trainer/teams',
-      'exercises-management': '/trainer/exercises-management',
-      'public-profile': '/trainer/public-profile',
-
-      // Default
-      '': '/fitspace',
-      home: '/fitspace',
-    }
-
-    let webPath = pathMappings[lookupPath] || `/fitspace/${lookupPath}`
-
-    // Handle trainer paths specifically
-    if (path.startsWith('trainer/')) {
-      webPath = pathMappings[lookupPath] || `/trainer/${lookupPath}`
-    }
-
-    // Add query parameters if they exist
-    if (queryParams && Object.keys(queryParams).length > 0) {
-      const searchParams = new URLSearchParams(queryParams)
-      webPath += `?${searchParams.toString()}`
-    }
-
-    return webPath
-  }
 
   // Check permissions status for iOS only when authenticated
   useEffect(() => {
