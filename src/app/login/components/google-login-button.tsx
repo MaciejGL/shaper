@@ -27,7 +27,7 @@ export const GoogleLoginButton = ({
         // Mobile OAuth flow with handoff
         const callbackUrl = '/auth/mobile/complete?mobile=1'
         const fullCallbackUrl = `${window.location.origin}${callbackUrl}`
-        const triggerUrl = `/auth/mobile/start?callbackUrl=${encodeURIComponent(fullCallbackUrl)}`
+        const triggerUrl = `/login?start=google&callbackUrl=${encodeURIComponent(fullCallbackUrl)}`
 
         // Open in system browser (not WebView)
         openSystemBrowser(triggerUrl)
