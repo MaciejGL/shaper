@@ -1,6 +1,5 @@
 'use client'
 
-import { signIn } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { AnimatedLogo } from '@/components/animated-logo'
@@ -29,21 +28,9 @@ export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
     if (isRedirecting.current) return
     isRedirecting.current = true
 
-    try {
-      // Try NextAuth's signIn function first
-      const result = await signIn('google', {
-        callbackUrl,
-        redirect: true,
-      })
-
-      // If signIn doesn't redirect (result is not undefined), use fallback
-      if (result?.error) {
-        window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
-      }
-    } catch (err) {
-      // Fallback: Direct navigation to Google OAuth
-      window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
-    }
+    // Redirect directly to Google OAuth endpoint
+    // This bypasses the custom signIn page to avoid showing the login form
+    window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
   }
 
   const handleManualTrigger = async () => {
