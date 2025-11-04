@@ -141,7 +141,7 @@ export const authOptions = {
         httpOnly: true,
         sameSite: 'none',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, // MUST be true when sameSite is 'none'
         maxAge: 900, // 15 minutes
       },
     },
@@ -151,7 +151,7 @@ export const authOptions = {
         httpOnly: true,
         sameSite: 'none',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, // MUST be true when sameSite is 'none'
         maxAge: 900, // 15 minutes
       },
     },
