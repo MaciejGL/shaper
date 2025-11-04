@@ -9,75 +9,64 @@ interface MobileOAuthTriggerProps {
   callbackUrl: string
 }
 
-const MAX_RETRIES = 3
-const RETRY_DELAY = 2000 // 2 seconds between retries
-
 /**
  * Mobile OAuth Trigger (Client Component)
  *
- * Automatically triggers Google OAuth with multiple retry attempts.
+ * Automatically redirects to Google OAuth, bypassing the custom sign-in page.
+ * Shows a fallback button if redirect doesn't happen within 5 seconds.
  */
 export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
   const [showManualButton, setShowManualButton] = useState(false)
   const [isManualLoading, setIsManualLoading] = useState(false)
   const hasTriggered = useRef(false)
-  const isRedirecting = useRef(false)
 
-  const triggerOAuth = async () => {
+  const triggerOAuth = () => {
     // Prevent multiple simultaneous redirects
-    if (isRedirecting.current) return
-    isRedirecting.current = true
+    if (hasTriggered.current) return
+    hasTriggered.current = true
 
-    // Redirect directly to Google OAuth endpoint
-    // This bypasses the custom signIn page to avoid showing the login form
-    window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    // Redirect directly to NextAuth's Google OAuth endpoint
+    // This bypasses the custom signIn page configured in authOptions.pages.signIn
+    // and goes straight to /api/auth/signin/google which initiates OAuth flow
+    const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
+
+    console.log('🔐 [MOBILE-OAUTH] Redirecting to Google OAuth:', {
+      oauthUrl,
+      callbackUrl,
+    })
+
+    window.location.href = oauthUrl
   }
 
-  const handleManualTrigger = async () => {
+  const handleManualTrigger = () => {
     setIsManualLoading(true)
-    await triggerOAuth()
+    triggerOAuth()
   }
 
   useEffect(() => {
     // Prevent double-mounting in React Strict Mode
     if (hasTriggered.current) return
-    hasTriggered.current = true
 
-    let currentAttempt = 0
+    // Trigger OAuth immediately when component mounts
+    // Small delay allows the loading UI to render first
+    const redirectTimer = setTimeout(() => {
+      triggerOAuth()
+    }, 300)
 
-    const attemptOAuth = async () => {
-      // If we've already successfully redirected, stop
-      if (isRedirecting.current && currentAttempt > 0) return
-
-      currentAttempt++
-
-      await triggerOAuth()
-
-      // If still on this page after attempting, schedule retry
-      if (currentAttempt < MAX_RETRIES) {
-        setTimeout(() => {
-          // Only retry if we're still on this page (didn't redirect)
-          if (
-            !isRedirecting.current ||
-            document.visibilityState === 'visible'
-          ) {
-            isRedirecting.current = false // Reset for retry
-            attemptOAuth()
-          }
-        }, RETRY_DELAY)
-      } else {
-        // All retries exhausted, show manual button
+    // Show fallback manual button if redirect doesn't happen within 5 seconds
+    // This handles edge cases where redirect might be blocked or slow
+    const fallbackTimer = setTimeout(() => {
+      if (!hasTriggered.current) {
+        console.warn(
+          '🔐 [MOBILE-OAUTH] Automatic redirect did not complete, showing manual button',
+        )
         setShowManualButton(true)
       }
-    }
-
-    // Start first attempt after short delay (500ms to let page load)
-    const initialTimer = setTimeout(() => {
-      attemptOAuth()
-    }, 500)
+    }, 5000)
 
     return () => {
-      clearTimeout(initialTimer)
+      clearTimeout(redirectTimer)
+      clearTimeout(fallbackTimer)
     }
   }, [callbackUrl])
 
