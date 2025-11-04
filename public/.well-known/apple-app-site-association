@@ -7,8 +7,13 @@
         ],
         "components": [
           {
+            "/": "/account-management*",
+            "exclude": true,
+            "comment": "Exclude account-management from universal links (opens in Safari)"
+          },
+          {
             "/": "*",
-            "comment": "Matches all paths - universal links for entire app"
+            "comment": "Matches all other paths - universal links for app"
           }
         ]
       }
