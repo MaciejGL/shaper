@@ -12,6 +12,11 @@
             "comment": "Exclude mobile OAuth flow from universal links (must open in Safari)"
           },
           {
+            "/": "/login*",
+            "exclude": true,
+            "comment": "Exclude login page (OAuth trigger)"
+          },
+          {
             "/": "/trainer/*",
             "exclude": true,
             "comment": "Exclude trainer pages from universal links (must open in Safari)"

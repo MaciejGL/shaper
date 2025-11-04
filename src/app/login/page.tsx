@@ -6,6 +6,7 @@ import React, { Suspense } from 'react'
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
 import { authOptions } from '@/lib/auth/config'
 
+import { ExistingSessionHandoff } from '../auth/mobile/start/existing-session-handoff'
 import { MobileOAuthTrigger } from '../auth/mobile/start/mobile-oauth-trigger'
 
 import { EmailChangeSuccess } from './components/email-change-success'
@@ -18,23 +19,32 @@ export default async function RequestOtpPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  let user
-  try {
-    user = await getServerSession(authOptions)
-  } catch (error) {
-    console.warn(error)
-  }
-
-  if (user?.user?.email) {
-    return redirect('/fitspace/workout')
-  }
-
-  // Check for mobile OAuth flow
   const params = await searchParams
   const startProvider = params?.start as string | undefined
   const callbackUrl = params?.callbackUrl as string | undefined
 
+  let session
+  try {
+    session = await getServerSession(authOptions)
+  } catch (error) {
+    console.warn(error)
+  }
+
+  // Regular login - redirect if already logged in
+  if (session?.user?.email && !startProvider) {
+    return redirect('/fitspace/workout')
+  }
+
+  // Check for mobile OAuth flow
   if (startProvider === 'google' && callbackUrl) {
+    // Check for existing session
+    if (session?.user?.email) {
+      const userName = session.user.name || session.user.email
+      return (
+        <ExistingSessionHandoff userName={userName} callbackUrl={callbackUrl} />
+      )
+    }
+
     return <MobileOAuthTrigger callbackUrl={callbackUrl} />
   }
 

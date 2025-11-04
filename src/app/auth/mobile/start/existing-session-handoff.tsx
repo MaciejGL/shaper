@@ -36,9 +36,9 @@ export function ExistingSessionHandoff({
     if (isNativeApp) {
       setAuthToken('')
     }
-    // Reload the same page - this will trigger OAuth since session is now cleared
+    // Redirect to login page with OAuth trigger - this will trigger OAuth since session is now cleared
     // The page will call getServerSession(), find no session, and trigger OAuth
-    window.location.href = `/auth/mobile/start?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    window.location.href = `/login?start=google&callbackUrl=${encodeURIComponent(callbackUrl)}`
   }
 
   return (
