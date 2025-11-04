@@ -2,7 +2,8 @@ import { GQLUserRole } from '@/generated/graphql-server'
 import { getCurrentUser, requireAuth } from '@/lib/getUser'
 import { cn } from '@/lib/utils'
 
-import { DeepLinkMobileNav } from './components/deep-link-mobile-nav'
+import { MobileNav } from '../fitspace/components/mobile-nav'
+
 import { NavigateBack } from './navigate-back'
 
 export default async function ProtectedLayout({
@@ -30,7 +31,7 @@ export default async function ProtectedLayout({
         <div className="h-20" />
       </div>
 
-      <DeepLinkMobileNav />
+      <MobileNav />
     </div>
   )
 }

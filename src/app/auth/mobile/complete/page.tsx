@@ -4,6 +4,7 @@ import { AnimatedLogo } from '@/components/animated-logo'
 import { authOptions } from '@/lib/auth/config'
 import { generateHandoffCode, saveHandoffCode } from '@/lib/auth/handoff-store'
 import prisma from '@/lib/db'
+import { getBaseUrl } from '@/lib/get-base-url'
 
 import { MobileCompleteRedirect } from './mobile-complete-redirect'
 
@@ -17,9 +18,9 @@ export const revalidate = 0
  * 1. Verifies the user is authenticated
  * 2. Generates a one-time handoff code
  * 3. Saves it to Redis (120s TTL)
- * 4. Redirects to: hypro://?oauth_code=XXX&next=/fitspace/workout
+ * 4. Redirects to: {baseUrl}/login?oauth_code=XXX&success=true&next=/fitspace/workout
  *
- * The mobile app intercepts the deep link and loads the exchange endpoint
+ * The mobile app opens via universal link and loads the exchange endpoint
  * in the WebView, which sets session cookies and redirects to the final destination.
  */
 export default async function MobileCompletePage({
@@ -96,13 +97,13 @@ export default async function MobileCompletePage({
   const code = generateHandoffCode()
   await saveHandoffCode(code, user.id)
 
-  // Use root-level deep link with query parameters to avoid Expo Router route matching
-  // Format: hypro://?oauth_code=XXX&next=/fitspace/workout
+  // Use HTTPS universal link to return to app
+  // Format: {baseUrl}/login?oauth_code=XXX&success=true&next=/fitspace/workout
+  const baseUrl = getBaseUrl()
   const nextPath = '/fitspace/workout'
-  const redirectUrl = `hypro://?oauth_code=${code}&next=${encodeURIComponent(nextPath)}`
+  const redirectUrl = `${baseUrl}/login?oauth_code=${code}&success=true&next=${encodeURIComponent(nextPath)}`
 
-  // Use client-side redirect for custom URL schemes
-  // Server-side redirect() doesn't work with hypro:// schemes
+  // Use client-side redirect to trigger universal link
   return (
     <MobileCompleteRedirect
       redirectUrl={redirectUrl}

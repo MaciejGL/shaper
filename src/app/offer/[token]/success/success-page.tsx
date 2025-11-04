@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ServiceType } from '@/generated/prisma/client'
-import { createDeepLink } from '@/lib/deep-links'
 import { getBaseUrl } from '@/lib/get-base-url'
 import { PackageSummaryItem } from '@/types/trainer-offer'
 
@@ -39,18 +38,18 @@ export function SuccessPage({
 
   const handleReturnToApp = useCallback(async () => {
     const packageIds = packageSummary.map((item) => item.packageId).join(',')
-    const appDeepLink = createDeepLink(
-      'fitspace/my-trainer?tab=purchased-services',
-      {
-        token: offer.token,
-        trainer: offer.trainerId,
-        packages: packageIds,
-      },
-    )
-    const baseUrl = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
+
+    // Build URL with query params
+    const params = new URLSearchParams({
+      tab: 'purchased-services',
+      token: offer.token,
+      trainer: offer.trainerId,
+      packages: packageIds,
+    })
+
+    let url = `${getBaseUrl()}/fitspace/my-trainer?${params.toString()}`
 
     // Generate session token if not in native app (external browser scenario)
-    let url = baseUrl
     if (!isNativeApp) {
       setIsGeneratingToken(true)
       try {
@@ -67,21 +66,11 @@ export function SuccessPage({
       setIsGeneratingToken(false)
     }
 
-    // Try to open the mobile app with deep link
+    // Universal link - opens in app if installed, otherwise in browser
     if (isNativeApp) {
-      // Already in mobile app, navigate within app
-      window.location.href = appDeepLink
+      window.location.href = url
     } else {
-      // On web browser, try to open mobile app via deep link
-      try {
-        window.location.href = appDeepLink
-        // Fallback to web if mobile app doesn't respond
-        setTimeout(() => {
-          window.open(url, '_blank')
-        }, 1000)
-      } catch {
-        window.open(url, '_blank')
-      }
+      window.open(url, '_blank')
     }
   }, [isNativeApp, offer.token, offer.trainerId, packageSummary])
 

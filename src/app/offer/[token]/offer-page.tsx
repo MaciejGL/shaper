@@ -35,7 +35,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { SectionIcon } from '@/components/ui/section-icon'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
-import { createDeepLink } from '@/lib/deep-links'
 import { getBaseUrl } from '@/lib/get-base-url'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { cn } from '@/lib/utils'
@@ -211,26 +210,13 @@ export function OfferPage({
   }
 
   const handleReturnToApp = useCallback(() => {
-    const appDeepLink = createDeepLink(
-      'fitspace/my-trainer?tab=purchased-services',
-    )
     const url = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
 
-    // Try to open the mobile app with deep link
+    // Universal link - opens in app if installed, otherwise in browser
     if (isNativeApp) {
-      // Already in mobile app, navigate within app
-      window.location.href = appDeepLink
+      window.location.href = url
     } else {
-      // On web browser, try to open mobile app via deep link
-      try {
-        window.location.href = appDeepLink
-        // Fallback to web if mobile app doesn't respond
-        setTimeout(() => {
-          window.open(url, '_blank')
-        }, 1000)
-      } catch {
-        window.open(url, '_blank')
-      }
+      window.open(url, '_blank')
     }
   }, [isNativeApp])
 

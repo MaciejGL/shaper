@@ -4,7 +4,7 @@ import { ArrowLeft, CheckCircle } from 'lucide-react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
-import { navigateToPath as navigateToDeepLink } from '@/lib/deep-links'
+import { getBaseUrl } from '@/lib/get-base-url'
 
 interface ReturnToAppProps {
   variant?: 'back' | 'complete'
@@ -16,7 +16,7 @@ export function ReturnToApp({ variant = 'complete' }: ReturnToAppProps) {
     if (isNativeApp) {
       navigateToPath('/fitspace/settings')
     } else {
-      navigateToDeepLink('/fitspace/settings')
+      window.location.href = `${getBaseUrl()}/fitspace/settings`
     }
   }
 

@@ -9,8 +9,7 @@ import { AnimatedLogo } from '@/components/animated-logo'
 /**
  * Login Auth Overlay
  *
- * Shows a loading overlay when OAuth is in progress or completing.
- * - oauth_in_progress=true: Shows while user is in system browser
+ * Shows a loading overlay when OAuth completes and returns to the app.
  * - success=true: Shows when OAuth completes and session is being established
  */
 export function LoginAuthOverlay() {
@@ -18,16 +17,13 @@ export function LoginAuthOverlay() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showOverlay, setShowOverlay] = useState(false)
-  const [isCompleting, setIsCompleting] = useState(false)
 
   useEffect(() => {
-    const oauthInProgress = searchParams?.get('oauth_in_progress') === 'true'
     const authSuccess = searchParams?.get('success') === 'true'
 
-    // Show overlay if OAuth is in progress OR completing
-    if (oauthInProgress || authSuccess) {
+    // Show overlay only when user returns from successful OAuth
+    if (authSuccess) {
       setShowOverlay(true)
-      setIsCompleting(authSuccess)
 
       // If session becomes authenticated, hide overlay and redirect
       if (status === 'authenticated') {
@@ -61,12 +57,7 @@ export function LoginAuthOverlay() {
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-950/95 backdrop-blur-sm">
       <div className="flex flex-col items-center gap-4">
         <AnimatedLogo size={80} infinite={true} forceColor="text-white" />
-        <h2 className="text-xl font-semibold text-white">
-          {isCompleting ? 'Completing Sign In...' : 'Waiting for Sign In...'}
-        </h2>
-        <p className="text-sm text-zinc-400 animate-pulse">
-          {isCompleting ? 'Just a moment' : 'Complete sign-in in your browser'}
-        </p>
+        <h2 className="text-xl font-semibold text-white">Signing in...</h2>
       </div>
     </div>
   )

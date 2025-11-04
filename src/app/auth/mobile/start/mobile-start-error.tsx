@@ -2,13 +2,14 @@
 
 import { AnimatedLogo } from '@/components/animated-logo'
 import { Button } from '@/components/ui/button'
+import { getBaseUrl } from '@/lib/get-base-url'
 
 /**
  * Error state when callback URL is missing
  */
 export function MobileStartError() {
   const handleReturnToLogin = () => {
-    window.location.href = 'hypro://'
+    window.location.href = `${getBaseUrl()}/fitspace/workout`
   }
 
   return (

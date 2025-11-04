@@ -17,51 +17,22 @@ import {
 import { useWebViewNavigation } from './webview-navigation-manager'
 
 /**
- * Bulletproof URL normalization for deep links
- * Handles all known malformed URL patterns from iOS/Android/WebView
+ * Normalize deep link URLs
+ * Handles HTTPS URLs and relative paths from push notifications
  */
 function normalizeDeepLink(url: string): string {
   if (!url) return url
 
-  let normalized = url.trim()
+  const normalized = url.trim()
 
-  // 🛡️ BULLETPROOF: Handle all known malformed URL patterns
-  normalized = normalized
-    .replace(/hypro:\/{3,}/g, 'hypro://') // hypro:///+ -> hypro://
-    .replace(/hypertro:\/{3,}/g, 'hypertro://') // hypertro:///+ -> hypertro:// (legacy)
-    .replace(/hypro:\/{1}([^\/])/g, 'hypro://$1') // hypro:/path -> hypro://path
-    .replace(/hypro:\/{2}([^\/])/g, 'hypro://$1') // hypro://path -> hypro://path (keep correct)
-    .replace(/hypertro:\/{1}([^\/])/g, 'hypertro://$1') // hypertro:/path -> hypertro://path (legacy)
-    .replace(/hypertro:\/{2}([^\/])/g, 'hypertro://$1') // hypertro://path -> hypertro://path (legacy, keep correct)
-
-  // Ensure double slash after scheme if missing
-  if (normalized.startsWith('hypro:') && !normalized.startsWith('hypro://')) {
-    normalized = normalized.replace('hypro:', 'hypro://')
-  }
-  if (
-    normalized.startsWith('hypertro:') &&
-    !normalized.startsWith('hypertro://')
-  ) {
-    normalized = normalized.replace('hypertro:', 'hypertro://')
+  // If it's already a full HTTPS URL, return as-is
+  if (normalized.startsWith('https://')) {
+    return normalized
   }
 
-  // 🔍 EXTRA: Handle edge cases from URL encoding/system processing
-  normalized = normalized
-    .replace(/hypro:\/+/g, 'hypro://') // Any number of slashes -> exactly 2
-    .replace(/hypro:\s+/g, 'hypro://') // Handle spaces after colon
-    .replace(/hypro:$/g, 'hypro://fitspace') // Handle bare scheme
-    .replace(/hypertro:\/+/g, 'hypertro://') // Any number of slashes -> exactly 2 (legacy)
-    .replace(/hypertro:\s+/g, 'hypertro://') // Handle spaces after colon (legacy)
-    .replace(/hypertro:$/g, 'hypertro://fitspace') // Handle bare scheme (legacy)
-
-  // Final validation - ensure valid format
-  if (normalized.startsWith('hypro:') && !normalized.includes('://')) {
-    const pathPart = normalized.replace(/^hypro:\/*/g, '')
-    normalized = `hypro://${pathPart || 'fitspace'}`
-  }
-  if (normalized.startsWith('hypertro:') && !normalized.includes('://')) {
-    const pathPart = normalized.replace(/^hypertro:\/*/g, '')
-    normalized = `hypertro://${pathPart || 'fitspace'}`
+  // If it's a relative path, convert to full HTTPS URL
+  if (normalized.startsWith('/')) {
+    return `${APP_CONFIG.WEB_URL}${normalized}`
   }
 
   return normalized
@@ -87,62 +58,29 @@ export function PushNotificationManager({
   const handleDeepLink = useCallback(
     (url: string) => {
       try {
-        // ✅ BULLETPROOF: Normalize URL first
+        // Normalize URL (convert paths to full HTTPS URLs)
         const normalizedUrl = normalizeDeepLink(url)
-
-        if (normalizedUrl !== url) {
-          console.info('🔧 URL normalized:', url, '->', normalizedUrl)
-        }
 
         // Parse the normalized URL
         const parsed = Linking.parse(normalizedUrl)
-        console.info('🔗 Parsed deep link:', {
-          url: normalizedUrl,
-          hostname: parsed.hostname,
-          path: parsed.path,
-          queryParams: parsed.queryParams,
-        })
 
-        // Handle OAuth handoff at root level: hypro://?oauth_code=XXX&next=/fitspace/workout
+        // Handle OAuth handoff: {baseUrl}/login?oauth_code=XXX&success=true&next=/fitspace/workout
         const oauthCode = parsed.queryParams?.oauth_code as string | undefined
-        console.info('🔐 [OAUTH-CHECK] Checking for oauth_code:', {
-          oauthCode: oauthCode
-            ? oauthCode.substring(0, 8) + '...'
-            : 'NOT FOUND',
-          allParams: parsed.queryParams,
-        })
 
         if (oauthCode) {
           const next =
             (parsed.queryParams?.next as string) || '/fitspace/workout'
 
-          console.info('🔐 [OAUTH-HANDOFF] Starting session exchange:', {
-            code: oauthCode.substring(0, 8) + '...',
-            next,
-          })
-
           // Navigate to exchange endpoint with code and next parameter
           // The endpoint will set session cookies and redirect to the final destination
-          const exchangeUrl = `https://www.hypro.app/api/mobile-auth/exchange?code=${oauthCode}&next=${encodeURIComponent(next)}`
+          const exchangeUrl = `${APP_CONFIG.WEB_URL}/api/mobile-auth/exchange?code=${oauthCode}&next=${encodeURIComponent(next)}`
 
           const attemptExchange = (attempt = 1) => {
             if (isReady()) {
-              console.info(
-                `🔐 [OAUTH-HANDOFF] Exchange attempt ${attempt} - Loading exchange endpoint`,
-              )
-
-              // Navigate to exchange endpoint (it will set cookies and redirect)
               navigateToPath(exchangeUrl)
             } else {
-              console.warn(
-                `🔐 [OAUTH-HANDOFF] Exchange attempt ${attempt} - WebView not ready, retrying...`,
-              )
               if (attempt < 10) {
                 setTimeout(() => attemptExchange(attempt + 1), 300 * attempt)
-              } else {
-                console.error(
-                  '🔐 [OAUTH-HANDOFF] Failed to exchange after 10 attempts',
-                )
               }
             }
           }
@@ -151,113 +89,20 @@ export function PushNotificationManager({
           return
         }
 
-        // Support pattern: hypertro://?url=https://... (open exact URL in WebView)
-        const urlParam = (parsed.queryParams?.url as string) || undefined
-        if (urlParam) {
-          // Ensure we use the full URL with domain to prevent default redirects
-          let fullUrl = urlParam.startsWith('http')
-            ? urlParam
-            : `https://www.hypro.app${urlParam.startsWith('/') ? '' : '/'}${urlParam}`
-
-          // IMPORTANT: Check if session_token was parsed as a separate query param
-          // This happens if the URL wasn't properly encoded in the deep link
-          const sessionToken = parsed.queryParams?.session_token as
-            | string
-            | undefined
-          if (sessionToken && !fullUrl.includes('session_token')) {
-            console.warn(
-              '⚠️ [PUSH-MANAGER] session_token was parsed separately! Reconstructing URL...',
-            )
-            // Reconstruct the full URL with the session_token
-            fullUrl = `${fullUrl}${fullUrl.includes('?') ? '&' : '?'}session_token=${sessionToken}`
-          }
-
-          console.info('📱 [PUSH-MANAGER] Navigating WebView to:', {
-            urlParam,
-            fullUrl,
-            hasSessionToken: fullUrl.includes('session_token'),
-            sessionTokenLength: sessionToken?.length,
-            isReady: isReady(),
-          })
-
-          // Retry navigation multiple times to ensure it works
+        // For HTTPS URLs, navigate directly
+        if (normalizedUrl.startsWith(APP_CONFIG.WEB_URL)) {
           const attemptNavigation = (attempt = 1) => {
             if (isReady()) {
-              console.info(
-                `📱 [PUSH-MANAGER] Navigation attempt ${attempt} - WebView ready, navigating...`,
-              )
-              navigateToPath(fullUrl)
+              navigateToPath(normalizedUrl)
             } else {
-              console.warn(
-                `📱 [PUSH-MANAGER] Navigation attempt ${attempt} - WebView not ready, retrying...`,
-              )
               if (attempt < 10) {
-                setTimeout(() => attemptNavigation(attempt + 1), 300 * attempt) // Exponential backoff
-              } else {
-                console.error(
-                  '📱 [PUSH-MANAGER] Failed to navigate after 10 attempts',
-                )
+                setTimeout(() => attemptNavigation(attempt + 1), 300 * attempt)
               }
             }
           }
 
           attemptNavigation()
           return
-        }
-
-        // Handle different URL schemes
-        if (
-          normalizedUrl.includes('hypro.app') ||
-          normalizedUrl.startsWith('hypro://') ||
-          normalizedUrl.startsWith('hypertro://')
-        ) {
-          // This is a Hypro deep link
-          let targetPath = parsed.path || '/'
-
-          // Clean up the path
-          if (targetPath.startsWith('/')) {
-            targetPath = targetPath.substring(1)
-          }
-
-          // Check if this is a path we should handle (fitspace/ or trainer/ or custom scheme)
-          const shouldHandle =
-            normalizedUrl.startsWith('hypro://') ||
-            normalizedUrl.startsWith('hypertro://') ||
-            targetPath.startsWith('fitspace/') ||
-            targetPath.startsWith('trainer/')
-
-          if (!shouldHandle) {
-            console.info(
-              '❌ Deep link ignored (not fitspace/trainer path):',
-              normalizedUrl,
-            )
-            return
-          }
-
-          // Map deep link paths to web app routes
-          const webPath = mapDeepLinkToWebPath(
-            targetPath,
-            parsed.queryParams as Record<string, string> | undefined,
-          )
-
-          console.info('✅ Navigating to web path:', webPath)
-
-          // Actually navigate the WebView to the target path
-          if (isReady()) {
-            navigateToPath(webPath)
-          } else {
-            console.warn('⚠️ WebView not ready, queuing navigation for later')
-            // Retry navigation after a short delay
-            setTimeout(() => {
-              if (isReady()) {
-                navigateToPath(webPath)
-              } else {
-                console.error('❌ WebView still not ready, skipping navigation')
-              }
-            }, 1000)
-          }
-        } else {
-          console.info('❌ Deep link ignored (not Hypro URL):', normalizedUrl)
         }
       } catch (error) {
         console.error(
