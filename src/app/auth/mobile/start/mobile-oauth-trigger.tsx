@@ -33,6 +33,8 @@ export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
     console.log('🔐 [MOBILE-OAUTH] Redirecting to Google OAuth:', {
       oauthUrl,
       callbackUrl,
+      currentOrigin: window.location.origin,
+      currentHref: window.location.href,
     })
 
     window.location.href = oauthUrl
@@ -51,7 +53,7 @@ export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
     // Small delay allows the loading UI to render first
     const redirectTimer = setTimeout(() => {
       triggerOAuth()
-    }, 300)
+    }, 5000)
 
     // Show fallback manual button if redirect doesn't happen within 5 seconds
     // This handles edge cases where redirect might be blocked or slow
@@ -62,7 +64,7 @@ export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
         )
         setShowManualButton(true)
       }
-    }, 5000)
+    }, 10000)
 
     return () => {
       clearTimeout(redirectTimer)
@@ -77,6 +79,14 @@ export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
         infinite={!showManualButton}
         forceColor="text-white"
       />
+      <pre>
+        {JSON.stringify({
+          oauthUrl: `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`,
+          callbackUrl,
+          currentOrigin: window.location.origin,
+          currentHref: window.location.href,
+        })}
+      </pre>
 
       <div className="mt-6 text-center flex flex-col items-center gap-4">
         <h1 className="text-xl font-semibold text-white">
