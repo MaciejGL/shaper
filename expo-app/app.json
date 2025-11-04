@@ -66,11 +66,6 @@
               "scheme": "https",
               "host": "www.hypro.app",
               "pathPrefix": "/fitspace"
-            },
-            {
-              "scheme": "https",
-              "host": "www.hypro.app",
-              "pathPrefix": "/trainer"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]

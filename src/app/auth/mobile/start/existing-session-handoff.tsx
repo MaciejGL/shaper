@@ -4,6 +4,7 @@ import { signOut } from 'next-auth/react'
 import { useState } from 'react'
 
 import { AnimatedLogo } from '@/components/animated-logo'
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
 
 interface ExistingSessionHandoffProps {
@@ -20,6 +21,7 @@ export function ExistingSessionHandoff({
   callbackUrl,
 }: ExistingSessionHandoffProps) {
   const [loading, setLoading] = useState(false)
+  const { isNativeApp, setAuthToken } = useMobileApp()
 
   const handleContinue = () => {
     setLoading(true)
@@ -31,10 +33,12 @@ export function ExistingSessionHandoff({
 
     // Sign out current session
     await signOut({ redirect: false })
-
-    // Reload the same page - this will trigger OAuth since session is now cleared
+    if (isNativeApp) {
+      setAuthToken('')
+    }
+    // Redirect to login page with OAuth trigger - this will trigger OAuth since session is now cleared
     // The page will call getServerSession(), find no session, and trigger OAuth
-    window.location.href = `/auth/mobile/start?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    window.location.href = `/login?start=google&callbackUrl=${encodeURIComponent(callbackUrl)}`
   }
 
   return (

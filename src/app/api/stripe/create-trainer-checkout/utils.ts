@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db'
+import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
 import {
   createInPersonDiscountIfEligible,
   createMealTrainingBundleDiscountIfEligible,
@@ -115,6 +116,14 @@ export async function findOrCreateUser(clientEmail: string) {
       include: {
         profile: true,
       },
+    })
+
+    // Notify admin about new user registration
+    notifyAdminNewUser({
+      email: user.email,
+      name: user.name,
+    }).catch((error) => {
+      console.error('Failed to notify admin about new user:', error)
     })
   }
 

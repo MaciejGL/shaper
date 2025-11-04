@@ -237,37 +237,32 @@ async function handleFileDownload(data: {
   mimeType: string
 }) {
   try {
-    const file = new FileSystem.File(FileSystem.Paths.cache, data.filename)
-
+    // Decode base64 to binary
     const binaryString = atob(data.base64Data)
     const bytes = new Uint8Array(binaryString.length)
     for (let i = 0; i < binaryString.length; i++) {
       bytes[i] = binaryString.charCodeAt(i)
     }
 
+    // Write to cache directory
+    const file = new FileSystem.File(FileSystem.Paths.cache, data.filename)
     const writer = file.writableStream().getWriter()
     await writer.write(bytes)
     await writer.close()
 
-    const isAvailable = await Sharing.isAvailableAsync()
+    // Use share sheet on both platforms
+    // On Android: User can select "Save to Downloads" or other apps
+    // On iOS: User can select "Save to Files" or other apps
+    await Sharing.shareAsync(file.uri, {
+      UTI: data.mimeType,
+      mimeType: data.mimeType,
+      dialogTitle: `Save ${data.filename}`,
+    })
 
-    if (isAvailable) {
-      await Sharing.shareAsync(file.uri, {
-        UTI: data.mimeType,
-        mimeType: data.mimeType,
-      })
-    } else if (Platform.OS === 'android') {
-      const destFile = new FileSystem.File(
-        FileSystem.Paths.document,
-        data.filename,
-      )
-      await file.copy(destFile)
-      Alert.alert('Download Complete', `File saved to: ${data.filename}`, [
-        { text: 'OK' },
-      ])
-    }
+    // No alert needed - share sheet provides clear feedback
   } catch (error) {
     console.error('File download error:', error)
+    // Only show alert on actual error
     Alert.alert(
       'Download Failed',
       'Could not download the file. Please try again.',
@@ -581,7 +576,9 @@ export const EnhancedWebView = forwardRef<
       <View style={styles.container}>
         <WebView
           ref={webViewRef}
-          source={{ uri: initialUrl || APP_CONFIG.WEB_URL }}
+          source={{
+            uri: initialUrl || `${APP_CONFIG.WEB_URL}/fitspace/workout`,
+          }}
           style={styles.webview}
           javaScriptEnabled={true}
           domStorageEnabled={true}

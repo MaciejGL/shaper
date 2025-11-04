@@ -27,19 +27,12 @@ export function MobileCompleteRedirect({
   const [showManualButton, setShowManualButton] = useState(false)
 
   useEffect(() => {
-    console.info('🔐 [MOBILE-REDIRECT] Triggering deep link:', {
-      redirectUrl,
-      userId,
-      email,
-    })
-
     // Trigger deep link immediately
     window.location.href = redirectUrl
 
     // If user is still on this page after 3 seconds, show manual button
     // This handles cases where the deep link doesn't work (app not installed, etc.)
     const fallbackTimer = setTimeout(() => {
-      console.warn('🔐 [MOBILE-REDIRECT] Deep link may have failed, showing manual option')
       setShowManualButton(true)
     }, 3000)
 
@@ -79,7 +72,9 @@ export function MobileCompleteRedirect({
             Almost Done!
           </h1>
           <p className="text-sm text-muted-foreground mb-4 text-center">
-            If the app didn't open automatically,<br />click the button below.
+            If the app didn't open automatically,
+            <br />
+            click the button below.
           </p>
           <Button onClick={handleManualOpen} size="lg">
             Open App

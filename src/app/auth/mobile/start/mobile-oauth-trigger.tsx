@@ -26,27 +26,13 @@ export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   const triggerOAuth = async () => {
-    // Prevent multiple simultaneous redirects
     if (hasTriggered.current) return
     hasTriggered.current = true
 
-    // Redirect directly to NextAuth's Google OAuth endpoint
-    // This bypasses the custom signIn page configured in authOptions.pages.signIn
-    // and goes straight to /api/auth/signin/google which initiates OAuth flow
     await signIn('google', {
       callbackUrl: callbackUrl,
       redirect: true,
     })
-    // const oauthUrl = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`
-
-    // console.log('🔐 [MOBILE-OAUTH] Redirecting to Google OAuth:', {
-    //   oauthUrl,
-    //   callbackUrl,
-    //   currentOrigin: window.location.origin,
-    //   currentHref: window.location.href,
-    // })
-
-    // window.location.href = oauthUrl
   }
 
   const handleManualTrigger = () => {
@@ -65,7 +51,7 @@ export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
         )
         buttonRef.current.click()
       }
-    }, 300)
+    }, 700)
 
     // Show fallback button after 3 seconds if auto-click didn't work
     const fallbackTimer = setTimeout(() => {

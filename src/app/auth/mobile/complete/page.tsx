@@ -97,13 +97,12 @@ export default async function MobileCompletePage({
   const code = generateHandoffCode()
   await saveHandoffCode(code, user.id)
 
-  // Use HTTPS universal link to return to app
-  // Format: {baseUrl}/login?oauth_code=XXX&success=true&next=/fitspace/workout
-  const baseUrl = getBaseUrl()
+  // Use custom scheme to return to app (bypasses universal link checks)
+  // Format: hypro://auth-complete?oauth_code=XXX&next=/fitspace/workout
   const nextPath = '/fitspace/workout'
-  const redirectUrl = `${baseUrl}/login?oauth_code=${code}&success=true&next=${encodeURIComponent(nextPath)}`
+  const redirectUrl = `hypro://auth-complete?oauth_code=${code}&next=${encodeURIComponent(nextPath)}`
 
-  // Use client-side redirect to trigger universal link
+  // Use client-side redirect to trigger custom scheme
   return (
     <MobileCompleteRedirect
       redirectUrl={redirectUrl}

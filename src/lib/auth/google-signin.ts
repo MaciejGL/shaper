@@ -9,6 +9,7 @@
 import { Account, Profile } from 'next-auth'
 
 import { prisma } from '@/lib/db'
+import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
 
 import {
   type GoogleProfile,
@@ -141,6 +142,17 @@ export async function handleGoogleSignIn(
       console.info(
         `Created new user with profile from Google OAuth: ${newUser.email}`,
       )
+
+      // Notify admin about new user registration
+      notifyAdminNewUser({
+        email: newUser.email,
+        firstName: sanitizedProfile.given_name,
+        lastName: sanitizedProfile.family_name,
+        name: newUser.name,
+      }).catch((error) => {
+        console.error('Failed to notify admin about new user:', error)
+      })
+
       return true
     }
   } catch (error) {

@@ -9,6 +9,7 @@
 import { Account, Profile } from 'next-auth'
 
 import { prisma } from '@/lib/db'
+import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
 
 import {
   type AppleProfile,
@@ -108,6 +109,17 @@ export async function handleAppleSignIn(
       console.info(
         `Created new user with profile from Apple OAuth: ${newUser.email}`,
       )
+
+      // Notify admin about new user registration
+      notifyAdminNewUser({
+        email: newUser.email,
+        firstName: sanitizedProfile.name?.firstName,
+        lastName: sanitizedProfile.name?.lastName,
+        name: newUser.name,
+      }).catch((error) => {
+        console.error('Failed to notify admin about new user:', error)
+      })
+
       return true
     }
   } catch (error) {
