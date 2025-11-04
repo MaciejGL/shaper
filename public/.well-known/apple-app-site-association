@@ -12,6 +12,11 @@
             "comment": "Exclude mobile OAuth flow from universal links (must open in Safari)"
           },
           {
+            "/": "/trainer/*",
+            "exclude": true,
+            "comment": "Exclude trainer pages from universal links (must open in Safari)"
+          },
+          {
             "/": "/account-management*",
             "exclude": true,
             "comment": "Exclude account-management from universal links (opens in Safari)"

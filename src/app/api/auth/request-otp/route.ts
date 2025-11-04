@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
 
 const SESSION_EXPIRATION_TIME = 1000 * 60 * 10 // 10 minutes
 
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
     include: { profile: { select: { firstName: true, lastName: true } } },
   })
 
+  let isNewUser = false
   if (!user) {
     user = await prisma.user.create({
       data: {
@@ -33,11 +35,23 @@ export async function POST(req: Request) {
       },
       include: { profile: { select: { firstName: true, lastName: true } } },
     })
+    isNewUser = true
   }
 
   await prisma.userSession.create({
     data: { userId: user.id, otp, expiresAt },
   })
+
+  // Notify admin about new user registration
+  if (isNewUser && !isDemoAccount) {
+    notifyAdminNewUser({
+      email: user.email,
+      firstName: user.profile?.firstName,
+      lastName: user.profile?.lastName,
+    }).catch((error) => {
+      console.error('Failed to notify admin about new user:', error)
+    })
+  }
 
   // Only send email for non-demo accounts
   if (!isDemoAccount) {
