@@ -225,8 +225,14 @@ function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const isProduction = process.env.NODE_ENV === 'production'
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
+  const { isNativeApp, setAuthToken } = useMobileApp()
 
   const handleLogout = async () => {
+    // Clear auth token from native app
+    if (isNativeApp) {
+      setAuthToken('')
+    }
+
     queryClient.clear()
     await signOut({ callbackUrl: '/login', redirect: false })
     window.location.replace('/login')
@@ -308,7 +314,7 @@ function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
 }
 
 function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
-  const { isNativeApp } = useMobileApp()
+  const { isNativeApp, setAuthToken } = useMobileApp()
   const [isOpen, setIsOpen] = useState(false)
   const isProduction = process.env.NODE_ENV === 'production'
   const queryClient = useQueryClient()
@@ -322,6 +328,11 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
   })
 
   const handleLogout = async () => {
+    // Clear auth token from native app
+    if (isNativeApp) {
+      setAuthToken('')
+    }
+
     queryClient.clear()
     await signOut({ callbackUrl: '/login', redirect: false })
     window.location.replace('/login')
