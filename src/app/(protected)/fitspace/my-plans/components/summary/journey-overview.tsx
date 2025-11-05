@@ -58,7 +58,7 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
             icon={<Calendar className="text-blue-500" />}
             label={dateRange}
             value={<div>{duration}</div>}
-            variant="outline"
+            variant="default"
           />
         </motion.div>
 
@@ -79,7 +79,7 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
                 <Progress value={adherencePercent} className="h-2 w-full" />
               </div>
             }
-            variant="outline"
+            variant="default"
           />
         </motion.div>
 
@@ -98,7 +98,7 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
                 {summary.totalWorkouts}
               </div>
             }
-            variant="outline"
+            variant="default"
           />
         </motion.div>
       </motion.div>

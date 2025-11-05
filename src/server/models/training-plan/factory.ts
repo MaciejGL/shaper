@@ -2854,21 +2854,126 @@ async function calculateBodyCompositionForPlan(
   startDate: Date,
   endDate: Date,
 ) {
-  // Get user profile to check for weight logs
+  // Get user profile
   const profile = await prisma.userProfile.findUnique({
     where: { userId },
-    select: { weight: true, weightUnit: true },
+    select: { id: true, weightUnit: true },
   })
 
-  // For now, we'll return basic weight data if available
-  // In the future, we can enhance this with check-in data
-  if (!profile?.weight) {
+  if (!profile) {
     return null
   }
 
-  // TODO: Query actual weight logs from check-ins to get start/end weights
-  // For now, return null if we don't have historical data
-  return null
+  // Fetch body progress logs (snapshots) during the plan period
+  const bodyProgressLogs = await prisma.bodyProgressLog.findMany({
+    where: {
+      userProfileId: profile.id,
+      loggedAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    orderBy: {
+      loggedAt: 'asc',
+    },
+    select: {
+      id: true,
+      loggedAt: true,
+      image1Url: true,
+      image2Url: true,
+      image3Url: true,
+    },
+  })
+
+  // Get body measurements for weight tracking
+  const bodyMeasurements = await prisma.userBodyMeasure.findMany({
+    where: {
+      userProfileId: profile.id,
+      measuredAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    orderBy: {
+      measuredAt: 'asc',
+    },
+    select: {
+      weight: true,
+      measuredAt: true,
+    },
+  })
+
+  if (bodyMeasurements.length < 2) {
+    // Need at least 2 weight measurements to show change
+    return null
+  }
+
+  const firstMeasurement = bodyMeasurements[0]
+  const lastMeasurement = bodyMeasurements[bodyMeasurements.length - 1]
+
+  const startWeight = firstMeasurement?.weight
+  const endWeight = lastMeasurement?.weight
+
+  if (!startWeight || !endWeight) {
+    return null
+  }
+
+  const weightChange = endWeight - startWeight
+
+  // Find snapshots closest to first and last measurements
+  const firstSnapshot = bodyProgressLogs.length > 0 ? bodyProgressLogs[0] : null
+  const lastSnapshot =
+    bodyProgressLogs.length > 0
+      ? bodyProgressLogs[bodyProgressLogs.length - 1]
+      : null
+
+  // Helper to find closest weight to a snapshot date
+  const findClosestWeight = (date: Date) => {
+    if (bodyMeasurements.length === 0) return null
+
+    let closestMeasurement = bodyMeasurements[0]
+    let closestDiff = Math.abs(
+      new Date(date).getTime() -
+        new Date(closestMeasurement.measuredAt).getTime(),
+    )
+
+    for (const measurement of bodyMeasurements) {
+      const diff = Math.abs(
+        new Date(date).getTime() - new Date(measurement.measuredAt).getTime(),
+      )
+      if (diff < closestDiff) {
+        closestDiff = diff
+        closestMeasurement = measurement
+      }
+    }
+
+    return closestMeasurement.weight
+  }
+
+  return {
+    startWeight,
+    endWeight,
+    weightChange,
+    unit: profile.weightUnit || 'kg',
+    startSnapshot: firstSnapshot
+      ? {
+          loggedAt: firstSnapshot.loggedAt.toISOString(),
+          weight: findClosestWeight(firstSnapshot.loggedAt),
+          image1Url: firstSnapshot.image1Url,
+          image2Url: firstSnapshot.image2Url,
+          image3Url: firstSnapshot.image3Url,
+        }
+      : null,
+    endSnapshot: lastSnapshot
+      ? {
+          loggedAt: lastSnapshot.loggedAt.toISOString(),
+          weight: findClosestWeight(lastSnapshot.loggedAt),
+          image1Url: lastSnapshot.image1Url,
+          image2Url: lastSnapshot.image2Url,
+          image3Url: lastSnapshot.image3Url,
+        }
+      : null,
+  }
 }
 
 /**

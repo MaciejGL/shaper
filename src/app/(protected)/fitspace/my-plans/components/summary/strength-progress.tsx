@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, TrendingUp } from 'lucide-react'
+import { ArrowRight, BicepsFlexed, TrendingUp } from 'lucide-react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetPlanSummaryQuery } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { cn } from '@/lib/utils'
@@ -32,7 +33,7 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
     >
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold flex items-center gap-2">
-          <TrendingUp className="size-4" />
+          <SectionIcon icon={BicepsFlexed} size="xs" variant="green" />
           Strength Progress
         </h3>
         <Badge variant="secondary">
@@ -63,23 +64,23 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
             }}
           >
             <Card>
-              <CardHeader>
-                {/* Exercise name */}
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-sm">
-                    {progression.exerciseName}
-                  </h4>
-                  <Badge
-                    variant="success"
-                    className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                  >
-                    +<AnimateNumber value={progression.improvementPercentage} />
-                    %
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="">
+              <CardContent>
                 <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm">
+                      {progression.exerciseName}
+                    </h4>
+                    <Badge
+                      variant="success"
+                      className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                    >
+                      +
+                      <AnimateNumber
+                        value={progression.improvementPercentage}
+                      />
+                      %
+                    </Badge>
+                  </div>
                   {/* Progress bar */}
                   <Progress
                     value={progression.improvementPercentage}

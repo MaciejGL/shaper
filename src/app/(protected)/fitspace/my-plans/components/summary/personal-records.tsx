@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetPlanSummaryQuery } from '@/generated/graphql-client'
 
 import { PRItem } from '../../../progress/components/latest-prs/pr-item'
@@ -34,7 +35,7 @@ export function PersonalRecords({ summary }: PersonalRecordsProps) {
     >
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold flex items-center gap-2">
-          <Trophy className="size-4 text-amber-600" />
+          <SectionIcon icon={Trophy} size="xs" variant="amber" />
           Personal Records
         </h3>
         <Badge variant="secondary">{allRecords.length} PRs Achieved</Badge>

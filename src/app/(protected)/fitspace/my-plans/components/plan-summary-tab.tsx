@@ -52,24 +52,19 @@ export function PlanSummaryTab({ planId }: PlanSummaryTabProps) {
   const summary = data.getPlanSummary
 
   return (
-    <div className="space-y-6 py-4">
-      {/* Journey Overview - Always show */}
+    <div className="space-y-8 py-4">
       <JourneyOverview summary={summary} />
 
-      {/* Strength Progress - Show if data available */}
+      {summary.bodyComposition && <BodyComposition summary={summary} />}
+
       {summary.strengthProgress.length > 0 && (
         <StrengthProgress summary={summary} />
       )}
 
-      {/* Body Composition - Show if data available */}
-      {summary.bodyComposition && <BodyComposition summary={summary} />}
-
-      {/* Personal Records - Show if data available */}
       {summary.personalRecords.length > 0 && (
         <PersonalRecords summary={summary} />
       )}
 
-      {/* Empty state if no progress data */}
       {summary.strengthProgress.length === 0 &&
         !summary.bodyComposition &&
         summary.personalRecords.length === 0 && (

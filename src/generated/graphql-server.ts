@@ -257,10 +257,21 @@ export type GQLBaseExerciseSubstitute = {
 
 export type GQLBodyCompositionChange = {
   __typename?: 'BodyCompositionChange';
+  endSnapshot?: EntireFieldWrapper<Maybe<GQLBodyCompositionSnapshot>>;
   endWeight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  startSnapshot?: EntireFieldWrapper<Maybe<GQLBodyCompositionSnapshot>>;
   startWeight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   unit: EntireFieldWrapper<Scalars['String']['output']>;
   weightChange?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+};
+
+export type GQLBodyCompositionSnapshot = {
+  __typename?: 'BodyCompositionSnapshot';
+  image1Url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  image2Url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  image3Url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  loggedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
 };
 
 export type GQLBodyProgressLog = {
@@ -3923,6 +3934,7 @@ export type GQLResolversTypes = {
   BaseExercise: ResolverTypeWrapper<GQLBaseExercise>;
   BaseExerciseSubstitute: ResolverTypeWrapper<GQLBaseExerciseSubstitute>;
   BodyCompositionChange: ResolverTypeWrapper<GQLBodyCompositionChange>;
+  BodyCompositionSnapshot: ResolverTypeWrapper<GQLBodyCompositionSnapshot>;
   BodyProgressLog: ResolverTypeWrapper<GQLBodyProgressLog>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Chat: ResolverTypeWrapper<GQLChat>;
@@ -4173,6 +4185,7 @@ export type GQLResolversParentTypes = {
   BaseExercise: GQLBaseExercise;
   BaseExerciseSubstitute: GQLBaseExerciseSubstitute;
   BodyCompositionChange: GQLBodyCompositionChange;
+  BodyCompositionSnapshot: GQLBodyCompositionSnapshot;
   BodyProgressLog: GQLBodyProgressLog;
   Boolean: Scalars['Boolean']['output'];
   Chat: GQLChat;
@@ -4469,10 +4482,21 @@ export type GQLBaseExerciseSubstituteResolvers<ContextType = GQLContext, ParentT
 };
 
 export type GQLBodyCompositionChangeResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BodyCompositionChange'] = GQLResolversParentTypes['BodyCompositionChange']> = {
+  endSnapshot?: Resolver<Maybe<GQLResolversTypes['BodyCompositionSnapshot']>, ParentType, ContextType>;
   endWeight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  startSnapshot?: Resolver<Maybe<GQLResolversTypes['BodyCompositionSnapshot']>, ParentType, ContextType>;
   startWeight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   unit?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weightChange?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLBodyCompositionSnapshotResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BodyCompositionSnapshot'] = GQLResolversParentTypes['BodyCompositionSnapshot']> = {
+  image1Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  image2Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  image3Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  loggedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5870,6 +5894,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   BaseExercise?: GQLBaseExerciseResolvers<ContextType>;
   BaseExerciseSubstitute?: GQLBaseExerciseSubstituteResolvers<ContextType>;
   BodyCompositionChange?: GQLBodyCompositionChangeResolvers<ContextType>;
+  BodyCompositionSnapshot?: GQLBodyCompositionSnapshotResolvers<ContextType>;
   BodyProgressLog?: GQLBodyProgressLogResolvers<ContextType>;
   Chat?: GQLChatResolvers<ContextType>;
   ChatWithMessages?: GQLChatWithMessagesResolvers<ContextType>;

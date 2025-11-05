@@ -20,11 +20,21 @@ type StrengthProgression {
   totalSessions: Int!
 }
 
+type BodyCompositionSnapshot {
+  loggedAt: String!
+  weight: Float
+  image1Url: String
+  image2Url: String
+  image3Url: String
+}
+
 type BodyCompositionChange {
   startWeight: Float
   endWeight: Float
   weightChange: Float
   unit: String!
+  startSnapshot: BodyCompositionSnapshot
+  endSnapshot: BodyCompositionSnapshot
 }
 
 type PersonalRecordSummary {

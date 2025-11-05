@@ -33,6 +33,20 @@ query GetPlanSummary($planId: ID!) {
       endWeight
       weightChange
       unit
+      startSnapshot {
+        loggedAt
+        weight
+        image1Url
+        image2Url
+        image3Url
+      }
+      endSnapshot {
+        loggedAt
+        weight
+        image1Url
+        image2Url
+        image3Url
+      }
     }
 
     personalRecords {

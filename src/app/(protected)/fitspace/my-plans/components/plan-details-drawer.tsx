@@ -58,18 +58,17 @@ export function PlanDetailsDrawer({
   isLoading = false,
 }: PlanDetailsDrawerProps) {
   const status = plan ? getPlanStatus(plan, isActive) : PlanStatus.Template
+  const isTemplate = status === PlanStatus.Template
   const isCompleted = status === PlanStatus.Completed
-  const [activeTab, setActiveTab] = useState(isCompleted ? 'summary' : 'info')
+  const [activeTab, setActiveTab] = useState(isTemplate ? 'info' : 'summary')
   const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
 
   // Reset to summary tab when drawer opens with a completed plan
   useEffect(() => {
-    if (open && isCompleted) {
-      setActiveTab('summary')
-    } else if (open && !isCompleted) {
-      setActiveTab('info')
+    if (open) {
+      setActiveTab(isTemplate ? 'info' : 'summary')
     }
-  }, [open, isCompleted])
+  }, [open, isTemplate])
 
   if (!plan) return null
   const isPaused = status === PlanStatus.Paused
@@ -120,7 +119,7 @@ export function PlanDetailsDrawer({
               className="w-full"
             >
               <TabsList className="w-full shadow-md">
-                {isCompleted && (
+                {!isTemplate && (
                   <TabsTrigger value="summary" className="flex-1">
                     Summary
                   </TabsTrigger>
@@ -133,7 +132,7 @@ export function PlanDetailsDrawer({
                 </TabsTrigger>
               </TabsList>
 
-              {isCompleted && (
+              {!isTemplate && (
                 <TabsContent value="summary">
                   <PlanSummaryTab planId={plan.id} />
                 </TabsContent>
