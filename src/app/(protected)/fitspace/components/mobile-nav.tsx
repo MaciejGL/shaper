@@ -135,8 +135,9 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
               !isActive
             const isHighlighted = isActive || isClicked
 
-            // Use deep link if requested and in native app
-            const shouldUseDeepLink = useDeepLinks && isNativeApp
+            // Use deep link if requested (account-management is always in Safari)
+            // Don't check isNativeApp because account-management opens in external browser
+            const shouldUseDeepLink = useDeepLinks
             const navigationHref = shouldUseDeepLink
               ? `hypro://${item.href.replace(/^\//, '')}`
               : item.href
