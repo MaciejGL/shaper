@@ -2,6 +2,7 @@
 
 import {
   Bell,
+  Calendar,
   Cloud,
   CreditCard,
   Dumbbell,
@@ -19,6 +20,7 @@ import {
   LazyPushNotificationsTab as PushNotificationsTab,
   LazyStripeTab as StripeTab,
   LazyTrainersTab as TrainersTab,
+  LazyTrainingPlansTab as TrainingPlansTab,
   LazyUsersTab as UsersTab,
 } from './components/lazy-admin-tabs'
 
@@ -27,8 +29,14 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useQueryState(
     'tab',
     parseAsStringEnum<
-      'users' | 'trainers' | 'exercises' | 'push' | 'stripe' | 'aws'
-    >(['users', 'trainers', 'exercises', 'push', 'stripe', 'aws'])
+      | 'users'
+      | 'trainers'
+      | 'plans'
+      | 'exercises'
+      | 'push'
+      | 'stripe'
+      | 'aws'
+    >(['users', 'trainers', 'plans', 'exercises', 'push', 'stripe', 'aws'])
       .withDefault('users')
       .withOptions({ clearOnDefault: true }),
   )
@@ -43,6 +51,7 @@ export default function AdminPage() {
             value as
               | 'users'
               | 'trainers'
+              | 'plans'
               | 'exercises'
               | 'push'
               | 'stripe'
@@ -58,6 +67,10 @@ export default function AdminPage() {
           <TabsTrigger value="trainers">
             <UserCheck className="h-4 w-4" />
             Trainers
+          </TabsTrigger>
+          <TabsTrigger value="plans">
+            <Calendar className="h-4 w-4" />
+            Training Plans
           </TabsTrigger>
           <TabsTrigger value="stripe">
             <CreditCard className="h-4 w-4" />
@@ -86,6 +99,10 @@ export default function AdminPage() {
 
         <TabsContent value="trainers" className="mt-6">
           <TrainersTab />
+        </TabsContent>
+
+        <TabsContent value="plans" className="mt-6">
+          <TrainingPlansTab />
         </TabsContent>
 
         <TabsContent value="stripe" className="mt-6">

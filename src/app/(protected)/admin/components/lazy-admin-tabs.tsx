@@ -85,6 +85,17 @@ const LazyStripeTab = dynamic(
   },
 )
 
+const LazyTrainingPlansTab = dynamic(
+  () =>
+    import('./training-plans-tab').then((mod) => ({
+      default: mod.TrainingPlansTab,
+    })),
+  {
+    loading: () => <AdminTabSkeleton />,
+    ssr: false,
+  },
+)
+
 export {
   LazyUsersTab,
   LazyTrainersTab,
@@ -92,4 +103,5 @@ export {
   LazyPushNotificationsTab,
   LazyAwsTab,
   LazyStripeTab,
+  LazyTrainingPlansTab,
 }
