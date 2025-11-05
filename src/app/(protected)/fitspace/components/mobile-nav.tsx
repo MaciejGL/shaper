@@ -19,7 +19,15 @@ import { cn } from '@/lib/utils'
 
 import { getDefaultSelection } from '../workout/[trainingId]/components/navigation-utils'
 
-export function MobileNav() {
+interface MobileNavProps {
+  /**
+   * Use deep links (hypro://) instead of Next.js Link
+   * Useful when page is opened from external sources (e.g., Stripe)
+   */
+  useDeepLinks?: boolean
+}
+
+export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
   const pathname = usePathname()
   const { isNativeApp } = useMobileApp()
   const isKeyboardVisible = useKeyboardVisible()
@@ -127,28 +135,45 @@ export function MobileNav() {
               !isActive
             const isHighlighted = isActive || isClicked
 
+            // Use deep link if requested and in native app
+            const shouldUseDeepLink = useDeepLinks && isNativeApp
+            const navigationHref = shouldUseDeepLink
+              ? `hypro://${item.href.replace(/^\//, '')}`
+              : item.href
+
+            const handleClick = () => {
+              setClickedItem(item.label)
+              setPendingNavigation(item.href)
+              // Scroll the main content container to top
+              document.getElementById('main-content')?.scrollTo(0, 0)
+
+              // If using deep links, trigger navigation via href change
+              if (shouldUseDeepLink) {
+                window.location.href = navigationHref
+              }
+            }
+
+            // Use <a> for deep links, <Link> for normal navigation
+            const NavComponent = shouldUseDeepLink ? 'a' : Link
+            const navProps = shouldUseDeepLink
+              ? { href: navigationHref }
+              : { href: item.href, prefetch: item.prefetch, scroll: true }
+
             return (
-              <Link
+              <NavComponent
                 key={item.id}
-                href={item.href}
-                onClick={() => {
-                  setClickedItem(item.label)
-                  setPendingNavigation(item.href)
-                  // Scroll the main content container to top
-                  document.getElementById('main-content')?.scrollTo(0, 0)
-                }}
+                {...navProps}
+                onClick={handleClick}
                 className={cn(
                   'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
                   isHighlighted
                     ? 'text-primary'
                     : 'text-muted-foreground hover:text-foreground',
                 )}
-                prefetch={item.prefetch}
-                scroll
               >
                 <Icon className="size-5 mb-1" />
                 <span className="text-[10px] font-medium">{item.label}</span>
-              </Link>
+              </NavComponent>
             )
           })}
         </div>

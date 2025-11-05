@@ -31,7 +31,7 @@ export default async function ProtectedLayout({
         <div className="h-20" />
       </div>
 
-      <MobileNav />
+      <MobileNav useDeepLinks />
     </div>
   )
 }
