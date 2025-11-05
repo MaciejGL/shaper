@@ -58,7 +58,7 @@ export default function MyTrainerPage() {
   useScrollToFromParams([isLoadingTrainer, trainer])
 
   return (
-    <div className="container-hypertro mx-auto max-w-md mt-6">
+    <div className="container-hypertro mx-auto mt-6">
       {/* <DashboardHeader
         title="Coaching"
         icon={UserCheck}

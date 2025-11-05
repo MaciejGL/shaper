@@ -41,7 +41,7 @@ export default function NutritionPage() {
 
   if (isLoadingAll) {
     return (
-      <div className="space-y-4 py-4">
+      <div className="space-y-4 py-4 container-hypertro mx-auto">
         <LoadingSkeleton count={4} />
       </div>
     )

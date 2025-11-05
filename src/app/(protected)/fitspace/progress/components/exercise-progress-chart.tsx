@@ -173,7 +173,10 @@ export function ExerciseProgressChart({
 
   return (
     <Card borderless variant="secondary" className="p-0">
-      <CardHeader className="p-0 pl-4 pr-1">
+      <CardHeader className="pb-0 pt-4 pl-4 pr-1">
+        <p className="text-sm text-muted-foreground">
+          {exercise.baseExercise?.name}
+        </p>
         <div className="flex flex-col gap-2 items-start">
           <ExerciseProgressStats
             currentOneRM={latestOneRM}

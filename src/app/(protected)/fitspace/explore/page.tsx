@@ -44,7 +44,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const plansData = plansResult.data
 
   return (
-    <div className="container-hypertro mx-auto max-w-md mt-6">
+    <div className="container-hypertro mx-auto mt-6">
       {/* <DashboardHeader
         title="Discover"
         icon={SearchIcon}

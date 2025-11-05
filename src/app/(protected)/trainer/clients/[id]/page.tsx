@@ -60,13 +60,16 @@ export default function ClientDetailPage({
   if (!client) return null
 
   const activePlan = data?.getClientActivePlan
-  const clientName = `${client.firstName} ${client.lastName}`
+  const clientName =
+    client.firstName && client.lastName
+      ? `${client.firstName} ${client.lastName}`
+      : client.email
   const hasAssignedPlans = data?.getClientTrainingPlans.length > 0
 
   return (
     <div className="container @container/client-detail-page mx-auto">
       <DashboardHeader
-        title="Client Profile"
+        title={clientName}
         icon={User}
         prevSegment={{ label: 'Clients', href: '/trainer/clients' }}
       />
