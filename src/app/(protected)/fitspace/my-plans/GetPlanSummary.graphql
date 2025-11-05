@@ -1,0 +1,51 @@
+query GetPlanSummary($planId: ID!) {
+  getPlanSummary(planId: $planId) {
+    duration {
+      weeks
+      startDate
+      endDate
+    }
+    adherence
+    workoutsCompleted
+    totalWorkouts
+
+    strengthProgress {
+      exerciseName
+      baseExerciseId
+      firstPerformance {
+        weight
+        reps
+        estimated1RM
+        date
+      }
+      lastPerformance {
+        weight
+        reps
+        estimated1RM
+        date
+      }
+      improvementPercentage
+      totalSessions
+    }
+
+    bodyComposition {
+      startWeight
+      endWeight
+      weightChange
+      unit
+    }
+
+    personalRecords {
+      exerciseName
+      baseExerciseId
+      bestEstimated1RM
+      weight
+      reps
+      achievedDate
+      weekNumber
+    }
+
+    totalVolumeLifted
+    totalPRsAchieved
+  }
+}

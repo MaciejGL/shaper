@@ -253,6 +253,14 @@ export type GQLBaseExerciseSubstitute = {
   substituteId: Scalars['ID']['output'];
 };
 
+export type GQLBodyCompositionChange = {
+  __typename?: 'BodyCompositionChange';
+  endWeight?: Maybe<Scalars['Float']['output']>;
+  startWeight?: Maybe<Scalars['Float']['output']>;
+  unit: Scalars['String']['output'];
+  weightChange?: Maybe<Scalars['Float']['output']>;
+};
+
 export type GQLBodyProgressLog = {
   __typename?: 'BodyProgressLog';
   createdAt: Scalars['String']['output'];
@@ -2246,6 +2254,14 @@ export type GQLPauseCoachingResult = {
   success: Scalars['Boolean']['output'];
 };
 
+export type GQLPerformanceData = {
+  __typename?: 'PerformanceData';
+  date: Scalars['String']['output'];
+  estimated1RM?: Maybe<Scalars['Float']['output']>;
+  reps?: Maybe<Scalars['Int']['output']>;
+  weight?: Maybe<Scalars['Float']['output']>;
+};
+
 export type GQLPersonalRecord = {
   __typename?: 'PersonalRecord';
   estimated1RM: Scalars['Float']['output'];
@@ -2267,10 +2283,41 @@ export type GQLPersonalRecordHistory = {
   weight: Scalars['Float']['output'];
 };
 
+export type GQLPersonalRecordSummary = {
+  __typename?: 'PersonalRecordSummary';
+  achievedDate: Scalars['String']['output'];
+  baseExerciseId: Scalars['String']['output'];
+  bestEstimated1RM: Scalars['Float']['output'];
+  exerciseName: Scalars['String']['output'];
+  reps: Scalars['Int']['output'];
+  weekNumber?: Maybe<Scalars['Int']['output']>;
+  weight: Scalars['Float']['output'];
+};
+
 export type GQLPlanDurationRange = {
   __typename?: 'PlanDurationRange';
   maxDay: Scalars['Int']['output'];
   minDay: Scalars['Int']['output'];
+};
+
+export type GQLPlanSummary = {
+  __typename?: 'PlanSummary';
+  adherence: Scalars['Float']['output'];
+  bodyComposition?: Maybe<GQLBodyCompositionChange>;
+  duration: GQLPlanSummaryDuration;
+  personalRecords: Array<GQLPersonalRecordSummary>;
+  strengthProgress: Array<GQLStrengthProgression>;
+  totalPRsAchieved: Scalars['Int']['output'];
+  totalVolumeLifted: Scalars['Float']['output'];
+  totalWorkouts: Scalars['Int']['output'];
+  workoutsCompleted: Scalars['Int']['output'];
+};
+
+export type GQLPlanSummaryDuration = {
+  __typename?: 'PlanSummaryDuration';
+  endDate?: Maybe<Scalars['String']['output']>;
+  startDate: Scalars['String']['output'];
+  weeks: Scalars['Int']['output'];
 };
 
 export type GQLPreviousExerciseLog = {
@@ -2354,6 +2401,7 @@ export type GQLQuery = {
   getMyTrainer?: Maybe<GQLPublicTrainer>;
   getOrCreateChat: GQLChat;
   getPackageTemplate?: Maybe<GQLPackageTemplate>;
+  getPlanSummary: GQLPlanSummary;
   getPublicTrainingPlans: Array<GQLTrainingPlan>;
   getQuickWorkoutDay?: Maybe<GQLGetWorkoutDayPayload>;
   getQuickWorkoutNavigation?: Maybe<GQLGetWorkoutNavigationPayload>;
@@ -2545,6 +2593,11 @@ export type GQLQueryGetOrCreateChatArgs = {
 
 export type GQLQueryGetPackageTemplateArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetPlanSummaryArgs = {
+  planId: Scalars['ID']['input'];
 };
 
 
@@ -2935,6 +2988,16 @@ export type GQLStartWorkoutFromFavouriteInput = {
   dayId?: InputMaybe<Scalars['ID']['input']>;
   favouriteWorkoutId: Scalars['ID']['input'];
   replaceExisting?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type GQLStrengthProgression = {
+  __typename?: 'StrengthProgression';
+  baseExerciseId?: Maybe<Scalars['String']['output']>;
+  exerciseName: Scalars['String']['output'];
+  firstPerformance: GQLPerformanceData;
+  improvementPercentage: Scalars['Float']['output'];
+  lastPerformance: GQLPerformanceData;
+  totalSessions: Scalars['Int']['output'];
 };
 
 export enum GQLSubscriptionDuration {
@@ -3942,6 +4005,13 @@ export type GQLRemoveWeekMutationVariables = Exact<{
 
 
 export type GQLRemoveWeekMutation = { __typename?: 'Mutation', removeWeek: boolean };
+
+export type GQLGetPlanSummaryQueryVariables = Exact<{
+  planId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetPlanSummaryQuery = { __typename?: 'Query', getPlanSummary: { __typename?: 'PlanSummary', adherence: number, workoutsCompleted: number, totalWorkouts: number, totalVolumeLifted: number, totalPRsAchieved: number, duration: { __typename?: 'PlanSummaryDuration', weeks: number, startDate: string, endDate?: string | undefined | null }, strengthProgress: Array<{ __typename?: 'StrengthProgression', exerciseName: string, baseExerciseId?: string | undefined | null, improvementPercentage: number, totalSessions: number, firstPerformance: { __typename?: 'PerformanceData', weight?: number | undefined | null, reps?: number | undefined | null, estimated1RM?: number | undefined | null, date: string }, lastPerformance: { __typename?: 'PerformanceData', weight?: number | undefined | null, reps?: number | undefined | null, estimated1RM?: number | undefined | null, date: string } }>, bodyComposition?: { __typename?: 'BodyCompositionChange', startWeight?: number | undefined | null, endWeight?: number | undefined | null, weightChange?: number | undefined | null, unit: string } | undefined | null, personalRecords: Array<{ __typename?: 'PersonalRecordSummary', exerciseName: string, baseExerciseId: string, bestEstimated1RM: number, weight: number, reps: number, achievedDate: string, weekNumber?: number | undefined | null }> } };
 
 export type GQLGetMyTrainerQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6811,6 +6881,98 @@ useRemoveWeekMutation.getKey = () => ['RemoveWeek'];
 
 
 useRemoveWeekMutation.fetcher = (variables: GQLRemoveWeekMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveWeekMutation, GQLRemoveWeekMutationVariables>(RemoveWeekDocument, variables, options);
+
+export const GetPlanSummaryDocument = `
+    query GetPlanSummary($planId: ID!) {
+  getPlanSummary(planId: $planId) {
+    duration {
+      weeks
+      startDate
+      endDate
+    }
+    adherence
+    workoutsCompleted
+    totalWorkouts
+    strengthProgress {
+      exerciseName
+      baseExerciseId
+      firstPerformance {
+        weight
+        reps
+        estimated1RM
+        date
+      }
+      lastPerformance {
+        weight
+        reps
+        estimated1RM
+        date
+      }
+      improvementPercentage
+      totalSessions
+    }
+    bodyComposition {
+      startWeight
+      endWeight
+      weightChange
+      unit
+    }
+    personalRecords {
+      exerciseName
+      baseExerciseId
+      bestEstimated1RM
+      weight
+      reps
+      achievedDate
+      weekNumber
+    }
+    totalVolumeLifted
+    totalPRsAchieved
+  }
+}
+    `;
+
+export const useGetPlanSummaryQuery = <
+      TData = GQLGetPlanSummaryQuery,
+      TError = unknown
+    >(
+      variables: GQLGetPlanSummaryQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetPlanSummaryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetPlanSummaryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetPlanSummaryQuery, TError, TData>(
+      {
+    queryKey: ['GetPlanSummary', variables],
+    queryFn: fetchData<GQLGetPlanSummaryQuery, GQLGetPlanSummaryQueryVariables>(GetPlanSummaryDocument, variables),
+    ...options
+  }
+    )};
+
+useGetPlanSummaryQuery.getKey = (variables: GQLGetPlanSummaryQueryVariables) => ['GetPlanSummary', variables];
+
+export const useInfiniteGetPlanSummaryQuery = <
+      TData = InfiniteData<GQLGetPlanSummaryQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetPlanSummaryQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetPlanSummaryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetPlanSummaryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetPlanSummaryQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetPlanSummary.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetPlanSummaryQuery, GQLGetPlanSummaryQueryVariables>(GetPlanSummaryDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetPlanSummaryQuery.getKey = (variables: GQLGetPlanSummaryQueryVariables) => ['GetPlanSummary.infinite', variables];
+
+
+useGetPlanSummaryQuery.fetcher = (variables: GQLGetPlanSummaryQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetPlanSummaryQuery, GQLGetPlanSummaryQueryVariables>(GetPlanSummaryDocument, variables, options);
 
 export const GetMyTrainerDocument = `
     query GetMyTrainer {

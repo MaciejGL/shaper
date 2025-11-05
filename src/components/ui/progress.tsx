@@ -9,9 +9,11 @@ function Progress({
   className,
   value = 0,
   duration = 1000,
+  classNameIndicator,
   ...props
 }: React.ComponentProps<typeof ProgressPrimitive.Root> & {
   duration?: number
+  classNameIndicator?: string
 }) {
   const fallbackValue = value ?? 0
   return (
@@ -25,16 +27,20 @@ function Progress({
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className={cn('bg-primary h-full w-full flex-1 transition-all', {
-          'bg-transparent': fallbackValue === 0,
-          'bg-amber-300': fallbackValue >= 10,
-          'bg-amber-400': fallbackValue >= 40,
-          'bg-amber-500': fallbackValue >= 50,
-          'bg-green-400': fallbackValue >= 60,
-          'bg-green-500': fallbackValue >= 70,
-          'bg-green-600': fallbackValue >= 80,
-          'bg-green-600 dark:bg-green-700': fallbackValue >= 90,
-        })}
+        className={cn(
+          'bg-primary h-full w-full flex-1 transition-all',
+          {
+            'bg-transparent': fallbackValue === 0,
+            'bg-amber-300': fallbackValue >= 10,
+            'bg-amber-400': fallbackValue >= 40,
+            'bg-amber-500': fallbackValue >= 50,
+            'bg-green-400': fallbackValue >= 60,
+            'bg-green-500': fallbackValue >= 70,
+            'bg-green-600': fallbackValue >= 80,
+            'bg-green-600 dark:bg-green-700': fallbackValue >= 90,
+          },
+          classNameIndicator,
+        )}
         style={{
           transitionDuration: `${duration}ms`,
           transform: `translateX(-${Math.max(0, 100 - fallbackValue)}%)`,

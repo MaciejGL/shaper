@@ -2611,3 +2611,348 @@ const getPreviousLogsByExerciseName = async (
 
   return previousLogsByExerciseName
 }
+
+export async function getPlanSummary(
+  args: { planId: string },
+  context: GQLContext,
+) {
+  const { planId } = args
+  if (!context.user) {
+    throw new Error('Unauthorized')
+  }
+
+  // Get the training plan with all weeks, days, exercises, and sets
+  const plan = await prisma.trainingPlan.findUnique({
+    where: { id: planId, assignedToId: context.user.user.id },
+    include: {
+      weeks: {
+        include: {
+          days: {
+            include: {
+              exercises: {
+                include: {
+                  sets: {
+                    where: { completedAt: { not: null } },
+                    include: { log: true },
+                    orderBy: { completedAt: 'asc' },
+                  },
+                  base: {
+                    select: { id: true, name: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: { weekNumber: 'asc' },
+      },
+    },
+  })
+
+  if (!plan) {
+    throw new Error('Training plan not found')
+  }
+
+  // Calculate journey overview
+  const duration = {
+    weeks: plan.weeks.length,
+    startDate: plan.startDate?.toISOString() || plan.createdAt.toISOString(),
+    endDate:
+      plan.endDate?.toISOString() || plan.completedAt?.toISOString() || null,
+  }
+
+  // Calculate adherence from weeks/days data
+  const allDays = plan.weeks
+    .flatMap((week) => week.days)
+    .filter(
+      (day) => !day.isRestDay && day.exercises && day.exercises.length > 0,
+    )
+  const completedDays = allDays.filter((day) => day.completedAt)
+  const adherence =
+    allDays.length > 0
+      ? Math.round((completedDays.length / allDays.length) * 100)
+      : 0
+
+  // Calculate completed workouts
+  const workoutsCompleted = plan.weeks.reduce(
+    (acc, week) =>
+      acc + (week.days?.filter((day) => day.completedAt).length ?? 0),
+    0,
+  )
+
+  // Calculate total workouts
+  const totalWorkouts =
+    plan.weeks?.reduce(
+      (acc, week) =>
+        acc +
+        (week.days?.filter((day) => !day.isRestDay && day.exercises?.length)
+          ?.length ?? 0),
+      0,
+    ) ?? 0
+
+  // Calculate strength progressions
+  const exerciseProgressions = calculateStrengthProgressionsForPlan(plan)
+
+  // Get top 5 exercises by improvement
+  const strengthProgress = exerciseProgressions
+    .sort((a, b) => b.improvementPercentage - a.improvementPercentage)
+    .slice(0, 5)
+
+  // Calculate body composition changes
+  const bodyComposition = await calculateBodyCompositionForPlan(
+    context.user.user.id,
+    plan.startDate || plan.createdAt,
+    plan.endDate || plan.completedAt || new Date(),
+  )
+
+  // Get personal records achieved during this plan
+  const personalRecords = await getPersonalRecordsForPlan(
+    context.user.user.id,
+    planId,
+    plan,
+  )
+
+  // Calculate total volume lifted
+  const totalVolumeLifted = calculateTotalVolumeForPlan(plan)
+
+  // Count total PRs
+  const totalPRsAchieved = personalRecords.length
+
+  return {
+    duration,
+    adherence,
+    workoutsCompleted,
+    totalWorkouts,
+    strengthProgress,
+    bodyComposition,
+    personalRecords,
+    totalVolumeLifted,
+    totalPRsAchieved,
+  }
+}
+
+/**
+ * Calculate strength progressions for all exercises in the plan
+ * Compares earliest logged performance vs latest logged performance
+ */
+function calculateStrengthProgressionsForPlan(plan: any) {
+  const { calculateEstimated1RM } = require('@/utils/one-rm-calculator')
+  const exerciseMap = new Map<
+    string,
+    {
+      name: string
+      baseId: string | null
+      performances: Array<{
+        weight: number
+        reps: number
+        date: Date
+      }>
+    }
+  >()
+
+  // Collect all performances for each exercise
+  for (const week of plan.weeks) {
+    for (const day of week.days) {
+      for (const exercise of day.exercises) {
+        const key = exercise.baseId || exercise.name
+
+        if (!exerciseMap.has(key)) {
+          exerciseMap.set(key, {
+            name: exercise.name,
+            baseId: exercise.baseId,
+            performances: [],
+          })
+        }
+
+        const exerciseData = exerciseMap.get(key)!
+
+        // Get completed sets with logs
+        for (const set of exercise.sets) {
+          if (set.log && set.log.weight && set.log.reps && set.completedAt) {
+            exerciseData.performances.push({
+              weight: set.log.weight,
+              reps: set.log.reps,
+              date: set.completedAt,
+            })
+          }
+        }
+      }
+    }
+  }
+
+  // Calculate progressions
+  const progressions = []
+
+  for (const [key, data] of exerciseMap.entries()) {
+    if (data.performances.length < 2) continue // Need at least 2 performances
+
+    // Sort by date
+    data.performances.sort((a, b) => a.date.getTime() - b.date.getTime())
+
+    // Get best performance from first few sessions (up to first 3 sessions)
+    const firstSessions = data.performances.slice(
+      0,
+      Math.min(3, data.performances.length),
+    )
+    const bestFirstPerf = firstSessions.reduce((best, current) => {
+      const currentRM = calculateEstimated1RM(current.weight, current.reps)
+      const bestRM = calculateEstimated1RM(best.weight, best.reps)
+      return currentRM > bestRM ? current : best
+    })
+
+    // Get best performance from last few sessions (up to last 3 sessions)
+    const lastSessions = data.performances.slice(
+      -Math.min(3, data.performances.length),
+    )
+    const bestLastPerf = lastSessions.reduce((best, current) => {
+      const currentRM = calculateEstimated1RM(current.weight, current.reps)
+      const bestRM = calculateEstimated1RM(best.weight, best.reps)
+      return currentRM > bestRM ? current : best
+    })
+
+    const first1RM = calculateEstimated1RM(
+      bestFirstPerf.weight,
+      bestFirstPerf.reps,
+    )
+    const last1RM = calculateEstimated1RM(
+      bestLastPerf.weight,
+      bestLastPerf.reps,
+    )
+
+    // Calculate improvement percentage
+    const improvementPercentage =
+      first1RM > 0 ? ((last1RM - first1RM) / first1RM) * 100 : 0
+
+    progressions.push({
+      exerciseName: data.name,
+      baseExerciseId: data.baseId,
+      firstPerformance: {
+        weight: bestFirstPerf.weight,
+        reps: bestFirstPerf.reps,
+        estimated1RM: first1RM,
+        date: bestFirstPerf.date.toISOString(),
+      },
+      lastPerformance: {
+        weight: bestLastPerf.weight,
+        reps: bestLastPerf.reps,
+        estimated1RM: last1RM,
+        date: bestLastPerf.date.toISOString(),
+      },
+      improvementPercentage: Math.round(improvementPercentage * 10) / 10,
+      totalSessions: data.performances.length,
+    })
+  }
+
+  return progressions
+}
+
+/**
+ * Calculate body composition changes during the plan
+ */
+async function calculateBodyCompositionForPlan(
+  userId: string,
+  startDate: Date,
+  endDate: Date,
+) {
+  // Get user profile to check for weight logs
+  const profile = await prisma.userProfile.findUnique({
+    where: { userId },
+    select: { weight: true, weightUnit: true },
+  })
+
+  // For now, we'll return basic weight data if available
+  // In the future, we can enhance this with check-in data
+  if (!profile?.weight) {
+    return null
+  }
+
+  // TODO: Query actual weight logs from check-ins to get start/end weights
+  // For now, return null if we don't have historical data
+  return null
+}
+
+/**
+ * Get personal records achieved during this plan
+ */
+async function getPersonalRecordsForPlan(
+  userId: string,
+  planId: string,
+  plan: any,
+) {
+  const startDate = plan.startDate || plan.createdAt
+  const endDate = plan.endDate || plan.completedAt || new Date()
+
+  // Get all PRs for this user within the plan timeframe
+  const prs = await prisma.personalRecord.findMany({
+    where: {
+      userId,
+      achievedAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    include: {
+      baseExercise: {
+        select: { name: true },
+      },
+      day: {
+        include: {
+          week: {
+            select: { weekNumber: true },
+          },
+        },
+      },
+    },
+    orderBy: {
+      estimated1RM: 'desc',
+    },
+  })
+
+  // Group by exercise and get the best PR per exercise
+  const bestPRsMap = new Map<string, any>()
+
+  for (const pr of prs) {
+    const key = pr.baseExerciseId
+    if (
+      !bestPRsMap.has(key) ||
+      pr.estimated1RM > bestPRsMap.get(key).estimated1RM
+    ) {
+      bestPRsMap.set(key, pr)
+    }
+  }
+
+  // Convert to array and format
+  const personalRecords = Array.from(bestPRsMap.values()).map((pr) => ({
+    exerciseName: pr.baseExercise.name,
+    baseExerciseId: pr.baseExerciseId,
+    bestEstimated1RM: pr.estimated1RM,
+    weight: pr.weight,
+    reps: pr.reps,
+    achievedDate: pr.achievedAt.toISOString(),
+    weekNumber: pr.day?.week?.weekNumber || null,
+  }))
+
+  // Sort by improvement (estimated 1RM)
+  return personalRecords.sort((a, b) => b.bestEstimated1RM - a.bestEstimated1RM)
+}
+
+/**
+ * Calculate total volume lifted during the plan
+ */
+function calculateTotalVolumeForPlan(plan: any) {
+  let totalVolume = 0
+
+  for (const week of plan.weeks) {
+    for (const day of week.days) {
+      for (const exercise of day.exercises) {
+        for (const set of exercise.sets) {
+          if (set.log && set.log.weight && set.log.reps) {
+            totalVolume += set.log.weight * set.log.reps
+          }
+        }
+      }
+    }
+  }
+
+  return Math.round(totalVolume * 10) / 10
+}
