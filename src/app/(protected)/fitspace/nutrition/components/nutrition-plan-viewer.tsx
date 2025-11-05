@@ -82,7 +82,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
       )}
 
       <Tabs value={activeDay} onValueChange={setActiveDay}>
-        <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar">
+        <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar mb-2">
           <TabsList size="lg">
             {days.map((day) => (
               <TabsTrigger
