@@ -237,43 +237,22 @@ async function handleFileDownload(data: {
   mimeType: string
 }) {
   try {
-    // Decode base64 to binary
     const binaryString = atob(data.base64Data)
     const bytes = new Uint8Array(binaryString.length)
     for (let i = 0; i < binaryString.length; i++) {
       bytes[i] = binaryString.charCodeAt(i)
     }
 
-    // Save to Documents directory (accessible on both platforms)
-    const documentsDir = FileSystem.Paths.document
-    const file = new FileSystem.File(documentsDir, data.filename)
+    const file = new FileSystem.File(FileSystem.Paths.document, data.filename)
     const writer = file.writableStream().getWriter()
     await writer.write(bytes)
     await writer.close()
 
-    if (Platform.OS === 'android') {
-      // Android: Show share sheet to let user save to Downloads or open directly
-      await Sharing.shareAsync(file.uri, {
-        UTI: data.mimeType,
-        mimeType: data.mimeType,
-      })
-    } else {
-      // iOS: Use share sheet to save to Files app
-      const isAvailable = await Sharing.isAvailableAsync()
-
-      if (isAvailable) {
-        await Sharing.shareAsync(file.uri, {
-          UTI: data.mimeType,
-          mimeType: data.mimeType,
-        })
-      } else {
-        Alert.alert('Download Complete', `${data.filename} has been saved.`, [
-          { text: 'OK' },
-        ])
-      }
-    }
+    await Sharing.shareAsync(file.uri, {
+      UTI: data.mimeType,
+      mimeType: data.mimeType,
+    })
   } catch (error) {
-    console.error('File download error:', error)
     Alert.alert(
       'Download Failed',
       'Could not download the file. Please try again.',
