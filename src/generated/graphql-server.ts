@@ -1185,6 +1185,7 @@ export type GQLMutation = {
   deleteCheckinSchedule: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteFavouriteWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  deleteMacroTargets: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteMeal: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteMessage: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteNote: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1566,6 +1567,11 @@ export type GQLMutationDeleteExerciseArgs = {
 
 export type GQLMutationDeleteFavouriteWorkoutArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeleteMacroTargetsArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -4972,6 +4978,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   deleteCheckinSchedule?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   deleteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteExerciseArgs, 'id'>>;
   deleteFavouriteWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteFavouriteWorkoutArgs, 'id'>>;
+  deleteMacroTargets?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteMacroTargetsArgs, 'clientId'>>;
   deleteMeal?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteMealArgs, 'id'>>;
   deleteMessage?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteMessageArgs, 'id'>>;
   deleteNote?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNoteArgs, 'id'>>;

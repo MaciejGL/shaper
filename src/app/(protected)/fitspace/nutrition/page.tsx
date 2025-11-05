@@ -56,7 +56,7 @@ export default function NutritionPage() {
             description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
             icon={Salad}
             cta={
-              user?.trainerId && (
+              !user?.trainerId && (
                 <ButtonLink
                   href="/fitspace/explore?tab=trainers"
                   iconEnd={<ArrowRight />}

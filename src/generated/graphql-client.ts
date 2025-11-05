@@ -1183,6 +1183,7 @@ export type GQLMutation = {
   deleteCheckinSchedule: Scalars['Boolean']['output'];
   deleteExercise: Scalars['Boolean']['output'];
   deleteFavouriteWorkout: Scalars['Boolean']['output'];
+  deleteMacroTargets: Scalars['Boolean']['output'];
   deleteMeal: Scalars['Boolean']['output'];
   deleteMessage: Scalars['Boolean']['output'];
   deleteNote: Scalars['Boolean']['output'];
@@ -1564,6 +1565,11 @@ export type GQLMutationDeleteExerciseArgs = {
 
 export type GQLMutationDeleteFavouriteWorkoutArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeleteMacroTargetsArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -4473,6 +4479,13 @@ export type GQLSetMacroTargetsMutationVariables = Exact<{
 
 export type GQLSetMacroTargetsMutation = { __typename?: 'Mutation', setMacroTargets: { __typename?: 'MacroTarget', id: string, clientId: string, trainerId: string, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, notes?: string | undefined | null, createdAt: string, updatedAt: string } };
 
+export type GQLDeleteMacroTargetsMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLDeleteMacroTargetsMutation = { __typename?: 'Mutation', deleteMacroTargets: boolean };
+
 export type GQLGetClientNutritionPlansQueryVariables = Exact<{
   clientId: Scalars['ID']['input'];
 }>;
@@ -4507,6 +4520,18 @@ export type GQLDeleteNutritionPlanMutationVariables = Exact<{
 
 
 export type GQLDeleteNutritionPlanMutation = { __typename?: 'Mutation', deleteNutritionPlan: boolean };
+
+export type GQLGetTrainerNutritionPlansQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetTrainerNutritionPlansQuery = { __typename?: 'Query', trainerNutritionPlans: Array<{ __typename?: 'NutritionPlan', id: string, name: string, description?: string | undefined | null, createdAt: string, dayCount: number, totalMealCount: number, client?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } | undefined | null }> };
+
+export type GQLCopyNutritionPlanMutationVariables = Exact<{
+  input: GQLCopyNutritionPlanInput;
+}>;
+
+
+export type GQLCopyNutritionPlanMutation = { __typename?: 'Mutation', copyNutritionPlan: { __typename?: 'CopyNutritionPlanPayload', success: boolean, nutritionPlan: { __typename?: 'NutritionPlan', id: string, name: string, description?: string | undefined | null, isSharedWithClient: boolean, createdAt: string, dayCount: number, totalMealCount: number } } };
 
 export type GQLGetClientByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10412,6 +10437,30 @@ useSetMacroTargetsMutation.getKey = () => ['SetMacroTargets'];
 
 useSetMacroTargetsMutation.fetcher = (variables: GQLSetMacroTargetsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLSetMacroTargetsMutation, GQLSetMacroTargetsMutationVariables>(SetMacroTargetsDocument, variables, options);
 
+export const DeleteMacroTargetsDocument = `
+    mutation DeleteMacroTargets($clientId: ID!) {
+  deleteMacroTargets(clientId: $clientId)
+}
+    `;
+
+export const useDeleteMacroTargetsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteMacroTargetsMutation, TError, GQLDeleteMacroTargetsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteMacroTargetsMutation, TError, GQLDeleteMacroTargetsMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteMacroTargets'],
+    mutationFn: (variables?: GQLDeleteMacroTargetsMutationVariables) => fetchData<GQLDeleteMacroTargetsMutation, GQLDeleteMacroTargetsMutationVariables>(DeleteMacroTargetsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteMacroTargetsMutation.getKey = () => ['DeleteMacroTargets'];
+
+
+useDeleteMacroTargetsMutation.fetcher = (variables: GQLDeleteMacroTargetsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteMacroTargetsMutation, GQLDeleteMacroTargetsMutationVariables>(DeleteMacroTargetsDocument, variables, options);
+
 export const GetClientNutritionPlansDocument = `
     query GetClientNutritionPlans($clientId: ID!) {
   getClientNutritionPlans(clientId: $clientId) {
@@ -10590,6 +10639,102 @@ useDeleteNutritionPlanMutation.getKey = () => ['DeleteNutritionPlan'];
 
 
 useDeleteNutritionPlanMutation.fetcher = (variables: GQLDeleteNutritionPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteNutritionPlanMutation, GQLDeleteNutritionPlanMutationVariables>(DeleteNutritionPlanDocument, variables, options);
+
+export const GetTrainerNutritionPlansDocument = `
+    query GetTrainerNutritionPlans {
+  trainerNutritionPlans {
+    id
+    name
+    description
+    createdAt
+    dayCount
+    totalMealCount
+    client {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}
+    `;
+
+export const useGetTrainerNutritionPlansQuery = <
+      TData = GQLGetTrainerNutritionPlansQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetTrainerNutritionPlansQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetTrainerNutritionPlansQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetTrainerNutritionPlansQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetTrainerNutritionPlansQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetTrainerNutritionPlans'] : ['GetTrainerNutritionPlans', variables],
+    queryFn: fetchData<GQLGetTrainerNutritionPlansQuery, GQLGetTrainerNutritionPlansQueryVariables>(GetTrainerNutritionPlansDocument, variables),
+    ...options
+  }
+    )};
+
+useGetTrainerNutritionPlansQuery.getKey = (variables?: GQLGetTrainerNutritionPlansQueryVariables) => variables === undefined ? ['GetTrainerNutritionPlans'] : ['GetTrainerNutritionPlans', variables];
+
+export const useInfiniteGetTrainerNutritionPlansQuery = <
+      TData = InfiniteData<GQLGetTrainerNutritionPlansQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetTrainerNutritionPlansQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetTrainerNutritionPlansQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetTrainerNutritionPlansQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetTrainerNutritionPlansQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetTrainerNutritionPlans.infinite'] : ['GetTrainerNutritionPlans.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetTrainerNutritionPlansQuery, GQLGetTrainerNutritionPlansQueryVariables>(GetTrainerNutritionPlansDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetTrainerNutritionPlansQuery.getKey = (variables?: GQLGetTrainerNutritionPlansQueryVariables) => variables === undefined ? ['GetTrainerNutritionPlans.infinite'] : ['GetTrainerNutritionPlans.infinite', variables];
+
+
+useGetTrainerNutritionPlansQuery.fetcher = (variables?: GQLGetTrainerNutritionPlansQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetTrainerNutritionPlansQuery, GQLGetTrainerNutritionPlansQueryVariables>(GetTrainerNutritionPlansDocument, variables, options);
+
+export const CopyNutritionPlanDocument = `
+    mutation CopyNutritionPlan($input: CopyNutritionPlanInput!) {
+  copyNutritionPlan(input: $input) {
+    nutritionPlan {
+      id
+      name
+      description
+      isSharedWithClient
+      createdAt
+      dayCount
+      totalMealCount
+    }
+    success
+  }
+}
+    `;
+
+export const useCopyNutritionPlanMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCopyNutritionPlanMutation, TError, GQLCopyNutritionPlanMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCopyNutritionPlanMutation, TError, GQLCopyNutritionPlanMutationVariables, TContext>(
+      {
+    mutationKey: ['CopyNutritionPlan'],
+    mutationFn: (variables?: GQLCopyNutritionPlanMutationVariables) => fetchData<GQLCopyNutritionPlanMutation, GQLCopyNutritionPlanMutationVariables>(CopyNutritionPlanDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCopyNutritionPlanMutation.getKey = () => ['CopyNutritionPlan'];
+
+
+useCopyNutritionPlanMutation.fetcher = (variables: GQLCopyNutritionPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCopyNutritionPlanMutation, GQLCopyNutritionPlanMutationVariables>(CopyNutritionPlanDocument, variables, options);
 
 export const GetClientByIdDocument = `
     query GetClientById($id: ID!) {

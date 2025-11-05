@@ -19,6 +19,7 @@ import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 
 import { ClientHeader } from '../header'
 
+import { ImportPlanCombobox } from './import-plan-combobox'
 import { NutritionPlanCard } from './nutrition-plan-card'
 
 interface NutritionPlansSectionProps {
@@ -229,13 +230,16 @@ export function NutritionPlansSection({
       <ClientHeader
         title="Nutrition Plans"
         action={
-          <Button
-            onClick={handleCreatePlan}
-            disabled={isCreating || isLoading}
-            size="sm"
-          >
-            {isCreating ? 'Creating...' : 'Create New Plan'}
-          </Button>
+          <div className="flex gap-2">
+            <ImportPlanCombobox clientId={clientId} />
+            <Button
+              onClick={handleCreatePlan}
+              disabled={isCreating || isLoading}
+              size="sm"
+            >
+              {isCreating ? 'Creating...' : 'Create New Plan'}
+            </Button>
+          </div>
         }
       />
 

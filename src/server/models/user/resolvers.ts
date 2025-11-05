@@ -926,6 +926,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           ? `${currentUser.profile.firstName} ${currentUser.profile.lastName}`
           : currentUser.name || 'Client'
 
+      // Cancel any active Stripe subscriptions at period end BEFORE removing trainer connection
+      await cancelUserStripeSubscriptions(userId)
+
       // Use transaction to ensure all operations succeed or fail together
       await prisma.$transaction(async (tx) => {
         // Disconnect trainer from client
@@ -983,9 +986,6 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       )
 
       await notifyCoachingCancelled(trainerId, clientName)
-
-      // Cancel any active Stripe subscriptions at period end
-      await cancelUserStripeSubscriptions(userId)
 
       // Invalidate access control cache for both users since their relationship ended
       await Promise.all([

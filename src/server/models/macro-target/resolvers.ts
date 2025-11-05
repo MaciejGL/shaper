@@ -71,4 +71,20 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     return new MacroTarget(macroTarget, context)
   },
+
+  deleteMacroTargets: async (_, { clientId }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Ensure trainer has access to this client
+    await ensureTrainerClientAccess(user.user.id, clientId)
+
+    await prisma.macroTarget.delete({
+      where: { clientId },
+    })
+
+    return true
+  },
 }

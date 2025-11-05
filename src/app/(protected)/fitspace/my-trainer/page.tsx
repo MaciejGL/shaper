@@ -28,6 +28,7 @@ import {
   useCancelCoachingMutation,
   useCancelCoachingRequestMutation,
   useFitGetMyTrainerOffersQuery,
+  useGetMySubscriptionStatusQuery,
   useGetMyTrainerQuery,
   useGetTrainerSharedNotesLimitedQuery,
   useMyCoachingRequestsQuery,
@@ -99,7 +100,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
   const { openModal } = useConfirmationModalContext()
-  const { user } = useUser()
+  const { user, subscription } = useUser()
   const queryClient = useQueryClient()
 
   const { mutateAsync: cancelCoaching } = useCancelCoachingMutation()
@@ -110,9 +111,19 @@ function TrainerView({ trainer }: TrainerViewProps) {
         ? `${trainer.profile.firstName} ${trainer.profile.lastName}`
         : trainer.name || 'your trainer'
 
+    // Check if user has active coaching subscription
+    const hasActiveSubscription = subscription?.trainerId === trainer.id
+
+    // Build description based on subscription status
+    const baseDescription = `Are you sure you want to cancel your coaching relationship with ${trainerName}?`
+    const subscriptionWarning = hasActiveSubscription
+      ? '\n\nYour coaching subscription will be cancelled and you will continue to have access until the end of your current billing period. You will not be charged anymore.'
+      : ''
+    const description = `${baseDescription}${subscriptionWarning}\n\nThis action cannot be undone.`
+
     openModal({
       title: 'Cancel Coaching',
-      description: `Are you sure you want to cancel your coaching relationship with ${trainerName}? This action cannot be undone.`,
+      description,
       confirmText: 'Cancel Coaching',
       cancelText: 'Keep Coaching',
       variant: 'destructive',
@@ -134,6 +145,9 @@ function TrainerView({ trainer }: TrainerViewProps) {
           })
           await queryClient.invalidateQueries({
             queryKey: useGetTrainerSharedNotesLimitedQuery.getKey(),
+          })
+          await queryClient.invalidateQueries({
+            queryKey: useGetMySubscriptionStatusQuery.getKey(),
           })
         } catch (error) {
           console.error('Failed to cancel coaching:', error)

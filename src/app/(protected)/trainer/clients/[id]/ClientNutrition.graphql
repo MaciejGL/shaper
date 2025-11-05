@@ -28,6 +28,10 @@ mutation SetMacroTargets($input: SetMacroTargetsInput!) {
   }
 }
 
+mutation DeleteMacroTargets($clientId: ID!) {
+  deleteMacroTargets(clientId: $clientId)
+}
+
 query GetClientNutritionPlans($clientId: ID!) {
   getClientNutritionPlans(clientId: $clientId) {
     id
@@ -81,4 +85,36 @@ mutation UnshareNutritionPlanFromClient($id: ID!) {
 
 mutation DeleteNutritionPlan($id: ID!) {
   deleteNutritionPlan(id: $id)
+}
+
+query GetTrainerNutritionPlans {
+  trainerNutritionPlans {
+    id
+    name
+    description
+    createdAt
+    dayCount
+    totalMealCount
+    client {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}
+
+mutation CopyNutritionPlan($input: CopyNutritionPlanInput!) {
+  copyNutritionPlan(input: $input) {
+    nutritionPlan {
+      id
+      name
+      description
+      isSharedWithClient
+      createdAt
+      dayCount
+      totalMealCount
+    }
+    success
+  }
 }
