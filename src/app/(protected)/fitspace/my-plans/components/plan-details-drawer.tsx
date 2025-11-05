@@ -8,7 +8,7 @@ import {
   Trash,
   Users,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { CollapsibleText } from '@/components/collapsible-text'
 import { RatingStars } from '@/components/rating-stars'
@@ -37,6 +37,7 @@ import {
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'
 import { PlanPreviewTab } from './plan-preview-tab'
+import { PlanSummaryTab } from './plan-summary-tab'
 import { WeekProgressCircle } from './week-progress-circle'
 
 interface PlanDetailsDrawerProps {
@@ -56,13 +57,20 @@ export function PlanDetailsDrawer({
   onAction,
   isLoading = false,
 }: PlanDetailsDrawerProps) {
-  const [activeTab, setActiveTab] = useState('info')
+  const status = plan ? getPlanStatus(plan, isActive) : PlanStatus.Template
+  const isTemplate = status === PlanStatus.Template
+  const isCompleted = status === PlanStatus.Completed
+  const [activeTab, setActiveTab] = useState(isTemplate ? 'info' : 'summary')
   const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
 
-  if (!plan) return null
+  // Reset to summary tab when drawer opens with a completed plan
+  useEffect(() => {
+    if (open) {
+      setActiveTab(isTemplate ? 'info' : 'summary')
+    }
+  }, [open, isTemplate])
 
-  const status = getPlanStatus(plan, isActive)
-  const isCompleted = status === PlanStatus.Completed
+  if (!plan) return null
   const isPaused = status === PlanStatus.Paused
   const isButtonLoading = isLoading || false
   const hasWeeks = 'weeks' in plan && plan.weeks && plan.weeks.length > 0
@@ -111,6 +119,11 @@ export function PlanDetailsDrawer({
               className="w-full"
             >
               <TabsList className="w-full shadow-md">
+                {!isTemplate && (
+                  <TabsTrigger value="summary" className="flex-1">
+                    Summary
+                  </TabsTrigger>
+                )}
                 <TabsTrigger value="info" className="flex-1">
                   Info
                 </TabsTrigger>
@@ -118,6 +131,12 @@ export function PlanDetailsDrawer({
                   Preview
                 </TabsTrigger>
               </TabsList>
+
+              {!isTemplate && (
+                <TabsContent value="summary">
+                  <PlanSummaryTab planId={plan.id} />
+                </TabsContent>
+              )}
 
               <TabsContent value="info" className="space-y-6">
                 <div className="space-y-4">

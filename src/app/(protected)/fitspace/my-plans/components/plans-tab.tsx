@@ -1,6 +1,7 @@
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Dumbbell } from 'lucide-react'
 import { useState } from 'react'
 
+import { BiggyIcon } from '@/components/biggy-icon'
 import { CardSkeleton } from '@/components/card-skeleton'
 import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -39,8 +40,8 @@ interface PlansTabProps {
 // Status priority for sorting (lower number = higher priority)
 const STATUS_PRIORITY: Record<PlanStatus, number> = {
   [PlanStatus.Active]: 1,
-  [PlanStatus.Paused]: 2,
-  [PlanStatus.Template]: 3,
+  [PlanStatus.Template]: 2,
+  [PlanStatus.Paused]: 3,
   [PlanStatus.Completed]: 4,
 }
 
@@ -107,6 +108,134 @@ function sortPlans(
   })
 }
 
+// Helper function to group plans by status
+function groupPlansByStatus(
+  plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[],
+): Record<
+  PlanStatus,
+  {
+    plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[]
+    count: number
+  }
+> {
+  const groups: Record<
+    PlanStatus,
+    {
+      plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[]
+      count: number
+    }
+  > = {
+    [PlanStatus.Active]: { plans: [], count: 0 },
+    [PlanStatus.Template]: { plans: [], count: 0 },
+    [PlanStatus.Paused]: { plans: [], count: 0 },
+    [PlanStatus.Completed]: { plans: [], count: 0 },
+  }
+
+  plans.forEach((item) => {
+    const status = getPlanStatus(item.plan, item.isActive)
+    groups[status].plans.push(item)
+    groups[status].count++
+  })
+
+  // Sort plans within each group by date
+  Object.values(groups).forEach((group) => {
+    group.plans.sort((a, b) => {
+      const dateA = getPlanDate(a.plan)
+      const dateB = getPlanDate(b.plan)
+      return dateB.getTime() - dateA.getTime()
+    })
+  })
+
+  return groups
+}
+
+// Compact empty state card for list sections
+interface EmptyStatusCardProps {
+  status: PlanStatus.Active | PlanStatus.Template
+}
+
+function EmptyStatusCard({ status }: EmptyStatusCardProps) {
+  if (status === PlanStatus.Active) {
+    return (
+      <CardContent className="flex items-center gap-4 py-4">
+        {/* <div className="size-12 bg-muted rounded-full flex items-center justify-center shrink-0">
+            <svg
+              className="size-6 text-muted-foreground"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div> */}
+        <div className="flex-1 min-w-0">
+          <h4 className="font-semibold text-sm mb-1">Activate Your Plan</h4>
+          <p className="text-sm text-muted-foreground">
+            Select one of your available plans to get started or select one of
+            our pre-made plans
+          </p>
+        </div>
+        <ButtonLink
+          href="/fitspace/explore?tab=plans"
+          size="sm"
+          iconEnd={<ChevronRight />}
+        >
+          Find Plan
+        </ButtonLink>
+      </CardContent>
+    )
+  }
+
+  // Template status
+  return (
+    <div className="space-y-3">
+      <CardContent className="flex items-center gap-4 py-6">
+        <div className="flex-1 min-w-0">
+          <h4 className="font-semibold text-sm mb-1">No Template Plans</h4>
+          <p className="text-sm text-muted-foreground">
+            Explore ready-made plans or get a personalized one from a trainer
+          </p>
+        </div>
+        <ButtonLink
+          href="/fitspace/explore?tab=plans"
+          size="sm"
+          iconEnd={<ChevronRight />}
+        >
+          Explore
+        </ButtonLink>
+      </CardContent>
+    </div>
+  )
+}
+
+// Status divider with count badge
+interface StatusDividerProps {
+  status: PlanStatus
+  count: number
+}
+
+function StatusDivider({ status, count }: StatusDividerProps) {
+  return (
+    <div className="flex items-center gap-3 pb-4 pt-2">
+      <div className="h-px flex-1 bg-border" />
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          {status}
+        </span>
+        <span className="flex-center size-5 rounded-full bg-muted text-xs font-medium text-muted-foreground">
+          {count}
+        </span>
+      </div>
+      <div className="h-px flex-1 bg-border" />
+    </div>
+  )
+}
+
 // Plans list component with status dividers
 interface PlansListProps {
   plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[]
@@ -115,36 +244,82 @@ interface PlansListProps {
 }
 
 function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
+  // When filter is "all", show sections with dividers
+  if (selectedFilter === 'all') {
+    const grouped = groupPlansByStatus(plans)
+    const statusOrder = [
+      PlanStatus.Active,
+      PlanStatus.Template,
+      PlanStatus.Paused,
+      PlanStatus.Completed,
+    ]
+
+    return (
+      <div className="space-y-2">
+        {statusOrder.map((status, statusIndex) => {
+          const group = grouped[status]
+          const hasPlans = group.count > 0
+          const isActiveOrTemplate =
+            status === PlanStatus.Active || status === PlanStatus.Template
+
+          // Only show sections with plans OR Active/Template (even if empty)
+          if (!hasPlans && !isActiveOrTemplate) return null
+
+          return (
+            <div key={status}>
+              {/* Show divider for all sections */}
+              {status !== PlanStatus.Active && (
+                <StatusDivider status={status} count={group.count} />
+              )}
+
+              {/* Show plans or empty state */}
+              {hasPlans ? (
+                <div className="space-y-2">
+                  {group.plans.map(({ plan, isActive }) => (
+                    <PlanCard
+                      key={plan.id}
+                      plan={plan}
+                      isActive={isActive}
+                      onClick={onPlanClick}
+                    />
+                  ))}
+                </div>
+              ) : isActiveOrTemplate ? (
+                <EmptyStatusCard
+                  status={status as PlanStatus.Active | PlanStatus.Template}
+                />
+              ) : null}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // When filtering by specific status
+  if (plans.length === 0) {
+    // Show compact empty state for Active/Template
+    if (
+      selectedFilter === PlanStatus.Active ||
+      selectedFilter === PlanStatus.Template
+    ) {
+      return <EmptyStatusCard status={selectedFilter} />
+    }
+    // For other statuses, let parent handle with EmptyFilterState
+    return null
+  }
+
+  // Show plans without dividers
   return (
     <div className="space-y-2">
-      {plans.map(({ plan, isActive }, index) => {
-        const currentStatus = getPlanStatus(plan, isActive)
-        const previousStatus =
-          index > 0
-            ? getPlanStatus(plans[index - 1].plan, plans[index - 1].isActive)
-            : null
-
-        // Show divider when status changes and filter is 'all'
-        const showDivider =
-          selectedFilter === 'all' &&
-          previousStatus !== null &&
-          currentStatus !== previousStatus
-
-        return (
-          <div key={plan.id}>
-            {showDivider && (
-              <div className="flex items-center gap-3 pb-4 pt-2">
-                <div className="h-px flex-1 bg-border" />
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  {currentStatus}
-                </span>
-                <div className="h-px flex-1 bg-border" />
-              </div>
-            )}
-            <PlanCard plan={plan} isActive={isActive} onClick={onPlanClick} />
-          </div>
-        )
-      })}
+      {plans.map(({ plan, isActive }) => (
+        <PlanCard
+          key={plan.id}
+          plan={plan}
+          isActive={isActive}
+          onClick={onPlanClick}
+        />
+      ))}
     </div>
   )
 }
@@ -224,7 +399,10 @@ export function PlansTab({
         />
 
         {/* Plans List */}
-        {sortedPlans.length > 0 ? (
+        {sortedPlans.length > 0 ||
+        selectedFilter === PlanStatus.Active ||
+        selectedFilter === PlanStatus.Template ||
+        selectedFilter === 'all' ? (
           <PlansList
             plans={sortedPlans}
             selectedFilter={selectedFilter}
@@ -266,25 +444,17 @@ function EmptyFilterState({ filter }: { filter: FilterOption }) {
   return (
     <Card borderless>
       <CardContent className="flex-center flex-col gap-4 py-12">
-        <div className="size-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-          <svg
-            className="size-8 text-muted-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            />
-          </svg>
-        </div>
+        <BiggyIcon icon={Dumbbell} />
         <h3 className="font-semibold">No {getFilterLabel()} plans</h3>
         <p className="text-muted-foreground text-center max-w-md">
           You don't have any {getFilterLabel()} plans at the moment.
         </p>
+        <ButtonLink
+          href="/fitspace/explore?tab=plans"
+          iconEnd={<ChevronRight />}
+        >
+          Explore Plans
+        </ButtonLink>
       </CardContent>
     </Card>
   )
@@ -295,32 +465,18 @@ function EmptyPlansState() {
     <div className="space-y-4">
       <Card>
         <CardContent className="flex-center flex-col gap-4 py-12">
-          <div className="size-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-            <svg
-              className="size-8 text-muted-foreground"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
-          </div>
+          <BiggyIcon icon={Dumbbell} />
           <h3 className="font-semibold">No Training Plans</h3>
           <p className="text-muted-foreground text-center max-w-md">
-            You don't have any training plans yet. Create your first plan or
-            check our ready plans!
+            You don't have any training plans yet. Start one of your available
+            plans or find a new one
           </p>
-
           <ButtonLink
             href="/fitspace/explore?tab=plans"
+            size="sm"
             iconEnd={<ChevronRight />}
           >
-            Explore Plans
+            Find Plan
           </ButtonLink>
         </CardContent>
       </Card>

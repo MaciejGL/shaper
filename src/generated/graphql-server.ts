@@ -255,6 +255,25 @@ export type GQLBaseExerciseSubstitute = {
   substituteId: EntireFieldWrapper<Scalars['ID']['output']>;
 };
 
+export type GQLBodyCompositionChange = {
+  __typename?: 'BodyCompositionChange';
+  endSnapshot?: EntireFieldWrapper<Maybe<GQLBodyCompositionSnapshot>>;
+  endWeight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  startSnapshot?: EntireFieldWrapper<Maybe<GQLBodyCompositionSnapshot>>;
+  startWeight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  unit: EntireFieldWrapper<Scalars['String']['output']>;
+  weightChange?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+};
+
+export type GQLBodyCompositionSnapshot = {
+  __typename?: 'BodyCompositionSnapshot';
+  image1Url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  image2Url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  image3Url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  loggedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+};
+
 export type GQLBodyProgressLog = {
   __typename?: 'BodyProgressLog';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -2248,6 +2267,14 @@ export type GQLPauseCoachingResult = {
   success: EntireFieldWrapper<Scalars['Boolean']['output']>;
 };
 
+export type GQLPerformanceData = {
+  __typename?: 'PerformanceData';
+  date: EntireFieldWrapper<Scalars['String']['output']>;
+  estimated1RM?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  reps?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+};
+
 export type GQLPersonalRecord = {
   __typename?: 'PersonalRecord';
   estimated1RM: EntireFieldWrapper<Scalars['Float']['output']>;
@@ -2269,10 +2296,41 @@ export type GQLPersonalRecordHistory = {
   weight: EntireFieldWrapper<Scalars['Float']['output']>;
 };
 
+export type GQLPersonalRecordSummary = {
+  __typename?: 'PersonalRecordSummary';
+  achievedDate: EntireFieldWrapper<Scalars['String']['output']>;
+  baseExerciseId: EntireFieldWrapper<Scalars['String']['output']>;
+  bestEstimated1RM: EntireFieldWrapper<Scalars['Float']['output']>;
+  exerciseName: EntireFieldWrapper<Scalars['String']['output']>;
+  reps: EntireFieldWrapper<Scalars['Int']['output']>;
+  weekNumber?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  weight: EntireFieldWrapper<Scalars['Float']['output']>;
+};
+
 export type GQLPlanDurationRange = {
   __typename?: 'PlanDurationRange';
   maxDay: EntireFieldWrapper<Scalars['Int']['output']>;
   minDay: EntireFieldWrapper<Scalars['Int']['output']>;
+};
+
+export type GQLPlanSummary = {
+  __typename?: 'PlanSummary';
+  adherence: EntireFieldWrapper<Scalars['Float']['output']>;
+  bodyComposition?: EntireFieldWrapper<Maybe<GQLBodyCompositionChange>>;
+  duration: EntireFieldWrapper<GQLPlanSummaryDuration>;
+  personalRecords: EntireFieldWrapper<Array<GQLPersonalRecordSummary>>;
+  strengthProgress: EntireFieldWrapper<Array<GQLStrengthProgression>>;
+  totalPRsAchieved: EntireFieldWrapper<Scalars['Int']['output']>;
+  totalVolumeLifted: EntireFieldWrapper<Scalars['Float']['output']>;
+  totalWorkouts: EntireFieldWrapper<Scalars['Int']['output']>;
+  workoutsCompleted: EntireFieldWrapper<Scalars['Int']['output']>;
+};
+
+export type GQLPlanSummaryDuration = {
+  __typename?: 'PlanSummaryDuration';
+  endDate?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  startDate: EntireFieldWrapper<Scalars['String']['output']>;
+  weeks: EntireFieldWrapper<Scalars['Int']['output']>;
 };
 
 export type GQLPreviousExerciseLog = {
@@ -2356,6 +2414,7 @@ export type GQLQuery = {
   getMyTrainer?: EntireFieldWrapper<Maybe<GQLPublicTrainer>>;
   getOrCreateChat: EntireFieldWrapper<GQLChat>;
   getPackageTemplate?: EntireFieldWrapper<Maybe<GQLPackageTemplate>>;
+  getPlanSummary: EntireFieldWrapper<GQLPlanSummary>;
   getPublicTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getQuickWorkoutDay?: EntireFieldWrapper<Maybe<GQLGetWorkoutDayPayload>>;
   getQuickWorkoutNavigation?: EntireFieldWrapper<Maybe<GQLGetWorkoutNavigationPayload>>;
@@ -2547,6 +2606,11 @@ export type GQLQueryGetOrCreateChatArgs = {
 
 export type GQLQueryGetPackageTemplateArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetPlanSummaryArgs = {
+  planId: Scalars['ID']['input'];
 };
 
 
@@ -2937,6 +3001,16 @@ export type GQLStartWorkoutFromFavouriteInput = {
   dayId?: InputMaybe<Scalars['ID']['input']>;
   favouriteWorkoutId: Scalars['ID']['input'];
   replaceExisting?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type GQLStrengthProgression = {
+  __typename?: 'StrengthProgression';
+  baseExerciseId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  exerciseName: EntireFieldWrapper<Scalars['String']['output']>;
+  firstPerformance: EntireFieldWrapper<GQLPerformanceData>;
+  improvementPercentage: EntireFieldWrapper<Scalars['Float']['output']>;
+  lastPerformance: EntireFieldWrapper<GQLPerformanceData>;
+  totalSessions: EntireFieldWrapper<Scalars['Int']['output']>;
 };
 
 export enum GQLSubscriptionDuration {
@@ -3859,6 +3933,8 @@ export type GQLResolversTypes = {
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
   BaseExercise: ResolverTypeWrapper<GQLBaseExercise>;
   BaseExerciseSubstitute: ResolverTypeWrapper<GQLBaseExerciseSubstitute>;
+  BodyCompositionChange: ResolverTypeWrapper<GQLBodyCompositionChange>;
+  BodyCompositionSnapshot: ResolverTypeWrapper<GQLBodyCompositionSnapshot>;
   BodyProgressLog: ResolverTypeWrapper<GQLBodyProgressLog>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Chat: ResolverTypeWrapper<GQLChat>;
@@ -3972,9 +4048,13 @@ export type GQLResolversTypes = {
   PackageSummaryItem: ResolverTypeWrapper<GQLPackageSummaryItem>;
   PackageTemplate: ResolverTypeWrapper<GQLPackageTemplate>;
   PauseCoachingResult: ResolverTypeWrapper<GQLPauseCoachingResult>;
+  PerformanceData: ResolverTypeWrapper<GQLPerformanceData>;
   PersonalRecord: ResolverTypeWrapper<GQLPersonalRecord>;
   PersonalRecordHistory: ResolverTypeWrapper<GQLPersonalRecordHistory>;
+  PersonalRecordSummary: ResolverTypeWrapper<GQLPersonalRecordSummary>;
   PlanDurationRange: ResolverTypeWrapper<GQLPlanDurationRange>;
+  PlanSummary: ResolverTypeWrapper<GQLPlanSummary>;
+  PlanSummaryDuration: ResolverTypeWrapper<GQLPlanSummaryDuration>;
   PreviousExerciseLog: ResolverTypeWrapper<GQLPreviousExerciseLog>;
   PublicTrainer: ResolverTypeWrapper<GQLPublicTrainer>;
   PushSubscription: ResolverTypeWrapper<GQLPushSubscription>;
@@ -3999,6 +4079,7 @@ export type GQLResolversTypes = {
   SetCompletionResult: ResolverTypeWrapper<GQLSetCompletionResult>;
   SetMacroTargetsInput: GQLSetMacroTargetsInput;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
+  StrengthProgression: ResolverTypeWrapper<GQLStrengthProgression>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   SubscriptionDuration: GQLSubscriptionDuration;
   SubscriptionStats: ResolverTypeWrapper<GQLSubscriptionStats>;
@@ -4103,6 +4184,8 @@ export type GQLResolversParentTypes = {
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
   BaseExercise: GQLBaseExercise;
   BaseExerciseSubstitute: GQLBaseExerciseSubstitute;
+  BodyCompositionChange: GQLBodyCompositionChange;
+  BodyCompositionSnapshot: GQLBodyCompositionSnapshot;
   BodyProgressLog: GQLBodyProgressLog;
   Boolean: Scalars['Boolean']['output'];
   Chat: GQLChat;
@@ -4200,9 +4283,13 @@ export type GQLResolversParentTypes = {
   PackageSummaryItem: GQLPackageSummaryItem;
   PackageTemplate: GQLPackageTemplate;
   PauseCoachingResult: GQLPauseCoachingResult;
+  PerformanceData: GQLPerformanceData;
   PersonalRecord: GQLPersonalRecord;
   PersonalRecordHistory: GQLPersonalRecordHistory;
+  PersonalRecordSummary: GQLPersonalRecordSummary;
   PlanDurationRange: GQLPlanDurationRange;
+  PlanSummary: GQLPlanSummary;
+  PlanSummaryDuration: GQLPlanSummaryDuration;
   PreviousExerciseLog: GQLPreviousExerciseLog;
   PublicTrainer: GQLPublicTrainer;
   PushSubscription: GQLPushSubscription;
@@ -4225,6 +4312,7 @@ export type GQLResolversParentTypes = {
   SetCompletionResult: GQLSetCompletionResult;
   SetMacroTargetsInput: GQLSetMacroTargetsInput;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
+  StrengthProgression: GQLStrengthProgression;
   String: Scalars['String']['output'];
   SubscriptionStats: GQLSubscriptionStats;
   Substitute: GQLSubstitute;
@@ -4390,6 +4478,25 @@ export type GQLBaseExerciseSubstituteResolvers<ContextType = GQLContext, ParentT
   reason?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   substitute?: Resolver<GQLResolversTypes['BaseExercise'], ParentType, ContextType>;
   substituteId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLBodyCompositionChangeResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BodyCompositionChange'] = GQLResolversParentTypes['BodyCompositionChange']> = {
+  endSnapshot?: Resolver<Maybe<GQLResolversTypes['BodyCompositionSnapshot']>, ParentType, ContextType>;
+  endWeight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  startSnapshot?: Resolver<Maybe<GQLResolversTypes['BodyCompositionSnapshot']>, ParentType, ContextType>;
+  startWeight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  unit?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  weightChange?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLBodyCompositionSnapshotResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BodyCompositionSnapshot'] = GQLResolversParentTypes['BodyCompositionSnapshot']> = {
+  image1Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  image2Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  image3Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  loggedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5117,6 +5224,14 @@ export type GQLPauseCoachingResultResolvers<ContextType = GQLContext, ParentType
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLPerformanceDataResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PerformanceData'] = GQLResolversParentTypes['PerformanceData']> = {
+  date?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  estimated1RM?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLPersonalRecordResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PersonalRecord'] = GQLResolversParentTypes['PersonalRecord']> = {
   estimated1RM?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -5138,9 +5253,40 @@ export type GQLPersonalRecordHistoryResolvers<ContextType = GQLContext, ParentTy
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLPersonalRecordSummaryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PersonalRecordSummary'] = GQLResolversParentTypes['PersonalRecordSummary']> = {
+  achievedDate?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  baseExerciseId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  bestEstimated1RM?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  reps?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  weekNumber?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  weight?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLPlanDurationRangeResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PlanDurationRange'] = GQLResolversParentTypes['PlanDurationRange']> = {
   maxDay?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   minDay?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLPlanSummaryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PlanSummary'] = GQLResolversParentTypes['PlanSummary']> = {
+  adherence?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  bodyComposition?: Resolver<Maybe<GQLResolversTypes['BodyCompositionChange']>, ParentType, ContextType>;
+  duration?: Resolver<GQLResolversTypes['PlanSummaryDuration'], ParentType, ContextType>;
+  personalRecords?: Resolver<Array<GQLResolversTypes['PersonalRecordSummary']>, ParentType, ContextType>;
+  strengthProgress?: Resolver<Array<GQLResolversTypes['StrengthProgression']>, ParentType, ContextType>;
+  totalPRsAchieved?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  totalVolumeLifted?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  totalWorkouts?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  workoutsCompleted?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLPlanSummaryDurationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PlanSummaryDuration'] = GQLResolversParentTypes['PlanSummaryDuration']> = {
+  endDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  startDate?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  weeks?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5224,6 +5370,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getMyTrainer?: Resolver<Maybe<GQLResolversTypes['PublicTrainer']>, ParentType, ContextType>;
   getOrCreateChat?: Resolver<GQLResolversTypes['Chat'], ParentType, ContextType, RequireFields<GQLQueryGetOrCreateChatArgs, 'partnerId'>>;
   getPackageTemplate?: Resolver<Maybe<GQLResolversTypes['PackageTemplate']>, ParentType, ContextType, RequireFields<GQLQueryGetPackageTemplateArgs, 'id'>>;
+  getPlanSummary?: Resolver<GQLResolversTypes['PlanSummary'], ParentType, ContextType, RequireFields<GQLQueryGetPlanSummaryArgs, 'planId'>>;
   getPublicTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetPublicTrainingPlansArgs>>;
   getQuickWorkoutDay?: Resolver<Maybe<GQLResolversTypes['GetWorkoutDayPayload']>, ParentType, ContextType, Partial<GQLQueryGetQuickWorkoutDayArgs>>;
   getQuickWorkoutNavigation?: Resolver<Maybe<GQLResolversTypes['GetWorkoutNavigationPayload']>, ParentType, ContextType>;
@@ -5360,6 +5507,16 @@ export type GQLSetCompletionResultResolvers<ContextType = GQLContext, ParentType
   improvement?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   isPersonalRecord?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLStrengthProgressionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['StrengthProgression'] = GQLResolversParentTypes['StrengthProgression']> = {
+  baseExerciseId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  firstPerformance?: Resolver<GQLResolversTypes['PerformanceData'], ParentType, ContextType>;
+  improvementPercentage?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  lastPerformance?: Resolver<GQLResolversTypes['PerformanceData'], ParentType, ContextType>;
+  totalSessions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5736,6 +5893,8 @@ export type GQLResolvers<ContextType = GQLContext> = {
   AiWorkoutVariant?: GQLAiWorkoutVariantResolvers<ContextType>;
   BaseExercise?: GQLBaseExerciseResolvers<ContextType>;
   BaseExerciseSubstitute?: GQLBaseExerciseSubstituteResolvers<ContextType>;
+  BodyCompositionChange?: GQLBodyCompositionChangeResolvers<ContextType>;
+  BodyCompositionSnapshot?: GQLBodyCompositionSnapshotResolvers<ContextType>;
   BodyProgressLog?: GQLBodyProgressLogResolvers<ContextType>;
   Chat?: GQLChatResolvers<ContextType>;
   ChatWithMessages?: GQLChatWithMessagesResolvers<ContextType>;
@@ -5789,9 +5948,13 @@ export type GQLResolvers<ContextType = GQLContext> = {
   PackageSummaryItem?: GQLPackageSummaryItemResolvers<ContextType>;
   PackageTemplate?: GQLPackageTemplateResolvers<ContextType>;
   PauseCoachingResult?: GQLPauseCoachingResultResolvers<ContextType>;
+  PerformanceData?: GQLPerformanceDataResolvers<ContextType>;
   PersonalRecord?: GQLPersonalRecordResolvers<ContextType>;
   PersonalRecordHistory?: GQLPersonalRecordHistoryResolvers<ContextType>;
+  PersonalRecordSummary?: GQLPersonalRecordSummaryResolvers<ContextType>;
   PlanDurationRange?: GQLPlanDurationRangeResolvers<ContextType>;
+  PlanSummary?: GQLPlanSummaryResolvers<ContextType>;
+  PlanSummaryDuration?: GQLPlanSummaryDurationResolvers<ContextType>;
   PreviousExerciseLog?: GQLPreviousExerciseLogResolvers<ContextType>;
   PublicTrainer?: GQLPublicTrainerResolvers<ContextType>;
   PushSubscription?: GQLPushSubscriptionResolvers<ContextType>;
@@ -5802,6 +5965,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   ServiceDelivery?: GQLServiceDeliveryResolvers<ContextType>;
   ServiceTask?: GQLServiceTaskResolvers<ContextType>;
   SetCompletionResult?: GQLSetCompletionResultResolvers<ContextType>;
+  StrengthProgression?: GQLStrengthProgressionResolvers<ContextType>;
   SubscriptionStats?: GQLSubscriptionStatsResolvers<ContextType>;
   Substitute?: GQLSubstituteResolvers<ContextType>;
   SuggestedSets?: GQLSuggestedSetsResolvers<ContextType>;

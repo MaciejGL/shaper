@@ -44,6 +44,7 @@ const selectTriggerVariants = cva(
         ),
         md: 'h-9 px-4 py-2 has-[>svg]:px-3 [&_svg]:size-5',
         lg: 'h-10 text-md rounded-md px-6 has-[>svg]:px-4 [&_svg]:size-5',
+        xl: 'h-14 text-base rounded-lg has-[>svg]:px-4 [&_svg]:size-5',
       },
     },
     defaultVariants: {

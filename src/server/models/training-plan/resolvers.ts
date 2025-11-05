@@ -35,6 +35,7 @@ import {
   getMyPlansOverview,
   getMyPlansOverviewFull,
   getMyPlansOverviewLite,
+  getPlanSummary,
   getPublicTrainingPlans,
   getQuickWorkoutDay,
   getQuickWorkoutNavigation,
@@ -107,6 +108,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   },
   getWorkoutDay: async (_, args, context) => {
     return getWorkoutDay(args, context)
+  },
+  getPlanSummary: async (_, args, context) => {
+    return getPlanSummary(args, context)
   },
 }
 

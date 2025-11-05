@@ -41,14 +41,14 @@ export default function NutritionPage() {
 
   if (isLoadingAll) {
     return (
-      <div className="space-y-4 py-4">
+      <div className="space-y-4 py-4 container-hypertro mx-auto">
         <LoadingSkeleton count={4} />
       </div>
     )
   }
 
   return (
-    <div className="container-hypertro mx-auto py-4">
+    <div className="container-hypertro mx-auto py-6">
       <div>
         {!hasMacroTargets && !hasPlans && (
           <EmptyStateCard
@@ -120,7 +120,7 @@ export default function NutritionPage() {
           </Card>
         )}
       </div>
-      <div className={cn(hasPlans && hasMacroTargets && 'mt-4')}>
+      <div className={cn(hasPlans && hasMacroTargets && 'mt-6')}>
         <NutritionPlanSelector
           onPlanSelect={handlePlanSelect}
           selectedPlanId={selectedPlanId}

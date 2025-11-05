@@ -93,7 +93,7 @@ export function SnapshotsSection() {
           <div className="flex items-center gap-2">
             {(latestSnapshot || previousSnapshot) && (
               <Button
-                variant="ghost"
+                variant="tertiary"
                 size="icon-sm"
                 iconOnly={
                   preferences.blurProgressSnapshots ? <Eye /> : <EyeOff />

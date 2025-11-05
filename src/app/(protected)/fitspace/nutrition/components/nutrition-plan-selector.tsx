@@ -89,10 +89,7 @@ export function NutritionPlanSelector({
       value={effectiveSelectedPlan || ''}
       onValueChange={handlePlanChange}
     >
-      <SelectTrigger
-        className="w-full h-auto text-base py-4 rounded-lg"
-        variant="ghost"
-      >
+      <SelectTrigger className="w-full" size="xl" variant="ghost">
         <SelectValue placeholder="Select a nutrition plan" />
       </SelectTrigger>
       <SelectContent>

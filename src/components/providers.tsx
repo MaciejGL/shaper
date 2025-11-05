@@ -29,7 +29,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         }}
         startOnLoad
         shallowRouting
-        delay={500}
+        delay={200}
       >
         <SessionProvider>
           <ActivityHeartbeat />

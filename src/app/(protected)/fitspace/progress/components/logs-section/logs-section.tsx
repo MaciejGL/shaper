@@ -1,6 +1,6 @@
 'use client'
 
-import { List, Plus, Weight } from 'lucide-react'
+import { List, Plus, TrendingUpDown } from 'lucide-react'
 import { useState } from 'react'
 
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
@@ -47,7 +47,7 @@ export function LogsSection() {
       <Card borderless>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2 whitespace-nowrap">
-            <Weight className="h-5 w-5 text-blue-500" />
+            <TrendingUpDown className="h-5 w-5 text-blue-500" />
             Body Measurements
           </CardTitle>
           <PremiumButtonWrapper

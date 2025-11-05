@@ -1,0 +1,73 @@
+type PlanSummaryDuration {
+  weeks: Int!
+  startDate: String!
+  endDate: String
+}
+
+type PerformanceData {
+  weight: Float
+  reps: Int
+  estimated1RM: Float
+  date: String!
+}
+
+type StrengthProgression {
+  exerciseName: String!
+  baseExerciseId: String
+  firstPerformance: PerformanceData!
+  lastPerformance: PerformanceData!
+  improvementPercentage: Float!
+  totalSessions: Int!
+}
+
+type BodyCompositionSnapshot {
+  loggedAt: String!
+  weight: Float
+  image1Url: String
+  image2Url: String
+  image3Url: String
+}
+
+type BodyCompositionChange {
+  startWeight: Float
+  endWeight: Float
+  weightChange: Float
+  unit: String!
+  startSnapshot: BodyCompositionSnapshot
+  endSnapshot: BodyCompositionSnapshot
+}
+
+type PersonalRecordSummary {
+  exerciseName: String!
+  baseExerciseId: String!
+  bestEstimated1RM: Float!
+  weight: Float!
+  reps: Int!
+  achievedDate: String!
+  weekNumber: Int
+}
+
+type PlanSummary {
+  # Journey Overview
+  duration: PlanSummaryDuration!
+  adherence: Float!
+  workoutsCompleted: Int!
+  totalWorkouts: Int!
+
+  # Strength Progress (top 5 exercises by improvement)
+  strengthProgress: [StrengthProgression!]!
+
+  # Body Composition (if tracked)
+  bodyComposition: BodyCompositionChange
+
+  # Personal Records (best per exercise, sorted by improvement)
+  personalRecords: [PersonalRecordSummary!]!
+
+  # Additional stats for sharing
+  totalVolumeLifted: Float!
+  totalPRsAchieved: Int!
+}
+
+extend type Query {
+  getPlanSummary(planId: ID!): PlanSummary!
+}

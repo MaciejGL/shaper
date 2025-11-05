@@ -36,7 +36,7 @@ export function StatsItem({
         >
           <div className="[&_svg]:size-5">{icon}</div>
           <div
-            className={cn('flex flex-col items-start', {
+            className={cn('flex flex-col items-start grow', {
               'items-center': iconPosition === 'top',
               'items-start': iconPosition === 'right',
             })}
@@ -50,7 +50,7 @@ export function StatsItem({
                 {value}
               </div>
             ) : (
-              <div className="text-lg text-left font-bold text-primary">
+              <div className="text-lg text-left font-bold text-primary w-full">
                 {value}
               </div>
             )}
