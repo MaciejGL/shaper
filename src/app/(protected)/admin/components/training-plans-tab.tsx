@@ -89,7 +89,9 @@ export function TrainingPlansTab() {
     } catch (error) {
       console.error('Error fetching training plans:', error)
       setError(
-        error instanceof Error ? error.message : 'Failed to fetch training plans',
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch training plans',
       )
     } finally {
       setLoading(false)
@@ -151,9 +153,7 @@ export function TrainingPlansTab() {
         ),
       )
       setError(
-        error instanceof Error
-          ? error.message
-          : `Failed to update ${field}`,
+        error instanceof Error ? error.message : `Failed to update ${field}`,
       )
     }
   }
@@ -322,16 +322,12 @@ export function TrainingPlansTab() {
                         {getCreatorName(plan.createdBy)}
                       </td>
                       <td className="border-b px-4 py-3">
-                        <Badge
-                          variant={plan.isDraft ? 'outline' : 'default'}
-                        >
+                        <Badge variant={plan.isDraft ? 'outline' : 'secondary'}>
                           {plan.isDraft ? 'Draft' : 'Published'}
                         </Badge>
                       </td>
                       <td className="border-b px-4 py-3">
-                        <Badge
-                          variant={plan.premium ? 'premium' : 'secondary'}
-                        >
+                        <Badge variant={plan.premium ? 'premium' : 'secondary'}>
                           {plan.premium ? 'Premium' : 'Free'}
                         </Badge>
                       </td>
@@ -415,4 +411,3 @@ export function TrainingPlansTab() {
     </div>
   )
 }
-
