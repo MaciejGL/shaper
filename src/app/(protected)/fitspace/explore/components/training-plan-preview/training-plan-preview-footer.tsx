@@ -1,52 +1,44 @@
 import { Crown, Dumbbell, Lock } from 'lucide-react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
-import {
-  GQLGetMySubscriptionStatusQuery,
-  GQLGetPublicTrainingPlansQuery,
-} from '@/generated/graphql-client'
+import { useUser } from '@/context/user-context'
+import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 
 interface TrainingPlanPreviewFooterProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
-  subscriptionData?: GQLGetMySubscriptionStatusQuery
   onAssignTemplate: (planId: string) => void
   isAssigning: boolean
 }
 
 export function TrainingPlanPreviewFooter({
   plan,
-  subscriptionData,
   onAssignTemplate,
   isAssigning,
 }: TrainingPlanPreviewFooterProps) {
+  // const { hasPremium } = useUser()
+  const hasPremium = false
+
   return (
     <div className="border-t p-4 flex-shrink-0">
       <div className="space-y-3">
-        {plan.isPremium ? (
-          // Premium plan - check if user has access
-          subscriptionData?.getMySubscriptionStatus?.hasPremium ||
-          subscriptionData?.getMySubscriptionStatus
-            ?.canAccessPremiumTrainingPlans ? (
+        {plan.premium ? (
+          // Premium plan - wrap with PremiumButtonWrapper
+          <PremiumButtonWrapper
+            hasPremium={hasPremium}
+            tooltipText="Upgrade to Premium to access this training plan"
+          >
             <Button
               className="w-full"
               size="lg"
               onClick={() => onAssignTemplate(plan.id)}
               loading={isAssigning}
-              disabled={isAssigning}
-              iconStart={<Crown />}
+              disabled={isAssigning || !hasPremium}
+              iconStart={hasPremium ? <Crown /> : <Lock />}
             >
-              Add to My Plans
+              {hasPremium ? 'Add to My Plans' : 'Premium Required'}
             </Button>
-          ) : (
-            <Button
-              className="w-full"
-              size="lg"
-              disabled
-              iconStart={<Lock />}
-            >
-              Premium Required
-            </Button>
-          )
+          </PremiumButtonWrapper>
         ) : (
           // Free plan
           <Button
@@ -61,7 +53,7 @@ export function TrainingPlanPreviewFooter({
           </Button>
         )}
 
-        {plan.isPremium && (
+        {plan.premium && !hasPremium && (
           <p className="text-xs text-center text-muted-foreground">
             Upgrade to Premium to access this training plan and unlock advanced
             features
@@ -71,4 +63,3 @@ export function TrainingPlanPreviewFooter({
     </div>
   )
 }
-

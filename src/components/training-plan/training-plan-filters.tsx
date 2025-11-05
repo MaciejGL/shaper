@@ -129,11 +129,12 @@ export function TrainingPlanFilters({
       {/* Active Focus Tags */}
       {selectedFocusTags.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-muted-foreground">Focus:</span>
+          <span className="text-sm text-muted-foreground">Filters:</span>
           {selectedFocusTags.map((tag) => (
             <Badge
               key={tag}
               variant="secondary"
+              size="lg"
               className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
               onClick={() => onToggleFocusTag(tag)}
             >

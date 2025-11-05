@@ -3259,7 +3259,6 @@ export type GQLTrainingPlan = {
   id: Scalars['ID']['output'];
   isDemo: Scalars['Boolean']['output'];
   isDraft: Scalars['Boolean']['output'];
-  isPremium?: Maybe<Scalars['Boolean']['output']>;
   isPublic: Scalars['Boolean']['output'];
   isTemplate: Scalars['Boolean']['output'];
   lastSessionActivity?: Maybe<Scalars['String']['output']>;
@@ -3872,7 +3871,7 @@ export type GQLGetPublicTrainingPlansQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetPublicTrainingPlansQuery = { __typename?: 'Query', getPublicTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isPremium?: boolean | undefined | null, difficulty?: GQLDifficulty | undefined | null, focusTags: Array<GQLFocusTag>, targetGoals: Array<GQLTargetGoal>, weekCount: number, assignmentCount: number, sessionsPerWeek?: number | undefined | null, avgSessionTime?: number | undefined | null, equipment: Array<string>, rating?: number | undefined | null, totalReviews: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null }> };
+export type GQLGetPublicTrainingPlansQuery = { __typename?: 'Query', getPublicTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, premium: boolean, difficulty?: GQLDifficulty | undefined | null, focusTags: Array<GQLFocusTag>, targetGoals: Array<GQLTargetGoal>, weekCount: number, assignmentCount: number, sessionsPerWeek?: number | undefined | null, avgSessionTime?: number | undefined | null, equipment: Array<string>, rating?: number | undefined | null, totalReviews: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null }> };
 
 export type GQLGetPublicTrainingPlanWeeksQueryVariables = Exact<{
   planId: Scalars['ID']['input'];
@@ -5798,7 +5797,7 @@ export const GetPublicTrainingPlansDocument = `
     title
     description
     isPublic
-    isPremium
+    premium
     difficulty
     focusTags
     targetGoals

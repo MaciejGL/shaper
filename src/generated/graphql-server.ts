@@ -3261,7 +3261,6 @@ export type GQLTrainingPlan = {
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   isDemo: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isDraft: EntireFieldWrapper<Scalars['Boolean']['output']>;
-  isPremium?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   isPublic: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isTemplate: EntireFieldWrapper<Scalars['Boolean']['output']>;
   lastSessionActivity?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -5686,7 +5685,6 @@ export type GQLTrainingPlanResolvers<ContextType = GQLContext, ParentType extend
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   isDemo?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isDraft?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  isPremium?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
   isPublic?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isTemplate?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   lastSessionActivity?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
