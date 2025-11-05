@@ -1,6 +1,5 @@
-import { FilesIcon, PlusCircle } from 'lucide-react'
+import { FilesIcon } from 'lucide-react'
 
-import { ButtonLink } from '@/components/ui/button-link'
 import {
   GQLGetTemplatesQuery,
   GetTemplatesDocument,
@@ -9,6 +8,7 @@ import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
 import { DashboardHeader } from '../components/dashboard-header'
 
+import { CreatePlanButton } from './components/create-plan-button'
 import { TrainingPlansList } from './components/training-plans-list'
 
 export const dynamic = 'force-dynamic'
@@ -26,13 +26,7 @@ export default async function Page() {
           description="Manage your training plans"
           icon={FilesIcon}
         />
-        <ButtonLink
-          href="/trainer/trainings/creator/new"
-          iconStart={<PlusCircle />}
-          className="self-baseline"
-        >
-          Create New Plan
-        </ButtonLink>
+        <CreatePlanButton />
       </div>
 
       <TrainingPlansList plans={templatesData?.getTemplates || []} />
