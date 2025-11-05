@@ -204,10 +204,10 @@ export default async function SupportPage() {
                         q: "Push notifications aren't working on mobile",
                         a: 'First, ensure notifications are enabled in your device settings for Hypro. Then check the notification preferences in the mobile app settings. Note: Push notifications only work on mobile apps, not in web browsers.',
                       },
-                      {
-                        q: 'Can I export my workout data?',
-                        a: 'Yes! Go to Settings → Data & Privacy → Export Data to download your workout history, progress measurements, and other fitness data in JSON format.',
-                      },
+                      // {
+                      //   q: 'Can I export my workout data?',
+                      //   a: 'Yes! Go to Settings → Data & Privacy → Export Data to download your workout history, progress measurements, and other fitness data in JSON format.',
+                      // },
                       {
                         q: 'How does OTP login work?',
                         a: 'Instead of passwords, Hypro uses one-time passwords (OTP). Enter your email, check your inbox for a 6-digit code, and enter it to log in. Codes expire after a few minutes for security.',
@@ -242,10 +242,10 @@ export default async function SupportPage() {
                   </h3>
                   <div className="space-y-4">
                     {[
-                      {
-                        q: 'What data can I export?',
-                        a: 'You can export your complete fitness data including workout plans, exercise logs, body measurements, meal plans, and progress tracking data in JSON format from Settings → Data & Privacy.',
-                      },
+                      // {
+                      //   q: 'What data can I export?',
+                      //   a: 'You can export your complete fitness data including workout plans, exercise logs, body measurements, meal plans, and progress tracking data in JSON format from Settings → Data & Privacy.',
+                      // },
                       {
                         q: 'How do I delete my account?',
                         a: 'To delete your account, go to Settings → Account → Delete Account or email support@hypro.app. This will permanently remove all your data including progress photos and workout history.',
@@ -393,48 +393,6 @@ export default async function SupportPage() {
                       your doctor first
                     </li>
                   </ul>
-                </div>
-              </div>
-
-              {/* Response Times */}
-              <div>
-                <h2 className="text-2xl font-semibold mb-6 text-foreground text-center">
-                  Response Times
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center p-6 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
-                    <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-white font-bold text-xl">24h</span>
-                    </div>
-                    <div className="text-lg font-semibold text-green-900 dark:text-green-100">
-                      General Support
-                    </div>
-                    <div className="text-sm text-green-700 dark:text-green-300 mt-2">
-                      App questions, account help, general inquiries
-                    </div>
-                  </div>
-                  <div className="text-center p-6 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-white font-bold text-xl">48h</span>
-                    </div>
-                    <div className="text-lg font-semibold text-blue-900 dark:text-blue-100">
-                      Technical Issues
-                    </div>
-                    <div className="text-sm text-blue-700 dark:text-blue-300 mt-2">
-                      Bug reports, app crashes, technical problems
-                    </div>
-                  </div>
-                  <div className="text-center p-6 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-white font-bold text-xl">72h</span>
-                    </div>
-                    <div className="text-lg font-semibold text-purple-900 dark:text-purple-100">
-                      Privacy & Legal
-                    </div>
-                    <div className="text-sm text-purple-700 dark:text-purple-300 mt-2">
-                      Data requests, privacy concerns, legal matters
-                    </div>
-                  </div>
                 </div>
               </div>
 
