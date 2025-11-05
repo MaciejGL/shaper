@@ -244,25 +244,36 @@ async function handleFileDownload(data: {
       bytes[i] = binaryString.charCodeAt(i)
     }
 
-    // Write to cache directory
-    const file = new FileSystem.File(FileSystem.Paths.cache, data.filename)
+    // Save to Documents directory (accessible on both platforms)
+    const documentsDir = FileSystem.Paths.document
+    const file = new FileSystem.File(documentsDir, data.filename)
     const writer = file.writableStream().getWriter()
     await writer.write(bytes)
     await writer.close()
 
-    // Use share sheet on both platforms
-    // On Android: User can select "Save to Downloads" or other apps
-    // On iOS: User can select "Save to Files" or other apps
-    await Sharing.shareAsync(file.uri, {
-      UTI: data.mimeType,
-      mimeType: data.mimeType,
-      dialogTitle: `Save ${data.filename}`,
-    })
+    if (Platform.OS === 'android') {
+      // Android: Show share sheet to let user save to Downloads or open directly
+      await Sharing.shareAsync(file.uri, {
+        UTI: data.mimeType,
+        mimeType: data.mimeType,
+      })
+    } else {
+      // iOS: Use share sheet to save to Files app
+      const isAvailable = await Sharing.isAvailableAsync()
 
-    // No alert needed - share sheet provides clear feedback
+      if (isAvailable) {
+        await Sharing.shareAsync(file.uri, {
+          UTI: data.mimeType,
+          mimeType: data.mimeType,
+        })
+      } else {
+        Alert.alert('Download Complete', `${data.filename} has been saved.`, [
+          { text: 'OK' },
+        ])
+      }
+    }
   } catch (error) {
     console.error('File download error:', error)
-    // Only show alert on actual error
     Alert.alert(
       'Download Failed',
       'Could not download the file. Please try again.',
