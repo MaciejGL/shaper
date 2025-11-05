@@ -14,7 +14,6 @@ type TrainingPlan {
   progress: Float
   nextSession: String
   isDemo: Boolean!
-  isPremium: Boolean
   focusTags: [FocusTag!]!
   targetGoals: [TargetGoal!]!
 

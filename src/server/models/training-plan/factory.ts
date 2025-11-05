@@ -88,6 +88,7 @@ export async function getTrainingPlanById(
                     base: {
                       select: {
                         videoUrl: true,
+                        images: true,
                         muscleGroups: true,
                       },
                     },
@@ -109,20 +110,21 @@ export async function getTrainingPlanById(
       throw new Error('Training plan not found')
     }
 
-    if (
-      trainingPlan.isTemplate &&
-      !trainingPlan.assignedToId &&
-      trainingPlan.createdById !== user.user.id
-    ) {
-      const scopedTrainingPlan = {
-        ...trainingPlan,
-        weeks: trainingPlan.weeks.map((week, weekIndex) => ({
-          ...week,
-          days: weekIndex === 0 ? week.days.map((day) => day) : undefined,
-        })),
-      } as typeof trainingPlan
-      return new TrainingPlan(scopedTrainingPlan, context)
-    }
+    // TODO: Why is this here?
+    // if (
+    //   trainingPlan.isTemplate &&
+    //   !trainingPlan.assignedToId &&
+    //   trainingPlan.createdById !== user.user.id
+    // ) {
+    //   const scopedTrainingPlan = {
+    //     ...trainingPlan,
+    //     weeks: trainingPlan.weeks.map((week, weekIndex) => ({
+    //       ...week,
+    //       days: weekIndex === 0 ? week.days.map((day) => day) : undefined,
+    //     })),
+    //   } as typeof trainingPlan
+    //   return new TrainingPlan(scopedTrainingPlan, context)
+    // }
 
     return new TrainingPlan(trainingPlan, context)
   } catch (error) {

@@ -4,7 +4,7 @@ query GetPublicTrainingPlans($limit: Int) {
     title
     description
     isPublic
-    isPremium
+    premium
     difficulty
     focusTags
     targetGoals

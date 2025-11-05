@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { useUser } from '@/context/user-context'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLGetPublicTrainingPlanWeeksQuery } from '@/generated/graphql-client'
 import { getDayName } from '@/lib/date-utils'
@@ -22,14 +24,17 @@ interface PlanPreviewTabProps {
   weeks?: PlanWeeks | null
   selectedWeekId?: string | null
   onAccordionChange?: () => void
+  isPremiumPlan: boolean
 }
 
 export function PlanPreviewTab({
   weeks,
   selectedWeekId = null,
   onAccordionChange,
+  isPremiumPlan = false,
 }: PlanPreviewTabProps) {
   const { preferences } = useUserPreferences()
+  const { hasPremium } = useUser()
   const weekRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const [accordionValue, setAccordionValue] = useState<string[]>([])
 
@@ -66,6 +71,9 @@ export function PlanPreviewTab({
   // Sort weeks by weekNumber
   const sortedWeeks = [...weeks].sort((a, b) => a.weekNumber - b.weekNumber)
 
+  // User has limited access if they don't have premium and the plan requires premium
+  const hasLimitedAccess = !hasPremium && isPremiumPlan
+
   return (
     <Accordion
       type="multiple"
@@ -74,12 +82,15 @@ export function PlanPreviewTab({
       value={accordionValue}
       onValueChange={setAccordionValue}
     >
-      {sortedWeeks.map((week) => {
+      {sortedWeeks.map((week, index) => {
         // Sort days according to user's week start preference
         const sortedDays = sortDaysForDisplay(
           week.days,
           preferences.weekStartsOn,
         )
+
+        // Block access to weeks beyond the first one for premium plans without premium access
+        const isWeekLocked = index > 0 && hasLimitedAccess
 
         return (
           <AccordionItem
@@ -89,16 +100,25 @@ export function PlanPreviewTab({
               weekRefs.current[week.id] = el
             }}
           >
-            <AccordionTrigger className="text-base font-semibold hover:no-underline">
-              <div className="flex items-center gap-2">
-                Week {week.weekNumber}
-              </div>
-            </AccordionTrigger>
+            <PremiumButtonWrapper
+              hasPremium={!isWeekLocked}
+              tooltipText="Upgrade to Premium to access all weeks"
+            >
+              <AccordionTrigger
+                className="text-base font-semibold hover:no-underline"
+                disabled={isWeekLocked}
+              >
+                <div className="flex items-center gap-2">
+                  Week {week.weekNumber}
+                </div>
+              </AccordionTrigger>
+            </PremiumButtonWrapper>
             <AccordionContent>
               <div className="space-y-2 pb-2">
-                {sortedDays.map((day) => (
-                  <ExplorePreviewDay key={day.id} day={day} />
-                ))}
+                {!isWeekLocked &&
+                  sortedDays.map((day) => (
+                    <ExplorePreviewDay key={day.id} day={day} />
+                  ))}
               </div>
             </AccordionContent>
           </AccordionItem>

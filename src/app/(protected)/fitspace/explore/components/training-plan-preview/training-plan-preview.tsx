@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -18,7 +19,6 @@ interface TrainingPlanPreviewProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number] | null
   isOpen: boolean
   onClose: () => void
-  subscriptionData?: GQLGetMySubscriptionStatusQuery
   onAssignTemplate: (planId: string) => void
   isAssigning: boolean
 }
@@ -27,7 +27,6 @@ export function TrainingPlanPreview({
   plan,
   isOpen,
   onClose,
-  subscriptionData,
   onAssignTemplate,
   isAssigning,
 }: TrainingPlanPreviewProps) {
@@ -83,14 +82,15 @@ export function TrainingPlanPreview({
 
               <TabsContent value="preview" className="">
                 {isLoadingWeeks ? (
-                  <div className="py-12 text-center">
-                    <p className="text-muted-foreground">Loading preview...</p>
+                  <div className="py-8 text-center space-y-3">
+                    <LoadingSkeleton count={4} />
                   </div>
                 ) : (
                   <PlanPreviewTab
                     weeks={weeksData?.getTrainingPlanById?.weeks || null}
                     selectedWeekId={selectedWeekId}
                     onAccordionChange={() => setSelectedWeekId(null)}
+                    isPremiumPlan={Boolean(plan.premium)}
                   />
                 )}
               </TabsContent>
@@ -99,7 +99,6 @@ export function TrainingPlanPreview({
 
           <TrainingPlanPreviewFooter
             plan={plan}
-            subscriptionData={subscriptionData}
             onAssignTemplate={onAssignTemplate}
             isAssigning={isAssigning}
           />

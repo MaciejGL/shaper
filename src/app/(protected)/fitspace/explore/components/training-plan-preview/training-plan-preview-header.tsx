@@ -24,7 +24,7 @@ export function TrainingPlanPreviewHeader({
           <div className="flex-1 space-y-2">
             <h2 className="text-xl font-bold">{plan.title}</h2>
             <div className="flex items-center gap-2">
-              {plan.isPremium ? (
+              {plan.premium ? (
                 <Badge variant="premium">
                   <Crown className="h-3 w-3 mr-1" />
                   Premium

@@ -19,7 +19,6 @@ import {
   GQLFocusTag,
   GQLGetPublicTrainingPlansQuery,
   useAssignTemplateToSelfMutation,
-  useGetMySubscriptionStatusQuery,
   useGetPublicTrainingPlansQuery,
 } from '@/generated/graphql-client'
 import { formatUserCount } from '@/utils/format-user-count'
@@ -56,8 +55,7 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
     },
   )
 
-  // Fetch subscription status and assignment mutation
-  const { data: subscriptionData } = useGetMySubscriptionStatusQuery({})
+  // Fetch assignment mutation
   const { mutateAsync: assignTemplate, isPending: isAssigning } =
     useAssignTemplateToSelfMutation({})
 
@@ -109,22 +107,22 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
   // Get all public plans from the API (includes both free and premium)
   const allPublicPlans = (data?.getPublicTrainingPlans || []).map((plan) => ({
     ...plan,
-    isPremium: plan.isPremium || false,
+    isPremium: plan.premium || false,
     focusTags: plan.focusTags || [],
     targetGoals: plan.targetGoals || [],
   }))
 
   // Separate into free and premium plans
-  const freePlans = allPublicPlans.filter((plan) => !plan.isPremium)
-  const premiumPlans = allPublicPlans.filter((plan) => plan.isPremium)
+  const freePlans = allPublicPlans.filter((plan) => !plan.premium)
+  const premiumPlans = allPublicPlans.filter((plan) => plan.premium)
 
   // Combine and filter plans
   const allPlans = [...freePlans, ...premiumPlans]
 
   const filteredPlans = allPlans.filter((plan) => {
     // Filter by type (free/premium/all)
-    if (activeFilter === 'free' && plan.isPremium) return false
-    if (activeFilter === 'premium' && !plan.isPremium) return false
+    if (activeFilter === 'free' && plan.premium) return false
+    if (activeFilter === 'premium' && !plan.premium) return false
 
     // Filter by focus tags - plan must have ALL selected tags (AND logic)
     if (selectedFocusTags.length > 0) {
@@ -173,28 +171,14 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
             </CardContent>
           </Card>
         ) : (
-          <>
-            {filtersApplied && (
-              <div className="text-sm text-muted-foreground mb-2">
-                {filteredPlans.length} plan
-                {filteredPlans.length !== 1 ? 's' : ''} found
-                {selectedFocusTags.length > 0 && (
-                  <span className="ml-1">
-                    with {selectedFocusTags.length} focus tag
-                    {selectedFocusTags.length !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </div>
-            )}
-            {filteredPlans.map((plan) => (
-              <TrainingPlanCard
-                key={plan.id}
-                plan={plan}
-                onClick={() => handlePlanClick(plan)}
-                isPremium={plan.isPremium}
-              />
-            ))}
-          </>
+          filteredPlans.map((plan) => (
+            <TrainingPlanCard
+              key={plan.id}
+              plan={plan}
+              onClick={() => handlePlanClick(plan)}
+              isPremium={plan.premium}
+            />
+          ))
         )}
       </div>
 
@@ -203,7 +187,6 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
         plan={selectedPlan}
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
-        subscriptionData={subscriptionData}
         onAssignTemplate={handleAssignTemplate}
         isAssigning={isAssigning}
       />
@@ -234,7 +217,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
       <CardHeader>
         <CardTitle className="flex items-start justify-between gap-2">
           {plan.title}
-          {plan.isPremium && (
+          {plan.premium && (
             <Badge variant="premium">
               <Crown className="h-2 w-2 mr-1" />
               Premium
@@ -246,15 +229,15 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
         <div className="space-y-2">
           {/* Focus Tags */}
           <div className="flex items-center gap-2">
-            {plan.difficulty && (
+            {plan.difficulty ? (
               <Badge
                 variant={difficultyVariantMap[plan.difficulty]}
                 className="capitalize"
               >
                 {plan.difficulty.toLowerCase()}
               </Badge>
-            )}
-            {plan.focusTags && plan.focusTags.length > 0 && (
+            ) : null}
+            {plan.focusTags && plan.focusTags.length > 0 ? (
               <div className="flex flex-wrap gap-1">
                 {plan.focusTags
                   .slice(0, 2)
@@ -269,7 +252,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
                   </Badge>
                 )}
               </div>
-            )}
+            ) : null}
           </div>
 
           <div className="flex items-center justify-between mt-4">
@@ -281,15 +264,15 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
             </div>
 
             {/* Assignment count for all plans */}
-            {formatUserCount(plan.assignmentCount) && (
+            {formatUserCount(plan.assignmentCount) ? (
               <div className="flex items-center gap-2 text-xs">
                 <span>{formatUserCount(plan.assignmentCount)}</span>
                 <Users className="h-3 w-3" />
               </div>
-            )}
+            ) : null}
 
             {/* Show rating only for premium plans */}
-            {plan.isPremium && plan.rating && (
+            {plan.premium && plan.rating ? (
               <div className="flex items-center gap-1 text-xs">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                 <span className="font-medium">{plan.rating}</span>
@@ -297,7 +280,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
                   ({plan.totalReviews})
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </CardContent>
