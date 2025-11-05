@@ -4,6 +4,7 @@ import {
 } from '@/generated/graphql-client'
 import { formatUserCount } from '@/utils/format-user-count'
 
+import { CreatorSection } from './sections/creator-section'
 import { DescriptionSection } from './sections/description-section'
 // import { EquipmentSection } from './sections/equipment-section'
 import { FocusTagsSection } from './sections/focus-tags-section'
@@ -15,12 +16,14 @@ interface TrainingPlanPreviewInfoTabProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
   weeksData?: GQLGetPublicTrainingPlanWeeksQuery
   onWeekClick: (weekId: string) => void
+  onCreatorClick?: () => void
 }
 
 export function TrainingPlanPreviewInfoTab({
   plan,
   weeksData,
   onWeekClick,
+  onCreatorClick,
 }: TrainingPlanPreviewInfoTabProps) {
   const formattedUserCount = formatUserCount(plan.assignmentCount)
 
@@ -40,6 +43,9 @@ export function TrainingPlanPreviewInfoTab({
       {plan.description && (
         <DescriptionSection description={plan.description} />
       )}
+      {plan.createdBy ? (
+        <CreatorSection creator={plan.createdBy} onClick={onCreatorClick} />
+      ) : null}
     </div>
   )
 }
