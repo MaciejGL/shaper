@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
+  useDeleteMacroTargetsMutation,
   useGetClientMacroTargetsQuery,
   useSetMacroTargetsMutation,
 } from '@/generated/graphql-client'
@@ -84,16 +86,68 @@ export function ClientMacroTargets({ clientId }: ClientMacroTargetsProps) {
     },
   })
 
+  const deleteMutation = useDeleteMacroTargetsMutation({
+    onMutate: async () => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey })
+
+      // Snapshot previous value
+      const previousData = queryClient.getQueryData(queryKey)
+
+      // Optimistically remove macro targets
+      queryClient.setQueryData(queryKey, {
+        getClientMacroTargets: null,
+      })
+
+      return { previousData }
+    },
+    onError: (error, variables, context) => {
+      // Rollback optimistic update on error
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData)
+      }
+      toast.error('Failed to reset macro targets: ' + (error as Error).message)
+    },
+    onSuccess: () => {
+      form.reset({
+        calories: undefined,
+        protein: undefined,
+        carbs: undefined,
+        fat: undefined,
+        notes: '',
+      })
+      toast.success('Macro targets reset successfully')
+    },
+    onSettled: () => {
+      // Always refetch after mutation
+      queryClient.invalidateQueries({ queryKey })
+    },
+  })
+
+  const hasMacroTargets = !!data?.getClientMacroTargets
+
   const form = useForm<MacroTargetsForm>({
     resolver: zodResolver(macroTargetsSchema),
     defaultValues: {
-      calories: data?.getClientMacroTargets?.calories || undefined,
-      protein: data?.getClientMacroTargets?.protein || undefined,
-      carbs: data?.getClientMacroTargets?.carbs || undefined,
-      fat: data?.getClientMacroTargets?.fat || undefined,
-      notes: data?.getClientMacroTargets?.notes || '',
+      calories: undefined,
+      protein: undefined,
+      carbs: undefined,
+      fat: undefined,
+      notes: '',
     },
   })
+
+  useEffect(() => {
+    if (data?.getClientMacroTargets) {
+      form.reset({
+        calories: data.getClientMacroTargets.calories || undefined,
+        protein: data.getClientMacroTargets.protein || undefined,
+        carbs: data.getClientMacroTargets.carbs || undefined,
+        fat: data.getClientMacroTargets.fat || undefined,
+        notes: data.getClientMacroTargets.notes || '',
+      })
+    }
+  }, [data, form])
 
   const onSubmit = (values: MacroTargetsForm) => {
     mutation.mutate({
@@ -108,6 +162,10 @@ export function ClientMacroTargets({ clientId }: ClientMacroTargetsProps) {
     })
   }
 
+  const handleReset = () => {
+    deleteMutation.mutate({ clientId })
+  }
+
   return (
     <div>
       <Form {...form}>
@@ -115,9 +173,22 @@ export function ClientMacroTargets({ clientId }: ClientMacroTargetsProps) {
           <ClientHeader
             title="Daily Macro Targets"
             action={
-              <Button size="sm" type="submit" loading={mutation.isPending}>
-                Save Macro Targets
-              </Button>
+              <div className="flex gap-2">
+                <Button size="sm" type="submit" loading={mutation.isPending}>
+                  Save Macro Targets
+                </Button>
+                {hasMacroTargets && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    type="button"
+                    loading={deleteMutation.isPending}
+                    onClick={handleReset}
+                  >
+                    Reset Macro
+                  </Button>
+                )}
+              </div>
             }
           />
           <div className="grid grid-cols-4 gap-4">

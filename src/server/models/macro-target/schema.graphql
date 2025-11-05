@@ -27,4 +27,5 @@ input SetMacroTargetsInput {
 
 type Mutation {
   setMacroTargets(input: SetMacroTargetsInput!): MacroTarget!
+  deleteMacroTargets(clientId: ID!): Boolean!
 }

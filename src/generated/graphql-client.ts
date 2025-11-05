@@ -1183,6 +1183,7 @@ export type GQLMutation = {
   deleteCheckinSchedule: Scalars['Boolean']['output'];
   deleteExercise: Scalars['Boolean']['output'];
   deleteFavouriteWorkout: Scalars['Boolean']['output'];
+  deleteMacroTargets: Scalars['Boolean']['output'];
   deleteMeal: Scalars['Boolean']['output'];
   deleteMessage: Scalars['Boolean']['output'];
   deleteNote: Scalars['Boolean']['output'];
@@ -1564,6 +1565,11 @@ export type GQLMutationDeleteExerciseArgs = {
 
 export type GQLMutationDeleteFavouriteWorkoutArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeleteMacroTargetsArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -4472,6 +4478,13 @@ export type GQLSetMacroTargetsMutationVariables = Exact<{
 
 
 export type GQLSetMacroTargetsMutation = { __typename?: 'Mutation', setMacroTargets: { __typename?: 'MacroTarget', id: string, clientId: string, trainerId: string, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, notes?: string | undefined | null, createdAt: string, updatedAt: string } };
+
+export type GQLDeleteMacroTargetsMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLDeleteMacroTargetsMutation = { __typename?: 'Mutation', deleteMacroTargets: boolean };
 
 export type GQLGetClientNutritionPlansQueryVariables = Exact<{
   clientId: Scalars['ID']['input'];
@@ -10411,6 +10424,30 @@ useSetMacroTargetsMutation.getKey = () => ['SetMacroTargets'];
 
 
 useSetMacroTargetsMutation.fetcher = (variables: GQLSetMacroTargetsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLSetMacroTargetsMutation, GQLSetMacroTargetsMutationVariables>(SetMacroTargetsDocument, variables, options);
+
+export const DeleteMacroTargetsDocument = `
+    mutation DeleteMacroTargets($clientId: ID!) {
+  deleteMacroTargets(clientId: $clientId)
+}
+    `;
+
+export const useDeleteMacroTargetsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteMacroTargetsMutation, TError, GQLDeleteMacroTargetsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteMacroTargetsMutation, TError, GQLDeleteMacroTargetsMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteMacroTargets'],
+    mutationFn: (variables?: GQLDeleteMacroTargetsMutationVariables) => fetchData<GQLDeleteMacroTargetsMutation, GQLDeleteMacroTargetsMutationVariables>(DeleteMacroTargetsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteMacroTargetsMutation.getKey = () => ['DeleteMacroTargets'];
+
+
+useDeleteMacroTargetsMutation.fetcher = (variables: GQLDeleteMacroTargetsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteMacroTargetsMutation, GQLDeleteMacroTargetsMutationVariables>(DeleteMacroTargetsDocument, variables, options);
 
 export const GetClientNutritionPlansDocument = `
     query GetClientNutritionPlans($clientId: ID!) {

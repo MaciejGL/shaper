@@ -28,6 +28,10 @@ mutation SetMacroTargets($input: SetMacroTargetsInput!) {
   }
 }
 
+mutation DeleteMacroTargets($clientId: ID!) {
+  deleteMacroTargets(clientId: $clientId)
+}
+
 query GetClientNutritionPlans($clientId: ID!) {
   getClientNutritionPlans(clientId: $clientId) {
     id
