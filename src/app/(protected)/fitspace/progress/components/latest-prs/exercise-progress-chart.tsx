@@ -116,18 +116,14 @@ export function ExerciseProgressChart({
       : 0
 
   return (
-    <Card
-      borderless
-      variant="secondary"
-      className="p-0 bg-transparent shadow-none gap-0 mt-4"
-    >
-      <CardHeader className="p-0">
+    <div className="mt-4">
+      <div>
         <CardTitle>1 Rep Max</CardTitle>
         <CardDescription>
           Estimated 1RM over time ({weightUnit})
         </CardDescription>
-      </CardHeader>
-      <CardContent className="p-0 bg-black/90 dark:bg-black/20 -mx-4 py-2 mt-4 mb-2">
+      </div>
+      <CardContent className="bg-black/90 dark:bg-black/20 py-2 mt-4 mb-2 rounded-lg">
         <ChartContainer id={`exercise-pr-${exerciseId}`} config={chartConfig}>
           <LineChart
             accessibilityLayer
@@ -182,7 +178,7 @@ export function ExerciseProgressChart({
           </LineChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="items-baseline gap-2 text-sm p-0 justify-end mt-0">
+      <CardFooter className="items-baseline gap-2 text-sm justify-end">
         <div className="text-muted-foreground leading-none">
           From {firstData?.estimated1RM?.toFixed(1) || 0} to{' '}
           {latestData?.estimated1RM?.toFixed(1) || 0} {weightUnit}
@@ -198,6 +194,6 @@ export function ExerciseProgressChart({
           {progressPercentage > 0 && <TrendingUp className="size-6" />}
         </div>
       </CardFooter>
-    </Card>
+    </div>
   )
 }
