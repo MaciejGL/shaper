@@ -3,8 +3,10 @@
  * Enhanced for bulletproof user switching
  * This component integrates all the functionality together
  */
+import * as Linking from 'expo-linking'
+import * as Notifications from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -39,6 +41,54 @@ function HyproAppContent({ authToken }: HyproAppProps) {
   usePushNotificationSync(currentAuthToken, checkAndSyncPermissions)
   useAndroidBackButton(webViewRef)
 
+  // State for initial URL detection (cold start with notification)
+  const [initialUrl, setInitialUrl] = useState<string | undefined>(undefined)
+  const [isCheckingInitialUrl, setIsCheckingInitialUrl] = useState(true)
+
+  // Check for initial URL from notification on cold start
+  useEffect(() => {
+    const checkInitialUrl = async () => {
+      try {
+        // Check for deep link URL
+        const linkUrl = await Linking.getInitialURL()
+        console.info('📱 [COLD-START] Checking for initial URL...')
+        console.info('📱 [COLD-START] Deep link URL:', linkUrl || 'none')
+
+        // Check for notification URL (cold start with notification tap)
+        const notificationResponse =
+          await Notifications.getLastNotificationResponse()
+        const notificationUrl = notificationResponse?.notification.request
+          .content.data?.url as string | undefined
+
+        console.info(
+          '📱 [COLD-START] Notification URL:',
+          notificationUrl || 'none',
+        )
+
+        // Priority: notification URL > deep link URL
+        const url = notificationUrl || linkUrl
+
+        if (url) {
+          console.info('📱 [COLD-START] Initial URL detected:', url)
+          setInitialUrl(url)
+        } else {
+          console.info('📱 [COLD-START] No initial URL, using default')
+        }
+      } catch (error) {
+        console.error('❌ [COLD-START] Error checking initial URL:', error)
+      } finally {
+        setIsCheckingInitialUrl(false)
+      }
+    }
+
+    checkInitialUrl()
+  }, [])
+
+  // Wait until we've checked for initial URL before rendering WebView
+  if (isCheckingInitialUrl) {
+    return null
+  }
+
   return (
     <PushNotificationManager authToken={currentAuthToken}>
       <SafeAreaView
@@ -50,6 +100,7 @@ function HyproAppContent({ authToken }: HyproAppProps) {
         />
         <EnhancedWebView
           ref={webViewRef}
+          initialUrl={initialUrl}
           onThemeChange={handleWebThemeChange}
           onAuthToken={handleAuthToken}
           onRequestPushPermission={requestPermissions}
