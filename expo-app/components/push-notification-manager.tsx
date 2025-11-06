@@ -114,13 +114,8 @@ export function PushNotificationManager({
     const linkingSubscription = Linking.addEventListener('url', handleUrl)
     linkingListener.current = () => linkingSubscription?.remove?.()
 
-    // Handle deep link on cold start (app opened from closed state)
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        console.info('📱 [PUSH-MANAGER] Deep link received (cold start):', url)
-        handleDeepLink(url)
-      }
-    })
+    // Note: Cold start deep link handling is now done in hypertro-app.tsx
+    // to properly convert URLs before passing to WebView initialUrl
 
     // Cleanup listeners on unmount
     return () => {

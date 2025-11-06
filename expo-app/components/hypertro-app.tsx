@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { APP_CONFIG } from '../config/app-config'
 import { useAndroidBackButton } from '../hooks/use-android-back-button'
 import { useAuthTokenManagement } from '../hooks/use-auth-token-management'
 import { usePushNotificationSync } from '../hooks/use-push-notification-sync'
@@ -27,6 +28,30 @@ import {
 
 interface HyproAppProps {
   authToken?: string
+}
+
+/**
+ * Convert relative or custom scheme URLs to full HTTPS URLs
+ */
+const convertToFullUrl = (url: string): string => {
+  // Already a full URL
+  if (url.startsWith('https://') || url.startsWith('http://')) {
+    return url
+  }
+
+  // Relative path - convert to full URL
+  if (url.startsWith('/')) {
+    return `${APP_CONFIG.WEB_URL}${url}`
+  }
+
+  // Custom schemes - convert to HTTPS
+  if (url.startsWith('hypro://') || url.startsWith('hypertro://')) {
+    const path = url.replace(/^(hypro|hypertro):\/\//, '')
+    return `${APP_CONFIG.WEB_URL}/${path}`
+  }
+
+  // Fallback - assume it needs web URL prefix
+  return `${APP_CONFIG.WEB_URL}/${url}`
 }
 
 function HyproAppContent({ authToken }: HyproAppProps) {
@@ -51,8 +76,6 @@ function HyproAppContent({ authToken }: HyproAppProps) {
       try {
         // Check for deep link URL
         const linkUrl = await Linking.getInitialURL()
-        console.info('📱 [COLD-START] Checking for initial URL...')
-        console.info('📱 [COLD-START] Deep link URL:', linkUrl || 'none')
 
         // Check for notification URL (cold start with notification tap)
         const notificationResponse =
@@ -60,22 +83,15 @@ function HyproAppContent({ authToken }: HyproAppProps) {
         const notificationUrl = notificationResponse?.notification.request
           .content.data?.url as string | undefined
 
-        console.info(
-          '📱 [COLD-START] Notification URL:',
-          notificationUrl || 'none',
-        )
-
         // Priority: notification URL > deep link URL
         const url = notificationUrl || linkUrl
 
         if (url) {
-          console.info('📱 [COLD-START] Initial URL detected:', url)
-          setInitialUrl(url)
-        } else {
-          console.info('📱 [COLD-START] No initial URL, using default')
+          const fullUrl = convertToFullUrl(url)
+          setInitialUrl(fullUrl)
         }
       } catch (error) {
-        console.error('❌ [COLD-START] Error checking initial URL:', error)
+        console.error('❌ Error checking initial URL:', error)
       } finally {
         setIsCheckingInitialUrl(false)
       }
