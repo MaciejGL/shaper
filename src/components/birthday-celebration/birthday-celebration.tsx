@@ -41,7 +41,7 @@ export function BirthdayCelebration({ onDismiss }: BirthdayCelebrationProps) {
             iconOnly={<X />}
           />
 
-          <CardHeader className="pb-4 text-center">
+          <CardHeader className="p-4 text-center">
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -61,30 +61,24 @@ export function BirthdayCelebration({ onDismiss }: BirthdayCelebrationProps) {
               className="space-y-4 text-lg"
             >
               <p className="text-xl font-semibold text-foreground">
-                Today we celebrate an incredible person!
+                Time to celebrate you, legend! 🎉
               </p>
 
               <div className="space-y-3 text-muted-foreground">
                 <p>
-                  Your dedication and hard work inspire everyone around you.
+                  Running your own supplement store, crushing it as a personal
+                  trainer, and on your way to bodybuilding greatness –
+                  you&apos;re absolutely killing it!
                 </p>
                 <p>
-                  From running your successful supplement store to helping
-                  clients transform their lives as an exceptional personal
-                  trainer, you make a real difference.
+                  Your dedication is next level, and everyone around you sees
+                  it.
                 </p>
-                <p>
-                  Your promising bodybuilding career shows what commitment can
-                  achieve.
-                </p>
-                <p>
-                  And of course, you have the most fantastic dog who&apos;s
-                  lucky to have you! 🐕
-                </p>
+                <p>Plus, you&apos;ve got the coolest dog ever! 🐕</p>
               </div>
 
               <p className="pt-4 text-xl font-bold text-primary">
-                Here&apos;s to another amazing year ahead! 🎊
+                Have an amazing birthday, Dawid! 🎊
               </p>
             </motion.div>
 
@@ -96,7 +90,7 @@ export function BirthdayCelebration({ onDismiss }: BirthdayCelebrationProps) {
               <Button
                 onClick={onDismiss}
                 size="lg"
-                className="mt-4 text-lg"
+                className="mt-4 text-lg mx-auto"
               >
                 Thank You! 🎉
               </Button>
@@ -107,4 +101,3 @@ export function BirthdayCelebration({ onDismiss }: BirthdayCelebrationProps) {
     </motion.div>
   )
 }
-
