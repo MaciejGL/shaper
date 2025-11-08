@@ -378,7 +378,7 @@ export function OfferPage({
           )}
 
           {/* Terms Agreement & Checkout */}
-          <div className="space-y-3">
+          <div className="space-y-3 mt-12">
             {/* Terms Agreement Checkbox */}
             <div className="flex items-start gap-3 my-6">
               <Checkbox
