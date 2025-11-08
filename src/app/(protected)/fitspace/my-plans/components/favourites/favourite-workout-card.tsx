@@ -107,9 +107,9 @@ export function FavouriteWorkoutCard({
       <Accordion type="single" collapsible>
         <AccordionItem
           value={favourite.id}
-          className="bg-card border-border !border rounded-xl"
+          className="bg-card border-border !border rounded-2xl overflow-hidden"
         >
-          <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left transition-colors">
+          <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left transition-colors bg-card-on-card rounded-none">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-medium truncate">
@@ -347,7 +347,7 @@ function SortableExerciseItem({
       style={style}
       className="grid grid-cols-[auto_1fr_auto] items-center gap-1 w-full"
     >
-      <span className="text-xs text-muted-foreground w-4 shrink-0">
+      <span className="text-sm text-muted-foreground w-4 shrink-0">
         {index + 1}.
       </span>
       <Card variant="tertiary" className="flex-1 p-2 gap-3">

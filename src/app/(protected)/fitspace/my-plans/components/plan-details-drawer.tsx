@@ -118,16 +118,21 @@ export function PlanDetailsDrawer({
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="w-full">
+              <TabsList
+                className="w-full"
+                variant="secondary"
+                size="lg"
+                rounded="3xl"
+              >
                 {!isTemplate && (
-                  <TabsTrigger value="summary" className="flex-1">
+                  <TabsTrigger value="summary" className="flex-1" rounded="3xl">
                     Summary
                   </TabsTrigger>
                 )}
-                <TabsTrigger value="info" className="flex-1">
+                <TabsTrigger value="info" className="flex-1" rounded="3xl">
                   Info
                 </TabsTrigger>
-                <TabsTrigger value="preview" className="flex-1">
+                <TabsTrigger value="preview" className="flex-1" rounded="3xl">
                   Preview
                 </TabsTrigger>
               </TabsList>

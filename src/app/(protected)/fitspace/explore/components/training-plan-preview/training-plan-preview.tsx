@@ -91,11 +91,16 @@ export function TrainingPlanPreview({
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="w-full">
-                  <TabsTrigger value="info" className="flex-1">
+                <TabsList
+                  className="w-full"
+                  variant="secondary"
+                  size="lg"
+                  rounded="2xl"
+                >
+                  <TabsTrigger value="info" className="flex-1" rounded="2xl">
                     Info
                   </TabsTrigger>
-                  <TabsTrigger value="preview" className="flex-1">
+                  <TabsTrigger value="preview" className="flex-1" rounded="2xl">
                     Preview
                   </TabsTrigger>
                 </TabsList>

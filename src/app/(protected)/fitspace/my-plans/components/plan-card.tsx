@@ -40,7 +40,7 @@ export function PlanCard({ plan, onClick, status }: PlanCardProps) {
     <Card
       onClick={() => onClick(plan)}
       className="cursor-pointer hover:bg-accent/50 transition-colors"
-      variant="secondary"
+      variant={status === PlanStatus.Active ? 'highlighted' : 'tertiary'}
     >
       <CardHeader className="py-0 gap-0">
         <div className="flex items-center justify-between gap-3">

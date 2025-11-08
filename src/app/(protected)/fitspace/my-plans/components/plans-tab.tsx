@@ -216,16 +216,12 @@ interface StatusDividerProps {
 function StatusDivider({ status, count }: StatusDividerProps) {
   return (
     <div className="flex items-center gap-3 w-full">
-      <div className="h-px flex-1 bg-border" />
       <div className="flex items-center gap-2">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          {status}
-        </span>
+        <span className="capitalize">{status}</span>
         <span className="flex-center size-5 rounded-full bg-muted text-xs font-medium text-muted-foreground">
           {count}
         </span>
       </div>
-      <div className="h-px flex-1 bg-border" />
     </div>
   )
 }
@@ -240,14 +236,6 @@ interface PlansListProps {
 function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
   // When filter is "all", show sections with dividers
   if (selectedFilter === 'all') {
-    const grouped = groupPlansByStatus(plans)
-    const statusOrder = [
-      PlanStatus.Active,
-      PlanStatus.Template,
-      PlanStatus.Paused,
-      PlanStatus.Completed,
-    ]
-
     const activePlan = plans.find(({ isActive }) => isActive)
     const templatePlans = plans.filter(
       ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Template,
