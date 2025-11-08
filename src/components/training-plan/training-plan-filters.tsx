@@ -162,49 +162,58 @@ export function TrainingPlanFilters({
       </div>
 
       {/* Active Filters */}
-      {(selectedFocusTags.length > 0 || selectedDifficulties.length > 0) && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-muted-foreground">Filters:</span>
-          <AnimatePresence mode="popLayout">
-            {selectedDifficulties.map((difficulty) => (
-              <motion.div
-                key={difficulty}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Badge
-                  variant="secondary"
-                  size="lg"
-                  className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                  onClick={() => onToggleDifficulty(difficulty)}
-                >
-                  {difficultyLabels[difficulty]} ×
-                </Badge>
-              </motion.div>
-            ))}
-            {selectedFocusTags.map((tag) => (
-              <motion.div
-                key={tag}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Badge
-                  variant="secondary"
-                  size="lg"
-                  className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                  onClick={() => onToggleFocusTag(tag)}
-                >
-                  {focusTagLabels[tag]} ×
-                </Badge>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {(selectedFocusTags.length > 0 || selectedDifficulties.length > 0) && (
+          <motion.div
+            layout
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="origin-top"
+          >
+            <div className="flex items-center gap-2 flex-wrap">
+              <AnimatePresence mode="popLayout">
+                {selectedDifficulties.map((difficulty) => (
+                  <motion.div
+                    key={difficulty}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Badge
+                      variant="secondary"
+                      size="lg"
+                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => onToggleDifficulty(difficulty)}
+                    >
+                      {difficultyLabels[difficulty]} ×
+                    </Badge>
+                  </motion.div>
+                ))}
+                {selectedFocusTags.map((tag) => (
+                  <motion.div
+                    key={tag}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Badge
+                      variant="secondary"
+                      size="lg"
+                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => onToggleFocusTag(tag)}
+                    >
+                      {focusTagLabels[tag]} ×
+                    </Badge>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Clock, Crown, Dumbbell, Star, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -190,14 +191,24 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
             </CardContent>
           </Card>
         ) : (
-          filteredPlans.map((plan) => (
-            <TrainingPlanCard
-              key={plan.id}
-              plan={plan}
-              onClick={() => handlePlanClick(plan)}
-              isPremium={plan.premium}
-            />
-          ))
+          <AnimatePresence mode="popLayout" initial={false}>
+            {filteredPlans.map((plan) => (
+              <motion.div
+                key={plan.id}
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <TrainingPlanCard
+                  plan={plan}
+                  onClick={() => handlePlanClick(plan)}
+                  isPremium={plan.premium}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
       </div>
 
