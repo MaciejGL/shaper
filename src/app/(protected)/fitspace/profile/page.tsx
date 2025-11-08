@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Bio } from '@/components/profile/bio'
 import { GoalsAndHealth } from '@/components/profile/goals-and-health'
 import { Header } from '@/components/profile/header'
@@ -14,7 +15,11 @@ export default function ProfilePage() {
   const { handleAvatarChange } = useProfile()
 
   if (!profile) {
-    return <div>Loading...</div>
+    return (
+      <div className="space-y-4">
+        <LoadingSkeleton count={3} variant="lg" />
+      </div>
+    )
   }
 
   return (

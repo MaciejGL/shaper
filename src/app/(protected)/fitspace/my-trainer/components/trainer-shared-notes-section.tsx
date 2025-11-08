@@ -152,7 +152,7 @@ function ViewAllNotesDrawer({ isOpen, onOpenChange }: ViewAllNotesDrawerProps) {
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           {isLoading ? (
             <div className="space-y-4">
-              <LoadingSkeleton count={2} variant="lg" withBorder />
+              <LoadingSkeleton count={2} variant="lg" />
             </div>
           ) : error ? (
             <div className="text-center py-8 text-red-500">
