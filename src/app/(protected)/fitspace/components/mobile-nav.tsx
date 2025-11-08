@@ -105,7 +105,7 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
         id: 'trainer',
         href: '/fitspace/my-trainer',
         icon: UserCheck,
-        label: 'Coaching',
+        label: 'Trainer',
         prefetch: true,
       },
       {
@@ -125,7 +125,7 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar safe-area-bottom safe-area-x rounded-t-2xl">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/50 backdrop-blur-md dark:bg-sidebar/50 safe-area-bottom safe-area-x border-t border-border/50">
         <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -168,12 +168,12 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
                 className={cn(
                   'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
                   isHighlighted
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground',
+                    ? cn(' text-sidebar-foreground font-semibold')
+                    : cn(' text-foreground/50 hover:text-sidebar-primary'),
                 )}
               >
                 <Icon className="size-5 mb-1" />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <span className="text-[10px]">{item.label}</span>
               </NavComponent>
             )
           })}

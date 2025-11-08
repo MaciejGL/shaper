@@ -17,7 +17,7 @@ type BioProps = {
 
 export function Bio({ profile, handleChange }: BioProps) {
   return (
-    <Card borderless>
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SectionIcon size="sm" icon={Star} variant="purple" />

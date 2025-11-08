@@ -60,7 +60,7 @@ export function CheckinScheduleForm({
             })
           }
         >
-          <SelectTrigger variant="tertiary" className="w-full">
+          <SelectTrigger variant="default" className="w-full">
             <SelectValue placeholder="Select frequency" />
           </SelectTrigger>
           <SelectContent>
@@ -86,7 +86,7 @@ export function CheckinScheduleForm({
               })
             }
           >
-            <SelectTrigger variant="tertiary" className="w-full">
+            <SelectTrigger variant="default" className="w-full">
               <SelectValue placeholder="Select day" />
             </SelectTrigger>
             <SelectContent>

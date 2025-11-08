@@ -59,4 +59,5 @@ extend type Mutation {
   updateCheckinSchedule(input: UpdateCheckinScheduleInput!): CheckinSchedule!
   deleteCheckinSchedule: Boolean!
   completeCheckin(input: CompleteCheckinInput!): CheckinCompletion!
+  skipCheckin: CheckinCompletion!
 }

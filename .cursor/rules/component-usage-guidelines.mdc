@@ -18,10 +18,6 @@ alwaysApply: true
   </CardContent>
 </Card>
 
-// Use borderless for subtle containers
-<Card borderless>
-  <CardContent>Content without visual card styling</CardContent>
-</Card>
 
 // Use variants for different contexts
 <Card variant="premium">Premium content</Card>
@@ -39,7 +35,7 @@ alwaysApply: true
 </Card>
 
 // ❌ DON'T: Cards for layout only (use div instead)
-<Card borderless>
+<Card>
   <div className="grid grid-cols-2 gap-4">...</div>
 </Card>
 

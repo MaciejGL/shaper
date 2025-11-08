@@ -33,7 +33,6 @@ export function NutritionPlanCard({
 
   return (
     <Card
-      borderless
       className={cn(
         'overflow-hidden transition-colors py-0',
         isPending ? 'bg-muted/30' : '',

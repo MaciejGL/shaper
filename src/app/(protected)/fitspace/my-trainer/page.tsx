@@ -35,7 +35,7 @@ import {
 } from '@/generated/graphql-client'
 import { useScrollToFromParams } from '@/hooks/use-scroll-to'
 
-// import { DashboardHeader } from '../../trainer/components/dashboard-header'
+import { ExtendHeader } from '../workout/[trainingId]/components/workout-page.client'
 
 import { ClientMeetingsSection } from './components/client-meetings-section'
 import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'
@@ -59,23 +59,32 @@ export default function MyTrainerPage() {
   useScrollToFromParams([isLoadingTrainer, trainer])
 
   return (
-    <div className="container-hypertro mx-auto mt-6">
-      {/* <DashboardHeader
-        title="Coaching"
-        icon={UserCheck}
-        variant="blue"
-        className="mb-6"
-      /> */}
+    <div className="container-hypertro mx-auto">
       {isLoadingTrainer && (
-        <div className="space-y-4">
-          <LoadingSkeleton count={1} variant="sm" />
-          <LoadingSkeleton count={2} variant="lg" />
-        </div>
+        <ExtendHeader
+          headerChildren={
+            <div className="px-2 py-4 dark">
+              <LoadingSkeleton
+                count={1}
+                variant="sm"
+                cardVariant="secondary"
+                withBorder
+              />
+            </div>
+          }
+        >
+          <div className="space-y-4 pt-2">
+            <LoadingSkeleton count={1} variant="md" />
+            <LoadingSkeleton count={3} variant="lg" />
+          </div>
+        </ExtendHeader>
       )}
       {!isLoadingTrainer && trainer && <TrainerView trainer={trainer} />}
 
       {!isLoadingTrainer && !trainer && (
-        <NoTrainerView requests={coachingRequests} />
+        <div className="pt-2">
+          <NoTrainerView requests={coachingRequests} />
+        </div>
       )}
     </div>
   )
@@ -162,75 +171,93 @@ function TrainerView({ trainer }: TrainerViewProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <TrainerCard
-        trainer={trainer}
-        showExperience={true}
-        showClientCount={false}
-        variant="secondary"
-        onClick={() => setIsDrawerOpen(true)}
-      />
+    <ExtendHeader
+      headerChildren={
+        <div className="px-2 dark space-y-4 pb-4">
+          <TrainerCard
+            trainer={trainer}
+            showExperience={true}
+            showClientCount={false}
+            variant="secondary"
+            className="rounded-2xl !border"
+            onClick={() => setIsDrawerOpen(true)}
+          />
 
-      <TrainerDetailsDrawer
-        trainer={trainer}
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        showRequestCoaching={false}
-      />
+          {isDrawerOpen && (
+            <TrainerDetailsDrawer
+              trainer={trainer}
+              isOpen={isDrawerOpen}
+              onClose={() => setIsDrawerOpen(false)}
+              showRequestCoaching={false}
+            />
+          )}
 
-      <PendingOffersList trainerId={trainer.id} />
-
-      <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
-        <div className="flex items-center justify-between mb-2">
-          <TabsList>
-            <TabsTrigger value="from-trainer">From Trainer</TabsTrigger>
-            <TabsTrigger value="purchased-services">
-              Purchased Services
-            </TabsTrigger>
-          </TabsList>
-          <Button
-            iconOnly={<MessageSquare />}
-            onClick={handleSendMessage}
-            variant="tertiary"
-          >
-            Contact Trainer
-          </Button>
+          <PendingOffersList trainerId={trainer.id} />
         </div>
-        <TabsContent value="from-trainer" className="space-y-4">
-          {/* Scheduled Meetings */}
-          <ClientMeetingsSection />
-
-          {/* Trainer Shared Notes Section */}
-          <div id="trainer-notes-section">
-            <TrainerSharedNotesSection />
+      }
+    >
+      <div className="space-y-6 pt-2">
+        <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+          <div className="grid grid-cols-[1fr_auto] items-center mb-2 gap-2">
+            <TabsList
+              rounded="3xl"
+              size="xl"
+              variant="secondary"
+              className="w-full"
+            >
+              <TabsTrigger value="from-trainer" rounded="3xl">
+                From Trainer
+              </TabsTrigger>
+              <TabsTrigger value="purchased-services" rounded="3xl">
+                Purchased Services
+              </TabsTrigger>
+            </TabsList>
+            <Button
+              iconOnly={<MessageSquare />}
+              onClick={handleSendMessage}
+              variant="tertiary"
+              className="rounded-2xl"
+              size="icon-lg"
+            >
+              Contact Trainer
+            </Button>
           </div>
-        </TabsContent>
-        <TabsContent value="purchased-services" className="space-y-4">
-          {/* Service Deliveries Section */}
-          <ClientServiceDeliveriesSection trainerId={trainer.id} />
+          <TabsContent value="from-trainer" className="space-y-4">
+            {/* Scheduled Meetings */}
+            <ClientMeetingsSection />
 
-          {/* Subscription Information */}
-          <SubscriptionInfoSection />
-          <Button
-            className="w-full"
-            size="lg"
-            variant="tertiary"
-            onClick={handleCancelCoaching}
-          >
-            Cancel Coaching
-          </Button>
-        </TabsContent>
-      </Tabs>
+            {/* Trainer Shared Notes Section */}
+            <div id="trainer-notes-section">
+              <TrainerSharedNotesSection />
+            </div>
+          </TabsContent>
+          <TabsContent value="purchased-services" className="space-y-4">
+            <SubscriptionInfoSection />
+            {/* Subscription Information */}
+            {/* Service Deliveries Section */}
+            <ClientServiceDeliveriesSection trainerId={trainer.id} />
 
-      <div className="grid grid-cols-2 gap-2"></div>
+            <Button
+              className="w-full"
+              size="lg"
+              variant="tertiary"
+              onClick={handleCancelCoaching}
+            >
+              Cancel Coaching
+            </Button>
+          </TabsContent>
+        </Tabs>
 
-      {/* Messenger Modal */}
-      <MessengerModal
-        isOpen={isMessengerOpen}
-        onClose={() => setIsMessengerOpen(false)}
-        partnerId={trainer.id}
-      />
-    </div>
+        <div className="grid grid-cols-2 gap-2"></div>
+
+        {/* Messenger Modal */}
+        <MessengerModal
+          isOpen={isMessengerOpen}
+          onClose={() => setIsMessengerOpen(false)}
+          partnerId={trainer.id}
+        />
+      </div>
+    </ExtendHeader>
   )
 }
 
@@ -312,7 +339,7 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
 
     return (
       <div className="space-y-4">
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="size-4" />
@@ -363,7 +390,7 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
 
   // No trainer and no pending requests - show find trainer
   return (
-    <Card borderless>
+    <Card>
       <CardContent className="p-6 text-center">
         <UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-lg font-semibold mb-2">No Trainer Connected</h2>

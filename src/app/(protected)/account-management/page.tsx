@@ -30,8 +30,8 @@ export default function AccountManagementPage() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center flex-col mb-4 gap-4">
-              <div className="size-12 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex-center shrink-0">
-                <UserRoundCogIcon className="w-6 h-6 text-black" />
+              <div className="size-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex-center shrink-0">
+                <UserRoundCogIcon className="w-6 h-6 text-white" />
               </div>
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-3xl font-bold">Account Management</h1>
@@ -44,7 +44,7 @@ export default function AccountManagementPage() {
 
           <div className="space-y-8 container-hypertro mx-auto">
             {/* Subscription Management Section */}
-            <Card borderless variant="secondary">
+            <Card variant="secondary">
               <CardHeader className="pb-6">
                 <div className="flex items-center space-x-3">
                   <div className="size-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shrink-0 self-start">

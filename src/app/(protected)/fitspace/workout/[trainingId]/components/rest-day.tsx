@@ -4,7 +4,7 @@ import { BiggyIcon } from '@/components/biggy-icon'
 
 export function RestDay() {
   return (
-    <div className="text-center p-6 text-muted-foreground flex-center flex-col mt-12">
+    <div className="text-center p-6 text-muted-foreground flex-center flex-col pt-16">
       <BiggyIcon icon={CoffeeIcon} />
       <p className="text-lg font-medium mb-2 mt-6">Rest up today</p>
       <p className="text-sm leading-relaxed">

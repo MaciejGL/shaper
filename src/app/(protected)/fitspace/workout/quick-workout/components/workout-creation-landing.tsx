@@ -45,7 +45,6 @@ export function WorkoutCreationLanding({
         transition={{ duration: 0.3, delay: 0.2 }}
       >
         <Card
-          borderless
           className="cursor-pointer transition-all"
           variant="secondary"
           onClick={onSelectAI}
@@ -93,7 +92,6 @@ export function WorkoutCreationLanding({
           transition={{ duration: 0.3, delay: 0.15 }}
         >
           <Card
-            borderless
             className="cursor-pointer transition-all"
             onClick={onSelectFavourites}
           >
@@ -129,7 +127,6 @@ export function WorkoutCreationLanding({
           transition={{ duration: 0.3, delay: 0.125 }}
         >
           <Card
-            borderless
             className="cursor-pointer transition-all"
             onClick={onSelectSingleExercise}
           >
@@ -162,7 +159,6 @@ export function WorkoutCreationLanding({
         transition={{ duration: 0.3, delay: 0.1 }}
       >
         <Card
-          borderless
           className="cursor-pointer transition-all"
           onClick={onSelectManual}
         >

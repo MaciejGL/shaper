@@ -31,7 +31,7 @@ export function TrainerSharedNotesSection() {
 
   if (isLoading) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={MessageSquare} size="xs" variant="sky" />
@@ -50,7 +50,7 @@ export function TrainerSharedNotesSection() {
 
   if (error) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={MessageSquare} size="xs" />
@@ -71,7 +71,7 @@ export function TrainerSharedNotesSection() {
 
   if (trainerNotes.length === 0) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={MessageSquare} size="xs" />
@@ -95,7 +95,7 @@ export function TrainerSharedNotesSection() {
   }
 
   return (
-    <Card borderless>
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SectionIcon icon={MessageSquare} size="xs" variant="sky" />
@@ -152,7 +152,7 @@ function ViewAllNotesDrawer({ isOpen, onOpenChange }: ViewAllNotesDrawerProps) {
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           {isLoading ? (
             <div className="space-y-4">
-              <LoadingSkeleton count={2} variant="lg" withBorder />
+              <LoadingSkeleton count={2} variant="lg" />
             </div>
           ) : error ? (
             <div className="text-center py-8 text-red-500">

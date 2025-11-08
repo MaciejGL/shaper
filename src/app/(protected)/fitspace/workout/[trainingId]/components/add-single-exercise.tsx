@@ -111,7 +111,7 @@ export function AddSingleExercise({
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           <Button
-            variant="secondary"
+            variant="tertiary"
             size="md"
             iconStart={<PlusIcon />}
             className="w-full"
@@ -144,10 +144,7 @@ export function AddSingleExercise({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Card
-          borderless
-          className="cursor-pointer transition-all hover:scale-[1.01]"
-        >
+        <Card className="cursor-pointer transition-all hover:scale-[1.01]">
           <CardContent>
             <div className="flex items-center">
               <div className="p-2 mr-3 bg-card-on-card rounded-lg">
@@ -243,8 +240,7 @@ function ExerciseList({
             return (
               <Card
                 key={exercise.id}
-                variant="tertiary"
-                borderless
+                variant="secondary"
                 className="cursor-pointer transition-all hover:scale-[1.01]"
                 onClick={() =>
                   !isAnyExerciseAdding && onSelectExercise(exercise.id)

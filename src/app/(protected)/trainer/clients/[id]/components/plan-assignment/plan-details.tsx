@@ -20,7 +20,7 @@ export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="max-w-max" borderless>
+      <Card className="max-w-max">
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <p className="text-lg font-semibold">{assignedPlan.title}</p>
@@ -41,7 +41,7 @@ export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
           </div>
         </CardContent>
       </Card>
-      <Card className="space-y-4" borderless>
+      <Card className="space-y-4">
         <CardContent>
           <div className="grid grid-cols-2 @xl/client-detail-page:grid-cols-4 gap-4">
             {assignedPlan.startDate && (

@@ -137,7 +137,7 @@ export function BodyProgressTimeline({ onEditLog }: BodyProgressTimelineProps) {
 
   if (progressLogs.length === 0) {
     return (
-      <Card borderless>
+      <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <Calendar className="size-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No Progress Logs Yet</h3>

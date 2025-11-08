@@ -236,7 +236,6 @@ export function ClientsTabs() {
                       return (
                         <Card
                           key={member.id}
-                          borderless
                           className={cn(
                             'cursor-pointer transition-all duration-200 hover:shadow-md',
                             isSelected

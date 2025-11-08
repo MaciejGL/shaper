@@ -263,8 +263,6 @@ function ExerciseList({
 
               return (
                 <Card
-                  variant="tertiary"
-                  borderless
                   className={
                     isDisabled
                       ? 'opacity-60 cursor-not-allowed'

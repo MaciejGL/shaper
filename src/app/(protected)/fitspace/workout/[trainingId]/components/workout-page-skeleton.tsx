@@ -12,11 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { GQLWorkoutType } from '@/generated/graphql-client'
 import { getDayName } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
-// Create dummy data structure matching the GraphQL schema
+import { COUNTER_MAIN_PADDING } from './navigation'
+
 const DUMMY_WEEK = {
   id: 'skeleton-week-1',
   weekNumber: 1,
@@ -118,8 +120,10 @@ export function WorkoutPageSkeleton() {
   return (
     <div>
       <SkeletonNavigation />
-      <div className="max-w-sm mx-auto pb-4">
-        <SkeletonExercises />
+      <div className="bg-sidebar -mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8">
+        <div className="max-w-sm mx-auto pb-4">
+          <SkeletonExercises />
+        </div>
       </div>
     </div>
   )
@@ -129,10 +133,9 @@ export function SkeletonNavigation() {
   return (
     <div
       className={cn(
-        'bg-sidebar rounded-b-xl',
-        // Counter Main padding
-        '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
-        'px-2 py-4 md:px-4 lg:p-8',
+        'bg-sidebar',
+        COUNTER_MAIN_PADDING,
+        'px-2 pt-4 pb-2 md:px-4 lg:p-8 -mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
       )}
     >
       <div className="mx-auto max-w-sm">
@@ -146,20 +149,13 @@ export function SkeletonNavigation() {
 function SkeletonWeekSelector() {
   return (
     <div className="flex justify-between gap-2">
-      <Button
-        iconOnly={<ChevronLeft />}
-        disabled={true}
-        size="icon-sm"
-        variant="tertiary"
-        className={cn('masked-placeholder-text')}
-      />
       <Select disabled>
         <SelectTrigger
           suppressHydrationWarning
           size="sm"
           variant="tertiary"
           className={cn(
-            '[&_svg]:data-[icon=mark]:size-3.5 truncate text-sm font-medium flex items-center gap-2 w-full',
+            'dark [&_svg]:data-[icon=mark]:size-3.5 truncate text-sm font-medium flex items-center gap-2',
             'masked-placeholder-text',
           )}
         >
@@ -169,13 +165,6 @@ function SkeletonWeekSelector() {
           <SelectItem value="skeleton">Week 1</SelectItem>
         </SelectContent>
       </Select>
-      <Button
-        iconOnly={<ChevronRight />}
-        size="icon-sm"
-        variant="tertiary"
-        disabled={true}
-        className={cn('masked-placeholder-text')}
-      />
     </div>
   )
 }
@@ -198,7 +187,7 @@ function SkeletonDay() {
     <div>
       <div
         className={cn(
-          'size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all bg-muted-foreground/30 dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80',
+          'dark size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80',
           'masked-placeholder-text',
         )}
       >
@@ -210,7 +199,7 @@ function SkeletonDay() {
         </span>
       </div>
 
-      <div className="relative h-1 my-1 mx-auto w-[66%] bg-secondary rounded-full">
+      <div className="dark relative h-1 my-1 mx-auto w-[66%] masked-placeholder-text rounded-full">
         <div
           className={cn(
             'h-1 rounded-full transition-all bg-amber-500',
@@ -230,27 +219,45 @@ export function SkeletonExercises() {
   const progressPercentage = 0 // Show some progress for skeleton
 
   return (
-    <div id={activeDay.id} className="max-w-sm mx-auto pb-4">
-      {!activeDay.isRestDay && (
-        <div className="flex flex-col py-3 space-y-2 w-full">
-          <div className="grid grid-cols-2 gap-2">
-            <Label className="flex items-center justify-center gap-2 whitespace-nowrap rounded-md p-1.5 bg-secondary dark:bg-muted-foreground/10 w-full"></Label>
-
-            <SkeletonExercisesCompleted
-              completedExercises={completedExercises}
-              totalExercises={activeDay.exercises.length}
-            />
-          </div>
-          <Progress
-            value={progressPercentage}
-            className={cn('masked-placeholder-text')}
-          />
-        </div>
+    <div
+      className={cn(
+        'bg-sidebar',
+        COUNTER_MAIN_PADDING,
+        'px-0 md:px-0 lg:px-0 pb-0 md:pb-0 lg:pb-0 pt-4',
       )}
-      <div className="space-y-3">
-        {activeDay.exercises.map((exercise) => (
-          <SkeletonExercise key={exercise.id} />
-        ))}
+    >
+      <div
+        id={activeDay.id}
+        className={cn(
+          'pb-4 bg-background rounded-t-3xl mt-0 px-2 md:px-4 lg:px-8',
+        )}
+      >
+        <div id={activeDay.id} className="max-w-sm mx-auto">
+          {!activeDay.isRestDay && (
+            <div className="flex flex-col py-3 space-y-2 w-full">
+              <Skeleton className="h-7 w-1/3 mx-auto" />
+              <div className="grid grid-cols-2 gap-2">
+                <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-2xl masked-placeholder-text">
+                  Loading
+                </Label>
+
+                <SkeletonExercisesCompleted
+                  completedExercises={completedExercises}
+                  totalExercises={activeDay.exercises.length}
+                />
+              </div>
+              <Progress
+                value={progressPercentage}
+                className={cn('masked-placeholder-text')}
+              />
+            </div>
+          )}
+          <div className="space-y-3">
+            {activeDay.exercises.map((exercise) => (
+              <SkeletonExercise key={exercise.id} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -267,7 +274,10 @@ function SkeletonExercisesCompleted({
     <Badge
       variant="secondary"
       size="lg"
-      className={cn('w-full bg-secondary', 'masked-placeholder-text')}
+      className={cn(
+        'w-full bg-card-on-card dark:bg-card-on-card',
+        'masked-placeholder-text',
+      )}
     >
       {completedExercises}/{totalExercises} completed
     </Badge>

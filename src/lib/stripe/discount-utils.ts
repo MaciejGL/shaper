@@ -47,7 +47,6 @@ export function getDiscountedAmount(
   pkg: PackageWithDiscount,
   originalAmount: number,
   bundleDiscount: number = 0,
-  mealTrainingDiscount: number = 0,
   hasCoachingSubscription: boolean = false,
 ): number {
   // Check if package has IN_PERSON_MEETING service type

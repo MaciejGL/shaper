@@ -12,6 +12,7 @@ import {
   createCheckinSchedule,
   deleteCheckinSchedule,
   getUserCheckinSchedule,
+  skipCheckin,
   updateCheckinSchedule,
 } from './factory'
 
@@ -231,5 +232,14 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     }
 
     return await completeCheckin(userSession.user.id, input, context)
+  },
+
+  skipCheckin: async (_parent, _args, context) => {
+    const userSession = context.user
+    if (!userSession) {
+      throw new Error('User not authenticated')
+    }
+
+    return await skipCheckin(userSession.user.id)
   },
 }

@@ -16,7 +16,7 @@ export function ExternalAccountManagement() {
   }
 
   return (
-    <Card className="border-0 shadow-xl col-span-2 lg:col-span-1">
+    <Card className="col-span-2 lg:col-span-1">
       <CardHeader className="pb-6">
         <div className="flex items-center space-x-3">
           <div className="size-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shrink-0 self-start">

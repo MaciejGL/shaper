@@ -22,7 +22,7 @@ export type UnifiedPlan = ActivePlan | AvailablePlan | CompletedPlan
 export enum PlanStatus {
   Active = 'active',
   Paused = 'paused',
-  Template = 'template',
+  Template = 'templates',
   Completed = 'completed',
 }
 

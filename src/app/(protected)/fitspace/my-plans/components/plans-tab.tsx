@@ -1,13 +1,20 @@
+import { differenceInDays } from 'date-fns'
 import { ChevronRight, Dumbbell } from 'lucide-react'
 import { useState } from 'react'
 
 import { BiggyIcon } from '@/components/biggy-icon'
-import { CardSkeleton } from '@/components/card-skeleton'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent } from '@/components/ui/card'
-import { useUser } from '@/context/user-context'
 import { GQLTrainingPlan } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 
 import {
   ActivePlan,
@@ -157,37 +164,24 @@ interface EmptyStatusCardProps {
 function EmptyStatusCard({ status }: EmptyStatusCardProps) {
   if (status === PlanStatus.Active) {
     return (
-      <CardContent className="flex items-center gap-4 py-4">
-        {/* <div className="size-12 bg-muted rounded-full flex items-center justify-center shrink-0">
-            <svg
-              className="size-6 text-muted-foreground"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div> */}
-        <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm mb-1">Activate Your Plan</h4>
-          <p className="text-sm text-muted-foreground">
-            Select one of your available plans to get started or select one of
-            our pre-made plans
-          </p>
-        </div>
-        <ButtonLink
-          href="/fitspace/explore?tab=plans"
-          size="sm"
-          iconEnd={<ChevronRight />}
-        >
-          Find Plan
-        </ButtonLink>
-      </CardContent>
+      <Card>
+        <CardContent className="flex items-center gap-4">
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-base mb-1">Activate Plan</h4>
+            <p className="text-sm text-muted-foreground">
+              Select one of your available plans to get started or select one of
+              our pre-made plans
+            </p>
+          </div>
+          <ButtonLink
+            href="/fitspace/explore?tab=plans"
+            size="sm"
+            iconEnd={<ChevronRight />}
+          >
+            Find Plan
+          </ButtonLink>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -221,17 +215,13 @@ interface StatusDividerProps {
 
 function StatusDivider({ status, count }: StatusDividerProps) {
   return (
-    <div className="flex items-center gap-3 pb-4 pt-2">
-      <div className="h-px flex-1 bg-border" />
+    <div className="flex items-center gap-3 w-full">
       <div className="flex items-center gap-2">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          {status}
-        </span>
+        <span className="capitalize">{status}</span>
         <span className="flex-center size-5 rounded-full bg-muted text-xs font-medium text-muted-foreground">
           {count}
         </span>
       </div>
-      <div className="h-px flex-1 bg-border" />
     </div>
   )
 }
@@ -246,52 +236,104 @@ interface PlansListProps {
 function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
   // When filter is "all", show sections with dividers
   if (selectedFilter === 'all') {
-    const grouped = groupPlansByStatus(plans)
-    const statusOrder = [
-      PlanStatus.Active,
-      PlanStatus.Template,
-      PlanStatus.Paused,
-      PlanStatus.Completed,
-    ]
+    const activePlan = plans.find(({ isActive }) => isActive)
+    const templatePlans = plans.filter(
+      ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Template,
+    )
+    const pausedPlans = plans.filter(
+      ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Paused,
+    )
+    const completedPlans = plans.filter(
+      ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Completed,
+    )
+
+    const hasNewTemplatePlans = templatePlans.some(
+      ({ plan }) =>
+        plan.createdAt &&
+        differenceInDays(new Date(), new Date(plan.createdAt)) < 3,
+    )
 
     return (
       <div className="space-y-2">
-        {statusOrder.map((status, statusIndex) => {
-          const group = grouped[status]
-          const hasPlans = group.count > 0
-          const isActiveOrTemplate =
-            status === PlanStatus.Active || status === PlanStatus.Template
-
-          // Only show sections with plans OR Active/Template (even if empty)
-          if (!hasPlans && !isActiveOrTemplate) return null
-
-          return (
-            <div key={status}>
-              {/* Show divider for all sections */}
-              {status !== PlanStatus.Active && (
-                <StatusDivider status={status} count={group.count} />
-              )}
-
-              {/* Show plans or empty state */}
-              {hasPlans ? (
-                <div className="space-y-2">
-                  {group.plans.map(({ plan, isActive }) => (
-                    <PlanCard
-                      key={plan.id}
-                      plan={plan}
-                      isActive={isActive}
-                      onClick={onPlanClick}
-                    />
-                  ))}
-                </div>
-              ) : isActiveOrTemplate ? (
-                <EmptyStatusCard
-                  status={status as PlanStatus.Active | PlanStatus.Template}
+        {activePlan ? (
+          <PlanCard
+            plan={activePlan.plan}
+            onClick={onPlanClick}
+            status={PlanStatus.Active}
+          />
+        ) : (
+          <EmptyStatusCard status={PlanStatus.Active} />
+        )}
+        <Accordion
+          type="single"
+          collapsible
+          defaultValue={
+            !activePlan || hasNewTemplatePlans ? 'template-plans' : undefined
+          }
+        >
+          <AccordionItem value="template-plans">
+            <AccordionTrigger>
+              <StatusDivider
+                status={PlanStatus.Template}
+                count={templatePlans.length}
+              />
+            </AccordionTrigger>
+            <AccordionContent className="space-y-2">
+              {templatePlans.map(({ plan }) => (
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  onClick={onPlanClick}
+                  status={PlanStatus.Template}
                 />
-              ) : null}
-            </div>
-          )
-        })}
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        <Accordion type="single" collapsible>
+          {pausedPlans.length > 0 ? (
+            <AccordionItem value="paused-plans">
+              <AccordionTrigger>
+                <StatusDivider
+                  status={PlanStatus.Paused}
+                  count={pausedPlans.length}
+                />
+              </AccordionTrigger>
+              <AccordionContent className="space-y-2">
+                {pausedPlans.map(({ plan }) => (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    onClick={onPlanClick}
+                    status={PlanStatus.Paused}
+                  />
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
+        </Accordion>
+        <Accordion type="single" collapsible>
+          {completedPlans.length > 0 ? (
+            <AccordionItem value="completed-plans" className="space-y-2">
+              <AccordionTrigger>
+                <StatusDivider
+                  status={PlanStatus.Completed}
+                  count={completedPlans.length}
+                />
+              </AccordionTrigger>
+              <AccordionContent>
+                {completedPlans.map(({ plan }) => (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    onClick={onPlanClick}
+                    status={PlanStatus.Completed}
+                  />
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
+        </Accordion>
       </div>
     )
   }
@@ -316,7 +358,7 @@ function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
         <PlanCard
           key={plan.id}
           plan={plan}
-          isActive={isActive}
+          status={getPlanStatus(plan, isActive)}
           onClick={onPlanClick}
         />
       ))}
@@ -376,9 +418,7 @@ export function PlansTab({
           counts={statusCounts}
         />
         <div className="space-y-2">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <CardSkeleton key={index} />
-          ))}
+          <LoadingSkeleton count={6} variant="md" cardVariant="secondary" />
         </div>
       </div>
     )
@@ -390,7 +430,7 @@ export function PlansTab({
 
   return (
     <>
-      <div className="space-y-8">
+      <div className="space-y-4">
         {/* Filter Chips */}
         <PlanStatusFilter
           selectedFilter={selectedFilter}
@@ -442,7 +482,7 @@ function EmptyFilterState({ filter }: { filter: FilterOption }) {
   }
 
   return (
-    <Card borderless>
+    <Card>
       <CardContent className="flex-center flex-col gap-4 py-12">
         <BiggyIcon icon={Dumbbell} />
         <h3 className="font-semibold">No {getFilterLabel()} plans</h3>

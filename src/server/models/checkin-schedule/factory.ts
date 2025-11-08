@@ -361,3 +361,31 @@ export async function completeCheckin(
 
   return new CheckinCompletion(completion)
 }
+
+/**
+ * Skip a check-in (creates empty completion)
+ */
+export async function skipCheckin(userId: string): Promise<CheckinCompletion> {
+  const userProfile = await prisma.userProfile.findUnique({
+    where: { userId },
+    include: { checkinSchedule: true },
+  })
+
+  if (!userProfile?.checkinSchedule) {
+    throw new Error('Check-in schedule not found')
+  }
+
+  const completion = await prisma.checkinCompletion.create({
+    data: {
+      scheduleId: userProfile.checkinSchedule.id,
+      measurementId: null,
+      progressLogId: null,
+    },
+    include: {
+      measurement: true,
+      progressLog: true,
+    },
+  })
+
+  return new CheckinCompletion(completion)
+}

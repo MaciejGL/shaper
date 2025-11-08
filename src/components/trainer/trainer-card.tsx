@@ -79,7 +79,6 @@ export function TrainerCard({
       )}
       variant={variant}
       onClick={onClick}
-      borderless
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">

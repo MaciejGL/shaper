@@ -51,26 +51,11 @@ alwaysApply: true
 </Card>
 
 // ❌ NEVER DO - use simple div instead
-<Card borderless>
+<Card>
   <div className="p-4">
     <Button>Simple action</Button>
   </div>
 </Card>
-```
-
-**Use borderless sparingly:**
-
-```typescript
-// ✅ ONLY when you need Card components but no visual styling
-<Card borderless>
-  <CardContent>Content that benefits from Card structure</CardContent>
-</Card>
-
-// ✅ BETTER - use simple container when possible
-<div className="p-4 space-y-4">
-  <h3>Title</h3>
-  <p>Content</p>
-</div>
 ```
 
 ### Component Length Rules

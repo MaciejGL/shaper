@@ -120,7 +120,7 @@ export default function ClientDetailPage({
                 activePlan={activePlan}
               />
             </div>
-            <Card borderless>
+            <Card>
               <CardContent>
                 <ClientAssessment clientId={client.id} />
               </CardContent>

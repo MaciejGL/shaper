@@ -192,7 +192,7 @@ export function AccountSection({}: AccountSectionProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <Card className="border-0 shadow-xl bg-card">
+      <Card className="bg-card">
         {/* Reset Account Data */}
         <CardHeader>
           <div className="flex items-center space-x-3">
@@ -233,7 +233,7 @@ export function AccountSection({}: AccountSectionProps) {
           </div>
         </CardContent>
       </Card>
-      <Card className="border-0 shadow-xl bg-card">
+      <Card className="bg-card">
         <CardHeader>
           <div className="flex items-center space-x-3">
             <div className="size-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shrink-0 self-start">

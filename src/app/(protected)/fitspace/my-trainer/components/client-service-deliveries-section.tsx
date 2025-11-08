@@ -49,7 +49,7 @@ export function ClientServiceDeliveriesSection({
 
   if (paidLoading) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={Package} size="xs" variant="green" />
@@ -62,7 +62,7 @@ export function ClientServiceDeliveriesSection({
             collapsible
             className="w-full flex flex-col gap-2"
           >
-            <LoadingSkeleton count={3} cardVariant="tertiary" variant="sm" />
+            <LoadingSkeleton count={3} variant="sm" />
           </Accordion>
         </CardContent>
       </Card>
@@ -79,7 +79,7 @@ function PurchasedOffersCard({
 }) {
   if (offers.length === 0) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={Package} size="xs" variant="green" />
@@ -98,7 +98,7 @@ function PurchasedOffersCard({
   }
 
   return (
-    <Card borderless>
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SectionIcon icon={Package} size="xs" variant="green" />
@@ -168,7 +168,7 @@ function TrainerOfferItem({ offer }: TrainerOfferItemProps) {
   return (
     <AccordionItem
       value={offer.id}
-      className="bg-card-on-card px-4 rounded-md border-none"
+      className="px-4 rounded-2xl border last:border-b"
     >
       <AccordionTrigger className="hover:no-underline flex justify-between items-center">
         <div className="flex items-center justify-between w-full pr-4">

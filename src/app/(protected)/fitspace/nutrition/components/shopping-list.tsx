@@ -131,14 +131,14 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
   ).length
 
   return (
-    <Card borderless>
-      <CardHeader>
+    <>
+      <CardHeader className="px-0 mb-0">
         <div className="flex items-center gap-2 mb-2">
           <SectionIcon icon={ShoppingCart} size="sm" variant="sky" />
           <p className="text-base font-medium">Shopping List</p>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0">
         <Card
           variant="tertiary"
           className="p-0 bg-card dark:bg-card-on-card border dark:border-0"
@@ -261,6 +261,6 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
           </Collapsible>
         </Card>
       </CardContent>
-    </Card>
+    </>
   )
 }

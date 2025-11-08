@@ -31,7 +31,7 @@ export function SessionTokenExpired({
   return (
     <div className="dark min-h-screen w-full bg-background flex-center">
       <div className="container-hypertro mx-auto max-w-md p-4">
-        <Card borderless variant="secondary" className="w-full text-center">
+        <Card variant="secondary" className="w-full text-center">
           <CardHeader>
             <div className="flex-center w-full">
               <BiggyIcon icon={Clock} variant="default" />

@@ -82,15 +82,12 @@ export function PlanPreviewTab({
       value={accordionValue}
       onValueChange={setAccordionValue}
     >
-      {sortedWeeks.map((week, index) => {
+      {sortedWeeks.map((week) => {
         // Sort days according to user's week start preference
         const sortedDays = sortDaysForDisplay(
           week.days,
           preferences.weekStartsOn,
         )
-
-        // Block access to weeks beyond the first one for premium plans without premium access
-        const isWeekLocked = index > 0 && hasLimitedAccess
 
         return (
           <AccordionItem
@@ -100,25 +97,16 @@ export function PlanPreviewTab({
               weekRefs.current[week.id] = el
             }}
           >
-            <PremiumButtonWrapper
-              hasPremium={!isWeekLocked}
-              tooltipText="Upgrade to Premium to access all weeks"
-            >
-              <AccordionTrigger
-                className="text-base font-semibold hover:no-underline"
-                disabled={isWeekLocked}
-              >
-                <div className="flex items-center gap-2">
-                  Week {week.weekNumber}
-                </div>
-              </AccordionTrigger>
-            </PremiumButtonWrapper>
+            <AccordionTrigger className="text-base font-semibold hover:no-underline">
+              <div className="flex items-center gap-2">
+                Week {week.weekNumber}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-2 pb-2">
-                {!isWeekLocked &&
-                  sortedDays.map((day) => (
-                    <ExplorePreviewDay key={day.id} day={day} />
-                  ))}
+                {sortedDays.map((day) => (
+                  <ExplorePreviewDay key={day.id} day={day} />
+                ))}
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -143,7 +131,7 @@ function ExplorePreviewDay({ day }: ExplorePreviewDayProps) {
     <div className="mb-8">
       <h4
         className={cn(
-          'text-base font-medium mb-2 bg-card-on-card p-4 rounded-md',
+          'text-base font-medium mb-2 bg-card-on-card p-4 rounded-xl',
           day.isRestDay ? 'text-muted-foreground' : '',
         )}
       >

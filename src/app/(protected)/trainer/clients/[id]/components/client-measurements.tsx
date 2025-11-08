@@ -37,7 +37,7 @@ export function ClientMeasurements({
   if (error) {
     return (
       <div className="space-y-6">
-        <Card borderless>
+        <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <p className="text-red-600">Error loading measurements</p>

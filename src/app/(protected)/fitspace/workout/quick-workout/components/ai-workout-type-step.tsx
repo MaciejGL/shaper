@@ -155,7 +155,7 @@ export function AiWorkoutTypeStep({
         <div className="flex justify-between bg-card-on-card rounded-lg">
           <div>
             <Button
-              variant="ghost"
+              variant="tertiary"
               size="icon-lg"
               onClick={handlePrevious}
               className="shrink-0 h-full"
@@ -177,11 +177,9 @@ export function AiWorkoutTypeStep({
                     key={option.id}
                     className="flex items-center justify-center"
                   >
-                    <div className="text-center py-1">
+                    <div className="text-center py-3 px-2 space-y-1">
                       <h3 className="font-semibold text-lg">{option.label}</h3>
-                      <p className="text-xs text-muted-foreground">
-                        {option.description}
-                      </p>
+                      <p className="text-sm">{option.description}</p>
                     </div>
                   </CarouselItem>
                 ))}
@@ -191,7 +189,7 @@ export function AiWorkoutTypeStep({
 
           <div>
             <Button
-              variant="ghost"
+              variant="tertiary"
               size="icon-lg"
               onClick={handleNext}
               iconOnly={<ChevronRight />}

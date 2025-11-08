@@ -18,19 +18,23 @@ interface NavigationProps {
   plan?: NavigationPlan | null
 }
 
+export const COUNTER_MAIN_PADDING =
+  '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8'
+
 export function Navigation({ plan }: NavigationProps) {
   if (!plan) return null
 
   return (
     <div
+      id="workout-navigation"
       className={cn(
-        'bg-sidebar rounded-b-2xl',
+        'bg-sidebar',
         // Counter Main padding
-        '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
-        'px-2 pt-4 pb-2 md:px-4 lg:p-8',
+        COUNTER_MAIN_PADDING,
+        ' px-2 pt-4 pb-2 md:px-4 lg:p-8',
       )}
     >
-      <div className="mx-auto max-w-sm">
+      <div className="mx-auto max-w-sm dark">
         <WeekSelector plan={plan} />
         <DaySelector plan={plan} />
       </div>
@@ -53,8 +57,8 @@ function Day({ day, isSelected }: { day: NavigationDay; isSelected: boolean }) {
       <button
         data-selected={isSelected}
         className={cn(
-          'size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all bg-primary/5 dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80',
-          'data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground dark:data-[selected=true]:bg-primary dark:data-[selected=true]:text-primary-foreground shadow-xs',
+          'size-12 shrink-0 rounded-xl flex-center flex-col text-primary transition-all bg-card-on-card dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80',
+          'data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground dark:data-[selected=true]:bg-primary dark:data-[selected=true]:text-primary-foreground shadow-sm',
         )}
         onClick={handleClick}
       >

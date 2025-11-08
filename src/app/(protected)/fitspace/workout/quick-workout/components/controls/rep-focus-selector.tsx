@@ -49,7 +49,7 @@ export function RepFocusSelector({
       transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
-      <Card borderless variant="tertiary">
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
             Training Focus

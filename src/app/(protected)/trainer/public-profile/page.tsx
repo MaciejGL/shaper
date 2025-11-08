@@ -244,7 +244,7 @@ export default function PublicProfilePage() {
     return (
       <>
         {/* Bio Section */}
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle>About / Bio</CardTitle>
           </CardHeader>
@@ -265,7 +265,7 @@ export default function PublicProfilePage() {
         </Card>
 
         {/* Trainer Since Section */}
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle>Training Experience</CardTitle>
           </CardHeader>
@@ -304,7 +304,7 @@ export default function PublicProfilePage() {
         </Card>
 
         {/* Client Capacity Section */}
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle>Client Capacity</CardTitle>
           </CardHeader>
@@ -337,7 +337,7 @@ export default function PublicProfilePage() {
         </Card>
 
         {/* Specializations Section */}
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle>Specializations</CardTitle>
           </CardHeader>
@@ -380,7 +380,7 @@ export default function PublicProfilePage() {
         </Card>
 
         {/* Credentials Section */}
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle>Credentials & Certifications</CardTitle>
           </CardHeader>
@@ -421,7 +421,7 @@ export default function PublicProfilePage() {
         </Card>
 
         {/* Success Stories Section */}
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle>Success Stories</CardTitle>
           </CardHeader>

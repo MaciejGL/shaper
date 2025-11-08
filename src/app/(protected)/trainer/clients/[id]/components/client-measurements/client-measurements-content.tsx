@@ -177,7 +177,7 @@ export function ClientMeasurementsContent({
 
 function ClientMeasurementsEmptyState({ clientName }: { clientName: string }) {
   return (
-    <Card borderless>
+    <Card>
       <CardContent className="pt-6">
         <div className="text-center py-8">
           <Scale className="h-12 w-12 mx-auto text-muted-foreground mb-4" />

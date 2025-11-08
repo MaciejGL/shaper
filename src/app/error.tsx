@@ -39,7 +39,7 @@ export default function Error({
           Try Again
         </Button>
         <ButtonLink href="/" iconStart={<Home />}>
-          Go To Home
+          Homepage
         </ButtonLink>
       </div>
     </div>

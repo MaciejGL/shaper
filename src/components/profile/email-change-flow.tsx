@@ -218,7 +218,7 @@ export function EmailChangeFlow({
   }
 
   return (
-    <Card className="mb-6" borderless>
+    <Card className="mb-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Mail className="size-6" /> Email Address

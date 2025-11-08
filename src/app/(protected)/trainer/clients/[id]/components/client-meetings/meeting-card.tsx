@@ -160,7 +160,7 @@ export function MeetingCard({
 
   return (
     <>
-      <Card borderless className={cn('py-3', isPast && 'opacity-75')}>
+      <Card className={cn('py-3', isPast && 'opacity-75')}>
         <CardContent className="space-y-2">
           {/* Header Row */}
           <div className="flex items-start justify-between gap-3">

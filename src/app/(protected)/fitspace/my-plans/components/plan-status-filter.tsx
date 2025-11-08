@@ -36,13 +36,9 @@ export function PlanStatusFilter({
 
   return (
     <Select value={selectedFilter} onValueChange={onFilterChange}>
-      <SelectTrigger
-        variant="tertiary"
-        size="md"
-        className="p-6 w-full bg-card rounded-xl"
-      >
+      <SelectTrigger variant="default" size="lg" className="w-full">
         <SelectValue>
-          <p>{selectedOption?.label}</p>
+          <p className="text-base">{selectedOption?.label}</p>
           {selectedCount > 0 && (
             <div className="ml-auto rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
               {selectedCount}
@@ -62,7 +58,7 @@ export function PlanStatusFilter({
               <div className="flex items-center justify-between gap-3 w-full">
                 <p>{option.label}</p>
                 {count > 0 && (
-                  <div className="ml-auto rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
+                  <div className="ml-auto rounded-full bg-card-on-card px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
                     {count}
                   </div>
                 )}

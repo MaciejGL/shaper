@@ -118,16 +118,21 @@ export function PlanDetailsDrawer({
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="w-full shadow-md">
+              <TabsList
+                className="w-full"
+                variant="secondary"
+                size="lg"
+                rounded="3xl"
+              >
                 {!isTemplate && (
-                  <TabsTrigger value="summary" className="flex-1">
+                  <TabsTrigger value="summary" className="flex-1" rounded="3xl">
                     Summary
                   </TabsTrigger>
                 )}
-                <TabsTrigger value="info" className="flex-1">
+                <TabsTrigger value="info" className="flex-1" rounded="3xl">
                   Info
                 </TabsTrigger>
-                <TabsTrigger value="preview" className="flex-1">
+                <TabsTrigger value="preview" className="flex-1" rounded="3xl">
                   Preview
                 </TabsTrigger>
               </TabsList>
@@ -288,15 +293,6 @@ export function PlanDetailsDrawer({
                         Pause
                       </Button>
                     )}
-                    {!isActive && (
-                      <Button
-                        onClick={() => onAction('activate', plan)}
-                        variant="default"
-                        disabled={isButtonLoading}
-                      >
-                        {isPaused ? 'Resume' : 'Activate'}
-                      </Button>
-                    )}
                     {(isActive || isPaused) && (
                       <Button
                         onClick={() => onAction('close', plan)}
@@ -304,6 +300,15 @@ export function PlanDetailsDrawer({
                         disabled={isButtonLoading}
                       >
                         Complete
+                      </Button>
+                    )}
+                    {!isActive && (
+                      <Button
+                        onClick={() => onAction('activate', plan)}
+                        variant="default"
+                        disabled={isButtonLoading}
+                      >
+                        {isPaused ? 'Resume' : 'Activate'}
                       </Button>
                     )}
                   </>

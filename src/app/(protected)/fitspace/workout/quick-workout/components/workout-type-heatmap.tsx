@@ -84,7 +84,7 @@ export function WorkoutTypeHeatmap({
 
         <TabsContent
           value="front"
-          className="flex flex-col items-center scale-75 sm:scale-90 -my-8 sm:-my-4"
+          className="flex flex-col items-center scale-100 sm:scale-90"
         >
           <FrontBodyView
             getPathProps={getPathProps}
@@ -95,10 +95,7 @@ export function WorkoutTypeHeatmap({
           />
         </TabsContent>
 
-        <TabsContent
-          value="back"
-          className="flex flex-col items-center scale-75 sm:scale-90 -my-8 sm:-my-4"
-        >
+        <TabsContent value="back" className="flex flex-col items-center">
           <BackBodyView
             getPathProps={getPathProps}
             isRegionSelected={isRegionSelected}

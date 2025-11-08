@@ -115,7 +115,7 @@ export function AddToFavouritesButton({ day }: AddToFavouritesButtonProps) {
   return (
     <>
       <Button
-        variant="secondary"
+        variant="tertiary"
         iconStart={<BookmarkIcon />}
         onClick={() => setOpen(true)}
         className="w-full"

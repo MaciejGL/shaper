@@ -1,20 +1,25 @@
 import { Card, CardContent, CardHeader, CardProps } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 export function LoadingSkeleton({
   count = 3,
   variant = 'md',
-  withBorder = false,
   cardVariant,
+  withBorder = false,
 }: {
   count?: number
   variant?: 'lg' | 'md' | 'sm'
-  withBorder?: boolean
   cardVariant?: CardProps['variant']
+  withBorder?: boolean
 }) {
   if (variant === 'lg') {
     return Array.from({ length: count }).map((_, index) => (
-      <Card key={index} borderless={!withBorder} variant={cardVariant}>
+      <Card
+        key={index}
+        variant={cardVariant}
+        className={cn(withBorder && '!border')}
+      >
         <CardHeader>
           <Skeleton className="h-6 w-1/3" />
         </CardHeader>
@@ -31,9 +36,8 @@ export function LoadingSkeleton({
     return Array.from({ length: count }).map((_, index) => (
       <Card
         key={index}
-        borderless={!withBorder}
-        className="py-0"
         variant={cardVariant}
+        className={cn('py-0', withBorder && '!border')}
       >
         <CardContent className="p-4">
           <Skeleton className="h-6 w-3/4 mb-3" />
@@ -48,8 +52,7 @@ export function LoadingSkeleton({
     return Array.from({ length: count }).map((_, index) => (
       <Card
         key={index}
-        borderless={!withBorder}
-        className="py-0"
+        className={cn('py-0', withBorder && '!border')}
         variant={cardVariant}
       >
         <CardContent className="p-4">
@@ -61,7 +64,11 @@ export function LoadingSkeleton({
   }
 
   return Array.from({ length: count }).map((_, index) => (
-    <Card key={index} borderless={!withBorder} variant={cardVariant}>
+    <Card
+      key={index}
+      variant={cardVariant}
+      className={cn(withBorder && '!border')}
+    >
       <CardHeader>
         <Skeleton className="h-8 w-1/3" />
       </CardHeader>

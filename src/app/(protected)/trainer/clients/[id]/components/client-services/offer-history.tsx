@@ -331,7 +331,7 @@ export function OfferHistory({ clientId, trainerId }: OfferHistoryProps) {
                       {offer.status}
                     </Badge>
                     {offer.status === 'pending' && (
-                      <Badge variant="tertiary">
+                      <Badge variant="secondary">
                         {getTimeRemaining(offer.expiresAt)}
                       </Badge>
                     )}

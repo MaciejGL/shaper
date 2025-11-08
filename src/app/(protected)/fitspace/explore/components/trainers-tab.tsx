@@ -18,8 +18,7 @@ import {
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
 
-type FeaturedTrainer =
-  GQLGetFeaturedTrainersQuery['getFeaturedTrainers'][number]
+import { FeaturedTrainer } from './explore.client'
 
 interface TrainersTabProps {
   initialTrainers?: FeaturedTrainer[]

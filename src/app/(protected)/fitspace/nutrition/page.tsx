@@ -15,6 +15,8 @@ import {
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
+import { ExtendHeader } from '../workout/[trainingId]/components/workout-page.client'
+
 import { NutritionPlanSelector } from './components/nutrition-plan-selector'
 import { NutritionPlanViewer } from './components/nutrition-plan-viewer'
 
@@ -48,88 +50,85 @@ export default function NutritionPage() {
   }
 
   return (
-    <div className="container-hypertro mx-auto py-6">
-      <div>
-        {!hasMacroTargets && !hasPlans && (
-          <EmptyStateCard
-            title="Macro targets not set"
-            description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
-            icon={Salad}
-            cta={
-              !user?.trainerId && (
-                <ButtonLink
-                  href="/fitspace/explore?tab=trainers"
-                  iconEnd={<ArrowRight />}
-                >
-                  Find a Trainer
-                </ButtonLink>
-              )
-            }
-          />
-        )}
-        <div className="grid grid-cols-4 gap-2">
-          {(isLoading || macroTargets?.calories) && (
-            <MacroCard
-              label="Calories"
-              value={macroTargets?.calories || '0000'}
-              color="text-primary"
-              isLoading={isLoading}
+    <div>
+      <ExtendHeader
+        headerChildren={
+          <div className="pb-4 px-2 dark space-y-4">
+            {hasMacroTargets && (
+              <div className="grid grid-cols-4 gap-2">
+                {(isLoading || macroTargets?.calories) && (
+                  <MacroCard
+                    label="Calories"
+                    value={macroTargets?.calories || '0000'}
+                    className="text-sidebar-foreground"
+                    isLoading={isLoading}
+                  />
+                )}
+
+                {(isLoading || macroTargets?.protein) && (
+                  <MacroCard
+                    label="Protein"
+                    value={macroTargets?.protein || '000'}
+                    unit="g"
+                    className="text-blue-500"
+                    isLoading={isLoading}
+                  />
+                )}
+
+                {(isLoading || macroTargets?.carbs) && (
+                  <MacroCard
+                    label="Carbs"
+                    value={macroTargets?.carbs || '000'}
+                    unit="g"
+                    className="text-green-500"
+                    isLoading={isLoading}
+                  />
+                )}
+
+                {(isLoading || macroTargets?.fat) && (
+                  <MacroCard
+                    label="Fat"
+                    value={macroTargets?.fat || '000'}
+                    unit="g"
+                    className="text-yellow-500"
+                    isLoading={isLoading}
+                  />
+                )}
+              </div>
+            )}
+            <NutritionPlanSelector
+              onPlanSelect={handlePlanSelect}
+              selectedPlanId={selectedPlanId}
+              nutritionPlans={nutritionPlansData?.nutritionPlans || []}
+              isLoading={isNutritionPlansLoading}
+            />
+          </div>
+        }
+      >
+        <div className="container-hypertro mx-auto pb-6 pt-2 space-y-4">
+          {!hasMacroTargets && !hasPlans && (
+            <EmptyStateCard
+              title="Macro targets not set"
+              description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
+              icon={Salad}
+              cta={
+                !user?.trainerId && (
+                  <ButtonLink
+                    href="/fitspace/explore?tab=trainers"
+                    iconEnd={<ArrowRight />}
+                  >
+                    Find a Trainer
+                  </ButtonLink>
+                )
+              }
             />
           )}
 
-          {(isLoading || macroTargets?.protein) && (
-            <MacroCard
-              label="Protein"
-              value={macroTargets?.protein || '000'}
-              unit="g"
-              color="text-blue-500"
-              isLoading={isLoading}
-            />
-          )}
-
-          {(isLoading || macroTargets?.carbs) && (
-            <MacroCard
-              label="Carbs"
-              value={macroTargets?.carbs || '000'}
-              unit="g"
-              color="text-green-500"
-              isLoading={isLoading}
-            />
-          )}
-
-          {(isLoading || macroTargets?.fat) && (
-            <MacroCard
-              label="Fat"
-              value={macroTargets?.fat || '000'}
-              unit="g"
-              color="text-yellow-500"
-              isLoading={isLoading}
-            />
-          )}
+          <div>
+            {selectedPlanId && <NutritionPlanViewer planId={selectedPlanId} />}
+          </div>
         </div>
-        {macroTargets?.notes && (
-          <Card borderless className="p-4 mt-4">
-            <CardHeader>
-              <CardTitle>Notes from trainer:</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                {macroTargets.notes}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-      <div className={cn(hasPlans && hasMacroTargets && 'mt-6')}>
-        <NutritionPlanSelector
-          onPlanSelect={handlePlanSelect}
-          selectedPlanId={selectedPlanId}
-          nutritionPlans={nutritionPlansData?.nutritionPlans || []}
-          isLoading={isNutritionPlansLoading}
-        />
-
-        {selectedPlanId && <NutritionPlanViewer planId={selectedPlanId} />}
-      </div>
+      </ExtendHeader>
     </div>
   )
 }

@@ -22,12 +22,12 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  'bg-card dark:bg-muted-foreground/10 text-muted-foreground inline-flex h-9 w-fit items-center justify-center py-[2px] px-[3px]',
+  'bg-card-on-card dark:bg-muted-foreground/10 text-muted-foreground inline-flex h-9 w-fit items-center justify-center py-[2px] px-[3px]',
   {
     variants: {
       variant: {
-        default: '',
-        secondary: 'bg-muted-foreground/10',
+        default: 'bg-card',
+        secondary: cn(' bg-card-on-card'),
       },
       size: {
         sm: 'h-8 rounded-lg',
@@ -40,6 +40,8 @@ const tabsListVariants = cva(
         lg: 'rounded-lg',
         full: 'rounded-full',
         xl: 'rounded-xl',
+        '2xl': 'rounded-2xl',
+        '3xl': 'rounded-3xl',
       },
     },
   },
@@ -53,7 +55,7 @@ function TabsList({
 }: React.ComponentProps<typeof TabsPrimitive.List> & {
   variant?: 'default' | 'secondary'
   size?: 'default' | 'sm' | 'lg' | 'xl'
-  rounded?: 'default' | 'lg' | 'xl' | 'full'
+  rounded?: 'default' | 'lg' | 'xl' | 'full' | '2xl' | '3xl'
 }) {
   return (
     <TabsPrimitive.List
@@ -66,7 +68,7 @@ function TabsList({
 
 const tabsTriggerVariants = cva(
   cn(
-    ' data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:bg-background text-muted-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-30  [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*="size-"])]:size-4 cursor-pointer',
+    ' data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:bg-background text-foreground/80 dark:text-foreground/80 inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-30  [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*="size-"])]:size-4 cursor-pointer',
   ),
   {
     variants: {
@@ -75,15 +77,17 @@ const tabsTriggerVariants = cva(
       },
       size: {
         sm: 'text-xs rounded-lg',
-        default: 'text-sm rounded-xl',
-        lg: 'text-sm px-3 py-1 rounded-xl',
-        xl: 'text-base px-4 py-1.5 rounded-xl',
+        default: 'rounded-xl',
+        lg: 'px-3 py-1 rounded-xl',
+        xl: 'px-4 py-1.5 rounded-xl',
       },
       rounded: {
         default: 'rounded-xl',
         lg: 'rounded-lg',
         full: 'rounded-full px-4',
         xl: cn('rounded-[10px]'),
+        '2xl': cn('rounded-[12px]'),
+        '3xl': cn('rounded-[18px]'),
       },
     },
   },
@@ -98,7 +102,7 @@ function TabsTrigger({
 }: React.ComponentProps<typeof TabsPrimitive.Trigger> & {
   variant?: 'default'
   size?: 'default' | 'sm' | 'lg' | 'xl'
-  rounded?: 'default' | 'lg' | 'xl' | 'full'
+  rounded?: 'default' | 'lg' | 'xl' | 'full' | '2xl' | '3xl'
 }) {
   return (
     <TabsPrimitive.Trigger

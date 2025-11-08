@@ -99,7 +99,6 @@ export function AllMeetingsDrawer({
     return (
       <Card
         key={meeting.id}
-        borderless
         className={cn('p-3 bg-card-on-card', isPastMeeting && 'opacity-60')}
       >
         <CardContent className="space-y-2 p-0">

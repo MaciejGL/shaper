@@ -60,7 +60,7 @@ export function IncomingCoachingRequestCard({
       : request.sender.name || 'A trainer'
 
   return (
-    <Card borderless>
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SectionIcon icon={UserPlus} size="xs" variant="blue" />

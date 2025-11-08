@@ -34,7 +34,7 @@ export function PersonalInfo({ profile, handleChange }: PersonalInfoProps) {
   const [showEmailChange, setShowEmailChange] = useState(false)
 
   return (
-    <Card className="mb-6" borderless>
+    <Card className="mb-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SectionIcon size="sm" icon={UserIcon} variant="green" />
