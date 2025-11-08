@@ -66,7 +66,6 @@ export const isMealOrTrainingPackage = (pkg: TrainerPackage): boolean => {
 export const getDiscountedAmount = (
   pkg: TrainerPackage,
   bundleDiscount: number = 0,
-  mealTrainingDiscount: number = 0,
   hasCoachingSubscription: boolean = false,
 ): number => {
   if (!pkg.pricing) return 0
@@ -85,12 +84,6 @@ export const getDiscountedAmount = (
     return Math.round(pkg.pricing.amount * discountMultiplier)
   }
 
-  // Apply meal+training bundle discount
-  if (isMealOrTrainingPackage(pkg) && mealTrainingDiscount > 0) {
-    const discountMultiplier = (100 - mealTrainingDiscount) / 100
-    return Math.round(pkg.pricing.amount * discountMultiplier)
-  }
-
   return pkg.pricing.amount
 }
 
@@ -102,7 +95,6 @@ export const formatPrice = (
   pkg: TrainerPackage,
   quantity: number = 1,
   bundleDiscount: number = 0,
-  mealTrainingDiscount: number = 0,
   hasCoachingSubscription: boolean = false,
 ): string => {
   if (!pkg.pricing) return 'Price TBD'
@@ -118,7 +110,6 @@ export const formatPrice = (
   const discountedAmount = getDiscountedAmount(
     pkg,
     bundleDiscount,
-    mealTrainingDiscount,
     hasCoachingSubscription,
   )
   const baseValue = (discountedAmount / 100).toFixed(2)
@@ -177,17 +168,12 @@ export const allowsQuantitySelection = (pkg: TrainerPackage): boolean => {
 export const hasAnyDiscount = (
   pkg: TrainerPackage,
   bundleDiscount: number = 0,
-  mealTrainingDiscount: number = 0,
   hasCoachingSubscription: boolean = false,
 ): boolean => {
   const isInPersonSession =
     pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
-  const isMealOrTraining = isMealOrTrainingPackage(pkg)
 
-  return (
-    (isInPersonSession && (bundleDiscount > 0 || hasCoachingSubscription)) ||
-    (isMealOrTraining && mealTrainingDiscount > 0)
-  )
+  return isInPersonSession && (bundleDiscount > 0 || hasCoachingSubscription)
 }
 
 /**
@@ -196,7 +182,6 @@ export const hasAnyDiscount = (
 export const getDiscountPercentage = (
   pkg: TrainerPackage,
   bundleDiscount: number = 0,
-  mealTrainingDiscount: number = 0,
   hasCoachingSubscription: boolean = false,
 ): number => {
   // Check if package is in-person session by lookup key
@@ -204,11 +189,6 @@ export const getDiscountPercentage = (
     pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
   if (isInPersonSession && (bundleDiscount > 0 || hasCoachingSubscription)) {
     return DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO
-  }
-
-  // Check if package is meal or training plan
-  if (isMealOrTrainingPackage(pkg) && mealTrainingDiscount > 0) {
-    return mealTrainingDiscount
   }
 
   return 0
@@ -278,9 +258,6 @@ export const calculateBundleTotal = (
     selectedPackages.map((item) => item.package),
     hasCoachingSubscription,
   )
-  const mealTrainingDiscount = findMealTrainingBundleDiscount(
-    selectedPackages.map((item) => item.package),
-  )
 
   selectedPackages.forEach((item) => {
     const pricing = item.package.pricing
@@ -290,7 +267,6 @@ export const calculateBundleTotal = (
     const discountedAmount = getDiscountedAmount(
       item.package,
       bundleDiscount,
-      mealTrainingDiscount,
       hasCoachingSubscription,
     )
     const itemTotal = (discountedAmount * item.quantity) / 100 // Convert from cents
@@ -326,9 +302,6 @@ export const calculateDiscountAmount = (
     selectedPackages.map((item) => item.package),
     hasCoachingSubscription,
   )
-  const mealTrainingDiscount = findMealTrainingBundleDiscount(
-    selectedPackages.map((item) => item.package),
-  )
 
   selectedPackages.forEach((item) => {
     const pricing = item.package.pricing
@@ -342,7 +315,6 @@ export const calculateDiscountAmount = (
     const discountedAmount = getDiscountedAmount(
       item.package,
       bundleDiscount,
-      mealTrainingDiscount,
       hasCoachingSubscription,
     )
     const discountedAmountTotal = (discountedAmount * item.quantity) / 100

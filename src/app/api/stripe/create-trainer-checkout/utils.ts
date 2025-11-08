@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
 import {
   createInPersonDiscountIfEligible,
-  createMealTrainingBundleDiscountIfEligible,
+  // createMealTrainingBundleDiscountIfEligible,
 } from '@/lib/stripe/discount-utils'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
@@ -257,13 +257,14 @@ export async function calculateBundleDiscounts(
     discounts.push(inPersonDiscount)
   }
 
-  const mealTrainingDiscount = await createMealTrainingBundleDiscountIfEligible(
-    checkoutItems,
-    offerToken,
-  )
-  if (mealTrainingDiscount) {
-    discounts.push(mealTrainingDiscount)
-  }
+  // TODO: Uncomment this when we have meal and training plans
+  // const mealTrainingDiscount = await createMealTrainingBundleDiscountIfEligible(
+  //   checkoutItems,
+  //   offerToken,
+  // )
+  // if (mealTrainingDiscount) {
+  //   discounts.push(mealTrainingDiscount)
+  // }
 
   return discounts
 }
