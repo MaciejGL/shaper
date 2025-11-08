@@ -34,7 +34,7 @@ export function Navigation({ plan }: NavigationProps) {
         ' px-2 pt-4 pb-2 md:px-4 lg:p-8',
       )}
     >
-      <div className="mx-auto max-w-sm">
+      <div className="mx-auto max-w-sm dark">
         <WeekSelector plan={plan} />
         <DaySelector plan={plan} />
       </div>

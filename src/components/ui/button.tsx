@@ -25,7 +25,7 @@ const buttonVariants = cva(
           'data-[loading=true]:bg-destructive/15 data-[loading=true]:text-destructive/30 disabled:bg-destructive/5 disabled:text-destructive/30',
         ),
         outline: cn(
-          'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+          'border hover:bg-accent hover:text-accent-foreground dark:border-input dark:hover:bg-input/50',
           // Loading state for outline variant
           'data-[loading=true]:bg-accent/30 data-[loading=true]:text-accent-foreground/30 disabled:bg-input/20 disabled:text-foreground/30',
         ),

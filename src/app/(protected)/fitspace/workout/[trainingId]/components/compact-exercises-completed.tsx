@@ -36,7 +36,7 @@ export function CompactExercisesCompleted() {
           {completedExercises.length} / {exercises.length}
         </Badge>
       </CardHeader>
-      <Card className="max-w-full py-2">
+      <Card className="max-w-full py-0">
         <div className="space-y-0">
           {exercises.map((exercise, index) => (
             <button
@@ -46,20 +46,18 @@ export function CompactExercisesCompleted() {
               }
               className="w-full text-left"
             >
-              <div className="flex items-center justify-between py-4 px-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium whitespace-pre-wrap">
-                    {exercise.name}
-                  </p>
-                </div>
+              <div className="flex items-center justify-between py-4 px-3 gap-3">
+                <p className="text-sm font-medium whitespace-pre-wrap flex-1">
+                  {exercise.name}
+                </p>
                 <p className="text-xs text-muted-foreground pt-0.5">
                   {exercise.sets.filter((set) => set.completedAt).length}/
                   {exercise.sets.length} sets
                 </p>
                 {exercise.completedAt ? (
-                  <CheckIcon className="size-4 text-green-500 ml-4 flex-shrink-0" />
+                  <CheckIcon className="size-4 text-green-500 flex-shrink-0" />
                 ) : (
-                  <CheckIcon className="size-4 text-muted-foreground/20 ml-4 flex-shrink-0" />
+                  <CheckIcon className="size-4 text-muted-foreground/20 flex-shrink-0" />
                 )}
               </div>
               {index < Math.min(exercises.length) - 1 && (

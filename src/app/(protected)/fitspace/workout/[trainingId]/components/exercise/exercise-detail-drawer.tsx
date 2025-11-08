@@ -26,6 +26,8 @@ interface ExerciseDetailDrawerProps {
 export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
   const videoUrl = exercise.videoUrl
   const images = exercise.images
+
+  if (!images.length) return null
   return (
     <Drawer>
       <DrawerTrigger asChild>

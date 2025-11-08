@@ -197,4 +197,4 @@ export function cleanupUserCacheMonitoring(): void {
 }
 
 // Auto-initialize when module is imported
-initializeUserCacheMonitoring()
+// initializeUserCacheMonitoring()

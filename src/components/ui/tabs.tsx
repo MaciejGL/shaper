@@ -26,8 +26,8 @@ const tabsListVariants = cva(
   {
     variants: {
       variant: {
-        default: '',
-        secondary: 'bg-muted-foreground/10',
+        default: 'bg-card',
+        secondary: cn(' bg-card-on-card'),
       },
       size: {
         sm: 'h-8 rounded-lg',
@@ -87,7 +87,7 @@ const tabsTriggerVariants = cva(
         full: 'rounded-full px-4',
         xl: cn('rounded-[10px]'),
         '2xl': cn('rounded-[12px]'),
-        '3xl': cn('rounded-[14px]'),
+        '3xl': cn('rounded-[18px]'),
       },
     },
   },

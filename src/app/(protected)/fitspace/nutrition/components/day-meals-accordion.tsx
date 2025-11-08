@@ -34,10 +34,10 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
 
   return (
     <>
-      <CardHeader>
+      <CardHeader className="px-0 mb-0">
         <DayMealsHeader day={day} />
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0">
         <Accordion type="multiple" className="space-y-2">
           {meals
             .sort((a, b) => a.orderIndex - b.orderIndex)
@@ -49,7 +49,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                 <AccordionItem
                   key={planMeal.id}
                   value={planMeal.id}
-                  className="rounded-lg dark:bg-card-on-card dark:border-none border last:border-b"
+                  className="rounded-xl dark:bg-card-on-card dark:border-none border last:border-b"
                 >
                   <AccordionTrigger className="p-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full mr-4">
@@ -198,8 +198,8 @@ export function DayMealsHeader({
 }) {
   return (
     <div className="flex items-center gap-2 mb-2">
-      <SectionIcon icon={ChefHat} size="sm" variant="amber" />
-      <p className="text-lg font-medium">Menu</p>
+      {/* <SectionIcon icon={ChefHat} size="sm" variant="amber" /> */}
+      <p className="text-lg font-medium">Meals</p>
       <div className="grid grid-cols-[auto_auto_auto_auto] gap-1 w-max ml-auto">
         <Badge variant="primary" isLoading={loading}>
           {Math.round(day?.dailyMacros?.calories || 0)} cal

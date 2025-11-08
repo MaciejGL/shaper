@@ -116,14 +116,14 @@ export function Exercises({
   // Main workout view
   return (
     <div>
-      <div className="flex flex-col pt-4 pb-6 space-y-2 w-full">
+      <div className="flex flex-col pt-2 pb-6 space-y-2 w-full">
         {hasNamedWorkoutType && (
-          <p className="text-lg font-medium text-center">
+          <p className="text-lg font-medium text-center pt-2">
             {formatWorkoutType(day.workoutType!)}
           </p>
         )}
         <div className="grid grid-flow-col gap-2 bg-background">
-          <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-xl">
+          <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-2xl">
             <Switch
               checked={preferences.trainingView === GQLTrainingView.Advanced}
               onCheckedChange={() =>
@@ -181,7 +181,11 @@ function ExercisesCompleted({
   totalExercises: number
 }) {
   return (
-    <Badge variant="secondary" size="lg" className="w-full bg-card-on-card">
+    <Badge
+      variant="secondary"
+      size="lg"
+      className="w-full bg-card-on-card dark:bg-card-on-card rounded-2xl"
+    >
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (
         <CheckCheck className="text-emerald-600" />

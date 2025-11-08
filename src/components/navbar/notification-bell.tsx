@@ -151,11 +151,11 @@ export function NotificationBell({
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon-md"
             className="relative h-9 w-9 rounded-full"
           >
-            <Bell className="size-5" />
+            <Bell className="size-5 text-sidebar-foreground dark" />
             <AnimatePresence>
               {showBadge && (
                 <motion.div

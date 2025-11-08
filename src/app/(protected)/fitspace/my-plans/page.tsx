@@ -3,11 +3,18 @@
 import { LayoutList } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  PrimaryTabList,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs'
 import {
   useFitspaceMyPlansQuery,
   useGetCheckinStatusQuery,
 } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
@@ -41,21 +48,26 @@ export default function MyPlansPage() {
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
 
   return (
-    <div className="container-hypertro mx-auto grid grid-rows-[max-content_1fr] mt-2">
+    <div
+      className={cn(
+        'container-hypertro mx-auto grid grid-rows-[max-content_1fr]',
+      )}
+    >
       <Tabs
         value={tab ?? PlanTab.Plans}
         defaultValue={PlanTab.Plans}
         onValueChange={(value) => setTab(value as PlanTab)}
         className="gap-0"
       >
-        <TabsList size="xl" rounded="2xl" className="w-full">
-          <TabsTrigger value={PlanTab.Plans} size="xl" rounded="2xl">
-            Plans
-          </TabsTrigger>
-          <TabsTrigger value={PlanTab.QuickWorkout} size="xl" rounded="2xl">
-            Custom Days
-          </TabsTrigger>
-        </TabsList>
+        <PrimaryTabList
+          options={[
+            { label: 'Plans', value: PlanTab.Plans },
+            { label: 'Custom Days', value: PlanTab.QuickWorkout },
+          ]}
+          onClick={setTab}
+          active={tab ?? PlanTab.Plans}
+          className="grid grid-cols-2"
+        />
 
         <TabsContent value={PlanTab.Plans} className="space-y-4 pt-4 pb-4">
           <PlansTab

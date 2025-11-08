@@ -89,7 +89,7 @@ export function NutritionPlanSelector({
       value={effectiveSelectedPlan || ''}
       onValueChange={handlePlanChange}
     >
-      <SelectTrigger className="w-full" size="xl" variant="tertiary">
+      <SelectTrigger className="w-full" size="lg" variant="default">
         <SelectValue placeholder="Select a nutrition plan" />
       </SelectTrigger>
       <SelectContent>

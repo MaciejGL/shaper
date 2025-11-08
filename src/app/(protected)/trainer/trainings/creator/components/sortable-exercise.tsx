@@ -210,25 +210,25 @@ export const SortableExercise = React.memo(
               {viewMode === 'full' && (
                 <div className="flex items-center gap-2 flex-wrap ">
                   {exercise.sets.length > 0 && (
-                    <Badge variant="tertiary">
+                    <Badge variant="secondary">
                       <FlameIcon /> {exercise.sets.length} set
                       {exercise.sets.length === 1 ? '' : 's'}
                     </Badge>
                   )}
                   {exercise.warmupSets ? (
-                    <Badge variant="tertiary">
+                    <Badge variant="secondary">
                       <FlameIcon />
                       {exercise.warmupSets} warmup
                       {exercise.warmupSets === 1 ? '' : 's'}
                     </Badge>
                   ) : null}
                   {exercise.restSeconds ? (
-                    <Badge variant="tertiary">
+                    <Badge variant="secondary">
                       <TimerIcon /> {exercise.restSeconds} rest
                     </Badge>
                   ) : null}
                   {exercise.tempo ? (
-                    <Badge variant="tertiary">
+                    <Badge variant="secondary">
                       <GaugeIcon /> {exercise.tempo}
                     </Badge>
                   ) : null}

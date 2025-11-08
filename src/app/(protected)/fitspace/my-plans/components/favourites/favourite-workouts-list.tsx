@@ -3,7 +3,7 @@
 import { Dumbbell, Plus } from 'lucide-react'
 import { useState } from 'react'
 
-import { CardSkeleton } from '@/components/card-skeleton'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
@@ -46,9 +46,7 @@ export function FavouriteWorkoutsList({
           </Button>
         </div>
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <CardSkeleton key={index} />
-          ))}
+          <LoadingSkeleton count={6} variant="sm" cardVariant="secondary" />
         </div>
       </div>
     )

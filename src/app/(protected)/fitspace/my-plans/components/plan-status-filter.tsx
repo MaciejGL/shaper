@@ -36,7 +36,7 @@ export function PlanStatusFilter({
 
   return (
     <Select value={selectedFilter} onValueChange={onFilterChange}>
-      <SelectTrigger variant="tertiary" size="xl" className="w-full">
+      <SelectTrigger variant="default" size="lg" className="w-full">
         <SelectValue>
           <p className="text-base">{selectedOption?.label}</p>
           {selectedCount > 0 && (

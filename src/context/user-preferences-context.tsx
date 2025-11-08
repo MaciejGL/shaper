@@ -134,9 +134,14 @@ export function UserPreferencesProvider({
   })
   preferencesRef.current = preferences
 
-  // Update preferences from database when profile data loads
+  // Track if this is the initial mount
+  const isInitialMount = useRef(true)
+
+  // Update preferences from database when profile data loads (only on initial mount)
   useEffect(() => {
-    if (profile) {
+    if (profile && isInitialMount.current) {
+      isInitialMount.current = false
+
       // Convert GraphQL enums to our types
       const weightUnit: WeightUnit =
         profile.weightUnit === GQLWeightUnit.Lbs

@@ -13,7 +13,7 @@ export function SimpleLogo({ size = 32, className }: SimpleLogoProps) {
       viewBox="0 0 512 512"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn('text-primary', className)}
+      className={cn('text-sidebar-foreground', className)}
     >
       <defs>
         <mask id="path-2-inside-1_3370_1806" fill="white">

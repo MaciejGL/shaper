@@ -3,9 +3,10 @@
 import { Download } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
+import { Divider } from '@/components/divider'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { downloadPDF, generateFilename } from '@/lib/pdf/pdf-generator'
@@ -74,19 +75,14 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
   }
 
   return (
-    <div className="space-y-4 mt-4">
-      {nutritionPlan?.description && (
-        <p className="text-sm text-muted-foreground mt-1">
-          {nutritionPlan.description}
-        </p>
-      )}
-
+    <div className="space-y-4">
       <Tabs value={activeDay} onValueChange={setActiveDay}>
         <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar mb-2">
-          <TabsList size="lg">
+          <TabsList size="lg" variant="secondary" rounded="3xl">
             {days.map((day) => (
               <TabsTrigger
                 size="lg"
+                rounded="3xl"
                 key={day.id}
                 value={day.dayNumber.toString()}
                 className="flex-shrink-0"
@@ -99,29 +95,32 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
         {days.map((day) => (
           <TabsContent key={day.id} value={day.dayNumber.toString()}>
-            <div className="space-y-8">
-              {/* Meals Accordion */}
-              <Card>
-                <DayMealsAccordion day={day} />
-                <CardFooter>
-                  <Button
-                    variant="tertiary"
-                    iconStart={<Download />}
-                    onClick={handleExportPDF}
-                    loading={isGeneratingPDF}
-                    disabled={isGeneratingPDF}
-                    className="w-full"
-                  >
-                    Export to PDF
-                  </Button>
-                </CardFooter>
-              </Card>
+            <div className="space-y-6 px-2">
+              <DayMealsAccordion day={day} />
+              <Button
+                variant="tertiary"
+                iconStart={<Download />}
+                onClick={handleExportPDF}
+                loading={isGeneratingPDF}
+                disabled={isGeneratingPDF}
+                className="w-full"
+              >
+                Export to PDF
+              </Button>
+
               {/* Shopping List */}
+              <Divider className="mt-8" />
               <ShoppingList day={day} planId={planId} />
             </div>
           </TabsContent>
         ))}
       </Tabs>
+
+      {nutritionPlan?.description && (
+        <p className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap">
+          {nutritionPlan.description}
+        </p>
+      )}
     </div>
   )
 }

@@ -174,14 +174,17 @@ export const Navbar = ({
           <div className="flex items-center gap-2">
             {withSidebar && <SidebarTrigger />}
             {isFitspace ? (
-              <Link href={linkToDashboard} scroll className="flex items-center">
+              <Link
+                href={linkToDashboard}
+                scroll
+                className="dark flex items-center"
+              >
                 <SimpleLogo size={32} />
-                <h2 className="text-base font-medium">Hypro</h2>
               </Link>
             ) : null}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="dark flex items-center gap-1 ml-auto">
             {user ? (
               <NotificationBell
                 notifications={notifications}
@@ -191,10 +194,12 @@ export const Navbar = ({
               <div className="h-[60px]" />
             )}
             {showMessenger && (
-              <div className="relative">
+              <div className="relative dark">
                 <Button
-                  variant="ghost"
-                  iconOnly={<MessageSquare />}
+                  variant="outline"
+                  iconOnly={
+                    <MessageSquare className="text-sidebar-foreground dark" />
+                  }
                   onClick={() => setIsMessengerOpen(true)}
                   className="rounded-full"
                 />
@@ -279,10 +284,10 @@ function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="rounded-full"
+          className="rounded-full dark"
           iconOnly={
             <UserAvatar
-              className="size-8"
+              className="size-8 dark"
               withFallbackAvatar
               imageUrl={user?.profile?.avatarUrl}
               firstName={user?.profile?.firstName ?? ''}
@@ -381,11 +386,11 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          variant="outline"
           className="rounded-full"
           iconOnly={
             <UserAvatar
-              className="size-8"
+              className="size-9"
               withFallbackAvatar
               imageUrl={user?.profile?.avatarUrl}
               firstName={user?.profile?.firstName ?? ''}
@@ -396,7 +401,7 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="end"
+        align="start"
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <DropdownProvider value={{ closeDropdown: () => setIsOpen(false) }}>

@@ -44,7 +44,7 @@ export function CheckinScheduleSection() {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="!border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="size-5 text-cyan-500" />
@@ -65,7 +65,7 @@ export function CheckinScheduleSection() {
   if (!checkinStatus?.hasSchedule) {
     return (
       <>
-        <Card>
+        <Card className="!border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="size-5 text-cyan-500" />
@@ -119,7 +119,7 @@ export function CheckinScheduleSection() {
 
   return (
     <>
-      <Card className="gap-2 rounded-2xl shadow-lg" variant="secondary">
+      <Card className="gap-2 rounded-2xl !border">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">

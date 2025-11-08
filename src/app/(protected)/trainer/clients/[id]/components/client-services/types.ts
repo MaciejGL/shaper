@@ -69,7 +69,6 @@ export interface PackageCardProps {
   onToggle: (packageId: string, checked: boolean) => void
   onUpdateQuantity: (packageId: string, quantity: number) => void
   bundleDiscount?: number
-  mealTrainingDiscount?: number
   hasCoachingSubscription?: boolean
 }
 
@@ -83,7 +82,6 @@ export interface PackageSelectionProps {
   onRetry: () => void
   clientName: string
   bundleDiscount?: number
-  mealTrainingDiscount?: number
   hasCoachingSubscription?: boolean
 }
 

@@ -1,4 +1,5 @@
-import { formatDate } from 'date-fns'
+import { differenceInDays, formatDate } from 'date-fns'
+import _ from 'lodash'
 import {
   BicepsFlexed,
   Check,
@@ -23,19 +24,23 @@ import {
 
 interface PlanCardProps {
   plan: UnifiedPlan
-  isActive?: boolean
   onClick: (plan: UnifiedPlan) => void
+  status: PlanStatus
 }
 
-export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
+export function PlanCard({ plan, onClick, status }: PlanCardProps) {
   if (!plan) return null
 
-  const status = getPlanStatus(plan, isActive)
+  const isNew =
+    status === PlanStatus.Template &&
+    plan.createdAt &&
+    differenceInDays(new Date(), new Date(plan.createdAt)) < 3
 
   return (
     <Card
       onClick={() => onClick(plan)}
       className="cursor-pointer hover:bg-accent/50 transition-colors"
+      variant="secondary"
     >
       <CardHeader className="py-0 gap-0">
         <div className="flex items-center justify-between gap-3">
@@ -46,8 +51,13 @@ export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
             {status === PlanStatus.Active && (
               <PlanStatusBadge status={status} plan={plan} />
             )}
+            {isNew && (
+              <Badge variant="success" className="w-fit" size="xs">
+                New
+              </Badge>
+            )}
           </div>
-          <ChevronRight className="size-5 text-muted-foreground flex-shrink-0" />
+          <ChevronRight className="size-4 text-muted-foreground/70 flex-shrink-0" />
         </div>
       </CardHeader>
     </Card>

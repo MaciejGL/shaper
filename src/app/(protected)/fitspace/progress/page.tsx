@@ -1,7 +1,7 @@
 'use client'
 
-// import { TrendingUp } from 'lucide-react'
-// import { DashboardHeader } from '../../trainer/components/dashboard-header'
+import { ExtendHeader } from '../workout/[trainingId]/components/workout-page.client'
+
 import { BodyMeasurementsProvider } from './components/body-measurements-context'
 import { CheckinScheduleSection } from './components/checkin-schedule/checkin-schedule-section'
 import { LatestPRs } from './components/latest-prs/latest-prs'
@@ -11,27 +11,26 @@ import { SnapshotsSection } from './components/snapshots-section/snapshots-secti
 
 export default function ProgressPage() {
   return (
-    <div className="container-hypertro mx-auto mt-6">
-      {/* <DashboardHeader
-        title="Progress"
-        icon={TrendingUp}
-        className="mb-6"
-        variant="green"
-      /> */}
+    <ExtendHeader
+      headerChildren={
+        <div className="pb-2 px-2 dark space-y-4">
+          <CheckinScheduleSection />
+        </div>
+      }
+    >
+      <div className="container-hypertro mx-auto mt-6">
+        <div className="space-y-6">
+          <BodyMeasurementsProvider>
+            <LogsSection />
 
-      <div className="space-y-6">
-        <CheckinScheduleSection />
+            <SnapshotsSection />
+          </BodyMeasurementsProvider>
 
-        <BodyMeasurementsProvider>
-          <LogsSection />
+          <LatestPRs />
 
-          <SnapshotsSection />
-        </BodyMeasurementsProvider>
-
-        <LatestPRs />
-
-        <MuscleHeatmapSection />
+          <MuscleHeatmapSection />
+        </div>
       </div>
-    </div>
+    </ExtendHeader>
   )
 }

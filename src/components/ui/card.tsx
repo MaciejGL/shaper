@@ -5,12 +5,12 @@ import { cn } from '@/lib/utils'
 
 const cardVariants = cva(
   cn(
-    'text-card-foreground flex flex-col gap-6 rounded-xl py-4 relative bg-card border border-border transition-[border,shadow] duration-200',
+    'text-card-foreground flex flex-col gap-6 rounded-2xl py-4 relative bg-card border border-border transition-[border,shadow] duration-200',
   ),
   {
     variants: {
       variant: {
-        secondary: 'bg-card border-border',
+        secondary: 'bg-card border-border dark:border-0',
         tertiary: 'bg-card-on-card border-border',
         premium:
           'relative bg-card border-[2px] dark:border-[1px] border-transparent bg-origin-border [background-clip:padding-box,border-box] [background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(245_158_11),rgb(251_146_60),rgb(249_115_22))] dark:[background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(251_191_36),rgb(251_146_60),rgb(251_146_60))] shadow-md',
