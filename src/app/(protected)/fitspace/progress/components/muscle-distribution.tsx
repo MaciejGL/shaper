@@ -48,7 +48,7 @@ export function MuscleDistribution() {
 
   if ((!distribution || totalSets === 0) && !isLoading) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle>Muscle Group Distribution</CardTitle>
         </CardHeader>

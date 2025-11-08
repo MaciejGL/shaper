@@ -12,9 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { GQLWorkoutType } from '@/generated/graphql-client'
 import { getDayName } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
+
+import { COUNTER_MAIN_PADDING } from './navigation'
 
 // Create dummy data structure matching the GraphQL schema
 const DUMMY_WEEK = {
@@ -129,10 +132,9 @@ export function SkeletonNavigation() {
   return (
     <div
       className={cn(
-        'bg-sidebar rounded-b-xl',
-        // Counter Main padding
-        '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
-        'px-2 py-4 md:px-4 lg:p-8',
+        'bg-sidebar',
+        COUNTER_MAIN_PADDING,
+        'px-2 pt-4 pb-2 md:px-4 lg:p-8',
       )}
     >
       <div className="mx-auto max-w-sm">
@@ -146,20 +148,13 @@ export function SkeletonNavigation() {
 function SkeletonWeekSelector() {
   return (
     <div className="flex justify-between gap-2">
-      <Button
-        iconOnly={<ChevronLeft />}
-        disabled={true}
-        size="icon-sm"
-        variant="tertiary"
-        className={cn('masked-placeholder-text')}
-      />
       <Select disabled>
         <SelectTrigger
           suppressHydrationWarning
           size="sm"
           variant="tertiary"
           className={cn(
-            '[&_svg]:data-[icon=mark]:size-3.5 truncate text-sm font-medium flex items-center gap-2 w-full',
+            '[&_svg]:data-[icon=mark]:size-3.5 truncate text-sm font-medium flex items-center gap-2',
             'masked-placeholder-text',
           )}
         >
@@ -169,13 +164,6 @@ function SkeletonWeekSelector() {
           <SelectItem value="skeleton">Week 1</SelectItem>
         </SelectContent>
       </Select>
-      <Button
-        iconOnly={<ChevronRight />}
-        size="icon-sm"
-        variant="tertiary"
-        disabled={true}
-        className={cn('masked-placeholder-text')}
-      />
     </div>
   )
 }
@@ -230,11 +218,12 @@ export function SkeletonExercises() {
   const progressPercentage = 0 // Show some progress for skeleton
 
   return (
-    <div id={activeDay.id} className="max-w-sm mx-auto pb-4">
+    <div id={activeDay.id} className="max-w-sm mx-auto pt-4 pb-6">
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-3 space-y-2 w-full">
+          <Skeleton className="h-7 w-1/3 mx-auto" />
           <div className="grid grid-cols-2 gap-2">
-            <Label className="flex items-center justify-center gap-2 whitespace-nowrap rounded-md p-1.5 bg-secondary dark:bg-muted-foreground/10 w-full"></Label>
+            <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-xl"></Label>
 
             <SkeletonExercisesCompleted
               completedExercises={completedExercises}

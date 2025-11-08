@@ -47,7 +47,7 @@
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.945 0 6.35);
+  --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
   --card-on-card: oklch(0.21 0.006 285.885 / 7%);
@@ -72,7 +72,7 @@
   --chart-3: oklch(0.65 0.25 25);
   --chart-4: oklch(0.7 0.22 55);
   --chart-5: oklch(0.65 0.25 285);
-  --sidebar: oklch(0.985 0 0);
+  --sidebar: oklch(0.97 0 0);
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.21 0.006 285.885);
   --sidebar-primary-foreground: oklch(0.985 0 0);

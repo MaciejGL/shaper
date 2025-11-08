@@ -113,7 +113,7 @@ function EmptyFavouritesState({
       : workoutStatus.message
 
   return (
-    <Card borderless>
+    <Card>
       <CardContent className="flex flex-col items-center justify-center text-center py-6">
         <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
           <Dumbbell className="w-6 h-6 text-muted-foreground" />

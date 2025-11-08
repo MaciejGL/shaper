@@ -121,7 +121,6 @@ function ExerciseCard({
   return (
     <div className="flex gap-2 items-center">
       <Card
-        borderless
         variant="tertiary"
         className={cn(
           'group/exercise-card p-0 border-b border-t-0 overflow-hidden flex-1 rounded-none pr-2',

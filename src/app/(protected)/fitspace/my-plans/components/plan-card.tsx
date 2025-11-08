@@ -34,17 +34,18 @@ export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
 
   return (
     <Card
-      borderless
       onClick={() => onClick(plan)}
       className="cursor-pointer hover:bg-accent/50 transition-colors"
     >
       <CardHeader className="py-0 gap-0">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0 space-y-1.5">
-            <CardTitle className="text-base font-medium line-clamp-2">
+            <CardTitle className="text-base font-normal line-clamp-2">
               {plan.title}
             </CardTitle>
-            <PlanStatusBadge status={status} plan={plan} />
+            {status === PlanStatus.Active && (
+              <PlanStatusBadge status={status} plan={plan} />
+            )}
           </div>
           <ChevronRight className="size-5 text-muted-foreground flex-shrink-0" />
         </div>
@@ -65,13 +66,13 @@ function PlanStatusBadge({
   ): {
     variant: BadgeProps['variant']
     label: string
-    icon: React.ReactNode
+    icon?: React.ReactNode
   } => {
     switch (status) {
       case PlanStatus.Active:
         return {
           variant: 'primary' as const,
-          icon: <PlayIcon className="size-3" />,
+          // icon: <PlayIcon className="size-3" />,
           label: 'Active',
         }
       case PlanStatus.Paused:
@@ -98,7 +99,7 @@ function PlanStatusBadge({
   const config = getStatusConfig(status)
 
   return (
-    <Badge variant={config.variant} className="w-fit">
+    <Badge variant={config.variant} className="w-fit" size="xs">
       {config.icon}
       {config.label}
     </Badge>

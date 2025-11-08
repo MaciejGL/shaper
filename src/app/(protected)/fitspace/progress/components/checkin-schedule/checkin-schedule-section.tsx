@@ -44,10 +44,10 @@ export function CheckinScheduleSection() {
 
   if (isLoading) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="size-5 text-primary" />
+            <Calendar className="size-5 text-cyan-500" />
             Check-ins
           </CardTitle>
         </CardHeader>
@@ -65,10 +65,10 @@ export function CheckinScheduleSection() {
   if (!checkinStatus?.hasSchedule) {
     return (
       <>
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="size-5 text-primary" />
+              <Calendar className="size-5 text-cyan-500" />
               Check-ins
             </CardTitle>
           </CardHeader>
@@ -119,11 +119,11 @@ export function CheckinScheduleSection() {
 
   return (
     <>
-      <Card borderless className="gap-2">
+      <Card className="gap-2 rounded-2xl shadow-lg" variant="secondary">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Calendar className="size-5 text-primary" />
+              <Calendar className="size-5 text-cyan-500" />
               Check-ins
             </div>
             <DropdownMenu>

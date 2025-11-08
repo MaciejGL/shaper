@@ -100,8 +100,8 @@ export function ExerciseMetadata({
   return (
     <div>
       <div className="flex gap-2 items-start pl-1">
-        <p className="text-base font-medium self-center">
-          <span className="text-muted-foreground text-sm">
+        <p className="text-lg font-medium self-center">
+          <span className="text-sm text-muted-foreground">
             {exercise.order}.
           </span>{' '}
           {exercise.name}
@@ -144,7 +144,7 @@ export function ExerciseMetadata({
           </DropdownMenu>
           <Button
             variant="tertiary"
-            size="sm"
+            size="icon-sm"
             iconOnly={
               <CheckIcon className={cn(isCompleted && 'text-green-600')} />
             }

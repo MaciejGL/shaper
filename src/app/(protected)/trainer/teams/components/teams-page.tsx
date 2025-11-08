@@ -130,7 +130,7 @@ export function TeamsPage() {
       <div className="space-y-6">
         {/* Pending Invitations */}
         {!invitationsLoading && invitations.length > 0 && (
-          <Card borderless>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="size-5" />
@@ -154,7 +154,7 @@ export function TeamsPage() {
         {currentTeam ? (
           <div className="space-y-6">
             {showCreateForm ? (
-              <Card borderless>
+              <Card>
                 <CardHeader>
                   <CardTitle>Create New Team</CardTitle>
                   <CardDescription>
@@ -176,7 +176,7 @@ export function TeamsPage() {
             )}
           </div>
         ) : (
-          <Card borderless className="text-center py-12">
+          <Card className="text-center py-12">
             <CardContent className="space-y-6">
               <div className="mx-auto size-24 rounded-full bg-muted flex items-center justify-center">
                 <Users className="size-12 text-muted-foreground" />

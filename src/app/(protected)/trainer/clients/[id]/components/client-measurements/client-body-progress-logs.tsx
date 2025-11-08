@@ -29,7 +29,7 @@ export function ClientBodyProgressLogs({
     return (
       <div>
         <ClientHeader title="Body Progress Snapshots" />
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Camera className="h-5 w-5" />
@@ -50,7 +50,7 @@ export function ClientBodyProgressLogs({
     return (
       <div>
         <ClientHeader title="Body Progress Snapshots" />
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Camera className="h-5 w-5" />

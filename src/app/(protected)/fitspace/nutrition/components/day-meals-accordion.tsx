@@ -33,7 +33,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
   }
 
   return (
-    <div>
+    <>
       <CardHeader>
         <DayMealsHeader day={day} />
       </CardHeader>
@@ -185,7 +185,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
             })}
         </Accordion>
       </CardContent>
-    </div>
+    </>
   )
 }
 

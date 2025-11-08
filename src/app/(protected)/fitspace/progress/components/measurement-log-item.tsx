@@ -70,8 +70,7 @@ export function MeasurementLogItem({
   return (
     <div
       className={cn(
-        'flex items-center justify-between p-3 last-of-type:rounded-b-lg first-of-type:rounded-t-lg not-last-of-type:border-b border-border bg-card',
-        isOnCard && 'bg-card-on-card border-muted-foreground/20',
+        'flex items-center justify-between p-3 last-of-type:rounded-b-lg first-of-type:rounded-t-lg border  not-last-of-type:border-b-0 border-border bg-card',
       )}
     >
       <div className="flex-1">

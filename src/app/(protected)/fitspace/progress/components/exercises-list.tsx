@@ -212,7 +212,6 @@ export function ExercisesList() {
           return (
             <ExerciseDrawer exerciseId={exerciseId} key={exerciseId}>
               <Card
-                borderless
                 key={exerciseId}
                 className="hover:shadow-sm transition-all cursor-pointer py-0 relative bg-card/70"
               >

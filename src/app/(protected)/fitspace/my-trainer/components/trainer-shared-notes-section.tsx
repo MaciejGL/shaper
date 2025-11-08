@@ -31,7 +31,7 @@ export function TrainerSharedNotesSection() {
 
   if (isLoading) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={MessageSquare} size="xs" variant="sky" />
@@ -50,7 +50,7 @@ export function TrainerSharedNotesSection() {
 
   if (error) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={MessageSquare} size="xs" />
@@ -71,7 +71,7 @@ export function TrainerSharedNotesSection() {
 
   if (trainerNotes.length === 0) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={MessageSquare} size="xs" />
@@ -95,7 +95,7 @@ export function TrainerSharedNotesSection() {
   }
 
   return (
-    <Card borderless>
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SectionIcon icon={MessageSquare} size="xs" variant="sky" />

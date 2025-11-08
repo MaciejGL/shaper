@@ -215,16 +215,16 @@ export function CalendarWeekSelector({
             }}
             modifiersClassNames={{
               completed:
-                'bg-green-300 dark:bg-green-700 font-semibold hover:bg-green-500 rounded-full',
+                'bg-green-300 dark:bg-green-700 font-semibold hover:bg-green-500 rounded-xl',
               pending:
-                'bg-yellow-200 dark:bg-yellow-500/50 font-medium hover:bg-yellow-400 rounded-full',
-              restDay: cn('rounded-full opacity-50'),
-              empty: 'rounded-full',
+                'bg-amber-200 dark:bg-amber-500/50 font-medium hover:bg-yellow-400 rounded-xl',
+              restDay: cn('rounded-xl opacity-50 bg-card-on-card'),
+              empty: 'rounded-xl bg-card-on-card/80',
               today: cn(
-                'outline-primary outline-offset-1 outline-2 rounded-full',
+                'outline-primary outline-offset-1 outline-2 rounded-xl',
               ),
             }}
-            className="w-full max-w-sm mx-auto [&_button]:!rounded-full [&_*]:font-medium [&_[data-selected=true]_button]:bg-primary bg-sidebar"
+            className="w-full max-w-sm mx-auto [&_button]:!rounded-xl [&_*]:font-medium [&_[data-selected=true]_button]:bg-primary bg-background"
           />
         </DrawerContent>
       </Drawer>

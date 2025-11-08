@@ -31,7 +31,7 @@ export function ExerciseCountControl({
       transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
-      <Card borderless variant="tertiary">
+      <Card>
         <CardContent>
           <div className="space-y-2">
             <Label htmlFor="exercise-count" className="text-sm font-medium">
@@ -40,7 +40,7 @@ export function ExerciseCountControl({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Button
-                  variant="secondary"
+                  variant="tertiary"
                   size="icon-sm"
                   onClick={() => updateCount(value - 1)}
                   disabled={value <= 1}
@@ -56,7 +56,7 @@ export function ExerciseCountControl({
                   />
                 </div>
                 <Button
-                  variant="secondary"
+                  variant="tertiary"
                   size="icon-sm"
                   onClick={() => updateCount(value + 1)}
                   disabled={value >= 10}

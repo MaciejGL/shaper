@@ -26,7 +26,7 @@ export default function ProfilePage() {
 
         <PersonalInfo profile={profile} handleChange={handleAutoSave} />
 
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <SectionIcon size="sm" icon={Bell} variant="blue" />

@@ -86,14 +86,14 @@ export function SubscriptionManagementSection() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <LoadingSkeleton count={2} withBorder variant="lg" />
+        <LoadingSkeleton count={2} variant="lg" />
       </div>
     )
   }
 
   if (hasError) {
     return (
-      <Card borderless className="bg-card-on-card">
+      <Card className="bg-card-on-card">
         <CardContent className="py-8 text-center space-y-4">
           <p className="text-muted-foreground">
             Failed to load subscription information
@@ -187,7 +187,7 @@ export function SubscriptionManagementSection() {
       {hasActiveSubscription ? (
         <>
           {/* Current Subscription Status */}
-          <Card borderless className="bg-card-on-card">
+          <Card className="bg-card-on-card">
             <CardContent className="space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">

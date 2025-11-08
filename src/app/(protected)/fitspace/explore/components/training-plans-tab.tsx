@@ -151,7 +151,7 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
         {isLoading ? (
           <LoadingSkeleton count={3} variant="lg" />
         ) : filteredPlans.length === 0 ? (
-          <Card borderless>
+          <Card>
             <CardContent className="p-6 text-center">
               <Dumbbell className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">
@@ -210,7 +210,6 @@ const difficultyVariantMap = {
 function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
   return (
     <Card
-      borderless
       className="cursor-pointer hover:border-primary/50 transition-colors"
       onClick={onClick}
     >

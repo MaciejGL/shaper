@@ -30,7 +30,7 @@ export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
 
   return (
     <>
-      <div className="space-y-4 mt-4">
+      <div className="space-y-4 pt-6">
         <p className="text-xl font-medium text-center">Create workout</p>
         <p className="text-sm text-muted-foreground text-center">
           Choose how you'd like to build your workout
@@ -58,7 +58,6 @@ export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
             }}
           >
             <Card
-              borderless
               className="cursor-pointer transition-all hover:scale-[1.01]"
               onClick={() => hasPremiumAccess && setShowAiWizard(true)}
             >
@@ -103,7 +102,6 @@ export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
             }}
           >
             <Card
-              borderless
               className="cursor-pointer transition-all hover:scale-[1.01]"
               onClick={() => setShowFavourites(true)}
             >

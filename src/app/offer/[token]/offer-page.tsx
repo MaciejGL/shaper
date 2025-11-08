@@ -226,7 +226,7 @@ export function OfferPage({
       <div className="dark min-h-screen w-full bg-background">
         <div className="container-hypertro mx-auto max-w-md">
           <div className="flex items-center justify-center min-h-screen p-4">
-            <Card borderless variant="secondary" className="w-full text-center">
+            <Card variant="secondary" className="w-full text-center">
               <CardHeader>
                 <div className="flex-center w-full">
                   <BiggyIcon icon={Clock} variant="default" />
@@ -274,7 +274,7 @@ export function OfferPage({
         <div className="space-y-4 p-4">
           {/* Personal Message */}
           {offer.personalMessage && (
-            <Card borderless variant="secondary">
+            <Card variant="secondary">
               <CardContent className="p-4 border-l-4 border-l-primary">
                 <p className="text-primary font-medium text-sm mb-2">
                   Personal message from {trainerName}:
@@ -284,7 +284,7 @@ export function OfferPage({
             </Card>
           )}
 
-          <Card borderless variant="secondary" className="mb-8">
+          <Card variant="secondary" className="mb-8">
             <CardContent className="space-y-4">
               {/* Show Premium Coaching badge if user qualifies for discount */}
               {qualifiesForInPersonDiscount && (

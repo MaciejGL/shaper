@@ -70,7 +70,7 @@ export function ClientMeetingsSection() {
 
   if (isLoading) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <SectionIcon icon={Calendar} size="xs" />
@@ -86,7 +86,7 @@ export function ClientMeetingsSection() {
 
   if (meetings.length === 0 && allMeetings.length === 0) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <SectionIcon icon={Calendar} size="xs" />
@@ -104,7 +104,7 @@ export function ClientMeetingsSection() {
 
   if (meetings.length === 0 && allMeetings.length > 0) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <SectionIcon icon={Calendar} size="xs" />
@@ -130,7 +130,7 @@ export function ClientMeetingsSection() {
 
   return (
     <>
-      <Card borderless>
+      <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <SectionIcon icon={Calendar} size="xs" />
@@ -164,11 +164,7 @@ export function ClientMeetingsSection() {
             const statusLabel = getStatusDisplay()
 
             return (
-              <Card
-                key={meeting.id}
-                borderless
-                className={cn('p-3 bg-card-on-card')}
-              >
+              <Card key={meeting.id} className={cn('p-3 bg-card-on-card')}>
                 <CardContent className="space-y-2 p-0">
                   {/* Header */}
                   <div className="flex items-start justify-between gap-3">

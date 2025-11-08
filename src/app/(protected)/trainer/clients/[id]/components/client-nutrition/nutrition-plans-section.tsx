@@ -192,7 +192,7 @@ export function NutritionPlansSection({
     return (
       <div>
         <ClientHeader title="Nutrition Plans" />
-        <Card borderless>
+        <Card>
           <CardContent className="pt-6">
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
@@ -207,7 +207,7 @@ export function NutritionPlansSection({
     return (
       <div>
         <ClientHeader title="Nutrition Plans" />
-        <Card borderless>
+        <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <p className="text-destructive">Failed to load nutrition plans</p>
@@ -244,7 +244,7 @@ export function NutritionPlansSection({
       />
 
       {nutritionPlans.length === 0 ? (
-        <Card borderless>
+        <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <p className="text-muted-foreground">No nutrition plans yet</p>

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { downloadPDF, generateFilename } from '@/lib/pdf/pdf-generator'
@@ -101,7 +101,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
           <TabsContent key={day.id} value={day.dayNumber.toString()}>
             <div className="space-y-8">
               {/* Meals Accordion */}
-              <Card borderless>
+              <Card>
                 <DayMealsAccordion day={day} />
                 <CardFooter>
                   <Button
@@ -130,10 +130,11 @@ export function NutritionPlanViewerLoading() {
   return (
     <div className="space-y-4 mt-4">
       <Tabs value="0">
-        <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar">
-          <TabsList>
+        <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 mb-2 overflow-x-auto hide-scrollbar">
+          <TabsList size="lg">
             {Array.from({ length: 7 }).map((_, index) => (
               <TabsTrigger
+                size="lg"
                 key={index}
                 value={index.toString()}
                 className="flex-shrink-0"
@@ -145,12 +146,12 @@ export function NutritionPlanViewerLoading() {
         </div>
 
         <TabsContent value="0">
-          <div className="space-y-6 mt-4">
+          <Card className="p-4">
             <DayMealsHeader loading />
             <div className="space-y-2">
               <LoadingSkeleton variant="sm" count={3} />
             </div>
-          </div>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

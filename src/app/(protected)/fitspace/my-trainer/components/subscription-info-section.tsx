@@ -33,7 +33,7 @@ export function SubscriptionInfoSection() {
 
   if (isLoading) {
     return (
-      <Card borderless>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <SectionIcon icon={SparklesIcon} size="xs" variant="amber" />
@@ -41,7 +41,7 @@ export function SubscriptionInfoSection() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <LoadingSkeleton count={2} withBorder />
+          <LoadingSkeleton count={2} />
         </CardContent>
       </Card>
     )
@@ -107,7 +107,7 @@ export function SubscriptionInfoSection() {
   const hasActiveSubscription = subscriptionData?.hasPremiumAccess
 
   return (
-    <Card borderless>
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <div className="flex items-center gap-2 justify-between w-full">

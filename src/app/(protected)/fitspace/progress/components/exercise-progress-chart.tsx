@@ -172,7 +172,7 @@ export function ExerciseProgressChart({
   } satisfies ChartConfig
 
   return (
-    <Card borderless variant="secondary" className="p-0">
+    <Card variant="secondary" className="p-0">
       <CardHeader className="pb-0 pt-4 pl-4 pr-1">
         <p className="text-sm text-muted-foreground">
           {exercise.baseExercise?.name}

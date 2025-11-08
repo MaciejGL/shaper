@@ -89,7 +89,7 @@ function PlanDetailsHeader() {
   const isDisabled = !!data.completedAt
 
   return (
-    <Card borderless>
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="w-5 h-5" />

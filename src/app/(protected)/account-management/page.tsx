@@ -44,7 +44,7 @@ export default function AccountManagementPage() {
 
           <div className="space-y-8 container-hypertro mx-auto">
             {/* Subscription Management Section */}
-            <Card borderless variant="secondary">
+            <Card variant="secondary">
               <CardHeader className="pb-6">
                 <div className="flex items-center space-x-3">
                   <div className="size-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shrink-0 self-start">

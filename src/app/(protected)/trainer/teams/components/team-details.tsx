@@ -41,7 +41,7 @@ export function TeamDetails({ team }: TeamDetailsProps) {
   return (
     <div className="space-y-6">
       {/* Team Overview Card */}
-      <Card borderless>
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="space-y-3 w-full">

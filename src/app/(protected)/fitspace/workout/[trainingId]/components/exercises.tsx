@@ -101,7 +101,7 @@ export function Exercises({
 
   if (isEmptyWorkout) {
     return (
-      <div className="mt-4">
+      <div>
         {isQuickWorkout ? (
           <EmptyWorkoutOptions dayId={day.id} />
         ) : (
@@ -116,13 +116,14 @@ export function Exercises({
   // Main workout view
   return (
     <div>
-      <div className="flex flex-col py-4 space-y-2 w-full">
+      <div className="flex flex-col pt-4 pb-6 space-y-2 w-full">
+        {hasNamedWorkoutType && (
+          <p className="text-lg font-medium text-center">
+            {formatWorkoutType(day.workoutType!)}
+          </p>
+        )}
         <div className="grid grid-flow-col gap-2 bg-background">
-          {hasNamedWorkoutType && (
-            <p className="text-lg">{formatWorkoutType(day.workoutType!)}</p>
-          )}
-
-          <Label className="flex items-center justify-center gap-2 whitespace-nowrap rounded-md p-1.5 bg-secondary dark:bg-muted-foreground/10 w-full">
+          <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-xl">
             <Switch
               checked={preferences.trainingView === GQLTrainingView.Advanced}
               onCheckedChange={() =>
@@ -153,7 +154,7 @@ export function Exercises({
           />
         ))}
         {isQuickWorkout && day.id && (
-          <div className="grid grid-cols-[auto_1fr] gap-2 py-4">
+          <div className="grid grid-cols-[auto_1fr] gap-2 pb-4">
             <div>
               <ClearWorkoutModal dayId={day.id} />
             </div>
@@ -161,7 +162,7 @@ export function Exercises({
               <AddSingleExercise dayId={day.id} variant="button" />
             </div>
 
-            <div className="col-span-full">
+            <div className="col-span-full empty:hidden">
               <AddToFavouritesButton day={day} />
             </div>
           </div>
@@ -180,7 +181,7 @@ function ExercisesCompleted({
   totalExercises: number
 }) {
   return (
-    <Badge variant="secondary" size="lg" className="w-full bg-secondary">
+    <Badge variant="secondary" size="lg" className="w-full bg-card-on-card">
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (
         <CheckCheck className="text-emerald-600" />

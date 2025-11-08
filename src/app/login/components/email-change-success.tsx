@@ -30,7 +30,7 @@ export function EmailChangeSuccess() {
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <Card borderless className="dark mb-2">
+          <Card className="dark mb-2">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <BiggyIcon size="sm" icon={CheckSquare} variant="success" />{' '}

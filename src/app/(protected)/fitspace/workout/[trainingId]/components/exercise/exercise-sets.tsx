@@ -279,36 +279,29 @@ export function ExerciseSets({
         })}
 
         {isAdvancedView && (
-          <div
-            className={cn(
-              'grid grid-cols-1 items-center justify-items-center mt-2 border-t border-border',
-              exercise.sets.length > 1 &&
-                exercise.sets.some((set) => set.isExtra) &&
-                'grid-cols-[1fr_1px_1fr]',
-            )}
-          >
+          <div className={cn('flex items-center justify-end gap-2 m-2 mt-4')}>
             {exercise.sets.some((set) => set.isExtra) &&
               exercise.sets.length > 1 && (
                 <>
                   <Button
-                    variant="ghost"
+                    variant="tertiary"
                     size="xs"
-                    iconStart={<PlusIcon />}
-                    className="w-full h-10"
+                    iconStart={<PlusIcon className="rotate-45" />}
+                    className=""
                     loading={isRemovingSet}
                     disabled={isRemovingSet}
                     onClick={handleRemoveLastSet}
                   >
                     Remove Last Set
                   </Button>
-                  <div className="h-full w-[1px] bg-border" />
+                  {/* <div className="h-full w-[1px] bg-border" /> */}
                 </>
               )}
             <Button
-              variant="ghost"
+              variant="tertiary"
               size="xs"
               iconStart={<PlusIcon />}
-              className="w-full h-10"
+              className=""
               loading={isAddingSet}
               onClick={handleAddSet}
             >

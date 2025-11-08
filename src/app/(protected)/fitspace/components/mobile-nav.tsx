@@ -125,7 +125,7 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar safe-area-bottom safe-area-x rounded-t-2xl">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background dark:bg-sidebar safe-area-bottom safe-area-x rounded-t-2xl border-t">
         <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon

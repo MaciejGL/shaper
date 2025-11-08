@@ -22,7 +22,7 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  'bg-card dark:bg-muted-foreground/10 text-muted-foreground inline-flex h-9 w-fit items-center justify-center py-[2px] px-[3px]',
+  'bg-card-on-card dark:bg-muted-foreground/10 text-muted-foreground inline-flex h-9 w-fit items-center justify-center py-[2px] px-[3px]',
   {
     variants: {
       variant: {
@@ -40,6 +40,8 @@ const tabsListVariants = cva(
         lg: 'rounded-lg',
         full: 'rounded-full',
         xl: 'rounded-xl',
+        '2xl': 'rounded-2xl',
+        '3xl': 'rounded-3xl',
       },
     },
   },
@@ -53,7 +55,7 @@ function TabsList({
 }: React.ComponentProps<typeof TabsPrimitive.List> & {
   variant?: 'default' | 'secondary'
   size?: 'default' | 'sm' | 'lg' | 'xl'
-  rounded?: 'default' | 'lg' | 'xl' | 'full'
+  rounded?: 'default' | 'lg' | 'xl' | 'full' | '2xl' | '3xl'
 }) {
   return (
     <TabsPrimitive.List
@@ -75,15 +77,17 @@ const tabsTriggerVariants = cva(
       },
       size: {
         sm: 'text-xs rounded-lg',
-        default: 'text-sm rounded-xl',
-        lg: 'text-sm px-3 py-1 rounded-xl',
-        xl: 'text-base px-4 py-1.5 rounded-xl',
+        default: 'rounded-xl',
+        lg: 'px-3 py-1 rounded-xl',
+        xl: 'px-4 py-1.5 rounded-xl',
       },
       rounded: {
         default: 'rounded-xl',
         lg: 'rounded-lg',
         full: 'rounded-full px-4',
         xl: cn('rounded-[10px]'),
+        '2xl': cn('rounded-[12px]'),
+        '3xl': cn('rounded-[14px]'),
       },
     },
   },
@@ -98,7 +102,7 @@ function TabsTrigger({
 }: React.ComponentProps<typeof TabsPrimitive.Trigger> & {
   variant?: 'default'
   size?: 'default' | 'sm' | 'lg' | 'xl'
-  rounded?: 'default' | 'lg' | 'xl' | 'full'
+  rounded?: 'default' | 'lg' | 'xl' | 'full' | '2xl' | '3xl'
 }) {
   return (
     <TabsPrimitive.Trigger

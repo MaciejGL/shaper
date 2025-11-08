@@ -30,7 +30,7 @@ export function PlanPreviewDay({
     <div className="mb-8">
       <h4
         className={cn(
-          'text-base font-medium mb-2 bg-card-on-card p-4 rounded-md flex items-center justify-between',
+          'text-base font-medium mb-2 bg-card-on-card p-4 rounded-xl flex items-center justify-between',
           day.isRestDay ? 'text-muted-foreground' : '',
         )}
       >

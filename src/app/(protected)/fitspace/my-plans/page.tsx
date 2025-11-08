@@ -41,18 +41,18 @@ export default function MyPlansPage() {
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
 
   return (
-    <div className="container-hypertro mx-auto grid grid-rows-[max-content_1fr] mt-6">
+    <div className="container-hypertro mx-auto grid grid-rows-[max-content_1fr] mt-2">
       <Tabs
         value={tab ?? PlanTab.Plans}
         defaultValue={PlanTab.Plans}
         onValueChange={(value) => setTab(value as PlanTab)}
         className="gap-0"
       >
-        <TabsList size="xl" className="w-full">
-          <TabsTrigger value={PlanTab.Plans} size="xl">
+        <TabsList size="xl" rounded="2xl" className="w-full">
+          <TabsTrigger value={PlanTab.Plans} size="xl" rounded="2xl">
             Plans
           </TabsTrigger>
-          <TabsTrigger value={PlanTab.QuickWorkout} size="xl">
+          <TabsTrigger value={PlanTab.QuickWorkout} size="xl" rounded="2xl">
             Custom Days
           </TabsTrigger>
         </TabsList>

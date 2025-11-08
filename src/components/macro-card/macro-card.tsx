@@ -20,7 +20,7 @@ export function MacroCard({
   return (
     <div
       className={cn(
-        'text-center p-2 bg-card rounded-lg flex-center flex-col',
+        'text-center p-2 bg-card-on-card rounded-2xl flex-center flex-col',
         className,
       )}
     >

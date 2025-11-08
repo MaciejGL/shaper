@@ -8,6 +8,7 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 import { GQLTrainingPlan } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 
 import {
   ActivePlan,
@@ -157,37 +158,39 @@ interface EmptyStatusCardProps {
 function EmptyStatusCard({ status }: EmptyStatusCardProps) {
   if (status === PlanStatus.Active) {
     return (
-      <CardContent className="flex items-center gap-4 py-4">
-        {/* <div className="size-12 bg-muted rounded-full flex items-center justify-center shrink-0">
+      <Card>
+        <CardContent className="flex items-center gap-4">
+          {/* <div className="size-12 bg-muted rounded-full flex items-center justify-center shrink-0">
             <svg
               className="size-6 text-muted-foreground"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-            >
+              >
               <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
-            </svg>
-          </div> */}
-        <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm mb-1">Activate Your Plan</h4>
-          <p className="text-sm text-muted-foreground">
-            Select one of your available plans to get started or select one of
-            our pre-made plans
-          </p>
-        </div>
-        <ButtonLink
-          href="/fitspace/explore?tab=plans"
-          size="sm"
-          iconEnd={<ChevronRight />}
-        >
-          Find Plan
-        </ButtonLink>
-      </CardContent>
+              </svg>
+              </div> */}
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-base mb-1">Activate Plan</h4>
+            <p className="text-sm text-muted-foreground">
+              Select one of your available plans to get started or select one of
+              our pre-made plans
+            </p>
+          </div>
+          <ButtonLink
+            href="/fitspace/explore?tab=plans"
+            size="sm"
+            iconEnd={<ChevronRight />}
+          >
+            Find Plan
+          </ButtonLink>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -221,7 +224,7 @@ interface StatusDividerProps {
 
 function StatusDivider({ status, count }: StatusDividerProps) {
   return (
-    <div className="flex items-center gap-3 pb-4 pt-2">
+    <div className="flex items-center gap-3 pb-6 pt-4">
       <div className="h-px flex-1 bg-border" />
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -256,7 +259,7 @@ function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
 
     return (
       <div className="space-y-2">
-        {statusOrder.map((status, statusIndex) => {
+        {statusOrder.map((status) => {
           const group = grouped[status]
           const hasPlans = group.count > 0
           const isActiveOrTemplate =
@@ -274,7 +277,12 @@ function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
 
               {/* Show plans or empty state */}
               {hasPlans ? (
-                <div className="space-y-2">
+                <div
+                  className={cn(
+                    'space-y-2 bg-card-on-card rounded-xl p-2',
+                    status === PlanStatus.Active && 'p-0 bg-transparent',
+                  )}
+                >
                   {group.plans.map(({ plan, isActive }) => (
                     <PlanCard
                       key={plan.id}
@@ -442,7 +450,7 @@ function EmptyFilterState({ filter }: { filter: FilterOption }) {
   }
 
   return (
-    <Card borderless>
+    <Card>
       <CardContent className="flex-center flex-col gap-4 py-12">
         <BiggyIcon icon={Dumbbell} />
         <h3 className="font-semibold">No {getFilterLabel()} plans</h3>

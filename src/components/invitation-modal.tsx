@@ -164,10 +164,7 @@ function SenderInfo({
 
   return (
     <div className="space-y-4 mb-6">
-      <Card
-        borderless
-        className="flex flex-row items-start gap-4 p-4 rounded-lg"
-      >
+      <Card className="flex flex-row items-start gap-4 p-4 rounded-lg">
         <Avatar className="h-12 w-12 border-2 shadow-sm">
           <AvatarImage src="/placeholder.svg?key=ebzsn" alt="Trainer" />
           <AvatarFallback>
@@ -263,7 +260,7 @@ function SuccessCard({
   }
 
   return (
-    <Card borderless className="relative overflow-hidden">
+    <Card className="relative overflow-hidden">
       <div className="relative">
         <CardHeader className="text-center pt-8 pb-6">
           <motion.div
@@ -346,7 +343,7 @@ function DeclinedCard({
   onClose: () => void
 }) {
   return (
-    <Card borderless className="relative overflow-hidden">
+    <Card className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-950/20 dark:to-gray-950/20" />
 
       <div className="relative">

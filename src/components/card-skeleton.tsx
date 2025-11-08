@@ -3,7 +3,7 @@ import { Skeleton } from './ui/skeleton'
 
 export function CardSkeleton() {
   return (
-    <Card borderless>
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <Skeleton className="h-6 w-1/2" />
         <Skeleton className="size-6" />

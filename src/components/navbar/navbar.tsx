@@ -13,7 +13,7 @@ import {
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
 import { UserContextType, useUser } from '@/context/user-context'
@@ -100,6 +100,8 @@ export const Navbar = ({
   const { user: userContext } = useUser()
   const { totalUnreadCount, notifications } = useUnreadMessageCount(userContext)
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
+  const [showBorder, setShowBorder] = useState(false)
+  const isFirstRender = useRef(true)
 
   const isTrainer = user?.user?.role === GQLUserRole.Trainer
 
@@ -115,10 +117,43 @@ export const Navbar = ({
 
   const isWorkoutPage = pathname.startsWith('/fitspace/workout')
 
+  useEffect(() => {
+    if (!isWorkoutPage) {
+      setShowBorder(true)
+      return
+    }
+
+    const checkPosition = () => {
+      const navigationElement = document.getElementById('workout-navigation')
+      if (!navigationElement) {
+        setShowBorder(false)
+        return
+      }
+
+      const navRect = navigationElement.getBoundingClientRect()
+      const navbarHeight = 60
+
+      isFirstRender.current = false
+      setShowBorder(navRect.bottom <= navbarHeight)
+    }
+    checkPosition()
+
+    window.addEventListener('scroll', checkPosition, { passive: true })
+
+    const timeoutId = setTimeout(checkPosition, 100)
+
+    return () => {
+      window.removeEventListener('scroll', checkPosition)
+      clearTimeout(timeoutId)
+    }
+  }, [isWorkoutPage, pathname])
+
   return (
     <>
       {user && !isTrainer && (
-        <motion.div className={cn('h-[60px]', isWorkoutPage && 'bg-sidebar')} />
+        <motion.div
+          className={cn('h-[60px] bg-sidebar', isWorkoutPage && 'bg-sidebar')}
+        />
       )}
 
       <div
@@ -128,11 +163,12 @@ export const Navbar = ({
           data-visible={isVisible}
           className={cn(
             'py-3 px-4 flex justify-between items-center bg-sidebar h-[60px]',
+            'transition-[transform,opacity,translate] duration-200',
             'data-[visible=true]:opacity-100 data-[visible=true]:translate-y-0',
-            'data-[visible=false]:opacity-0 data-[visible=false]:translate-y-[-100px] transition-all duration-200',
-            'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
-            'py-3 px-4',
-            isFitspace && 'rounded-b-2xl',
+            'data-[visible=false]:opacity-0 data-[visible=false]:translate-y-[-100px]',
+            'mt-[var(--safe-area-inset-top)]',
+            // isFitspace && !isWorkoutPage && 'border-border border-b',
+            // isWorkoutPage && showBorder && 'border-b border-border',
           )}
         >
           <div className="flex items-center gap-2">

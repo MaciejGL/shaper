@@ -118,7 +118,7 @@ export function PlanDetailsDrawer({
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="w-full shadow-md">
+              <TabsList className="w-full">
                 {!isTemplate && (
                   <TabsTrigger value="summary" className="flex-1">
                     Summary
@@ -288,15 +288,6 @@ export function PlanDetailsDrawer({
                         Pause
                       </Button>
                     )}
-                    {!isActive && (
-                      <Button
-                        onClick={() => onAction('activate', plan)}
-                        variant="default"
-                        disabled={isButtonLoading}
-                      >
-                        {isPaused ? 'Resume' : 'Activate'}
-                      </Button>
-                    )}
                     {(isActive || isPaused) && (
                       <Button
                         onClick={() => onAction('close', plan)}
@@ -304,6 +295,15 @@ export function PlanDetailsDrawer({
                         disabled={isButtonLoading}
                       >
                         Complete
+                      </Button>
+                    )}
+                    {!isActive && (
+                      <Button
+                        onClick={() => onAction('activate', plan)}
+                        variant="default"
+                        disabled={isButtonLoading}
+                      >
+                        {isPaused ? 'Resume' : 'Activate'}
                       </Button>
                     )}
                   </>

@@ -145,7 +145,7 @@ export function TrainingCard({
   }
 
   return (
-    <Card borderless>
+    <Card>
       <CardHeader>
         <div className="flex justify-between items-start">
           <CardTitle>{plan.title}</CardTitle>

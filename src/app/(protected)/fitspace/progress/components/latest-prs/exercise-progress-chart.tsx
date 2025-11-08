@@ -94,7 +94,7 @@ export function ExerciseProgressChart({
 
   if (chartData.length === 0 && !exerciseLogsLoading) {
     return (
-      <Card borderless variant="secondary" className="p-0 bg-transparent">
+      <Card variant="secondary" className="p-0 bg-transparent">
         <CardContent className="h-64 flex items-center justify-center p-0">
           <div className="text-center text-muted-foreground">
             <p className="text-sm">No data available</p>

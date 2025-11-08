@@ -131,7 +131,7 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
   ).length
 
   return (
-    <Card borderless>
+    <Card>
       <CardHeader>
         <div className="flex items-center gap-2 mb-2">
           <SectionIcon icon={ShoppingCart} size="sm" variant="sky" />

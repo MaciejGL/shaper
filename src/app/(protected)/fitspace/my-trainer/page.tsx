@@ -35,8 +35,6 @@ import {
 } from '@/generated/graphql-client'
 import { useScrollToFromParams } from '@/hooks/use-scroll-to'
 
-// import { DashboardHeader } from '../../trainer/components/dashboard-header'
-
 import { ClientMeetingsSection } from './components/client-meetings-section'
 import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'
 import { IncomingCoachingRequestCard } from './components/incoming-coaching-request-card'
@@ -60,12 +58,6 @@ export default function MyTrainerPage() {
 
   return (
     <div className="container-hypertro mx-auto mt-6">
-      {/* <DashboardHeader
-        title="Coaching"
-        icon={UserCheck}
-        variant="blue"
-        className="mb-6"
-      /> */}
       {isLoadingTrainer && (
         <div className="space-y-4">
           <LoadingSkeleton count={1} variant="sm" />
@@ -168,6 +160,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
         showExperience={true}
         showClientCount={false}
         variant="secondary"
+        className="rounded-2xl"
         onClick={() => setIsDrawerOpen(true)}
       />
 
@@ -312,7 +305,7 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
 
     return (
       <div className="space-y-4">
-        <Card borderless>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="size-4" />
@@ -363,7 +356,7 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
 
   // No trainer and no pending requests - show find trainer
   return (
-    <Card borderless>
+    <Card>
       <CardContent className="p-6 text-center">
         <UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-lg font-semibold mb-2">No Trainer Connected</h2>

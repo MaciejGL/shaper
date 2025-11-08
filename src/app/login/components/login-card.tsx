@@ -39,10 +39,7 @@ export const LoginCard = () => {
   } = useLoginForm()
 
   return (
-    <Card
-      borderless
-      className="dark flex flex-col gap-8 w-full max-w-md relative"
-    >
+    <Card className="dark flex flex-col gap-8 w-full max-w-md relative">
       <LoginAuthOverlay />
       <CardHeader className="space-y-1">
         <CardTitle>Login</CardTitle>

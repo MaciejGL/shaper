@@ -48,7 +48,7 @@ export default function NutritionPage() {
   }
 
   return (
-    <div className="container-hypertro mx-auto py-6">
+    <div className="container-hypertro mx-auto pb-6 pt-2">
       <div>
         {!hasMacroTargets && !hasPlans && (
           <EmptyStateCard
@@ -108,7 +108,7 @@ export default function NutritionPage() {
           )}
         </div>
         {macroTargets?.notes && (
-          <Card borderless className="p-4 mt-4">
+          <Card className="p-4 mt-4">
             <CardHeader>
               <CardTitle>Notes from trainer:</CardTitle>
             </CardHeader>
@@ -120,7 +120,7 @@ export default function NutritionPage() {
           </Card>
         )}
       </div>
-      <div className={cn(hasPlans && hasMacroTargets && 'mt-6')}>
+      <div className={cn(hasPlans && hasMacroTargets && 'mt-2')}>
         <NutritionPlanSelector
           onPlanSelect={handlePlanSelect}
           selectedPlanId={selectedPlanId}
