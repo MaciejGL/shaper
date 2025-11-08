@@ -1244,6 +1244,7 @@ export type GQLMutation = {
   sendMessage: GQLMessage;
   setMacroTargets: GQLMacroTarget;
   shareNutritionPlanWithClient: GQLNutritionPlan;
+  skipCheckin: GQLCheckinCompletion;
   startWorkoutFromFavourite: Scalars['ID']['output'];
   swapExercise: GQLSubstitute;
   unarchiveMeal: GQLMeal;
@@ -4237,6 +4238,11 @@ export type GQLCompleteCheckinMutationVariables = Exact<{
 
 
 export type GQLCompleteCheckinMutation = { __typename?: 'Mutation', completeCheckin: { __typename?: 'CheckinCompletion', id: string, completedAt: string, measurement?: { __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, measuredAt: string } | undefined | null, progressLog?: { __typename?: 'BodyProgressLog', id: string, loggedAt: string } | undefined | null } };
+
+export type GQLSkipCheckinMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLSkipCheckinMutation = { __typename?: 'Mutation', skipCheckin: { __typename?: 'CheckinCompletion', id: string, completedAt: string, measurement?: { __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, measuredAt: string } | undefined | null, progressLog?: { __typename?: 'BodyProgressLog', id: string, loggedAt: string } | undefined | null } };
 
 export type GQLResetUserLogsMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -8659,6 +8665,42 @@ useCompleteCheckinMutation.getKey = () => ['CompleteCheckin'];
 
 
 useCompleteCheckinMutation.fetcher = (variables: GQLCompleteCheckinMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCompleteCheckinMutation, GQLCompleteCheckinMutationVariables>(CompleteCheckinDocument, variables, options);
+
+export const SkipCheckinDocument = `
+    mutation SkipCheckin {
+  skipCheckin {
+    id
+    completedAt
+    measurement {
+      id
+      weight
+      measuredAt
+    }
+    progressLog {
+      id
+      loggedAt
+    }
+  }
+}
+    `;
+
+export const useSkipCheckinMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLSkipCheckinMutation, TError, GQLSkipCheckinMutationVariables, TContext>) => {
+    
+    return useMutation<GQLSkipCheckinMutation, TError, GQLSkipCheckinMutationVariables, TContext>(
+      {
+    mutationKey: ['SkipCheckin'],
+    mutationFn: (variables?: GQLSkipCheckinMutationVariables) => fetchData<GQLSkipCheckinMutation, GQLSkipCheckinMutationVariables>(SkipCheckinDocument, variables)(),
+    ...options
+  }
+    )};
+
+useSkipCheckinMutation.getKey = () => ['SkipCheckin'];
+
+
+useSkipCheckinMutation.fetcher = (variables?: GQLSkipCheckinMutationVariables, options?: RequestInit['headers']) => fetchData<GQLSkipCheckinMutation, GQLSkipCheckinMutationVariables>(SkipCheckinDocument, variables, options);
 
 export const ResetUserLogsDocument = `
     mutation ResetUserLogs {

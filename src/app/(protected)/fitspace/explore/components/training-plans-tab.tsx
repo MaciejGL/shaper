@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
+  GQLDifficulty,
   GQLFocusTag,
   GQLGetPublicTrainingPlansQuery,
   useAssignTemplateToSelfMutation,
@@ -23,10 +24,8 @@ import {
 } from '@/generated/graphql-client'
 import { formatUserCount } from '@/utils/format-user-count'
 
+import { PublicTrainingPlan } from './explore.client'
 import { TrainingPlanPreview } from './training-plan-preview/training-plan-preview'
-
-type PublicTrainingPlan =
-  GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
 
 interface TrainingPlansTabProps {
   initialPlans?: PublicTrainingPlan[]
@@ -39,6 +38,9 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   const [selectedFocusTags, setSelectedFocusTags] = useState<GQLFocusTag[]>([])
+  const [selectedDifficulties, setSelectedDifficulties] = useState<
+    GQLDifficulty[]
+  >([])
   const queryClient = useQueryClient()
   const router = useRouter()
   // Fetch public training plans
@@ -91,9 +93,18 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
     )
   }
 
+  const toggleDifficulty = (difficulty: GQLDifficulty) => {
+    setSelectedDifficulties((prev) =>
+      prev.includes(difficulty)
+        ? prev.filter((d) => d !== difficulty)
+        : [...prev, difficulty],
+    )
+  }
+
   const clearAllFilters = () => {
     setActiveFilter('all')
     setSelectedFocusTags([])
+    setSelectedDifficulties([])
   }
 
   if (isLoading) {
@@ -124,6 +135,13 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
     if (activeFilter === 'free' && plan.premium) return false
     if (activeFilter === 'premium' && !plan.premium) return false
 
+    // Filter by difficulty - plan must match ANY selected difficulty (OR logic)
+    if (selectedDifficulties.length > 0) {
+      if (!plan.difficulty || !selectedDifficulties.includes(plan.difficulty)) {
+        return false
+      }
+    }
+
     // Filter by focus tags - plan must have ALL selected tags (AND logic)
     if (selectedFocusTags.length > 0) {
       return selectedFocusTags.every((selectedTag) =>
@@ -134,15 +152,16 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
     return true
   })
 
-  const filtersApplied = selectedFocusTags.length > 0
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Filter Section */}
       <TrainingPlanFilters
         activeFilter={activeFilter}
         selectedFocusTags={selectedFocusTags}
+        selectedDifficulties={selectedDifficulties}
         onFilterChange={setActiveFilter}
         onToggleFocusTag={toggleFocusTag}
+        onToggleDifficulty={toggleDifficulty}
         onClearAllFilters={clearAllFilters}
       />
 
@@ -216,22 +235,25 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
       <CardHeader>
         <CardTitle className="flex items-start justify-between gap-2">
           {plan.title}
-          {plan.premium && (
+          {plan.premium ? (
             <Badge variant="premium">
               <Crown className="h-2 w-2 mr-1" />
               Premium
             </Badge>
+          ) : (
+            <Badge variant="secondary">Free</Badge>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
           {/* Focus Tags */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2">
             {plan.difficulty ? (
               <Badge
                 variant={difficultyVariantMap[plan.difficulty]}
                 className="capitalize"
+                size="lg"
               >
                 {plan.difficulty.toLowerCase()}
               </Badge>
@@ -241,12 +263,12 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
                 {plan.focusTags
                   .slice(0, 2)
                   .map((tag: GQLFocusTag, index: number) => (
-                    <Badge key={index} variant="secondary">
+                    <Badge key={index} variant="secondary" size="lg">
                       {focusTagLabels[tag] || tag}
                     </Badge>
                   ))}
                 {plan.focusTags.length > 2 && (
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" size="lg">
                     +{plan.focusTags.length - 2}
                   </Badge>
                 )}

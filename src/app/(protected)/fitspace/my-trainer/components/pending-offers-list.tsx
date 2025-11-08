@@ -83,7 +83,7 @@ export function PendingOffersList({ trainerId }: PendingOffersListProps) {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton count={1} variant="md" />
+    return <LoadingSkeleton count={1} variant="md" withBorder />
   }
 
   if (pendingOffers.length === 0) {

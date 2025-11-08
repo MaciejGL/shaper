@@ -59,12 +59,13 @@ export function getDayName(
 }
 
 /**
- * Format a date as relative time (e.g., "2 hours ago", "3 days ago")
+ * Format a date as relative time (e.g., "tomorrow", "in 3 days")
  * @param date - Date string or Date object
  * @returns Formatted relative time string
  */
 export function formatRelativeTime(date: string | Date): string {
   const dateObj = typeof date === 'string' ? parseISO(date) : date
+
   return formatDistanceToNow(dateObj, { addSuffix: true })
 }
 

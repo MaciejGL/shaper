@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { differenceInDays } from 'date-fns'
 import { toast } from 'sonner'
 
 import { useUser } from '@/context/user-context'
@@ -10,6 +11,7 @@ import {
   useDeleteCheckinScheduleMutation,
   useGetCheckinStatusQuery,
   useGetUserBodyProgressLogsQuery,
+  useSkipCheckinMutation,
   useUpdateCheckinScheduleMutation,
 } from '@/generated/graphql-client'
 
@@ -205,14 +207,69 @@ export function useCheckinScheduleOperations() {
     },
   })
 
+  const skipCheckinMutation = useSkipCheckinMutation({
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey })
+      const previousData = queryClient.getQueryData(queryKey)
+
+      queryClient.setQueryData(queryKey, (old: GQLGetCheckinStatusQuery) => {
+        if (!old?.checkinStatus?.schedule) return old
+
+        const newCompletion = {
+          id: `temp-${Date.now()}`,
+          completedAt: new Date().toISOString(),
+          measurement: null,
+          progressLog: null,
+        }
+
+        return {
+          ...old,
+          checkinStatus: {
+            ...old.checkinStatus,
+            schedule: {
+              ...old.checkinStatus.schedule,
+              completions: [
+                newCompletion,
+                ...old.checkinStatus.schedule.completions,
+              ],
+            },
+            isCheckinDue: false,
+            daysSinceLastCheckin: 0,
+          },
+        }
+      })
+
+      return { previousData }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData)
+      }
+      toast.error('Failed to skip check-in. Please try again.')
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey })
+    },
+  })
+
   return {
     createSchedule: createScheduleMutation.mutate,
     updateSchedule: updateScheduleMutation.mutate,
     deleteSchedule: deleteScheduleMutation.mutate,
     completeCheckin: completeCheckinMutation.mutate,
+    skipCheckin: skipCheckinMutation.mutate,
     isCreating: createScheduleMutation.isPending,
     isUpdating: updateScheduleMutation.isPending,
     isDeleting: deleteScheduleMutation.isPending,
     isCompleting: completeCheckinMutation.isPending,
+    isSkipping: skipCheckinMutation.isPending,
   }
+}
+
+export function isCheckinWithinThreeDays(
+  nextCheckinDate: string | null,
+): boolean {
+  if (!nextCheckinDate) return false
+  const daysUntil = differenceInDays(new Date(nextCheckinDate), new Date())
+  return daysUntil >= 0 && daysUntil <= 3
 }

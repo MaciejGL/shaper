@@ -7,7 +7,7 @@ import { MultiSelectToggle } from './multi-select-toggle'
 const FOCUS_TAG_OPTIONS = [
   { value: GQLFocusTag.Strength, label: 'Strength' },
   { value: GQLFocusTag.Cardio, label: 'Cardio' },
-  { value: GQLFocusTag.BeginnerFriendly, label: 'Beginner Friendly' },
+  // { value: GQLFocusTag.BeginnerFriendly, label: 'Beginner Friendly' },
   { value: GQLFocusTag.BodyRecomposition, label: 'Body Recomposition' },
   { value: GQLFocusTag.Powerlifting, label: 'Powerlifting' },
   { value: GQLFocusTag.WeightLoss, label: 'Weight Loss' },

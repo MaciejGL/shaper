@@ -78,3 +78,19 @@ mutation CompleteCheckin($input: CompleteCheckinInput!) {
     }
   }
 }
+
+mutation SkipCheckin {
+  skipCheckin {
+    id
+    completedAt
+    measurement {
+      id
+      weight
+      measuredAt
+    }
+    progressLog {
+      id
+      loggedAt
+    }
+  }
+}

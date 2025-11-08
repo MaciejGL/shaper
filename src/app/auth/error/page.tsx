@@ -37,7 +37,7 @@ export default function AuthErrorPage() {
           </Button>
 
           <Button variant="ghost" asChild className="w-full text-gray-400">
-            <Link href="/">Go to homepage</Link>
+            <Link href="/">Homepage</Link>
           </Button>
         </div>
       </div>

@@ -62,7 +62,7 @@ export function ClientServiceDeliveriesSection({
             collapsible
             className="w-full flex flex-col gap-2"
           >
-            <LoadingSkeleton count={3} cardVariant="tertiary" variant="sm" />
+            <LoadingSkeleton count={3} variant="sm" />
           </Accordion>
         </CardContent>
       </Card>
@@ -168,7 +168,7 @@ function TrainerOfferItem({ offer }: TrainerOfferItemProps) {
   return (
     <AccordionItem
       value={offer.id}
-      className="px-4 rounded-md border last:border-b"
+      className="px-4 rounded-2xl border last:border-b"
     >
       <AccordionTrigger className="hover:no-underline flex justify-between items-center">
         <div className="flex items-center justify-between w-full pr-4">

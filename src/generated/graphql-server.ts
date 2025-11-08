@@ -1246,6 +1246,7 @@ export type GQLMutation = {
   sendMessage: EntireFieldWrapper<GQLMessage>;
   setMacroTargets: EntireFieldWrapper<GQLMacroTarget>;
   shareNutritionPlanWithClient: EntireFieldWrapper<GQLNutritionPlan>;
+  skipCheckin: EntireFieldWrapper<GQLCheckinCompletion>;
   startWorkoutFromFavourite: EntireFieldWrapper<Scalars['ID']['output']>;
   swapExercise: EntireFieldWrapper<GQLSubstitute>;
   unarchiveMeal: EntireFieldWrapper<GQLMeal>;
@@ -5038,6 +5039,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   sendMessage?: Resolver<GQLResolversTypes['Message'], ParentType, ContextType, RequireFields<GQLMutationSendMessageArgs, 'input'>>;
   setMacroTargets?: Resolver<GQLResolversTypes['MacroTarget'], ParentType, ContextType, RequireFields<GQLMutationSetMacroTargetsArgs, 'input'>>;
   shareNutritionPlanWithClient?: Resolver<GQLResolversTypes['NutritionPlan'], ParentType, ContextType, RequireFields<GQLMutationShareNutritionPlanWithClientArgs, 'id'>>;
+  skipCheckin?: Resolver<GQLResolversTypes['CheckinCompletion'], ParentType, ContextType>;
   startWorkoutFromFavourite?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationStartWorkoutFromFavouriteArgs, 'input'>>;
   swapExercise?: Resolver<GQLResolversTypes['Substitute'], ParentType, ContextType, RequireFields<GQLMutationSwapExerciseArgs, 'exerciseId' | 'substituteId'>>;
   unarchiveMeal?: Resolver<GQLResolversTypes['Meal'], ParentType, ContextType, RequireFields<GQLMutationUnarchiveMealArgs, 'id'>>;
