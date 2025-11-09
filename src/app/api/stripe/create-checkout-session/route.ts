@@ -12,11 +12,11 @@ import { recordTermsAgreement } from '@/lib/terms-utils'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { userId, packageId, returnUrl, cancelUrl } = body
+    const { userId, packageId, lookupKey, returnUrl, cancelUrl } = body
 
-    if (!userId || !packageId) {
+    if (!userId || (!packageId && !lookupKey)) {
       return NextResponse.json(
-        { error: 'User ID and Package ID are required' },
+        { error: 'User ID and either Package ID or Lookup Key are required' },
         { status: 400 },
       )
     }
@@ -38,8 +38,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Find package template
-    const packageTemplate = await prisma.packageTemplate.findUnique({
+    let packageTemplate = null
+    let stripeLookupKey: string | null = null
+    let packageName = 'Premium Subscription'
+
+    // If packageId provided, look up package template
+    if (packageId) {
+      packageTemplate = await prisma.packageTemplate.findUnique({
       where: { id: packageId },
       select: {
         id: true,
@@ -52,7 +57,10 @@ export async function POST(request: NextRequest) {
     })
 
     if (!packageTemplate) {
-      return NextResponse.json({ error: 'Package not found' }, { status: 404 })
+        return NextResponse.json(
+          { error: 'Package not found' },
+          { status: 404 },
+        )
     }
 
     // Check if package has Stripe configuration
@@ -62,6 +70,9 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       )
     }
+
+      stripeLookupKey = packageTemplate.stripeLookupKey
+      packageName = packageTemplate.name
 
     // Check if user already has an active subscription for this package
     const existingSubscription = await prisma.userSubscription.findFirst({
@@ -86,6 +97,50 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 },
       )
+      }
+    } else if (lookupKey) {
+      // Direct lookup key provided (for platform subscriptions)
+      stripeLookupKey = lookupKey
+
+      // Determine package name from lookup key
+      if (lookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY) {
+        packageName = 'Premium Monthly'
+      } else if (lookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY) {
+        packageName = 'Premium Yearly'
+      }
+
+      // Check if user already has an active platform subscription
+      const existingSubscription = await prisma.userSubscription.findFirst({
+        where: {
+          userId,
+          status: {
+            in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING],
+          },
+          package: {
+            stripeLookupKey: {
+              in: [
+                STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY,
+                STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY,
+              ],
+            },
+          },
+        },
+      })
+
+      if (existingSubscription) {
+        return NextResponse.json(
+          {
+            error:
+              'You already have an active premium subscription. Please cancel it first.',
+            existingSubscription: {
+              id: existingSubscription.id,
+              status: existingSubscription.status,
+              endDate: existingSubscription.endDate,
+            },
+          },
+          { status: 400 },
+        )
+      }
     }
 
     // Create or get Stripe customer
@@ -122,25 +177,23 @@ export async function POST(request: NextRequest) {
       hasUsedTrialInDB ||
       (stripeCustomer as Stripe.Customer).metadata?.hasUsedTrial === 'true'
 
-    // Get lookup key and resolve to price ID
-    const lookupKey = packageTemplate.stripeLookupKey
-
-    if (!lookupKey) {
+    // Validate we have a lookup key
+    if (!stripeLookupKey) {
       return NextResponse.json(
-        { error: 'No valid lookup key found for this package' },
+        { error: 'No valid lookup key found' },
         { status: 400 },
       )
     }
 
     // Resolve lookup key to actual price ID for Stripe API
     const prices = await stripe.prices.list({
-      lookup_keys: [lookupKey],
+      lookup_keys: [stripeLookupKey],
       limit: 1,
     })
 
     if (prices.data.length === 0) {
       return NextResponse.json(
-        { error: `No price found for lookup key: ${lookupKey}` },
+        { error: `No price found for lookup key: ${stripeLookupKey}` },
         { status: 400 },
       )
     }
@@ -149,7 +202,7 @@ export async function POST(request: NextRequest) {
 
     // Check if this is a coaching upgrade
     const isCoachingSubscription =
-      packageTemplate.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING
+      stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING
 
     // If purchasing coaching, check if user has existing premium subscription to trigger refund
     let hasCoachingUpgrade = false
@@ -191,8 +244,9 @@ export async function POST(request: NextRequest) {
       cancel_url: cancelUrl || `${getBaseUrl()}?cancelled=true`,
       metadata: {
         userId,
-        packageId,
-        packageName: packageTemplate.name,
+        packageId: packageId || null,
+        packageName,
+        lookupKey: stripeLookupKey,
         isNewSubscription: 'true',
         hasCoachingUpgrade: hasCoachingUpgrade.toString(),
       },
@@ -202,9 +256,10 @@ export async function POST(request: NextRequest) {
           : SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS,
         metadata: {
           userId,
-          packageId,
-          packageName: packageTemplate.name,
-          trainerIdAssigned: packageTemplate.trainerId || '',
+          packageId: packageId || null,
+          packageName,
+          lookupKey: stripeLookupKey,
+          trainerIdAssigned: packageTemplate?.trainerId || '',
         },
       },
       // Customize the checkout experience
@@ -217,7 +272,7 @@ export async function POST(request: NextRequest) {
     })
 
     console.info(
-      `🛒 Checkout session created for user ${userId}, package ${packageId}${hasUsedTrial ? ' (no trial)' : ` (${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day trial)`}${hasCoachingUpgrade ? ' (coaching upgrade - will trigger refund)' : ''}`,
+      `🛒 Checkout session created for user ${userId}, ${packageId ? `package ${packageId}` : `lookup key ${stripeLookupKey}`}${hasUsedTrial ? ' (no trial)' : ` (${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day trial)`}${hasCoachingUpgrade ? ' (coaching upgrade - will trigger refund)' : ''}`,
     )
 
     try {
@@ -231,12 +286,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       checkoutUrl: checkoutSession.url,
       sessionId: checkoutSession.id,
-      packageName: packageTemplate.name,
-      duration: packageTemplate.duration,
+      packageName,
+      duration: packageTemplate?.duration || null,
       hasTrialPeriod: !hasUsedTrial,
       trialDays: hasUsedTrial ? 0 : SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS,
       message: hasUsedTrial
-        ? `Redirecting to payment for ${packageTemplate.name}`
+        ? `Redirecting to payment for ${packageName}`
         : `Redirecting to payment - ${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS} day trial included!`,
     })
   } catch (error) {

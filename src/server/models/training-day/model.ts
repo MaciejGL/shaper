@@ -144,4 +144,20 @@ export default class TrainingDay implements GQLTrainingDay {
   get updatedAt() {
     return this.data.updatedAt.toISOString()
   }
+
+  async isFreeDemo() {
+    const freeWorkoutDay = await this.context.loaders.day.isFreeDemo.load(
+      this.data.id,
+    )
+    return !!freeWorkoutDay
+  }
+
+  async timesStarted() {
+    const count = await this.context.loaders.day.timesStarted.load(this.data.id)
+    return count
+  }
+
+  get sourcePlanId() {
+    return this.data.sourcePlanId ?? null
+  }
 }

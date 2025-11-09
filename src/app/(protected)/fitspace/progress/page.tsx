@@ -1,6 +1,6 @@
 'use client'
 
-import { ExtendHeader } from '../workout/[trainingId]/components/workout-page.client'
+import { ExtendHeader } from '@/components/extend-header'
 
 import { BodyMeasurementsProvider } from './components/body-measurements-context'
 import { CheckinScheduleSection } from './components/checkin-schedule/checkin-schedule-section'

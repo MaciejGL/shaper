@@ -6,6 +6,7 @@ import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
+import { ExtendHeader } from '@/components/extend-header'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { MessengerModal } from '@/components/messenger-modal/messenger-modal'
 import { TrainerCard } from '@/components/trainer/trainer-card'
@@ -34,8 +35,6 @@ import {
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
 import { useScrollToFromParams } from '@/hooks/use-scroll-to'
-
-import { ExtendHeader } from '../workout/[trainingId]/components/workout-page.client'
 
 import { ClientMeetingsSection } from './components/client-meetings-section'
 import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'

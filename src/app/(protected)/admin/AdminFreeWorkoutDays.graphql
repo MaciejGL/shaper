@@ -1,0 +1,88 @@
+query GetAdminFreeWorkoutDays {
+  getAdminFreeWorkoutDays {
+    id
+    trainingDayId
+    planId
+    isVisible
+    heroImageUrl
+    createdAt
+    updatedAt
+    trainingDay {
+      id
+      workoutType
+      exercisesCount
+      timesStarted
+    }
+    plan {
+      id
+      title
+    }
+  }
+}
+
+mutation AddFreeWorkoutDay($input: AddFreeWorkoutDayInput!) {
+  addFreeWorkoutDay(input: $input) {
+    id
+    trainingDayId
+    planId
+    isVisible
+    heroImageUrl
+  }
+}
+
+mutation UpdateFreeWorkoutDay(
+  $id: ID!
+  $isVisible: Boolean
+  $heroImageUrl: String
+) {
+  updateFreeWorkoutDay(
+    id: $id
+    isVisible: $isVisible
+    heroImageUrl: $heroImageUrl
+  )
+}
+
+mutation RemoveFreeWorkoutDay($id: ID!) {
+  removeFreeWorkoutDay(id: $id)
+}
+
+query GetPublicTrainingPlanWeeksForAdmin($planId: ID!) {
+  getTrainingPlanById(id: $planId) {
+    id
+    title
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+    }
+    weeks {
+      id
+      weekNumber
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        workoutType
+        timesStarted
+        exercises {
+          id
+          name
+          videoUrl
+          restSeconds
+          warmupSets
+          images {
+            id
+            thumbnail
+            medium
+            url
+            order
+          }
+          sets {
+            id
+          }
+        }
+      }
+    }
+  }
+}

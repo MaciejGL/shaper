@@ -69,6 +69,12 @@ export type GQLAddExercisesToWorkoutInput = {
   workoutId: Scalars['ID']['input'];
 };
 
+export type GQLAddFreeWorkoutDayInput = {
+  heroImageUrl?: InputMaybe<Scalars['String']['input']>;
+  planId: Scalars['ID']['input'];
+  trainingDayId: Scalars['ID']['input'];
+};
+
 export type GQLAddIngredientToMealInput = {
   grams: Scalars['Float']['input'];
   ingredientId: Scalars['ID']['input'];
@@ -826,6 +832,19 @@ export enum GQLFocusTag {
   WeightLoss = 'WEIGHT_LOSS'
 }
 
+export type GQLFreeWorkoutDay = {
+  __typename?: 'FreeWorkoutDay';
+  createdAt: Scalars['String']['output'];
+  heroImageUrl?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isVisible: Scalars['Boolean']['output'];
+  plan?: Maybe<GQLTrainingPlan>;
+  planId: Scalars['ID']['output'];
+  trainingDay?: Maybe<GQLTrainingDay>;
+  trainingDayId: Scalars['ID']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type GQLGenerateAiWorkoutInput = {
   exerciseCount: Scalars['Int']['input'];
   maxSetsPerExercise: Scalars['Int']['input'];
@@ -1133,6 +1152,7 @@ export type GQLMutation = {
   addExerciseToDay: Scalars['ID']['output'];
   addExercisesToQuickWorkout: GQLTrainingPlan;
   addExercisesToWorkout: Array<GQLTrainingExercise>;
+  addFreeWorkoutDay: GQLFreeWorkoutDay;
   addIngredientToMeal: GQLMealIngredient;
   addMealToNutritionPlanDay: GQLNutritionPlanMeal;
   addNutritionPlanDay: GQLNutritionPlanDay;
@@ -1145,7 +1165,7 @@ export type GQLMutation = {
   addTrainingWeek: Scalars['ID']['output'];
   addUserLocation: GQLUserProfile;
   archiveMeal: GQLMeal;
-  assignTemplateToSelf: Scalars['Boolean']['output'];
+  assignTemplateToSelf: Scalars['ID']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   cancelCoaching: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
@@ -1222,6 +1242,7 @@ export type GQLMutation = {
   removeExerciseFromDay: Scalars['Boolean']['output'];
   removeExerciseFromWorkout: Scalars['Boolean']['output'];
   removeFavouriteExercise: Scalars['Boolean']['output'];
+  removeFreeWorkoutDay: Scalars['Boolean']['output'];
   removeIngredientFromMeal: Scalars['Boolean']['output'];
   removeMealFromNutritionPlanDay: Scalars['Boolean']['output'];
   removeNutritionPlanDay: Scalars['Boolean']['output'];
@@ -1245,6 +1266,7 @@ export type GQLMutation = {
   setMacroTargets: GQLMacroTarget;
   shareNutritionPlanWithClient: GQLNutritionPlan;
   skipCheckin: GQLCheckinCompletion;
+  startFreeWorkoutDay: GQLStartFreeWorkoutResult;
   startWorkoutFromFavourite: Scalars['ID']['output'];
   swapExercise: GQLSubstitute;
   unarchiveMeal: GQLMeal;
@@ -1259,6 +1281,7 @@ export type GQLMutation = {
   updateFavouriteExerciseSets: Scalars['Boolean']['output'];
   updateFavouriteExercisesOrder: Scalars['Boolean']['output'];
   updateFavouriteWorkout: GQLFavouriteWorkout;
+  updateFreeWorkoutDay: Scalars['Boolean']['output'];
   updateIngredient: GQLIngredient;
   updateMeal: GQLMeal;
   updateMealIngredient: GQLMealIngredient;
@@ -1327,6 +1350,11 @@ export type GQLMutationAddExercisesToQuickWorkoutArgs = {
 
 export type GQLMutationAddExercisesToWorkoutArgs = {
   input: GQLAddExercisesToWorkoutInput;
+};
+
+
+export type GQLMutationAddFreeWorkoutDayArgs = {
+  input: GQLAddFreeWorkoutDayInput;
 };
 
 
@@ -1768,6 +1796,11 @@ export type GQLMutationRemoveFavouriteExerciseArgs = {
 };
 
 
+export type GQLMutationRemoveFreeWorkoutDayArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationRemoveIngredientFromMealArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1875,6 +1908,11 @@ export type GQLMutationShareNutritionPlanWithClientArgs = {
 };
 
 
+export type GQLMutationStartFreeWorkoutDayArgs = {
+  input: GQLStartFreeWorkoutDayInput;
+};
+
+
 export type GQLMutationStartWorkoutFromFavouriteArgs = {
   input: GQLStartWorkoutFromFavouriteInput;
 };
@@ -1948,6 +1986,13 @@ export type GQLMutationUpdateFavouriteExercisesOrderArgs = {
 
 export type GQLMutationUpdateFavouriteWorkoutArgs = {
   input: GQLUpdateFavouriteWorkoutInput;
+};
+
+
+export type GQLMutationUpdateFreeWorkoutDayArgs = {
+  heroImageUrl?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  isVisible?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -2394,6 +2439,7 @@ export type GQLQuery = {
   exercisesProgressByUser: Array<GQLExerciseProgress>;
   getActivePackageTemplates: Array<GQLPackageTemplate>;
   getActivePlanId?: Maybe<Scalars['ID']['output']>;
+  getAdminFreeWorkoutDays: Array<GQLFreeWorkoutDay>;
   getAllUsersWithSubscriptions: GQLUsersWithSubscriptionsResult;
   getChatMessages: Array<GQLMessage>;
   getClientActivePlan?: Maybe<GQLTrainingPlan>;
@@ -2406,6 +2452,7 @@ export type GQLQuery = {
   getFavouriteWorkout?: Maybe<GQLFavouriteWorkout>;
   getFavouriteWorkouts: Array<GQLFavouriteWorkout>;
   getFeaturedTrainers: Array<GQLPublicTrainer>;
+  getFreeWorkoutDays: Array<GQLFreeWorkoutDay>;
   getMessengerInitialData: GQLMessengerInitialData;
   getMyChats: Array<GQLChat>;
   getMyClientSurvey?: Maybe<GQLClientSurvey>;
@@ -2419,6 +2466,7 @@ export type GQLQuery = {
   getMyTrainer?: Maybe<GQLPublicTrainer>;
   getOrCreateChat: GQLChat;
   getPackageTemplate?: Maybe<GQLPackageTemplate>;
+  getPlanPreview: GQLTrainingPlan;
   getPlanSummary: GQLPlanSummary;
   getPublicTrainingPlans: Array<GQLTrainingPlan>;
   getQuickWorkoutDay?: Maybe<GQLGetWorkoutDayPayload>;
@@ -2610,6 +2658,11 @@ export type GQLQueryGetOrCreateChatArgs = {
 
 
 export type GQLQueryGetPackageTemplateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetPlanPreviewArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3002,6 +3055,19 @@ export type GQLSetMacroTargetsInput = {
   protein?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLStartFreeWorkoutDayInput = {
+  dayId?: InputMaybe<Scalars['ID']['input']>;
+  replaceExisting?: InputMaybe<Scalars['Boolean']['input']>;
+  trainingDayId: Scalars['ID']['input'];
+};
+
+export type GQLStartFreeWorkoutResult = {
+  __typename?: 'StartFreeWorkoutResult';
+  dayId: Scalars['ID']['output'];
+  planId: Scalars['ID']['output'];
+  weekId: Scalars['ID']['output'];
+};
+
 export type GQLStartWorkoutFromFavouriteInput = {
   dayId?: InputMaybe<Scalars['ID']['input']>;
   favouriteWorkoutId: Scalars['ID']['input'];
@@ -3199,10 +3265,13 @@ export type GQLTrainingDay = {
   exercises: Array<GQLTrainingExercise>;
   exercisesCount: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
+  isFreeDemo: Scalars['Boolean']['output'];
   isRestDay: Scalars['Boolean']['output'];
   personalRecords?: Maybe<Array<GQLPersonalRecord>>;
   scheduledAt?: Maybe<Scalars['String']['output']>;
+  sourcePlanId?: Maybe<Scalars['String']['output']>;
   startedAt?: Maybe<Scalars['String']['output']>;
+  timesStarted: Scalars['Int']['output'];
   trainingWeekId: Scalars['ID']['output'];
   updatedAt: Scalars['String']['output'];
   workoutType?: Maybe<GQLWorkoutType>;
@@ -3257,6 +3326,7 @@ export type GQLTrainingPlan = {
   endDate?: Maybe<Scalars['String']['output']>;
   equipment: Array<Scalars['String']['output']>;
   focusTags: Array<GQLFocusTag>;
+  heroImageUrl?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   isDemo: Scalars['Boolean']['output'];
   isDraft: Scalars['Boolean']['output'];
@@ -3271,6 +3341,7 @@ export type GQLTrainingPlan = {
   sessionsPerWeek?: Maybe<Scalars['Int']['output']>;
   startDate?: Maybe<Scalars['String']['output']>;
   targetGoals: Array<GQLTargetGoal>;
+  timesStarted: Scalars['Int']['output'];
   title: Scalars['String']['output'];
   totalReviews: Scalars['Int']['output'];
   totalWorkouts: Scalars['Int']['output'];
@@ -3839,6 +3910,41 @@ export enum GQLWorkoutType {
   UpperBody = 'UpperBody'
 }
 
+export type GQLGetAdminFreeWorkoutDaysQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetAdminFreeWorkoutDaysQuery = { __typename?: 'Query', getAdminFreeWorkoutDays: Array<{ __typename?: 'FreeWorkoutDay', id: string, trainingDayId: string, planId: string, isVisible: boolean, heroImageUrl?: string | undefined | null, createdAt: string, updatedAt: string, trainingDay?: { __typename?: 'TrainingDay', id: string, workoutType?: GQLWorkoutType | undefined | null, exercisesCount: number, timesStarted: number } | undefined | null, plan?: { __typename?: 'TrainingPlan', id: string, title: string } | undefined | null }> };
+
+export type GQLAddFreeWorkoutDayMutationVariables = Exact<{
+  input: GQLAddFreeWorkoutDayInput;
+}>;
+
+
+export type GQLAddFreeWorkoutDayMutation = { __typename?: 'Mutation', addFreeWorkoutDay: { __typename?: 'FreeWorkoutDay', id: string, trainingDayId: string, planId: string, isVisible: boolean, heroImageUrl?: string | undefined | null } };
+
+export type GQLUpdateFreeWorkoutDayMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  isVisible?: InputMaybe<Scalars['Boolean']['input']>;
+  heroImageUrl?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GQLUpdateFreeWorkoutDayMutation = { __typename?: 'Mutation', updateFreeWorkoutDay: boolean };
+
+export type GQLRemoveFreeWorkoutDayMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveFreeWorkoutDayMutation = { __typename?: 'Mutation', removeFreeWorkoutDay: boolean };
+
+export type GQLGetPublicTrainingPlanWeeksForAdminQueryVariables = Exact<{
+  planId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetPublicTrainingPlanWeeksForAdminQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, title: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, timesStarted: number, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, restSeconds?: number | undefined | null, warmupSets?: number | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, sets: Array<{ __typename?: 'ExerciseSet', id: string }> }> }> }> } };
+
 export type GQLGetAdminUserStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -3879,7 +3985,7 @@ export type GQLGetPublicTrainingPlanWeeksQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetPublicTrainingPlanWeeksQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }> }> }> }> } };
+export type GQLGetPublicTrainingPlanWeeksQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }> }> }> }> } };
 
 export type GQLGetFeaturedTrainersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -3887,6 +3993,18 @@ export type GQLGetFeaturedTrainersQueryVariables = Exact<{
 
 
 export type GQLGetFeaturedTrainersQuery = { __typename?: 'Query', getFeaturedTrainers: Array<{ __typename?: 'PublicTrainer', id: string, name?: string | undefined | null, role: GQLUserRole, clientCount: number, email: string, capacity?: number | undefined | null, spotsLeft?: number | undefined | null, isAtCapacity: boolean, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, bio?: string | undefined | null, avatarUrl?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null } | undefined | null }> };
+
+export type GQLGetFreeWorkoutDaysQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetFreeWorkoutDaysQuery = { __typename?: 'Query', getFreeWorkoutDays: Array<{ __typename?: 'FreeWorkoutDay', id: string, trainingDayId: string, heroImageUrl?: string | undefined | null, trainingDay?: { __typename?: 'TrainingDay', id: string, workoutType?: GQLWorkoutType | undefined | null, exercisesCount: number, timesStarted: number, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null }> }> } | undefined | null, plan?: { __typename?: 'TrainingPlan', id: string, title: string, premium: boolean, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null } | undefined | null }> };
+
+export type GQLStartFreeWorkoutDayMutationVariables = Exact<{
+  input: GQLStartFreeWorkoutDayInput;
+}>;
+
+
+export type GQLStartFreeWorkoutDayMutation = { __typename?: 'Mutation', startFreeWorkoutDay: { __typename?: 'StartFreeWorkoutResult', planId: string, weekId: string, dayId: string } };
 
 export type GQLGetFavouriteWorkoutsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5379,7 +5497,7 @@ export type GQLAssignTemplateToSelfMutationVariables = Exact<{
 }>;
 
 
-export type GQLAssignTemplateToSelfMutation = { __typename?: 'Mutation', assignTemplateToSelf: boolean };
+export type GQLAssignTemplateToSelfMutation = { __typename?: 'Mutation', assignTemplateToSelf: string };
 
 export type GQLUserBasicQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5599,6 +5717,239 @@ export const TrainingTemplateFragmentDoc = `
   }
 }
     `;
+export const GetAdminFreeWorkoutDaysDocument = `
+    query GetAdminFreeWorkoutDays {
+  getAdminFreeWorkoutDays {
+    id
+    trainingDayId
+    planId
+    isVisible
+    heroImageUrl
+    createdAt
+    updatedAt
+    trainingDay {
+      id
+      workoutType
+      exercisesCount
+      timesStarted
+    }
+    plan {
+      id
+      title
+    }
+  }
+}
+    `;
+
+export const useGetAdminFreeWorkoutDaysQuery = <
+      TData = GQLGetAdminFreeWorkoutDaysQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetAdminFreeWorkoutDaysQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetAdminFreeWorkoutDaysQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetAdminFreeWorkoutDaysQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetAdminFreeWorkoutDaysQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetAdminFreeWorkoutDays'] : ['GetAdminFreeWorkoutDays', variables],
+    queryFn: fetchData<GQLGetAdminFreeWorkoutDaysQuery, GQLGetAdminFreeWorkoutDaysQueryVariables>(GetAdminFreeWorkoutDaysDocument, variables),
+    ...options
+  }
+    )};
+
+useGetAdminFreeWorkoutDaysQuery.getKey = (variables?: GQLGetAdminFreeWorkoutDaysQueryVariables) => variables === undefined ? ['GetAdminFreeWorkoutDays'] : ['GetAdminFreeWorkoutDays', variables];
+
+export const useInfiniteGetAdminFreeWorkoutDaysQuery = <
+      TData = InfiniteData<GQLGetAdminFreeWorkoutDaysQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetAdminFreeWorkoutDaysQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetAdminFreeWorkoutDaysQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetAdminFreeWorkoutDaysQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetAdminFreeWorkoutDaysQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetAdminFreeWorkoutDays.infinite'] : ['GetAdminFreeWorkoutDays.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetAdminFreeWorkoutDaysQuery, GQLGetAdminFreeWorkoutDaysQueryVariables>(GetAdminFreeWorkoutDaysDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetAdminFreeWorkoutDaysQuery.getKey = (variables?: GQLGetAdminFreeWorkoutDaysQueryVariables) => variables === undefined ? ['GetAdminFreeWorkoutDays.infinite'] : ['GetAdminFreeWorkoutDays.infinite', variables];
+
+
+useGetAdminFreeWorkoutDaysQuery.fetcher = (variables?: GQLGetAdminFreeWorkoutDaysQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetAdminFreeWorkoutDaysQuery, GQLGetAdminFreeWorkoutDaysQueryVariables>(GetAdminFreeWorkoutDaysDocument, variables, options);
+
+export const AddFreeWorkoutDayDocument = `
+    mutation AddFreeWorkoutDay($input: AddFreeWorkoutDayInput!) {
+  addFreeWorkoutDay(input: $input) {
+    id
+    trainingDayId
+    planId
+    isVisible
+    heroImageUrl
+  }
+}
+    `;
+
+export const useAddFreeWorkoutDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddFreeWorkoutDayMutation, TError, GQLAddFreeWorkoutDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddFreeWorkoutDayMutation, TError, GQLAddFreeWorkoutDayMutationVariables, TContext>(
+      {
+    mutationKey: ['AddFreeWorkoutDay'],
+    mutationFn: (variables?: GQLAddFreeWorkoutDayMutationVariables) => fetchData<GQLAddFreeWorkoutDayMutation, GQLAddFreeWorkoutDayMutationVariables>(AddFreeWorkoutDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddFreeWorkoutDayMutation.getKey = () => ['AddFreeWorkoutDay'];
+
+
+useAddFreeWorkoutDayMutation.fetcher = (variables: GQLAddFreeWorkoutDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddFreeWorkoutDayMutation, GQLAddFreeWorkoutDayMutationVariables>(AddFreeWorkoutDayDocument, variables, options);
+
+export const UpdateFreeWorkoutDayDocument = `
+    mutation UpdateFreeWorkoutDay($id: ID!, $isVisible: Boolean, $heroImageUrl: String) {
+  updateFreeWorkoutDay(
+    id: $id
+    isVisible: $isVisible
+    heroImageUrl: $heroImageUrl
+  )
+}
+    `;
+
+export const useUpdateFreeWorkoutDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateFreeWorkoutDayMutation, TError, GQLUpdateFreeWorkoutDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateFreeWorkoutDayMutation, TError, GQLUpdateFreeWorkoutDayMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateFreeWorkoutDay'],
+    mutationFn: (variables?: GQLUpdateFreeWorkoutDayMutationVariables) => fetchData<GQLUpdateFreeWorkoutDayMutation, GQLUpdateFreeWorkoutDayMutationVariables>(UpdateFreeWorkoutDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateFreeWorkoutDayMutation.getKey = () => ['UpdateFreeWorkoutDay'];
+
+
+useUpdateFreeWorkoutDayMutation.fetcher = (variables: GQLUpdateFreeWorkoutDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateFreeWorkoutDayMutation, GQLUpdateFreeWorkoutDayMutationVariables>(UpdateFreeWorkoutDayDocument, variables, options);
+
+export const RemoveFreeWorkoutDayDocument = `
+    mutation RemoveFreeWorkoutDay($id: ID!) {
+  removeFreeWorkoutDay(id: $id)
+}
+    `;
+
+export const useRemoveFreeWorkoutDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveFreeWorkoutDayMutation, TError, GQLRemoveFreeWorkoutDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveFreeWorkoutDayMutation, TError, GQLRemoveFreeWorkoutDayMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveFreeWorkoutDay'],
+    mutationFn: (variables?: GQLRemoveFreeWorkoutDayMutationVariables) => fetchData<GQLRemoveFreeWorkoutDayMutation, GQLRemoveFreeWorkoutDayMutationVariables>(RemoveFreeWorkoutDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveFreeWorkoutDayMutation.getKey = () => ['RemoveFreeWorkoutDay'];
+
+
+useRemoveFreeWorkoutDayMutation.fetcher = (variables: GQLRemoveFreeWorkoutDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveFreeWorkoutDayMutation, GQLRemoveFreeWorkoutDayMutationVariables>(RemoveFreeWorkoutDayDocument, variables, options);
+
+export const GetPublicTrainingPlanWeeksForAdminDocument = `
+    query GetPublicTrainingPlanWeeksForAdmin($planId: ID!) {
+  getTrainingPlanById(id: $planId) {
+    id
+    title
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+    }
+    weeks {
+      id
+      weekNumber
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        workoutType
+        timesStarted
+        exercises {
+          id
+          name
+          videoUrl
+          restSeconds
+          warmupSets
+          images {
+            id
+            thumbnail
+            medium
+            url
+            order
+          }
+          sets {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useGetPublicTrainingPlanWeeksForAdminQuery = <
+      TData = GQLGetPublicTrainingPlanWeeksForAdminQuery,
+      TError = unknown
+    >(
+      variables: GQLGetPublicTrainingPlanWeeksForAdminQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetPublicTrainingPlanWeeksForAdminQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetPublicTrainingPlanWeeksForAdminQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetPublicTrainingPlanWeeksForAdminQuery, TError, TData>(
+      {
+    queryKey: ['GetPublicTrainingPlanWeeksForAdmin', variables],
+    queryFn: fetchData<GQLGetPublicTrainingPlanWeeksForAdminQuery, GQLGetPublicTrainingPlanWeeksForAdminQueryVariables>(GetPublicTrainingPlanWeeksForAdminDocument, variables),
+    ...options
+  }
+    )};
+
+useGetPublicTrainingPlanWeeksForAdminQuery.getKey = (variables: GQLGetPublicTrainingPlanWeeksForAdminQueryVariables) => ['GetPublicTrainingPlanWeeksForAdmin', variables];
+
+export const useInfiniteGetPublicTrainingPlanWeeksForAdminQuery = <
+      TData = InfiniteData<GQLGetPublicTrainingPlanWeeksForAdminQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetPublicTrainingPlanWeeksForAdminQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetPublicTrainingPlanWeeksForAdminQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetPublicTrainingPlanWeeksForAdminQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetPublicTrainingPlanWeeksForAdminQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetPublicTrainingPlanWeeksForAdmin.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetPublicTrainingPlanWeeksForAdminQuery, GQLGetPublicTrainingPlanWeeksForAdminQueryVariables>(GetPublicTrainingPlanWeeksForAdminDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetPublicTrainingPlanWeeksForAdminQuery.getKey = (variables: GQLGetPublicTrainingPlanWeeksForAdminQueryVariables) => ['GetPublicTrainingPlanWeeksForAdmin.infinite', variables];
+
+
+useGetPublicTrainingPlanWeeksForAdminQuery.fetcher = (variables: GQLGetPublicTrainingPlanWeeksForAdminQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetPublicTrainingPlanWeeksForAdminQuery, GQLGetPublicTrainingPlanWeeksForAdminQueryVariables>(GetPublicTrainingPlanWeeksForAdminDocument, variables, options);
+
 export const GetAdminUserStatsDocument = `
     query GetAdminUserStats {
   adminUserStats {
@@ -5879,6 +6230,7 @@ export const GetPublicTrainingPlanWeeksDocument = `
         id
         dayOfWeek
         isRestDay
+        workoutType
         exercises {
           id
           name
@@ -6005,6 +6357,122 @@ useInfiniteGetFeaturedTrainersQuery.getKey = (variables?: GQLGetFeaturedTrainers
 
 
 useGetFeaturedTrainersQuery.fetcher = (variables?: GQLGetFeaturedTrainersQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetFeaturedTrainersQuery, GQLGetFeaturedTrainersQueryVariables>(GetFeaturedTrainersDocument, variables, options);
+
+export const GetFreeWorkoutDaysDocument = `
+    query GetFreeWorkoutDays {
+  getFreeWorkoutDays {
+    id
+    trainingDayId
+    heroImageUrl
+    trainingDay {
+      id
+      workoutType
+      exercisesCount
+      timesStarted
+      exercises {
+        id
+        name
+        videoUrl
+        images {
+          id
+          thumbnail
+          medium
+          url
+          order
+        }
+        sets {
+          id
+          reps
+          minReps
+          maxReps
+          weight
+        }
+      }
+    }
+    plan {
+      id
+      title
+      premium
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+      }
+    }
+  }
+}
+    `;
+
+export const useGetFreeWorkoutDaysQuery = <
+      TData = GQLGetFreeWorkoutDaysQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetFreeWorkoutDaysQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetFreeWorkoutDaysQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetFreeWorkoutDaysQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetFreeWorkoutDaysQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetFreeWorkoutDays'] : ['GetFreeWorkoutDays', variables],
+    queryFn: fetchData<GQLGetFreeWorkoutDaysQuery, GQLGetFreeWorkoutDaysQueryVariables>(GetFreeWorkoutDaysDocument, variables),
+    ...options
+  }
+    )};
+
+useGetFreeWorkoutDaysQuery.getKey = (variables?: GQLGetFreeWorkoutDaysQueryVariables) => variables === undefined ? ['GetFreeWorkoutDays'] : ['GetFreeWorkoutDays', variables];
+
+export const useInfiniteGetFreeWorkoutDaysQuery = <
+      TData = InfiniteData<GQLGetFreeWorkoutDaysQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetFreeWorkoutDaysQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetFreeWorkoutDaysQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetFreeWorkoutDaysQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetFreeWorkoutDaysQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetFreeWorkoutDays.infinite'] : ['GetFreeWorkoutDays.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetFreeWorkoutDaysQuery, GQLGetFreeWorkoutDaysQueryVariables>(GetFreeWorkoutDaysDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetFreeWorkoutDaysQuery.getKey = (variables?: GQLGetFreeWorkoutDaysQueryVariables) => variables === undefined ? ['GetFreeWorkoutDays.infinite'] : ['GetFreeWorkoutDays.infinite', variables];
+
+
+useGetFreeWorkoutDaysQuery.fetcher = (variables?: GQLGetFreeWorkoutDaysQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetFreeWorkoutDaysQuery, GQLGetFreeWorkoutDaysQueryVariables>(GetFreeWorkoutDaysDocument, variables, options);
+
+export const StartFreeWorkoutDayDocument = `
+    mutation StartFreeWorkoutDay($input: StartFreeWorkoutDayInput!) {
+  startFreeWorkoutDay(input: $input) {
+    planId
+    weekId
+    dayId
+  }
+}
+    `;
+
+export const useStartFreeWorkoutDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLStartFreeWorkoutDayMutation, TError, GQLStartFreeWorkoutDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLStartFreeWorkoutDayMutation, TError, GQLStartFreeWorkoutDayMutationVariables, TContext>(
+      {
+    mutationKey: ['StartFreeWorkoutDay'],
+    mutationFn: (variables?: GQLStartFreeWorkoutDayMutationVariables) => fetchData<GQLStartFreeWorkoutDayMutation, GQLStartFreeWorkoutDayMutationVariables>(StartFreeWorkoutDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useStartFreeWorkoutDayMutation.getKey = () => ['StartFreeWorkoutDay'];
+
+
+useStartFreeWorkoutDayMutation.fetcher = (variables: GQLStartFreeWorkoutDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLStartFreeWorkoutDayMutation, GQLStartFreeWorkoutDayMutationVariables>(StartFreeWorkoutDayDocument, variables, options);
 
 export const GetFavouriteWorkoutsDocument = `
     query GetFavouriteWorkouts {

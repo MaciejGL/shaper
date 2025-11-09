@@ -272,31 +272,34 @@ model MobilePushToken {
 }
 
 model TrainingPlan {
-  id           String         @id @default(uuid())
-  title        String
-  description  String?
-  createdById  String
-  isPublic     Boolean        @default(false)
-  isTemplate   Boolean        @default(false)
-  templateId   String?
-  completedAt  DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  assignedToId String?
-  isDraft      Boolean        @default(true)
-  active       Boolean        @default(false)
-  endDate      DateTime?
-  startDate    DateTime?
-  difficulty   String?
-  focusTags    String[]
-  premium      Boolean        @default(false)
-  targetGoals  String[]
-  reviews      Review[]
-  assignedTo   User?          @relation("AssignedPlans", fields: [assignedToId], references: [id])
-  createdBy    User           @relation("CreatedPlans", fields: [createdById], references: [id])
-  template     TrainingPlan?  @relation("Template", fields: [templateId], references: [id])
-  templates    TrainingPlan[] @relation("Template")
-  weeks        TrainingWeek[]
+  id                   String            @id @default(uuid())
+  title                String
+  description          String?
+  createdById          String
+  isPublic             Boolean           @default(false)
+  isTemplate           Boolean           @default(false)
+  templateId           String?
+  completedAt          DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  assignedToId         String?
+  isDraft              Boolean           @default(true)
+  active               Boolean           @default(false)
+  endDate              DateTime?
+  startDate            DateTime?
+  difficulty           String?
+  focusTags            String[]
+  premium              Boolean           @default(false)
+  targetGoals          String[]
+  heroImageUrl         String?
+  sourceTrainingPlanId String?
+  reviews              Review[]
+  assignedTo           User?             @relation("AssignedPlans", fields: [assignedToId], references: [id])
+  createdBy            User              @relation("CreatedPlans", fields: [createdById], references: [id])
+  template             TrainingPlan?     @relation("Template", fields: [templateId], references: [id])
+  templates            TrainingPlan[]    @relation("Template")
+  weeks                TrainingWeek[]
+  freeWorkoutDays      FreeWorkoutDay[]
 
   @@index([completedAt])
   @@index([assignedToId])
@@ -305,6 +308,7 @@ model TrainingPlan {
   @@index([createdById])
   @@index([active])
   @@index([templateId])
+  @@index([sourceTrainingPlanId])
 }
 
 model TrainingWeek {
@@ -327,26 +331,31 @@ model TrainingWeek {
 }
 
 model TrainingDay {
-  id              String                @id @default(uuid())
-  weekId          String
-  dayOfWeek       Int
-  completedAt     DateTime?
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-  isRestDay       Boolean               @default(false)
-  workoutType     String?
-  scheduledAt     DateTime?
-  isExtra         Boolean               @default(false)
-  personalRecords PersonalRecord[]
-  week            TrainingWeek          @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  exercises       TrainingExercise[]
-  events          WorkoutSessionEvent[]
+  id                  String                @id @default(uuid())
+  weekId              String
+  dayOfWeek           Int
+  completedAt         DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  isRestDay           Boolean               @default(false)
+  workoutType         String?
+  scheduledAt         DateTime?
+  isExtra             Boolean               @default(false)
+  sourceTrainingDayId String?
+  sourcePlanId        String?
+  personalRecords     PersonalRecord[]
+  week                TrainingWeek          @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  exercises           TrainingExercise[]
+  events              WorkoutSessionEvent[]
+  freeWorkoutDay      FreeWorkoutDay?
 
   @@index([completedAt])
   @@index([weekId])
   @@index([weekId, dayOfWeek])
   @@index([scheduledAt])
   @@index([weekId, scheduledAt])
+  @@index([sourceTrainingDayId])
+  @@index([sourcePlanId])
 }
 
 model TrainingExercise {
@@ -1121,6 +1130,22 @@ model ClientSurvey {
 
   @@index([userId])
   @@index([updatedAt])
+}
+
+model FreeWorkoutDay {
+  id            String       @id @default(uuid())
+  trainingDayId String       @unique
+  planId        String
+  isVisible     Boolean      @default(true)
+  heroImageUrl  String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  trainingDay   TrainingDay  @relation(fields: [trainingDayId], references: [id], onDelete: Cascade)
+  plan          TrainingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([isVisible])
+  @@index([planId])
+  @@index([trainingDayId])
 }
 
 enum ServiceType {

@@ -3,9 +3,9 @@ import { getBaseUrl } from '@/lib/get-base-url'
 
 // Subscription Configuration
 export const SUBSCRIPTION_CONFIG = {
-  // Trial period duration (7 days in milliseconds)
-  TRIAL_PERIOD_DAYS: undefined,
-  // TRIAL_PERIOD_MS: 7 * 24 * 60 * 60 * 1000,
+  // Trial period duration (7 days)
+  TRIAL_PERIOD_DAYS: 7,
+  TRIAL_PERIOD_MS: 7 * 24 * 60 * 60 * 1000,
 
   // Grace period after failed payment (3 days in milliseconds)
   GRACE_PERIOD_DAYS: 3,

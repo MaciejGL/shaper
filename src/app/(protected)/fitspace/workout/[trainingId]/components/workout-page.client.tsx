@@ -259,30 +259,3 @@ const WorkoutDay = ({
     </WorkoutProvider>
   )
 }
-
-export const ExtendHeader = ({
-  headerChildren,
-  children,
-}: {
-  headerChildren: React.ReactNode
-  children: React.ReactNode
-}) => {
-  return (
-    <div
-      className={cn(
-        'bg-sidebar',
-        COUNTER_MAIN_PADDING,
-        'px-0 md:px-0 lg:px-0 pb-0 md:pb-0 lg:pb-0 pt-4',
-      )}
-    >
-      {headerChildren && <div className="dark">{headerChildren}</div>}
-      <div
-        className={cn(
-          'pb-4 bg-background rounded-t-3xl mt-0 px-2 md:px-4 lg:px-8  overflow-hidden',
-        )}
-      >
-        <div className="max-w-sm mx-auto">{children}</div>
-      </div>
-    </div>
-  )
-}

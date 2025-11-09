@@ -36,6 +36,7 @@ query GetPublicTrainingPlanWeeks($planId: ID!) {
         id
         dayOfWeek
         isRestDay
+        workoutType
         exercises {
           id
           name
@@ -73,5 +74,57 @@ query GetFeaturedTrainers($limit: Int) {
       successStories
       trainerSince
     }
+  }
+}
+
+query GetFreeWorkoutDays {
+  getFreeWorkoutDays {
+    id
+    trainingDayId
+    heroImageUrl
+    trainingDay {
+      id
+      workoutType
+      exercisesCount
+      timesStarted
+      exercises {
+        id
+        name
+        videoUrl
+        images {
+          id
+          thumbnail
+          medium
+          url
+          order
+        }
+        sets {
+          id
+          reps
+          minReps
+          maxReps
+          weight
+        }
+      }
+    }
+    plan {
+      id
+      title
+      premium
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+      }
+    }
+  }
+}
+
+mutation StartFreeWorkoutDay($input: StartFreeWorkoutDayInput!) {
+  startFreeWorkoutDay(input: $input) {
+    planId
+    weekId
+    dayId
   }
 }

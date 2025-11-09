@@ -1,17 +1,18 @@
+import { Lock } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { Badge } from '@/components/ui/badge'
 import { useUser } from '@/context/user-context'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLGetPublicTrainingPlanWeeksQuery } from '@/generated/graphql-client'
-import { getDayName } from '@/lib/date-utils'
-import { sortDaysForDisplay } from '@/lib/date-utils'
+import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { getDayName, sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 import { PlanPreviewExerciseRow } from '../../my-plans/components/plan-preview-exercise-row'
@@ -34,7 +35,9 @@ export function PlanPreviewTab({
   isPremiumPlan = false,
 }: PlanPreviewTabProps) {
   const { preferences } = useUserPreferences()
-  const { hasPremium } = useUser()
+  const { user } = useUser()
+  const { data: subscriptionData } = useCurrentSubscription(user?.id)
+  const hasPremium = subscriptionData?.hasPremiumAccess || false
   const weekRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const [accordionValue, setAccordionValue] = useState<string[]>([])
 
@@ -105,7 +108,11 @@ export function PlanPreviewTab({
             <AccordionContent>
               <div className="space-y-2 pb-2">
                 {sortedDays.map((day) => (
-                  <ExplorePreviewDay key={day.id} day={day} />
+                  <ExplorePreviewDay
+                    key={day.id}
+                    day={day}
+                    showExercises={!hasLimitedAccess}
+                  />
                 ))}
               </div>
             </AccordionContent>
@@ -121,9 +128,10 @@ type ExploreDay = PlanWeeks[number]['days'][number]
 
 interface ExplorePreviewDayProps {
   day: ExploreDay
+  showExercises: boolean
 }
 
-function ExplorePreviewDay({ day }: ExplorePreviewDayProps) {
+function ExplorePreviewDay({ day, showExercises }: ExplorePreviewDayProps) {
   const dayName = getDayName(day.dayOfWeek)
   const exercises = day.exercises || []
 
@@ -131,15 +139,28 @@ function ExplorePreviewDay({ day }: ExplorePreviewDayProps) {
     <div className="mb-8">
       <h4
         className={cn(
-          'text-base font-medium mb-2 bg-card-on-card p-4 rounded-xl',
+          'text-base font-medium mb-2 bg-card-on-card p-4 rounded-xl flex items-center justify-between',
           day.isRestDay ? 'text-muted-foreground' : '',
         )}
       >
-        {dayName}
-        {day.isRestDay && <span className="ml-2 text-xs">• Rest Day</span>}
+        <span>
+          {dayName}
+          {day.isRestDay && <span className="ml-2 text-xs">• Rest Day</span>}
+          {!day.isRestDay && day.workoutType && (
+            <span className="ml-2 text-xs text-muted-foreground">
+              • {day.workoutType}
+            </span>
+          )}
+        </span>
+        {!showExercises && !day.isRestDay && (
+          <Badge variant="secondary" className="text-xs">
+            <Lock className="h-3 w-3 mr-1" />
+            Premium
+          </Badge>
+        )}
       </h4>
 
-      {!day.isRestDay && exercises.length > 0 && (
+      {!day.isRestDay && showExercises && exercises.length > 0 && (
         <div className="pl-0 space-y-2">
           {exercises.map((exercise, index) => (
             <PlanPreviewExerciseRow
@@ -151,7 +172,19 @@ function ExplorePreviewDay({ day }: ExplorePreviewDayProps) {
         </div>
       )}
 
-      {!day.isRestDay && exercises.length === 0 && (
+      {!day.isRestDay && !showExercises && (
+        <div className="pl-4 py-4 space-y-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="h-4 w-4" />
+            <p>Exercise details are available with Premium</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {exercises.length} exercises included in this workout
+          </p>
+        </div>
+      )}
+
+      {!day.isRestDay && showExercises && exercises.length === 0 && (
         <p className="text-xs text-muted-foreground pl-4">
           No exercises assigned
         </p>

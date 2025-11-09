@@ -1,9 +1,10 @@
 import { Crown, Dumbbell, Lock } from 'lucide-react'
 
-import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import { useUser } from '@/context/user-context'
 import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
+import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { useOpenUrl } from '@/hooks/use-open-url'
 
 interface TrainingPlanPreviewFooterProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
@@ -16,49 +17,42 @@ export function TrainingPlanPreviewFooter({
   onAssignTemplate,
   isAssigning,
 }: TrainingPlanPreviewFooterProps) {
-  // const { hasPremium } = useUser()
-  const hasPremium = false
+  const { user } = useUser()
+  const { openUrl, isLoading: isOpeningUrl } = useOpenUrl({
+    errorMessage: 'Failed to open subscription plans',
+  })
+  const { data: subscriptionData } = useCurrentSubscription(user?.id)
+  const hasPremium = subscriptionData?.hasPremiumAccess || false
+
+  const handleStartPlan = () => {
+    // If user doesn't have premium, redirect to offers page
+    // This prevents hitting the backend training plan limit error
+    if (!hasPremium) {
+      openUrl(
+        `/account-management/offers?redirectUrl=/fitspace/explore/plan/${plan.id}`,
+      )
+      return
+    }
+
+    // Premium users can start the plan directly
+    onAssignTemplate(plan.id)
+  }
+
+  const isLoading = isAssigning || isOpeningUrl
 
   return (
     <div className="border-t p-4 flex-shrink-0">
       <div className="space-y-3">
-        {plan.premium ? (
-          // Premium plan - wrap with PremiumButtonWrapper
-          <PremiumButtonWrapper
-            hasPremium={hasPremium}
-            tooltipText="Upgrade to Premium to access this training plan"
-          >
             <Button
               className="w-full"
               size="lg"
-              onClick={() => onAssignTemplate(plan.id)}
-              loading={isAssigning}
-              disabled={isAssigning || !hasPremium}
-              iconStart={hasPremium ? <Crown /> : <Lock />}
-            >
-              {hasPremium ? 'Add to My Plans' : 'Premium Required'}
-            </Button>
-          </PremiumButtonWrapper>
-        ) : (
-          // Free plan
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={() => onAssignTemplate(plan.id)}
-            disabled={isAssigning}
-            loading={isAssigning}
-            iconStart={<Dumbbell />}
-          >
-            Add to My Plans
+          onClick={handleStartPlan}
+          disabled={isLoading}
+          loading={isLoading}
+          iconStart={plan.premium ? <Crown /> : <Dumbbell />}
+        >
+          Start Training Plan
           </Button>
-        )}
-
-        {plan.premium && !hasPremium && (
-          <p className="text-xs text-center text-muted-foreground">
-            Upgrade to Premium to access this training plan and unlock advanced
-            features
-          </p>
-        )}
       </div>
     </div>
   )

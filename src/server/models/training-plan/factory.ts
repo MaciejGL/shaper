@@ -1244,6 +1244,7 @@ export async function assignTemplateToSelf(
   }
 
   const userId = user.user.id
+  const weekStartsOn = (user.user.profile?.weekStartsOn ?? 1) as 0 | 1
 
   // Get the template plan to check if it's premium
   const template = await prisma.trainingPlan.findUnique({
@@ -1285,11 +1286,13 @@ export async function assignTemplateToSelf(
     await subscriptionValidator.getUserSubscriptionStatus(userId, context)
 
   if (!subscriptionStatus.hasPremium) {
-    // Count current assigned training plans (non-completed)
+    // Count current assigned training plans (non-completed, non-Quick Workout)
     const currentPlansCount = await prisma.trainingPlan.count({
       where: {
         assignedToId: userId,
         active: false,
+        title: { not: 'Quick Workout' },
+        completedAt: null,
       },
     })
 
@@ -1307,6 +1310,19 @@ export async function assignTemplateToSelf(
     throw new Error('Training plan template not found')
   }
 
+  // Mark any existing active plan (except Quick Workout) as completed
+  await prisma.trainingPlan.updateMany({
+    where: {
+      assignedToId: userId,
+      active: true,
+      title: { not: 'Quick Workout' },
+    },
+    data: {
+      active: false,
+      completedAt: new Date(),
+    },
+  })
+
   // Duplicate the plan
   const duplicated = await duplicatePlan({
     plan: fullPlan,
@@ -1318,17 +1334,29 @@ export async function assignTemplateToSelf(
     throw new Error('Failed to assign template')
   }
 
-  // Assign to self
+  // Update plan metadata
   await prisma.trainingPlan.update({
     where: { id: duplicated.id },
     data: {
       assignedToId: userId,
       isTemplate: false,
-      templateId: planId, // Track which template this was created from
+      templateId: planId,
+      sourceTrainingPlanId: planId,
     },
   })
 
-  return true
+  // Use existing activatePlan logic to schedule and activate
+  const startDate = getWeekStartUTC(new Date())
+  await activatePlan(
+    {
+      planId: duplicated.id,
+      startDate: startDate.toISOString(),
+      resume: false,
+    },
+    context,
+  )
+
+  return duplicated.id
 }
 
 export async function activatePlan(

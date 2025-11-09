@@ -4,12 +4,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Clock, Crown, Dumbbell, Star, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import {
-  FilterType,
   TrainingPlanFilters,
   focusTagLabels,
 } from '@/components/training-plan/training-plan-filters'
@@ -23,6 +22,7 @@ import {
   useAssignTemplateToSelfMutation,
   useGetPublicTrainingPlansQuery,
 } from '@/generated/graphql-client'
+import { useOpenUrl } from '@/hooks/use-open-url'
 import { formatUserCount } from '@/utils/format-user-count'
 
 import { PublicTrainingPlan } from './explore.client'
@@ -30,20 +30,26 @@ import { TrainingPlanPreview } from './training-plan-preview/training-plan-previ
 
 interface TrainingPlansTabProps {
   initialPlans?: PublicTrainingPlan[]
+  initialPlanId?: string | null
 }
 
-export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
+export function TrainingPlansTab({
+  initialPlans = [],
+  initialPlanId,
+}: TrainingPlansTabProps) {
   const [selectedPlan, setSelectedPlan] = useState<
     GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number] | null
   >(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   const [selectedFocusTags, setSelectedFocusTags] = useState<GQLFocusTag[]>([])
   const [selectedDifficulties, setSelectedDifficulties] = useState<
     GQLDifficulty[]
   >([])
   const queryClient = useQueryClient()
   const router = useRouter()
+  const { openUrl } = useOpenUrl({
+    errorMessage: 'Failed to open subscription plans',
+  })
   // Fetch public training plans
   const { data, isLoading } = useGetPublicTrainingPlansQuery(
     {
@@ -69,6 +75,18 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
     setIsPreviewOpen(true)
   }
 
+  useEffect(() => {
+    if (initialPlanId && data?.getPublicTrainingPlans) {
+      const plan = data.getPublicTrainingPlans.find(
+        (p) => p.id === initialPlanId,
+      )
+      if (plan) {
+        setSelectedPlan(plan)
+        setIsPreviewOpen(true)
+      }
+    }
+  }, [initialPlanId, data])
+
   const handleAssignTemplate = async (planId: string) => {
     try {
       await assignTemplate({
@@ -85,6 +103,22 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
       router.push('/fitspace/my-plans')
     } catch (error) {
       console.error('Failed to add training plan to your plans:', error)
+
+      // If error contains "limit reached" or "Premium", redirect to offers
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
+      if (
+        errorMessage.includes('limit reached') ||
+        errorMessage.includes('Premium') ||
+        errorMessage.includes('subscription')
+      ) {
+        toast.error('Premium subscription required')
+        openUrl(
+          `/account-management/offers?redirectUrl=/fitspace/explore/plan/${planId}`,
+        )
+      } else {
+        toast.error('Failed to start training plan')
+      }
     }
   }
 
@@ -103,7 +137,6 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
   }
 
   const clearAllFilters = () => {
-    setActiveFilter('all')
     setSelectedFocusTags([])
     setSelectedDifficulties([])
   }
@@ -117,25 +150,9 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
   }
 
   // Get all public plans from the API (includes both free and premium)
-  const allPublicPlans = (data?.getPublicTrainingPlans || []).map((plan) => ({
-    ...plan,
-    isPremium: plan.premium || false,
-    focusTags: plan.focusTags || [],
-    targetGoals: plan.targetGoals || [],
-  }))
-
-  // Separate into free and premium plans
-  const freePlans = allPublicPlans.filter((plan) => !plan.premium)
-  const premiumPlans = allPublicPlans.filter((plan) => plan.premium)
-
-  // Combine and filter plans
-  const allPlans = [...freePlans, ...premiumPlans]
+  const allPlans = data?.getPublicTrainingPlans || []
 
   const filteredPlans = allPlans.filter((plan) => {
-    // Filter by type (free/premium/all)
-    if (activeFilter === 'free' && plan.premium) return false
-    if (activeFilter === 'premium' && !plan.premium) return false
-
     // Filter by difficulty - plan must match ANY selected difficulty (OR logic)
     if (selectedDifficulties.length > 0) {
       if (!plan.difficulty || !selectedDifficulties.includes(plan.difficulty)) {
@@ -157,10 +174,8 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
     <div className="space-y-4">
       {/* Filter Section */}
       <TrainingPlanFilters
-        activeFilter={activeFilter}
         selectedFocusTags={selectedFocusTags}
         selectedDifficulties={selectedDifficulties}
-        onFilterChange={setActiveFilter}
         onToggleFocusTag={toggleFocusTag}
         onToggleDifficulty={toggleDifficulty}
         onClearAllFilters={clearAllFilters}

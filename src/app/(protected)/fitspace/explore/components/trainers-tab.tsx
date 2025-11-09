@@ -1,7 +1,7 @@
 'use client'
 
 import { User } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { ClientSurveyModal } from '@/components/client-survey/client-survey-modal'
 import { useClientSurvey } from '@/components/client-survey/use-client-survey.hook'
@@ -22,9 +22,13 @@ import { FeaturedTrainer } from './explore.client'
 
 interface TrainersTabProps {
   initialTrainers?: FeaturedTrainer[]
+  initialTrainerId?: string | null
 }
 
-export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
+export function TrainersTab({
+  initialTrainers = [],
+  initialTrainerId,
+}: TrainersTabProps) {
   const [selectedTrainer, setSelectedTrainer] =
     useState<FeaturedTrainer | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -89,6 +93,16 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
     setSelectedTrainer(trainer)
     setIsDrawerOpen(true)
   }
+
+  useEffect(() => {
+    if (initialTrainerId && trainers.length > 0) {
+      const trainer = trainers.find((t) => t.id === initialTrainerId)
+      if (trainer) {
+        setSelectedTrainer(trainer)
+        setIsDrawerOpen(true)
+      }
+    }
+  }, [initialTrainerId, trainers])
 
   const handleRequestCoaching = async (trainer: TrainerData) => {
     setTrainerForRequest(trainer)

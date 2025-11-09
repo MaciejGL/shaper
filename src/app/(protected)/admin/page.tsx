@@ -6,6 +6,7 @@ import {
   Cloud,
   CreditCard,
   Dumbbell,
+  Flame,
   UserCheck,
   Users,
 } from 'lucide-react'
@@ -17,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   LazyAwsTab as AwsTab,
   LazyExercisesTab as ExercisesTab,
+  LazyFreeWorkoutDaysAdmin as FreeWorkoutDaysAdmin,
   LazyPushNotificationsTab as PushNotificationsTab,
   LazyStripeTab as StripeTab,
   LazyTrainersTab as TrainersTab,
@@ -32,11 +34,21 @@ export default function AdminPage() {
       | 'users'
       | 'trainers'
       | 'plans'
+      | 'free-workouts'
       | 'exercises'
       | 'push'
       | 'stripe'
       | 'aws'
-    >(['users', 'trainers', 'plans', 'exercises', 'push', 'stripe', 'aws'])
+    >([
+      'users',
+      'trainers',
+      'plans',
+      'free-workouts',
+      'exercises',
+      'push',
+      'stripe',
+      'aws',
+    ])
       .withDefault('users')
       .withOptions({ clearOnDefault: true }),
   )
@@ -52,6 +64,7 @@ export default function AdminPage() {
               | 'users'
               | 'trainers'
               | 'plans'
+              | 'free-workouts'
               | 'exercises'
               | 'push'
               | 'stripe'
@@ -71,6 +84,10 @@ export default function AdminPage() {
           <TabsTrigger value="plans">
             <Calendar className="h-4 w-4" />
             Training Plans
+          </TabsTrigger>
+          <TabsTrigger value="free-workouts">
+            <Flame className="h-4 w-4" />
+            Free Workouts
           </TabsTrigger>
           <TabsTrigger value="stripe">
             <CreditCard className="h-4 w-4" />
@@ -103,6 +120,10 @@ export default function AdminPage() {
 
         <TabsContent value="plans" className="mt-6">
           <TrainingPlansTab />
+        </TabsContent>
+
+        <TabsContent value="free-workouts" className="mt-6">
+          <FreeWorkoutDaysAdmin />
         </TabsContent>
 
         <TabsContent value="stripe" className="mt-6">

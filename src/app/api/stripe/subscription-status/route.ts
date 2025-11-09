@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
 
     const subscription = primarySubscription
 
-    // Check trial status (14 days)
+    // Check trial status (7 days)
     const isInTrial =
       subscription.isTrialActive &&
       subscription.trialEnd &&

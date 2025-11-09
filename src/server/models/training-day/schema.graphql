@@ -32,6 +32,9 @@ type TrainingDay {
   personalRecords: [PersonalRecord!]
 
   trainingWeekId: ID!
+  isFreeDemo: Boolean!
+  timesStarted: Int!
+  sourcePlanId: String
   createdAt: String!
   updatedAt: String!
 }

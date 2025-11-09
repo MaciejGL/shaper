@@ -126,6 +126,29 @@ export const createPlanLoaders = () => ({
     },
   ),
 
+  timesStartedByPlanId: new DataLoader(
+    async (sourcePlanIds: readonly string[]) => {
+      const counts = await prisma.trainingPlan.groupBy({
+        by: ['sourceTrainingPlanId'],
+        where: {
+          sourceTrainingPlanId: { in: sourcePlanIds as string[] },
+        },
+        _count: {
+          sourceTrainingPlanId: true,
+        },
+      })
+
+      const map = new Map(
+        counts.map((item) => [
+          item.sourceTrainingPlanId,
+          item._count.sourceTrainingPlanId,
+        ]),
+      )
+
+      return sourcePlanIds.map((id) => map.get(id) ?? 0)
+    },
+  ),
+
   weeksByPlanId: new DataLoader(async (planIds: readonly string[]) => {
     const allWeeks = await prisma.trainingWeek.findMany({
       where: {
