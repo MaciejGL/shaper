@@ -22,6 +22,7 @@ export type TrainingDetails = Pick<
   | 'completedAt'
   | 'focusTags'
   | 'targetGoals'
+  | 'heroImageUrl'
 > & {
   difficulty?: GQLDifficulty | null
   assignedTo?: Pick<GQLUser, 'id'> | null

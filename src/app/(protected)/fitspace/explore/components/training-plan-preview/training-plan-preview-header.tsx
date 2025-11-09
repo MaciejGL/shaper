@@ -3,6 +3,8 @@ import { Crown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 
+import { HeroImage } from '../workout-day-preview/workout-day-preview'
+
 interface TrainingPlanPreviewHeaderProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
 }
@@ -17,53 +19,42 @@ const difficultyVariantMap = {
 export function TrainingPlanPreviewHeader({
   plan,
 }: TrainingPlanPreviewHeaderProps) {
+  const trainerName =
+    plan.createdBy?.firstName ||
+    `${plan.createdBy?.firstName || ''} ${plan.createdBy?.lastName || ''}`.trim() ||
+    'Unknown Trainer'
   return (
-    <div className="border-b flex-shrink-0 relative overflow-hidden">
+    <div className="flex-shrink-0 relative overflow-hidden dark">
       {/* Hero image background */}
       {plan.heroImageUrl && (
-        <div className="absolute inset-0">
+        <div className="relative h-52 w-full overflow-hidden rounded-t-2xl">
           <div
-            className="w-full h-full bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center"
             style={{
               backgroundImage: `url(${plan.heroImageUrl})`,
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
-        </div>
-      )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
 
-      <div className={`p-4 relative ${plan.heroImageUrl ? 'dark' : ''}`}>
-        <div className="space-y-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 space-y-2">
-              <h2 className="text-xl font-bold text-foreground">
-                {plan.title}
-              </h2>
-              <div className="flex items-center gap-2">
-                {plan.premium ? (
-                  <Badge variant="premium">
-                    <Crown className="h-3 w-3 mr-1" />
-                    Premium
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary">Free</Badge>
-                )}
-                {plan.difficulty && (
-                  <Badge
-                    variant={
-                      difficultyVariantMap[
-                        plan.difficulty as keyof typeof difficultyVariantMap
-                      ]
-                    }
-                  >
-                    {plan.difficulty}
-                  </Badge>
-                )}
-              </div>
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            <h2 className="text-2xl font-semibold mb-2">{plan.title}</h2>
+            <div className="flex justify-between gap-1 text-white/80">
+              {plan.difficulty && (
+                <Badge
+                  variant={
+                    difficultyVariantMap[
+                      plan.difficulty as keyof typeof difficultyVariantMap
+                    ]
+                  }
+                >
+                  {plan.difficulty}
+                </Badge>
+              )}
+              <span className="text-sm">by {trainerName}</span>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

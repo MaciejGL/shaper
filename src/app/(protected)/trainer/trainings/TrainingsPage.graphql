@@ -8,6 +8,7 @@ fragment TrainingTemplate on TrainingPlan {
   difficulty
   focusTags
   targetGoals
+  heroImageUrl
   createdAt
   updatedAt
   assignedCount
@@ -52,6 +53,14 @@ fragment TrainingTemplate on TrainingPlan {
         order
         videoUrl
         completedAt
+
+        images {
+          id
+          url
+          order
+          thumbnail
+          medium
+        }
 
         sets {
           id

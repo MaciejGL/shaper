@@ -276,6 +276,7 @@ input UpdateTrainingPlanDetailsInput {
   difficulty: Difficulty
   focusTags: [FocusTag!]
   targetGoals: [TargetGoal!]
+  heroImageUrl: String
 }
 
 input UpdateTrainingWeekDetailsInput {

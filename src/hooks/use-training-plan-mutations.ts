@@ -79,6 +79,9 @@ export function useTrainingPlanMutations(trainingId?: string) {
           targetGoals:
             variables.input.targetGoals ??
             oldData.getTrainingPlanById.targetGoals,
+          heroImageUrl:
+            variables.input.heroImageUrl ??
+            oldData.getTrainingPlanById.heroImageUrl,
         },
       }
     },

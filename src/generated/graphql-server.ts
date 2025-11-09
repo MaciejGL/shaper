@@ -3665,6 +3665,7 @@ export type GQLUpdateTrainingPlanDetailsInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   difficulty?: InputMaybe<GQLDifficulty>;
   focusTags?: InputMaybe<Array<GQLFocusTag>>;
+  heroImageUrl?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
   isDraft?: InputMaybe<Scalars['Boolean']['input']>;
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;

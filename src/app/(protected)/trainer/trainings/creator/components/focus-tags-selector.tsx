@@ -9,11 +9,11 @@ const FOCUS_TAG_OPTIONS = [
   { value: GQLFocusTag.Cardio, label: 'Cardio' },
   // { value: GQLFocusTag.BeginnerFriendly, label: 'Beginner Friendly' },
   { value: GQLFocusTag.BodyRecomposition, label: 'Body Recomposition' },
-  { value: GQLFocusTag.Powerlifting, label: 'Powerlifting' },
+  // { value: GQLFocusTag.Powerlifting, label: 'Powerlifting' },
   { value: GQLFocusTag.WeightLoss, label: 'Weight Loss' },
-  { value: GQLFocusTag.Endurance, label: 'Endurance' },
-  { value: GQLFocusTag.FunctionalFitness, label: 'Functional Fitness' },
-  { value: GQLFocusTag.Bodyweight, label: 'Bodyweight' },
+  // { value: GQLFocusTag.Endurance, label: 'Endurance' },
+  // { value: GQLFocusTag.FunctionalFitness, label: 'Functional Fitness' },
+  // { value: GQLFocusTag.Bodyweight, label: 'Bodyweight' },
   { value: GQLFocusTag.MuscleBuilding, label: 'Muscle Building' },
 ]
 

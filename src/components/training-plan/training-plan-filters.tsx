@@ -35,7 +35,7 @@ const focusTagOptions: GQLFocusTag[] = [
   // GQLFocusTag.Cardio,
   // GQLFocusTag.BeginnerFriendly,
   GQLFocusTag.BodyRecomposition,
-  GQLFocusTag.Powerlifting,
+  // GQLFocusTag.Powerlifting,
   GQLFocusTag.WeightLoss,
   // GQLFocusTag.Endurance,
   // GQLFocusTag.FunctionalFitness,
@@ -79,12 +79,12 @@ export function TrainingPlanFilters({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="tertiary"
-              size="icon-lg"
-              iconOnly={<Filter />}
-              className="ml-auto rounded-2xl"
+              variant="outline"
+              size="md"
+              iconStart={<Filter />}
+              className="ml-auto "
             >
-              More Filters
+              Filters
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="max-w-72 min-w-52">

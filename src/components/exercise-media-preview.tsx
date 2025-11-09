@@ -7,7 +7,6 @@ import { useState } from 'react'
 import { getYouTubeEmbedUrl } from '@/lib/get-youtube-embed-url'
 import { cn } from '@/lib/utils'
 
-import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
 
 interface ExerciseMediaPreviewProps {
@@ -29,7 +28,7 @@ export function ExerciseMediaPreview({
   const mediaPreview = (
     <div
       className={cn(
-        'relative overflow-hidden rounded-md bg-muted',
+        'relative overflow-hidden rounded-xl bg-muted',
         className || 'size-32',
       )}
     >
@@ -46,12 +45,9 @@ export function ExerciseMediaPreview({
       )}
       {videoUrl && (
         <div className="absolute inset-0 flex items-end justify-end p-1 bg-black/20">
-          <Button
-            size="icon-xs"
-            variant="ghost"
-            iconOnly={<Play className="fill-white stroke-white" />}
-            className="bg-black/20 backdrop-blur-sm hover:bg-black/70"
-          />
+          <div className="flex-center size-6 rounded-sm bg-black/20 backdrop-blur-sm">
+            <Play className="size-3 fill-white stroke-white" />
+          </div>
         </div>
       )}
     </div>

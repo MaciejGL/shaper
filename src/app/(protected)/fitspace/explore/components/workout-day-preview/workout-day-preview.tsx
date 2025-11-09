@@ -105,12 +105,12 @@ export function WorkoutDayPreview({
 interface HeroImageProps {
   imageUrl: string
   workoutType: string
-  planTitle: string
+  planTitle?: string
   trainerName: string
   onViewPlan: () => void
 }
 
-function HeroImage({
+export function HeroImage({
   imageUrl,
   workoutType,
   planTitle,
@@ -130,15 +130,17 @@ function HeroImage({
       <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
         <h2 className="text-2xl font-semibold mb-2">{workoutType}</h2>
         <div className="flex justify-between gap-1 text-white/80">
-          <span className="text-sm">
-            From{' '}
-            <button
-              onClick={onViewPlan}
-              className="font-medium text-white hover:text-primary underline-offset-2 hover:underline"
-            >
-              {planTitle}
-            </button>
-          </span>
+          {planTitle && (
+            <span className="text-sm">
+              From{' '}
+              <button
+                onClick={onViewPlan}
+                className="font-medium text-white hover:text-primary underline-offset-2 hover:underline"
+              >
+                {planTitle}
+              </button>
+            </span>
+          )}
           <span className="text-sm">by {trainerName}</span>
         </div>
       </div>

@@ -255,7 +255,7 @@ const difficultyVariantMap = {
 function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
   return (
     <Card
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark"
+      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark border-none"
       onClick={onClick}
     >
       {/* Hero image background */}
@@ -274,14 +274,6 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
       <CardHeader className="relative">
         <CardTitle className="text-2xl text-foreground flex items-start justify-between gap-2">
           {plan.title}
-          {plan.premium ? (
-            <Badge variant="premium">
-              <Crown className="h-2 w-2 mr-1" />
-              Premium
-            </Badge>
-          ) : (
-            <Badge variant="secondary">Free</Badge>
-          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="relative">
@@ -292,7 +284,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
               <Badge
                 variant={difficultyVariantMap[plan.difficulty]}
                 className="capitalize"
-                size="lg"
+                size="md"
               >
                 {plan.difficulty.toLowerCase()}
               </Badge>
@@ -302,33 +294,23 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
                 {plan.focusTags
                   .slice(0, 2)
                   .map((tag: GQLFocusTag, index: number) => (
-                    <Badge key={index} variant="secondary" size="lg">
+                    <Badge key={index} variant="secondary" size="md">
                       {focusTagLabels[tag] || tag}
                     </Badge>
                   ))}
-                {plan.focusTags.length > 2 && (
-                  <Badge variant="secondary" size="lg">
-                    +{plan.focusTags.length - 2}
-                  </Badge>
-                )}
               </div>
             ) : null}
           </div>
 
           <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-3 text-xs text-foreground">
-              <div className="flex items-center gap-2">
-                <Clock className="h-3 w-3" />
-                {plan.weekCount} weeks
-              </div>
-            </div>
+            <div>{plan.weekCount} weeks</div>
 
             {/* Assignment count for all plans */}
             {formatUserCount(plan.assignmentCount) ? (
-              <div className="flex items-center gap-2 text-xs text-foreground">
+              <Badge>
                 <span>{formatUserCount(plan.assignmentCount)}</span>
                 <Users className="h-3 w-3" />
-              </div>
+              </Badge>
             ) : null}
 
             {/* Show rating only for premium plans */}
