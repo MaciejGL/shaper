@@ -147,6 +147,7 @@ type Mutation {
   moveExercise(input: MoveExerciseInput!): Boolean!
   addSetToExercise(input: AddSetToExerciseInput!): ID!
   removeSetFromExercise(setId: ID!): Boolean!
+  updateTrainingPlanHeroImage(planId: ID!, heroImageUrl: String!): Boolean!
 }
 
 input AssignTrainingPlanToClientInput {

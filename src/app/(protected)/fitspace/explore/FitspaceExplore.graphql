@@ -13,6 +13,7 @@ query GetPublicTrainingPlans($limit: Int) {
     sessionsPerWeek
     avgSessionTime
     equipment
+    heroImageUrl
     rating
     totalReviews
     createdBy {

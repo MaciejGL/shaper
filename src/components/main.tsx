@@ -38,9 +38,9 @@ export const Main = ({
         <div
           id="main-content"
           className={cn(
-            'w-full h-full p-2 md:p-4 lg:p-8 bg-background safe-area-bottom',
+            'w-full h-full p-2 md:px-4 lg:px-8 bg-background safe-area-bottom',
             {
-              'md:rounded-md overflow-y-auto': isTrainer,
+              'md:rounded-md overflow-y-auto md:p-4 lg:p-8': isTrainer,
               'pt-[calc(var(--safe-area-inset-top))] grow rounded-t-3xl':
                 !isTrainer,
             },

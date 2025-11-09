@@ -1304,6 +1304,7 @@ export type GQLMutation = {
   updateTrainingExercise: Scalars['Boolean']['output'];
   updateTrainingPlan: Scalars['Boolean']['output'];
   updateTrainingPlanDetails: Scalars['Boolean']['output'];
+  updateTrainingPlanHeroImage: Scalars['Boolean']['output'];
   updateTrainingWeekDetails: Scalars['Boolean']['output'];
   updateUserFeatured: GQLAdminUserListItem;
   updateUserRole: GQLAdminUserListItem;
@@ -2111,6 +2112,12 @@ export type GQLMutationUpdateTrainingPlanArgs = {
 
 export type GQLMutationUpdateTrainingPlanDetailsArgs = {
   input: GQLUpdateTrainingPlanDetailsInput;
+};
+
+
+export type GQLMutationUpdateTrainingPlanHeroImageArgs = {
+  heroImageUrl: Scalars['String']['input'];
+  planId: Scalars['ID']['input'];
 };
 
 
@@ -3966,6 +3973,21 @@ export type GQLUpdateUserFeaturedMutationVariables = Exact<{
 
 export type GQLUpdateUserFeaturedMutation = { __typename?: 'Mutation', updateUserFeatured: { __typename?: 'AdminUserListItem', id: string, featured: boolean } };
 
+export type GQLGetTrainingPlanWithExercisesQueryVariables = Exact<{
+  planId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetTrainingPlanWithExercisesQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, title: string, heroImageUrl?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, weekCount: number, assignmentCount: number, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, workoutType?: GQLWorkoutType | undefined | null, timesStarted: number, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, warmupSets?: number | undefined | null, images: Array<{ __typename?: 'Image', id: string, url: string, thumbnail?: string | undefined | null, medium?: string | undefined | null }>, sets: Array<{ __typename?: 'ExerciseSet', id: string }> }> }> }> } };
+
+export type GQLUpdateTrainingPlanHeroImageMutationVariables = Exact<{
+  planId: Scalars['ID']['input'];
+  heroImageUrl: Scalars['String']['input'];
+}>;
+
+
+export type GQLUpdateTrainingPlanHeroImageMutation = { __typename?: 'Mutation', updateTrainingPlanHeroImage: boolean };
+
 export type GQLAdminGenerateAiWorkoutMutationVariables = Exact<{
   input: GQLGenerateAiWorkoutInput;
 }>;
@@ -3978,7 +4000,7 @@ export type GQLGetPublicTrainingPlansQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetPublicTrainingPlansQuery = { __typename?: 'Query', getPublicTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, premium: boolean, difficulty?: GQLDifficulty | undefined | null, focusTags: Array<GQLFocusTag>, targetGoals: Array<GQLTargetGoal>, weekCount: number, assignmentCount: number, sessionsPerWeek?: number | undefined | null, avgSessionTime?: number | undefined | null, equipment: Array<string>, rating?: number | undefined | null, totalReviews: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null }> };
+export type GQLGetPublicTrainingPlansQuery = { __typename?: 'Query', getPublicTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, premium: boolean, difficulty?: GQLDifficulty | undefined | null, focusTags: Array<GQLFocusTag>, targetGoals: Array<GQLTargetGoal>, weekCount: number, assignmentCount: number, sessionsPerWeek?: number | undefined | null, avgSessionTime?: number | undefined | null, equipment: Array<string>, heroImageUrl?: string | undefined | null, rating?: number | undefined | null, totalReviews: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null }> };
 
 export type GQLGetPublicTrainingPlanWeeksQueryVariables = Exact<{
   planId: Scalars['ID']['input'];
@@ -6100,6 +6122,115 @@ useUpdateUserFeaturedMutation.getKey = () => ['UpdateUserFeatured'];
 
 useUpdateUserFeaturedMutation.fetcher = (variables: GQLUpdateUserFeaturedMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateUserFeaturedMutation, GQLUpdateUserFeaturedMutationVariables>(UpdateUserFeaturedDocument, variables, options);
 
+export const GetTrainingPlanWithExercisesDocument = `
+    query GetTrainingPlanWithExercises($planId: ID!) {
+  getTrainingPlanById(id: $planId) {
+    id
+    title
+    heroImageUrl
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+    }
+    difficulty
+    weekCount
+    assignmentCount
+    weeks {
+      id
+      weekNumber
+      days {
+        id
+        workoutType
+        timesStarted
+        exercises {
+          id
+          name
+          images {
+            id
+            url
+            thumbnail
+            medium
+          }
+          sets {
+            id
+          }
+          restSeconds
+          warmupSets
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useGetTrainingPlanWithExercisesQuery = <
+      TData = GQLGetTrainingPlanWithExercisesQuery,
+      TError = unknown
+    >(
+      variables: GQLGetTrainingPlanWithExercisesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetTrainingPlanWithExercisesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetTrainingPlanWithExercisesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetTrainingPlanWithExercisesQuery, TError, TData>(
+      {
+    queryKey: ['GetTrainingPlanWithExercises', variables],
+    queryFn: fetchData<GQLGetTrainingPlanWithExercisesQuery, GQLGetTrainingPlanWithExercisesQueryVariables>(GetTrainingPlanWithExercisesDocument, variables),
+    ...options
+  }
+    )};
+
+useGetTrainingPlanWithExercisesQuery.getKey = (variables: GQLGetTrainingPlanWithExercisesQueryVariables) => ['GetTrainingPlanWithExercises', variables];
+
+export const useInfiniteGetTrainingPlanWithExercisesQuery = <
+      TData = InfiniteData<GQLGetTrainingPlanWithExercisesQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetTrainingPlanWithExercisesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetTrainingPlanWithExercisesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetTrainingPlanWithExercisesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetTrainingPlanWithExercisesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetTrainingPlanWithExercises.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetTrainingPlanWithExercisesQuery, GQLGetTrainingPlanWithExercisesQueryVariables>(GetTrainingPlanWithExercisesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetTrainingPlanWithExercisesQuery.getKey = (variables: GQLGetTrainingPlanWithExercisesQueryVariables) => ['GetTrainingPlanWithExercises.infinite', variables];
+
+
+useGetTrainingPlanWithExercisesQuery.fetcher = (variables: GQLGetTrainingPlanWithExercisesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetTrainingPlanWithExercisesQuery, GQLGetTrainingPlanWithExercisesQueryVariables>(GetTrainingPlanWithExercisesDocument, variables, options);
+
+export const UpdateTrainingPlanHeroImageDocument = `
+    mutation UpdateTrainingPlanHeroImage($planId: ID!, $heroImageUrl: String!) {
+  updateTrainingPlanHeroImage(planId: $planId, heroImageUrl: $heroImageUrl)
+}
+    `;
+
+export const useUpdateTrainingPlanHeroImageMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateTrainingPlanHeroImageMutation, TError, GQLUpdateTrainingPlanHeroImageMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateTrainingPlanHeroImageMutation, TError, GQLUpdateTrainingPlanHeroImageMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateTrainingPlanHeroImage'],
+    mutationFn: (variables?: GQLUpdateTrainingPlanHeroImageMutationVariables) => fetchData<GQLUpdateTrainingPlanHeroImageMutation, GQLUpdateTrainingPlanHeroImageMutationVariables>(UpdateTrainingPlanHeroImageDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateTrainingPlanHeroImageMutation.getKey = () => ['UpdateTrainingPlanHeroImage'];
+
+
+useUpdateTrainingPlanHeroImageMutation.fetcher = (variables: GQLUpdateTrainingPlanHeroImageMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateTrainingPlanHeroImageMutation, GQLUpdateTrainingPlanHeroImageMutationVariables>(UpdateTrainingPlanHeroImageDocument, variables, options);
+
 export const AdminGenerateAiWorkoutDocument = `
     mutation AdminGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
   generateAiWorkout(input: $input) {
@@ -6163,6 +6294,7 @@ export const GetPublicTrainingPlansDocument = `
     sessionsPerWeek
     avgSessionTime
     equipment
+    heroImageUrl
     rating
     totalReviews
     createdBy {

@@ -1306,6 +1306,7 @@ export type GQLMutation = {
   updateTrainingExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateTrainingPlanDetails: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  updateTrainingPlanHeroImage: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateTrainingWeekDetails: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateUserFeatured: EntireFieldWrapper<GQLAdminUserListItem>;
   updateUserRole: EntireFieldWrapper<GQLAdminUserListItem>;
@@ -2113,6 +2114,12 @@ export type GQLMutationUpdateTrainingPlanArgs = {
 
 export type GQLMutationUpdateTrainingPlanDetailsArgs = {
   input: GQLUpdateTrainingPlanDetailsInput;
+};
+
+
+export type GQLMutationUpdateTrainingPlanHeroImageArgs = {
+  heroImageUrl: Scalars['String']['input'];
+  planId: Scalars['ID']['input'];
 };
 
 
@@ -5172,6 +5179,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateTrainingExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingExerciseArgs, 'input'>>;
   updateTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingPlanArgs, 'input'>>;
   updateTrainingPlanDetails?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingPlanDetailsArgs, 'input'>>;
+  updateTrainingPlanHeroImage?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingPlanHeroImageArgs, 'heroImageUrl' | 'planId'>>;
   updateTrainingWeekDetails?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingWeekDetailsArgs, 'input'>>;
   updateUserFeatured?: Resolver<GQLResolversTypes['AdminUserListItem'], ParentType, ContextType, RequireFields<GQLMutationUpdateUserFeaturedArgs, 'input'>>;
   updateUserRole?: Resolver<GQLResolversTypes['AdminUserListItem'], ParentType, ContextType, RequireFields<GQLMutationUpdateUserRoleArgs, 'input'>>;

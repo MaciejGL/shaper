@@ -18,31 +18,48 @@ export function TrainingPlanPreviewHeader({
   plan,
 }: TrainingPlanPreviewHeaderProps) {
   return (
-    <div className="p-4 border-b flex-shrink-0">
-      <div className="space-y-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 space-y-2">
-            <h2 className="text-xl font-bold">{plan.title}</h2>
-            <div className="flex items-center gap-2">
-              {plan.premium ? (
-                <Badge variant="premium">
-                  <Crown className="h-3 w-3 mr-1" />
-                  Premium
-                </Badge>
-              ) : (
-                <Badge variant="secondary">Free</Badge>
-              )}
-              {plan.difficulty && (
-                <Badge
-                  variant={
-                    difficultyVariantMap[
-                      plan.difficulty as keyof typeof difficultyVariantMap
-                    ]
-                  }
-                >
-                  {plan.difficulty}
-                </Badge>
-              )}
+    <div className="border-b flex-shrink-0 relative overflow-hidden">
+      {/* Hero image background */}
+      {plan.heroImageUrl && (
+        <div className="absolute inset-0">
+          <div
+            className="w-full h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${plan.heroImageUrl})`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
+        </div>
+      )}
+
+      <div className={`p-4 relative ${plan.heroImageUrl ? 'dark' : ''}`}>
+        <div className="space-y-3">
+          <div className="flex items-start justify-between">
+            <div className="flex-1 space-y-2">
+              <h2 className="text-xl font-bold text-foreground">
+                {plan.title}
+              </h2>
+              <div className="flex items-center gap-2">
+                {plan.premium ? (
+                  <Badge variant="premium">
+                    <Crown className="h-3 w-3 mr-1" />
+                    Premium
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary">Free</Badge>
+                )}
+                {plan.difficulty && (
+                  <Badge
+                    variant={
+                      difficultyVariantMap[
+                        plan.difficulty as keyof typeof difficultyVariantMap
+                      ]
+                    }
+                  >
+                    {plan.difficulty}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         </div>

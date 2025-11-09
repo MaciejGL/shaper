@@ -1,0 +1,44 @@
+query GetTrainingPlanWithExercises($planId: ID!) {
+  getTrainingPlanById(id: $planId) {
+    id
+    title
+    heroImageUrl
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+    }
+    difficulty
+    weekCount
+    assignmentCount
+    weeks {
+      id
+      weekNumber
+      days {
+        id
+        workoutType
+        timesStarted
+        exercises {
+          id
+          name
+          images {
+            id
+            url
+            thumbnail
+            medium
+          }
+          sets {
+            id
+          }
+          restSeconds
+          warmupSets
+        }
+      }
+    }
+  }
+}
+
+mutation UpdateTrainingPlanHeroImage($planId: ID!, $heroImageUrl: String!) {
+  updateTrainingPlanHeroImage(planId: $planId, heroImageUrl: $heroImageUrl)
+}

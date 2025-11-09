@@ -255,11 +255,24 @@ const difficultyVariantMap = {
 function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
   return (
     <Card
-      className="cursor-pointer hover:border-primary/50 transition-colors"
+      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark"
       onClick={onClick}
     >
-      <CardHeader>
-        <CardTitle className="flex items-start justify-between gap-2">
+      {/* Hero image background */}
+      {plan.heroImageUrl && (
+        <div className="absolute inset-0 opacity-100 group-hover:opacity-30 transition-opacity">
+          <div
+            className="w-full h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${plan.heroImageUrl})`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
+        </div>
+      )}
+
+      <CardHeader className="relative">
+        <CardTitle className="text-2xl text-foreground flex items-start justify-between gap-2">
           {plan.title}
           {plan.premium ? (
             <Badge variant="premium">
@@ -271,7 +284,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <div className="space-y-2">
           {/* Focus Tags */}
           <div className="flex flex-col gap-2">
@@ -303,7 +316,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
           </div>
 
           <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-3 text-xs text-foreground">
               <div className="flex items-center gap-2">
                 <Clock className="h-3 w-3" />
                 {plan.weekCount} weeks
@@ -312,7 +325,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
 
             {/* Assignment count for all plans */}
             {formatUserCount(plan.assignmentCount) ? (
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-xs text-foreground">
                 <span>{formatUserCount(plan.assignmentCount)}</span>
                 <Users className="h-3 w-3" />
               </div>
@@ -320,7 +333,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
 
             {/* Show rating only for premium plans */}
             {plan.premium && plan.rating ? (
-              <div className="flex items-center gap-1 text-xs">
+              <div className="flex items-center gap-1 text-xs text-foreground">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                 <span className="font-medium">{plan.rating}</span>
                 <span className="text-muted-foreground">
