@@ -1,15 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs'
 
+import { ExtendHeader } from '@/components/extend-header'
 import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import {
   GQLGetFeaturedTrainersQuery,
   GQLGetPublicTrainingPlansQuery,
 } from '@/generated/graphql-client'
 
-import { ExtendHeader } from '../../workout/[trainingId]/components/workout-page.client'
-
+import { FreeWorkoutsTab } from './free-workouts-tab'
 import { TrainersTab } from './trainers-tab'
 import { TrainingPlansTab } from './training-plans-tab'
 
@@ -25,37 +25,67 @@ interface ExploreClientProps {
 }
 
 enum Tab {
-  Plans = 'plans',
+  FreeWorkouts = 'free-workouts',
+  PremiumPlans = 'premium-plans',
   Trainers = 'trainers',
 }
+
 export function ExploreClient({ plans, trainers }: ExploreClientProps) {
-  const [tab, setTab] = useState<Tab>(Tab.Plans)
+  const [params, setParams] = useQueryStates(
+    {
+      tab: parseAsStringEnum<Tab>(Object.values(Tab)).withDefault(
+        Tab.FreeWorkouts,
+      ),
+      workout: parseAsString,
+      plan: parseAsString,
+      trainer: parseAsString,
+    },
+    {
+      history: 'push',
+    },
+  )
+
   return (
     <ExtendHeader headerChildren={null}>
       <div className="container-hypertro mx-auto">
         <Tabs
-          defaultValue={Tab.Plans}
-          value={tab}
-          // onValueChange={(value) => setTab(value as Tab)}
+          defaultValue={Tab.FreeWorkouts}
+          value={params.tab}
           className="w-full"
         >
           <PrimaryTabList
             options={[
-              { label: 'Plans', value: Tab.Plans },
+              { label: 'Free', value: Tab.FreeWorkouts },
+              { label: 'Plans', value: Tab.PremiumPlans },
               { label: 'Trainers', value: Tab.Trainers },
             ]}
-            onClick={(value) => setTab(value)}
-            active={tab}
-            className="grid w-full grid-cols-2"
+            onClick={(value) => setParams({ tab: value as Tab })}
+            active={params.tab}
+            className="grid w-full grid-cols-3"
             size="xl"
           />
 
-          <TabsContent value="plans">
-            <TrainingPlansTab initialPlans={plans || []} />
+          <TabsContent value="free-workouts">
+            <FreeWorkoutsTab
+              initialWorkoutId={params.workout}
+              onNavigateToPlan={(planId) =>
+                setParams({ tab: Tab.PremiumPlans, plan: planId })
+              }
+            />
+          </TabsContent>
+
+          <TabsContent value="premium-plans">
+            <TrainingPlansTab
+              initialPlans={plans || []}
+              initialPlanId={params.plan}
+            />
           </TabsContent>
 
           <TabsContent value="trainers">
-            <TrainersTab initialTrainers={trainers || []} />
+            <TrainersTab
+              initialTrainers={trainers || []}
+              initialTrainerId={params.trainer}
+            />
           </TabsContent>
         </Tabs>
       </div>

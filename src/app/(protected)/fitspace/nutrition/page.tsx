@@ -4,6 +4,7 @@ import { ArrowRight, Salad } from 'lucide-react'
 import { useState } from 'react'
 
 import { EmptyStateCard } from '@/components/empty-state-card'
+import { ExtendHeader } from '@/components/extend-header'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { MacroCard } from '@/components/macro-card/macro-card'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -14,8 +15,6 @@ import {
   useGetMyNutritionPlansQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
-
-import { ExtendHeader } from '../workout/[trainingId]/components/workout-page.client'
 
 import { NutritionPlanSelector } from './components/nutrition-plan-selector'
 import { NutritionPlanViewer } from './components/nutrition-plan-viewer'

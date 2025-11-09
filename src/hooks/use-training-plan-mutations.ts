@@ -79,6 +79,9 @@ export function useTrainingPlanMutations(trainingId?: string) {
           targetGoals:
             variables.input.targetGoals ??
             oldData.getTrainingPlanById.targetGoals,
+          heroImageUrl:
+            variables.input.heroImageUrl ??
+            oldData.getTrainingPlanById.heroImageUrl,
         },
       }
     },
@@ -212,6 +215,7 @@ export function useTrainingPlanMutations(trainingId?: string) {
         tempo: variables.input.tempo || '',
         type: variables.input.type,
         warmupSets: variables.input.warmupSets,
+        images: [],
         sets: [],
         order,
       }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { Suspense, use, useEffect, useMemo } from 'react'
 
+import { ExtendHeader } from '@/components/extend-header'
 import { WorkoutProvider } from '@/context/workout-context/workout-context'
 import {
   GQLFitspaceGetQuickWorkoutDayQuery,
@@ -15,7 +16,6 @@ import {
 import { cn } from '@/lib/utils'
 
 import { Exercises } from './exercises'
-import { COUNTER_MAIN_PADDING } from './navigation'
 import { NavigationWrapper } from './navigation-wrapper'
 import { SkeletonExercises, SkeletonNavigation } from './workout-page-skeleton'
 
@@ -71,13 +71,16 @@ export function WorkoutPageClientNew({
   const isQuickWorkout = trainingId === 'quick-workout'
 
   return (
-    <div>
-      <Suspense fallback={<SkeletonNavigation />}>
-        <NavigationWrapper
-          navigationDataPromise={navigationPromise}
-          trainingId={trainingId}
-        />
-      </Suspense>
+    <ExtendHeader
+      headerChildren={
+        <Suspense fallback={<SkeletonNavigation />}>
+          <NavigationWrapper
+            navigationDataPromise={navigationPromise}
+            trainingId={trainingId}
+          />
+        </Suspense>
+      }
+    >
       <Suspense fallback={<SkeletonExercises />}>
         <WorkoutDay
           dayId={dayId}
@@ -85,7 +88,7 @@ export function WorkoutPageClientNew({
           isQuickWorkout={isQuickWorkout}
         />
       </Suspense>
-    </div>
+    </ExtendHeader>
   )
 }
 
@@ -226,63 +229,24 @@ const WorkoutDay = ({
         []
       }
     >
-      <div
-        className={cn(
-          'bg-sidebar',
-          COUNTER_MAIN_PADDING,
-          'px-0 md:px-0 lg:px-0 pb-0 md:pb-0 lg:pb-0 pt-4',
-        )}
-      >
-        <div
-          className={cn(
-            'pb-4 bg-background rounded-t-3xl mt-0 px-2 md:px-4 lg:px-8',
+      <div>
+        <div className={cn('pb-4')}>
+          {isLoadingNewDay ? (
+            <SkeletonExercises />
+          ) : (
+            (dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day) && (
+              <Exercises
+                day={dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day}
+                previousDayLogs={
+                  dayDataQuery?.getWorkoutDay?.previousDayLogs ??
+                  initialDay?.previousDayLogs
+                }
+                isQuickWorkout={isQuickWorkout}
+              />
+            )
           )}
-        >
-          <div className="max-w-sm mx-auto">
-            {isLoadingNewDay ? (
-              <SkeletonExercises />
-            ) : (
-              (dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day) && (
-                <Exercises
-                  day={dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day}
-                  previousDayLogs={
-                    dayDataQuery?.getWorkoutDay?.previousDayLogs ??
-                    initialDay?.previousDayLogs
-                  }
-                  isQuickWorkout={isQuickWorkout}
-                />
-              )
-            )}
-          </div>
         </div>
       </div>
     </WorkoutProvider>
-  )
-}
-
-export const ExtendHeader = ({
-  headerChildren,
-  children,
-}: {
-  headerChildren: React.ReactNode
-  children: React.ReactNode
-}) => {
-  return (
-    <div
-      className={cn(
-        'bg-sidebar',
-        COUNTER_MAIN_PADDING,
-        'px-0 md:px-0 lg:px-0 pb-0 md:pb-0 lg:pb-0 pt-4',
-      )}
-    >
-      {headerChildren && <div className="dark">{headerChildren}</div>}
-      <div
-        className={cn(
-          'pb-4 bg-background rounded-t-3xl mt-0 px-2 md:px-4 lg:px-8  overflow-hidden',
-        )}
-      >
-        <div className="max-w-sm mx-auto">{children}</div>
-      </div>
-    </div>
   )
 }

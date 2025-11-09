@@ -8,8 +8,10 @@ import {
   Filter,
   Loader2,
   Search,
+  Upload,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -21,8 +23,23 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { MultiImageUpload } from '@/components/ui/multi-image-upload'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
+import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
+import { formatUserCount } from '@/utils/format-user-count'
 
 interface TrainingPlanCreator {
   id: string
@@ -64,6 +81,16 @@ export function TrainingPlansTab() {
   // Pagination
   const [offset, setOffset] = useState(0)
   const limit = 20
+
+  // Hero image management
+  const [isEditImageDialogOpen, setIsEditImageDialogOpen] = useState(false)
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null)
+  const [heroImageUrl, setHeroImageUrl] = useState('')
+  const [imageSource, setImageSource] = useState<'exercise' | 'custom'>(
+    'exercise',
+  )
+  const [planData, setPlanData] = useState<any>(null)
+  const [loadingPlanData, setLoadingPlanData] = useState(false)
 
   const fetchPlans = async () => {
     try {
@@ -172,6 +199,95 @@ export function TrainingPlansTab() {
       day: 'numeric',
     })
   }
+
+  const handleEditImage = async (plan: AdminTrainingPlanItem) => {
+    setEditingPlanId(plan.id)
+    setLoadingPlanData(true)
+    setIsEditImageDialogOpen(true)
+
+    try {
+      const response = await fetch(
+        `/api/admin/training-plans/${plan.id}/exercises`,
+      )
+      if (!response.ok) throw new Error('Failed to load plan data')
+
+      const data = await response.json()
+      setPlanData(data)
+      setHeroImageUrl(data.heroImageUrl || '')
+      setImageSource(data.heroImageUrl ? 'exercise' : 'custom')
+    } catch (error) {
+      console.error('Failed to load plan data:', error)
+      toast.error('Failed to load plan data')
+    } finally {
+      setLoadingPlanData(false)
+    }
+  }
+
+  const handleUpdateHeroImage = async () => {
+    if (!editingPlanId || !heroImageUrl) {
+      toast.error('Please select an image')
+      return
+    }
+
+    try {
+      const response = await fetch(
+        `/api/admin/training-plans/${editingPlanId}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ heroImageUrl }),
+        },
+      )
+
+      if (!response.ok) throw new Error('Failed to update hero image')
+
+      toast.success('Hero image updated')
+      setIsEditImageDialogOpen(false)
+      setEditingPlanId(null)
+      setPlanData(null)
+      setHeroImageUrl('')
+      setImageSource('exercise')
+      fetchPlans()
+    } catch (error) {
+      console.error('Failed to update hero image:', error)
+      toast.error('Failed to update hero image')
+    }
+  }
+
+  // Extract exercise images from plan data
+  const exerciseImages = useMemo(() => {
+    if (!planData?.weeks) return []
+
+    const images: Array<{ url: string; exerciseName: string }> = []
+    planData.weeks.forEach((week: any) => {
+      week.days?.forEach((day: any) => {
+        day.exercises?.forEach((exercise: any) => {
+          exercise.base?.images?.forEach((img: any) => {
+            if (img.url) {
+              images.push({
+                url: img.url,
+                exerciseName: exercise.name,
+              })
+            }
+          })
+        })
+      })
+    })
+    return images
+  }, [planData])
+
+  // Calculate estimated duration
+  const estimatedDuration = useMemo(() => {
+    if (!planData?.weeks) return null
+
+    const allExercises = planData.weeks.flatMap(
+      (week: any) =>
+        week.days?.flatMap((day: any) => day.exercises || []) || [],
+    )
+
+    if (allExercises.length === 0) return null
+    return estimateWorkoutTime(allExercises)
+  }, [planData])
 
   if (loading && plans.length === 0) {
     return (
@@ -303,6 +419,9 @@ export function TrainingPlansTab() {
                     <th className="border-b px-4 py-3 text-left text-sm font-medium">
                       Updated
                     </th>
+                    <th className="border-b px-4 py-3 text-left text-sm font-medium">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -363,6 +482,16 @@ export function TrainingPlansTab() {
                       <td className="border-b px-4 py-3 text-sm">
                         {formatDate(plan.updatedAt)}
                       </td>
+                      <td className="border-b px-4 py-3">
+                        <Button
+                          size="sm"
+                          variant="tertiary"
+                          onClick={() => handleEditImage(plan)}
+                          iconStart={<Upload />}
+                        >
+                          Edit Image
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -408,6 +537,233 @@ export function TrainingPlansTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Hero Image Dialog */}
+      <Dialog
+        open={isEditImageDialogOpen}
+        onOpenChange={setIsEditImageDialogOpen}
+      >
+        <DialogContent
+          dialogTitle="Edit Training Plan Hero Image"
+          className="max-w-4xl max-h-[90vh] overflow-y-auto"
+        >
+          <DialogHeader>
+            <DialogTitle>Edit Training Plan Hero Image</DialogTitle>
+            <DialogDescription>
+              Select an image from exercises or upload a custom one
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingPlanData ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Loading plan data...</span>
+            </div>
+          ) : (
+            <div className="space-y-4 py-4">
+              <Tabs
+                value={imageSource}
+                onValueChange={(value) => {
+                  setImageSource(value as 'exercise' | 'custom')
+                }}
+              >
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="exercise">
+                    Exercise Images ({exerciseImages.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="custom">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Custom
+                  </TabsTrigger>
+                  <TabsTrigger value="preview">Preview</TabsTrigger>
+                </TabsList>
+
+                {/* Exercise Images Tab */}
+                <TabsContent value="exercise" className="space-y-3">
+                  <Label>Select from exercise images:</Label>
+                  {exerciseImages.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto">
+                      {exerciseImages.map((img, index) => (
+                        <div
+                          key={index}
+                          className={cn(
+                            'relative aspect-video rounded-lg overflow-hidden border-2 cursor-pointer transition-all',
+                            heroImageUrl === img.url
+                              ? 'border-primary ring-2 ring-primary'
+                              : 'border-border hover:border-primary/50',
+                          )}
+                          onClick={() => setHeroImageUrl(img.url)}
+                        >
+                          <img
+                            src={img.url}
+                            alt={img.exerciseName}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                            <p className="text-white text-xs font-medium truncate">
+                              {img.exerciseName}
+                            </p>
+                          </div>
+                          {heroImageUrl === img.url && (
+                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                              <Eye className="w-4 h-4" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8 text-center">
+                        <p className="text-muted-foreground text-sm">
+                          No exercise images available for this plan
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Try uploading a custom image instead
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+
+                {/* Custom Upload Tab */}
+                <TabsContent value="custom" className="space-y-3">
+                  <Label>Upload custom hero image:</Label>
+                  <MultiImageUpload
+                    imageType="exercise"
+                    currentImageUrls={heroImageUrl ? [heroImageUrl] : []}
+                    onImagesChange={(urls) => setHeroImageUrl(urls[0] || '')}
+                    maxImages={1}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Upload a high-quality image that represents this training
+                    plan
+                  </p>
+                </TabsContent>
+
+                {/* Preview Tab */}
+                <TabsContent value="preview" className="space-y-3">
+                  <Label>Preview how it will look:</Label>
+                  {heroImageUrl && planData ? (
+                    <TrainingPlanPreviewCard
+                      title={planData.title}
+                      difficulty={planData.difficulty}
+                      weekCount={planData.weekCount}
+                      assignmentCount={planData.assignmentCount}
+                      premium={planData.premium}
+                      heroImageUrl={heroImageUrl}
+                      estimatedDuration={estimatedDuration}
+                    />
+                  ) : (
+                    <Card>
+                      <CardContent className="py-8 text-center">
+                        <p className="text-muted-foreground text-sm">
+                          Select or upload an image to see preview
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="tertiary">Cancel</Button>
+            </DialogClose>
+            <Button
+              onClick={handleUpdateHeroImage}
+              disabled={!heroImageUrl || loadingPlanData}
+              loading={false}
+            >
+              Update Image
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+  )
+}
+
+// Preview card component for the dialog
+interface TrainingPlanPreviewCardProps {
+  title: string
+  difficulty?: string | null
+  weekCount: number
+  assignmentCount: number
+  premium: boolean
+  heroImageUrl: string
+  estimatedDuration: number | null
+}
+
+function TrainingPlanPreviewCard({
+  title,
+  difficulty,
+  weekCount,
+  assignmentCount,
+  premium,
+  heroImageUrl,
+  estimatedDuration,
+}: TrainingPlanPreviewCardProps) {
+  const difficultyVariantMap = {
+    BEGINNER: 'beginner',
+    INTERMEDIATE: 'intermediate',
+    ADVANCED: 'advanced',
+    EXPERT: 'expert',
+  } as const
+
+  return (
+    <Card className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark">
+      {heroImageUrl && (
+        <div className="absolute inset-0 opacity-100 group-hover:opacity-30 transition-opacity">
+          <div
+            className="w-full h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${heroImageUrl})`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
+        </div>
+      )}
+
+      <CardHeader className="relative">
+        <CardTitle className="text-2xl text-foreground flex items-start justify-between gap-2">
+          {title}
+          {premium ? (
+            <Badge variant="premium">Premium</Badge>
+          ) : (
+            <Badge variant="secondary">Free</Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="relative">
+        <div className="space-y-2">
+          {difficulty && (
+            <Badge
+              variant={
+                difficultyVariantMap[
+                  difficulty as keyof typeof difficultyVariantMap
+                ]
+              }
+              size="lg"
+            >
+              {difficulty.toLowerCase()}
+            </Badge>
+          )}
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-3 text-xs text-foreground">
+              <div>{weekCount} weeks</div>
+              {estimatedDuration && <div>~{estimatedDuration} min/session</div>}
+            </div>
+            {formatUserCount(assignmentCount) && (
+              <div className="flex items-center gap-2 text-xs text-foreground">
+                <span>{formatUserCount(assignmentCount)} started</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

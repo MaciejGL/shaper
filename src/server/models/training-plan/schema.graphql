@@ -41,6 +41,8 @@ type TrainingPlan {
   sessionsPerWeek: Int
   avgSessionTime: Int
   equipment: [String!]!
+  heroImageUrl: String
+  timesStarted: Int!
 
   createdAt: String!
   updatedAt: String!
@@ -94,6 +96,7 @@ type Query {
   getTemplates(draft: Boolean, limit: Int): [TrainingPlan!]!
   getPublicTrainingPlans(limit: Int): [TrainingPlan!]!
   getTrainingPlanById(id: ID!): TrainingPlan!
+  getPlanPreview(id: ID!): TrainingPlan!
   getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
   getClientActivePlan(clientId: ID!): TrainingPlan
   getMyPlansOverview: MyPlansPayload!
@@ -118,7 +121,7 @@ type Mutation {
   deleteTrainingPlan(id: ID!): Boolean!
   duplicateTrainingPlan(id: ID!): ID!
   assignTrainingPlanToClient(input: AssignTrainingPlanToClientInput!): Boolean!
-  assignTemplateToSelf(planId: ID!): Boolean!
+  assignTemplateToSelf(planId: ID!): ID!
   removeTrainingPlanFromClient(planId: ID!, clientId: ID!): Boolean!
   activatePlan(planId: ID!, startDate: String!, resume: Boolean!): Boolean!
   pausePlan(planId: ID!): Boolean!
@@ -144,6 +147,7 @@ type Mutation {
   moveExercise(input: MoveExerciseInput!): Boolean!
   addSetToExercise(input: AddSetToExerciseInput!): ID!
   removeSetFromExercise(setId: ID!): Boolean!
+  updateTrainingPlanHeroImage(planId: ID!, heroImageUrl: String!): Boolean!
 }
 
 input AssignTrainingPlanToClientInput {
@@ -272,6 +276,7 @@ input UpdateTrainingPlanDetailsInput {
   difficulty: Difficulty
   focusTags: [FocusTag!]
   targetGoals: [TargetGoal!]
+  heroImageUrl: String
 }
 
 input UpdateTrainingWeekDetailsInput {

@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Crown, Filter } from 'lucide-react'
+import { Filter } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,11 +15,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { GQLDifficulty, GQLFocusTag } from '@/generated/graphql-client'
-import { cn } from '@/lib/utils'
-
-import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
-
-type FilterType = 'all' | 'free' | 'premium'
 
 const focusTagLabels: Record<GQLFocusTag, string> = {
   [GQLFocusTag.Strength]: 'Strength',
@@ -40,7 +35,7 @@ const focusTagOptions: GQLFocusTag[] = [
   // GQLFocusTag.Cardio,
   // GQLFocusTag.BeginnerFriendly,
   GQLFocusTag.BodyRecomposition,
-  GQLFocusTag.Powerlifting,
+  // GQLFocusTag.Powerlifting,
   GQLFocusTag.WeightLoss,
   // GQLFocusTag.Endurance,
   // GQLFocusTag.FunctionalFitness,
@@ -62,20 +57,16 @@ const difficultyOptions: GQLDifficulty[] = [
 ]
 
 interface TrainingPlanFiltersProps {
-  activeFilter: FilterType
   selectedFocusTags: GQLFocusTag[]
   selectedDifficulties: GQLDifficulty[]
-  onFilterChange: (filter: FilterType) => void
   onToggleFocusTag: (tag: GQLFocusTag) => void
   onToggleDifficulty: (difficulty: GQLDifficulty) => void
   onClearAllFilters: () => void
 }
 
 export function TrainingPlanFilters({
-  activeFilter,
   selectedFocusTags,
   selectedDifficulties,
-  onFilterChange,
   onToggleFocusTag,
   onToggleDifficulty,
   onClearAllFilters,
@@ -84,44 +75,16 @@ export function TrainingPlanFilters({
     <div className="space-y-4">
       {/* Main Filter Buttons */}
       <div className="grid grid-cols-[1fr_auto] items-center gap-2 w-full">
-        <Tabs
-          defaultValue="all"
-          onValueChange={(value) => onFilterChange(value as FilterType)}
-        >
-          <TabsList
-            variant="secondary"
-            className="w-full grid-cols-3"
-            size="xl"
-            rounded="2xl"
-          >
-            <TabsTrigger value="all" rounded="2xl">
-              All Plans
-            </TabsTrigger>
-            <TabsTrigger value="premium" rounded="2xl">
-              <Crown
-                className={cn(
-                  'text-amber-500',
-                  activeFilter === 'premium' && 'text-amber-600',
-                )}
-              />{' '}
-              Premium
-            </TabsTrigger>
-            <TabsTrigger value="free" rounded="2xl">
-              Free
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
         {/* Advanced Filters Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="tertiary"
-              size="icon-lg"
-              iconOnly={<Filter />}
-              className="ml-auto rounded-2xl"
+              variant="outline"
+              size="md"
+              iconStart={<Filter />}
+              className="ml-auto "
             >
-              More Filters
+              Filters
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="max-w-72 min-w-52">
@@ -218,4 +181,4 @@ export function TrainingPlanFilters({
   )
 }
 
-export { difficultyLabels, focusTagLabels, type FilterType }
+export { difficultyLabels, focusTagLabels }

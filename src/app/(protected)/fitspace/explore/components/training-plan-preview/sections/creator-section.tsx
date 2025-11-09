@@ -36,7 +36,7 @@ export function CreatorSection({ creator, onClick }: CreatorSectionProps) {
             ? 'cursor-pointer hover:border-primary/50 transition-colors'
             : '',
         )}
-        variant="tertiary"
+        variant="highlighted"
         onClick={onClick}
       >
         <CardContent className="p-3">

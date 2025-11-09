@@ -84,6 +84,7 @@ export function TrainingPlanProvider({
         completedAt: plan.completedAt,
         focusTags: plan.focusTags || [],
         targetGoals: plan.targetGoals || [],
+        heroImageUrl: plan.heroImageUrl || '',
       },
       weeks: plan.weeks,
     }

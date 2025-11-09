@@ -312,6 +312,7 @@ export function createTrainingPlanOptimisticUpdate() {
               restSeconds: variables.exercise.restSeconds || null,
               warmupSets: variables.exercise.warmupSets || null,
               tempo: variables.exercise.tempo || null,
+              images: [],
               sets: [
                 {
                   id: tempId,

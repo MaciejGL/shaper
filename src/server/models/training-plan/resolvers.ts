@@ -16,6 +16,7 @@ import {
   GQLMutationUpdateTrainingWeekDetailsArgs,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import prisma from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
 import {
@@ -261,5 +262,35 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     context,
   ) => {
     return removeSetFromExercise(setId, context)
+  },
+
+  updateTrainingPlanHeroImage: async (_, { planId, heroImageUrl }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('Not authenticated')
+    }
+
+    const plan = await prisma.trainingPlan.findUnique({
+      where: { id: planId },
+      select: { createdById: true },
+    })
+
+    if (!plan) {
+      throw new Error('Training plan not found')
+    }
+
+    const isCreator = plan.createdById === user.user.id
+    const isAdmin = user.user.role === 'ADMIN'
+
+    if (!isCreator && !isAdmin) {
+      throw new Error('Not authorized to update this plan')
+    }
+
+    await prisma.trainingPlan.update({
+      where: { id: planId },
+      data: { heroImageUrl },
+    })
+
+    return true
   },
 }

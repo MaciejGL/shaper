@@ -96,6 +96,17 @@ const LazyTrainingPlansTab = dynamic(
   },
 )
 
+const LazyFreeWorkoutDaysAdmin = dynamic(
+  () =>
+    import('./free-workout-days-admin').then((mod) => ({
+      default: mod.FreeWorkoutDaysAdmin,
+    })),
+  {
+    loading: () => <AdminTabSkeleton />,
+    ssr: false,
+  },
+)
+
 export {
   LazyUsersTab,
   LazyTrainersTab,
@@ -104,4 +115,5 @@ export {
   LazyAwsTab,
   LazyStripeTab,
   LazyTrainingPlansTab,
+  LazyFreeWorkoutDaysAdmin,
 }

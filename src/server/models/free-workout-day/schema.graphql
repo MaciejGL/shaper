@@ -1,0 +1,45 @@
+type FreeWorkoutDay {
+  id: ID!
+  trainingDayId: ID!
+  planId: ID!
+  isVisible: Boolean!
+  heroImageUrl: String
+  trainingDay: TrainingDay
+  plan: TrainingPlan
+  createdAt: String!
+  updatedAt: String!
+}
+
+input AddFreeWorkoutDayInput {
+  trainingDayId: ID!
+  planId: ID!
+  heroImageUrl: String
+}
+
+type Query {
+  getFreeWorkoutDays: [FreeWorkoutDay!]!
+  getAdminFreeWorkoutDays: [FreeWorkoutDay!]!
+}
+
+type StartFreeWorkoutResult {
+  planId: ID!
+  weekId: ID!
+  dayId: ID!
+}
+
+input StartFreeWorkoutDayInput {
+  trainingDayId: ID!
+  dayId: ID # Optional: if provided, add to this specific day; otherwise add to today
+  replaceExisting: Boolean
+}
+
+type Mutation {
+  addFreeWorkoutDay(input: AddFreeWorkoutDayInput!): FreeWorkoutDay!
+  updateFreeWorkoutDay(
+    id: ID!
+    isVisible: Boolean
+    heroImageUrl: String
+  ): Boolean!
+  removeFreeWorkoutDay(id: ID!): Boolean!
+  startFreeWorkoutDay(input: StartFreeWorkoutDayInput!): StartFreeWorkoutResult!
+}

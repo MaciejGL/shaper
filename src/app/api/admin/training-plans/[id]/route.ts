@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { requireAdminUser } from '@/lib/admin-auth'
@@ -13,8 +14,12 @@ export async function PATCH(
     const { id } = await params
     const body = await request.json()
 
-    // Only allow updating isPublic and premium fields
-    const updateData: { isPublic?: boolean; premium?: boolean } = {}
+    // Only allow updating isPublic, premium, and heroImageUrl fields
+    const updateData: {
+      isPublic?: boolean
+      premium?: boolean
+      heroImageUrl?: string
+    } = {}
 
     if (typeof body.isPublic === 'boolean') {
       updateData.isPublic = body.isPublic
@@ -22,6 +27,10 @@ export async function PATCH(
 
     if (typeof body.premium === 'boolean') {
       updateData.premium = body.premium
+    }
+
+    if (typeof body.heroImageUrl === 'string') {
+      updateData.heroImageUrl = body.heroImageUrl
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -46,6 +55,9 @@ export async function PATCH(
       },
     })
 
+    // Revalidate explore page to show updated hero images
+    revalidatePath('/fitspace/explore')
+
     return NextResponse.json({
       success: true,
       plan: updatedPlan,
@@ -63,4 +75,3 @@ export async function PATCH(
     )
   }
 }
-

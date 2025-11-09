@@ -197,6 +197,22 @@ export default class TrainingPlan implements GQLTrainingPlan {
     return 0
   }
 
+  async timesStarted() {
+    if (!this.data.isTemplate) {
+      return 0
+    }
+
+    const count = await this.context.loaders.plan.timesStartedByPlanId.load(
+      this.data.id,
+    )
+
+    return count
+  }
+
+  get heroImageUrl() {
+    return this.data.heroImageUrl ?? null
+  }
+
   get isDemo() {
     return this.data.assignedToId !== this.context.user?.user.id
   }

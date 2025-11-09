@@ -33,7 +33,6 @@ export function TrainingPlanPreview({
   isAssigning,
 }: TrainingPlanPreviewProps) {
   const [activeTab, setActiveTab] = useState('info')
-  const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
   const [isTrainerDrawerOpen, setIsTrainerDrawerOpen] = useState(false)
 
   // Lazy load weeks data only when preview tab is active
@@ -47,7 +46,6 @@ export function TrainingPlanPreview({
     )
 
   const handleWeekClick = (weekId: string) => {
-    setSelectedWeekId(weekId)
     setActiveTab('preview')
   }
 
@@ -80,12 +78,11 @@ export function TrainingPlanPreview({
   return (
     <>
       <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DrawerContent dialogTitle={plan.title}>
-          <div className="flex flex-col h-full overflow-hidden">
-            <TrainingPlanPreviewHeader plan={plan} />
-
+        <DrawerContent dialogTitle={plan.title} grabber={false}>
+          <div className="flex flex-col h-full overflow-y-auto">
             {/* Tabs Content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <TrainingPlanPreviewHeader plan={plan} />
+            <div className="flex-1  p-4">
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
@@ -122,9 +119,6 @@ export function TrainingPlanPreview({
                   ) : (
                     <PlanPreviewTab
                       weeks={weeksData?.getTrainingPlanById?.weeks || null}
-                      selectedWeekId={selectedWeekId}
-                      onAccordionChange={() => setSelectedWeekId(null)}
-                      isPremiumPlan={Boolean(plan.premium)}
                     />
                   )}
                 </TabsContent>

@@ -18,22 +18,11 @@ interface NavigationProps {
   plan?: NavigationPlan | null
 }
 
-export const COUNTER_MAIN_PADDING =
-  '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8'
-
 export function Navigation({ plan }: NavigationProps) {
   if (!plan) return null
 
   return (
-    <div
-      id="workout-navigation"
-      className={cn(
-        'bg-sidebar',
-        // Counter Main padding
-        COUNTER_MAIN_PADDING,
-        ' px-2 pt-4 pb-2 md:px-4 lg:p-8',
-      )}
-    >
+    <div id="workout-navigation" className={'px-2 pb-2'}>
       <div className="mx-auto max-w-sm dark">
         <WeekSelector plan={plan} />
         <DaySelector plan={plan} />

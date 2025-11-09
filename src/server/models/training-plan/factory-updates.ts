@@ -70,6 +70,8 @@ export async function updateTrainingPlanDetails(
       difficulty: input.difficulty,
       focusTags: input.focusTags ?? undefined,
       targetGoals: input.targetGoals ?? undefined,
+      heroImageUrl:
+        input.heroImageUrl !== undefined ? input.heroImageUrl : undefined,
     },
   })
 

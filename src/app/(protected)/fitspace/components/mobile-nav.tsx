@@ -166,10 +166,10 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
                 {...navProps}
                 onClick={handleClick}
                 className={cn(
-                  'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
+                  'flex flex-col items-center justify-center p-2 rounded-lg transition-colors hover:text-sidebar-primary',
                   isHighlighted
                     ? cn(' text-sidebar-foreground font-semibold')
-                    : cn(' text-foreground/50 hover:text-sidebar-primary'),
+                    : cn(' text-foreground/50'),
                 )}
               >
                 <Icon className="size-5 mb-1" />
