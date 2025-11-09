@@ -17,8 +17,6 @@ import { GQLWorkoutType } from '@/generated/graphql-client'
 import { getDayName } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
-import { COUNTER_MAIN_PADDING } from './navigation'
-
 const DUMMY_WEEK = {
   id: 'skeleton-week-1',
   weekNumber: 1,
@@ -131,17 +129,9 @@ export function WorkoutPageSkeleton() {
 
 export function SkeletonNavigation() {
   return (
-    <div
-      className={cn(
-        'bg-sidebar',
-        COUNTER_MAIN_PADDING,
-        'px-2 pt-4 pb-2 md:px-4 lg:p-8 -mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
-      )}
-    >
-      <div className="mx-auto max-w-sm">
-        <SkeletonWeekSelector />
-        <SkeletonDaySelector />
-      </div>
+    <div className={cn('px-2 pb-2')}>
+      <SkeletonWeekSelector />
+      <SkeletonDaySelector />
     </div>
   )
 }
@@ -219,44 +209,31 @@ export function SkeletonExercises() {
   const progressPercentage = 0 // Show some progress for skeleton
 
   return (
-    <div
-      className={cn(
-        'bg-sidebar',
-        COUNTER_MAIN_PADDING,
-        'px-0 md:px-0 lg:px-0 pb-0 md:pb-0 lg:pb-0 pt-4',
-      )}
-    >
-      <div
-        id={activeDay.id}
-        className={cn(
-          'pb-4 bg-background rounded-t-3xl mt-0 px-2 md:px-4 lg:px-8',
-        )}
-      >
-        <div id={activeDay.id} className="max-w-sm mx-auto">
-          {!activeDay.isRestDay && (
-            <div className="flex flex-col py-3 space-y-2 w-full">
-              <Skeleton className="h-7 w-1/3 mx-auto" />
-              <div className="grid grid-cols-2 gap-2">
-                <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-2xl masked-placeholder-text">
-                  Loading
-                </Label>
+    <div>
+      <div id={activeDay.id} className={cn('pb-4')}>
+        {!activeDay.isRestDay && (
+          <div className="flex flex-col py-3 space-y-2 w-full">
+            <Skeleton className="h-7 w-1/3 mx-auto" />
+            <div className="grid grid-cols-2 gap-2">
+              <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-2xl masked-placeholder-text">
+                Loading
+              </Label>
 
-                <SkeletonExercisesCompleted
-                  completedExercises={completedExercises}
-                  totalExercises={activeDay.exercises.length}
-                />
-              </div>
-              <Progress
-                value={progressPercentage}
-                className={cn('masked-placeholder-text')}
+              <SkeletonExercisesCompleted
+                completedExercises={completedExercises}
+                totalExercises={activeDay.exercises.length}
               />
             </div>
-          )}
-          <div className="space-y-3">
-            {activeDay.exercises.map((exercise) => (
-              <SkeletonExercise key={exercise.id} />
-            ))}
+            <Progress
+              value={progressPercentage}
+              className={cn('masked-placeholder-text')}
+            />
           </div>
+        )}
+        <div className="space-y-3">
+          {activeDay.exercises.map((exercise) => (
+            <SkeletonExercise key={exercise.id} />
+          ))}
         </div>
       </div>
     </div>

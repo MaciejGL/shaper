@@ -1,4 +1,3 @@
-import { COUNTER_MAIN_PADDING } from '@/app/(protected)/fitspace/workout/[trainingId]/components/navigation'
 import { cn } from '@/lib/utils'
 
 export const ExtendHeader = ({
