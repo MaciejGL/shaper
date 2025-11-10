@@ -120,7 +120,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${robotoMono.variable} antialiased min-h-svh`}
+        className={`${inter.variable} ${robotoMono.variable} antialiased min-h-svh bg-sidebar`}
       >
         {isDevelopment && (
           <div className="fixed top-0 left-0 size-2 rounded-full bg-red-500 z-50"></div>

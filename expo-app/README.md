@@ -40,6 +40,23 @@ npm run android
 npm run web
 ```
 
+### Running in iOS Simulator (Expo Go)
+
+The easiest way to test on iOS without building:
+
+1. **Open iOS Simulator** first (launch from Xcode or run `open -a Simulator`)
+
+2. **Start the development server**:
+   ```bash
+   npx expo start
+   ```
+
+3. **In the terminal**, press **`s`** to switch to Expo Go mode
+
+4. **Press `i`** to open the app in iOS Simulator
+
+That's it! The app will load in the simulator using Expo Go. You can reload with `r` and access the Expo menu with `⌘ + D`.
+
 ### Testing on Real Devices
 
 #### Development Builds (Internal Testing)

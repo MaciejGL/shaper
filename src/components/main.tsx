@@ -24,7 +24,7 @@ export const Main = ({
   return (
     <main
       className={cn(
-        'h-dvh grid grid-cols-1 grid-rows-[auto_1fr] w-full',
+        'h-dvh grid grid-cols-1 grid-rows-[auto_1fr] w-full ',
         className,
       )}
     >

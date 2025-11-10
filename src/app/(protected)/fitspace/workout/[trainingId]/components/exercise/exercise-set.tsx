@@ -66,7 +66,6 @@ export function ExerciseSet({
     improvement: number
     estimated1RM: number
   } | null>(null)
-
   const { mutateAsync: updateSetLog } = useFitspaceUpdateSetLogMutation({
     onMutate: async (newLog) => {
       await queryClient.cancelQueries({

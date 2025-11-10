@@ -562,6 +562,8 @@ export const EnhancedWebView = forwardRef<
       return <OfflineScreen onRetry={handleRetry} />
     }
 
+    console.log('[INITIAL URL]', initialUrl)
+
     return (
       <View style={styles.container}>
         <WebView

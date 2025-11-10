@@ -7,7 +7,7 @@ import * as Linking from 'expo-linking'
 import * as Notifications from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { APP_CONFIG } from '../config/app-config'
@@ -34,6 +34,11 @@ interface HyproAppProps {
  * Convert relative or custom scheme URLs to full HTTPS URLs
  */
 const convertToFullUrl = (url: string): string => {
+  if (url.startsWith('exp://')) {
+    console.log('🔗 Ignoring exp:// deep link in WebView context:', url)
+    // return exactly from exp://... to the WebView
+    return ``
+  }
   // Already a full URL
   if (url.startsWith('https://') || url.startsWith('http://')) {
     return url
@@ -69,6 +74,20 @@ function HyproAppContent({ authToken }: HyproAppProps) {
   // State for initial URL detection (cold start with notification)
   const [initialUrl, setInitialUrl] = useState<string | undefined>(undefined)
   const [isCheckingInitialUrl, setIsCheckingInitialUrl] = useState(true)
+  const [currentUrl, setCurrentUrl] = useState<string>('')
+
+  // Determine bottom bar color based on current URL
+  const isFitspaceRoute = currentUrl.includes('/fitspace')
+  const bottomBarColor = isFitspaceRoute
+    ? colors.appBackground
+    : colors.statusBarBackground
+
+  // Handle navigation state changes to track current URL
+  const handleNavigationStateChange = (navState: any) => {
+    if (navState.url) {
+      setCurrentUrl(navState.url)
+    }
+  }
 
   // Check for initial URL from notification on cold start
   useEffect(() => {
@@ -107,23 +126,31 @@ function HyproAppContent({ authToken }: HyproAppProps) {
 
   return (
     <PushNotificationManager authToken={currentAuthToken}>
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.appBackground }]}
-      >
+      <View style={styles.container}>
         <StatusBar
           style={colors.statusBarStyle}
           backgroundColor={colors.statusBarBackground}
         />
-        <EnhancedWebView
-          ref={webViewRef}
-          initialUrl={initialUrl}
-          onThemeChange={handleWebThemeChange}
-          onAuthToken={handleAuthToken}
-          onRequestPushPermission={requestPermissions}
-          onCheckPushPermissions={checkAndSyncPermissions}
-          onDisablePushPermissions={disableNotifications}
+        <SafeAreaView
+          style={{ backgroundColor: colors.statusBarBackground }}
+          edges={['top']}
         />
-      </SafeAreaView>
+        <SafeAreaView
+          style={[styles.content, { backgroundColor: bottomBarColor }]}
+          edges={['left', 'right']}
+        >
+          <EnhancedWebView
+            ref={webViewRef}
+            initialUrl={initialUrl}
+            onThemeChange={handleWebThemeChange}
+            onAuthToken={handleAuthToken}
+            onRequestPushPermission={requestPermissions}
+            onCheckPushPermissions={checkAndSyncPermissions}
+            onDisablePushPermissions={disableNotifications}
+            onNavigationStateChange={handleNavigationStateChange}
+          />
+        </SafeAreaView>
+      </View>
     </PushNotificationManager>
   )
 }
@@ -138,6 +165,9 @@ export function HyproApp({ authToken }: HyproAppProps) {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
   },
 })
