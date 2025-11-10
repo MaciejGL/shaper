@@ -80,6 +80,7 @@ export function WorkoutPageClientNew({
           />
         </Suspense>
       }
+      classNameHeader="px-2 pt-2"
     >
       <Suspense fallback={<SkeletonExercises />}>
         <WorkoutDay
@@ -207,7 +208,7 @@ const WorkoutDay = ({
       // But prevent unnecessary network requests when we have data
       refetchOnMount: !hasDataForCurrentDay && !isRestDay,
       refetchOnWindowFocus: false,
-      staleTime: hasDataForCurrentDay || isRestDay ? Infinity : 0,
+      staleTime: isRestDay ? Infinity : 0,
       retry: false,
     },
   )
@@ -229,23 +230,21 @@ const WorkoutDay = ({
         []
       }
     >
-      <div>
-        <div className={cn('pb-4')}>
-          {isLoadingNewDay ? (
-            <SkeletonExercises />
-          ) : (
-            (dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day) && (
-              <Exercises
-                day={dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day}
-                previousDayLogs={
-                  dayDataQuery?.getWorkoutDay?.previousDayLogs ??
-                  initialDay?.previousDayLogs
-                }
-                isQuickWorkout={isQuickWorkout}
-              />
-            )
-          )}
-        </div>
+      <div className={cn('pb-4')}>
+        {isLoadingNewDay ? (
+          <SkeletonExercises />
+        ) : (
+          (dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day) && (
+            <Exercises
+              day={dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day}
+              previousDayLogs={
+                dayDataQuery?.getWorkoutDay?.previousDayLogs ??
+                initialDay?.previousDayLogs
+              }
+              isQuickWorkout={isQuickWorkout}
+            />
+          )
+        )}
       </div>
     </WorkoutProvider>
   )

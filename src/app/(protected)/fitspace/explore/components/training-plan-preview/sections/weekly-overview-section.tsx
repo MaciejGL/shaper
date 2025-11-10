@@ -1,10 +1,10 @@
 import { ChevronRight } from 'lucide-react'
 
 import { StatsItem } from '@/components/stats-item'
-import { GQLGetPublicTrainingPlanWeeksQuery } from '@/generated/graphql-client'
+import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 
 interface WeeklyOverviewSectionProps {
-  weeksData?: GQLGetPublicTrainingPlanWeeksQuery
+  weeksData?: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
   onWeekClick: (weekId: string) => void
 }
 
@@ -12,10 +12,7 @@ export function WeeklyOverviewSection({
   weeksData,
   onWeekClick,
 }: WeeklyOverviewSectionProps) {
-  if (
-    !weeksData?.getTrainingPlanById?.weeks ||
-    weeksData.getTrainingPlanById.weeks.length === 0
-  ) {
+  if (!weeksData?.weeks || weeksData.weeks.length === 0) {
     return null
   }
 
@@ -23,7 +20,7 @@ export function WeeklyOverviewSection({
     <div className="space-y-2">
       <h3 className="text-sm font-medium">Weekly Overview</h3>
       <div className="grid grid-cols-2 gap-2">
-        {weeksData.getTrainingPlanById.weeks
+        {weeksData.weeks
           .slice()
           .sort((a, b) => a.weekNumber - b.weekNumber)
           .map((week) => (
@@ -38,6 +35,7 @@ export function WeeklyOverviewSection({
                 icon={
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 }
+                variant="outline"
                 value={`Week ${week.weekNumber}`}
               />
             </button>

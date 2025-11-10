@@ -24,7 +24,7 @@ export const Main = ({
   return (
     <main
       className={cn(
-        'h-dvh grid grid-cols-1 grid-rows-[auto_1fr] w-full',
+        'h-dvh grid grid-cols-1 grid-rows-[auto_1fr] w-full ',
         className,
       )}
     >
@@ -32,19 +32,16 @@ export const Main = ({
 
       <div
         className={cn('w-full grid bg-sidebar', {
-          'md:p-2 md:-mt-2 overflow-hidden': isTrainer,
+          'md:-mt-2 overflow-hidden': isTrainer,
         })}
       >
         <div
           id="main-content"
-          className={cn(
-            'w-full h-full p-2 md:px-4 lg:px-8 bg-background safe-area-bottom',
-            {
-              'md:rounded-md overflow-y-auto md:p-4 lg:p-8': isTrainer,
-              'pt-[calc(var(--safe-area-inset-top))] grow rounded-t-3xl':
-                !isTrainer,
-            },
-          )}
+          className={cn('w-full h-full bg-background safe-area-bottom', {
+            'md:rounded-md overflow-y-auto p-2 md:px-4 lg:px-8': isTrainer,
+            'pt-[calc(var(--safe-area-inset-top))] grow rounded-t-3xl':
+              !isTrainer,
+          })}
         >
           {children}
         </div>

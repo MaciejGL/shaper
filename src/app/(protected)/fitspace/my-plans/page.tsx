@@ -66,10 +66,11 @@ export default function MyPlansPage() {
           ]}
           onClick={setTab}
           active={tab ?? PlanTab.Plans}
+          size="lg"
           className="grid grid-cols-2"
         />
 
-        <TabsContent value={PlanTab.Plans} className="space-y-4 pt-4 pb-4">
+        <TabsContent value={PlanTab.Plans} className="space-y-4 pt-4 pb-4 px-4">
           <PlansTab
             activePlan={activePlan}
             availablePlans={availablePlans}
@@ -81,7 +82,7 @@ export default function MyPlansPage() {
 
         <TabsContent
           value={PlanTab.QuickWorkout}
-          className="space-y-4 pt-4 pb-4"
+          className="space-y-4 pt-4 pb-4 px-4"
         >
           <EnhancedQuickWorkoutTab />
         </TabsContent>

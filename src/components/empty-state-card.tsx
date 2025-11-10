@@ -7,19 +7,21 @@ export function EmptyStateCard({
   icon,
   cta,
 }: {
-  title: string
-  description: string
-  icon: React.ElementType
+  title?: string
+  description?: string
+  icon?: React.ElementType
   cta?: React.ReactNode
 }) {
   return (
-    <Card className="flex flex-col items-center justify-center py-12">
-      <div className="flex flex-col items-center justify-center">
-        <BiggyIcon icon={icon} variant="default" />
-        <div className="text-lg font-medium mb-2 mt-4">{title}</div>
-        <div className="text-muted-foreground text-center max-w-[35ch] text-sm">
-          {description}
-        </div>
+    <Card className="flex flex-col items-center justify-center py-12 px-4 text-center">
+      <div className="flex flex-col items-center justify-center space-y-4">
+        {icon && <BiggyIcon icon={icon} variant="default" />}
+        {title && <div className="text-lg font-medium mb-2 mt-4">{title}</div>}
+        {description && (
+          <div className="text-muted-foreground text-center max-w-[35ch] text-sm">
+            {description}
+          </div>
+        )}
         {cta && <div className="mt-4">{cta}</div>}
       </div>
     </Card>

@@ -5,7 +5,6 @@ import { BookmarkIcon, ChevronRight, SparklesIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { ButtonLink } from '@/components/ui/button-link'
 import {
   Card,
   CardContent,
@@ -13,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
+import { useOpenUrl } from '@/hooks/use-open-url'
 
 import { FavouritesSheet } from '../../quick-workout/components/favourites-sheet'
 import { QuickWorkoutAiWizard } from '../../quick-workout/components/quick-workout-ai-wizard'
@@ -25,6 +25,7 @@ interface EmptyWorkoutOptionsProps {
 
 export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
   const { hasPremium: hasPremiumAccess, isLoading: isLoadingUser } = useUser()
+  const { openUrl, isLoading: isOpeningUrl } = useOpenUrl()
   const [showAiWizard, setShowAiWizard] = useState(false)
   const [showFavourites, setShowFavourites] = useState(false)
 
@@ -73,13 +74,18 @@ export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
                     </CardDescription>
                   </div>
                   {!hasPremiumAccess && !isLoadingUser ? (
-                    <ButtonLink
-                      href="/fitspace/settings/subscription"
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openUrl('/account-management/offers')
+                      }}
                       size="xs"
                       variant="gradient"
+                      loading={isOpeningUrl}
+                      disabled={isOpeningUrl}
                     >
                       Upgrade
-                    </ButtonLink>
+                    </Button>
                   ) : (
                     <Button
                       variant="link"

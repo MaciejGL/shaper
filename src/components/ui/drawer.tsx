@@ -87,10 +87,12 @@ function DrawerContent({
   children,
   dialogTitle,
   grabber = true,
+  grabberAbsolute = false,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content> & {
   dialogTitle: string
   grabber?: boolean
+  grabberAbsolute?: boolean
 }) {
   return (
     <DrawerPortal data-slot="drawer-portal">
@@ -100,7 +102,7 @@ function DrawerContent({
         className={cn(
           'group/drawer-content bg-background dark:bg-sidebar fixed z-50 flex flex-col h-full',
           'data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-2xl data-[vaul-drawer-direction=top]:border-b',
-          'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[calc(95dvh-var(--safe-area-inset-bottom,0px)-var(--safe-area-inset-top,0px))] data-[vaul-drawer-direction=bottom]:rounded-t-2xl',
+          'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:pb-[var(--safe-area-inset-bottom)px] data-[vaul-drawer-direction=bottom]:max-h-[calc(95dvh-var(--safe-area-inset-bottom,0px)-var(--safe-area-inset-top,0px))] data-[vaul-drawer-direction=bottom]:rounded-t-2xl',
           'data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=right]:sm:max-w-sm',
           'data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=left]:sm:max-w-sm focus-visible:outline-none overflow-hidden',
           className,
@@ -111,11 +113,22 @@ function DrawerContent({
           <DrawerTitle className="sr-only">{dialogTitle}</DrawerTitle>
         )}
         {grabber && (
-          <div className="bg-primary/5 mx-auto mt-2 hidden h-1 w-[70px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
+          <div
+            className={cn(
+              'bg-primary/5 mx-auto mt-2 hidden h-1.5 w-[70px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block',
+              grabberAbsolute &&
+                'group-data-[vaul-drawer-direction=bottom]/drawer-content:relative bg-black/60 z-[100] top-4 left-0 right-0 -mt-2',
+            )}
+          />
         )}
         {children}
         {grabber && (
-          <div className="bg-primary/5 mx-auto my-2 hidden h-1 w-[70px] shrink-0 rounded-full group-data-[vaul-drawer-direction=top]/drawer-content:block" />
+          <div
+            className={cn(
+              'bg-primary/5 mx-auto my-2 hidden h-1 w-[70px] shrink-0 rounded-full group-data-[vaul-drawer-direction=top]/drawer-content:block',
+              grabberAbsolute && 'absolute bottom-0 left-0 right-0',
+            )}
+          />
         )}
       </DrawerPrimitive.Content>
     </DrawerPortal>
@@ -137,7 +150,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="drawer-footer"
       className={cn(
-        'mt-auto flex flex-col gap-2 p-4 bg-background dark:bg-sidebar',
+        'mt-auto flex flex-col gap-2 p-4 bg-background dark:bg-sidebar safe-area-bottom-content',
         className,
       )}
       {...props}

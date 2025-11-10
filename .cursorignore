@@ -1,0 +1,17 @@
+node_modules/
+.next/
+expo-app/node_modules/
+expo-app/.expo/
+expo-app/ios/Pods/
+expo-app/ios/build/
+expo-app/android/build/
+expo-app/android/.gradle/
+dist/
+build/
+*.log
+.pnpm-store/
+.turbo/
+tsconfig.tsbuildinfo
+prisma/migrations/
+public/
+

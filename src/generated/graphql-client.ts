@@ -4001,14 +4001,7 @@ export type GQLGetPublicTrainingPlansQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetPublicTrainingPlansQuery = { __typename?: 'Query', getPublicTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, premium: boolean, difficulty?: GQLDifficulty | undefined | null, focusTags: Array<GQLFocusTag>, targetGoals: Array<GQLTargetGoal>, weekCount: number, assignmentCount: number, sessionsPerWeek?: number | undefined | null, avgSessionTime?: number | undefined | null, equipment: Array<string>, heroImageUrl?: string | undefined | null, rating?: number | undefined | null, totalReviews: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null }> };
-
-export type GQLGetPublicTrainingPlanWeeksQueryVariables = Exact<{
-  planId: Scalars['ID']['input'];
-}>;
-
-
-export type GQLGetPublicTrainingPlanWeeksQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }> }> }> }> } };
+export type GQLGetPublicTrainingPlansQuery = { __typename?: 'Query', getPublicTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, premium: boolean, difficulty?: GQLDifficulty | undefined | null, focusTags: Array<GQLFocusTag>, targetGoals: Array<GQLTargetGoal>, weekCount: number, assignmentCount: number, sessionsPerWeek?: number | undefined | null, avgSessionTime?: number | undefined | null, equipment: Array<string>, heroImageUrl?: string | undefined | null, rating?: number | undefined | null, totalReviews: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }> }> }> }> }> };
 
 export type GQLGetFeaturedTrainersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -6314,6 +6307,28 @@ export const GetPublicTrainingPlansDocument = `
     }
     createdAt
     updatedAt
+    weeks {
+      id
+      weekNumber
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        workoutType
+        exercises {
+          id
+          name
+          videoUrl
+          images {
+            id
+            thumbnail
+            medium
+            url
+            order
+          }
+        }
+      }
+    }
   }
 }
     `;
@@ -6359,78 +6374,6 @@ useInfiniteGetPublicTrainingPlansQuery.getKey = (variables?: GQLGetPublicTrainin
 
 
 useGetPublicTrainingPlansQuery.fetcher = (variables?: GQLGetPublicTrainingPlansQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetPublicTrainingPlansQuery, GQLGetPublicTrainingPlansQueryVariables>(GetPublicTrainingPlansDocument, variables, options);
-
-export const GetPublicTrainingPlanWeeksDocument = `
-    query GetPublicTrainingPlanWeeks($planId: ID!) {
-  getTrainingPlanById(id: $planId) {
-    id
-    weeks {
-      id
-      weekNumber
-      days {
-        id
-        dayOfWeek
-        isRestDay
-        workoutType
-        exercises {
-          id
-          name
-          videoUrl
-          images {
-            id
-            thumbnail
-            medium
-            url
-            order
-          }
-        }
-      }
-    }
-  }
-}
-    `;
-
-export const useGetPublicTrainingPlanWeeksQuery = <
-      TData = GQLGetPublicTrainingPlanWeeksQuery,
-      TError = unknown
-    >(
-      variables: GQLGetPublicTrainingPlanWeeksQueryVariables,
-      options?: Omit<UseQueryOptions<GQLGetPublicTrainingPlanWeeksQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetPublicTrainingPlanWeeksQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useQuery<GQLGetPublicTrainingPlanWeeksQuery, TError, TData>(
-      {
-    queryKey: ['GetPublicTrainingPlanWeeks', variables],
-    queryFn: fetchData<GQLGetPublicTrainingPlanWeeksQuery, GQLGetPublicTrainingPlanWeeksQueryVariables>(GetPublicTrainingPlanWeeksDocument, variables),
-    ...options
-  }
-    )};
-
-useGetPublicTrainingPlanWeeksQuery.getKey = (variables: GQLGetPublicTrainingPlanWeeksQueryVariables) => ['GetPublicTrainingPlanWeeks', variables];
-
-export const useInfiniteGetPublicTrainingPlanWeeksQuery = <
-      TData = InfiniteData<GQLGetPublicTrainingPlanWeeksQuery>,
-      TError = unknown
-    >(
-      variables: GQLGetPublicTrainingPlanWeeksQueryVariables,
-      options: Omit<UseInfiniteQueryOptions<GQLGetPublicTrainingPlanWeeksQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetPublicTrainingPlanWeeksQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useInfiniteQuery<GQLGetPublicTrainingPlanWeeksQuery, TError, TData>(
-      (() => {
-    const { queryKey: optionsQueryKey, ...restOptions } = options;
-    return {
-      queryKey: optionsQueryKey ?? ['GetPublicTrainingPlanWeeks.infinite', variables],
-      queryFn: (metaData) => fetchData<GQLGetPublicTrainingPlanWeeksQuery, GQLGetPublicTrainingPlanWeeksQueryVariables>(GetPublicTrainingPlanWeeksDocument, {...variables, ...(metaData.pageParam ?? {})})(),
-      ...restOptions
-    }
-  })()
-    )};
-
-useInfiniteGetPublicTrainingPlanWeeksQuery.getKey = (variables: GQLGetPublicTrainingPlanWeeksQueryVariables) => ['GetPublicTrainingPlanWeeks.infinite', variables];
-
-
-useGetPublicTrainingPlanWeeksQuery.fetcher = (variables: GQLGetPublicTrainingPlanWeeksQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetPublicTrainingPlanWeeksQuery, GQLGetPublicTrainingPlanWeeksQueryVariables>(GetPublicTrainingPlanWeeksDocument, variables, options);
 
 export const GetFeaturedTrainersDocument = `
     query GetFeaturedTrainers($limit: Int) {

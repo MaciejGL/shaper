@@ -106,7 +106,7 @@ export function CheckinScheduleSection({
     }
 
     return (
-      <div className="pb-4 px-2 dark">
+      <div className="py-6 dark">
         <AnimatePresence>
           {!isAnimatingOut && (
             <motion.div

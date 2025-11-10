@@ -16,38 +16,50 @@ export function ProgramDetailsSection({
   return (
     <div>
       <div className="grid grid-cols-2 gap-2 text-sm">
-        <Badge variant="secondary" size="lg" className="w-full justify-between">
-          <span className="text-muted-foreground">Weeks:</span>
+        <Badge
+          variant="outline"
+          size="lg"
+          className="w-full justify-between py-2"
+        >
+          <span className="text-muted-foreground font-normal text-sm">
+            Weeks:
+          </span>
           <span className="font-medium text-base">{weekCount}</span>
         </Badge>
 
         {sessionsPerWeek && (
           <Badge
-            variant="secondary"
+            variant="outline"
             size="lg"
-            className="w-full justify-between"
+            className="w-full justify-between py-2"
           >
-            <span className="text-muted-foreground">Sessions/week:</span>
+            <span className="text-muted-foreground font-normal text-sm">
+              Sessions/week:
+            </span>
             <span className="font-medium text-base">{sessionsPerWeek}</span>
           </Badge>
         )}
         {avgSessionTime && (
           <Badge
-            variant="secondary"
+            variant="outline"
             size="lg"
-            className="w-full justify-between"
+            className="w-full justify-between py-2"
           >
-            <span className="text-muted-foreground">Avg. time:</span>
+            <span className="text-muted-foreground font-normal text-sm">
+              Avg. time:
+            </span>
             <span className="font-medium text-base">{avgSessionTime} min</span>
           </Badge>
         )}
         {formattedUserCount && (
           <Badge
-            variant="secondary"
+            variant="outline"
             size="lg"
-            className="w-full justify-between"
+            className="w-full justify-between py-2"
           >
-            <span className="text-muted-foreground">Users enrolled:</span>
+            <span className="text-muted-foreground font-normal text-sm">
+              Users enrolled:
+            </span>
             <span className="font-medium text-base">{formattedUserCount}</span>
           </Badge>
         )}

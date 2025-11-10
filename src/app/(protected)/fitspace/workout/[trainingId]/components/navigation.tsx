@@ -22,7 +22,7 @@ export function Navigation({ plan }: NavigationProps) {
   if (!plan) return null
 
   return (
-    <div id="workout-navigation" className={'px-2 pb-2'}>
+    <div id="workout-navigation" className="pb-2">
       <div className="mx-auto max-w-sm dark">
         <WeekSelector plan={plan} />
         <DaySelector plan={plan} />

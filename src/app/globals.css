@@ -72,7 +72,7 @@
   --chart-3: oklch(0.65 0.25 25);
   --chart-4: oklch(0.7 0.22 55);
   --chart-5: oklch(0.65 0.25 285);
-  --sidebar: oklch(0.2 0 0);
+  --sidebar: oklch(0.22 0.005 285.823);
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.21 0.006 285.885);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -162,6 +162,16 @@
     --safe-area-inset-right: env(safe-area-inset-right, 0px);
     --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
     --safe-area-inset-left: env(safe-area-inset-left, 0px);
+
+    /* Adjusted safe areas for tighter UI */
+    --safe-area-bottom-nav: max(
+      4px,
+      calc(env(safe-area-inset-bottom, 0px) - 18px)
+    ); /* Navigation bars - tight (34px → 16px on iPhone) */
+    --safe-area-bottom-content: max(
+      8px,
+      calc(env(safe-area-inset-bottom, 0px) - 12px)
+    ); /* Content areas - moderate (34px → 22px on iPhone) */
   }
 }
 
@@ -258,6 +268,14 @@
 
 @utility safe-area-bottom {
   padding-bottom: var(--safe-area-inset-bottom);
+}
+
+@utility safe-area-bottom-nav {
+  padding-bottom: var(--safe-area-bottom-nav);
+}
+
+@utility safe-area-bottom-content {
+  padding-bottom: var(--safe-area-bottom-content);
 }
 
 @utility safe-area-left {

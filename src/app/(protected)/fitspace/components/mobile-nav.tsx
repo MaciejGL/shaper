@@ -125,7 +125,7 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/50 backdrop-blur-md dark:bg-sidebar/50 safe-area-bottom safe-area-x border-t border-border/50">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/50 backdrop-blur-md dark:bg-sidebar/50 pb-[var(--safe-area-bottom-nav)] safe-area-x border-t border-border/50">
         <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -166,10 +166,10 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
                 {...navProps}
                 onClick={handleClick}
                 className={cn(
-                  'flex flex-col items-center justify-center p-2 rounded-lg transition-colors hover:text-sidebar-primary',
+                  'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
                   isHighlighted
                     ? cn(' text-sidebar-foreground font-semibold')
-                    : cn(' text-foreground/50'),
+                    : cn(' text-foreground/50 hover:text-sidebar-primary'),
                 )}
               >
                 <Icon className="size-5 mb-1" />

@@ -236,7 +236,7 @@ export function ExerciseMetadata({
       </div>
 
       {exercise.additionalInstructions && (
-        <div className="text-xs dark:text-muted-foreground bg-muted/50 p-2 rounded mt-2 flex items-center gap-2">
+        <div className="text-xs dark:text-muted-foreground bg-muted/50 p-3 rounded-lg mt-2 flex items-center gap-2">
           <InfoIcon className="size-3 text-blue-500 flex-shrink-0 self-start mt-0.5" />
           <p className="whitespace-pre-wrap">
             {exercise.additionalInstructions}

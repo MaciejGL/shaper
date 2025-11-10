@@ -21,7 +21,7 @@ function PullToRefreshIndicator({ state }: { state: PullState }) {
   return (
     <div
       className={cn(
-        'fixed top-0 left-0 right-0 h-20 flex justify-center items-end pb-2',
+        'fixed top-0 left-0 right-0 h-20 flex justify-center items-end pb-2 dark',
         'bg-gradient-to-b from-background to-transparent z-[9999] pointer-events-none',
       )}
       style={{

@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import { ChevronRight, PlusIcon, SparklesIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { ButtonLink } from '@/components/ui/button-link'
 import {
   Card,
   CardContent,
@@ -12,6 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
+import { useOpenUrl } from '@/hooks/use-open-url'
 
 interface EmptyFavouriteOptionsProps {
   onOpenAiWizard: () => void
@@ -25,6 +25,7 @@ export function EmptyFavouriteOptions({
   hasExercises = false,
 }: EmptyFavouriteOptionsProps) {
   const { hasPremium: hasPremiumAccess, isLoading: isLoadingUser } = useUser()
+  const { openUrl, isLoading: isOpeningUrl } = useOpenUrl()
 
   return (
     <div className="space-y-4">
@@ -56,13 +57,18 @@ export function EmptyFavouriteOptions({
                   </CardDescription>
                 </div>
                 {!hasPremiumAccess && !isLoadingUser ? (
-                  <ButtonLink
-                    href="/fitspace/settings/subscription"
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      openUrl('/account-management/offers')
+                    }}
                     size="xs"
                     variant="gradient"
+                    loading={isOpeningUrl}
+                    disabled={isOpeningUrl}
                   >
                     Upgrade
-                  </ButtonLink>
+                  </Button>
                 ) : (
                   <Button variant="link" iconOnly={<ChevronRight />}>
                     Generate

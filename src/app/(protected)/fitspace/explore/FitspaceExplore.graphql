@@ -24,12 +24,6 @@ query GetPublicTrainingPlans($limit: Int) {
     }
     createdAt
     updatedAt
-  }
-}
-
-query GetPublicTrainingPlanWeeks($planId: ID!) {
-  getTrainingPlanById(id: $planId) {
-    id
     weeks {
       id
       weekNumber

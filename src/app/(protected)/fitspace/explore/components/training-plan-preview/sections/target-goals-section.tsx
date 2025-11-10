@@ -8,7 +8,7 @@ export function TargetGoalsSection({ targetGoals }: TargetGoalsSectionProps) {
   if (!targetGoals || targetGoals.length === 0) return null
 
   return (
-    <div>
+    <div className="pl-2">
       <h3 className="font-semibold mb-2 text-sm">What You'll Achieve</h3>
       <ul className="space-y-1">
         {targetGoals.map((goal: string, index: number) => (

@@ -29,7 +29,16 @@ async function getInternalApiUrl(path: string): Promise<string> {
   const hdrs = await headers()
   const host =
     hdrs.get('host') ?? process.env.NEXT_PUBLIC_VERCEL_URL ?? 'localhost:4000'
-  const protocol = host.startsWith('localhost') ? 'http' : 'https'
+
+  // Use HTTP for localhost and local network IPs (192.168.x.x, 10.x.x.x, etc.)
+  const isLocalDevelopment =
+    host.startsWith('localhost') ||
+    host.startsWith('192.168.') ||
+    host.startsWith('10.') ||
+    host.startsWith('172.16.') ||
+    host.startsWith('127.')
+
+  const protocol = isLocalDevelopment ? 'http' : 'https'
   return `${protocol}://${host}${path}`
 }
 

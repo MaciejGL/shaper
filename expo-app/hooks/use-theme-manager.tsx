@@ -18,16 +18,16 @@ interface ThemeColors {
 
 const THEME_COLORS: Record<AppTheme, ThemeColors> = {
   light: {
-    statusBarStyle: 'dark',
-    statusBarBackground: '#ffffff',
+    statusBarStyle: 'light',
+    statusBarBackground: '#1a1a1d',
     navigationBarBackground: '#ffffff',
     appBackground: '#ffffff',
   },
   dark: {
     statusBarStyle: 'light',
-    statusBarBackground: '#000000',
-    navigationBarBackground: '#000000',
-    appBackground: '#000000',
+    statusBarBackground: '#1a1a1d',
+    navigationBarBackground: '#111114',
+    appBackground: '#111114',
   },
 }
 

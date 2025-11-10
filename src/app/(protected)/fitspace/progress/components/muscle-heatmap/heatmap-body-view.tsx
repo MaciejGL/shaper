@@ -140,7 +140,7 @@ export function HeatmapBodyView({
         <div className="text-xs font-medium text-muted-foreground">
           Intensity
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {HEATMAP_COLORS.levels.map((level) => (
             <div key={level.label} className="flex items-center gap-2">
               <div className={cn('size-3 rounded', level.bgColor)} />
