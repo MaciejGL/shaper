@@ -2,13 +2,13 @@ import Image from 'next/image'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { useUserPreferences } from '@/context/user-preferences-context'
-import { GQLGetPublicTrainingPlanWeeksQuery } from '@/generated/graphql-client'
+import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 import { sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 type PlanWeeks = NonNullable<
-  GQLGetPublicTrainingPlanWeeksQuery['getTrainingPlanById']['weeks']
+  GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]['weeks']
 >
 
 interface PlanPreviewTabProps {

@@ -152,8 +152,14 @@ function PrimaryTabList<T extends string>({
   size?: 'md' | 'sm' | 'lg' | 'xl'
   classNameButton?: string
 }) {
+  const uniqueId = React.useId()
+
   return (
-    <div className={cn('rounded-full bg-muted p-1')}>
+    <div
+      className={cn(
+        'rounded-full border border-black/8 dark:border-white/10 bg-muted p-1 min-w-max w-full',
+      )}
+    >
       <div className={cn('relative flex', className)}>
         {options.map((option) => (
           <Button
@@ -168,7 +174,7 @@ function PrimaryTabList<T extends string>({
           >
             {active === option.value && (
               <motion.div
-                layoutId="activeTabBackground"
+                layoutId={`activeTabBackground-${uniqueId}`}
                 className="absolute inset-0 bg-primary dark:bg-primary/20 rounded-full z-0"
                 transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
               />
@@ -178,8 +184,8 @@ function PrimaryTabList<T extends string>({
               className={cn(
                 'relative transition-colors duration-500',
                 active === option.value
-                  ? 'text-primary-foreground'
-                  : 'text-primary/50',
+                  ? 'text-primary-foreground dark:text-primary'
+                  : 'text-primary/80',
               )}
             >
               {option.label}

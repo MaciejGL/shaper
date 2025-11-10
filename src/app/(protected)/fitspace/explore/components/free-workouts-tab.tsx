@@ -2,48 +2,42 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Dumbbell, Flame, Users } from 'lucide-react'
+import { Dumbbell, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { BiggyIcon } from '@/components/biggy-icon'
-import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  GQLGetFreeWorkoutDaysQuery,
-  useGetFreeWorkoutDaysQuery,
-  useStartFreeWorkoutDayMutation,
-} from '@/generated/graphql-client'
+import { useStartFreeWorkoutDayMutation } from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
 import { formatUserCount } from '@/utils/format-user-count'
 
-import { WorkoutDayPreview } from './workout-day-preview/workout-day-preview'
+import { FreeWorkoutDay, PublicTrainingPlan } from './explore.client'
+import { UnifiedPreviewDrawer } from './workout-day-preview/unified-preview-drawer'
 
 interface FreeWorkoutsTabProps {
+  initialWorkouts: FreeWorkoutDay[]
   initialWorkoutId?: string | null
-  onNavigateToPlan?: (planId: string) => void
+  onAssignTemplate: (planId: string) => void
+  isAssigning: boolean
+  availablePlans: PublicTrainingPlan[]
 }
 
 export function FreeWorkoutsTab({
+  initialWorkouts,
   initialWorkoutId,
-  onNavigateToPlan,
+  onAssignTemplate,
+  isAssigning,
+  availablePlans,
 }: FreeWorkoutsTabProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
-
-  const { data, isLoading } = useGetFreeWorkoutDaysQuery(
-    {},
-    {
-      staleTime: 2 * 60 * 1000,
-    },
-  )
 
   const { mutateAsync: startWorkoutDay, isPending: isStarting } =
     useStartFreeWorkoutDayMutation({
@@ -55,9 +49,7 @@ export function FreeWorkoutsTab({
         await queryInvalidation.favouriteWorkoutStart(queryClient)
 
         setIsPreviewOpen(false)
-        setSelectedDayId(null)
 
-        // Navigate directly to the specific day with query params (same as favourites)
         startTransition(() => {
           router.push(
             `/fitspace/workout/quick-workout?week=${weekId}&day=${dayId}`,
@@ -67,7 +59,7 @@ export function FreeWorkoutsTab({
       },
     })
 
-  const freeWorkoutDays = data?.getFreeWorkoutDays || []
+  const freeWorkoutDays = initialWorkouts
 
   const handleCardClick = (dayId: string) => {
     setSelectedDayId(dayId)
@@ -100,15 +92,9 @@ export function FreeWorkoutsTab({
     }
   }, [initialWorkoutId, freeWorkoutDays])
 
-  const selectedDay = freeWorkoutDays.find((day) => day.id === selectedDayId)
-
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        <LoadingSkeleton count={3} variant="lg" />
-      </div>
-    )
-  }
+  const selectedWorkout = selectedDayId
+    ? freeWorkoutDays.find((d) => d.id === selectedDayId)
+    : null
 
   if (freeWorkoutDays.length === 0) {
     return (
@@ -148,20 +134,27 @@ export function FreeWorkoutsTab({
         </AnimatePresence>
       </div>
 
-      <WorkoutDayPreview
-        day={selectedDay}
+      <UnifiedPreviewDrawer
+        initialView={
+          selectedWorkout ? { type: 'workout', data: selectedWorkout } : null
+        }
         isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
+        onClose={() => {
+          setIsPreviewOpen(false)
+          setSelectedDayId(null)
+        }}
         onStartWorkout={handleStartWorkout}
         isStarting={isStarting}
-        onNavigateToPlan={onNavigateToPlan}
+        onAssignTemplate={onAssignTemplate}
+        isAssigning={isAssigning}
+        availablePlans={availablePlans}
       />
     </div>
   )
 }
 
 interface FreeWorkoutDayCardProps {
-  day: GQLGetFreeWorkoutDaysQuery['getFreeWorkoutDays'][number]
+  day: FreeWorkoutDay
   onClick: () => void
 }
 

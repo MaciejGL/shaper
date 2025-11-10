@@ -15,6 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import {
   GQLDifficulty,
   GQLFocusTag,
@@ -26,7 +27,7 @@ import { useOpenUrl } from '@/hooks/use-open-url'
 import { formatUserCount } from '@/utils/format-user-count'
 
 import { PublicTrainingPlan } from './explore.client'
-import { TrainingPlanPreview } from './training-plan-preview/training-plan-preview'
+import { TrainingPlanPreviewContent } from './workout-day-preview/training-plan-preview-content'
 
 interface TrainingPlansTabProps {
   initialPlans?: PublicTrainingPlan[]
@@ -228,13 +229,24 @@ export function TrainingPlansTab({
       </div>
 
       {/* Plan Preview Drawer */}
-      <TrainingPlanPreview
-        plan={selectedPlan}
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        onAssignTemplate={handleAssignTemplate}
-        isAssigning={isAssigning}
-      />
+      <Drawer
+        open={isPreviewOpen}
+        onOpenChange={(open) => !open && setIsPreviewOpen(false)}
+      >
+        <DrawerContent
+          dialogTitle={selectedPlan?.title || 'Plan'}
+          grabber={false}
+        >
+          {selectedPlan && (
+            <TrainingPlanPreviewContent
+              plan={selectedPlan}
+              onAssignTemplate={handleAssignTemplate}
+              isAssigning={isAssigning}
+              weeksData={selectedPlan}
+            />
+          )}
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }

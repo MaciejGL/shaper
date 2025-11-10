@@ -8,7 +8,6 @@ import { useState } from 'react'
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { ExtendHeader } from '@/components/extend-header'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
-import { MessengerModal } from '@/components/messenger-modal/messenger-modal'
 import { TrainerCard } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Badge } from '@/components/ui/badge'
@@ -21,7 +20,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  PrimaryTabList,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import {
   GQLGetMyTrainerQuery,
@@ -72,7 +77,7 @@ export default function MyTrainerPage() {
             </div>
           }
         >
-          <div className="space-y-4 pt-2">
+          <div className="space-y-4">
             <LoadingSkeleton count={1} variant="md" />
             <LoadingSkeleton count={3} variant="lg" />
           </div>
@@ -81,7 +86,7 @@ export default function MyTrainerPage() {
       {!isLoadingTrainer && trainer && <TrainerView trainer={trainer} />}
 
       {!isLoadingTrainer && !trainer && (
-        <div className="pt-2">
+        <div className="pt-4 px-4">
           <NoTrainerView requests={coachingRequests} />
         </div>
       )}
@@ -106,7 +111,6 @@ function TrainerView({ trainer }: TrainerViewProps) {
       .withOptions({ clearOnDefault: true }),
   )
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [isMessengerOpen, setIsMessengerOpen] = useState(false)
   const { openModal } = useConfirmationModalContext()
   const { user, subscription } = useUser()
   const queryClient = useQueryClient()
@@ -165,12 +169,9 @@ function TrainerView({ trainer }: TrainerViewProps) {
     })
   }
 
-  const handleSendMessage = () => {
-    setIsMessengerOpen(true)
-  }
-
   return (
     <ExtendHeader
+      classNameContent="px-0 pt-0"
       headerChildren={
         <div className="dark space-y-6 pb-6 pt-4">
           <TrainerCard
@@ -197,29 +198,18 @@ function TrainerView({ trainer }: TrainerViewProps) {
     >
       <div className="space-y-6">
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
-          <div className="grid grid-cols-[1fr_auto] items-center mb-2 gap-2">
-            <TabsList
-              rounded="3xl"
-              size="xl"
-              variant="secondary"
-              className="w-full"
-            >
-              <TabsTrigger value="from-trainer" rounded="3xl">
-                From Trainer
-              </TabsTrigger>
-              <TabsTrigger value="purchased-services" rounded="3xl">
-                Purchased Services
-              </TabsTrigger>
-            </TabsList>
-            <Button
-              iconOnly={<MessageSquare />}
-              onClick={handleSendMessage}
-              variant="outline"
-              className="rounded-full"
-              size="icon-lg"
-            >
-              Contact Trainer
-            </Button>
+          <div className="grid items-center mb-2 gap-2">
+            <PrimaryTabList
+              options={[
+                { label: 'From Trainer', value: Tab.FromTrainer },
+                { label: 'Purchased Services', value: Tab.PurchasedServices },
+              ]}
+              onClick={setTab}
+              active={tab}
+              size="lg"
+              className="grid grid-cols-2"
+              classNameButton="text-sm px-3"
+            />
           </div>
           <TabsContent value="from-trainer" className="space-y-4">
             {/* Scheduled Meetings */}
@@ -248,13 +238,6 @@ function TrainerView({ trainer }: TrainerViewProps) {
         </Tabs>
 
         <div className="grid grid-cols-2 gap-2"></div>
-
-        {/* Messenger Modal */}
-        <MessengerModal
-          isOpen={isMessengerOpen}
-          onClose={() => setIsMessengerOpen(false)}
-          partnerId={trainer.id}
-        />
       </div>
     </ExtendHeader>
   )

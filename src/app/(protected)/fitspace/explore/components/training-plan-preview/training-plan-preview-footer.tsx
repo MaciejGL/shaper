@@ -1,6 +1,7 @@
-import { Crown, Dumbbell, Lock } from 'lucide-react'
+import { Crown, Dumbbell } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { DrawerFooter } from '@/components/ui/drawer'
 import { useUser } from '@/context/user-context'
 import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
@@ -41,19 +42,17 @@ export function TrainingPlanPreviewFooter({
   const isLoading = isAssigning || isOpeningUrl
 
   return (
-    <div className="border-t p-4 flex-shrink-0">
-      <div className="space-y-3">
-            <Button
-              className="w-full"
-              size="lg"
-          onClick={handleStartPlan}
-          disabled={isLoading}
-          loading={isLoading}
-          iconStart={plan.premium ? <Crown /> : <Dumbbell />}
-        >
-          Start Training Plan
-          </Button>
-      </div>
-    </div>
+    <DrawerFooter className="border-t">
+      <Button
+        className="w-full"
+        size="lg"
+        onClick={handleStartPlan}
+        disabled={isLoading}
+        loading={isLoading}
+        iconStart={plan.premium ? <Crown /> : <Dumbbell />}
+      >
+        Start Training Plan
+      </Button>
+    </DrawerFooter>
   )
 }

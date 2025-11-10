@@ -1,41 +1,37 @@
 'use client'
 
-import { Crown, ExternalLink } from 'lucide-react'
+import { ChevronRight, Crown } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { getWorkoutTypeLabel } from '@/app/(protected)/trainer/trainings/creator/components/day-components'
 import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer'
+import { DrawerFooter } from '@/components/ui/drawer'
 import {
-  GQLGetFreeWorkoutDaysQuery,
+  GQLWorkoutType,
   useFitspaceGetActivePlanIdQuery,
 } from '@/generated/graphql-client'
 
-type WorkoutDay = GQLGetFreeWorkoutDaysQuery['getFreeWorkoutDays'][number]
+import { WorkoutDay } from './types'
 
-interface WorkoutDayPreviewProps {
-  day?: WorkoutDay | null
-  isOpen: boolean
-  onClose: () => void
+interface WorkoutDayPreviewContentProps {
+  day: WorkoutDay
   onStartWorkout: (dayId: string) => void
   isStarting: boolean
-  onNavigateToPlan?: (planId: string) => void
+  onNavigateToPlan: (planId: string) => void
+  onClose: () => void
 }
 
-export function WorkoutDayPreview({
+export function WorkoutDayPreviewContent({
   day,
-  isOpen,
-  onClose,
   onStartWorkout,
   isStarting,
   onNavigateToPlan,
-}: WorkoutDayPreviewProps) {
+  onClose,
+}: WorkoutDayPreviewContentProps) {
   const { data: activePlanData } = useFitspaceGetActivePlanIdQuery()
   const hasActivePlan = !!activePlanData?.getActivePlanId
-
-  if (!day) return null
 
   const workoutType = day.trainingDay?.workoutType || 'Workout'
   const planTitle = day.plan?.title || 'Training Plan'
@@ -47,9 +43,8 @@ export function WorkoutDayPreview({
   const isPlanPremium = day.plan?.premium || false
 
   const handleViewFullPlan = () => {
-    if (!day.plan?.id || !onNavigateToPlan) return
+    if (!day.plan?.id) return
     onNavigateToPlan(day.plan.id)
-    onClose()
   }
 
   const handleStartWorkoutClick = () => {
@@ -63,42 +58,36 @@ export function WorkoutDayPreview({
   }
 
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent
-        className="max-h-[90vh]"
-        dialogTitle="Workout Day Preview"
-        grabber={false}
-      >
-        <div className="overflow-y-auto overflow-x-hidden">
-          {day.heroImageUrl && (
-            <HeroImage
-              imageUrl={day.heroImageUrl}
-              workoutType={workoutType}
+    <div className="flex flex-col h-full">
+      <div className="overflow-y-auto overflow-x-hidden flex-1">
+        {day.heroImageUrl && (
+          <HeroImage
+            imageUrl={day.heroImageUrl}
+            workoutType={workoutType}
+            planTitle={planTitle}
+            trainerName={trainerName}
+            onViewPlan={handleViewFullPlan}
+          />
+        )}
+
+        <div className="px-4 py-6 space-y-6">
+          <ExercisesList exercises={exercises} />
+          {day.plan && (
+            <PlanPromotion
               planTitle={planTitle}
-              trainerName={trainerName}
+              isPremium={isPlanPremium}
               onViewPlan={handleViewFullPlan}
             />
           )}
-
-          <div className="px-4 py-6 space-y-6">
-            <ExercisesList exercises={exercises} />
-            {day.plan && (
-              <PlanPromotion
-                planTitle={planTitle}
-                isPremium={isPlanPremium}
-                onViewPlan={handleViewFullPlan}
-              />
-            )}
-          </div>
         </div>
+      </div>
 
-        <WorkoutDayActions
-          onStart={handleStartWorkoutClick}
-          onClose={onClose}
-          isStarting={isStarting}
-        />
-      </DrawerContent>
-    </Drawer>
+      <WorkoutDayActions
+        onStart={handleStartWorkoutClick}
+        onClose={onClose}
+        isStarting={isStarting}
+      />
+    </div>
   )
 }
 
@@ -110,7 +99,7 @@ interface HeroImageProps {
   onViewPlan: () => void
 }
 
-export function HeroImage({
+function HeroImage({
   imageUrl,
   workoutType,
   planTitle,
@@ -128,18 +117,18 @@ export function HeroImage({
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
 
       <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-        <h2 className="text-2xl font-semibold mb-2">{workoutType}</h2>
+        <h2 className="text-2xl font-semibold mb-2">
+          {getWorkoutTypeLabel(workoutType as GQLWorkoutType)}
+        </h2>
         <div className="flex justify-between gap-1 text-white/80">
           {planTitle && (
-            <span className="text-sm">
-              From{' '}
-              <button
-                onClick={onViewPlan}
-                className="font-medium text-white hover:text-primary underline-offset-2 hover:underline"
-              >
-                {planTitle}
-              </button>
-            </span>
+            <button
+              onClick={onViewPlan}
+              className="font-medium text-white hover:text-primary underline-offset-2 hover:underline flex items-center gap-1 text-sm cursor-pointer"
+            >
+              <span className="text-muted-foreground">From</span> {planTitle}
+              <ChevronRight className="size-4" />
+            </button>
           )}
           <span className="text-sm">by {trainerName}</span>
         </div>

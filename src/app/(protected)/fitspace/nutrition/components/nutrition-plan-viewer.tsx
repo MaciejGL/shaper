@@ -73,10 +73,12 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
   if (!nutritionPlan || days.length === 0) {
     return (
-      <EmptyStateCard
-        icon={Salad}
-        description="This nutrition plan doesn't have any days configured yet."
-      />
+      <div className="p-4">
+        <EmptyStateCard
+          icon={Salad}
+          description="This nutrition plan doesn't have any days configured yet."
+        />
+      </div>
     )
   }
 
@@ -93,7 +95,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
             onClick={setActiveDay}
             active={activeDay}
             className="text-sm"
-            classNameButton="text-sm px-3"
+            classNameButton="text-sm px-3 grow"
           />
         </div>
 
@@ -103,7 +105,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
             value={day.dayNumber.toString()}
             className="px-4"
           >
-            <div className="space-y-6 px-2">
+            <div className="space-y-6">
               <DayMealsAccordion day={day} />
               <Button
                 variant="tertiary"
@@ -135,28 +137,26 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
 export function NutritionPlanViewerLoading() {
   return (
-    <div className="space-y-4 mt-4">
+    <div className="space-y-4 ">
       <Tabs value="0">
-        <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 mb-2 overflow-x-auto hide-scrollbar">
-          <TabsList size="lg">
-            {Array.from({ length: 7 }).map((_, index) => (
-              <TabsTrigger
-                size="lg"
-                key={index}
-                value={index.toString()}
-                className="flex-shrink-0"
-              >
-                Day {index + 1}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <div className="flex items-center gap-2 max-w-screen overflow-x-auto hide-scrollbar mb-4">
+          <PrimaryTabList
+            options={Array.from({ length: 7 }).map((_, index) => ({
+              label: `Day ${index + 1}`,
+              value: index.toString(),
+            }))}
+            onClick={() => {}}
+            active="0"
+            size="lg"
+            className="text-sm"
+            classNameButton="text-sm px-3"
+          />
         </div>
-
-        <TabsContent value="0">
+        <TabsContent value="0" className="px-4">
           <Card className="p-4">
             <DayMealsHeader loading />
             <div className="space-y-2">
-              <LoadingSkeleton variant="sm" count={3} />
+              <LoadingSkeleton variant="sm" count={3} cardVariant="tertiary" />
             </div>
           </Card>
         </TabsContent>

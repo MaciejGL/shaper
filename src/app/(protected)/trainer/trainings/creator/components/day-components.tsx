@@ -147,7 +147,7 @@ const addSpacesToCamelCase = (str: string) => {
   return str.replace(/([a-z])([A-Z])/g, '$1 $2')
 }
 
-const getWorkoutTypeLabel = (workoutType?: GQLWorkoutType | null) => {
+export const getWorkoutTypeLabel = (workoutType?: GQLWorkoutType | null) => {
   if (!workoutType) return ''
   return addSpacesToCamelCase(workoutType)
 }

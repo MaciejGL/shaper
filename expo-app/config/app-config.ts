@@ -15,7 +15,7 @@ export const APP_CONFIG = {
 
   // App info
   APP_NAME: 'Hypro',
-  USER_AGENT: 'HyproApp/1.0 (Expo)',
+  USER_AGENT: 'HyproApp/1.0',
 }
 
 // Helper function to get current config

@@ -42,9 +42,17 @@ export default function NutritionPage() {
 
   if (isLoadingAll) {
     return (
-      <div className="space-y-4 p-4 container-hypertro mx-auto">
-        <LoadingSkeleton count={4} />
-      </div>
+      <ExtendHeader
+        headerChildren={
+          <div className="dark space-y-6 pt-4 pb-4">
+            <LoadingSkeleton count={1} cardVariant="tertiary" />
+          </div>
+        }
+      >
+        <div className="container-hypertro mx-auto space-y-4">
+          <LoadingSkeleton count={4} />
+        </div>
+      </ExtendHeader>
     )
   }
 
@@ -108,21 +116,23 @@ export default function NutritionPage() {
     >
       <div className="container-hypertro mx-auto space-y-4">
         {showEmptyState && (
-          <EmptyStateCard
-            title="Macro targets not set"
-            description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
-            icon={Salad}
-            cta={
-              !user?.trainerId && (
-                <ButtonLink
-                  href="/fitspace/explore?tab=trainers"
-                  iconEnd={<ArrowRight />}
-                >
-                  Find a Trainer
-                </ButtonLink>
-              )
-            }
-          />
+          <div className="p-4">
+            <EmptyStateCard
+              title="Macro targets not set"
+              description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
+              icon={Salad}
+              cta={
+                !user?.trainerId && (
+                  <ButtonLink
+                    href="/fitspace/explore?tab=trainers"
+                    iconEnd={<ArrowRight />}
+                  >
+                    Find a Trainer
+                  </ButtonLink>
+                )
+              }
+            />
+          </div>
         )}
 
         {selectedPlanId && <NutritionPlanViewer planId={selectedPlanId} />}

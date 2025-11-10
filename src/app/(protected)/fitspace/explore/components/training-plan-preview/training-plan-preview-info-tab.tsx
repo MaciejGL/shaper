@@ -1,7 +1,4 @@
-import {
-  GQLGetPublicTrainingPlanWeeksQuery,
-  GQLGetPublicTrainingPlansQuery,
-} from '@/generated/graphql-client'
+import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 import { formatUserCount } from '@/utils/format-user-count'
 
 import { CreatorSection } from './sections/creator-section'
@@ -14,7 +11,7 @@ import { WeeklyOverviewSection } from './sections/weekly-overview-section'
 
 interface TrainingPlanPreviewInfoTabProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
-  weeksData?: GQLGetPublicTrainingPlanWeeksQuery
+  weeksData?: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
   onWeekClick: (weekId: string) => void
   onCreatorClick?: () => void
 }

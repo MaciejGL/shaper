@@ -1,9 +1,5 @@
-import { Crown } from 'lucide-react'
-
 import { Badge } from '@/components/ui/badge'
 import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
-
-import { HeroImage } from '../workout-day-preview/workout-day-preview'
 
 interface TrainingPlanPreviewHeaderProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]

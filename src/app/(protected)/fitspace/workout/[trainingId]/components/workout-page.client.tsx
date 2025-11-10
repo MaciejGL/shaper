@@ -80,6 +80,7 @@ export function WorkoutPageClientNew({
           />
         </Suspense>
       }
+      classNameHeader="px-2 pt-2"
     >
       <Suspense fallback={<SkeletonExercises />}>
         <WorkoutDay

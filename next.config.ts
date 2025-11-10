@@ -123,6 +123,7 @@ const nextConfig: NextConfig = {
       'framer-motion',
     ],
   },
+  allowedDevOrigins: ['http://localhost:4000', 'http://192.168.0.5:4000'],
   devIndicators:
     process.env.NEXT_PUBLIC_DEVTOOLS === 'true'
       ? {
