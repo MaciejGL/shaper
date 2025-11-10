@@ -35,20 +35,18 @@ export default function ProgressPage() {
     <ExtendHeader
       headerChildren={showInHeader ? <CheckinScheduleSection /> : null}
     >
-      <div className="container-hypertro mx-auto mt-4">
-        <div className="space-y-6">
-          <BodyMeasurementsProvider>
-            <LogsSection />
+      <div className="space-y-6">
+        <BodyMeasurementsProvider>
+          <LogsSection />
 
-            <SnapshotsSection />
-          </BodyMeasurementsProvider>
+          <SnapshotsSection />
+        </BodyMeasurementsProvider>
 
-          <LatestPRs />
+        <LatestPRs />
 
-          <MuscleHeatmapSection />
+        <MuscleHeatmapSection />
 
-          {showAtBottom && <CheckinScheduleSection variant="minimal" />}
-        </div>
+        {showAtBottom && <CheckinScheduleSection variant="minimal" />}
       </div>
     </ExtendHeader>
   )

@@ -116,9 +116,9 @@ export function Exercises({
   // Main workout view
   return (
     <div>
-      <div className="flex flex-col pt-2 pb-6 space-y-2 w-full">
+      <div className="flex flex-col pb-4 space-y-2 w-full">
         {hasNamedWorkoutType && (
-          <p className="text-lg font-medium text-center pt-2">
+          <p className="text-lg font-medium text-center pb-2">
             {formatWorkoutType(day.workoutType!)}
           </p>
         )}

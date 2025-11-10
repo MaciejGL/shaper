@@ -172,7 +172,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
   return (
     <ExtendHeader
       headerChildren={
-        <div className="px-2 dark space-y-4 pb-4">
+        <div className="dark space-y-6 pb-6 pt-4">
           <TrainerCard
             trainer={trainer}
             showExperience={true}
@@ -195,7 +195,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
         </div>
       }
     >
-      <div className="space-y-6 pt-2">
+      <div className="space-y-6">
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
           <div className="grid grid-cols-[1fr_auto] items-center mb-2 gap-2">
             <TabsList
@@ -214,8 +214,8 @@ function TrainerView({ trainer }: TrainerViewProps) {
             <Button
               iconOnly={<MessageSquare />}
               onClick={handleSendMessage}
-              variant="tertiary"
-              className="rounded-2xl"
+              variant="outline"
+              className="rounded-full"
               size="icon-lg"
             >
               Contact Trainer

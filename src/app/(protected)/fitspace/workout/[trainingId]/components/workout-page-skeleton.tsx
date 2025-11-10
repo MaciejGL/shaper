@@ -1,6 +1,7 @@
 import { formatDate } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
+import { ExtendHeader } from '@/components/extend-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -116,14 +117,9 @@ const DUMMY_WEEK = {
 
 export function WorkoutPageSkeleton() {
   return (
-    <div>
-      <SkeletonNavigation />
-      <div className="bg-sidebar -mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8">
-        <div className="max-w-sm mx-auto pb-4">
-          <SkeletonExercises />
-        </div>
-      </div>
-    </div>
+    <ExtendHeader headerChildren={<SkeletonNavigation />}>
+      <SkeletonExercises />
+    </ExtendHeader>
   )
 }
 
@@ -209,32 +205,30 @@ export function SkeletonExercises() {
   const progressPercentage = 0 // Show some progress for skeleton
 
   return (
-    <div>
-      <div id={activeDay.id} className={cn('pb-4')}>
-        {!activeDay.isRestDay && (
-          <div className="flex flex-col py-3 space-y-2 w-full">
-            <Skeleton className="h-7 w-1/3 mx-auto" />
-            <div className="grid grid-cols-2 gap-2">
-              <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-2xl masked-placeholder-text">
-                Loading
-              </Label>
+    <div id={activeDay.id}>
+      {!activeDay.isRestDay && (
+        <div className="flex flex-col pb-4 space-y-3 w-full">
+          <Skeleton className="h-7 w-1/3 mx-auto" />
+          <div className="grid grid-cols-2 gap-2">
+            <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-2xl masked-placeholder-text">
+              Loading
+            </Label>
 
-              <SkeletonExercisesCompleted
-                completedExercises={completedExercises}
-                totalExercises={activeDay.exercises.length}
-              />
-            </div>
-            <Progress
-              value={progressPercentage}
-              className={cn('masked-placeholder-text')}
+            <SkeletonExercisesCompleted
+              completedExercises={completedExercises}
+              totalExercises={activeDay.exercises.length}
             />
           </div>
-        )}
-        <div className="space-y-3">
-          {activeDay.exercises.map((exercise) => (
-            <SkeletonExercise key={exercise.id} />
-          ))}
+          <Progress
+            value={progressPercentage}
+            className={cn('masked-placeholder-text')}
+          />
         </div>
+      )}
+      <div className="space-y-6">
+        {activeDay.exercises.map((exercise) => (
+          <SkeletonExercise key={exercise.id} />
+        ))}
       </div>
     </div>
   )

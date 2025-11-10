@@ -1,13 +1,20 @@
 'use client'
 
-import { Download } from 'lucide-react'
+import { Download, Salad } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Divider } from '@/components/divider'
+import { EmptyStateCard } from '@/components/empty-state-card'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  PrimaryTabList,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs'
 import { useGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { downloadPDF, generateFilename } from '@/lib/pdf/pdf-generator'
 
@@ -66,35 +73,36 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
   if (!nutritionPlan || days.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">
-          This nutrition plan doesn't have any days configured yet.
-        </p>
-      </div>
+      <EmptyStateCard
+        icon={Salad}
+        description="This nutrition plan doesn't have any days configured yet."
+      />
     )
   }
 
   return (
     <div className="space-y-4">
       <Tabs value={activeDay} onValueChange={setActiveDay}>
-        <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar mb-2">
-          <TabsList size="lg" variant="secondary" rounded="3xl">
-            {days.map((day) => (
-              <TabsTrigger
-                size="lg"
-                rounded="3xl"
-                key={day.id}
-                value={day.dayNumber.toString()}
-                className="flex-shrink-0"
-              >
-                {day.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <div className="flex items-center gap-2 max-w-screen overflow-x-auto hide-scrollbar mb-4">
+          <PrimaryTabList
+            size="lg"
+            options={days.map((day) => ({
+              label: day.name,
+              value: day.dayNumber.toString(),
+            }))}
+            onClick={setActiveDay}
+            active={activeDay}
+            className="text-sm"
+            classNameButton="text-sm px-3"
+          />
         </div>
 
         {days.map((day) => (
-          <TabsContent key={day.id} value={day.dayNumber.toString()}>
+          <TabsContent
+            key={day.id}
+            value={day.dayNumber.toString()}
+            className="px-4"
+          >
             <div className="space-y-6 px-2">
               <DayMealsAccordion day={day} />
               <Button
@@ -109,7 +117,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
               </Button>
 
               {/* Shopping List */}
-              <Divider className="mt-8" />
+              <Divider className="my-8" />
               <ShoppingList day={day} planId={planId} />
             </div>
           </TabsContent>
@@ -117,7 +125,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
       </Tabs>
 
       {nutritionPlan?.description && (
-        <p className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap">
+        <p className="text-sm text-muted-foreground mt-4 px-4 whitespace-pre-wrap">
           {nutritionPlan.description}
         </p>
       )}

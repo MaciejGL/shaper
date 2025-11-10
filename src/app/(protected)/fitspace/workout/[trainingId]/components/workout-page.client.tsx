@@ -229,23 +229,21 @@ const WorkoutDay = ({
         []
       }
     >
-      <div>
-        <div className={cn('pb-4')}>
-          {isLoadingNewDay ? (
-            <SkeletonExercises />
-          ) : (
-            (dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day) && (
-              <Exercises
-                day={dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day}
-                previousDayLogs={
-                  dayDataQuery?.getWorkoutDay?.previousDayLogs ??
-                  initialDay?.previousDayLogs
-                }
-                isQuickWorkout={isQuickWorkout}
-              />
-            )
-          )}
-        </div>
+      <div className={cn('pb-4')}>
+        {isLoadingNewDay ? (
+          <SkeletonExercises />
+        ) : (
+          (dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day) && (
+            <Exercises
+              day={dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day}
+              previousDayLogs={
+                dayDataQuery?.getWorkoutDay?.previousDayLogs ??
+                initialDay?.previousDayLogs
+              }
+              isQuickWorkout={isQuickWorkout}
+            />
+          )
+        )}
       </div>
     </WorkoutProvider>
   )

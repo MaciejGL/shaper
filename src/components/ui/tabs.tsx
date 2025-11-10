@@ -2,6 +2,7 @@
 
 import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { cva } from 'class-variance-authority'
+import { motion } from 'framer-motion'
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
@@ -136,6 +137,7 @@ function PrimaryTabList<T extends string>({
   active,
   className,
   size = 'xl',
+  classNameButton,
 }: {
   options: {
     label: string
@@ -148,66 +150,43 @@ function PrimaryTabList<T extends string>({
   active: T
   className?: string
   size?: 'md' | 'sm' | 'lg' | 'xl'
+  classNameButton?: string
 }) {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-  const [underlineStyle, setUnderlineStyle] = React.useState({
-    width: 0,
-    left: 0,
-  })
-
-  React.useEffect(() => {
-    if (!containerRef.current) return
-
-    const activeButton = containerRef.current.querySelector(
-      `[data-value="${active}"]`,
-    ) as HTMLElement
-
-    if (activeButton) {
-      const containerRect = containerRef.current.getBoundingClientRect()
-      const buttonRect = activeButton.getBoundingClientRect()
-
-      setUnderlineStyle({
-        width: buttonRect.width,
-        left: buttonRect.left - containerRect.left,
-      })
-    }
-  }, [active])
-
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        'relative flex gap-2 mb-2 border-b-2 border-primary/10 dark:border-border',
-        className,
-      )}
-    >
-      {options.map((option) => (
-        <Button
-          key={option.value}
-          data-value={option.value}
-          variant="variantless"
-          size={size}
-          onClick={() => onClick(option.value)}
-          disabled={option.disabled}
-          className={cn(
-            'relative rounded-none transition-colors duration-200',
-            active === option.value ? 'text-foreground' : 'text-foreground/80',
-          )}
-          iconStart={option.icon}
-          iconEnd={option.disabled ? option.disabledIcon : undefined}
-        >
-          {option.label}
-        </Button>
-      ))}
+    <div className={cn('rounded-full bg-muted p-1')}>
+      <div className={cn('relative flex', className)}>
+        {options.map((option) => (
+          <Button
+            key={option.value}
+            variant="variantless"
+            size={size}
+            onClick={() => onClick(option.value)}
+            disabled={option.disabled}
+            iconStart={option.icon}
+            iconEnd={option.disabled ? option.disabledIcon : undefined}
+            className={cn('relative', classNameButton)}
+          >
+            {active === option.value && (
+              <motion.div
+                layoutId="activeTabBackground"
+                className="absolute inset-0 bg-primary dark:bg-primary/20 rounded-full z-0"
+                transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
+              />
+            )}
 
-      {/* Animated underline */}
-      <div
-        className="absolute bottom-[-2px] h-0.5 bg-primary transition-all duration-300 ease-out rounded-full"
-        style={{
-          width: underlineStyle.width,
-          transform: `translateX(${underlineStyle.left}px)`,
-        }}
-      />
+            <span
+              className={cn(
+                'relative transition-colors duration-500',
+                active === option.value
+                  ? 'text-primary-foreground'
+                  : 'text-primary/50',
+              )}
+            >
+              {option.label}
+            </span>
+          </Button>
+        ))}
+      </div>
     </div>
   )
 }
