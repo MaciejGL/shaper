@@ -99,11 +99,6 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
         })
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
-            dayId: dayId ?? '',
-          }),
-        })
       },
       onError: () => {
         invalidateQuery({
