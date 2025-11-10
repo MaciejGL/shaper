@@ -207,7 +207,7 @@ const WorkoutDay = ({
       // But prevent unnecessary network requests when we have data
       refetchOnMount: !hasDataForCurrentDay && !isRestDay,
       refetchOnWindowFocus: false,
-      staleTime: hasDataForCurrentDay || isRestDay ? Infinity : 0,
+      staleTime: hasDataForCurrentDay || isRestDay ? 5 * 60 * 1000 : 0,
       retry: false,
     },
   )

@@ -161,6 +161,13 @@ export function ExerciseSet({
           setTimeout(() => setPRData(null), 5000)
         }
 
+        // Force query refetch to ensure UI stays in sync
+        queryClient.invalidateQueries({
+          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+            dayId: dayId ?? '',
+          }),
+        })
+
         // Timer logic
         if (variables.completed && !skipTimer) {
           onSetCompleted(false)
