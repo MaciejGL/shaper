@@ -214,9 +214,14 @@ export function prepareCheckoutItems(
 }
 
 /**
- * Resolves Stripe lookup keys to actual price IDs
+ * Resolves Stripe lookup keys to actual price IDs and applies tax rates
+ * @param checkoutItems - Items to convert to line items
+ * @param taxRateId - Optional tax rate ID to apply (e.g., 0% VAT for Norwegian compliance)
  */
-export async function prepareLineItems(checkoutItems: BundleItem[]) {
+export async function prepareLineItems(
+  checkoutItems: BundleItem[],
+  taxRateId?: string | null,
+) {
   return Promise.all(
     checkoutItems.map(async (item) => {
       const prices = await stripe.prices.list({
@@ -230,10 +235,21 @@ export async function prepareLineItems(checkoutItems: BundleItem[]) {
         )
       }
 
-      return {
+      const lineItem: {
+        price: string
+        quantity: number
+        tax_rates?: string[]
+      } = {
         price: prices.data[0].id,
         quantity: item.quantity,
       }
+
+      // Apply 0% VAT if configured
+      if (taxRateId) {
+        lineItem.tax_rates = [taxRateId]
+      }
+
+      return lineItem
     }),
   )
 }

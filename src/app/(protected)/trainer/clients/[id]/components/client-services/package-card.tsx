@@ -36,12 +36,7 @@ export function PackageCard({
   hasCoachingSubscription = false,
 }: PackageCardProps) {
   return (
-    <Card
-      className={cn('transition-colors', {
-        'border-primary bg-primary/5': isSelected,
-        'border-border': !isSelected,
-      })}
-    >
+    <Card variant={isSelected ? 'premium' : 'tertiary'}>
       <CardHeader className="flex items-start gap-2">
         <Checkbox
           id={`package-${pkg.id}`}

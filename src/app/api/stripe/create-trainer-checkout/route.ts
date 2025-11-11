@@ -5,6 +5,12 @@ import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getBaseUrl } from '@/lib/get-base-url'
 import { COMMISSION_CONFIG } from '@/lib/stripe/config'
+import { buildSupplierName } from '@/lib/stripe/connect-utils'
+import {
+  getInvoiceMetadata,
+  getInvoiceTemplateConfig,
+  getZeroVatTaxRateId,
+} from '@/lib/stripe/invoice-config'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import {
   type PayoutDestination,
@@ -77,8 +83,30 @@ export async function POST(request: NextRequest) {
 
     const hasCoachingSubscription = !!clientCoachingSubscription
 
-    // Prepare line items with Stripe prices
-    const lineItems = await prepareLineItems(checkoutItems)
+    // Fetch trainer info for supplier attribution
+    let supplierName: string | undefined
+    if (offer.trainerId) {
+      const trainer = await prisma.user.findUnique({
+        where: { id: offer.trainerId },
+        include: { profile: true },
+      })
+
+      if (trainer?.profile) {
+        const firstName = trainer.profile.firstName || trainer.name
+        const lastName = trainer.profile.lastName
+        const connectAccountId = trainer.stripeConnectedAccountId
+
+        supplierName = await buildSupplierName(
+          firstName || '',
+          lastName,
+          connectAccountId,
+        )
+      }
+    }
+
+    // Get tax rate and prepare line items
+    const zeroVatTaxRateId = getZeroVatTaxRateId()
+    const lineItems = await prepareLineItems(checkoutItems, zeroVatTaxRateId)
 
     // Calculate bundle discounts (considers both bundle contents and user subscription)
     const discounts = await calculateBundleDiscounts(
@@ -106,20 +134,33 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Build session metadata
-    const sessionMetadata = buildSessionMetadata(
-      offerToken,
-      offer.trainerId,
-      user.id,
-      clientEmail,
-      checkoutItems,
-      offerItems.length,
-      hasPremiumCoaching,
-      discounts,
-      payout.displayName,
-      payout.platformFeePercent,
-      payout.connectedAccountId,
-    )
+    // Build session metadata with invoice compliance data
+    const invoiceMetadata = getInvoiceMetadata()
+    const sessionMetadata = {
+      ...buildSessionMetadata(
+        offerToken,
+        offer.trainerId,
+        user.id,
+        clientEmail,
+        checkoutItems,
+        offerItems.length,
+        hasPremiumCoaching,
+        discounts,
+        payout.displayName,
+        payout.platformFeePercent,
+        payout.connectedAccountId,
+      ),
+      ...invoiceMetadata,
+      ...(supplierName && {
+        supplier_name: supplierName,
+        supplier_label: 'Services provided by',
+      }),
+    }
+
+    // Apply invoice template to customer
+    await stripe.customers.update(customerId, {
+      invoice_settings: getInvoiceTemplateConfig(),
+    })
 
     // Create Stripe checkout session
     const checkoutSession = await stripe.checkout.sessions.create({

@@ -5,6 +5,11 @@ import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getBaseUrl } from '@/lib/get-base-url'
 import { SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
+import {
+  getInvoiceMetadata,
+  getInvoiceTemplateConfig,
+  getZeroVatTaxRateId,
+} from '@/lib/stripe/invoice-config'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 import { recordTermsAgreement } from '@/lib/terms-utils'
@@ -45,58 +50,58 @@ export async function POST(request: NextRequest) {
     // If packageId provided, look up package template
     if (packageId) {
       packageTemplate = await prisma.packageTemplate.findUnique({
-      where: { id: packageId },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        duration: true,
-        stripeLookupKey: true,
-        trainerId: true,
-      },
-    })
+        where: { id: packageId },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          duration: true,
+          stripeLookupKey: true,
+          trainerId: true,
+        },
+      })
 
-    if (!packageTemplate) {
+      if (!packageTemplate) {
         return NextResponse.json(
           { error: 'Package not found' },
           { status: 404 },
         )
-    }
+      }
 
-    // Check if package has Stripe configuration
-    if (!packageTemplate.stripeLookupKey) {
-      return NextResponse.json(
-        { error: 'Package is not configured for Stripe payments' },
-        { status: 400 },
-      )
-    }
+      // Check if package has Stripe configuration
+      if (!packageTemplate.stripeLookupKey) {
+        return NextResponse.json(
+          { error: 'Package is not configured for Stripe payments' },
+          { status: 400 },
+        )
+      }
 
       stripeLookupKey = packageTemplate.stripeLookupKey
       packageName = packageTemplate.name
 
-    // Check if user already has an active subscription for this package
-    const existingSubscription = await prisma.userSubscription.findFirst({
-      where: {
-        userId,
-        packageId,
-        status: {
-          in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING],
-        },
-      },
-    })
-
-    if (existingSubscription) {
-      return NextResponse.json(
-        {
-          error: 'You already have an active subscription for this package',
-          existingSubscription: {
-            id: existingSubscription.id,
-            status: existingSubscription.status,
-            endDate: existingSubscription.endDate,
+      // Check if user already has an active subscription for this package
+      const existingSubscription = await prisma.userSubscription.findFirst({
+        where: {
+          userId,
+          packageId,
+          status: {
+            in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING],
           },
         },
-        { status: 400 },
-      )
+      })
+
+      if (existingSubscription) {
+        return NextResponse.json(
+          {
+            error: 'You already have an active subscription for this package',
+            existingSubscription: {
+              id: existingSubscription.id,
+              status: existingSubscription.status,
+              endDate: existingSubscription.endDate,
+            },
+          },
+          { status: 400 },
+        )
       }
     } else if (lookupKey) {
       // Direct lookup key provided (for platform subscriptions)
@@ -226,16 +231,29 @@ export async function POST(request: NextRequest) {
       hasCoachingUpgrade = !!existingPremium
     }
 
+    // Apply 0% VAT if configured
+    const zeroVatTaxRateId = getZeroVatTaxRateId()
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      {
+        price: priceId,
+        quantity: 1,
+        ...(zeroVatTaxRateId && { tax_rates: [zeroVatTaxRateId] }),
+      },
+    ]
+
+    // Add Norwegian compliance metadata
+    const invoiceMetadata = getInvoiceMetadata()
+
+    // Apply invoice template to customer
+    await stripe.customers.update(customerId, {
+      invoice_settings: getInvoiceTemplateConfig(),
+    })
+
     // Create checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       mode: 'subscription',
       allow_promotion_codes: true,
       success_url: returnUrl
@@ -249,6 +267,7 @@ export async function POST(request: NextRequest) {
         lookupKey: stripeLookupKey,
         isNewSubscription: 'true',
         hasCoachingUpgrade: hasCoachingUpgrade.toString(),
+        ...invoiceMetadata,
       },
       subscription_data: {
         trial_period_days: hasUsedTrial
@@ -260,6 +279,7 @@ export async function POST(request: NextRequest) {
           packageName,
           lookupKey: stripeLookupKey,
           trainerIdAssigned: packageTemplate?.trainerId || '',
+          ...invoiceMetadata,
         },
       },
       // Customize the checkout experience
