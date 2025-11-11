@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import { CollapsibleText } from '@/components/collapsible-text'
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { RatingStars } from '@/components/rating-stars'
 import { StatsItem } from '@/components/stats-item'
 import { Badge, BadgeProps } from '@/components/ui/badge'
@@ -24,6 +25,7 @@ import {
   DrawerHeader,
 } from '@/components/ui/drawer'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useUser } from '@/context/user-context'
 
 import {
   AvailablePlan,
@@ -57,6 +59,8 @@ export function PlanDetailsDrawer({
   onAction,
   isLoading = false,
 }: PlanDetailsDrawerProps) {
+  const { hasPremium } = useUser()
+
   const status = plan ? getPlanStatus(plan, isActive) : PlanStatus.Template
   const isTemplate = status === PlanStatus.Template
   const isCompleted = status === PlanStatus.Completed
@@ -74,6 +78,8 @@ export function PlanDetailsDrawer({
   const isPaused = status === PlanStatus.Paused
   const isButtonLoading = isLoading || false
   const hasWeeks = 'weeks' in plan && plan.weeks && plan.weeks.length > 0
+  const isPremiumPlan = 'premium' in plan && plan.premium
+  const canActivate = !isPremiumPlan || hasPremium
 
   const handleWeekClick = (weekId: string) => {
     setSelectedWeekId(weekId)
@@ -303,13 +309,18 @@ export function PlanDetailsDrawer({
                       </Button>
                     )}
                     {!isActive && (
-                      <Button
-                        onClick={() => onAction('activate', plan)}
-                        variant="default"
-                        disabled={isButtonLoading}
+                      <PremiumButtonWrapper
+                        hasPremium={canActivate}
+                        tooltipText="Premium subscription required to activate this plan"
                       >
-                        {isPaused ? 'Resume' : 'Activate'}
-                      </Button>
+                        <Button
+                          onClick={() => onAction('activate', plan)}
+                          variant="default"
+                          disabled={isButtonLoading || !canActivate}
+                        >
+                          {isPaused ? 'Resume' : 'Activate'}
+                        </Button>
+                      </PremiumButtonWrapper>
                     )}
                   </>
                 )}

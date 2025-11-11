@@ -1,15 +1,6 @@
 import { differenceInDays, formatDate } from 'date-fns'
 import _ from 'lodash'
-import {
-  BicepsFlexed,
-  Check,
-  CheckCircle,
-  ChevronRight,
-  FileIcon,
-  FileText,
-  PauseIcon,
-  PlayIcon,
-} from 'lucide-react'
+import { Check, ChevronRight, Crown, FileIcon, PauseIcon } from 'lucide-react'
 
 import { Badge, BadgeProps } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,6 +27,8 @@ export function PlanCard({ plan, onClick, status }: PlanCardProps) {
     plan.createdAt &&
     differenceInDays(new Date(), new Date(plan.createdAt)) < 3
 
+  const isPremiumPlan = 'premium' in plan && plan.premium
+
   return (
     <Card
       onClick={() => onClick(plan)}
@@ -48,14 +41,22 @@ export function PlanCard({ plan, onClick, status }: PlanCardProps) {
             <CardTitle className="text-base font-normal line-clamp-2">
               {plan.title}
             </CardTitle>
-            {status === PlanStatus.Active && (
-              <PlanStatusBadge status={status} plan={plan} />
-            )}
-            {isNew && (
-              <Badge variant="success" className="w-fit" size="xs">
-                New
-              </Badge>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {status === PlanStatus.Active && (
+                <PlanStatusBadge status={status} plan={plan} />
+              )}
+              {isNew && (
+                <Badge variant="success" className="w-fit" size="xs">
+                  New
+                </Badge>
+              )}
+              {isPremiumPlan && (
+                <Badge variant="premium" className="w-fit" size="xs">
+                  <Crown className="size-3" />
+                  Premium
+                </Badge>
+              )}
+            </div>
           </div>
           <ChevronRight className="size-4 text-muted-foreground/70 flex-shrink-0" />
         </div>

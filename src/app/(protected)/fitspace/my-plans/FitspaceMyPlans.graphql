@@ -17,6 +17,7 @@ query FitspaceMyPlans {
       updatedAt
       createdAt
       active
+      premium
 
       weeks {
         id
@@ -123,6 +124,7 @@ query FitspaceMyPlans {
       targetGoals
       active
       createdAt
+      premium
       weeks {
         id
         weekNumber
@@ -181,6 +183,7 @@ query FitspaceMyPlans {
       rating
       active
       createdAt
+      premium
       userReview {
         id
         rating
