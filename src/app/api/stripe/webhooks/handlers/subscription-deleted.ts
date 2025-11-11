@@ -9,6 +9,7 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { isProd } from '@/lib/get-base-url'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 
@@ -102,7 +103,7 @@ export async function handleSubscriptionDeleted(
       }
 
       // Remove trainer assignment when coaching subscription ends
-      if (userSubscription.trainerId) {
+      if (userSubscription.trainerId && isProd) {
         await prisma.user.update({
           where: { id: userSubscription.userId },
           data: { trainerId: null },

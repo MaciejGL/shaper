@@ -63,7 +63,7 @@ export default function MyTrainerPage() {
   useScrollToFromParams([isLoadingTrainer, trainer])
 
   return (
-    <div className="container-hypertro mx-auto">
+    <>
       {isLoadingTrainer && (
         <ExtendHeader
           headerChildren={
@@ -90,7 +90,7 @@ export default function MyTrainerPage() {
           <NoTrainerView requests={coachingRequests} />
         </div>
       )}
-    </div>
+    </>
   )
 }
 
@@ -236,8 +236,6 @@ function TrainerView({ trainer }: TrainerViewProps) {
             </Button>
           </TabsContent>
         </Tabs>
-
-        <div className="grid grid-cols-2 gap-2"></div>
       </div>
     </ExtendHeader>
   )
