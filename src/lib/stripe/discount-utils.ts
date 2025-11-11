@@ -210,7 +210,7 @@ export async function createInPersonCoachingComboCoupon(
   return await stripe.coupons.create({
     percent_off: discountPercent,
     duration: 'once',
-    name: `In-Person Sessions ${discountPercent}% Off`,
+    name: `In-Person Sessions Discount`,
     applies_to: {
       products: productIds,
     },

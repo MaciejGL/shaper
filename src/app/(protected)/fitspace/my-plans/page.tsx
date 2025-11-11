@@ -50,7 +50,7 @@ export default function MyPlansPage() {
   return (
     <div
       className={cn(
-        'container-hypertro mx-auto grid grid-rows-[max-content_1fr]',
+        'container-hypertro mx-auto max-w-md grid grid-rows-[max-content_1fr]',
       )}
     >
       <Tabs
