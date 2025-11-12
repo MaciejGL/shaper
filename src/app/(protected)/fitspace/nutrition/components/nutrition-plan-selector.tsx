@@ -1,7 +1,9 @@
 'use client'
 
+import { Download } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -9,13 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { GQLGetMyNutritionPlansQuery } from '@/generated/graphql-client'
+import type {
+  GQLGetMyNutritionPlanQuery,
+  GQLGetMyNutritionPlansQuery,
+} from '@/generated/graphql-client'
+import { downloadPDF, generateFilename } from '@/lib/pdf/pdf-generator'
+
+import { NutritionPlanPDF } from './pdf/nutrition-plan-pdf'
 
 interface NutritionPlanSelectorProps {
   onPlanSelect: (planId: string | null) => void
   selectedPlanId?: string | null
   nutritionPlans: GQLGetMyNutritionPlansQuery['nutritionPlans']
   isLoading: boolean
+  nutritionPlan?: GQLGetMyNutritionPlanQuery['nutritionPlan'] | null
 }
 
 const STORAGE_KEY = 'fitspace_selected_nutrition_plan'
@@ -25,10 +34,33 @@ export function NutritionPlanSelector({
   selectedPlanId,
   nutritionPlans,
   isLoading,
+  nutritionPlan,
 }: NutritionPlanSelectorProps) {
   const [localSelectedPlan, setLocalSelectedPlan] = useState<string | null>(
     null,
   )
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+
+  const handleExportPDF = async () => {
+    if (!nutritionPlan) return
+
+    setIsGeneratingPDF(true)
+    try {
+      const filename = generateFilename({
+        prefix: `Nutrition Plan - ${nutritionPlan.name}`,
+        skipTimestamp: true,
+      })
+
+      await downloadPDF(
+        <NutritionPlanPDF nutritionPlan={nutritionPlan} />,
+        filename,
+      )
+    } catch (error) {
+      console.error('Failed to generate PDF:', error)
+    } finally {
+      setIsGeneratingPDF(false)
+    }
+  }
 
   // Sort plans by creation date (newest first)
   const sortedPlans = [...nutritionPlans].sort((a, b) => {
@@ -85,22 +117,35 @@ export function NutritionPlanSelector({
   const effectiveSelectedPlan = selectedPlanId || localSelectedPlan
 
   return (
-    <Select
-      value={effectiveSelectedPlan || ''}
-      onValueChange={handlePlanChange}
-    >
-      <SelectTrigger className="w-full" size="lg" variant="default">
-        <SelectValue placeholder="Select a nutrition plan" />
-      </SelectTrigger>
-      <SelectContent>
-        {sortedPlans.map((plan) => (
-          <SelectItem key={plan.id} value={plan.id}>
-            <div className="flex flex-col items-start w-full">
-              <span className="font-medium text-base">{plan.name}</span>
-            </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="w-full flex items-center gap-2 dark">
+      <Select
+        value={effectiveSelectedPlan || ''}
+        onValueChange={handlePlanChange}
+      >
+        <SelectTrigger className="w-full" size="lg" variant="default">
+          <SelectValue placeholder="Select a nutrition plan" />
+        </SelectTrigger>
+        <SelectContent>
+          {sortedPlans.map((plan) => (
+            <SelectItem key={plan.id} value={plan.id}>
+              <div className="flex flex-col items-start w-full">
+                <span className="font-medium text-base">{plan.name}</span>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button
+        variant="outline"
+        size="icon-lg"
+        iconOnly={<Download className="dark:text-white" />}
+        onClick={handleExportPDF}
+        loading={isGeneratingPDF}
+        disabled={isGeneratingPDF}
+        className="dark"
+      >
+        Export to PDF
+      </Button>
+    </div>
   )
 }

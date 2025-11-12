@@ -132,12 +132,6 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
 
   return (
     <>
-      <CardHeader className="px-0 mb-0">
-        <div className="flex items-center gap-2 mb-2">
-          <SectionIcon icon={ShoppingCart} size="sm" variant="sky" />
-          <p className="text-base font-medium">Shopping List</p>
-        </div>
-      </CardHeader>
       <CardContent className="px-0">
         <Card
           variant="tertiary"
@@ -149,10 +143,10 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
             className="overflow-hidden"
           >
             <CollapsibleTrigger className="cursor-pointer hover:bg-muted/30 transition-colors w-full p-4">
-              <CardTitle className="flex items-center justify-between text-base">
-                <div className="text-sm">
-                  Ingredients{' '}
-                  <span className="text-muted-foreground font-normal ml-2">
+              <CardTitle className="flex items-center justify-between gap-6">
+                <div className="text-sm flex items-center justify-between w-full">
+                  <p>Shopping List</p>
+                  <span className="text-muted-foreground font-normal">
                     {checkedCount}/{aggregatedIngredients.length} items
                   </span>
                 </div>
@@ -170,7 +164,7 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
                 <div className="space-y-3">
                   {/* Portion multiplier */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 ml-auto">
                       <Button
                         variant="secondary"
                         size="icon-sm"

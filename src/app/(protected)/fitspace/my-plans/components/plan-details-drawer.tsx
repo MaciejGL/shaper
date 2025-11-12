@@ -93,27 +93,30 @@ export function PlanDetailsDrawer({
           {/* Header */}
           <DrawerHeader className="border-b flex-shrink-0">
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="w-full space-y-2">
                 <h3 className="text-lg font-medium">{plan.title}</h3>
-                {/* Plan Status and Basic Info */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <PlanStatusBadge status={status} plan={plan} />
-                  {plan.difficulty && (
-                    <Badge variant="secondary" className="capitalize">
-                      {plan.difficulty.toLowerCase()}
-                    </Badge>
+                <div className="flex items-center gap-2 w-full justify-between">
+                  {/* Plan Status and Basic Info */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <PlanStatusBadge status={status} plan={plan} />
+                    {plan.difficulty && (
+                      <Badge variant="secondary" className="capitalize">
+                        {plan.difficulty.toLowerCase()}
+                      </Badge>
+                    )}
+                  </div>
+                  {plan.startDate && plan.endDate && plan.active && (
+                    <ButtonLink
+                      href={`/fitspace/workout/${plan.id}`}
+                      iconEnd={<ArrowRightIcon />}
+                      size="sm"
+                    >
+                      Go to Plan
+                    </ButtonLink>
                   )}
                 </div>
               </div>
               {/* Go to Plan button in header */}
-              {plan.startDate && plan.endDate && plan.active && (
-                <ButtonLink
-                  href={`/fitspace/workout/${plan.id}`}
-                  iconEnd={<ArrowRightIcon />}
-                >
-                  Go to Plan
-                </ButtonLink>
-              )}
             </div>
           </DrawerHeader>
 

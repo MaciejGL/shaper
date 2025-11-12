@@ -1,4 +1,7 @@
+'use client'
+
 import { Check } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -17,11 +20,34 @@ export function ProgressCircle({
   strokeWidth = 2,
   showValue = false,
 }: ProgressCircleProps) {
+  const [displayProgress, setDisplayProgress] = useState(0)
+
+  useEffect(() => {
+    const clampedProgress = Math.min(100, Math.max(0, progress))
+    const duration = 800
+    const startTime = Date.now()
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const t = Math.min(elapsed / duration, 1)
+      const easeOut = 1 - Math.pow(1 - t, 3)
+
+      setDisplayProgress(Math.round(easeOut * clampedProgress))
+
+      if (elapsed < duration) {
+        requestAnimationFrame(animate)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [progress])
+
   const percentage = Math.min(100, Math.max(0, progress))
   const isComplete = percentage === 100
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
-  const strokeDashoffset = circumference - (percentage / 100) * circumference
+  const strokeDashoffset =
+    circumference - (displayProgress / 100) * circumference
 
   const getProgressColor = (value: number): string => {
     if (value >= 90) return 'text-green-600 dark:text-green-500'
@@ -38,10 +64,7 @@ export function ProgressCircle({
 
   return (
     <div
-      className={cn(
-        'relative flex items-center justify-center',
-        className,
-      )}
+      className={cn('relative flex items-center justify-center', className)}
       style={{ width: size, height: size }}
     >
       {/* Background circle */}
@@ -71,25 +94,27 @@ export function ProgressCircle({
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
-          className={cn('transition-all duration-300', getProgressColor(percentage))}
+          className={cn(
+            'transition-all duration-75',
+            getProgressColor(percentage),
+          )}
         />
       </svg>
 
       {/* Center content */}
       {isComplete ? (
         <Check
-          className="text-green-500"
+          className="text-green-500 animate-in scale-in-50 duration-300"
           style={{ width: size * 0.6, height: size * 0.6 }}
         />
       ) : showValue ? (
         <span
-          className="font-bold tabular-nums text-foreground"
+          className="font-bold tabular-nums text-foreground transition-all duration-75"
           style={{ fontSize: `${fontSize}px` }}
         >
-          {Math.round(percentage)}%
+          {displayProgress}%
         </span>
       ) : null}
     </div>
   )
 }
-

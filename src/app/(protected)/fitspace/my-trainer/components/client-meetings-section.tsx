@@ -73,12 +73,14 @@ export function ClientMeetingsSection() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <SectionIcon icon={Calendar} size="xs" />
+            <SectionIcon icon={Calendar} size="xs" color="cyan" />
             <CardTitle>Meetings</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Loading meetings...</p>
+          <p className="text-sm text-muted-foreground masked-placeholder-text">
+            Loading meetings...
+          </p>
         </CardContent>
       </Card>
     )
@@ -89,7 +91,7 @@ export function ClientMeetingsSection() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <SectionIcon icon={Calendar} size="xs" />
+            <SectionIcon icon={Calendar} size="xs" variant="blue" />
             <CardTitle>Meetings</CardTitle>
           </div>
         </CardHeader>
@@ -107,7 +109,7 @@ export function ClientMeetingsSection() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <SectionIcon icon={Calendar} size="xs" />
+            <SectionIcon icon={Calendar} size="xs" variant="blue" />
             <CardTitle>Meetings</CardTitle>
             <Button
               variant="ghost"
@@ -133,7 +135,7 @@ export function ClientMeetingsSection() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <SectionIcon icon={Calendar} size="xs" />
+            <SectionIcon icon={Calendar} size="xs" variant="blue" />
             <CardTitle>Meetings</CardTitle>
             <Button
               variant="ghost"

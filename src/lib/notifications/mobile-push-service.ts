@@ -6,6 +6,7 @@
 import { Expo, ExpoPushMessage } from 'expo-server-sdk'
 
 import { prisma } from '../db'
+import { subscriptionValidator } from '../subscription/subscription-validator'
 
 // Create a new Expo SDK client
 const expo = new Expo()
@@ -32,10 +33,24 @@ export async function sendMobilePushNotifications({
   badge,
 }: MobilePushNotification) {
   try {
-    // Get mobile push tokens for the specified users
+    // Filter users by premium access - only premium users receive push notifications
+    const premiumUserIds: string[] = []
+    for (const userId of userIds) {
+      const hasPremium = await subscriptionValidator.hasPremiumAccess(userId)
+      if (hasPremium) {
+        premiumUserIds.push(userId)
+      }
+    }
+
+    if (premiumUserIds.length === 0) {
+      console.info('📱 No premium users found for push notifications:', userIds)
+      return { success: true, sent: 0, failed: 0, errors: [] }
+    }
+
+    // Get mobile push tokens for the premium users
     const mobilePushTokens = await prisma.mobilePushToken.findMany({
       where: {
-        userId: { in: userIds },
+        userId: { in: premiumUserIds },
         pushNotificationsEnabled: true,
       },
       include: {
@@ -49,7 +64,10 @@ export async function sendMobilePushNotifications({
     })
 
     if (mobilePushTokens.length === 0) {
-      console.info('📱 No mobile push tokens found for users:', userIds)
+      console.info(
+        '📱 No mobile push tokens found for premium users:',
+        premiumUserIds,
+      )
       return { success: true, sent: 0, failed: 0, errors: [] }
     }
 

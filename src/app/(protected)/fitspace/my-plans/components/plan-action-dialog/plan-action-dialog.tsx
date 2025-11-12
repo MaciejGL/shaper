@@ -1,8 +1,9 @@
 import { formatDate } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
-import { BicepsFlexed, CheckCircle, Pause, Trash } from 'lucide-react'
+import { BicepsFlexed, CheckCircle, Crown, Pause, Trash } from 'lucide-react'
 import { useState } from 'react'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -15,6 +16,7 @@ import {
 import { DialogHeader } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { WeekPicker } from '@/components/week-picker'
+import { useUser } from '@/context/user-context'
 import {
   GQLCheckinFrequency,
   GQLTrainingPlan,
@@ -50,6 +52,7 @@ export function PlanActionDialog({
   isLoading,
   hasCheckinSchedule = false,
 }: PlanActionDialogProps) {
+  const { hasPremium } = useUser()
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [scheduleCheckins, setScheduleCheckins] = useState(false)
   const [checkinSchedule, setCheckinSchedule] =
@@ -76,7 +79,7 @@ export function PlanActionDialog({
       title: isPaused ? 'Resume Plan' : 'Activate Plan',
       description: isPaused
         ? `Ready to continue? "${plan.title}" will become your active plan and you can pick up where you left off.`
-        : `Let's get started! "${plan.title}" will become your active training plan.`,
+        : plan.title,
       confirmText: isPaused ? 'Resume Plan' : 'Activate Plan',
       icon: <BicepsFlexed className="size-4" />,
     },
@@ -110,7 +113,7 @@ export function PlanActionDialog({
             {config.icon}
             {config.title}
           </DialogTitle>
-          <DialogDescription className="my-4 leading-relaxed">
+          <DialogDescription className="mt-4 leading-relaxed">
             {config.description}
           </DialogDescription>
         </DialogHeader>
@@ -142,14 +145,21 @@ export function PlanActionDialog({
                     id="schedule-checkins"
                     checked={scheduleCheckins}
                     onCheckedChange={(checked) =>
-                      setScheduleCheckins(checked as boolean)
+                      hasPremium && setScheduleCheckins(checked as boolean)
                     }
+                    disabled={!hasPremium}
                   />
                   <Label
                     htmlFor="schedule-checkins"
-                    className="text-base font-medium"
+                    className="text-base font-medium flex items-center gap-2"
                   >
                     Check-ins
+                    {!hasPremium && (
+                      <Badge variant="premium" size="sm">
+                        <Crown className="size-3" />
+                        Premium
+                      </Badge>
+                    )}
                   </Label>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -187,7 +197,7 @@ export function PlanActionDialog({
             )}
 
             {/* Plan Preview */}
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label>What to expect:</Label>
               <div className="text-sm text-muted-foreground space-y-1">
                 <div className="flex justify-between">
@@ -219,11 +229,11 @@ export function PlanActionDialog({
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
         )}
         <DialogFooter className="grid grid-cols-[auto_1fr] gap-2">
-          <Button variant="secondary" onClick={onClose} disabled={isLoading}>
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button

@@ -53,13 +53,12 @@ export function TrainerSharedNotesSection() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={MessageSquare} size="xs" />
+            <SectionIcon icon={MessageSquare} size="xs" variant="sky" />
             Trainer Notes
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-sm text-muted-foreground">
               Unable to load trainer notes.
             </p>
@@ -74,13 +73,12 @@ export function TrainerSharedNotesSection() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={MessageSquare} size="xs" />
+            <SectionIcon icon={MessageSquare} size="xs" variant="sky" />
             Trainer Notes
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-sm text-muted-foreground">
               No notes from your trainer yet.
             </p>

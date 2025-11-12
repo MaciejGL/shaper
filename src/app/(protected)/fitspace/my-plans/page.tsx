@@ -5,6 +5,7 @@ import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
 import { ExtendHeader } from '@/components/extend-header'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import {
   PrimaryTabList,
   Tabs,
@@ -104,10 +105,10 @@ export default function MyPlansPage() {
 
   return (
     <>
-      {activePlan ? (
-        <ExtendHeader
-          classNameContent="px-0 pt-0"
-          headerChildren={
+      <ExtendHeader
+        classNameContent="px-0 pt-0"
+        headerChildren={
+          activePlan ? (
             <div className="dark space-y-6 pb-6 pt-4">
               <PlanCard
                 plan={activePlan}
@@ -115,19 +116,15 @@ export default function MyPlansPage() {
                 status={getPlanStatus(activePlan, activePlan.active)}
               />
             </div>
-          }
-        >
-          {tabsContent}
-        </ExtendHeader>
-      ) : (
-        <div
-          className={cn(
-            'container-hypertro mx-auto max-w-md grid grid-rows-[max-content_1fr]',
-          )}
-        >
-          {tabsContent}
-        </div>
-      )}
+          ) : isLoadingPlans ? (
+            <div className="dark space-y-6 pb-6 pt-4">
+              <LoadingSkeleton count={1} variant="md" className="h-[120px]" />
+            </div>
+          ) : null
+        }
+      >
+        {tabsContent}
+      </ExtendHeader>
 
       <PlanDetailsDrawer
         plan={activePlan}
