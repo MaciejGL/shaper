@@ -18,6 +18,7 @@ query FitspaceMyPlans {
       createdAt
       active
       premium
+      heroImageUrl
 
       weeks {
         id
@@ -125,6 +126,7 @@ query FitspaceMyPlans {
       active
       createdAt
       premium
+      heroImageUrl
       weeks {
         id
         weekNumber

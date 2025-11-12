@@ -14,7 +14,6 @@ import React, {
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { SwipeToReveal } from '@/components/ui/swipe-to-reveal'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutDayQuery,
@@ -298,15 +297,6 @@ export function ExerciseSet({
     }, 250) // 250ms delay to detect double click
   }, [handleToggleSetCompletion])
 
-  const handleDoubleClick = useCallback(() => {
-    // Clear single click timeout
-    if (clickTimeoutRef.current) {
-      clearTimeout(clickTimeoutRef.current)
-    }
-
-    handleToggleSetCompletion(true) // Double click - skip timer
-  }, [handleToggleSetCompletion])
-
   return (
     <motion.div
       key={`set-${set.id}`}
@@ -314,241 +304,224 @@ export function ExerciseSet({
       animate={{ height: 'auto' }}
       exit={{ height: 0 }}
       transition={{ duration: 0.15, ease: 'linear' }}
-      className="relative"
+      className={cn('relative', !isLastSet && 'border-b border-border/50')}
     >
-      <SwipeToReveal
-        actions={[
-          {
-            id: 'remove',
-            label: 'Remove',
-            onClick: onDelete,
-          },
-        ]}
-        isSwipeable={set.isExtra}
-        className={cn('bg-card', !isLastSet && 'border-b border-border/50')}
-      >
-        {isAdvancedView && (
-          <div className="flex items-center gap-1 mb-0.5">
-            <div
-              className={cn(
-                isAdvancedView
-                  ? sharedLayoutAdvancedStyles
-                  : sharedLayoutSimpleStyles,
-                'pb-0.5 pt-1 leading-none',
-                set.isExtra && !repRange && 'opacity-0 h-0',
-              )}
-            >
-              <div />
-              <div />
-              <div className="text-[0.75rem] text-muted-foreground text-center">
-                {set.isExtra && !repRange ? 'Extra' : repRange}
-              </div>
-              <div className="text-[0.75rem] text-muted-foreground text-center">
-                {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
-              </div>
-              <div />
-            </div>
-          </div>
-        )}
-
-        <div className={cn('flex items-start gap-1 pb-1')}>
+      {isAdvancedView && (
+        <div className="flex items-center gap-1 mb-0.5">
           <div
             className={cn(
               isAdvancedView
                 ? sharedLayoutAdvancedStyles
                 : sharedLayoutSimpleStyles,
-              'text-primary relative',
-              !isAdvancedView && 'pt-1',
+              'pb-0.5 pt-1 leading-none',
+              set.isExtra && !repRange && 'opacity-0 h-0',
             )}
           >
-            <div className="text-sm text-muted-foreground text-center">
-              {set.order}
+            <div />
+            <div />
+            <div className="text-[0.75rem] text-muted-foreground text-center">
+              {set.isExtra && !repRange ? 'Extra' : repRange}
             </div>
-            {isAdvancedView && (
-              <div className="text-xs text-muted-foreground text-center">
-                <div>
-                  {!isNil(thisSet?.reps || thisSet?.weight) ? (
-                    <p>
-                      {typeof thisSet?.reps === 'number'
-                        ? thisSet.reps.toString()
-                        : ''}
-                      {!isNil(thisSet?.weight) &&
-                        !isNil(thisSet?.reps) &&
-                        ' x '}
-                      {typeof thisSet?.weight === 'number'
-                        ? toDisplayWeight(thisSet.weight)?.toString() +
-                          preferences.weightUnit
-                        : ''}
-                    </p>
-                  ) : (
-                    <div className="bg-muted w-6 h-0.5 rounded-md mx-auto" />
-                  )}
-                </div>
-              </div>
-            )}
-            {isAdvancedView ? (
-              <Input
-                id={`set-${set.id}-reps`}
-                value={reps}
-                onChange={(e) => handleInputChange(e, 'reps')}
-                inputMode="decimal"
-                variant={'secondary'}
-                placeholder={previousSetRepsLog?.toString() || ''}
-                className="text-center"
-                size="sm"
-              />
-            ) : (
-              <div className="text-center text-sm">
-                {repRange || (previousSetRepsLog?.toString() ?? '--')}
-              </div>
-            )}
-            {isAdvancedView ? (
-              <ExerciseWeightInput
-                setId={set.id}
-                weightInKg={weight ? parseFloat(weight) : null}
-                onWeightChange={(weightInKg) => {
-                  hasUserEdited.current = true
-                  onWeightChange(weightInKg?.toString() || '')
-                }}
-                placeholder={
-                  previousSetWeightLog
-                    ? toDisplayWeight(previousSetWeightLog)?.toString()
-                    : ''
-                }
-                disabled={false}
-                showWeightUnit={false}
-              />
-            ) : (
-              <div className="text-center text-sm text-muted-foreground">
-                {set.log?.weight
-                  ? toDisplayWeight(set.log.weight)?.toFixed(1)
-                  : set.weight
-                    ? toDisplayWeight(set.weight)?.toFixed(1)
-                    : previousSetWeightLog
-                      ? toDisplayWeight(previousSetWeightLog)?.toFixed(1)
-                      : '--'}
-              </div>
-            )}
-            <div className="flex justify-center">
-              <Button
-                variant="tertiary"
-                size="icon-xs"
-                iconOnly={
-                  <CheckIcon
-                    className={cn(
-                      'size-4 transition-colors',
-                      set.completedAt
-                        ? 'text-green-500'
-                        : 'text-muted-foreground/40',
-                    )}
-                  />
-                }
-                onClick={handleClick}
-                onDoubleClick={handleDoubleClick}
-                className={cn(
-                  'self-center',
-                  set.completedAt &&
-                    'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
-                )}
-              />
+            <div className="text-[0.75rem] text-muted-foreground text-center">
+              {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
             </div>
+            <div />
           </div>
         </div>
+      )}
 
-        {/* PR Celebration Overlay */}
-        {isAdvancedView && (
-          <AnimatePresence mode="wait">
-            {prData?.show && (
+      <div className={cn('flex items-start gap-1 pb-1')}>
+        <div
+          className={cn(
+            isAdvancedView
+              ? sharedLayoutAdvancedStyles
+              : sharedLayoutSimpleStyles,
+            'text-primary relative',
+            !isAdvancedView && 'pt-1',
+          )}
+        >
+          <div className="text-sm text-muted-foreground text-center">
+            {set.order}
+          </div>
+          {isAdvancedView && (
+            <div className="text-xs text-muted-foreground text-center">
+              <div>
+                {!isNil(thisSet?.reps || thisSet?.weight) ? (
+                  <p>
+                    {typeof thisSet?.reps === 'number'
+                      ? thisSet.reps.toString()
+                      : ''}
+                    {!isNil(thisSet?.weight) && !isNil(thisSet?.reps) && ' x '}
+                    {typeof thisSet?.weight === 'number'
+                      ? toDisplayWeight(thisSet.weight)?.toString() +
+                        preferences.weightUnit
+                      : ''}
+                  </p>
+                ) : (
+                  <div className="bg-muted w-6 h-0.5 rounded-md mx-auto" />
+                )}
+              </div>
+            </div>
+          )}
+          {isAdvancedView ? (
+            <Input
+              id={`set-${set.id}-reps`}
+              value={reps}
+              onChange={(e) => handleInputChange(e, 'reps')}
+              inputMode="decimal"
+              variant={'secondary'}
+              placeholder={previousSetRepsLog?.toString() || ''}
+              className="text-center"
+              size="sm"
+            />
+          ) : (
+            <div className="text-center text-sm">
+              {repRange || (previousSetRepsLog?.toString() ?? '--')}
+            </div>
+          )}
+          {isAdvancedView ? (
+            <ExerciseWeightInput
+              setId={set.id}
+              weightInKg={weight ? parseFloat(weight) : null}
+              onWeightChange={(weightInKg) => {
+                hasUserEdited.current = true
+                onWeightChange(weightInKg?.toString() || '')
+              }}
+              placeholder={
+                previousSetWeightLog
+                  ? toDisplayWeight(previousSetWeightLog)?.toString()
+                  : ''
+              }
+              disabled={false}
+              showWeightUnit={false}
+            />
+          ) : (
+            <div className="text-center text-sm text-muted-foreground">
+              {set.log?.weight
+                ? toDisplayWeight(set.log.weight)?.toFixed(1)
+                : set.weight
+                  ? toDisplayWeight(set.weight)?.toFixed(1)
+                  : previousSetWeightLog
+                    ? toDisplayWeight(previousSetWeightLog)?.toFixed(1)
+                    : '--'}
+            </div>
+          )}
+          <div className="flex justify-center">
+            <Button
+              variant="tertiary"
+              size="icon-xs"
+              iconOnly={
+                <CheckIcon
+                  className={cn(
+                    'size-4 transition-colors',
+                    set.completedAt
+                      ? 'text-green-500'
+                      : 'text-muted-foreground/40',
+                  )}
+                />
+              }
+              onClick={handleClick}
+              className={cn(
+                'self-center',
+                set.completedAt &&
+                  'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
+              )}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* PR Celebration Overlay */}
+      {isAdvancedView && (
+        <AnimatePresence mode="wait">
+          {prData?.show && (
+            <motion.div
+              key="pr-overlay"
+              initial={{ width: 0 }}
+              animate={{ width: '100%' }}
+              exit={{ width: 0 }}
+              transition={{
+                duration: 1,
+                type: 'spring',
+                stiffness: 400,
+                damping: 25,
+              }}
+              onClick={() => setPRData(null)}
+              className={cn(
+                sharedLayoutAdvancedStyles,
+                'absolute left-0 top-0 bottom-0 z-10 h-full px-0',
+              )}
+            >
               <motion.div
-                key="pr-overlay"
+                key="pr-overlay-content"
                 initial={{ width: 0 }}
                 animate={{ width: '100%' }}
                 exit={{ width: 0 }}
-                transition={{
-                  duration: 1,
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 25,
-                }}
-                onClick={() => setPRData(null)}
                 className={cn(
-                  sharedLayoutAdvancedStyles,
-                  'absolute left-0 top-0 bottom-0 z-10 h-full px-0',
+                  'bg-gradient-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/2 dark:to-amber-600/60 backdrop-blur-[5px] rounded-r-lg h-full overflow-hidden',
+                  'col-span-3',
                 )}
               >
-                <motion.div
-                  key="pr-overlay-content"
-                  initial={{ width: 0 }}
-                  animate={{ width: '100%' }}
-                  exit={{ width: 0 }}
+                <div
                   className={cn(
-                    'bg-gradient-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/2 dark:to-amber-600/60 backdrop-blur-[5px] rounded-r-lg h-full overflow-hidden',
-                    'col-span-3',
+                    'flex items-center justify-between h-full',
+                    'px-4 gap-4',
                   )}
                 >
-                  <div
-                    className={cn(
-                      'flex items-center justify-between h-full',
-                      'px-4 gap-4',
-                    )}
-                  >
-                    <div className="flex items-center flex-col justify-center animate-pulse">
-                      <TrophyIcon
-                        className={cn(
-                          'text-yellow-500 dark:text-amber-400 shrink-0',
-                          'size-4',
-                        )}
-                      />
-                      <span
-                        className={cn(
-                          'text-[10px] font-medium whitespace-nowrap',
-                          'text-[10px]',
-                        )}
-                      >
-                        New PR!
-                      </span>
-                    </div>
-                    <motion.div
-                      key="pr-overlay-content-inner"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{
-                        duration: 0.2,
-                        delay: 0.2,
-                        type: 'spring',
-                        stiffness: 200,
-                        damping: 25,
-                      }}
-                      className="flex items-baseline justify-center gap-4 overflow-hidden"
+                  <div className="flex items-center flex-col justify-center animate-pulse">
+                    <TrophyIcon
+                      className={cn(
+                        'text-yellow-500 dark:text-amber-400 shrink-0',
+                        'size-4',
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        'text-[10px] font-medium whitespace-nowrap',
+                        'text-[10px]',
+                      )}
                     >
-                      <div
-                        className={cn(
-                          'text-lg font-semibold whitespace-nowrap',
-                          'text-lg',
-                        )}
-                      >
-                        {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(
-                          1,
-                        )}{' '}
-                        {preferences.weightUnit}
-                      </div>
-                      <div
-                        className={cn(
-                          'text-base font-medium flex items-center gap-1 text-green-600 dark:text-amber-300 whitespace-nowrap',
-                          'text-base',
-                        )}
-                      >
-                        +{prData?.improvement.toFixed(1) || 3}%{' '}
-                      </div>
-                    </motion.div>
+                      New PR!
+                    </span>
                   </div>
-                </motion.div>
+                  <motion.div
+                    key="pr-overlay-content-inner"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      duration: 0.2,
+                      delay: 0.2,
+                      type: 'spring',
+                      stiffness: 200,
+                      damping: 25,
+                    }}
+                    className="flex items-baseline justify-center gap-4 overflow-hidden"
+                  >
+                    <div
+                      className={cn(
+                        'text-lg font-semibold whitespace-nowrap',
+                        'text-lg',
+                      )}
+                    >
+                      {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(1)}{' '}
+                      {preferences.weightUnit}
+                    </div>
+                    <div
+                      className={cn(
+                        'text-base font-medium flex items-center gap-1 text-green-600 dark:text-amber-300 whitespace-nowrap',
+                        'text-base',
+                      )}
+                    >
+                      +{prData?.improvement.toFixed(1) || 3}%{' '}
+                    </div>
+                  </motion.div>
+                </div>
               </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-      </SwipeToReveal>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </motion.div>
   )
 }

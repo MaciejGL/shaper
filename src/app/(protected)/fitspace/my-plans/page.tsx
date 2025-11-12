@@ -2,7 +2,9 @@
 
 import { LayoutList } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
+import { useState } from 'react'
 
+import { ExtendHeader } from '@/components/extend-header'
 import {
   PrimaryTabList,
   Tabs,
@@ -20,15 +22,19 @@ import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { PlanActionDialog } from './components/plan-action-dialog/plan-action-dialog'
 import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
+import { PlanCard } from './components/plan-card'
+import { PlanDetailsDrawer } from './components/plan-details-drawer'
 import { PlansTab } from './components/plans-tab'
 import { EnhancedQuickWorkoutTab } from './components/quick-workout-plan-tab/enhanced-quick-workout-tab'
-import { PlanTab } from './types'
+import { PlanStatus, PlanTab, getPlanStatus } from './types'
 
 export default function MyPlansPage() {
   const [tab, setTab] = useQueryState<PlanTab>(
     'tab',
     parseAsStringEnum<PlanTab>([PlanTab.Plans, PlanTab.QuickWorkout]),
   )
+
+  const [isActivePlanDrawerOpen, setIsActivePlanDrawerOpen] = useState(false)
 
   const {
     dialogState,
@@ -47,46 +53,90 @@ export default function MyPlansPage() {
   const availablePlans = data?.getMyPlansOverviewFull?.availablePlans
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
 
-  return (
-    <div
-      className={cn(
-        'container-hypertro mx-auto max-w-md grid grid-rows-[max-content_1fr]',
-      )}
+  const handleActivePlanClick = () => {
+    setIsActivePlanDrawerOpen(true)
+  }
+
+  const handleActivePlanAction = (
+    action: 'activate' | 'pause' | 'close' | 'delete',
+  ) => {
+    if (!activePlan) return
+    handlePlanAction(action, activePlan)
+    setIsActivePlanDrawerOpen(false)
+  }
+
+  const tabsContent = (
+    <Tabs
+      value={tab ?? PlanTab.Plans}
+      defaultValue={PlanTab.Plans}
+      onValueChange={(value) => setTab(value as PlanTab)}
+      className="gap-0"
     >
-      <Tabs
-        value={tab ?? PlanTab.Plans}
-        defaultValue={PlanTab.Plans}
-        onValueChange={(value) => setTab(value as PlanTab)}
-        className="gap-0"
-      >
-        <PrimaryTabList
-          options={[
-            { label: 'Plans', value: PlanTab.Plans },
-            { label: 'Custom Days', value: PlanTab.QuickWorkout },
-          ]}
-          onClick={setTab}
-          active={tab ?? PlanTab.Plans}
-          size="lg"
-          className="grid grid-cols-2"
+      <PrimaryTabList
+        options={[
+          { label: 'Plans', value: PlanTab.Plans },
+          { label: 'Custom Days', value: PlanTab.QuickWorkout },
+        ]}
+        onClick={setTab}
+        active={tab ?? PlanTab.Plans}
+        size="lg"
+        className="grid grid-cols-2"
+      />
+
+      <TabsContent value={PlanTab.Plans} className="space-y-4 pt-4 pb-4 px-4">
+        <PlansTab
+          activePlan={activePlan}
+          availablePlans={availablePlans}
+          completedPlans={completedPlans}
+          handlePlanAction={handlePlanAction}
+          loading={isLoadingPlans}
         />
+      </TabsContent>
 
-        <TabsContent value={PlanTab.Plans} className="space-y-4 pt-4 pb-4 px-4">
-          <PlansTab
-            activePlan={activePlan}
-            availablePlans={availablePlans}
-            completedPlans={completedPlans}
-            handlePlanAction={handlePlanAction}
-            loading={isLoadingPlans}
-          />
-        </TabsContent>
+      <TabsContent
+        value={PlanTab.QuickWorkout}
+        className="space-y-4 pt-4 pb-4 px-4"
+      >
+        <EnhancedQuickWorkoutTab />
+      </TabsContent>
+    </Tabs>
+  )
 
-        <TabsContent
-          value={PlanTab.QuickWorkout}
-          className="space-y-4 pt-4 pb-4 px-4"
+  return (
+    <>
+      {activePlan ? (
+        <ExtendHeader
+          classNameContent="px-0 pt-0"
+          headerChildren={
+            <div className="dark space-y-6 pb-6 pt-4">
+              <PlanCard
+                plan={activePlan}
+                onClick={handleActivePlanClick}
+                status={getPlanStatus(activePlan, activePlan.active)}
+              />
+            </div>
+          }
         >
-          <EnhancedQuickWorkoutTab />
-        </TabsContent>
-      </Tabs>
+          {tabsContent}
+        </ExtendHeader>
+      ) : (
+        <div
+          className={cn(
+            'container-hypertro mx-auto max-w-md grid grid-rows-[max-content_1fr]',
+          )}
+        >
+          {tabsContent}
+        </div>
+      )}
+
+      <PlanDetailsDrawer
+        plan={activePlan}
+        isActive={true}
+        open={isActivePlanDrawerOpen}
+        onClose={() => setIsActivePlanDrawerOpen(false)}
+        onAction={handleActivePlanAction}
+        isLoading={isLoadingPlans}
+      />
 
       <PlanActionDialog
         isOpen={dialogState.isOpen}
@@ -99,6 +149,6 @@ export default function MyPlansPage() {
         }
         hasCheckinSchedule={checkinData?.checkinStatus?.hasSchedule}
       />
-    </div>
+    </>
   )
 }

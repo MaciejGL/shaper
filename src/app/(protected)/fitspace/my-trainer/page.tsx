@@ -196,7 +196,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
         </div>
       }
     >
-      <div className="space-y-6">
+      <div className="space-y-6 ">
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
           <div className="grid items-center mb-2 gap-2">
             <PrimaryTabList
@@ -211,7 +211,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
               classNameButton="text-sm px-3"
             />
           </div>
-          <TabsContent value="from-trainer" className="space-y-4">
+          <TabsContent value="from-trainer" className="space-y-4 px-4">
             {/* Scheduled Meetings */}
             <ClientMeetingsSection />
 
@@ -220,7 +220,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
               <TrainerSharedNotesSection />
             </div>
           </TabsContent>
-          <TabsContent value="purchased-services" className="space-y-4">
+          <TabsContent value="purchased-services" className="space-y-4 px-4">
             <SubscriptionInfoSection />
             {/* Subscription Information */}
             {/* Service Deliveries Section */}

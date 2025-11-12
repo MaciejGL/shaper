@@ -66,15 +66,23 @@ function getPlanDate(plan: UnifiedPlan): Date {
 // Helper function to count plans by status
 function countPlansByStatus(
   allPlans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[],
+  activePlan: ActivePlan | null,
 ): Record<FilterOption, number> {
   const counts: Record<FilterOption, number> = {
-    all: allPlans.length,
+    all: allPlans.length + (activePlan ? 1 : 0),
     [PlanStatus.Active]: 0,
     [PlanStatus.Paused]: 0,
     [PlanStatus.Template]: 0,
     [PlanStatus.Completed]: 0,
   }
 
+  // Count the active plan if it exists
+  if (activePlan) {
+    const activePlanStatus = getPlanStatus(activePlan, activePlan.active)
+    counts[activePlanStatus] = (counts[activePlanStatus] || 0) + 1
+  }
+
+  // Count other plans
   allPlans.forEach(({ plan, isActive }) => {
     const status = getPlanStatus(plan, isActive)
     counts[status] = (counts[status] || 0) + 1
@@ -231,12 +239,17 @@ interface PlansListProps {
   plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[]
   selectedFilter: FilterOption
   onPlanClick: (plan: UnifiedPlan) => void
+  hasActivePlan: boolean
 }
 
-function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
+function PlansList({
+  plans,
+  selectedFilter,
+  onPlanClick,
+  hasActivePlan,
+}: PlansListProps) {
   // When filter is "all", show sections with dividers
   if (selectedFilter === 'all') {
-    const activePlan = plans.find(({ isActive }) => isActive)
     const templatePlans = plans.filter(
       ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Template,
     )
@@ -255,30 +268,23 @@ function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
 
     return (
       <div className="space-y-2">
-        {activePlan ? (
-          <PlanCard
-            plan={activePlan.plan}
-            onClick={onPlanClick}
-            status={PlanStatus.Active}
-          />
-        ) : (
-          <EmptyStatusCard status={PlanStatus.Active} />
-        )}
+        {!hasActivePlan && <EmptyStatusCard status={PlanStatus.Active} />}
         <Accordion
           type="single"
           collapsible
           defaultValue={
-            !activePlan || hasNewTemplatePlans ? 'template-plans' : undefined
+            !hasActivePlan || hasNewTemplatePlans ? 'template-plans' : undefined
           }
         >
-          <AccordionItem value="template-plans">
-            <AccordionTrigger>
+          <AccordionItem value="template-plans" className="border-b">
+            <AccordionTrigger className="px-2 py-4">
               <StatusDivider
                 status={PlanStatus.Template}
                 count={templatePlans.length}
               />
             </AccordionTrigger>
-            <AccordionContent className="space-y-2">
+            <AccordionContent className=" space-y-2 grid grid-cols-[auto_1fr] gap-2">
+              <div className="w-[2px] bg-amber-500 h-full rounded-full" />
               {templatePlans.map(({ plan }) => (
                 <PlanCard
                   key={plan.id}
@@ -289,17 +295,16 @@ function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
               ))}
             </AccordionContent>
           </AccordionItem>
-        </Accordion>
-        <Accordion type="single" collapsible>
           {pausedPlans.length > 0 ? (
-            <AccordionItem value="paused-plans">
-              <AccordionTrigger>
+            <AccordionItem value="paused-plans" className="border-b">
+              <AccordionTrigger className="px-2 py-4">
                 <StatusDivider
                   status={PlanStatus.Paused}
                   count={pausedPlans.length}
                 />
               </AccordionTrigger>
-              <AccordionContent className="space-y-2">
+              <AccordionContent className=" space-y-2 grid grid-cols-[auto_1fr] gap-2">
+                <div className="w-[2px] bg-amber-500 h-full rounded-full" />
                 {pausedPlans.map(({ plan }) => (
                   <PlanCard
                     key={plan.id}
@@ -311,17 +316,16 @@ function PlansList({ plans, selectedFilter, onPlanClick }: PlansListProps) {
               </AccordionContent>
             </AccordionItem>
           ) : null}
-        </Accordion>
-        <Accordion type="single" collapsible>
           {completedPlans.length > 0 ? (
-            <AccordionItem value="completed-plans" className="space-y-2">
-              <AccordionTrigger>
+            <AccordionItem value="completed-plans" className="border-b">
+              <AccordionTrigger className="px-2 py-4">
                 <StatusDivider
                   status={PlanStatus.Completed}
                   count={completedPlans.length}
                 />
               </AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className=" space-y-2 grid grid-cols-[auto_1fr] gap-2">
+                <div className="w-[2px] bg-amber-500 h-full rounded-full" />
                 {completedPlans.map(({ plan }) => (
                   <PlanCard
                     key={plan.id}
@@ -377,15 +381,14 @@ export function PlansTab({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('all')
 
-  // Combine all plans into a single array
+  // Combine available and completed plans (active plan shown in header)
   const allPlans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[] = [
-    ...(activePlan ? [{ plan: activePlan, isActive: true }] : []),
     ...availablePlans.map((plan) => ({ plan, isActive: false })),
     ...completedPlans.map((plan) => ({ plan, isActive: false })),
   ]
 
-  // Count plans by status
-  const statusCounts = countPlansByStatus(allPlans)
+  // Count plans by status (include active plan in counts)
+  const statusCounts = countPlansByStatus(allPlans, activePlan)
 
   // Filter and sort plans
   const filteredPlans = filterPlans(allPlans, selectedFilter)
@@ -447,6 +450,7 @@ export function PlansTab({
             plans={sortedPlans}
             selectedFilter={selectedFilter}
             onPlanClick={handlePlanClick}
+            hasActivePlan={!!activePlan}
           />
         ) : (
           <EmptyFilterState filter={selectedFilter} />

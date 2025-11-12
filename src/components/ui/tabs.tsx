@@ -157,7 +157,7 @@ function PrimaryTabList<T extends string>({
   return (
     <div
       className={cn(
-        'rounded-full border border-black/8  dark:border-white/10 bg-muted/10 p-[2px] min-w-max w-full',
+        'rounded-xl border border-black/8  dark:border-white/10 bg-muted/10 p-[2px] min-w-max w-full',
       )}
     >
       <div className={cn('relative flex', className)}>
@@ -175,7 +175,7 @@ function PrimaryTabList<T extends string>({
             {active === option.value && (
               <motion.div
                 layoutId={`activeTabBackground-${uniqueId}`}
-                className="absolute inset-0 bg-primary dark:bg-primary/20 rounded-full z-0"
+                className="absolute inset-0 bg-primary dark:bg-primary/20 rounded-xl z-0"
                 transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
               />
             )}
