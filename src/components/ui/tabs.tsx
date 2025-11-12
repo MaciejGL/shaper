@@ -157,7 +157,7 @@ function PrimaryTabList<T extends string>({
   return (
     <div
       className={cn(
-        'rounded-xl border border-black/8  dark:border-white/10 bg-muted/10 p-[2px] min-w-max w-full',
+        'rounded-[14px] border border-black/15  dark:border-white/10 bg-muted/10 p-[2px] min-w-max w-full',
       )}
     >
       <div className={cn('relative flex', className)}>
