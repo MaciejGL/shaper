@@ -14,7 +14,6 @@ import {
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent } from '@/components/ui/card'
 import { GQLTrainingPlan } from '@/generated/graphql-client'
-import { cn } from '@/lib/utils'
 
 import {
   ActivePlan,
@@ -121,47 +120,6 @@ function sortPlans(
     const dateB = getPlanDate(b.plan)
     return dateB.getTime() - dateA.getTime()
   })
-}
-
-// Helper function to group plans by status
-function groupPlansByStatus(
-  plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[],
-): Record<
-  PlanStatus,
-  {
-    plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[]
-    count: number
-  }
-> {
-  const groups: Record<
-    PlanStatus,
-    {
-      plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[]
-      count: number
-    }
-  > = {
-    [PlanStatus.Active]: { plans: [], count: 0 },
-    [PlanStatus.Template]: { plans: [], count: 0 },
-    [PlanStatus.Paused]: { plans: [], count: 0 },
-    [PlanStatus.Completed]: { plans: [], count: 0 },
-  }
-
-  plans.forEach((item) => {
-    const status = getPlanStatus(item.plan, item.isActive)
-    groups[status].plans.push(item)
-    groups[status].count++
-  })
-
-  // Sort plans within each group by date
-  Object.values(groups).forEach((group) => {
-    group.plans.sort((a, b) => {
-      const dateA = getPlanDate(a.plan)
-      const dateB = getPlanDate(b.plan)
-      return dateB.getTime() - dateA.getTime()
-    })
-  })
-
-  return groups
 }
 
 // Compact empty state card for list sections

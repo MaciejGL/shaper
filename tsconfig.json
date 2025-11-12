@@ -1,14 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "types": [
-      "vitest/globals"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["vitest/globals"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -20,33 +14,21 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@lib/*": [
-        "./src/lib/*"
-      ],
-      "@components/*": [
-        "./src/components/*"
-      ],
-      "@utils/*": [
-        "./src/utils/*"
-      ],
-      "@actions/*": [
-        "./src/actions/*"
-      ],
-      "@hooks/*": [
-        "./src/hooks/*"
-      ],
-      "@public/*": [
-        "./public/*"
-      ]
+      "@/*": ["./src/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@components/*": ["./src/components/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@actions/*": ["./src/actions/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@public/*": ["./public/*"]
     }
   },
   "include": [
@@ -58,8 +40,5 @@
     "scripts/update-exercises.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "expo-app"
-  ]
+  "exclude": ["node_modules", "expo-app"]
 }

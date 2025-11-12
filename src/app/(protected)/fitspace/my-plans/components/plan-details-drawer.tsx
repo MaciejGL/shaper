@@ -4,7 +4,6 @@ import {
   BicepsFlexed,
   Calendar,
   CheckCircle,
-  Loader,
   Trash,
   Users,
 } from 'lucide-react'
@@ -19,7 +18,6 @@ import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,

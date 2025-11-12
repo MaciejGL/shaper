@@ -52,7 +52,7 @@ export function PlanPreviewDay({
       )}
       {!day.isRestDay && exercises.length > 0 && (
         <div className="pl-0 space-y-2">
-          {exercises.map((exercise, index) => (
+          {exercises.map((exercise) => (
             <PlanPreviewExerciseRow
               key={exercise.id}
               exercise={exercise}
