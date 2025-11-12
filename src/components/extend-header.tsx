@@ -22,7 +22,7 @@ export const ExtendHeader = ({
       )}
       <div
         className={cn(
-          'bg-background rounded-t-xl p-4 overflow-hidden',
+          'bg-background rounded-t-[14px] p-4 overflow-hidden',
           classNameContent,
         )}
       >
