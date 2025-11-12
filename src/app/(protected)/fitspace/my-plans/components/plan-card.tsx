@@ -1,26 +1,10 @@
-import { differenceInDays, formatDate } from 'date-fns'
-import _ from 'lodash'
-import {
-  BicepsFlexed,
-  Check,
-  CheckCircle,
-  ChevronRight,
-  FileIcon,
-  FileText,
-  PauseIcon,
-  PlayIcon,
-} from 'lucide-react'
+import { Crown, User } from 'lucide-react'
 
-import { Badge, BadgeProps } from '@/components/ui/badge'
-import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ProgressCircle } from '@/components/ui/progress-circle'
 
-import {
-  AvailablePlan,
-  CompletedPlan,
-  PlanStatus,
-  UnifiedPlan,
-  getPlanStatus,
-} from '../types'
+import { PlanStatus, UnifiedPlan } from '../types'
 
 interface PlanCardProps {
   plan: UnifiedPlan
@@ -31,87 +15,77 @@ interface PlanCardProps {
 export function PlanCard({ plan, onClick, status }: PlanCardProps) {
   if (!plan) return null
 
-  const isNew =
-    status === PlanStatus.Template &&
-    plan.createdAt &&
-    differenceInDays(new Date(), new Date(plan.createdAt)) < 3
+  const isPremiumPlan = 'premium' in plan && plan.premium
+  const heroImageUrl = 'heroImageUrl' in plan ? plan.heroImageUrl : null
+
+  const trainerInfo = 'createdBy' in plan ? plan.createdBy : null
+  const trainerName = trainerInfo
+    ? `${trainerInfo.firstName} ${trainerInfo.lastName}`.trim()
+    : null
+
+  const hasStartDate = 'startDate' in plan && plan.startDate
+  const hasProgress =
+    hasStartDate && plan.completedWorkoutsDays != null && plan.totalWorkouts > 0
+  const progressPercentage = hasProgress
+    ? (plan.completedWorkoutsDays / plan.totalWorkouts) * 100
+    : 0
 
   return (
     <Card
       onClick={() => onClick(plan)}
-      className="cursor-pointer hover:bg-accent/50 transition-colors"
-      variant={status === PlanStatus.Active ? 'highlighted' : 'tertiary'}
+      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative bg-card"
+      variant={status === PlanStatus.Active ? 'premium' : 'tertiary'}
     >
-      <CardHeader className="py-0 gap-0">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex-1 min-w-0 space-y-1.5">
-            <CardTitle className="text-base font-normal line-clamp-2">
-              {plan.title}
-            </CardTitle>
+      {heroImageUrl && (
+        <div className="absolute inset-0 opacity-100 group-hover:opacity-30 transition-opacity">
+          <div
+            className="w-full h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${heroImageUrl})`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
+        </div>
+      )}
+
+      <CardHeader className="relative">
+        <CardTitle className="text-foreground flex items-start justify-between gap-2">
+          {plan.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="relative">
+        <div className="space-y-2">
+          <div className="flex items-end gap-2">
             {status === PlanStatus.Active && (
-              <PlanStatusBadge status={status} plan={plan} />
-            )}
-            {isNew && (
-              <Badge variant="success" className="w-fit" size="xs">
-                New
+              <Badge variant="primary" className="w-fit" size="md">
+                Active
               </Badge>
             )}
+            {isPremiumPlan && (
+              <Badge variant="premium" className="w-fit" size="md">
+                <Crown className="size-3" />
+                Premium
+              </Badge>
+            )}
+            {trainerName && status === PlanStatus.Template && (
+              <Badge variant="success" className="w-fit" size="md">
+                <User className="size-3" />
+                by {trainerName}
+              </Badge>
+            )}
+            {hasProgress && (
+              <div className="flex items-center ml-auto bg-background/70 rounded-full p-1">
+                <ProgressCircle
+                  progress={progressPercentage}
+                  size={status === PlanStatus.Active ? 48 : 32}
+                  strokeWidth={status === PlanStatus.Active ? 4 : 3}
+                  showValue={true}
+                />
+              </div>
+            )}
           </div>
-          <ChevronRight className="size-4 text-muted-foreground/70 flex-shrink-0" />
         </div>
-      </CardHeader>
+      </CardContent>
     </Card>
-  )
-}
-
-function PlanStatusBadge({
-  status,
-  plan,
-}: {
-  status: PlanStatus
-  plan: UnifiedPlan
-}) {
-  const getStatusConfig = (
-    status: PlanStatus,
-  ): {
-    variant: BadgeProps['variant']
-    label: string
-    icon?: React.ReactNode
-  } => {
-    switch (status) {
-      case PlanStatus.Active:
-        return {
-          variant: 'primary' as const,
-          // icon: <PlayIcon className="size-3" />,
-          label: 'Active',
-        }
-      case PlanStatus.Paused:
-        return {
-          variant: 'warning' as const,
-          icon: <PauseIcon className="size-3" />,
-          label: `Paused ${formatDate(new Date((plan as AvailablePlan).updatedAt), 'd. MMM yyyy')}`,
-        }
-      case PlanStatus.Completed:
-        return {
-          variant: 'success',
-          icon: <Check className="size-3" />,
-          label: `Completed ${formatDate(new Date((plan as CompletedPlan).completedAt!), 'd. MMM yyyy')}`,
-        }
-      case PlanStatus.Template:
-        return {
-          variant: 'secondary' as const,
-          icon: <FileIcon className="size-3" />,
-          label: 'Template',
-        }
-    }
-  }
-
-  const config = getStatusConfig(status)
-
-  return (
-    <Badge variant={config.variant} className="w-fit" size="xs">
-      {config.icon}
-      {config.label}
-    </Badge>
   )
 }

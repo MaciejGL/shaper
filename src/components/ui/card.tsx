@@ -10,7 +10,7 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        secondary: 'bg-card border-border dark:border-0',
+        secondary: 'bg-card border-border',
         tertiary: 'bg-card-on-card border-border',
         highlighted: cn(
           ' bg-linear-to-tr dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-800 from-neutral-100 via-neutral-300 to-neutral-400 border-none',

@@ -17,6 +17,8 @@ query FitspaceMyPlans {
       updatedAt
       createdAt
       active
+      premium
+      heroImageUrl
 
       weeks {
         id
@@ -123,6 +125,8 @@ query FitspaceMyPlans {
       targetGoals
       active
       createdAt
+      premium
+      heroImageUrl
       weeks {
         id
         weekNumber
@@ -181,6 +185,7 @@ query FitspaceMyPlans {
       rating
       active
       createdAt
+      premium
       userReview {
         id
         rating
