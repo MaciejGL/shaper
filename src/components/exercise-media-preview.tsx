@@ -40,14 +40,13 @@ export function ExerciseMediaPreview({
 
   return (
     <div className="flex flex-col gap-2">
-      <button
-        onClick={handleImageClick}
+      <div
+        onClick={hasMultipleImages ? handleImageClick : undefined}
         className={cn(
           'relative overflow-hidden rounded-xl bg-muted',
           className || 'size-32',
           hasMultipleImages && 'cursor-pointer',
         )}
-        disabled={!hasMultipleImages}
       >
         {validImages.length > 0 ? (
           <>
@@ -72,7 +71,7 @@ export function ExerciseMediaPreview({
         ) : (
           <ImagePlaceholder />
         )}
-      </button>
+      </div>
 
       {hasMultipleImages && (
         <div className="flex items-center justify-center gap-1">
