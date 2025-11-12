@@ -142,6 +142,8 @@ export function FreeWorkoutsTab({
         isOpen={isPreviewOpen}
         onClose={() => {
           setIsPreviewOpen(false)
+        }}
+        onAnimationComplete={() => {
           setSelectedDayId(null)
         }}
         onStartWorkout={handleStartWorkout}
