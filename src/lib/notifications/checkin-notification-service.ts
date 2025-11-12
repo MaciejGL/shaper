@@ -3,6 +3,7 @@ import { formatInTimeZone } from 'date-fns-tz'
 
 import { sendPushNotificationToUsers } from '@/app/actions/push-notifications'
 import { prisma } from '@/lib/db'
+import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 
 interface CheckinNotificationResult {
   success: boolean
@@ -170,6 +171,12 @@ export async function sendCheckinNotifications(): Promise<CheckinNotificationRes
         const schedule = profile?.checkinSchedule
 
         if (!profile || !schedule) continue
+
+        // Check premium access - only premium users receive check-in notifications
+        const hasPremium = await subscriptionValidator.hasPremiumAccess(user.id)
+        if (!hasPremium) {
+          continue
+        }
 
         // Get user's timezone (default to UTC)
         const userTimezone = profile.timezone || 'UTC'

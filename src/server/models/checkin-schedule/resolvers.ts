@@ -6,6 +6,8 @@ import {
 } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
 
+import { checkPremiumAccess } from '../subscription/factory'
+
 import {
   calculateNextCheckinDate,
   completeCheckin,
@@ -106,6 +108,13 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not authenticated')
     }
 
+    // Check premium access - required for check-in schedules
+
+    const hasPremium = await checkPremiumAccess(context)
+    if (!hasPremium) {
+      return null
+    }
+
     return await getUserCheckinSchedule(userSession.user.id)
   },
 
@@ -113,6 +122,18 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     const userSession = context.user
     if (!userSession) {
       throw new Error('User not authenticated')
+    }
+
+    // Check premium access - required for check-in schedules
+    const hasPremium = await checkPremiumAccess(context)
+    if (!hasPremium) {
+      return {
+        hasSchedule: false,
+        schedule: null,
+        nextCheckinDate: null,
+        isCheckinDue: false,
+        daysSinceLastCheckin: null,
+      }
     }
 
     const schedule = await getUserCheckinSchedule(userSession.user.id)

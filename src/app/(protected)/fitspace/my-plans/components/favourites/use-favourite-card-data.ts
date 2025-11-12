@@ -54,7 +54,7 @@ export function useFavouriteCardData({
     if (!workoutStatus.canStart) {
       return {
         disabled: true,
-        variant: 'tertiary',
+        variant: 'default',
         text: 'Start',
         subtext: "Can't be activated because you have an active training plan.",
         loading: isStarting,
@@ -64,7 +64,7 @@ export function useFavouriteCardData({
     if (workoutStatus.needsConfirmation) {
       return {
         disabled: isStarting,
-        variant: 'tertiary',
+        variant: 'default',
         text: 'Replace & Start',
         subtext:
           'You have a workout planned for today. Starting a favourite will replace it.',

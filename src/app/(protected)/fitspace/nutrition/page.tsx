@@ -8,10 +8,11 @@ import { ExtendHeader } from '@/components/extend-header'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { MacroCard } from '@/components/macro-card/macro-card'
 import { ButtonLink } from '@/components/ui/button-link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useUser } from '@/context/user-context'
 import {
   useGetMyMacroTargetsQuery,
+  useGetMyNutritionPlanQuery,
   useGetMyNutritionPlansQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
@@ -27,6 +28,15 @@ export default function NutritionPage() {
     useGetMyNutritionPlansQuery()
   const macroTargets = data?.getMyMacroTargets
 
+  const { data: nutritionPlanData, isLoading: isNutritionPlanLoading } =
+    useGetMyNutritionPlanQuery(
+      { id: selectedPlanId! },
+      {
+        enabled: !!selectedPlanId,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      },
+    )
+
   const handlePlanSelect = (planId: string | null) => {
     setSelectedPlanId(planId)
   }
@@ -38,78 +48,82 @@ export default function NutritionPage() {
     macroTargets?.carbs ||
     macroTargets?.fat
 
-  const isLoadingAll = isLoading || isNutritionPlansLoading
+  const isLoadingAll =
+    isLoading || isNutritionPlansLoading || isNutritionPlanLoading
 
-  if (isLoadingAll) {
-    return (
-      <ExtendHeader
-        headerChildren={
-          <div className="dark space-y-6 pt-4 pb-4">
-            <LoadingSkeleton count={1} cardVariant="tertiary" />
-          </div>
-        }
-      >
-        <div className="container-hypertro mx-auto space-y-4">
-          <LoadingSkeleton count={4} />
-        </div>
-      </ExtendHeader>
-    )
-  }
+  // if (isLoadingAll) {
+  //   return (
+  //     <ExtendHeader
+  //       headerChildren={
+  //         <div className="dark space-y-6 pt-4 pb-4">
+  //           <LoadingSkeleton count={1} cardVariant="tertiary" />
+  //         </div>
+  //       }
+  //     >
+  //       <div className="container-hypertro mx-auto space-y-4">
+  //         <LoadingSkeleton count={4} />
+  //       </div>
+  //     </ExtendHeader>
+  //   )
+  // }
 
-  const showEmptyState = !hasMacroTargets && !hasPlans
+  const showEmptyState = !hasMacroTargets && !hasPlans && !isLoadingAll
 
   return (
     <ExtendHeader
       headerChildren={
         <div className="dark space-y-6 pt-4 pb-4">
-          {hasMacroTargets && (
-            <div className="grid grid-cols-4 gap-2">
-              {(isLoading || macroTargets?.calories) && (
-                <MacroCard
-                  label="Calories"
-                  value={macroTargets?.calories || '0000'}
-                  className="text-sidebar-foreground"
-                  isLoading={isLoading}
-                />
-              )}
+          <div className="grid grid-cols-4 gap-2">
+            {(isLoading || macroTargets?.calories) && (
+              <MacroCard
+                label="Calories"
+                value={macroTargets?.calories || '0000'}
+                className="text-sidebar-foreground"
+                isLoading={isLoading}
+              />
+            )}
 
-              {(isLoading || macroTargets?.protein) && (
-                <MacroCard
-                  label="Protein"
-                  value={macroTargets?.protein || '000'}
-                  unit="g"
-                  className="text-blue-500"
-                  isLoading={isLoading}
-                />
-              )}
+            {(isLoading || macroTargets?.protein) && (
+              <MacroCard
+                label="Protein"
+                value={macroTargets?.protein || '000'}
+                unit="g"
+                className="text-blue-500"
+                isLoading={isLoading}
+              />
+            )}
 
-              {(isLoading || macroTargets?.carbs) && (
-                <MacroCard
-                  label="Carbs"
-                  value={macroTargets?.carbs || '000'}
-                  unit="g"
-                  className="text-green-500"
-                  isLoading={isLoading}
-                />
-              )}
+            {(isLoading || macroTargets?.carbs) && (
+              <MacroCard
+                label="Carbs"
+                value={macroTargets?.carbs || '000'}
+                unit="g"
+                className="text-green-500"
+                isLoading={isLoading}
+              />
+            )}
 
-              {(isLoading || macroTargets?.fat) && (
-                <MacroCard
-                  label="Fat"
-                  value={macroTargets?.fat || '000'}
-                  unit="g"
-                  className="text-yellow-500"
-                  isLoading={isLoading}
-                />
-              )}
-            </div>
+            {(isLoading || macroTargets?.fat) && (
+              <MacroCard
+                label="Fat"
+                value={macroTargets?.fat || '000'}
+                unit="g"
+                className="text-yellow-500"
+                isLoading={isLoading}
+              />
+            )}
+          </div>
+          {!isLoadingAll ? (
+            <NutritionPlanSelector
+              onPlanSelect={handlePlanSelect}
+              selectedPlanId={selectedPlanId}
+              nutritionPlans={nutritionPlansData?.nutritionPlans || []}
+              isLoading={isNutritionPlansLoading}
+              nutritionPlan={nutritionPlanData?.nutritionPlan}
+            />
+          ) : (
+            <Skeleton className="h-[40px]" />
           )}
-          <NutritionPlanSelector
-            onPlanSelect={handlePlanSelect}
-            selectedPlanId={selectedPlanId}
-            nutritionPlans={nutritionPlansData?.nutritionPlans || []}
-            isLoading={isNutritionPlansLoading}
-          />
         </div>
       }
       classNameContent="pt-0 px-0"
@@ -135,7 +149,12 @@ export default function NutritionPage() {
           </div>
         )}
 
-        {selectedPlanId && <NutritionPlanViewer planId={selectedPlanId} />}
+        {(selectedPlanId || isNutritionPlanLoading) && (
+          <NutritionPlanViewer
+            isLoading={isNutritionPlanLoading}
+            nutritionPlan={nutritionPlanData?.nutritionPlan}
+          />
+        )}
       </div>
     </ExtendHeader>
   )

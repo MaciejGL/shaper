@@ -1,6 +1,7 @@
 'use client'
 
 import { ExtendHeader } from '@/components/extend-header'
+import { useUser } from '@/context/user-context'
 
 import { BodyMeasurementsProvider } from './components/body-measurements-context'
 import { CheckinScheduleSection } from './components/checkin-schedule/checkin-schedule-section'
@@ -15,6 +16,7 @@ import { MuscleHeatmapSection } from './components/muscle-heatmap/muscle-heatmap
 import { SnapshotsSection } from './components/snapshots-section/snapshots-section'
 
 export default function ProgressPage() {
+  const { hasPremium } = useUser()
   const { data } = useCheckinStatus()
   const { isDismissed } = useCheckinDismissal()
 
@@ -26,10 +28,11 @@ export default function ProgressPage() {
   const isWithinThreeDays = isCheckinWithinThreeDays(nextCheckinDate || null)
 
   const showInHeader =
-    (!hasSchedule && !isDismissed) ||
-    (hasSchedule && (isWithinThreeDays || isCheckinDue))
+    hasPremium &&
+    ((!hasSchedule && !isDismissed) ||
+      (hasSchedule && (isWithinThreeDays || isCheckinDue)))
 
-  const showAtBottom = !showInHeader
+  const showAtBottom = hasPremium && !showInHeader
 
   return (
     <ExtendHeader

@@ -109,7 +109,7 @@ export function FavouriteWorkoutCard({
           value={favourite.id}
           className="bg-card border-border !border rounded-2xl overflow-hidden"
         >
-          <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left transition-colors bg-card-on-card rounded-none">
+          <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left transition-colors rounded-none">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-medium truncate">
@@ -148,6 +148,51 @@ export function FavouriteWorkoutCard({
             <div className="border-t pt-4">
               {showCardHeader && (
                 <CardHeader className="space-y-2 pb-4">
+                  {buttonProps.subtext && (
+                    <Alert
+                      className="flex items-center gap-2 col-span-full"
+                      variant="warning"
+                      withoutTitle
+                      size="sm"
+                    >
+                      <AlertDescription>{buttonProps.subtext}</AlertDescription>
+                    </Alert>
+                  )}
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      size="icon-sm"
+                      onClick={onDelete}
+                      variant="outline"
+                      iconOnly={<Trash2 />}
+                    >
+                      Remove
+                    </Button>
+                    <Button
+                      size="icon-sm"
+                      variant="outline"
+                      iconOnly={<Edit />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowEditMetadata(true)
+                      }}
+                    >
+                      Edit
+                    </Button>
+
+                    {!isEmpty && (
+                      <Button
+                        onClick={onStart}
+                        size="sm"
+                        variant={buttonProps.variant}
+                        disabled={buttonProps.disabled}
+                        loading={buttonProps.loading}
+                        iconEnd={<ChevronRight />}
+                      >
+                        {buttonProps.text}
+                      </Button>
+                    )}
+                  </div>
+
                   <div className="flex justify-between">
                     {favourite.description && (
                       <p className="text-sm text-muted-foreground line-clamp-2">
@@ -169,7 +214,7 @@ export function FavouriteWorkoutCard({
                 </CardHeader>
               )}
 
-              <CardContent className="pt-0 pb-4 space-y-4">
+              <CardContent className="pt-0  space-y-4">
                 {isEmpty ? (
                   <EmptyFavouriteOptions
                     onOpenAiWizard={() => setShowAiWizard(true)}
@@ -179,7 +224,7 @@ export function FavouriteWorkoutCard({
                   <>
                     {/* Exercise Preview */}
                     <div className="space-y-1">
-                      <h4 className="text-sm font-medium">Exercises</h4>
+                      {/* <h4 className="text-sm font-medium">Exercises</h4> */}
                       <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
@@ -219,53 +264,6 @@ export function FavouriteWorkoutCard({
                   </>
                 )}
               </CardContent>
-              <CardFooter className="grid grid-cols-[auto_auto_1fr] gap-2 border-t [.border-t]:pt-4">
-                {buttonProps.subtext && (
-                  <Alert
-                    className="flex items-center gap-2 col-span-full"
-                    variant="warning"
-                    withoutTitle
-                    size="sm"
-                  >
-                    <AlertDescription>{buttonProps.subtext}</AlertDescription>
-                  </Alert>
-                )}
-
-                <Button
-                  size="sm"
-                  onClick={onDelete}
-                  variant="tertiary"
-                  iconStart={<Trash2 />}
-                >
-                  Remove
-                </Button>
-                <Button
-                  size="sm"
-                  variant="tertiary"
-                  className="ml-auto"
-                  iconStart={<Edit />}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowEditMetadata(true)
-                  }}
-                >
-                  Edit
-                </Button>
-
-                {!isEmpty && (
-                  <Button
-                    onClick={onStart}
-                    size="sm"
-                    variant={buttonProps.variant}
-                    disabled={buttonProps.disabled}
-                    loading={buttonProps.loading}
-                    iconEnd={<ChevronRight />}
-                    className="ml-auto"
-                  >
-                    {buttonProps.text}
-                  </Button>
-                )}
-              </CardFooter>
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -350,9 +348,9 @@ function SortableExerciseItem({
       <span className="text-sm text-muted-foreground w-4 shrink-0">
         {index + 1}.
       </span>
-      <Card variant="tertiary" className="flex-1 p-2 gap-3">
+      <Card variant="tertiary" className="flex-1 p-2 gap-2">
         <CardHeader className="flex items-center justify-between p-0">
-          <p className="justify-start whitespace-normal font-medium text-base">
+          <p className="justify-start whitespace-normal font-medium font-base">
             {exercise.name}
           </p>
           <Button
@@ -370,12 +368,13 @@ function SortableExerciseItem({
         </CardHeader>
         <CardContent className="p-0">
           <div className="flex items-center gap-0.5 shrink-0">
-            <div className="grid grid-cols-[1fr_auto] items-center gap-4 ml-auto">
-              <p>Sets</p>
-              <div className="grid grid-cols-3 items-center gap-0.5 bg-card rounded-lg p-0.5">
+            <div className="grid grid-cols-[1fr_auto] justify-between items-center gap-4 w-full">
+              <p className="text-sm">Sets</p>
+              <div className="grid grid-cols-3 items-center gap-0.5 bg-card rounded-xl p-0.5">
                 <Button
                   size="icon-sm"
                   variant="tertiary"
+                  className="rounded-xl"
                   iconOnly={<MinusIcon />}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -391,6 +390,7 @@ function SortableExerciseItem({
                 />
                 <Button
                   size="icon-sm"
+                  className="rounded-xl"
                   variant="tertiary"
                   iconOnly={<PlusIcon />}
                   onClick={(e) => {

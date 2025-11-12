@@ -9,11 +9,10 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { CardContent, CardHeader } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { useCookingUnits } from '@/lib/cooking-units'
-import { cn } from '@/lib/utils'
 
 interface DayMealsAccordionProps {
   day: NonNullable<GQLGetMyNutritionPlanQuery['nutritionPlan']>['days'][number]
@@ -49,14 +48,12 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                 <AccordionItem
                   key={planMeal.id}
                   value={planMeal.id}
-                  className="rounded-xl dark:bg-card-on-card dark:border-none border last:border-b"
+                  className="rounded-2xl dark:bg-card-on-card dark:border-none border last:border-b"
                 >
                   <AccordionTrigger className="p-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full mr-4">
                       <div className="flex items-center gap-3">
-                        <span className="text-left">
-                          {`${index + 1}. ${meal.name}`}
-                        </span>
+                        <span className="text-left">{`${meal.name}`}</span>
                       </div>
                     </div>
                   </AccordionTrigger>
@@ -197,24 +194,20 @@ export function DayMealsHeader({
   loading?: boolean
 }) {
   return (
-    <div className="flex items-center gap-2 mb-2">
-      {/* <SectionIcon icon={ChefHat} size="sm" variant="amber" /> */}
-      <p className="text-lg font-medium">Meals</p>
-      <div className="grid grid-cols-[auto_auto_auto_auto] gap-1 w-max ml-auto">
-        <Badge variant="primary" isLoading={loading}>
-          {Math.round(day?.dailyMacros?.calories || 0)} cal
-        </Badge>
-        <Badge variant="info" isLoading={loading}>
-          {Math.round(day?.dailyMacros?.protein || 0)} P
-        </Badge>
+    <div className="grid grid-cols-[auto_auto_auto_auto] gap-1 w-max mb-2">
+      <Badge variant="primary" isLoading={loading} size="lg">
+        {Math.round(day?.dailyMacros?.calories || 0)} cal
+      </Badge>
+      <Badge variant="info" isLoading={loading} size="lg">
+        {Math.round(day?.dailyMacros?.protein || 0)} P
+      </Badge>
 
-        <Badge variant="success" isLoading={loading}>
-          {Math.round(day?.dailyMacros?.carbs || 0)} C
-        </Badge>
-        <Badge variant="warning" isLoading={loading}>
-          {Math.round(day?.dailyMacros?.fat || 0)} F
-        </Badge>
-      </div>
+      <Badge variant="success" isLoading={loading} size="lg">
+        {Math.round(day?.dailyMacros?.carbs || 0)} C
+      </Badge>
+      <Badge variant="warning" isLoading={loading} size="lg">
+        {Math.round(day?.dailyMacros?.fat || 0)} F
+      </Badge>
     </div>
   )
 }

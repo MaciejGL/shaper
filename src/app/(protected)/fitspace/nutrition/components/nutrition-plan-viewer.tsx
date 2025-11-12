@@ -1,66 +1,32 @@
 'use client'
 
-import { Download, Salad } from 'lucide-react'
+import { Salad } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Divider } from '@/components/divider'
 import { EmptyStateCard } from '@/components/empty-state-card'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import {
-  PrimaryTabList,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
-import { useGetMyNutritionPlanQuery } from '@/generated/graphql-client'
-import { downloadPDF, generateFilename } from '@/lib/pdf/pdf-generator'
+import { Skeleton } from '@/components/ui/skeleton'
+import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
+import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 
 import { DayMealsAccordion, DayMealsHeader } from './day-meals-accordion'
-import { NutritionPlanPDF } from './pdf/nutrition-plan-pdf'
 import { ShoppingList } from './shopping-list'
 
 interface NutritionPlanViewerProps {
-  planId: string
+  nutritionPlan?: GQLGetMyNutritionPlanQuery['nutritionPlan'] | null
+  isLoading: boolean
 }
 
-export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
-  const { data, isLoading } = useGetMyNutritionPlanQuery(
-    { id: planId },
-    {
-      enabled: !!planId,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  )
-
+export function NutritionPlanViewer({
+  isLoading,
+  nutritionPlan,
+}: NutritionPlanViewerProps) {
   const [activeDay, setActiveDay] = useState<string>('')
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
-  const nutritionPlan = data?.nutritionPlan
   const days = useMemo(() => nutritionPlan?.days || [], [nutritionPlan])
 
-  const handleExportPDF = async () => {
-    if (!nutritionPlan) return
-
-    setIsGeneratingPDF(true)
-    try {
-      const filename = generateFilename({
-        prefix: `Nutrition Plan - ${nutritionPlan.name}`,
-        skipTimestamp: true,
-      })
-
-      await downloadPDF(
-        <NutritionPlanPDF nutritionPlan={nutritionPlan} />,
-        filename,
-      )
-    } catch (error) {
-      console.error('Failed to generate PDF:', error)
-    } finally {
-      setIsGeneratingPDF(false)
-    }
-  }
   useEffect(() => {
     if (days.length > 0 && !activeDay) {
       setActiveDay(days[0].dayNumber.toString())
@@ -107,20 +73,9 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
           >
             <div className="space-y-6">
               <DayMealsAccordion day={day} />
-              <Button
-                variant="tertiary"
-                iconStart={<Download />}
-                onClick={handleExportPDF}
-                loading={isGeneratingPDF}
-                disabled={isGeneratingPDF}
-                className="w-full"
-              >
-                Export to PDF
-              </Button>
+              <Divider className="mb-6" />
 
-              {/* Shopping List */}
-              <Divider className="my-8" />
-              <ShoppingList day={day} planId={planId} />
+              <ShoppingList day={day} planId={nutritionPlan.id} />
             </div>
           </TabsContent>
         ))}
@@ -135,32 +90,16 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
   )
 }
 
-export function NutritionPlanViewerLoading() {
+function NutritionPlanViewerLoading() {
   return (
-    <div className="space-y-4 ">
-      <Tabs value="0">
-        <div className="flex items-center gap-2 max-w-screen overflow-x-auto hide-scrollbar mb-4">
-          <PrimaryTabList
-            options={Array.from({ length: 7 }).map((_, index) => ({
-              label: `Day ${index + 1}`,
-              value: index.toString(),
-            }))}
-            onClick={() => {}}
-            active="0"
-            size="lg"
-            className="text-sm"
-            classNameButton="text-sm px-3"
-          />
+    <Tabs value="0">
+      <Skeleton className="h-[46px] w-full rounded-[14px] mb-4" />
+      <TabsContent value="0" className="px-4">
+        <DayMealsHeader loading />
+        <div className="space-y-2">
+          <LoadingSkeleton variant="sm" count={3} cardVariant="tertiary" />
         </div>
-        <TabsContent value="0" className="px-4">
-          <Card className="p-4">
-            <DayMealsHeader loading />
-            <div className="space-y-2">
-              <LoadingSkeleton variant="sm" count={3} cardVariant="tertiary" />
-            </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+      </TabsContent>
+    </Tabs>
   )
 }

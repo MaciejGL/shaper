@@ -117,7 +117,10 @@ const DUMMY_WEEK = {
 
 export function WorkoutPageSkeleton() {
   return (
-    <ExtendHeader headerChildren={<SkeletonNavigation />}>
+    <ExtendHeader
+      headerChildren={<SkeletonNavigation />}
+      classNameHeader="px-2 pt-2"
+    >
       <SkeletonExercises />
     </ExtendHeader>
   )
@@ -125,7 +128,7 @@ export function WorkoutPageSkeleton() {
 
 export function SkeletonNavigation() {
   return (
-    <div className={cn('px-2 pb-2')}>
+    <div className={cn('pb-2')}>
       <SkeletonWeekSelector />
       <SkeletonDaySelector />
     </div>
@@ -135,22 +138,9 @@ export function SkeletonNavigation() {
 function SkeletonWeekSelector() {
   return (
     <div className="flex justify-between gap-2">
-      <Select disabled>
-        <SelectTrigger
-          suppressHydrationWarning
-          size="sm"
-          variant="tertiary"
-          className={cn(
-            'dark [&_svg]:data-[icon=mark]:size-3.5 truncate text-sm font-medium flex items-center gap-2',
-            'masked-placeholder-text',
-          )}
-        >
-          <SelectValue placeholder="Loading workout..." />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="skeleton">Week 1</SelectItem>
-        </SelectContent>
-      </Select>
+      <Button variant="tertiary" size="sm" className="masked-placeholder-text">
+        Week 1 Loading...
+      </Button>
     </div>
   )
 }
@@ -173,7 +163,7 @@ function SkeletonDay() {
     <div>
       <div
         className={cn(
-          'dark size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80',
+          'dark size-12 shrink-0 rounded-xl flex-center flex-col text-primary transition-all dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80',
           'masked-placeholder-text',
         )}
       >
