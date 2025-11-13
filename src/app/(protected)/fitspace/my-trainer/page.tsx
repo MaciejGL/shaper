@@ -20,11 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  PrimaryTabList,
-  Tabs,
-  TabsContent,
-} from '@/components/ui/tabs'
+import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import {
   GQLGetMyTrainerQuery,

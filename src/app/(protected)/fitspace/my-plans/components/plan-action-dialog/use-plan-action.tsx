@@ -109,31 +109,32 @@ export function usePlanAction() {
         (dialogState.action === 'activate' && data.startDate) ||
         (dialogState.action === 'activate' && dialogState.plan.startDate)
       ) {
-        // Activate the plan
-        await activatePlan({
-          planId: dialogState.plan.id,
-          startDate: data.startDate
-            ? format(data.startDate, 'yyyy-MM-dd')
-            : format(new Date(), 'yyyy-MM-dd'),
-          resume: dialogState.plan.startDate ? true : false,
-        })
-
-        // Create check-in schedule if requested
-        if (data.scheduleCheckins && data.checkinSchedule) {
-          await createCheckinSchedule({
-            input: {
-              frequency: data.checkinSchedule.frequency as GQLCheckinFrequency,
-              dayOfWeek:
-                data.checkinSchedule.frequency !== 'MONTHLY'
-                  ? data.checkinSchedule.dayOfWeek
-                  : undefined,
-              dayOfMonth:
-                data.checkinSchedule.frequency === 'MONTHLY'
-                  ? data.checkinSchedule.dayOfMonth
-                  : undefined,
-            },
-          })
-        }
+        await Promise.all([
+          activatePlan({
+            planId: dialogState.plan.id,
+            startDate: data.startDate
+              ? format(data.startDate, 'yyyy-MM-dd')
+              : format(new Date(), 'yyyy-MM-dd'),
+            resume: dialogState.plan.startDate ? true : false,
+          }),
+          data.scheduleCheckins && data.checkinSchedule
+            ? createCheckinSchedule({
+                input: {
+                  frequency: data.checkinSchedule
+                    .frequency as GQLCheckinFrequency,
+                  dayOfWeek:
+                    data.checkinSchedule.frequency !== 'MONTHLY'
+                      ? data.checkinSchedule.dayOfWeek
+                      : undefined,
+                  dayOfMonth:
+                    data.checkinSchedule.frequency === 'MONTHLY'
+                      ? data.checkinSchedule.dayOfMonth
+                      : undefined,
+                },
+              })
+            : Promise.resolve(),
+        ])
+        router.push('/fitspace/workout')
       } else if (dialogState.action === 'pause') {
         await pausePlan({ planId: dialogState.plan.id })
       } else if (dialogState.action === 'close') {

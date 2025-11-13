@@ -58,11 +58,9 @@ export function TrainerSharedNotesSection() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground">
-              Unable to load trainer notes.
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Unable to load trainer notes.
+          </p>
         </CardContent>
       </Card>
     )
@@ -78,15 +76,9 @@ export function TrainerSharedNotesSection() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground">
-              No notes from your trainer yet.
-            </p>
-            <p className="text-xs text-muted-foreground mt-2">
-              Your trainer can share exercise notes with you from workout
-              sessions.
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            No notes from your trainer yet.
+          </p>
         </CardContent>
       </Card>
     )

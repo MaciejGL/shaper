@@ -212,15 +212,17 @@ function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
                 count={pausedPlans.length}
               />
             </AccordionTrigger>
-            <AccordionContent variant="grid" className="space-y-2 p-2 pr-0">
-              {pausedPlans.map(({ plan }) => (
-                <PlanCard
-                  key={plan.id}
-                  plan={plan}
-                  onClick={onPlanClick}
-                  status={PlanStatus.Paused}
-                />
-              ))}
+            <AccordionContent variant="grid" className="p-2 pr-0">
+              <div className="space-y-2 ">
+                {pausedPlans.map(({ plan }) => (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    onClick={onPlanClick}
+                    status={PlanStatus.Paused}
+                  />
+                ))}
+              </div>
             </AccordionContent>
           </AccordionItem>
         ) : null}
