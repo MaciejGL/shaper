@@ -6,7 +6,6 @@ import {
   ArrowUp,
   ChevronLeft,
   ChevronRight,
-  Scale,
   TrendingUpDown,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -33,6 +32,19 @@ export function BodyComposition({ summary }: BodyCompositionProps) {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const bodyComp = summary.bodyComposition
+  // Track carousel index
+  React.useEffect(() => {
+    if (!carouselApi) return
+
+    const onSelect = () => {
+      setCurrentImageIndex(carouselApi.selectedScrollSnap())
+    }
+
+    carouselApi.on('select', onSelect)
+    return () => {
+      carouselApi.off('select', onSelect)
+    }
+  }, [carouselApi])
 
   if (!bodyComp) {
     return null
@@ -67,20 +79,6 @@ export function BodyComposition({ summary }: BodyCompositionProps) {
       endUrl: bodyComp.endSnapshot?.image3Url,
     },
   ].filter((img) => img.startUrl || img.endUrl)
-
-  // Track carousel index
-  React.useEffect(() => {
-    if (!carouselApi) return
-
-    const onSelect = () => {
-      setCurrentImageIndex(carouselApi.selectedScrollSnap())
-    }
-
-    carouselApi.on('select', onSelect)
-    return () => {
-      carouselApi.off('select', onSelect)
-    }
-  }, [carouselApi])
 
   return (
     <motion.div
@@ -325,8 +323,12 @@ function ImageComparisonSlider({
               alt={`End - ${endDate}`}
               fill
               className="object-cover select-none"
-              onContextMenu={(e) => e.preventDefault()}
-              onDragStart={(e) => e.preventDefault()}
+              onContextMenu={(e: React.MouseEvent<HTMLImageElement>) =>
+                e.preventDefault()
+              }
+              onDragStart={(e: React.DragEvent<HTMLImageElement>) =>
+                e.preventDefault()
+              }
               draggable={false}
             />
           )}
@@ -342,8 +344,12 @@ function ImageComparisonSlider({
                 alt={`Start - ${startDate}`}
                 fill
                 className="object-cover select-none"
-                onContextMenu={(e) => e.preventDefault()}
-                onDragStart={(e) => e.preventDefault()}
+                onContextMenu={(e: React.MouseEvent<HTMLImageElement>) =>
+                  e.preventDefault()
+                }
+                onDragStart={(e: React.DragEvent<HTMLImageElement>) =>
+                  e.preventDefault()
+                }
                 draggable={false}
               />
             </div>

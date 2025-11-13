@@ -12,7 +12,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
-import { useMobileApp } from '@/components/mobile-app-bridge'
 import { useFitspaceGetWorkoutNavigationQuery } from '@/generated/graphql-client'
 import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
 import { cn } from '@/lib/utils'
@@ -29,7 +28,6 @@ interface MobileNavProps {
 
 export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
   const pathname = usePathname()
-  const { isNativeApp } = useMobileApp()
   const isKeyboardVisible = useKeyboardVisible()
   const [clickedItem, setClickedItem] = useState<string | null>(null)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(

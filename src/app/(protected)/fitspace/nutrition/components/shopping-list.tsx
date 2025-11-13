@@ -1,18 +1,17 @@
 'use client'
 
-import { ChevronDown, Minus, Plus, ShoppingCart } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { ChevronDown, Minus, Plus } from 'lucide-react'
+import { startTransition, useEffect, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { useCookingUnits } from '@/lib/cooking-units'
 import { cn } from '@/lib/utils'
@@ -48,7 +47,9 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as string[]
-        setCheckedItems(new Set(parsed))
+        startTransition(() => {
+          setCheckedItems(new Set(parsed))
+        })
       } catch {
         // Ignore invalid JSON
       }

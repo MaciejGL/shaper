@@ -1,21 +1,20 @@
-import { FlatCompat } from '@eslint/eslintrc'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
-import { dirname, resolve } from 'path'
-import { fileURLToPath } from 'url'
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
+import nextTypescript from 'eslint-config-next/typescript'
+import { resolve } from 'path'
+
+// import { fileURLToPath } from 'url'
 
 const project = resolve(process.cwd(), 'tsconfig.json')
 
 // import tailwindcssPlugin from 'eslint-plugin-tailwindcss';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
+// const __filename = fileURLToPath(import.meta.url)
+// const __dirname = dirname(__filename)
 
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  ...nextCoreWebVitals,
+  ...nextTypescript,
   {
     files: ['src/generated/**/*.{ts,tsx}'],
     rules: {
@@ -23,7 +22,6 @@ const eslintConfig = [
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
-
   {
     files: ['**/*.{ts,tsx}'],
     plugins: {
@@ -70,7 +68,7 @@ const eslintConfig = [
       ],
       'import/no-named-as-default-member': 'off',
       'import/no-named-as-default': 'off',
-      // 'tailwindcss/no-contradicting-classname': 'warn',
+      'tailwindcss/no-contradicting-classname': 'off',
       // 'tailwindcss/no-custom-classname': 'warn',
     },
   },
@@ -94,6 +92,7 @@ const eslintConfig = [
       '*generated*.*',
       'node_modules/',
       'dist/',
+      'src/__tests__/**',
     ],
   },
 ]

@@ -1,14 +1,13 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, BicepsFlexed, TrendingUp } from 'lucide-react'
+import { ArrowRight, BicepsFlexed } from 'lucide-react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetPlanSummaryQuery } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
-import { cn } from '@/lib/utils'
 
 import { getTopProgressions } from '../../utils/summary-helpers'
 

@@ -228,6 +228,7 @@ describe('navigation-utils', () => {
         isRestDay: false,
         completedAt: null,
         scheduledAt: null,
+        exercisesCount: 0,
       },
       {
         id: 'd2',
@@ -235,6 +236,7 @@ describe('navigation-utils', () => {
         isRestDay: false,
         completedAt: null,
         scheduledAt: null,
+        exercisesCount: 0,
       },
       {
         id: 'd3',
@@ -242,6 +244,7 @@ describe('navigation-utils', () => {
         isRestDay: false,
         completedAt: null,
         scheduledAt: null,
+        exercisesCount: 0,
       },
     ]
 
@@ -265,6 +268,7 @@ describe('navigation-utils', () => {
           isRestDay: false,
           completedAt: '2025-10-01T00:00:00Z',
           scheduledAt: null,
+          exercisesCount: 0,
         },
         {
           id: 'd2',
@@ -272,6 +276,7 @@ describe('navigation-utils', () => {
           isRestDay: false,
           completedAt: null,
           scheduledAt: null,
+          exercisesCount: 0,
         },
         {
           id: 'd3',
@@ -279,6 +284,7 @@ describe('navigation-utils', () => {
           isRestDay: false,
           completedAt: null,
           scheduledAt: null,
+          exercisesCount: 0,
         },
       ]
 
@@ -294,6 +300,7 @@ describe('navigation-utils', () => {
           isRestDay: false,
           completedAt: '2025-10-01T00:00:00Z',
           scheduledAt: null,
+          exercisesCount: 0,
         },
         {
           id: 'd2',
@@ -301,6 +308,7 @@ describe('navigation-utils', () => {
           isRestDay: false,
           completedAt: '2025-10-02T00:00:00Z',
           scheduledAt: null,
+          exercisesCount: 0,
         },
       ]
 
@@ -343,6 +351,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Monday
               {
                 id: 'd2',
@@ -350,6 +359,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Tuesday
               {
                 id: 'd3',
@@ -357,6 +367,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Wednesday
               {
                 id: 'd4',
@@ -364,6 +375,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Thursday
               {
                 id: 'd5',
@@ -371,6 +383,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Friday
             ],
           },
@@ -407,6 +420,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Monday
               {
                 id: 'd2',
@@ -414,6 +428,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Tuesday
               {
                 id: 'd3',
@@ -421,6 +436,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Wednesday
               {
                 id: 'd4',
@@ -428,6 +444,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Thursday
               {
                 id: 'd5',
@@ -435,6 +452,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Friday
             ],
           },
@@ -450,6 +468,7 @@ describe('navigation-utils', () => {
                 isRestDay: false,
                 completedAt: null,
                 scheduledAt: null,
+                exercisesCount: 0,
               }, // Monday
             ],
           },

@@ -677,8 +677,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     return true
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  activateUser: async (_, { userId }) => {
+  activateUser: async () => {
     await requireAdminUser()
 
     // For now, activation just means the user can log in normally

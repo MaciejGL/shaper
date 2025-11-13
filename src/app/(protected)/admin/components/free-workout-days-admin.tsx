@@ -466,11 +466,6 @@ export function FreeWorkoutDaysAdmin() {
                       <FreeWorkoutPreviewCard
                         workoutType={selectedDayData.workoutType || 'Workout'}
                         planTitle={selectedPlan?.title || 'Training Plan'}
-                        trainerName={
-                          selectedPlan?.createdBy?.firstName ||
-                          `${selectedPlan?.createdBy?.firstName || ''} ${selectedPlan?.createdBy?.lastName || ''}`.trim() ||
-                          'Unknown Trainer'
-                        }
                         exerciseCount={selectedDayData.exercises?.length || 0}
                         estimatedDuration={estimatedDuration}
                         heroImageUrl={heroImageUrl}
@@ -609,11 +604,6 @@ export function FreeWorkoutDaysAdmin() {
                       <FreeWorkoutPreviewCard
                         workoutType={selectedDayData.workoutType || 'Workout'}
                         planTitle={selectedPlan?.title || 'Training Plan'}
-                        trainerName={
-                          selectedPlan?.createdBy?.firstName ||
-                          `${selectedPlan?.createdBy?.firstName || ''} ${selectedPlan?.createdBy?.lastName || ''}`.trim() ||
-                          'Unknown Trainer'
-                        }
                         exerciseCount={selectedDayData.exercises?.length || 0}
                         estimatedDuration={estimatedDuration}
                         heroImageUrl={heroImageUrl}
@@ -655,7 +645,6 @@ export function FreeWorkoutDaysAdmin() {
 interface FreeWorkoutPreviewCardProps {
   workoutType: string
   planTitle: string
-  trainerName: string
   exerciseCount: number
   estimatedDuration: number | null
   heroImageUrl: string
@@ -665,7 +654,6 @@ interface FreeWorkoutPreviewCardProps {
 function FreeWorkoutPreviewCard({
   workoutType,
   planTitle,
-  trainerName,
   exerciseCount,
   estimatedDuration,
   heroImageUrl,

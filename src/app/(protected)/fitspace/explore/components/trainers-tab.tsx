@@ -11,7 +11,6 @@ import { TrainerCard, TrainerData } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Card, CardContent } from '@/components/ui/card'
 import {
-  GQLGetFeaturedTrainersQuery,
   useCancelCoachingRequestMutation,
   useCreateCoachingRequestMutation,
   useGetFeaturedTrainersQuery,

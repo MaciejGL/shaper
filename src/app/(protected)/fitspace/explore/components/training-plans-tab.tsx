@@ -2,9 +2,9 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Clock, Crown, Dumbbell, Star, Users } from 'lucide-react'
+import { Dumbbell, Star, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { startTransition, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
@@ -82,8 +82,10 @@ export function TrainingPlansTab({
         (p) => p.id === initialPlanId,
       )
       if (plan) {
-        setSelectedPlan(plan)
-        setIsPreviewOpen(true)
+        startTransition(() => {
+          setSelectedPlan(plan)
+          setIsPreviewOpen(true)
+        })
       }
     }
   }, [initialPlanId, data])

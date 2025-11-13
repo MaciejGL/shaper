@@ -1,7 +1,5 @@
 'use client'
 
-import { ChefHat } from 'lucide-react'
-
 import {
   Accordion,
   AccordionContent,
@@ -10,7 +8,6 @@ import {
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { CardContent, CardHeader } from '@/components/ui/card'
-import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { useCookingUnits } from '@/lib/cooking-units'
 
@@ -40,7 +37,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
         <Accordion type="multiple" className="space-y-2">
           {meals
             .sort((a, b) => a.orderIndex - b.orderIndex)
-            .map((planMeal, index) => {
+            .map((planMeal) => {
               const meal = planMeal.meal
               const macros = planMeal.adjustedMacros
 
