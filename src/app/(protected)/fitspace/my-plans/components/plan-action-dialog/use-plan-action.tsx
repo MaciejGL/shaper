@@ -37,10 +37,6 @@ export function usePlanAction() {
 
   const { mutateAsync: activatePlan, isPending: isActivatingPlan } =
     useActivatePlanMutation({
-      onSuccess: async () => {
-        await queryInvalidation.planStateChange(queryClient)
-        router.refresh()
-      },
       onError: () => {
         toast.error('Failed to activate plan, please try again.')
       },
@@ -104,11 +100,12 @@ export function usePlanAction() {
   }) => {
     if (!dialogState.plan) return
 
+    const isActivateAction =
+      dialogState.action === 'activate' &&
+      (data.startDate || dialogState.plan.startDate)
+
     try {
-      if (
-        (dialogState.action === 'activate' && data.startDate) ||
-        (dialogState.action === 'activate' && dialogState.plan.startDate)
-      ) {
+      if (isActivateAction) {
         await Promise.all([
           activatePlan({
             planId: dialogState.plan.id,
@@ -134,13 +131,17 @@ export function usePlanAction() {
               })
             : Promise.resolve(),
         ])
-        router.push('/fitspace/workout')
       } else if (dialogState.action === 'pause') {
         await pausePlan({ planId: dialogState.plan.id })
       } else if (dialogState.action === 'close') {
         await closePlan({ planId: dialogState.plan.id })
       } else if (dialogState.action === 'delete') {
         await deletePlan({ planId: dialogState.plan.id })
+      }
+      await queryInvalidation.planStateChange(queryClient)
+      router.refresh()
+      if (isActivateAction) {
+        router.push('/fitspace/workout')
       }
     } catch (error) {
       console.error('Plan action error:', error)
