@@ -35,9 +35,6 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
           <SectionIcon icon={BicepsFlexed} size="xs" variant="green" />
           Strength Progress
         </h3>
-        <Badge variant="secondary">
-          Top {topProgressions.length} Improvements
-        </Badge>
       </div>
 
       <motion.div
@@ -88,7 +85,7 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                   />
 
                   {/* Before/After comparison */}
-                  <div className="flex items-center justify-between text-sm bg-card-on-card p-2 rounded-lg">
+                  <div className="flex items-center justify-between text-sm bg-card-on-card p-2 rounded-xl">
                     <div className="flex flex-col">
                       {/* <span className="text-xs text-muted-foreground">
                         Start

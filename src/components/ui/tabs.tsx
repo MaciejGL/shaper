@@ -28,7 +28,7 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: 'bg-card',
-        secondary: cn(' bg-card-on-card'),
+        secondary: cn('bg-card-on-card border'),
       },
       size: {
         sm: 'h-8 rounded-lg',
@@ -69,7 +69,7 @@ function TabsList({
 
 const tabsTriggerVariants = cva(
   cn(
-    ' data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:bg-background text-foreground/80 dark:text-foreground/80 inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-30  [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*="size-"])]:size-4 cursor-pointer',
+    ' data-[state=active]:bg-card data-[state=active]:text-foreground dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:bg-background text-foreground/80 dark:text-foreground/80 inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-30  [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*="size-"])]:size-4 cursor-pointer',
   ),
   {
     variants: {
@@ -157,7 +157,7 @@ function PrimaryTabList<T extends string>({
   return (
     <div
       className={cn(
-        'rounded-[14px] border border-black/15  dark:border-white/10 bg-muted/10 p-[2px] min-w-max w-full',
+        'rounded-[14px] bg-card dark:bg-background border border-black/15  dark:border-white/10 p-[2px] min-w-max w-full',
       )}
     >
       <div className={cn('relative flex', className)}>

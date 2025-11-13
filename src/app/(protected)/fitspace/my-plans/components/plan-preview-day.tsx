@@ -27,7 +27,7 @@ export function PlanPreviewDay({
   ).length
 
   return (
-    <div className="mb-8">
+    <div className="mb-12">
       <h4
         className={cn(
           'text-base font-medium mb-2 bg-card-on-card p-4 rounded-xl flex items-center justify-between',

@@ -125,7 +125,7 @@ export function Exercises({
           </p>
         )}
         <div className="grid grid-flow-col gap-2 bg-background">
-          <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-2xl">
+          <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card border border-border w-full rounded-2xl">
             <Switch
               checked={preferences.trainingView === GQLTrainingView.Advanced}
               onCheckedChange={() =>
@@ -186,7 +186,7 @@ function ExercisesCompleted({
     <Badge
       variant="secondary"
       size="lg"
-      className="w-full bg-card-on-card dark:bg-card-on-card rounded-2xl"
+      className="w-full bg-card border border-border rounded-2xl"
     >
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (

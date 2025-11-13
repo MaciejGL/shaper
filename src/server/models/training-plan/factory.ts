@@ -2091,6 +2091,7 @@ export async function getWorkoutDay(
 
   // Find all previous exercises with matching baseIds (single query)
   // First, try to find exercises within the same plan
+  // LIMIT to last 50 exercises to prevent memory issues with long training history
   const allPreviousExercises = await prisma.trainingExercise.findMany({
     where: {
       baseId: { in: exerciseBaseIds },
@@ -2144,6 +2145,7 @@ export async function getWorkoutDay(
       },
     },
     orderBy: [{ completedAt: 'desc' }],
+    take: 30,
   })
 
   const seenBaseIds = new Set<string>()
@@ -2212,6 +2214,7 @@ export async function getWorkoutDay(
         },
       },
       orderBy: [{ completedAt: 'desc' }],
+      take: 30,
     })
 
     // Add fallback exercises that meet the criteria
@@ -2527,6 +2530,7 @@ export async function getQuickWorkoutDay(
   }
 
   // Find all previous exercises with matching baseIds
+  // LIMIT to last 50 exercises to prevent memory issues
   const allPreviousExercises = await prisma.trainingExercise.findMany({
     where: {
       baseId: { in: exerciseBaseIds },
@@ -2577,6 +2581,7 @@ export async function getQuickWorkoutDay(
       { day: { week: { weekNumber: 'desc' } } },
       { day: { dayOfWeek: 'desc' } },
     ],
+    take: 30,
   })
 
   // Group by baseId and keep only the most recent occurrence

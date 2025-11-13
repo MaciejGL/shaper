@@ -42,11 +42,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
               const macros = planMeal.adjustedMacros
 
               return (
-                <AccordionItem
-                  key={planMeal.id}
-                  value={planMeal.id}
-                  className="rounded-2xl dark:bg-card-on-card dark:border-none border last:border-b"
-                >
+                <AccordionItem key={planMeal.id} value={planMeal.id}>
                   <AccordionTrigger className="p-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full mr-4">
                       <div className="flex items-center gap-3">
@@ -55,7 +51,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                     </div>
                   </AccordionTrigger>
 
-                  <AccordionContent className="px-4 pb-4">
+                  <AccordionContent className="p-4">
                     <div className="space-y-6">
                       {/* Meal Description */}
                       {meal.description && (
@@ -105,7 +101,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                       </div>
 
                       {/* Ingredients */}
-                      <div>
+                      <div className="p-4 bg-card-on-card rounded-xl">
                         <h4 className="font-medium text-base mb-3 flex items-center gap-2">
                           Ingredients
                         </h4>

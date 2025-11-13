@@ -98,7 +98,7 @@ export function PlanDetailsDrawer({
                   <div className="flex items-center gap-2 flex-wrap">
                     <PlanStatusBadge status={status} plan={plan} />
                     {plan.difficulty && (
-                      <Badge variant="secondary" className="capitalize">
+                      <Badge variant="outline" className="capitalize">
                         {plan.difficulty.toLowerCase()}
                       </Badge>
                     )}

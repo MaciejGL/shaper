@@ -105,11 +105,8 @@ export function FavouriteWorkoutCard({
   return (
     <>
       <Accordion type="single" collapsible>
-        <AccordionItem
-          value={favourite.id}
-          className="bg-card border-border !border rounded-2xl overflow-hidden"
-        >
-          <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left transition-colors rounded-none">
+        <AccordionItem value={favourite.id}>
+          <AccordionTrigger variant="default">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-medium truncate">
@@ -145,7 +142,7 @@ export function FavouriteWorkoutCard({
           </AccordionTrigger>
 
           <AccordionContent>
-            <div className="border-t pt-4">
+            <div className="pt-4">
               {showCardHeader && (
                 <CardHeader className="space-y-2 pb-4">
                   {buttonProps.subtext && (

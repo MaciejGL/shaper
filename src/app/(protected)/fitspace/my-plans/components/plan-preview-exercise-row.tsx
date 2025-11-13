@@ -144,7 +144,9 @@ export function PlanPreviewExerciseRow({
           )}
         </div>
       )}
-      <div className="flex flex-col gap-2">
+      <div
+        className={cn('flex flex-col gap-2', hasMultipleImages && 'pb-[14px]')}
+      >
         <span className="text-base flex-1">
           {isRestDay ? 'Rest Day' : exercise?.name || 'Exercise name'}
         </span>

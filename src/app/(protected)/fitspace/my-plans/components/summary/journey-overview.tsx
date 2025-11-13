@@ -48,19 +48,45 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
         initial="hidden"
         animate="show"
       >
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, y: 10 },
-            show: { opacity: 1, y: 0 },
-          }}
-        >
-          <StatsItem
-            icon={<Calendar className="text-blue-500" />}
-            label={dateRange}
-            value={<div>{duration}</div>}
-            variant="default"
-          />
-        </motion.div>
+        <div className="grid grid-cols-2 items-stretch gap-2">
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 10 },
+              show: { opacity: 1, y: 0 },
+            }}
+            className="h-full"
+          >
+            <StatsItem
+              icon={<Calendar className="text-blue-500" />}
+              label={dateRange}
+              value={<div>{duration}</div>}
+              variant="secondary"
+              border
+              className="h-full flex items-center justify-center"
+            />
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 10 },
+              show: { opacity: 1, y: 0 },
+            }}
+            className="h-full"
+          >
+            <StatsItem
+              className="h-full flex items-center"
+              icon={<CheckCircle className="text-violet-500" />}
+              label="Completed Workouts"
+              value={
+                <div>
+                  <AnimateNumber value={summary.workoutsCompleted} />/
+                  {summary.totalWorkouts}
+                </div>
+              }
+              variant="secondary"
+              border
+            />
+          </motion.div>
+        </div>
 
         <motion.div
           variants={{
@@ -69,6 +95,7 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
           }}
         >
           <StatsItem
+            className="h-full"
             icon={<Target className="text-green-600" />}
             label="Adherence"
             value={
@@ -79,26 +106,8 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
                 <Progress value={adherencePercent} className="h-2 w-full" />
               </div>
             }
-            variant="default"
-          />
-        </motion.div>
-
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, y: 10 },
-            show: { opacity: 1, y: 0 },
-          }}
-        >
-          <StatsItem
-            icon={<CheckCircle className="text-violet-500" />}
-            label="Completed Workouts"
-            value={
-              <div>
-                <AnimateNumber value={summary.workoutsCompleted} />/
-                {summary.totalWorkouts}
-              </div>
-            }
-            variant="default"
+            variant="secondary"
+            border
           />
         </motion.div>
       </motion.div>
