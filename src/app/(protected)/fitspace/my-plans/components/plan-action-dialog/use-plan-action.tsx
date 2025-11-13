@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { revalidatePlanPages } from '@/app/actions/revalidate'
 import {
   GQLCheckinFrequency,
   GQLTrainingPlan,
@@ -138,6 +139,7 @@ export function usePlanAction() {
       } else if (dialogState.action === 'delete') {
         await deletePlan({ planId: dialogState.plan.id })
       }
+      await revalidatePlanPages()
       await queryInvalidation.planStateChange(queryClient)
       router.refresh()
       if (isActivateAction) {
