@@ -18,7 +18,6 @@ import { UserSubscriptionStatusData } from '@/server/models/user-subscription-st
 import UserSubscription, {
   UserSubscriptionWithIncludes,
 } from '@/server/models/user-subscription/model'
-import { GQLContext } from '@/types/gql-context'
 import { SubscriptionStatus } from '@/types/subscription'
 
 import { stripe } from '../stripe/stripe'
@@ -31,17 +30,8 @@ export class SubscriptionValidator {
    * 1. Active premium subscription, OR
    * 2. Active Complete Coaching Combo (includes premium access)
    */
-  async hasPremiumAccess(
-    userId: string,
-    context?: GQLContext,
-  ): Promise<boolean> {
-    // Create a minimal context if not provided
-    const tempContext =
-      context || ({ user: { user: { id: userId } } } as GQLContext)
-    const validSubscriptions = await this.getValidSubscriptions(
-      userId,
-      tempContext,
-    )
+  async hasPremiumAccess(userId: string): Promise<boolean> {
+    const validSubscriptions = await this.getValidSubscriptions(userId)
 
     return await this.evaluatePremiumLogic(validSubscriptions)
   }
@@ -250,9 +240,8 @@ export class SubscriptionValidator {
    */
   async getUserSubscriptionStatus(
     userId: string,
-    context: GQLContext,
   ): Promise<UserSubscriptionStatusData> {
-    const validSubscriptions = await this.getValidSubscriptions(userId, context)
+    const validSubscriptions = await this.getValidSubscriptions(userId)
 
     const hasPremium = await this.evaluatePremiumLogic(validSubscriptions)
 
@@ -309,7 +298,6 @@ export class SubscriptionValidator {
    */
   private async getValidSubscriptions(
     userId: string,
-    context: GQLContext,
   ): Promise<UserSubscription[]> {
     // Use database NOW() to avoid serverless timezone/clock drift issues
     const now = new Date()
@@ -346,8 +334,7 @@ export class SubscriptionValidator {
     })
 
     return validSubs.map(
-      (sub) =>
-        new UserSubscription(sub as UserSubscriptionWithIncludes, context),
+      (sub) => new UserSubscription(sub as UserSubscriptionWithIncludes),
     )
   }
 
@@ -473,7 +460,5 @@ export const checkCriticalPremiumAccess = (userId: string) =>
   subscriptionValidator.validateCriticalAccess(userId)
 
 // Enhanced subscription status
-export const getEnhancedSubscriptionStatus = (
-  userId: string,
-  context: GQLContext,
-) => subscriptionValidator.getUserSubscriptionStatus(userId, context)
+export const getEnhancedSubscriptionStatus = (userId: string) =>
+  subscriptionValidator.getUserSubscriptionStatus(userId)

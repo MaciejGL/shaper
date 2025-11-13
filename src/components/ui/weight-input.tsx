@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react'
+import { forwardRef, useEffect, useId, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
@@ -33,6 +33,7 @@ export const WeightInput = forwardRef<HTMLInputElement, WeightInputProps>(
   ) => {
     const { toDisplayWeight, toStorageWeight, getWeightLabel, weightUnit } =
       useWeightConversion()
+    const inputId = useId()
 
     // Local state to preserve user's typing experience
     const [inputValue, setInputValue] = useState('')
@@ -99,14 +100,13 @@ export const WeightInput = forwardRef<HTMLInputElement, WeightInputProps>(
     }
 
     const finalLabel = label || getWeightLabel()
-    const inputId =
-      id || `weight-input-${Math.random().toString(36).substr(2, 9)}`
+    const finalInputId = id || `weight-input-${inputId}`
 
     return (
       <div className="relative">
         <Input
           ref={ref}
-          id={inputId}
+          id={finalInputId}
           value={inputValue}
           label={showLabel ? finalLabel : undefined}
           onChange={handleInputChange}

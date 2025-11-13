@@ -296,7 +296,7 @@ function extractIncludes(args: unknown): string[] {
 
 function generateQueryDescription(
   model?: string,
-  operation?: string,
+  _operation?: string,
   includes: string[] = [],
 ): string {
   const modelName = model || 'unknown'

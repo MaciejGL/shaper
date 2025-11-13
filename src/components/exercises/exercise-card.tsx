@@ -68,21 +68,21 @@ export function ExerciseCard({
         {/* Column 1: Images & Video */}
         <ExerciseImagesVideoSection
           exercise={currentExercise}
-          onUpdate={(id, field, value) => updateField(field, value)}
+          onUpdate={(_, field, value) => updateField(field, value)}
         />
 
         {/* Column 2: Name, Description, Instructions */}
         <ExerciseContentSection
           exercise={exercise}
           currentExercise={currentExercise}
-          onUpdate={(id, field, value) => updateField(field, value)}
+          onUpdate={(_, field, value) => updateField(field, value)}
         />
 
         {/* Column 3: Tips */}
         <ExerciseTipsSection
           exercise={exercise}
           currentExercise={currentExercise}
-          onUpdate={(id, field, value) => updateField(field, value)}
+          onUpdate={(_, field, value) => updateField(field, value)}
         />
 
         {/* Column 4: Settings & Muscles */}

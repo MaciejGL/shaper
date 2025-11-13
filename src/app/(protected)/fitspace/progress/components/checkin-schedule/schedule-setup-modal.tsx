@@ -110,7 +110,7 @@ export function CheckinScheduleForm({
               })
             }
           >
-            <SelectTrigger variant="tertiary" className="w-full">
+            <SelectTrigger variant="outline" className="w-full">
               <SelectValue placeholder="Select day" />
             </SelectTrigger>
             <SelectContent>

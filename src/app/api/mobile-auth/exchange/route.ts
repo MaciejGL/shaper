@@ -1,7 +1,6 @@
 import { encode } from 'next-auth/jwt'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { authOptions } from '@/lib/auth/config'
 import { consumeHandoffCode } from '@/lib/auth/handoff-store'
 import prisma from '@/lib/db'
 

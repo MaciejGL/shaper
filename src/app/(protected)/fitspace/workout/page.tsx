@@ -1,8 +1,17 @@
 import { redirect } from 'next/navigation'
 
+import {
+  FitspaceGetWorkoutDayDocument,
+  FitspaceGetWorkoutNavigationDocument,
+  GQLFitspaceGetWorkoutDayQuery,
+  GQLFitspaceGetWorkoutNavigationQuery,
+} from '@/generated/graphql-client'
 import { ensureQuickWorkout } from '@/lib/auth/ensure-quick-workout'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/getUser'
+import { gqlServerFetch } from '@/lib/gqlServerFetch'
+
+import { WorkoutPageServer } from './training/components/workout-page.server'
 
 // Force dynamic rendering - never cache this redirect logic
 // Critical for accurate workout routing after plan status changes
@@ -64,12 +73,35 @@ export default async function SessionPage() {
     quickWorkout = plans[0]
   }
 
-  // Priority: Trainer-assigned plan > Quick Workout > My Plans
+  // Determine which training to show
+  let trainingId: string
+  let isQuickWorkout = false
   if (trainingFromTrainer) {
-    return redirect(`/fitspace/workout/${trainingFromTrainer.id}`)
+    trainingId = trainingFromTrainer.id
   } else if (quickWorkout) {
-    return redirect('/fitspace/workout/quick-workout')
+    isQuickWorkout = true
+    trainingId = quickWorkout.id
   } else {
     return redirect('/fitspace/my-plans')
   }
+
+  // Render the workout page directly instead of redirecting
+  const navigationPromise =
+    gqlServerFetch<GQLFitspaceGetWorkoutNavigationQuery>(
+      FitspaceGetWorkoutNavigationDocument,
+      { trainingId },
+    )
+  const dayPromise = gqlServerFetch<GQLFitspaceGetWorkoutDayQuery>(
+    FitspaceGetWorkoutDayDocument,
+    { dayId: undefined },
+  )
+
+  return (
+    <WorkoutPageServer
+      trainingId={trainingId}
+      navigationPromise={navigationPromise}
+      dayPromise={dayPromise}
+      isQuickWorkout={isQuickWorkout}
+    />
+  )
 }

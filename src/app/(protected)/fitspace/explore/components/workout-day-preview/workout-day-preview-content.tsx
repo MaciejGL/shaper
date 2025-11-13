@@ -3,7 +3,6 @@
 import { ChevronRight, Crown } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { getWorkoutTypeLabel } from '@/app/(protected)/trainer/trainings/creator/components/day-components'
 import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,6 +11,7 @@ import {
   GQLWorkoutType,
   useFitspaceGetActivePlanIdQuery,
 } from '@/generated/graphql-client'
+import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { WorkoutDay } from './types'
 
@@ -118,7 +118,7 @@ function HeroImage({
 
       <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
         <h2 className="text-2xl font-semibold mb-2">
-          {getWorkoutTypeLabel(workoutType as GQLWorkoutType)}
+          {formatWorkoutType(workoutType as GQLWorkoutType)}
         </h2>
         <div className="flex justify-between gap-1 text-white/80">
           {planTitle && (

@@ -141,12 +141,12 @@ export function LogsSection() {
             Detailed Logs
           </Button>
         </div>
+        <MuscleLogsDrawer
+          isOpen={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+          userId={user.id}
+        />
       </CardFooter>
-      <MuscleLogsDrawer
-        isOpen={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        userId={user.id}
-      />
     </Card>
   )
 }

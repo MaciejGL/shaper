@@ -113,7 +113,7 @@ export function NutritionPlanDayContent({
 
       return { previousData, queryKey }
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       // Rollback on error
       if (context?.previousData && context?.queryKey) {
         queryClient.setQueryData(context.queryKey, context.previousData)
@@ -292,7 +292,7 @@ function DayMenuHeader({
 
       return { previousData, queryKey }
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       // Rollback on error
       if (context?.previousData && context?.queryKey) {
         queryClient.setQueryData(context.queryKey, context.previousData)

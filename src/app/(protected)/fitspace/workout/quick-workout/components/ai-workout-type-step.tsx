@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { RadioButtons } from '@/components/radio-buttons'

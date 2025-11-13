@@ -66,11 +66,9 @@ export function useStartWorkoutFromFavourite() {
       startTransition(() => {
         if (parts.length === 3) {
           const [, weekId, dayId] = parts
-          router.push(
-            `/fitspace/workout/quick-workout?week=${weekId}&day=${dayId}`,
-          )
+          router.push(`/fitspace/workout?week=${weekId}&day=${dayId}`)
         } else {
-          router.push(`/fitspace/workout/quick-workout`)
+          router.push(`/fitspace/workout`)
         }
 
         router.refresh()

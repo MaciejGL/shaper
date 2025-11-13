@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     try {
       const currentUser = await getCurrentUser()
       userId = currentUser?.user.id || null
-    } catch (error) {
+    } catch (_error) {
       // Not authenticated - we can still store the token for later association
       console.error('Anonymous push token registration')
     }

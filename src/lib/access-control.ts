@@ -34,7 +34,7 @@ export async function verifyTrainerClientAccess(
       console.info(`[ACCESS_CONTROL] Cache HIT for ${cacheKey}`)
       return cachedResult
     }
-  } catch (error) {
+  } catch {
     // Redis cache failed - continue without cache
     console.warn(
       `[ACCESS_CONTROL] Cache unavailable, proceeding with database check`,

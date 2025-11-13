@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { RotateCcw, Trash2 } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
@@ -13,8 +13,6 @@ import {
   useDeleteUserAccountMutation,
   useResetUserLogsMutation,
 } from '@/generated/graphql-client'
-
-interface AccountSectionProps {}
 
 // Custom validation component for destructive actions
 function DestructiveActionValidator({
@@ -91,7 +89,7 @@ function DestructiveActionValidator({
   )
 }
 
-export function AccountSection({}: AccountSectionProps) {
+export function AccountSection() {
   const [isResetting, setIsResetting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 

@@ -136,15 +136,6 @@ interface ClientStats {
   completedPurchases: number
 }
 
-interface RecentActivity {
-  id: string
-  type: string
-  item: string
-  amount: number
-  status: string
-  date: string
-}
-
 // Simplified offer interface to match new API response
 interface SimplifiedClientOffer {
   id: string
@@ -182,8 +173,6 @@ function ClientServicesOverview({
 }: ClientServicesOverviewProps) {
   const [stats, setStats] = useState<ClientStats | null>(null)
   const [offers, setOffers] = useState<SimplifiedClientOffer[]>([])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -203,7 +192,6 @@ function ClientServicesOverview({
       const data = await response.json()
       setStats(data.stats)
       setOffers(data.offers || [])
-      setRecentActivity(data.recentActivity)
     } catch (err) {
       console.error('Error fetching client stats:', err)
       setError(err instanceof Error ? err.message : 'Failed to load data')

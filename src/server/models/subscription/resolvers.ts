@@ -30,8 +30,8 @@ export const Query: GQLQueryResolvers = {
     getTrainerDeliveries(args, context),
 
   // Admin subscription management
-  getAllUsersWithSubscriptions: async (_, args, context) =>
-    getAllUsersWithSubscriptions(args, context),
+  getAllUsersWithSubscriptions: async (_, args) =>
+    getAllUsersWithSubscriptions(args),
 
   getSubscriptionStats: async () => getSubscriptionStats(),
 }

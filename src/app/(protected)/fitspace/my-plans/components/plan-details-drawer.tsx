@@ -4,7 +4,6 @@ import {
   BicepsFlexed,
   Calendar,
   CheckCircle,
-  Loader,
   Trash,
   Users,
 } from 'lucide-react'
@@ -19,7 +18,6 @@ import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
@@ -100,14 +98,14 @@ export function PlanDetailsDrawer({
                   <div className="flex items-center gap-2 flex-wrap">
                     <PlanStatusBadge status={status} plan={plan} />
                     {plan.difficulty && (
-                      <Badge variant="secondary" className="capitalize">
+                      <Badge variant="outline" className="capitalize">
                         {plan.difficulty.toLowerCase()}
                       </Badge>
                     )}
                   </div>
                   {plan.startDate && plan.endDate && plan.active && (
                     <ButtonLink
-                      href={`/fitspace/workout/${plan.id}`}
+                      href={`/fitspace/workout`}
                       iconEnd={<ArrowRightIcon />}
                       size="sm"
                     >

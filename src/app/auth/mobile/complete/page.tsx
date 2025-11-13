@@ -4,7 +4,6 @@ import { AnimatedLogo } from '@/components/animated-logo'
 import { authOptions } from '@/lib/auth/config'
 import { generateHandoffCode, saveHandoffCode } from '@/lib/auth/handoff-store'
 import prisma from '@/lib/db'
-import { getBaseUrl } from '@/lib/get-base-url'
 
 import { MobileCompleteRedirect } from './mobile-complete-redirect'
 
@@ -26,7 +25,7 @@ export const revalidate = 0
 export default async function MobileCompletePage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
   const mobile = params.mobile as string | undefined

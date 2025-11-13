@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { revalidatePlanPages } from '@/app/actions/revalidate'
 import {
   GQLCheckinFrequency,
   GQLTrainingPlan,
@@ -37,10 +38,6 @@ export function usePlanAction() {
 
   const { mutateAsync: activatePlan, isPending: isActivatingPlan } =
     useActivatePlanMutation({
-      onSuccess: async () => {
-        await queryInvalidation.planStateChange(queryClient)
-        router.refresh()
-      },
       onError: () => {
         toast.error('Failed to activate plan, please try again.')
       },
@@ -104,42 +101,49 @@ export function usePlanAction() {
   }) => {
     if (!dialogState.plan) return
 
-    try {
-      if (
-        (dialogState.action === 'activate' && data.startDate) ||
-        (dialogState.action === 'activate' && dialogState.plan.startDate)
-      ) {
-        // Activate the plan
-        await activatePlan({
-          planId: dialogState.plan.id,
-          startDate: data.startDate
-            ? format(data.startDate, 'yyyy-MM-dd')
-            : format(new Date(), 'yyyy-MM-dd'),
-          resume: dialogState.plan.startDate ? true : false,
-        })
+    const isActivateAction =
+      dialogState.action === 'activate' &&
+      (data.startDate || dialogState.plan.startDate)
 
-        // Create check-in schedule if requested
-        if (data.scheduleCheckins && data.checkinSchedule) {
-          await createCheckinSchedule({
-            input: {
-              frequency: data.checkinSchedule.frequency as GQLCheckinFrequency,
-              dayOfWeek:
-                data.checkinSchedule.frequency !== 'MONTHLY'
-                  ? data.checkinSchedule.dayOfWeek
-                  : undefined,
-              dayOfMonth:
-                data.checkinSchedule.frequency === 'MONTHLY'
-                  ? data.checkinSchedule.dayOfMonth
-                  : undefined,
-            },
-          })
-        }
+    try {
+      if (isActivateAction) {
+        await Promise.all([
+          activatePlan({
+            planId: dialogState.plan.id,
+            startDate: data.startDate
+              ? format(data.startDate, 'yyyy-MM-dd')
+              : format(new Date(), 'yyyy-MM-dd'),
+            resume: dialogState.plan.startDate ? true : false,
+          }),
+          data.scheduleCheckins && data.checkinSchedule
+            ? createCheckinSchedule({
+                input: {
+                  frequency: data.checkinSchedule
+                    .frequency as GQLCheckinFrequency,
+                  dayOfWeek:
+                    data.checkinSchedule.frequency !== 'MONTHLY'
+                      ? data.checkinSchedule.dayOfWeek
+                      : undefined,
+                  dayOfMonth:
+                    data.checkinSchedule.frequency === 'MONTHLY'
+                      ? data.checkinSchedule.dayOfMonth
+                      : undefined,
+                },
+              })
+            : Promise.resolve(),
+        ])
       } else if (dialogState.action === 'pause') {
         await pausePlan({ planId: dialogState.plan.id })
       } else if (dialogState.action === 'close') {
         await closePlan({ planId: dialogState.plan.id })
       } else if (dialogState.action === 'delete') {
         await deletePlan({ planId: dialogState.plan.id })
+      }
+      await revalidatePlanPages()
+      await queryInvalidation.planStateChange(queryClient)
+      router.refresh()
+      if (isActivateAction) {
+        router.push('/fitspace/workout')
       }
     } catch (error) {
       console.error('Plan action error:', error)

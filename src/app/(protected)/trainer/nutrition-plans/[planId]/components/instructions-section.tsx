@@ -48,7 +48,7 @@ export function InstructionsSection({
       </div>
 
       <div className="space-y-2">
-        {instructions.map((instruction: string, index: number) => (
+        {instructions.map((_, index: number) => (
           <div key={index} className="flex items-start gap-2">
             <span className="text-sm text-muted-foreground w-8">
               {index + 1}.

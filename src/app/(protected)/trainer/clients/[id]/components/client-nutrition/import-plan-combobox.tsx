@@ -27,7 +27,6 @@ import {
   useGetTrainerNutritionPlansQuery,
 } from '@/generated/graphql-client'
 import { useDebounce } from '@/hooks/use-debounce'
-import { cn } from '@/lib/utils'
 
 type NutritionPlanWithClient = NonNullable<
   GQLGetTrainerNutritionPlansQuery['trainerNutritionPlans']
@@ -104,7 +103,7 @@ export function ImportPlanCombobox({ clientId }: ImportPlanComboboxProps) {
       setIsOpen(false)
       setSearchQuery('')
     },
-    onError: (error, variables, context) => {
+    onError: (error, _, context) => {
       toast.error('Failed to import plan: ' + (error as Error).message)
       // Rollback optimistic update
       if (context?.previousData) {

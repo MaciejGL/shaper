@@ -178,6 +178,7 @@ describe('Macro Calculations', () => {
         teamId: 'team-1',
         createdAt: new Date(),
         updatedAt: new Date(),
+        archived: false,
         createdBy: createdByMock,
         team: {
           id: 'team-1',
@@ -266,6 +267,7 @@ describe('Macro Calculations', () => {
         teamId: 'team-1',
         createdAt: new Date(),
         updatedAt: new Date(),
+        archived: false,
         createdBy: createdByMock,
         team: {
           id: 'team-1',
@@ -311,6 +313,7 @@ describe('Macro Calculations', () => {
         teamId: 'team-1',
         createdAt: new Date(),
         updatedAt: new Date(),
+        archived: false,
         createdBy: createdByMock,
         team: {
           id: 'team-1',
@@ -377,6 +380,7 @@ describe('Macro Calculations', () => {
         teamId: 'team-1',
         createdAt: new Date(),
         updatedAt: new Date(),
+        archived: false,
         createdBy: createdByMock,
         team: {
           id: 'team-1',

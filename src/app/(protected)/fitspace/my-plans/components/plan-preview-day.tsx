@@ -27,7 +27,7 @@ export function PlanPreviewDay({
   ).length
 
   return (
-    <div className="mb-8">
+    <div className="mb-12">
       <h4
         className={cn(
           'text-base font-medium mb-2 bg-card-on-card p-4 rounded-xl flex items-center justify-between',
@@ -52,7 +52,7 @@ export function PlanPreviewDay({
       )}
       {!day.isRestDay && exercises.length > 0 && (
         <div className="pl-0 space-y-2">
-          {exercises.map((exercise, index) => (
+          {exercises.map((exercise) => (
             <PlanPreviewExerciseRow
               key={exercise.id}
               exercise={exercise}

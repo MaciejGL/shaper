@@ -66,7 +66,7 @@ export function PhysicalStats({ profile, handleChange }: PhysicalStatsProps) {
             >
               <SelectTrigger
                 id="fitnessLevel"
-                variant="secondary"
+                variant="outline"
                 className="w-full"
               >
                 <SelectValue placeholder="Select" />
@@ -94,7 +94,7 @@ export function PhysicalStats({ profile, handleChange }: PhysicalStatsProps) {
             >
               <SelectTrigger
                 id="activityLevel"
-                variant="secondary"
+                variant="outline"
                 className="w-full"
               >
                 <SelectValue placeholder="Select" />

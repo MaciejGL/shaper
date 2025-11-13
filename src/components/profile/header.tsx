@@ -34,7 +34,7 @@ export function Header({ profile, onAvatarChange }: HeaderProps) {
 
         {profile?.firstName && profile?.lastName && (
           <div className="text-center md:text-left flex-1">
-            <h2 className="text-2xl font-bold">{`${profile.firstName} ${profile.lastName}`}</h2>
+            <h2 className="text-2xl font-bold text-foreground">{`${profile.firstName} ${profile.lastName}`}</h2>
             <p className="text-sm text-muted-foreground">{profile.email}</p>
           </div>
         )}

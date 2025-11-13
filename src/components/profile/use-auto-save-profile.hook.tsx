@@ -6,6 +6,7 @@ import {
   type GQLUpdateProfileInput,
   useProfileQuery,
   useUpdateProfileMutation,
+  useUserBasicQuery,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 
@@ -38,6 +39,13 @@ export function useAutoSaveProfile() {
 
   // Track the latest changes for debounced saving
   const latestChangesRef = useRef<Partial<GQLUpdateProfileInput>>({})
+  const debouncedSaveRef = useRef<ReturnType<typeof debounce> | null>(null)
+  const serverProfileRef = useRef(serverProfile)
+
+  // Keep serverProfile ref in sync without recreating debounced function
+  useEffect(() => {
+    serverProfileRef.current = serverProfile
+  }, [serverProfile])
 
   // Profile update mutation
   const { mutateAsync: updateProfileMutation } = useUpdateProfileMutation({
@@ -46,6 +54,7 @@ export function useAutoSaveProfile() {
       latestChangesRef.current = {}
       // Invalidate queries to sync across app
       invalidateQueries({ queryKey: useProfileQuery.getKey({}) })
+      invalidateQueries({ queryKey: useUserBasicQuery.getKey({}) })
     },
     onError: (error) => {
       toast.error('Failed to save changes. Please try again.')
@@ -53,32 +62,45 @@ export function useAutoSaveProfile() {
     },
   })
 
-  // Debounced save function
+  // Create debounced save function once and keep it stable
+  useEffect(() => {
+    debouncedSaveRef.current = debounce(async () => {
+      const currentServerProfile = serverProfileRef.current
+      if (
+        !currentServerProfile ||
+        Object.keys(latestChangesRef.current).length === 0
+      )
+        return
+
+      const updateInput: GQLUpdateProfileInput = {
+        ...latestChangesRef.current,
+        // Always include required fields
+        firstName:
+          latestChangesRef.current.firstName || currentServerProfile.firstName,
+        lastName:
+          latestChangesRef.current.lastName || currentServerProfile.lastName,
+        email: latestChangesRef.current.email || currentServerProfile.email,
+      }
+
+      try {
+        await updateProfileMutation({ input: updateInput })
+      } catch (_error) {
+        // Error handling is done in mutation onError
+      }
+    }, 1000)
+
+    return () => {
+      debouncedSaveRef.current?.cancel()
+    }
+    // Only recreate if updateProfileMutation changes (stable from React Query)
+  }, [updateProfileMutation])
+
+  // Stable callback wrapper
   const debouncedSave = useMemo(
-    () =>
-      debounce(async () => {
-        if (
-          !serverProfile ||
-          Object.keys(latestChangesRef.current).length === 0
-        )
-          return
-
-        const updateInput: GQLUpdateProfileInput = {
-          ...latestChangesRef.current,
-          // Always include required fields
-          firstName:
-            latestChangesRef.current.firstName || serverProfile.firstName,
-          lastName: latestChangesRef.current.lastName || serverProfile.lastName,
-          email: latestChangesRef.current.email || serverProfile.email,
-        }
-
-        try {
-          await updateProfileMutation({ input: updateInput })
-        } catch (error) {
-          // Error handling is done in mutation onError
-        }
-      }, 1000),
-    [updateProfileMutation, serverProfile],
+    () => () => {
+      debouncedSaveRef.current?.()
+    },
+    [],
   )
 
   // Handle field changes

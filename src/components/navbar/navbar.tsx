@@ -13,7 +13,7 @@ import {
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
 import { UserContextType, useUser } from '@/context/user-context'
@@ -100,8 +100,6 @@ export const Navbar = ({
   const { user: userContext } = useUser()
   const { totalUnreadCount, notifications } = useUnreadMessageCount(userContext)
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
-  const [showBorder, setShowBorder] = useState(false)
-  const isFirstRender = useRef(true)
 
   const isTrainer = user?.user?.role === GQLUserRole.Trainer
 
@@ -116,37 +114,6 @@ export const Navbar = ({
     isTrainer
 
   const isWorkoutPage = pathname.startsWith('/fitspace/workout')
-
-  useEffect(() => {
-    if (!isWorkoutPage) {
-      setShowBorder(true)
-      return
-    }
-
-    const checkPosition = () => {
-      const navigationElement = document.getElementById('workout-navigation')
-      if (!navigationElement) {
-        setShowBorder(false)
-        return
-      }
-
-      const navRect = navigationElement.getBoundingClientRect()
-      const navbarHeight = 60
-
-      isFirstRender.current = false
-      setShowBorder(navRect.bottom <= navbarHeight)
-    }
-    checkPosition()
-
-    window.addEventListener('scroll', checkPosition, { passive: true })
-
-    const timeoutId = setTimeout(checkPosition, 100)
-
-    return () => {
-      window.removeEventListener('scroll', checkPosition)
-      clearTimeout(timeoutId)
-    }
-  }, [isWorkoutPage, pathname])
 
   return (
     <>
@@ -361,10 +328,7 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const queryClient = useQueryClient()
 
   // Use the hook to properly handle session tokens
-  const {
-    openUrl: openAccountManagement,
-    isLoading: isOpeningAccountManagement,
-  } = useOpenUrl({
+  const { openUrl: openAccountManagement } = useOpenUrl({
     errorMessage: 'Failed to open account management',
   })
 

@@ -30,7 +30,7 @@ export async function getMySubscriptions(
     orderBy: { createdAt: 'desc' },
   })
 
-  return subscriptions.map((sub) => new UserSubscription(sub, context))
+  return subscriptions.map((sub) => new UserSubscription(sub))
 }
 
 /**
@@ -44,11 +44,8 @@ export async function getMySubscriptionStatus(context: GQLContext) {
 
   const userId = context.user.user.id
 
-  const status = await subscriptionValidator.getUserSubscriptionStatus(
-    userId,
-    context,
-  )
+  const status = await subscriptionValidator.getUserSubscriptionStatus(userId)
 
   // Use the UserSubscriptionStatus model
-  return new UserSubscriptionStatus(status, context)
+  return new UserSubscriptionStatus(status)
 }

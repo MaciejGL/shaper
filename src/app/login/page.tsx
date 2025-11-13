@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
 import { authOptions } from '@/lib/auth/config'
@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic'
 export default async function RequestOtpPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
   const startProvider = params?.start as string | undefined

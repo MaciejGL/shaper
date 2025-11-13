@@ -92,7 +92,7 @@ export function MeetingCard({
       })
       await queryClient.invalidateQueries({ queryKey })
       toast.success('Meeting marked as completed')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to update meeting')
     } finally {
       setIsUpdating(false)
@@ -116,7 +116,7 @@ export function MeetingCard({
           })
           await queryClient.invalidateQueries({ queryKey })
           toast.success('Meeting cancelled')
-        } catch (error) {
+        } catch (_error) {
           toast.error('Failed to cancel meeting')
         } finally {
           setIsUpdating(false)
@@ -134,7 +134,7 @@ export function MeetingCard({
       })
       await queryClient.invalidateQueries({ queryKey })
       toast.success('Meeting reopened')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to reopen meeting')
     } finally {
       setIsUpdating(false)

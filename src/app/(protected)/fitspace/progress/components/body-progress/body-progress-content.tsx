@@ -12,9 +12,7 @@ import { Section } from '../section'
 import { BodyProgressTimeline } from './body-progress-timeline'
 import { CreateProgressLogDialog } from './create-progress-log-dialog'
 
-interface BodyProgressContentProps {}
-
-export function BodyProgressContent({}: BodyProgressContentProps) {
+export function BodyProgressContent() {
   const { hasPremium } = useUser()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editLog, setEditLog] = useState<{

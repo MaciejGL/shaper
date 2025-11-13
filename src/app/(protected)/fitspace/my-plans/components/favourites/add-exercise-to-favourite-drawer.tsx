@@ -255,7 +255,7 @@ function ExerciseList({
           <Virtuoso
             data={filteredExercises}
             style={{ height: '100%' }}
-            itemContent={(index, exercise) => {
+            itemContent={(_index, exercise) => {
               const isThisExerciseAdding = addingExerciseId === exercise.id
               const isAnyExerciseAdding = isAdding
               const isAlreadyAdded = addedExerciseIds.has(exercise.id)

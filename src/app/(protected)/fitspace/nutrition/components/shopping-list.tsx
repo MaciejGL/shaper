@@ -1,18 +1,17 @@
 'use client'
 
-import { ChevronDown, Minus, Plus, ShoppingCart } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Minus, Plus } from 'lucide-react'
+import { startTransition, useEffect, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
-import { SectionIcon } from '@/components/ui/section-icon'
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { useCookingUnits } from '@/lib/cooking-units'
 import { cn } from '@/lib/utils'
@@ -36,7 +35,7 @@ interface ShoppingListProps {
 export function ShoppingList({ day, planId }: ShoppingListProps) {
   const { formatIngredient } = useCookingUnits()
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set())
-  const [isOpen, setIsOpen] = useState(false)
+  const [value, setValue] = useState<string | undefined>(undefined)
   const [portionMultiplier, setPortionMultiplier] = useState(1)
 
   // Create unique storage key for this plan and day
@@ -48,7 +47,9 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as string[]
-        setCheckedItems(new Set(parsed))
+        startTransition(() => {
+          setCheckedItems(new Set(parsed))
+        })
       } catch {
         // Ignore invalid JSON
       }
@@ -131,130 +132,111 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
   ).length
 
   return (
-    <>
-      <CardContent className="px-0">
-        <Card
-          variant="tertiary"
-          className="p-0 bg-card dark:bg-card-on-card border dark:border-0"
-        >
-          <Collapsible
-            open={isOpen}
-            onOpenChange={setIsOpen}
-            className="overflow-hidden"
-          >
-            <CollapsibleTrigger className="cursor-pointer hover:bg-muted/30 transition-colors w-full p-4">
-              <CardTitle className="flex items-center justify-between gap-6">
-                <div className="text-sm flex items-center justify-between w-full">
-                  <p>Shopping List</p>
-                  <span className="text-muted-foreground font-normal">
-                    {checkedCount}/{aggregatedIngredients.length} items
-                  </span>
+    <Accordion type="single" collapsible value={value} onValueChange={setValue}>
+      <AccordionItem value="shopping-list">
+        <AccordionTrigger variant="default">
+          <div className="text-sm flex items-center justify-between w-full">
+            <p>Shopping List</p>
+            <span className="text-muted-foreground font-normal">
+              {checkedCount}/{aggregatedIngredients.length} items
+            </span>
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent>
+          <div className="p-4">
+            <div className="space-y-3">
+              {/* Portion multiplier */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 ml-auto">
+                  <Button
+                    variant="secondary"
+                    size="icon-sm"
+                    onClick={decrementPortions}
+                    disabled={portionMultiplier <= 1}
+                    iconOnly={<Minus />}
+                  />
+
+                  <AnimateNumber
+                    value={portionMultiplier}
+                    duration={200}
+                    className="text-xl font-bold text-primary"
+                  />
+                  <Button
+                    variant="secondary"
+                    size="icon-sm"
+                    onClick={incrementPortions}
+                    iconOnly={<Plus />}
+                  />
                 </div>
-                <ChevronDown
-                  className={cn(
-                    'h-4 w-4 text-muted-foreground',
-                    isOpen && 'rotate-180',
-                  )}
-                />
-              </CardTitle>
-            </CollapsibleTrigger>
+                {checkedCount > 0 && (
+                  <div className="flex justify-end">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={clearAllChecked}
+                      className="text-xs"
+                    >
+                      Clear All
+                    </Button>
+                  </div>
+                )}
+              </div>
 
-            <CollapsibleContent>
-              <CardContent className="py-4">
-                <div className="space-y-3">
-                  {/* Portion multiplier */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 ml-auto">
-                      <Button
-                        variant="secondary"
-                        size="icon-sm"
-                        onClick={decrementPortions}
-                        disabled={portionMultiplier <= 1}
-                        iconOnly={<Minus />}
-                      />
-
-                      <AnimateNumber
-                        value={portionMultiplier}
-                        duration={200}
-                        className="text-xl font-bold text-primary"
-                      />
-                      <Button
-                        variant="secondary"
-                        size="icon-sm"
-                        onClick={incrementPortions}
-                        iconOnly={<Plus />}
-                      />
-                    </div>
-                    {checkedCount > 0 && (
-                      <div className="flex justify-end">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={clearAllChecked}
-                          className="text-xs"
+              <div className="space-y-2">
+                {aggregatedIngredients
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((ingredient) => {
+                    const isChecked = checkedItems.has(ingredient.id)
+                    return (
+                      <div
+                        key={ingredient.id}
+                        className={cn(
+                          'grid grid-cols-[24px_1fr_auto_auto] items-end gap-3 p-2 rounded-lg transition-all border',
+                          isChecked
+                            ? 'bg-muted/50 opacity-60'
+                            : 'hover:bg-muted/30',
+                        )}
+                        onClick={() =>
+                          handleItemCheck(ingredient.id, !isChecked)
+                        }
+                      >
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) =>
+                            handleItemCheck(ingredient.id, Boolean(checked))
+                          }
+                          className="flex-shrink-0 self-center"
+                        />
+                        <span
+                          className={cn(
+                            'flex-1 grow-[2]',
+                            isChecked
+                              ? 'line-through text-muted-foreground'
+                              : '',
+                          )}
                         >
-                          Clear All
-                        </Button>
+                          {ingredient.name}
+                        </span>
+
+                        <span
+                          className={cn(
+                            'text-sm',
+                            isChecked
+                              ? 'line-through text-muted-foreground'
+                              : 'text-muted-foreground',
+                          )}
+                        >
+                          {ingredient.formattedAmount}
+                        </span>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    {aggregatedIngredients
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map((ingredient) => {
-                        const isChecked = checkedItems.has(ingredient.id)
-                        return (
-                          <div
-                            key={ingredient.id}
-                            className={cn(
-                              'grid grid-cols-[24px_1fr_auto_auto] items-end gap-3 p-2 rounded-lg transition-all border',
-                              isChecked
-                                ? 'bg-muted/50 opacity-60'
-                                : 'hover:bg-muted/30',
-                            )}
-                            onClick={() =>
-                              handleItemCheck(ingredient.id, !isChecked)
-                            }
-                          >
-                            <Checkbox
-                              checked={isChecked}
-                              onCheckedChange={(checked) =>
-                                handleItemCheck(ingredient.id, Boolean(checked))
-                              }
-                              className="flex-shrink-0 self-center"
-                            />
-                            <span
-                              className={cn(
-                                'flex-1 grow-[2]',
-                                isChecked
-                                  ? 'line-through text-muted-foreground'
-                                  : '',
-                              )}
-                            >
-                              {ingredient.name}
-                            </span>
-
-                            <span
-                              className={cn(
-                                'text-sm',
-                                isChecked
-                                  ? 'line-through text-muted-foreground'
-                                  : 'text-muted-foreground',
-                              )}
-                            >
-                              {ingredient.formattedAmount}
-                            </span>
-                          </div>
-                        )
-                      })}
-                  </div>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
-      </CardContent>
-    </>
+                    )
+                  })}
+              </div>
+            </div>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   )
 }

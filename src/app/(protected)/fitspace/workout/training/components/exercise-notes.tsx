@@ -1,7 +1,7 @@
 'use client'
 
 import { Edit3, Plus, Reply, Send, Share, Trash2 } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { AnimateHeightItem } from '@/components/animations/animated-container'
 import { Button } from '@/components/ui/button'

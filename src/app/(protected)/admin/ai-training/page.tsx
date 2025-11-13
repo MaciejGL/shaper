@@ -199,7 +199,7 @@ export default function AITrainingPage() {
       setEditedWorkout(null)
       setNotes('')
       refreshStats()
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to save training example')
     }
   }
@@ -221,7 +221,7 @@ export default function AITrainingPage() {
       window.URL.revokeObjectURL(url)
 
       toast.success('Training data downloaded')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to export training data')
     }
   }

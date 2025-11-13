@@ -81,7 +81,7 @@ export function AddDayButton({
       setIsOpen(false)
       setDayName('')
     },
-    onError: (error, variables, context) => {
+    onError: (error, _, context) => {
       toast.error('Failed to add day: ' + (error as Error).message)
       // Rollback on error
       if (context?.previousData && context?.queryKey) {

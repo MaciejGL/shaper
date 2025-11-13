@@ -129,7 +129,7 @@ export default function PublicProfilePage() {
         }),
       ])
       toast.success('Public profile updated successfully!')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to update profile. Please try again.')
     }
   }

@@ -5,7 +5,6 @@ import { formatDate } from 'date-fns'
 import { Package } from 'lucide-react'
 import { useState } from 'react'
 
-import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -40,7 +39,7 @@ export function PendingOffersList({ trainerId }: PendingOffersListProps) {
     name: string
   } | null>(null)
 
-  const { data, isLoading } = useFitGetMyTrainerOffersQuery(
+  const { data } = useFitGetMyTrainerOffersQuery(
     {
       clientEmail: user?.email || '',
       trainerId,
@@ -80,10 +79,6 @@ export function PendingOffersList({ trainerId }: PendingOffersListProps) {
         trainerId,
       }),
     })
-  }
-
-  if (isLoading) {
-    return <LoadingSkeleton count={1} variant="md" withBorder />
   }
 
   if (pendingOffers.length === 0) {

@@ -61,7 +61,7 @@ export function DeleteMealDialog({
       toast.success('Meal deleted successfully')
       onOpenChange(false)
     },
-    onError: (error, variables, context) => {
+    onError: (error, _, context) => {
       toast.error('Failed to delete meal: ' + (error as Error).message)
       // Rollback
       if (context?.previousData) {

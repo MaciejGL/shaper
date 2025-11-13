@@ -47,7 +47,6 @@ export function ExerciseSet({
   weight,
   onRepsChange,
   onWeightChange,
-  onDelete,
   isLastSet,
   onSetCompleted,
   onSetUncompleted,
@@ -107,7 +106,7 @@ export function ExerciseSet({
 
       return { previousWorkout }
     },
-    onError: (err, newLog, context) => {
+    onError: (_, __, context) => {
       if (context?.previousWorkout) {
         queryClient.setQueryData(
           useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),

@@ -26,7 +26,7 @@ export function SwipeableWrapper({
   const constraintsRef = useRef(null)
 
   const handleDragEnd = (
-    event: MouseEvent | TouchEvent | PointerEvent,
+    _: MouseEvent | TouchEvent | PointerEvent,
     info: PanInfo,
   ) => {
     if (disabled) return

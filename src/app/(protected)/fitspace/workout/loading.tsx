@@ -1,4 +1,4 @@
-import { WorkoutPageSkeleton } from './[trainingId]/components/workout-page-skeleton'
+import { WorkoutPageSkeleton } from './training/components/workout-page-skeleton'
 
 export default function WorkoutLoading() {
   return <WorkoutPageSkeleton />

@@ -12,7 +12,7 @@ export function formatIngredientName(name: string): string {
     .toLowerCase() // Convert to lowercase first
     .replace(
       /(^|[\s\-_.])(\w)/g,
-      (match, separator, char) => separator + char.toUpperCase(),
+      (_, separator, char) => separator + char.toUpperCase(),
     ) // Capitalize first letter of each word
     .replace(/\bW\//g, 'With') // Replace "w/" with "With"
     .replace(/\bAnd\b/g, 'and') // Lowercase common conjunctions

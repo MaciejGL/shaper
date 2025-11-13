@@ -1,4 +1,4 @@
-import { CoffeeIcon, HamIcon } from 'lucide-react'
+import { CoffeeIcon } from 'lucide-react'
 
 import { BiggyIcon } from '@/components/biggy-icon'
 

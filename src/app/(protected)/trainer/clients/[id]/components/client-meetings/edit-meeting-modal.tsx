@@ -247,7 +247,7 @@ export function EditMeetingModal({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger variant="tertiary">
+                      <SelectTrigger variant="outline">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>

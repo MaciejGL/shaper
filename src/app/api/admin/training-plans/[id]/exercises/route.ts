@@ -4,7 +4,7 @@ import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 
 export async function GET(
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {

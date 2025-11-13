@@ -72,7 +72,7 @@ export function PlanPreviewTab({
   return (
     <Accordion
       type="multiple"
-      className="w-full"
+      className="w-full space-y-2"
       data-vaul-no-drag
       value={accordionValue}
       onValueChange={setAccordionValue}
@@ -118,7 +118,7 @@ export function PlanPreviewTab({
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-2 pb-2">
+              <div className="space-y-2 p-2">
                 {sortedDays.map((day) => (
                   <PlanPreviewDay
                     key={day.id}

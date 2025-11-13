@@ -7,7 +7,6 @@ import type {
   User as PrismaUser,
   UserSubscription as PrismaUserSubscription,
 } from '@/generated/prisma/client'
-import { GQLContext } from '@/types/gql-context'
 import { SubscriptionStatus } from '@/types/subscription'
 
 export type UserSubscriptionWithIncludes = PrismaUserSubscription & {
@@ -16,10 +15,7 @@ export type UserSubscriptionWithIncludes = PrismaUserSubscription & {
 }
 
 export default class UserSubscription implements GQLUserSubscription {
-  constructor(
-    private data: UserSubscriptionWithIncludes,
-    private context: GQLContext,
-  ) {}
+  constructor(private data: UserSubscriptionWithIncludes) {}
 
   get id() {
     return this.data.id

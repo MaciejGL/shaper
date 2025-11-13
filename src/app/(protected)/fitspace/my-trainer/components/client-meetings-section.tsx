@@ -97,7 +97,7 @@ export function ClientMeetingsSection() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            No meetings scheduled with your trainer.
+            No meetings scheduled yet.
           </p>
         </CardContent>
       </Card>
@@ -123,7 +123,7 @@ export function ClientMeetingsSection() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            No upcoming meetings. View past meetings.
+            You don&apos;t have any meetings scheduled right now.
           </p>
         </CardContent>
       </Card>

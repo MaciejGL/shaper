@@ -57,14 +57,16 @@ export function Exercises({
     })
 
     return mostRecentTimestamp > 0 ? mostRecentTimestamp : undefined
-  }, [day?.exercises])
+  }, [day])
 
   // Determine if workout is currently active (user logged something in last 5 minutes)
+  // Note: Using useState with lazy init to avoid calling Date.now() during render
+  const [currentTime] = React.useState(() => Date.now())
   const isActive = React.useMemo(() => {
     if (!lastActivityTimestamp) return false
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000
+    const fiveMinutesAgo = currentTime - 5 * 60 * 1000
     return lastActivityTimestamp >= fiveMinutesAgo
-  }, [lastActivityTimestamp])
+  }, [lastActivityTimestamp, currentTime])
 
   const isCompleted = day?.completedAt ? true : false
 
@@ -123,7 +125,7 @@ export function Exercises({
           </p>
         )}
         <div className="grid grid-flow-col gap-2 bg-background">
-          <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-2xl">
+          <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card border border-border w-full rounded-2xl">
             <Switch
               checked={preferences.trainingView === GQLTrainingView.Advanced}
               onCheckedChange={() =>
@@ -184,7 +186,7 @@ function ExercisesCompleted({
     <Badge
       variant="secondary"
       size="lg"
-      className="w-full bg-card-on-card dark:bg-card-on-card rounded-2xl"
+      className="w-full bg-card border border-border rounded-2xl"
     >
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (

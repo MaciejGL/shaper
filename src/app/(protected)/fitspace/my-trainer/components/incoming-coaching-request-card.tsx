@@ -2,7 +2,6 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { UserPlus } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'

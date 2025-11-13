@@ -41,7 +41,7 @@ import { cn } from '@/lib/utils'
 import { calculateCaloriesBurned } from '@/lib/workout/calculate-calories-burned'
 import { generateWeightComparison } from '@/utils/weight-comparisons'
 
-import { WorkoutExercise } from './workout-page.client'
+import { WorkoutExercise } from './workout-day'
 
 interface WorkoutSummaryDrawerProps {
   open: boolean

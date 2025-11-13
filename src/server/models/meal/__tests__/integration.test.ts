@@ -106,6 +106,7 @@ describe('Meal Integration Tests', () => {
         teamId: 'team-1',
         createdAt: new Date(),
         updatedAt: new Date(),
+        archived: false,
         createdBy: mockUser,
         team: mockTeam,
         ingredients: [
@@ -183,6 +184,7 @@ describe('Meal Integration Tests', () => {
         teamId: 'team-1',
         createdAt: new Date(),
         updatedAt: new Date(),
+        archived: false,
         createdBy: mockUser,
         team: mockTeam,
         ingredients: [
@@ -233,6 +235,7 @@ describe('Meal Integration Tests', () => {
         teamId: 'team-1',
         createdAt: new Date(),
         updatedAt: new Date(),
+        archived: false,
         createdBy: mockUser,
         team: mockTeam,
         ingredients: [],
@@ -339,6 +342,7 @@ describe('Meal Integration Tests', () => {
         teamId: 'team-1',
         createdAt: new Date(),
         updatedAt: new Date(),
+        archived: false,
         createdBy: mockUser,
         team: mockTeam,
         ingredients: [
@@ -419,6 +423,7 @@ describe('Meal Integration Tests', () => {
         teamId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        archived: false,
         createdBy: mockUser,
         team: null,
         ingredients: [],

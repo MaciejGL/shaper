@@ -1,7 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
+import { Clock, UserCheck, Users } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
@@ -20,13 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  PrimaryTabList,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
+import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import {
   GQLGetMyTrainerQuery,

@@ -1,25 +1,15 @@
 'use client'
 
-import { LayoutList } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
 import { ExtendHeader } from '@/components/extend-header'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
-import {
-  PrimaryTabList,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
+import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import {
   useFitspaceMyPlansQuery,
   useGetCheckinStatusQuery,
 } from '@/generated/graphql-client'
-import { cn } from '@/lib/utils'
-
-import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { PlanActionDialog } from './components/plan-action-dialog/plan-action-dialog'
 import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
@@ -27,7 +17,7 @@ import { PlanCard } from './components/plan-card'
 import { PlanDetailsDrawer } from './components/plan-details-drawer'
 import { PlansTab } from './components/plans-tab'
 import { EnhancedQuickWorkoutTab } from './components/quick-workout-plan-tab/enhanced-quick-workout-tab'
-import { PlanStatus, PlanTab, getPlanStatus } from './types'
+import { PlanTab, getPlanStatus } from './types'
 
 export default function MyPlansPage() {
   const [tab, setTab] = useQueryState<PlanTab>(
@@ -84,7 +74,7 @@ export default function MyPlansPage() {
         className="grid grid-cols-2"
       />
 
-      <TabsContent value={PlanTab.Plans} className="space-y-4 pt-4 pb-4 px-4">
+      <TabsContent value={PlanTab.Plans} className="space-y-4 py-6 px-4">
         <PlansTab
           activePlan={activePlan}
           availablePlans={availablePlans}
@@ -94,10 +84,7 @@ export default function MyPlansPage() {
         />
       </TabsContent>
 
-      <TabsContent
-        value={PlanTab.QuickWorkout}
-        className="space-y-4 pt-4 pb-4 px-4"
-      >
+      <TabsContent value={PlanTab.QuickWorkout} className="space-y-4 py-6 px-4">
         <EnhancedQuickWorkoutTab />
       </TabsContent>
     </Tabs>

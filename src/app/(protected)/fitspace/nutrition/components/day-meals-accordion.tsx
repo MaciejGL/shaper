@@ -1,7 +1,5 @@
 'use client'
 
-import { ChefHat } from 'lucide-react'
-
 import {
   Accordion,
   AccordionContent,
@@ -10,7 +8,6 @@ import {
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { CardContent, CardHeader } from '@/components/ui/card'
-import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { useCookingUnits } from '@/lib/cooking-units'
 
@@ -40,16 +37,12 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
         <Accordion type="multiple" className="space-y-2">
           {meals
             .sort((a, b) => a.orderIndex - b.orderIndex)
-            .map((planMeal, index) => {
+            .map((planMeal) => {
               const meal = planMeal.meal
               const macros = planMeal.adjustedMacros
 
               return (
-                <AccordionItem
-                  key={planMeal.id}
-                  value={planMeal.id}
-                  className="rounded-2xl dark:bg-card-on-card dark:border-none border last:border-b"
-                >
+                <AccordionItem key={planMeal.id} value={planMeal.id}>
                   <AccordionTrigger className="p-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full mr-4">
                       <div className="flex items-center gap-3">
@@ -58,7 +51,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                     </div>
                   </AccordionTrigger>
 
-                  <AccordionContent className="px-4 pb-4">
+                  <AccordionContent className="p-4">
                     <div className="space-y-6">
                       {/* Meal Description */}
                       {meal.description && (
@@ -108,7 +101,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                       </div>
 
                       {/* Ingredients */}
-                      <div>
+                      <div className="p-4 bg-card-on-card rounded-xl">
                         <h4 className="font-medium text-base mb-3 flex items-center gap-2">
                           Ingredients
                         </h4>

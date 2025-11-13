@@ -42,6 +42,7 @@ import {
 } from '@/lib/server-date-utils'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
+import { calculateEstimated1RM } from '@/utils/one-rm-calculator'
 
 import ExerciseSet from '../exercise-set/model'
 import { createNotification } from '../notification/factory'
@@ -1244,7 +1245,6 @@ export async function assignTemplateToSelf(
   }
 
   const userId = user.user.id
-  const weekStartsOn = (user.user.profile?.weekStartsOn ?? 1) as 0 | 1
 
   // Get the template plan to check if it's premium
   const template = await prisma.trainingPlan.findUnique({
@@ -1269,7 +1269,7 @@ export async function assignTemplateToSelf(
   // Check if template is premium and user has access
   if (template.premium) {
     const subscriptionStatus =
-      await subscriptionValidator.getUserSubscriptionStatus(userId, context)
+      await subscriptionValidator.getUserSubscriptionStatus(userId)
 
     if (
       !subscriptionStatus.hasPremium &&
@@ -1283,7 +1283,7 @@ export async function assignTemplateToSelf(
 
   // Check training plan limits
   const subscriptionStatus =
-    await subscriptionValidator.getUserSubscriptionStatus(userId, context)
+    await subscriptionValidator.getUserSubscriptionStatus(userId)
 
   if (!subscriptionStatus.hasPremium) {
     // Count current assigned training plans (non-completed, non-Quick Workout)
@@ -1898,7 +1898,6 @@ export async function getWorkoutNavigation(
   const defaultPlan = await prisma.trainingPlan.findUnique({
     where: {
       id: trainingId,
-      active: true,
       assignedToId: user.user.id,
       createdById: user.user.id,
     },
@@ -2022,6 +2021,7 @@ export async function getWorkoutDay(
   } else {
     // Find today's scheduled day with all data
     const todayUTC = getTodayUTC('UTC')
+
     day = await prisma.trainingDay.findFirst({
       where: {
         week: {
@@ -2034,6 +2034,21 @@ export async function getWorkoutDay(
       },
       include: WORKOUT_DAY_INCLUDE,
     })
+
+    if (!day) {
+      day = await prisma.trainingDay.findFirst({
+        where: {
+          week: {
+            plan: { assignedToId: user.user.id, createdById: user.user.id },
+          },
+          scheduledAt: {
+            gte: todayUTC,
+            lt: new Date(todayUTC.getTime() + 24 * 60 * 60 * 1000),
+          },
+        },
+        include: WORKOUT_DAY_INCLUDE,
+      })
+    }
   }
 
   if (!day) {
@@ -2091,6 +2106,7 @@ export async function getWorkoutDay(
 
   // Find all previous exercises with matching baseIds (single query)
   // First, try to find exercises within the same plan
+  // LIMIT to last 50 exercises to prevent memory issues with long training history
   const allPreviousExercises = await prisma.trainingExercise.findMany({
     where: {
       baseId: { in: exerciseBaseIds },
@@ -2144,6 +2160,7 @@ export async function getWorkoutDay(
       },
     },
     orderBy: [{ completedAt: 'desc' }],
+    take: 30,
   })
 
   const seenBaseIds = new Set<string>()
@@ -2212,6 +2229,7 @@ export async function getWorkoutDay(
         },
       },
       orderBy: [{ completedAt: 'desc' }],
+      take: 30,
     })
 
     // Add fallback exercises that meet the criteria
@@ -2527,6 +2545,7 @@ export async function getQuickWorkoutDay(
   }
 
   // Find all previous exercises with matching baseIds
+  // LIMIT to last 50 exercises to prevent memory issues
   const allPreviousExercises = await prisma.trainingExercise.findMany({
     where: {
       baseId: { in: exerciseBaseIds },
@@ -2577,6 +2596,7 @@ export async function getQuickWorkoutDay(
       { day: { week: { weekNumber: 'desc' } } },
       { day: { dayOfWeek: 'desc' } },
     ],
+    take: 30,
   })
 
   // Group by baseId and keep only the most recent occurrence
@@ -2738,7 +2758,6 @@ export async function getPlanSummary(
   // Get personal records achieved during this plan
   const personalRecords = await getPersonalRecordsForPlan(
     context.user.user.id,
-    planId,
     plan,
   )
 
@@ -2761,22 +2780,44 @@ export async function getPlanSummary(
   }
 }
 
+type PlanWithProgressionData = Prisma.TrainingPlanGetPayload<{
+  include: {
+    weeks: {
+      include: {
+        days: {
+          include: {
+            exercises: {
+              include: {
+                sets: {
+                  include: { log: true }
+                }
+                base: {
+                  select: { id: true; name: true }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}>
+
 /**
  * Calculate strength progressions for all exercises in the plan
  * Compares earliest logged performance vs latest logged performance
  */
-function calculateStrengthProgressionsForPlan(plan: any) {
-  const { calculateEstimated1RM } = require('@/utils/one-rm-calculator')
+function calculateStrengthProgressionsForPlan(plan: PlanWithProgressionData) {
   const exerciseMap = new Map<
     string,
     {
       name: string
       baseId: string | null
-      performances: Array<{
+      performances: {
         weight: number
         reps: number
         date: Date
-      }>
+      }[]
     }
   >()
 
@@ -2813,7 +2854,7 @@ function calculateStrengthProgressionsForPlan(plan: any) {
   // Calculate progressions
   const progressions = []
 
-  for (const [key, data] of exerciseMap.entries()) {
+  for (const [_, data] of exerciseMap.entries()) {
     if (data.performances.length < 2) continue // Need at least 2 performances
 
     // Sort by date
@@ -3006,13 +3047,27 @@ async function calculateBodyCompositionForPlan(
   }
 }
 
+type PersonalRecordWithDetails = Prisma.PersonalRecordGetPayload<{
+  include: {
+    baseExercise: {
+      select: { name: true }
+    }
+    day: {
+      include: {
+        week: {
+          select: { weekNumber: true }
+        }
+      }
+    }
+  }
+}>
+
 /**
  * Get personal records achieved during this plan
  */
 async function getPersonalRecordsForPlan(
   userId: string,
-  planId: string,
-  plan: any,
+  plan: PlanWithProgressionData,
 ) {
   const startDate = plan.startDate || plan.createdAt
   const endDate = plan.endDate || plan.completedAt || new Date()
@@ -3044,14 +3099,12 @@ async function getPersonalRecordsForPlan(
   })
 
   // Group by exercise and get the best PR per exercise
-  const bestPRsMap = new Map<string, any>()
+  const bestPRsMap = new Map<string, PersonalRecordWithDetails>()
 
   for (const pr of prs) {
     const key = pr.baseExerciseId
-    if (
-      !bestPRsMap.has(key) ||
-      pr.estimated1RM > bestPRsMap.get(key).estimated1RM
-    ) {
+    const existing = bestPRsMap.get(key)
+    if (!existing || pr.estimated1RM > existing.estimated1RM) {
       bestPRsMap.set(key, pr)
     }
   }
@@ -3074,7 +3127,7 @@ async function getPersonalRecordsForPlan(
 /**
  * Calculate total volume lifted during the plan
  */
-function calculateTotalVolumeForPlan(plan: any) {
+function calculateTotalVolumeForPlan(plan: PlanWithProgressionData) {
   let totalVolume = 0
 
   for (const week of plan.weeks) {

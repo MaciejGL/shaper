@@ -15,6 +15,7 @@ interface UnifiedPreviewDrawerProps {
   initialView: DrawerView | null
   isOpen: boolean
   onClose: () => void
+  onAnimationComplete?: () => void
   onStartWorkout: (dayId: string) => void
   isStarting: boolean
   onAssignTemplate: (planId: string) => void
@@ -26,6 +27,7 @@ export function UnifiedPreviewDrawer({
   initialView,
   isOpen,
   onClose,
+  onAnimationComplete,
   onStartWorkout,
   isStarting,
   onAssignTemplate,
@@ -63,13 +65,20 @@ export function UnifiedPreviewDrawer({
 
   const handleDrawerClose = () => {
     setIsClosing(true)
-    setTimeout(() => {
+    onClose()
+  }
+
+  const handleAnimationEnd = (e: React.AnimationEvent<HTMLDivElement>) => {
+    // Only handle animation events from the DrawerContent itself, not from children (like Dialog)
+    if (e.target !== e.currentTarget) return
+
+    if (isClosing) {
       setViewStack([])
       setDirection('forward')
       setHasNavigated(false)
       setIsClosing(false)
-    }, 200)
-    onClose()
+      onAnimationComplete?.()
+    }
   }
 
   const slideVariants = {
@@ -110,11 +119,20 @@ export function UnifiedPreviewDrawer({
   }
 
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => !open && handleDrawerClose()}>
+    <Drawer
+      open={isOpen}
+      onOpenChange={(open) => {
+        // Only handle when closing (open === false)
+        if (!open) {
+          handleDrawerClose()
+        }
+      }}
+    >
       <DrawerContent
         className="max-h-[90vh]"
         dialogTitle={getTitle()}
         grabberAbsolute
+        onAnimationEnd={handleAnimationEnd}
       >
         {viewStack.length > 0 && (
           <div className="absolute top-4 left-4 z-50">

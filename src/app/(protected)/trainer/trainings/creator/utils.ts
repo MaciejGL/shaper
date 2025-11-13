@@ -1,7 +1,5 @@
-import { formatDate } from 'date-fns'
-
 import { GQLWorkoutType } from '@/generated/graphql-client'
-import { WeekStartDay, dayNames } from '@/lib/date-utils'
+import { dayNames } from '@/lib/date-utils'
 
 export interface Exercise {
   id: string

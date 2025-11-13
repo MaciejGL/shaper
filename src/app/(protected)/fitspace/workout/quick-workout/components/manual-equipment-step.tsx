@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
 import { GQLEquipment } from '@/generated/graphql-client'
 
-import { EquipmentFilters } from '../../[trainingId]/components/equipment-filters'
+import { EquipmentFilters } from '../../training/components/equipment-filters'
 
 interface ManualEquipmentStepProps {
   selectedEquipment: GQLEquipment[]

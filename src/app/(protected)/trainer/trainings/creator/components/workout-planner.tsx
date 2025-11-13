@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core'
 import { DumbbellIcon } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { DashboardHeader } from '@/app/(protected)/trainer/components/dashboard-header'
 import { Skeleton } from '@/components/ui/skeleton'

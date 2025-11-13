@@ -57,10 +57,7 @@ export function FormActions({
               transition={{ duration: 0.1 }}
               className="flex items-center gap-2"
             >
-              <Loader2 className="size-3 animate-spin text-amber-500" />
-              <p className="text-sm text-muted-foreground whitespace-nowrap animate-pulse">
-                Saving changes
-              </p>
+              <Loader2 className="size-4 animate-spin text-amber-500" />
             </motion.div>
           ) : (
             <motion.div
@@ -71,10 +68,7 @@ export function FormActions({
               transition={{ duration: 0.1 }}
               className="flex items-center gap-2"
             >
-              <CheckCheck className="size-3 text-green-500" />
-              <p className="text-sm text-muted-foreground whitespace-nowrap">
-                Changes saved
-              </p>
+              <CheckCheck className="size-4 text-green-500" />
             </motion.div>
           )}
         </AnimatePresence>

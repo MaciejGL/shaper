@@ -3,7 +3,6 @@ import type {
   GQLUserSubscription,
   GQLUserSubscriptionStatus,
 } from '@/generated/graphql-server'
-import { GQLContext } from '@/types/gql-context'
 import type { ServiceUsageTracker } from '@/types/subscription'
 
 import UserSubscription from '../user-subscription/model'
@@ -26,10 +25,7 @@ export interface UserSubscriptionStatusData {
 export default class UserSubscriptionStatus
   implements GQLUserSubscriptionStatus
 {
-  constructor(
-    private data: UserSubscriptionStatusData,
-    private context: GQLContext,
-  ) {}
+  constructor(private data: UserSubscriptionStatusData) {}
 
   get hasPremium() {
     return this.data.hasPremium

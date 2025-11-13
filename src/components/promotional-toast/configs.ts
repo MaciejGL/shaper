@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import { GQLNotificationType } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
 
-import { NotificationData, PromotionalToastConfig } from './types'
+import { PromotionalToastConfig } from './types'
 
 export function usePromotionalToastConfigs(): Record<
   GQLNotificationType,

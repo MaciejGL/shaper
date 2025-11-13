@@ -183,10 +183,10 @@ export function Sidebar({
                   variant={
                     selectedMuscleGroup === muscleGroup.slug
                       ? 'primary'
-                      : 'secondary'
+                      : 'outline'
                   }
                   onClick={() => onMuscleGroupChange(muscleGroup.slug)}
-                  className="cursor-pointer w-full"
+                  className="cursor-pointer w-full rounded-md"
                 >
                   {muscleGroup.name.replace('Hip', '')}
                 </Badge>
@@ -254,10 +254,10 @@ export function Sidebar({
                   variant={
                     selectedEquipment === equipment.value
                       ? 'primary'
-                      : 'secondary'
+                      : 'outline'
                   }
                   onClick={() => onEquipmentChange(equipment.value)}
-                  className="cursor-pointer w-full"
+                  className="cursor-pointer w-full rounded-md"
                 >
                   {equipment.label}
                 </Badge>

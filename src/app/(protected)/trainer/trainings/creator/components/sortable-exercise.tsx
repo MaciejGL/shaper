@@ -579,7 +579,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
       weight: lastSetData?.weight ?? undefined,
       rpe: lastSetData?.rpe ?? undefined,
     })
-  }, [addSetOptimistic, exercise?.sets])
+  }, [addSetOptimistic, exercise])
 
   const removeSet = useCallback(
     (setId: string) => {

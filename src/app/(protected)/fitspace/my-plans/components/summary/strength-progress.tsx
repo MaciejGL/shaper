@@ -1,14 +1,13 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, BicepsFlexed, TrendingUp } from 'lucide-react'
+import { ArrowRight, BicepsFlexed } from 'lucide-react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetPlanSummaryQuery } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
-import { cn } from '@/lib/utils'
 
 import { getTopProgressions } from '../../utils/summary-helpers'
 
@@ -36,9 +35,6 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
           <SectionIcon icon={BicepsFlexed} size="xs" variant="green" />
           Strength Progress
         </h3>
-        <Badge variant="secondary">
-          Top {topProgressions.length} Improvements
-        </Badge>
       </div>
 
       <motion.div
@@ -89,7 +85,7 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                   />
 
                   {/* Before/After comparison */}
-                  <div className="flex items-center justify-between text-sm bg-card-on-card p-2 rounded-lg">
+                  <div className="flex items-center justify-between text-sm bg-card-on-card p-2 rounded-xl">
                     <div className="flex flex-col">
                       {/* <span className="text-xs text-muted-foreground">
                         Start

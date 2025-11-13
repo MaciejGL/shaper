@@ -61,7 +61,7 @@ export function ArchiveMealDialog({
       toast.success('Meal archived successfully')
       onOpenChange(false)
     },
-    onError: (error, variables, context) => {
+    onError: (error, _, context) => {
       toast.error('Failed to archive meal: ' + (error as Error).message)
       if (context?.previousData) {
         const queryKey = useGetMealsForLibraryQuery.getKey({})
@@ -100,7 +100,7 @@ export function ArchiveMealDialog({
       toast.success('Meal restored successfully')
       onOpenChange(false)
     },
-    onError: (error, variables, context) => {
+    onError: (error, _, context) => {
       toast.error('Failed to restore meal: ' + (error as Error).message)
       if (context?.previousData) {
         const queryKey = useGetMealsForLibraryQuery.getKey({})

@@ -179,12 +179,6 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   async assignmentCount() {
-    console.log(
-      'assignmentCount',
-      this.data.id,
-      this.data.isTemplate,
-      this.data.isPublic,
-    )
     if (this.data.isTemplate && this.data.isPublic) {
       const count =
         await this.context.loaders.plan.assignmentCountByTemplateId.load(

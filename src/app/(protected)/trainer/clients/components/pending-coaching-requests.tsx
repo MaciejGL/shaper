@@ -46,7 +46,7 @@ function RequestCard({ request }: { request: CoachingRequest }) {
 
   const { mutate: acceptRequest, isPending: isAccepting } =
     useAcceptCoachingRequestMutation({
-      onSuccess: async (data) => {
+      onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: useMyCoachingRequestsQuery.getKey(),
         })

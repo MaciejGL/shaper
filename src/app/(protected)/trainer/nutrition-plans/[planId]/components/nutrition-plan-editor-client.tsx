@@ -40,7 +40,6 @@ export function NutritionPlanEditorClient({
     { id: planId },
     {
       initialData: serverData,
-      initialDataUpdatedAt: Date.now(),
       staleTime: 5 * 60 * 1000, // 5 minutes
       refetchOnMount: false,
       refetchOnWindowFocus: false,

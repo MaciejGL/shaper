@@ -14,6 +14,7 @@ import { useStartFreeWorkoutDayMutation } from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
+import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 import { formatUserCount } from '@/utils/format-user-count'
 
 import { FreeWorkoutDay, PublicTrainingPlan } from './explore.client'
@@ -51,9 +52,7 @@ export function FreeWorkoutsTab({
         setIsPreviewOpen(false)
 
         startTransition(() => {
-          router.push(
-            `/fitspace/workout/quick-workout?week=${weekId}&day=${dayId}`,
-          )
+          router.push(`/fitspace/workout?week=${weekId}&day=${dayId}`)
           router.refresh()
         })
       },
@@ -141,6 +140,8 @@ export function FreeWorkoutsTab({
         isOpen={isPreviewOpen}
         onClose={() => {
           setIsPreviewOpen(false)
+        }}
+        onAnimationComplete={() => {
           setSelectedDayId(null)
         }}
         onStartWorkout={handleStartWorkout}
@@ -159,7 +160,7 @@ interface FreeWorkoutDayCardProps {
 }
 
 function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
-  const workoutType = day.trainingDay?.workoutType || 'Workout'
+  const workoutType = day.trainingDay?.workoutType
   const planTitle = day.plan?.title || 'Training Plan'
   const exerciseCount = day.trainingDay?.exercisesCount || 0
   const timesStarted = day.trainingDay?.timesStarted || 0
@@ -168,7 +169,7 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
   const estimatedDuration = useMemo(() => {
     if (!day.trainingDay?.exercises) return null
     return estimateWorkoutTime(day.trainingDay.exercises)
-  }, [day.trainingDay?.exercises])
+  }, [day])
 
   return (
     <Card
@@ -194,7 +195,7 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
             <CardTitle className="text-2xl text-foreground">
-              {workoutType}
+              {formatWorkoutType(workoutType) || 'Workout'}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               <span className="font-medium">{planTitle}</span>

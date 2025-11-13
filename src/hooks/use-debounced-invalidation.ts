@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { debounce } from 'lodash'
-import { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 interface UseDebouncedInvalidationOptions {
   /**
@@ -54,18 +54,19 @@ export function useDebouncedInvalidation({
   // Store the current query keys in refs to avoid recreating the debounced function
   const queryKeyRef = useRef(queryKey)
   const queryKeysRef = useRef(queryKeys)
-
-  // Update refs when values change
-  queryKeyRef.current = queryKey
-  queryKeysRef.current = queryKeys
-
-  // Create a stable debounced function that doesn't change on every render
   const debouncedInvalidateRef = useRef<ReturnType<typeof debounce> | null>(
     null,
   )
 
-  // Initialize the debounced function once
-  if (!debouncedInvalidateRef.current) {
+  // Update refs when values change
+  useEffect(() => {
+    queryKeyRef.current = queryKey
+    queryKeysRef.current = queryKeys
+  })
+
+  // Create debounced function in effect (allowed to access refs)
+  // Only recreates when delay or queryClient changes
+  useEffect(() => {
     debouncedInvalidateRef.current = debounce(() => {
       // Use the current values from refs
       const currentQueryKey = queryKeyRef.current
@@ -83,19 +84,20 @@ export function useDebouncedInvalidation({
         })
       }
     }, delay)
-  }
 
-  // Return a stable callback that calls the debounced function
-  const debouncedInvalidate = useCallback(() => {
-    debouncedInvalidateRef.current?.()
-  }, [])
-
-  // Cleanup the debounced function on unmount to prevent memory leaks
-  useEffect(() => {
+    // Cleanup: cancel debounced function when recreating or unmounting
     return () => {
       debouncedInvalidateRef.current?.cancel()
     }
-  }, [])
+  }, [delay, queryClient])
+
+  // Return stable callback that invokes the debounced function
+  const debouncedInvalidate = useMemo(
+    () => () => {
+      debouncedInvalidateRef.current?.()
+    },
+    [],
+  )
 
   return debouncedInvalidate
 }

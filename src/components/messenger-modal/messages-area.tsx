@@ -29,7 +29,9 @@ export function MessagesArea({
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const previousScrollHeight = useRef<number>(0)
   const currentChatId = useRef<string | null>(null)
-  const initialMessageIds = useRef<Set<string>>(new Set())
+  const [initialMessageIds, setInitialMessageIds] = useState<Set<string>>(
+    new Set(),
+  )
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false)
 
   // Check if user is near the bottom of the chat
@@ -62,7 +64,7 @@ export function MessagesArea({
     if (isChatChange) {
       currentChatId.current = currentMessagesChatId
       // Reset initial load tracking for new chat
-      initialMessageIds.current = new Set(messages.map((m) => m.id))
+      setInitialMessageIds(new Set(messages.map((m) => m.id)))
       setIsInitialLoadComplete(false)
       scrollToBottom(true) // Instant scroll for chat changes
 
@@ -73,7 +75,7 @@ export function MessagesArea({
 
     // For existing chat, mark initial load complete if not already
     if (!isInitialLoadComplete && messages.length > 0) {
-      initialMessageIds.current = new Set(messages.map((m) => m.id))
+      setInitialMessageIds(new Set(messages.map((m) => m.id)))
       setIsInitialLoadComplete(true)
     }
 
@@ -176,7 +178,7 @@ export function MessagesArea({
 
         // Only animate messages that weren't part of initial load
         const shouldAnimate =
-          isInitialLoadComplete && !initialMessageIds.current.has(message.id)
+          isInitialLoadComplete && !initialMessageIds.has(message.id)
 
         return (
           <Message

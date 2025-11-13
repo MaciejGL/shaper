@@ -121,7 +121,7 @@ export function ExistingWorkoutView({
             <div className="space-y-4">
               <div className="flex flex-col gap-3">
                 <ButtonLink
-                  href={`/fitspace/workout/${quickWorkoutPlan.id}`}
+                  href={`/fitspace/workout`}
                   size="lg"
                   className="w-full"
                   iconEnd={<ChevronRight />}

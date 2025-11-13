@@ -1,18 +1,10 @@
 import { formatDate } from 'date-fns'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { ExtendHeader } from '@/components/extend-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { GQLWorkoutType } from '@/generated/graphql-client'
 import { getDayName } from '@/lib/date-utils'

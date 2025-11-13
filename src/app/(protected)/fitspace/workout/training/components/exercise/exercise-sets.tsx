@@ -3,7 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { PlusIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useIsFirstRender } from '@/components/animated-grid'
 import { Button } from '@/components/ui/button'

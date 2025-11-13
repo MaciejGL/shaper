@@ -48,6 +48,7 @@ describe('Meal Model', () => {
       teamId: 'team-1',
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
+      archived: false,
       createdBy: createdByMock,
       team: {
         id: 'team-1',

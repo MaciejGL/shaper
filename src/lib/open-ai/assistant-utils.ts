@@ -76,7 +76,7 @@ export function parseAssistantJsonResponse(response: string) {
 
   try {
     return JSON.parse(response)
-  } catch (err) {
+  } catch {
     // Clean the response by removing markdown code blocks
     let cleanedResponse = response.trim()
 
@@ -107,7 +107,7 @@ export function parseAssistantJsonResponse(response: string) {
 
     try {
       return JSON.parse(cleanedResponse)
-    } catch (err) {
+    } catch {
       console.error(
         'Failed to parse AI response. Preview:',
         response.substring(0, 500),

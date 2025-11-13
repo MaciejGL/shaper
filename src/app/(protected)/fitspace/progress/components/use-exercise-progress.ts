@@ -135,7 +135,7 @@ export function useChartData(
       const setsPerPoint =
         totalSetsFromExercise > 0
           ? Math.ceil(totalSetsFromExercise / oneRMData.length)
-          : Math.round(8 + Math.random() * 6) // Fallback: 8-14 sets
+          : 10 // Fallback: 10 sets (fixed value to maintain purity)
 
       // Try to find matching volume data or estimate
       const matchingVolume = volumeFromProgress.find((vol) => {
@@ -212,7 +212,7 @@ export function useExerciseImprovement(
   exercise: ExerciseProgress | undefined,
   timePeriod: TimePeriod,
 ) {
-  return useMemo(() => {
+  const value = useMemo(() => {
     if (
       !exercise?.estimated1RMProgress ||
       exercise?.estimated1RMProgress.length < 2
@@ -285,5 +285,7 @@ export function useExerciseImprovement(
       minImprovement,
       Math.min(maxImprovement, calculatedImprovement),
     )
-  }, [exercise?.estimated1RMProgress, timePeriod])
+  }, [exercise, timePeriod])
+
+  return value
 }

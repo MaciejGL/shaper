@@ -12,12 +12,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
-import { useMobileApp } from '@/components/mobile-app-bridge'
 import { useFitspaceGetWorkoutNavigationQuery } from '@/generated/graphql-client'
 import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
 import { cn } from '@/lib/utils'
 
-import { getDefaultSelection } from '../workout/[trainingId]/components/navigation-utils'
+import { getDefaultSelection } from '../workout/training/components/navigation-utils'
 
 interface MobileNavProps {
   /**
@@ -29,7 +28,6 @@ interface MobileNavProps {
 
 export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
   const pathname = usePathname()
-  const { isNativeApp } = useMobileApp()
   const isKeyboardVisible = useKeyboardVisible()
   const [clickedItem, setClickedItem] = useState<string | null>(null)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
@@ -69,7 +67,7 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
   const navItems = useMemo(() => {
     // Use stable workout URL during hydration to prevent hydration mismatch
     const workoutHref = trainingId
-      ? `/fitspace/workout/${trainingId}?weekId=${weekId || ''}&dayId=${dayId || ''}`
+      ? `/fitspace/workout?weekId=${weekId || ''}&dayId=${dayId || ''}`
       : '/fitspace/workout' // Fallback to plans page when no training data available
 
     return [

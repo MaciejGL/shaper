@@ -4,7 +4,11 @@ export interface MobileBridgeMessage {
     | 'NATIVE_PUSH_REGISTER'
     | 'NATIVE_SHARE'
     | 'REQUEST_EXPO_PUSH_TOKEN'
-  data?: any
+  data?:
+    | CameraRequest
+    | PushTokenData
+    | FileDownloadData
+    | Record<string, unknown>
 }
 
 export interface CameraRequest {

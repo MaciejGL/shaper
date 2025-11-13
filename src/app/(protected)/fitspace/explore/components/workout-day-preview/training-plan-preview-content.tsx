@@ -29,7 +29,7 @@ export function TrainingPlanPreviewContent({
   const [activeTab, setActiveTab] = useState('info')
   const [isTrainerDrawerOpen, setIsTrainerDrawerOpen] = useState(false)
 
-  const handleWeekClick = (weekId: string) => {
+  const handleWeekClick = () => {
     setActiveTab('preview')
   }
 

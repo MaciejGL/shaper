@@ -161,7 +161,7 @@ function getPrismaClient(): PrismaClient {
 
 // Export lazy Prisma client getter
 export const prisma = new Proxy({} as PrismaClient, {
-  get(target, prop) {
+  get(_, prop) {
     const client = getPrismaClient()
     return client[prop as keyof PrismaClient]
   },
@@ -169,7 +169,7 @@ export const prisma = new Proxy({} as PrismaClient, {
 
 // Export lazy pool getter
 export const pool = new Proxy({} as Pool, {
-  get(target, prop) {
+  get(_, prop) {
     const poolInstance = getPool()
     return poolInstance[prop as keyof Pool]
   },

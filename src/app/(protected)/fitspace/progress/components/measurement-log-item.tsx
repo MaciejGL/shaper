@@ -17,14 +17,12 @@ interface MeasurementLogItemProps {
     label: string
     unit: string
   }[]
-  isOnCard?: boolean
 }
 
 export function MeasurementLogItem({
   measurement,
   onUpdate,
   relevantFields,
-  isOnCard = false,
 }: MeasurementLogItemProps) {
   const { toDisplayWeight, weightUnit } = useWeightConversion()
   const { toDisplayCircumference, circumferenceUnit } =

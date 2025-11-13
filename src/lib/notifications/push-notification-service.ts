@@ -33,7 +33,7 @@ export async function notifyMeetingScheduled(
 export async function notifyMeetingUpdated(
   clientId: string,
   meetingTitle: string,
-  changedFields: string,
+  _changedFields: string,
   meetingDate: string,
   trainerName: string,
 ) {
@@ -400,7 +400,7 @@ export async function notifyTeamInvitation(
 export async function notifyTrainerOfferReceived(
   clientUserId: string,
   trainerName: string,
-  packageDescription: string,
+  _packageDescription: string,
   offerToken: string,
 ) {
   return await sendPushNotificationToUsers(

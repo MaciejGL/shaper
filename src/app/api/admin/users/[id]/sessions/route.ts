@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db'
 
 // DELETE /api/admin/users/[id]/sessions - Clear all user sessions
 export async function DELETE(
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {

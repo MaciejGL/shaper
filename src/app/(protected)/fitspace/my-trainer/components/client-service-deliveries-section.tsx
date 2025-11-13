@@ -166,11 +166,11 @@ function TrainerOfferItem({ offer }: TrainerOfferItemProps) {
   )
 
   return (
-    <AccordionItem
-      value={offer.id}
-      className="px-4 rounded-2xl border last:border-b"
-    >
-      <AccordionTrigger className="hover:no-underline flex justify-between items-center">
+    <AccordionItem value={offer.id} className="border-none">
+      <AccordionTrigger
+        variant="outline"
+        className="flex justify-between items-center"
+      >
         <div className="flex items-center justify-between w-full pr-4">
           <div className="flex items-center gap-3">
             <div className="text-left">
@@ -192,7 +192,7 @@ function TrainerOfferItem({ offer }: TrainerOfferItemProps) {
       </AccordionTrigger>
 
       <AccordionContent>
-        <div className="space-y-4 pb-4">
+        <div className="space-y-4 p-4">
           <div>
             <h4 className="font-medium text-sm text-muted-foreground mb-3">
               What's included in this package:

@@ -109,7 +109,7 @@ export function MealSearchCombobox({
       setIsOpen(false)
       onMealAdded?.()
     },
-    onError: (error, variables, context) => {
+    onError: (error, _, context) => {
       toast.error('Failed to add meal: ' + (error as Error).message)
       // Rollback optimistic update
       if (context?.previousData) {

@@ -53,7 +53,7 @@ export function UnmatchedExercisesModal({
       })
       setExercises((prev) => prev.filter((e) => e.id !== id))
       toast.success('Exercise removed')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to remove exercise')
     }
   }
