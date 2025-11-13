@@ -12,7 +12,7 @@ import { useWorkoutPrefetch } from '../hooks/use-workout-prefetch'
 
 import { CalendarWeekSelector } from './calendar-week-selector'
 import { getDefaultSelection } from './navigation-utils'
-import { NavigationDay, NavigationPlan } from './workout-page.client'
+import { NavigationDay, NavigationPlan } from './workout-day'
 
 interface NavigationProps {
   plan?: NavigationPlan | null

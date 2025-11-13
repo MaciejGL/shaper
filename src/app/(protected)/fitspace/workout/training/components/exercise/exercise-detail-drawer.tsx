@@ -17,7 +17,7 @@ import { SectionIcon } from '@/components/ui/section-icon'
 import { getYouTubeEmbedUrl } from '@/lib/get-youtube-embed-url'
 import { cn } from '@/lib/utils'
 
-import { WorkoutExercise } from '../workout-page.client'
+import { WorkoutExercise } from '../workout-day'
 
 interface ExerciseDetailDrawerProps {
   exercise: WorkoutExercise

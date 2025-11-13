@@ -4,7 +4,7 @@ import {
   NavigationPlan,
   NavigationWeek,
   WorkoutDayData,
-} from './[trainingId]/components/workout-page.client'
+} from './training/components/workout-day'
 
 export const getExpectedDayDate = (
   day: WorkoutDayData,

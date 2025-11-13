@@ -105,7 +105,7 @@ export function PlanDetailsDrawer({
                   </div>
                   {plan.startDate && plan.endDate && plan.active && (
                     <ButtonLink
-                      href={`/fitspace/workout/${plan.id}`}
+                      href={`/fitspace/workout`}
                       iconEnd={<ArrowRightIcon />}
                       size="sm"
                     >

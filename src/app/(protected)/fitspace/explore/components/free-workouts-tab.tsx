@@ -52,9 +52,7 @@ export function FreeWorkoutsTab({
         setIsPreviewOpen(false)
 
         startTransition(() => {
-          router.push(
-            `/fitspace/workout/quick-workout?week=${weekId}&day=${dayId}`,
-          )
+          router.push(`/fitspace/workout?week=${weekId}&day=${dayId}`)
           router.refresh()
         })
       },

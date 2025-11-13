@@ -11,11 +11,7 @@ import {
   isQuickWorkout,
   jsDateToTrainingDay,
 } from './navigation-utils'
-import {
-  NavigationDay,
-  NavigationPlan,
-  NavigationWeek,
-} from './workout-page.client'
+import { NavigationDay, NavigationPlan, NavigationWeek } from './workout-day'
 
 describe('navigation-utils', () => {
   describe('isQuickWorkout', () => {

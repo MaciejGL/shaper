@@ -9,7 +9,7 @@ import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { cn } from '@/lib/utils'
 
-import { NavigationPlan } from './workout-page.client'
+import { NavigationPlan } from './workout-day'
 
 interface CalendarWeekSelectorProps {
   plan: NavigationPlan

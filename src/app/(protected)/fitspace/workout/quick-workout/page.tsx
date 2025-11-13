@@ -6,7 +6,7 @@ import {
 } from '@/generated/graphql-client'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
-import { WorkoutPageClientNew } from '../[trainingId]/components/workout-page.client'
+import { WorkoutPageServer } from '../training/components/workout-page.server'
 
 // Force dynamic rendering - quick workout changes frequently
 export const dynamic = 'force-dynamic'
@@ -34,7 +34,7 @@ export default async function QuickWorkoutPage({
   )
 
   return (
-    <WorkoutPageClientNew
+    <WorkoutPageServer
       navigationPromise={navigationPromise}
       dayPromise={dayPromise}
       trainingId="quick-workout"

@@ -1,8 +1,4 @@
-import {
-  NavigationDay,
-  NavigationPlan,
-  NavigationWeek,
-} from './workout-page.client'
+import { NavigationDay, NavigationPlan, NavigationWeek } from './workout-day'
 
 /**
  * Checks if a plan is a Quick Workout (uses scheduledAt on weeks)

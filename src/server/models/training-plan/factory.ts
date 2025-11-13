@@ -1898,7 +1898,6 @@ export async function getWorkoutNavigation(
   const defaultPlan = await prisma.trainingPlan.findUnique({
     where: {
       id: trainingId,
-      active: true,
       assignedToId: user.user.id,
       createdById: user.user.id,
     },
@@ -2022,6 +2021,7 @@ export async function getWorkoutDay(
   } else {
     // Find today's scheduled day with all data
     const todayUTC = getTodayUTC('UTC')
+
     day = await prisma.trainingDay.findFirst({
       where: {
         week: {
@@ -2034,6 +2034,21 @@ export async function getWorkoutDay(
       },
       include: WORKOUT_DAY_INCLUDE,
     })
+
+    if (!day) {
+      day = await prisma.trainingDay.findFirst({
+        where: {
+          week: {
+            plan: { assignedToId: user.user.id, createdById: user.user.id },
+          },
+          scheduledAt: {
+            gte: todayUTC,
+            lt: new Date(todayUTC.getTime() + 24 * 60 * 60 * 1000),
+          },
+        },
+        include: WORKOUT_DAY_INCLUDE,
+      })
+    }
   }
 
   if (!day) {
