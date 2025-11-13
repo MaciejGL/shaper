@@ -238,7 +238,7 @@ export function ExerciseSettingsSection({
             value={currentExercise.equipment}
             onValueChange={(value) => handleFieldUpdate('equipment', value)}
           >
-            <SelectTrigger variant="tertiary" className="w-full">
+            <SelectTrigger variant="outline" className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -259,7 +259,7 @@ export function ExerciseSettingsSection({
               handleFieldUpdate('version', parseInt(value))
             }
           >
-            <SelectTrigger variant="tertiary" className="w-full">
+            <SelectTrigger variant="outline" className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

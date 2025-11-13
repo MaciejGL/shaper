@@ -75,7 +75,7 @@ export function useMessengerData(
     }
 
     return null
-  }, [messengerData?.getMessengerInitialData?.chats, selectedChatId])
+  }, [messengerData, selectedChatId])
 
   // Get additional messages for the selected chat (pagination)
   // Only fetch when user actually requests more messages

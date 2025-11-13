@@ -1,3 +1,4 @@
+import { GQLTargetGoal } from '@/generated/graphql-client'
 import { translateTargetGoal } from '@/utils/translate-target-goal'
 
 interface TargetGoalsSectionProps {
@@ -17,7 +18,7 @@ export function TargetGoalsSection({ targetGoals }: TargetGoalsSectionProps) {
             className="text-sm text-muted-foreground flex items-start gap-2"
           >
             <div className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
-            {translateTargetGoal(goal as any)}
+            {translateTargetGoal(goal as GQLTargetGoal)}
           </li>
         ))}
       </ul>

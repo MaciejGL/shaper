@@ -97,6 +97,7 @@ const eslintConfig = [
       'src/__tests__/**',
       'src/lib/pdf/**',
       'expo-app/**',
+      'src/app/(protected)/admin/**',
     ],
   },
 ]

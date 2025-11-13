@@ -1,7 +1,7 @@
 'use client'
 
 import { User } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { ClientSurveyModal } from '@/components/client-survey/client-survey-modal'
 import { useClientSurvey } from '@/components/client-survey/use-client-survey.hook'
@@ -62,7 +62,7 @@ export function TrainersTab({
   const createCoachingRequestMutation = useCreateCoachingRequestMutation()
   const cancelCoachingRequestMutation = useCancelCoachingRequestMutation()
 
-  const trainers = data?.getFeaturedTrainers || []
+  const trainers = useMemo(() => data?.getFeaturedTrainers || [], [data])
   const coachingRequests = coachingRequestsData?.coachingRequests || []
 
   // Helper to get latest request between current user and another user

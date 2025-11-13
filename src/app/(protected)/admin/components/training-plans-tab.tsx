@@ -89,7 +89,25 @@ export function TrainingPlansTab() {
   const [imageSource, setImageSource] = useState<'exercise' | 'custom'>(
     'exercise',
   )
-  const [planData, setPlanData] = useState<any>(null)
+  const [planData, setPlanData] = useState<{
+    title?: string
+    difficulty?: string
+    weekCount?: number
+    assignmentCount?: number
+    premium?: boolean
+    heroImageUrl?: string
+    weeks?: {
+      days?: {
+        exercises?: {
+          name: string
+          sets?: { id: string }[]
+          restSeconds?: number
+          warmupSets?: number
+          base?: { images?: { url: string }[] }
+        }[]
+      }[]
+    }[]
+  } | null>(null)
   const [loadingPlanData, setLoadingPlanData] = useState(false)
 
   const fetchPlans = async () => {
@@ -258,11 +276,11 @@ export function TrainingPlansTab() {
   const exerciseImages = useMemo(() => {
     if (!planData?.weeks) return []
 
-    const images: Array<{ url: string; exerciseName: string }> = []
-    planData.weeks.forEach((week: any) => {
-      week.days?.forEach((day: any) => {
-        day.exercises?.forEach((exercise: any) => {
-          exercise.base?.images?.forEach((img: any) => {
+    const images: { url: string; exerciseName: string }[] = []
+    planData.weeks.forEach((week) => {
+      week.days?.forEach((day) => {
+        day.exercises?.forEach((exercise) => {
+          exercise.base?.images?.forEach((img) => {
             if (img.url) {
               images.push({
                 url: img.url,
@@ -281,12 +299,12 @@ export function TrainingPlansTab() {
     if (!planData?.weeks) return null
 
     const allExercises = planData.weeks.flatMap(
-      (week: any) =>
-        week.days?.flatMap((day: any) => day.exercises || []) || [],
+      (week) => week.days?.flatMap((day) => day.exercises || []) || [],
     )
 
     if (allExercises.length === 0) return null
-    return estimateWorkoutTime(allExercises)
+    // Cast to expected type since this is admin preview code
+    return estimateWorkoutTime(allExercises as never[])
   }, [planData])
 
   if (loading && plans.length === 0) {
@@ -646,11 +664,11 @@ export function TrainingPlansTab() {
                   <Label>Preview how it will look:</Label>
                   {heroImageUrl && planData ? (
                     <TrainingPlanPreviewCard
-                      title={planData.title}
-                      difficulty={planData.difficulty}
-                      weekCount={planData.weekCount}
-                      assignmentCount={planData.assignmentCount}
-                      premium={planData.premium}
+                      title={planData.title || ''}
+                      difficulty={planData.difficulty || ''}
+                      weekCount={planData.weekCount || 0}
+                      assignmentCount={planData.assignmentCount || 0}
+                      premium={planData.premium || false}
                       heroImageUrl={heroImageUrl}
                       estimatedDuration={estimatedDuration}
                     />

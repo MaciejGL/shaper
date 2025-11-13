@@ -515,7 +515,7 @@ export function ExerciseEditor({
               setFilterPremium(value)
             }
           >
-            <SelectTrigger className="w-[120px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[120px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -531,7 +531,7 @@ export function ExerciseEditor({
               setFilterVersion(value)
             }
           >
-            <SelectTrigger className="w-[100px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[100px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -547,7 +547,7 @@ export function ExerciseEditor({
               setFilterPublic(value)
             }
           >
-            <SelectTrigger className="w-[120px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[120px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -561,7 +561,7 @@ export function ExerciseEditor({
             value={itemsPerPage.toString()}
             onValueChange={(value) => setItemsPerPage(parseInt(value))}
           >
-            <SelectTrigger className="w-[80px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[80px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -581,7 +581,7 @@ export function ExerciseEditor({
               setFilterImages(value)
             }
           >
-            <SelectTrigger className="w-[140px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[140px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -597,7 +597,7 @@ export function ExerciseEditor({
               setFilterVideo(value)
             }
           >
-            <SelectTrigger className="w-[140px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[140px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -613,7 +613,7 @@ export function ExerciseEditor({
               setFilterDescription(value)
             }
           >
-            <SelectTrigger className="w-[160px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[160px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -627,7 +627,7 @@ export function ExerciseEditor({
             value={filterMuscleGroup}
             onValueChange={setFilterMuscleGroup}
           >
-            <SelectTrigger className="w-[140px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[140px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -642,7 +642,7 @@ export function ExerciseEditor({
               setFilterVerified(value)
             }
           >
-            <SelectTrigger className="w-[120px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[120px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -653,7 +653,7 @@ export function ExerciseEditor({
           </Select>
 
           <Select value={filterCreator} onValueChange={setFilterCreator}>
-            <SelectTrigger className="w-[140px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[140px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -667,7 +667,7 @@ export function ExerciseEditor({
           </Select>
 
           <Select value={filterEquipment} onValueChange={setFilterEquipment}>
-            <SelectTrigger className="w-[140px] h-9" variant="tertiary">
+            <SelectTrigger className="w-[140px] h-9" variant="outline">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

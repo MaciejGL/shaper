@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 import { VideoOverlayButton } from './video-overlay-button'
 
 interface ExerciseMediaPreviewProps {
-  images?: Array<{ medium?: string | null } | null> | null
+  images?: ({ medium?: string | null } | null)[] | null
   videoUrl?: string | null
   alt?: string
   className?: string

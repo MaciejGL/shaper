@@ -186,7 +186,7 @@ export function useProfile() {
         },
       })
     },
-    [updateAvatarOnly],
+    [updateAvatarOnly, setProfile],
   )
 
   return {

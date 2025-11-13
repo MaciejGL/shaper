@@ -90,7 +90,7 @@ export function FreeWorkoutDaysAdmin() {
   const exerciseImages = useMemo(() => {
     if (!selectedDayData?.exercises) return []
 
-    const images: Array<{ url: string; exerciseName: string }> = []
+    const images: { url: string; exerciseName: string }[] = []
     selectedDayData.exercises.forEach((exercise) => {
       exercise.images?.forEach((img) => {
         if (img.url) {

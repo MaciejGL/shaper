@@ -18,7 +18,7 @@ self.addEventListener('install', (event) => {
     try {
       const cache = await caches.open(STATIC_CACHE_NAME)
       await cache.addAll(STATIC_ASSETS)
-    } catch (error) {
+    } catch {
       // Don't fail installation - app works fine without cached icons
     }
   }
@@ -44,7 +44,7 @@ self.addEventListener('activate', (event) => {
             return caches.delete(name)
           }),
       )
-    } catch (error) {}
+    } catch {}
   }
 
   event.waitUntil(cleanup())

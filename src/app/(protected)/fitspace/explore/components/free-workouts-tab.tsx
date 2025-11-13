@@ -171,7 +171,7 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
   const estimatedDuration = useMemo(() => {
     if (!day.trainingDay?.exercises) return null
     return estimateWorkoutTime(day.trainingDay.exercises)
-  }, [day.trainingDay?.exercises])
+  }, [day])
 
   return (
     <Card

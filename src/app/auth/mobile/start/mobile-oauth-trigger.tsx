@@ -46,9 +46,6 @@ export function MobileOAuthTrigger({ callbackUrl }: MobileOAuthTriggerProps) {
     // The browser sees a button click event, which allows cookies to be set
     const autoClickTimer = setTimeout(() => {
       if (buttonRef.current && !hasTriggered.current) {
-        console.log(
-          '🔐 [MOBILE-OAUTH] Auto-clicking button to simulate user interaction',
-        )
         buttonRef.current.click()
       }
     }, 700)

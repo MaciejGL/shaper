@@ -285,7 +285,7 @@ export function useExerciseImprovement(
       minImprovement,
       Math.min(maxImprovement, calculatedImprovement),
     )
-  }, [exercise?.estimated1RMProgress, timePeriod])
+  }, [exercise, timePeriod])
 
   return value
 }

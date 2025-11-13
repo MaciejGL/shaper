@@ -27,7 +27,7 @@ export default function ProfilePage() {
     <AnimatedPageTransition id="profile">
       <ExtendHeader
         headerChildren={
-          <div className="py-6">
+          <div className="py-6 dark">
             <Header profile={profile} onAvatarChange={handleAvatarChange} />
           </div>
         }

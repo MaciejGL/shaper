@@ -11,19 +11,19 @@ interface Exercise {
   name: string
   videoUrl?: string | null
   completedAt?: string | null
-  images?: Array<{
+  images?: {
     __typename?: string
     id: string
     thumbnail?: string | null
     medium?: string | null
     url: string
     order: number
-  }>
+  }[]
   // Optional fields from other query types (not used by this component)
-  muscleGroups?: any
-  sets?: any
-  restSeconds?: any
-  instructions?: any
+  muscleGroups?: unknown
+  sets?: unknown
+  restSeconds?: unknown
+  instructions?: unknown
 }
 
 interface PlanPreviewExerciseRowProps {

@@ -204,23 +204,25 @@ function HeroImageSection({ disabled }: { disabled: boolean }) {
   const exerciseImages = useMemo(() => {
     if (!formData?.weeks) return []
 
-    const images: Array<{ url: string; exerciseName: string }> = []
+    const images: { url: string; exerciseName: string }[] = []
     const seenUrls = new Set<string>() // Avoid duplicates
 
     formData.weeks.forEach((week) => {
       week.days?.forEach((day) => {
-        day.exercises?.forEach((exercise: any) => {
-          // Get images directly from exercise
-          exercise.images?.forEach((img: any) => {
-            if (img.url && !seenUrls.has(img.url)) {
-              seenUrls.add(img.url)
-              images.push({
-                url: img.url,
-                exerciseName: exercise.name,
-              })
-            }
-          })
-        })
+        day.exercises?.forEach(
+          (exercise: { name: string; images?: { url: string }[] }) => {
+            // Get images directly from exercise
+            exercise.images?.forEach((img) => {
+              if (img.url && !seenUrls.has(img.url)) {
+                seenUrls.add(img.url)
+                images.push({
+                  url: img.url,
+                  exerciseName: exercise.name,
+                })
+              }
+            })
+          },
+        )
       })
     })
     return images

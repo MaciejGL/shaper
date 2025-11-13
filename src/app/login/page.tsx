@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic'
 export default async function RequestOtpPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
   const startProvider = params?.start as string | undefined

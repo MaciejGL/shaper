@@ -20,7 +20,7 @@ export const revalidate = 0
 export default async function MobileStartPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
   const callbackUrl = params.callbackUrl as string | undefined

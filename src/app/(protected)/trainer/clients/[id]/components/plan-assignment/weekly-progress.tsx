@@ -57,8 +57,6 @@ export function WeeklyProgress({ plan, clientId }: WeeklyProgressProps) {
 
   const sharedNotes = sharedNotesData?.clientSharedNotes || []
 
-  console.log(plan)
-
   // Find the week ID that matches the deep link weekNumber
   const initialWeekId = useMemo(() => {
     if (week !== null) {

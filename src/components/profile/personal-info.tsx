@@ -112,6 +112,10 @@ export function PersonalInfo({ profile, handleChange }: PersonalInfoProps) {
             <DatePicker
               date={profile?.birthday ? new Date(profile.birthday) : undefined}
               dateFormat="d MMM yyyy"
+              buttonProps={{
+                size: 'lg',
+                variant: 'outline',
+              }}
               setDate={(date) =>
                 date && handleChange('birthday', date.toISOString())
               }
@@ -120,12 +124,11 @@ export function PersonalInfo({ profile, handleChange }: PersonalInfoProps) {
 
           <div className="space-y-2">
             <Label htmlFor="sex">Gender</Label>
-
             <Select
               value={profile?.sex ?? ''}
               onValueChange={(value) => handleChange('sex', value)}
             >
-              <SelectTrigger id="sex" className="w-full" variant="secondary">
+              <SelectTrigger id="sex" className="w-full" variant="outline">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>

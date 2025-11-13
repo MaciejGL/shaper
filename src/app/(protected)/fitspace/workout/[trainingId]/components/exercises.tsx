@@ -57,7 +57,7 @@ export function Exercises({
     })
 
     return mostRecentTimestamp > 0 ? mostRecentTimestamp : undefined
-  }, [day?.exercises])
+  }, [day])
 
   // Determine if workout is currently active (user logged something in last 5 minutes)
   // Note: Using useState with lazy init to avoid calling Date.now() during render
