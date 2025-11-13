@@ -125,7 +125,7 @@ export function PersonalInfo({ profile, handleChange }: PersonalInfoProps) {
               value={profile?.sex ?? ''}
               onValueChange={(value) => handleChange('sex', value)}
             >
-              <SelectTrigger id="sex" className="w-full" variant="tertiary">
+              <SelectTrigger id="sex" className="w-full" variant="secondary">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>

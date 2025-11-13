@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 
 // Global modal stack to track all open modals in order
 const modalStack: string[] = []
@@ -48,20 +48,18 @@ const emergencyCleanupStack = () => {
  * ```
  */
 export function useModalHistory(isOpen: boolean, onClose: () => void) {
-  const modalIdRef = useRef<string>(`modal-${Math.random().toString(36)}`)
+  const id = useId()
+  const modalIdRef = useRef<string>(`modal-${id}`)
   const hasAddedHistoryRef = useRef(false)
   const isClosingViaBackButtonRef = useRef(false)
 
   // SAFETY: Cleanup on unmount - remove from stack even if not properly closed
   useEffect(() => {
+    const modalId = modalIdRef.current
     return () => {
-      const modalId = modalIdRef.current
       const index = modalStack.indexOf(modalId)
       if (index > -1) {
         modalStack.splice(index, 1)
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Modal cleaned up on unmount:', modalId)
-        }
       }
     }
   }, [])
@@ -102,8 +100,6 @@ export function useModalHistory(isOpen: boolean, onClose: () => void) {
 
         window.addEventListener('popstate', handlePopState)
         return () => window.removeEventListener('popstate', handlePopState)
-      } else if (process.env.NODE_ENV === 'development') {
-        console.warn('Modal ID already in stack, skipping:', modalId)
       }
     } else if (!isOpen && hasAddedHistoryRef.current) {
       // Remove from stack
@@ -126,8 +122,6 @@ export function useModalHistory(isOpen: boolean, onClose: () => void) {
           // Set flag to ignore the popstate event this will trigger
           ignoreNextPopstate = true
           history.back()
-        } else if (process.env.NODE_ENV === 'development' && wasInStack) {
-          console.log('Modal closed without history.back() (not topmost)')
         }
       }
 

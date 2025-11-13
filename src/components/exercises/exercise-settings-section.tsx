@@ -2,7 +2,6 @@
 
 import { Edit, X } from 'lucide-react'
 import { Suspense, useCallback, useState } from 'react'
-import React from 'react'
 
 import { MuscleGroupSelector } from '@/app/(protected)/trainer/exercises/components/muscle-group-selector'
 import { Badge } from '@/components/ui/badge'

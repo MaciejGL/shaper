@@ -2,7 +2,7 @@
 
 import { ImageIcon, X } from 'lucide-react'
 import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { GQLOptimizedImage } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'

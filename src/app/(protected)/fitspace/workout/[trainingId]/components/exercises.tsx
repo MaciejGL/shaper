@@ -60,11 +60,13 @@ export function Exercises({
   }, [day?.exercises])
 
   // Determine if workout is currently active (user logged something in last 5 minutes)
+  // Note: Using useState with lazy init to avoid calling Date.now() during render
+  const [currentTime] = React.useState(() => Date.now())
   const isActive = React.useMemo(() => {
     if (!lastActivityTimestamp) return false
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000
+    const fiveMinutesAgo = currentTime - 5 * 60 * 1000
     return lastActivityTimestamp >= fiveMinutesAgo
-  }, [lastActivityTimestamp])
+  }, [lastActivityTimestamp, currentTime])
 
   const isCompleted = day?.completedAt ? true : false
 

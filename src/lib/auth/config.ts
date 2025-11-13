@@ -1,4 +1,3 @@
-import { OAuth2Client } from 'google-auth-library'
 import { NextAuthOptions } from 'next-auth'
 import AppleProvider from 'next-auth/providers/apple'
 import CredentialsProvider from 'next-auth/providers/credentials'

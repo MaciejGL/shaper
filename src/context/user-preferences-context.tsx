@@ -132,7 +132,11 @@ export function UserPreferencesProvider({
     ...DEFAULT_PREFERENCES,
     ...initialPreferences,
   })
-  preferencesRef.current = preferences
+
+  // Update ref when preferences change (in effect to avoid render-phase updates)
+  useEffect(() => {
+    preferencesRef.current = preferences
+  })
 
   // Track if this is the initial mount
   const isInitialMount = useRef(true)

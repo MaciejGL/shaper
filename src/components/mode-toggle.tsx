@@ -3,7 +3,6 @@
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
-import * as React from 'react'
 
 import { switchThemeWithTransition } from '@/lib/theme-transition'
 

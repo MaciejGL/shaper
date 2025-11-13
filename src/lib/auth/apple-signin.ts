@@ -39,12 +39,12 @@ function mapJWTProfileToAppleProfile(
 /**
  * Handles Apple OAuth sign-in process
  *
- * @param account - NextAuth account object from Apple OAuth
+ * @param _ - NextAuth account object from Apple OAuth (unused)
  * @param profile - NextAuth profile object from Apple JWT
  * @returns Promise<boolean> - true if sign-in successful, false otherwise
  */
 export async function handleAppleSignIn(
-  account: Account,
+  _: Account,
   profile: Profile,
 ): Promise<boolean> {
   try {

@@ -20,7 +20,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useUser } from '@/context/user-context'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'

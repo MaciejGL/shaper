@@ -38,10 +38,7 @@ export async function checkPremiumAccess(
   }
 
   try {
-    return await subscriptionValidator.hasPremiumAccess(
-      context.user.user.id,
-      context,
-    )
+    return await subscriptionValidator.hasPremiumAccess(context.user.user.id)
   } catch (error) {
     console.error('Error checking premium access:', error)
     return false
@@ -270,7 +267,6 @@ export async function getActivePackageTemplates(
  */
 export async function getAllUsersWithSubscriptions(
   args: GQLQueryGetAllUsersWithSubscriptionsArgs,
-  context: GQLContext,
 ) {
   // Require admin access
   await requireAdminUser()
@@ -321,7 +317,7 @@ export async function getAllUsersWithSubscriptions(
       role: user.role,
       hasActiveSubscription: !!activeSubscription,
       subscription: activeSubscription
-        ? new UserSubscription(activeSubscription, context)
+        ? new UserSubscription(activeSubscription)
         : null,
       createdAt: user.createdAt.toISOString(),
     }
@@ -389,7 +385,10 @@ export async function getSubscriptionStats() {
 /**
  * Admin: Give lifetime premium subscription to a user
  */
-export async function giveLifetimePremium(userId: string, context: GQLContext) {
+export async function giveLifetimePremium(
+  userId: string,
+  _context: GQLContext,
+) {
   // Require admin access
   await requireAdminUser()
 
@@ -449,7 +448,7 @@ export async function giveLifetimePremium(userId: string, context: GQLContext) {
     },
   })
 
-  return new UserSubscription(newSubscription, context)
+  return new UserSubscription(newSubscription)
 }
 
 /**
@@ -535,7 +534,7 @@ export async function pauseClientCoachingSubscription(
     success: true,
     message: 'Coaching subscription paused successfully',
     pausedUntil: null, // Indefinite pause
-    subscription: new UserSubscription(coachingSubscription, context),
+    subscription: new UserSubscription(coachingSubscription),
   }
 }
 
@@ -597,6 +596,6 @@ export async function resumeClientCoachingSubscription(
   return {
     success: true,
     message: 'Coaching subscription resumed successfully',
-    subscription: new UserSubscription(coachingSubscription, context),
+    subscription: new UserSubscription(coachingSubscription),
   }
 }

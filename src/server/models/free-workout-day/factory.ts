@@ -1,5 +1,4 @@
-import { addDays, getISOWeek, isSameWeek, startOfToday } from 'date-fns'
-import { revalidatePath } from 'next/cache'
+import { addDays, getISOWeek, isSameWeek } from 'date-fns'
 
 import {
   GQLMutationAddFreeWorkoutDayArgs,
@@ -167,7 +166,7 @@ export async function addFreeWorkoutDay(
 
 export async function updateFreeWorkoutDay(
   args: GQLMutationUpdateFreeWorkoutDayArgs,
-  context: GQLContext,
+  _context: GQLContext,
 ) {
   await requireAdminUser()
 
@@ -196,7 +195,7 @@ export async function updateFreeWorkoutDay(
 
 export async function removeFreeWorkoutDay(
   args: GQLMutationRemoveFreeWorkoutDayArgs,
-  context: GQLContext,
+  _context: GQLContext,
 ) {
   await requireAdminUser()
 

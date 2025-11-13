@@ -18,7 +18,9 @@ export function useDragDropLogic(day: TrainingDay) {
 
   // Store throttled functions in refs so we can cancel them
   const calculateInsertionIndexRef = useRef<
-    | (((over: Over, isMouseOver: boolean) => void) & { cancel: () => void })
+    | (((over: Over | null, isMouseOver: boolean) => void) & {
+        cancel: () => void
+      })
     | null
   >(null)
   const throttledMouseMoveRef = useRef<
@@ -72,12 +74,8 @@ export function useDragDropLogic(day: TrainingDay) {
     }
   }, [over, active])
 
-  // Create throttled insertion index calculation
-  const calculateInsertionIndex = useMemo(() => {
-    if (calculateInsertionIndexRef.current) {
-      calculateInsertionIndexRef.current.cancel()
-    }
-
+  // Create throttled insertion index calculation in effect
+  useEffect(() => {
     const throttledFunc = throttle(
       (over: Over | null, isMouseOver: boolean) => {
         // Double-check drag state before doing anything
@@ -133,8 +131,19 @@ export function useDragDropLogic(day: TrainingDay) {
     ) // Reduce throttle delay to ~60fps for faster response
 
     calculateInsertionIndexRef.current = throttledFunc
-    return throttledFunc
+
+    return () => {
+      throttledFunc.cancel()
+    }
   }, [dragInfo, day, active])
+
+  // Get stable reference to the calculation function
+  const calculateInsertionIndex = useMemo(
+    () => (over: Over | null, isMouseOver: boolean) => {
+      calculateInsertionIndexRef.current?.(over, isMouseOver)
+    },
+    [],
+  )
 
   // Optimized mouse tracking with throttling
   useEffect(() => {

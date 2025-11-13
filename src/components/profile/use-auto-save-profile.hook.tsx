@@ -38,6 +38,7 @@ export function useAutoSaveProfile() {
 
   // Track the latest changes for debounced saving
   const latestChangesRef = useRef<Partial<GQLUpdateProfileInput>>({})
+  const debouncedSaveRef = useRef<ReturnType<typeof debounce> | null>(null)
 
   // Profile update mutation
   const { mutateAsync: updateProfileMutation } = useUpdateProfileMutation({
@@ -53,32 +54,42 @@ export function useAutoSaveProfile() {
     },
   })
 
-  // Debounced save function
+  // Create debounced save function in effect
+  useEffect(() => {
+    debouncedSaveRef.current = debounce(async () => {
+      if (
+        !serverProfile ||
+        Object.keys(latestChangesRef.current).length === 0
+      )
+        return
+
+      const updateInput: GQLUpdateProfileInput = {
+        ...latestChangesRef.current,
+        // Always include required fields
+        firstName:
+          latestChangesRef.current.firstName || serverProfile.firstName,
+        lastName: latestChangesRef.current.lastName || serverProfile.lastName,
+        email: latestChangesRef.current.email || serverProfile.email,
+      }
+
+      try {
+        await updateProfileMutation({ input: updateInput })
+      } catch (_error) {
+        // Error handling is done in mutation onError
+      }
+    }, 1000)
+
+    return () => {
+      debouncedSaveRef.current?.cancel()
+    }
+  }, [updateProfileMutation, serverProfile])
+
+  // Stable callback wrapper
   const debouncedSave = useMemo(
-    () =>
-      debounce(async () => {
-        if (
-          !serverProfile ||
-          Object.keys(latestChangesRef.current).length === 0
-        )
-          return
-
-        const updateInput: GQLUpdateProfileInput = {
-          ...latestChangesRef.current,
-          // Always include required fields
-          firstName:
-            latestChangesRef.current.firstName || serverProfile.firstName,
-          lastName: latestChangesRef.current.lastName || serverProfile.lastName,
-          email: latestChangesRef.current.email || serverProfile.email,
-        }
-
-        try {
-          await updateProfileMutation({ input: updateInput })
-        } catch (error) {
-          // Error handling is done in mutation onError
-        }
-      }, 1000),
-    [updateProfileMutation, serverProfile],
+    () => () => {
+      debouncedSaveRef.current?.()
+    },
+    [],
   )
 
   // Handle field changes

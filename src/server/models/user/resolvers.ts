@@ -240,14 +240,12 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   },
 
   // Public queries
-  getFeaturedTrainers: async (_, { limit = 10 }, context) => {
+  getFeaturedTrainers: async (_, { limit = 10 }) => {
     const cacheKey = `featured-trainers:${limit}`
 
     const cachedTrainers = await getFromCache<UserWithIncludes[]>(cacheKey)
     if (cachedTrainers) {
-      return cachedTrainers.map(
-        (trainer) => new PublicTrainer(trainer, context),
-      )
+      return cachedTrainers.map((trainer) => new PublicTrainer(trainer))
     }
 
     const featuredTrainers = await prisma.user.findMany({
@@ -268,9 +266,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     })
 
     await setInCache(cacheKey, featuredTrainers, 60 * 60 * 1) // 1 hour
-    return featuredTrainers.map(
-      (trainer) => new PublicTrainer(trainer, context),
-    )
+    return featuredTrainers.map((trainer) => new PublicTrainer(trainer))
   },
 
   clientHasActiveCoachingSubscription: async (_, { clientId }, context) => {
@@ -318,7 +314,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     const cacheKey = `my-trainer:user-id:${user.user.id}:user-trainer-id:${trainerId}`
     const cachedTrainer = await getFromCache<UserWithIncludes>(cacheKey)
     if (cachedTrainer) {
-      return new PublicTrainer(cachedTrainer, context)
+      return new PublicTrainer(cachedTrainer)
     }
 
     const trainer = await prisma.user.findUnique({
@@ -339,7 +335,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     await setInCache(cacheKey, trainer, 60 * 60 * 1) // 1 hour
 
-    return new PublicTrainer(trainer, context)
+    return new PublicTrainer(trainer)
   },
 
   // Admin-only queries

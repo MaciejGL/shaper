@@ -8,7 +8,7 @@ import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 
 export async function GET(
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: Promise<{ clientId: string }> },
 ) {
   try {
@@ -23,7 +23,7 @@ export async function GET(
     // Verify trainer has permission
     try {
       await ensureTrainerClientAccess(user.user.id, clientId)
-    } catch (error) {
+    } catch (_error) {
       return NextResponse.json(
         { error: 'Client not found or not associated with this trainer' },
         { status: 403 },

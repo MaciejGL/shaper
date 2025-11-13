@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import { createContext, useContext, useEffect, useMemo, useRef } from 'react'
+import { createContext, useContext, useEffect, useMemo } from 'react'
 
 import {
   GQLGetMySubscriptionStatusQuery,
@@ -44,8 +44,6 @@ export function UserProvider({
     {},
     {
       initialData,
-      // If we have initialData, treat it as fresh for 30 seconds
-      initialDataUpdatedAt: initialData ? Date.now() : undefined,
       enabled: !!initialData || session.status === 'authenticated',
       staleTime: 30000, // Keep data fresh for 30 seconds
       refetchOnWindowFocus: false,
@@ -56,24 +54,20 @@ export function UserProvider({
 
   useSyncTimezone(data?.userBasic?.profile?.timezone ?? undefined)
 
-  const {
-    data: subscriptionData,
-    isLoading: isLoadingSubscription,
-    error: subscriptionError,
-  } = useGetMySubscriptionStatusQuery(
-    {},
-    {
-      initialData: initialSubscriptionData,
-      // If we have initialData, treat it as fresh for 10 seconds
-      initialDataUpdatedAt: initialSubscriptionData ? Date.now() : undefined,
-      enabled: !!initialSubscriptionData || session.status === 'authenticated',
-      staleTime: 10000, // Data is fresh for 10 seconds - prevents rapid refetches
-      refetchOnWindowFocus: true, // ✅ CRITICAL: Refetch when user returns from payment
-      refetchOnMount: true, // ✅ Refetch when component mounts
-      // Keep previous data while refetching to prevent flash
-      placeholderData: (previousData) => previousData,
-    },
-  )
+  const { data: subscriptionData, isLoading: isLoadingSubscription } =
+    useGetMySubscriptionStatusQuery(
+      {},
+      {
+        initialData: initialSubscriptionData,
+        enabled:
+          !!initialSubscriptionData || session.status === 'authenticated',
+        staleTime: 10000, // Data is fresh for 10 seconds - prevents rapid refetches
+        refetchOnWindowFocus: true, // ✅ CRITICAL: Refetch when user returns from payment
+        refetchOnMount: true, // ✅ Refetch when component mounts
+        // Keep previous data while refetching to prevent flash
+        placeholderData: (previousData) => previousData,
+      },
+    )
 
   // Refetch user data when session becomes authenticated (after login)
   // Clear user query cache when user logs out

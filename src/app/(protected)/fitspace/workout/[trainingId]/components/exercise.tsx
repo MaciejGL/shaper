@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { Card } from '@/components/ui/card'
 import {

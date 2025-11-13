@@ -46,7 +46,7 @@ export function useProfile() {
       // Return a context with the previous data
       return { previousProfile }
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousProfile) {
         // Rollback the local state

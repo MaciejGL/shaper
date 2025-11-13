@@ -148,7 +148,6 @@ export function ExerciseEditor({
   })
 
   // Component state
-  const [allExercises, setAllExercises] = useState<Exercise[]>([]) // Raw data from API
   const [exercises, setExercises] = useState<Exercise[]>([]) // Filtered exercises for display
   const [loading, setLoading] = useState(true)
   const [availableCreators, setAvailableCreators] = useState<
@@ -197,7 +196,7 @@ export function ExerciseEditor({
             : exercise,
         ),
       )
-      setAllExercises((prev) =>
+      setExercises((prev) =>
         prev.map((exercise) =>
           exercise.id === exerciseId
             ? { ...exercise, [field]: value }
@@ -218,7 +217,7 @@ export function ExerciseEditor({
             : exercise,
         ),
       )
-      setAllExercises((prev) =>
+      setExercises((prev) =>
         prev.map((exercise) =>
           exercise.id === exerciseId
             ? { ...exercise, name: newName }
@@ -257,7 +256,7 @@ export function ExerciseEditor({
       const data = await response.json()
 
       // Store exercises and update display
-      setAllExercises(data.exercises)
+      setExercises(data.exercises)
       setExercises(data.exercises)
       setTotalPages(data.pagination.totalPages)
       setTotalItems(data.pagination.totalItems)
@@ -326,7 +325,7 @@ export function ExerciseEditor({
       const data = await response.json()
 
       // Store exercises and update display
-      setAllExercises(data.exercises)
+      setExercises(data.exercises)
       setExercises(data.exercises)
       setTotalPages(data.pagination.totalPages)
       setTotalItems(data.pagination.totalItems)
@@ -415,7 +414,7 @@ export function ExerciseEditor({
       toast.success(`Successfully deleted "${exercise.name}"`)
 
       // Optimistically remove from UI immediately
-      setAllExercises((prev) => prev.filter((ex) => ex.id !== exercise.id))
+      setExercises((prev) => prev.filter((ex) => ex.id !== exercise.id))
       setTotalItems((prev) => prev - 1)
 
       // Check if we need to go back a page (if this was the last item on current page)

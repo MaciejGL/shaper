@@ -400,7 +400,7 @@ async function generateSingleWorkoutVariant(
   try {
     const parsedResponse = parseAssistantJsonResponse(assistantReply)
     aiResponse = validateSingleVariantResponse(parsedResponse)
-  } catch (error) {
+  } catch {
     throw new GraphQLError(
       `AI response format invalid for variant. Please try again.`,
     )

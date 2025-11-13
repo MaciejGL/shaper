@@ -19,6 +19,7 @@ describe('NutritionPlanMeal.adjustedMacros', () => {
     teamId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
+    archived: false,
     ingredients: [
       {
         id: 'ingredient1',
@@ -160,6 +161,7 @@ describe('NutritionPlanMeal.adjustedMacros', () => {
   it('should handle empty ingredients array', () => {
     const emptyMeal = {
       ...mockMeal,
+      archived: false,
       ingredients: [],
     }
 

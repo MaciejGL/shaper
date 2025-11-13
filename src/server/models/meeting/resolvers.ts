@@ -15,7 +15,7 @@ import {
 } from './factory'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
-  myUpcomingMeetings: async (_, args, context) => myUpcomingMeetings(context),
+  myUpcomingMeetings: async (_, __, context) => myUpcomingMeetings(context),
 
   getTraineeMeetings: async (_, args, context) =>
     getTraineeMeetings(args, context),

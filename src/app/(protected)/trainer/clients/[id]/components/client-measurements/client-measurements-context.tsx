@@ -1,6 +1,6 @@
 'use client'
 
-import React, { ReactNode, createContext, useContext, useMemo } from 'react'
+import { ReactNode, createContext, useContext, useMemo } from 'react'
 
 // Copy the utility hook from fitspace progress to use here
 import { useBodyMeasurements } from '@/app/(protected)/fitspace/progress/components/use-body-measurements'

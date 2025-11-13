@@ -70,7 +70,7 @@ export function ClientMacroTargets({ clientId }: ClientMacroTargetsProps) {
 
       return { previousData }
     },
-    onError: (error, variables, context) => {
+    onError: (error, _, context) => {
       // Rollback optimistic update on error
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData)
@@ -101,7 +101,7 @@ export function ClientMacroTargets({ clientId }: ClientMacroTargetsProps) {
 
       return { previousData }
     },
-    onError: (error, variables, context) => {
+    onError: (error, _, context) => {
       // Rollback optimistic update on error
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData)

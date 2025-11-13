@@ -74,7 +74,7 @@ export function SwipeToReveal({
   }
 
   const handleDrag = (
-    event: MouseEvent | TouchEvent | PointerEvent,
+    _: MouseEvent | TouchEvent | PointerEvent,
     info: PanInfo,
   ) => {
     // Clear any existing timeout and set a new one
@@ -96,7 +96,7 @@ export function SwipeToReveal({
   }
 
   const handleDragEnd = (
-    event: MouseEvent | TouchEvent | PointerEvent,
+    _: MouseEvent | TouchEvent | PointerEvent,
     info: PanInfo,
   ) => {
     if (disabled) return

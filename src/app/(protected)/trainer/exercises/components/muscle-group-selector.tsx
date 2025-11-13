@@ -80,7 +80,6 @@ export function MuscleGroupSelector({
   const renderMuscleSection = (
     title: string,
     description: string,
-    selectedMuscles: { id: string }[],
     handleToggle: (
       muscle: GQLMuscleGroupCategoriesQuery['muscleGroupCategories'][number]['muscles'][number],
     ) => void,
@@ -125,7 +124,6 @@ export function MuscleGroupSelector({
       {renderMuscleSection(
         'Primary Muscle Groups',
         'Main muscles targeted by this exercise',
-        selectedPrimaryMuscleGroups,
         handlePrimaryMuscleToggle,
         isPrimaryMuscleSelected,
         true,
@@ -134,7 +132,6 @@ export function MuscleGroupSelector({
       {renderMuscleSection(
         'Secondary Muscle Groups',
         'Muscles that assist or are worked secondarily (optional)',
-        selectedSecondaryMuscleGroups,
         handleSecondaryMuscleToggle,
         isSecondaryMuscleSelected,
         false,

@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useUser } from '@/context/user-context'
@@ -42,12 +42,13 @@ export function useMessengerData(
       },
     )
 
-  // Find the selected chat
-  const selectedChat = useMemo(() => {
-    if (!messengerData?.getMessengerInitialData?.chats) return null
-
-    // If no chat is selected but we have a partnerId, find that chat
-    if (!selectedChatId && partnerId) {
+  // Auto-select chat based on partnerId
+  useEffect(() => {
+    if (
+      !selectedChatId &&
+      partnerId &&
+      messengerData?.getMessengerInitialData?.chats
+    ) {
       const currentUserId = user?.id
       const chat = messengerData.getMessengerInitialData.chats.find(
         (chat) =>
@@ -56,9 +57,13 @@ export function useMessengerData(
       )
       if (chat) {
         setSelectedChatId(chat.id)
-        return chat
       }
     }
+  }, [selectedChatId, partnerId, messengerData, user])
+
+  // Find the selected chat
+  const selectedChat = useMemo(() => {
+    if (!messengerData?.getMessengerInitialData?.chats) return null
 
     // Return the selected chat if we have one
     if (selectedChatId) {
@@ -70,12 +75,7 @@ export function useMessengerData(
     }
 
     return null
-  }, [
-    messengerData?.getMessengerInitialData?.chats,
-    selectedChatId,
-    partnerId,
-    user?.id,
-  ])
+  }, [messengerData?.getMessengerInitialData?.chats, selectedChatId])
 
   // Get additional messages for the selected chat (pagination)
   // Only fetch when user actually requests more messages
@@ -203,7 +203,7 @@ export function useMessengerData(
 
       return { previousMessengerData, messengerQueryKey }
     },
-    onError: (error, variables, context) => {
+    onError: (_, __, context) => {
       if (context?.previousMessengerData && context?.messengerQueryKey) {
         queryClient.setQueryData(
           context.messengerQueryKey,
@@ -323,7 +323,7 @@ export function useMessengerData(
 
       return { previousData, messengerQueryKey }
     },
-    onError: (error, variables, context) => {
+    onError: (_, __, context) => {
       if (context?.previousData && context?.messengerQueryKey) {
         queryClient.setQueryData(
           context.messengerQueryKey,

@@ -185,7 +185,7 @@ export function useExerciseFormMutations(exerciseId: string) {
     updateFn: optimisticUpdaters.addSet,
     onSuccess: (
       data: GQLAddSetExerciseFormMutation,
-      variables: GQLAddSetExerciseFormMutationVariables,
+      _: GQLAddSetExerciseFormMutationVariables,
       tempId?: string,
     ) => {
       // Replace temporary ID with real server ID

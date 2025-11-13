@@ -6,7 +6,6 @@ import {
   Clock,
   Eye,
   FileText,
-  Image as ImageIcon,
   Upload,
   Users,
   X,
@@ -201,13 +200,6 @@ function HeroImageSection({ disabled }: { disabled: boolean }) {
     'exercise',
   )
 
-  if (!formData) return null
-
-  const heroImageUrl = formData.details.heroImageUrl || ''
-  const isPublic =
-    formData.details.isPublic || !formData.details.isDraft || false
-  const isImageEditDisabled = disabled || isPublic
-
   // Extract exercise images from plan data
   const exerciseImages = useMemo(() => {
     if (!formData?.weeks) return []
@@ -233,6 +225,14 @@ function HeroImageSection({ disabled }: { disabled: boolean }) {
     })
     return images
   }, [formData])
+
+  // Early return after all hooks
+  if (!formData) return null
+
+  const heroImageUrl = formData.details.heroImageUrl || ''
+  const isPublic =
+    formData.details.isPublic || !formData.details.isDraft || false
+  const isImageEditDisabled = disabled || isPublic
 
   const handleImageUpload = (urls: string[]) => {
     updateDetails({ heroImageUrl: urls[0] || '' })

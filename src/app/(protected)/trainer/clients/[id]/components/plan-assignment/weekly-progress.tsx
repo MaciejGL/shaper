@@ -62,7 +62,7 @@ export function WeeklyProgress({ plan, clientId }: WeeklyProgressProps) {
   // Find the week ID that matches the deep link weekNumber
   const initialWeekId = useMemo(() => {
     if (week !== null) {
-      const targetWeek = plan.weeks.find((w, index) => index + 1 === week)
+      const targetWeek = plan.weeks.find((_, index) => index + 1 === week)
       return targetWeek?.id || plan.weeks[0]?.id
     }
     return plan.weeks[0]?.id

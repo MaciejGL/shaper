@@ -49,6 +49,8 @@ const eslintConfig = [
       'react/no-unescaped-entities': 'off',
       '@next/next/no-img-element': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
+      'react-hooks/set-state-in-effect': 'off',
+
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -93,6 +95,8 @@ const eslintConfig = [
       'node_modules/',
       'dist/',
       'src/__tests__/**',
+      'src/lib/pdf/**',
+      'expo-app/**',
     ],
   },
 ]

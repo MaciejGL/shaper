@@ -1,10 +1,7 @@
-import { ArrowLeft, Home } from 'lucide-react'
-import Image from 'next/image'
+import { ArrowLeft } from 'lucide-react'
 
 import { AnimatedLogo } from '@/components/animated-logo'
-import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
-import { Card, CardContent } from '@/components/ui/card'
 
 export default function NotFound() {
   return (

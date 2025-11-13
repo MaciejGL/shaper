@@ -1,4 +1,4 @@
-import { PackageTemplate, User } from '@/generated/prisma/client'
+import { PackageTemplate } from '@/generated/prisma/client'
 
 export interface CheckoutRequest {
   offerToken: string

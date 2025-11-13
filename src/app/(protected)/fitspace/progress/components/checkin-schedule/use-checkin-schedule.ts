@@ -63,7 +63,7 @@ export function useCheckinScheduleOperations() {
 
       return { previousData }
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       // Rollback on error
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData)
@@ -98,7 +98,7 @@ export function useCheckinScheduleOperations() {
 
       return { previousData }
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData)
       }
@@ -130,7 +130,7 @@ export function useCheckinScheduleOperations() {
 
       return { previousData }
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData)
       }
@@ -187,7 +187,7 @@ export function useCheckinScheduleOperations() {
 
       return { previousData }
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData)
       }
@@ -241,7 +241,7 @@ export function useCheckinScheduleOperations() {
 
       return { previousData }
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData)
       }

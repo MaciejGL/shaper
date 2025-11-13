@@ -35,11 +35,7 @@ export async function handlePaymentFailed(invoice: InvoiceWithSubscription) {
         )
 
         // Handle dunning management
-        await handleDunningManagement(
-          subscription,
-          newRetryCount,
-          subscriptionId,
-        )
+        await handleDunningManagement(newRetryCount, subscriptionId)
 
         // Send payment failed email
         await sendPaymentFailedEmail(subscription, newRetryCount)
@@ -84,7 +80,6 @@ async function updateSubscriptionForFailedPayment(
 }
 
 async function handleDunningManagement(
-  subscription: UserSubscription & { package: PackageTemplate },
   newRetryCount: number,
   subscriptionId: string,
 ) {

@@ -35,7 +35,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 

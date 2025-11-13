@@ -12,7 +12,7 @@ export function useTrackWorkoutSession(
   lastActivityTimestamp?: number, // When user last interacted with sets
 ) {
   const intervalRef = useRef<NodeJS.Timeout | number | null>(null)
-  const lastTickRef = useRef<number>(Date.now())
+  const lastTickRef = useRef<number>(new Date().getTime())
   const isPageVisible = useRef<boolean>(true)
 
   const { mutateAsync: logWorkoutProgress } =
@@ -49,7 +49,7 @@ export function useTrackWorkoutSession(
         tick: TICK_INTERVAL,
       })
       lastTickRef.current = now
-    } catch (e) {
+    } catch {
       // Silently handle errors - they're already logged by onError
       // This prevents unhandled promise rejections
     }

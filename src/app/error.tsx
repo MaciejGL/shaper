@@ -1,7 +1,6 @@
 'use client'
 
 import { Home, RefreshCw } from 'lucide-react'
-import Image from 'next/image'
 import posthog from 'posthog-js'
 import { useEffect } from 'react'
 

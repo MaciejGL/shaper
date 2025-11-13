@@ -22,7 +22,6 @@ export function MeasurementHistoryList({
   onUpdate,
   focusField,
   maxMonths,
-  isOnCard = false,
 }: MeasurementHistoryListProps) {
   const { measurementsByMonth } = useBodyMeasurements(measurements)
   const { weightUnit } = useWeightConversion()
@@ -97,7 +96,6 @@ export function MeasurementHistoryList({
                   measurement={measurement}
                   onUpdate={onUpdate}
                   relevantFields={relevantFields}
-                  isOnCard={isOnCard}
                 />
               )
             })}

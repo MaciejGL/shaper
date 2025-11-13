@@ -7,7 +7,6 @@ import {
   Clock,
   CreditCard,
   Info,
-  Package,
   Shield,
 } from 'lucide-react'
 import { useCallback, useState } from 'react'
@@ -22,18 +21,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { SectionIcon } from '@/components/ui/section-icon'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 import { getBaseUrl } from '@/lib/get-base-url'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'

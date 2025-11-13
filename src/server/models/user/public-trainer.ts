@@ -3,7 +3,6 @@ import {
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
 } from '@/generated/prisma/client'
-import { GQLContext } from '@/types/gql-context'
 
 import UserProfile from '../user-profile/model'
 
@@ -15,10 +14,7 @@ type UserWithIncludes = PrismaUser & {
 }
 
 export default class PublicTrainer implements GQLPublicTrainer {
-  constructor(
-    private readonly data: UserWithIncludes,
-    private readonly context: GQLContext,
-  ) {}
+  constructor(private readonly data: UserWithIncludes) {}
 
   get id() {
     return this.data.id

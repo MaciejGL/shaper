@@ -1,7 +1,7 @@
 'use client'
 
 import { NotebookPenIcon } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerTrigger } from '@/components/ui/drawer'

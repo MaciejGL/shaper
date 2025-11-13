@@ -52,7 +52,7 @@ export function DuplicateMealDialog({
       onOpenChange(false)
       setNewName(`${meal.name} (Copy)`)
     },
-    onError: (error, variables, context) => {
+    onError: (error, _, context) => {
       toast.error('Failed to duplicate meal: ' + (error as Error).message)
       // Rollback
       if (context?.previousData) {

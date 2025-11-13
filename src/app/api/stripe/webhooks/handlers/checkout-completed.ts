@@ -14,7 +14,6 @@ import {
 import { getPayoutDestination } from '@/lib/stripe/revenue-sharing-utils'
 import { stripe } from '@/lib/stripe/stripe'
 import { createSupportChatForUser } from '@/lib/support-chat'
-import { createNotification } from '@/server/models/notification/factory'
 
 import { StripeServiceType } from '../../enums'
 import {

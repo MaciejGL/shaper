@@ -4,7 +4,7 @@ import { isAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 
 export async function DELETE(
-  request: NextRequest,
+  _: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   try {

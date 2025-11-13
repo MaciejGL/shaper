@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
+import { ExtendHeader } from '@/components/extend-header'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Bio } from '@/components/profile/bio'
 import { GoalsAndHealth } from '@/components/profile/goals-and-health'
@@ -24,9 +25,13 @@ export default function ProfilePage() {
 
   return (
     <AnimatedPageTransition id="profile">
-      <div className="container-hypertro mx-auto pt-8">
-        <Header profile={profile} onAvatarChange={handleAvatarChange} />
-
+      <ExtendHeader
+        headerChildren={
+          <div className="py-6">
+            <Header profile={profile} onAvatarChange={handleAvatarChange} />
+          </div>
+        }
+      >
         <PersonalInfo profile={profile} handleChange={handleAutoSave} />
 
         <PhysicalStats profile={profile} handleChange={handleAutoSave} />
@@ -34,7 +39,7 @@ export default function ProfilePage() {
         <GoalsAndHealth profile={profile} handleChange={handleAutoSave} />
 
         <Bio profile={profile} handleChange={handleAutoSave} />
-      </div>
+      </ExtendHeader>
     </AnimatedPageTransition>
   )
 }

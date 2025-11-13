@@ -36,7 +36,7 @@ export async function sendPushForNotification(
   userId: string,
   type: GQLNotificationType,
   message: string,
-  link?: string,
+  _link?: string,
   additionalData?: {
     senderName?: string
     planTitle?: string

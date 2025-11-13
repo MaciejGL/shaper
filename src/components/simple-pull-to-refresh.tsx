@@ -189,7 +189,7 @@ export function SimplePullToRefresh() {
       if (progress >= 1 && !hasTriggeredHaptic && 'vibrate' in navigator) {
         try {
           navigator.vibrate(50)
-        } catch (error) {
+        } catch (_error) {
           // Vibration blocked or not supported, silently ignore
         }
         hasTriggeredHaptic = true

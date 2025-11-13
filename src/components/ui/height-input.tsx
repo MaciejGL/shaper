@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useId, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,6 +31,7 @@ export const HeightInput = forwardRef<HTMLInputElement, HeightInputProps>(
     ref,
   ) => {
     const { getHeightLabel, heightUnit } = useHeightConversion()
+    const generatedId = useId()
 
     // For cm: single input value
     // For ft: separate feet and inches
@@ -108,8 +109,7 @@ export const HeightInput = forwardRef<HTMLInputElement, HeightInputProps>(
     }
 
     const finalLabel = label || getHeightLabel()
-    const inputId =
-      id || `height-input-${Math.random().toString(36).substr(2, 9)}`
+    const inputId = id || generatedId
 
     if (heightUnit === 'cm') {
       return (

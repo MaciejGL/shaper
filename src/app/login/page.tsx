@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
 import { authOptions } from '@/lib/auth/config'

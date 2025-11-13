@@ -94,7 +94,7 @@ export function MealCard({
 
       return { previousData, queryKey }
     },
-    onError: (err: unknown, variables: unknown, context) => {
+    onError: (err: unknown, _, context) => {
       toast.error('Failed to delete meal: ' + (err as Error).message)
       // Rollback on error
       if (context?.previousData && context?.queryKey) {
