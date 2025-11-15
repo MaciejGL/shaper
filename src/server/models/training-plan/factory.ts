@@ -1938,8 +1938,6 @@ export async function getWorkoutDay(
     throw new GraphQLError('User not found')
   }
 
-  console.log('getWorkoutDay', dayId, user)
-
   const WORKOUT_DAY_INCLUDE = {
     week: {
       select: {
@@ -2039,8 +2037,6 @@ export async function getWorkoutDay(
       })
     }
   }
-
-  console.log('day', day)
 
   if (!day) {
     throw new GraphQLError('Day not found')
