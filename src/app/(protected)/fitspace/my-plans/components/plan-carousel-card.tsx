@@ -66,7 +66,8 @@ export function PlanCarouselCard({
             fill
             className="object-cover"
             quality={100}
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="(max-width: 768px) 70vw, 300px"
+            priority={false}
             key={imageUrl}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
@@ -116,7 +117,14 @@ export function PlanCarouselCard({
   )
 
   if (layoutId) {
-    return <motion.div layoutId={layoutId}>{cardContent}</motion.div>
+    return (
+      <motion.div
+        key={plan?.id ? `${plan.id}-carousel-card` : `carousel-card`}
+        layoutId={layoutId}
+      >
+        {cardContent}
+      </motion.div>
+    )
   }
 
   return cardContent

@@ -101,53 +101,59 @@ export function PlanSection({
         )}
       </div>
 
-      <LayoutGroup>
-        {!isExpanded ? (
-          <Carousel
-            opts={{
-              align: 'start',
-              dragFree: true,
-            }}
-            className="w-screen space-y-3 -mx-4"
-          >
-            <CarouselContent className="ml-0">
-              {plans.slice(0, maxPlans).map((plan) => (
-                <CarouselItem
-                  key={plan?.id}
-                  className="basis-[70%] md:basis-[20%] pl-4"
-                >
-                  <PlanCarouselCard
-                    plan={plan}
-                    onClick={onPlanClick}
-                    imageUrl={getPlanImage(plan)}
-                    showProgress={showProgress}
-                    layoutId={`plan-${plan?.id}`}
-                  />
-                </CarouselItem>
-              ))}
-              <div className="w-4 shrink-0" />
-            </CarouselContent>
+      <AnimatePresence mode="wait">
+        <LayoutGroup id="plan-section" key={`plan-section-`}>
+          {!isExpanded ? (
+            <div>
+              <Carousel
+                opts={{
+                  align: 'start',
+                  dragFree: true,
+                }}
+                className="w-screen space-y-3 -mx-4"
+              >
+                <CarouselContent className="ml-0">
+                  {plans.slice(0, maxPlans).map((plan) => (
+                    <CarouselItem
+                      key={
+                        plan?.id ? `${plan.id}-carousel-item` : `carousel-item`
+                      }
+                      className="basis-[70%] md:basis-[20%] pl-4"
+                    >
+                      <PlanCarouselCard
+                        key={plan?.id}
+                        plan={plan}
+                        onClick={onPlanClick}
+                        imageUrl={getPlanImage(plan)}
+                        showProgress={showProgress}
+                        layoutId={`plan-${plan?.id}`}
+                      />
+                    </CarouselItem>
+                  ))}
+                  <div className="w-4 shrink-0" />
+                </CarouselContent>
 
-            {plans.length > 1 && (
-              <CarouselDots count={plans.length} className="px-4" />
-            )}
-          </Carousel>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 animate-in fade-in duration-300">
-            {plans.map((plan) => (
-              <PlanCarouselCard
-                key={plan?.id}
-                plan={plan}
-                onClick={onPlanClick}
-                imageUrl={getPlanImage(plan)}
-                showProgress={showProgress}
-                isExpanded
-                layoutId={`plan-${plan?.id}`}
-              />
-            ))}
-          </div>
-        )}
-      </LayoutGroup>
+                {plans.length > 1 && (
+                  <CarouselDots count={plans.length} className="px-4" />
+                )}
+              </Carousel>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {plans.map((plan) => (
+                <PlanCarouselCard
+                  key={plan?.id}
+                  plan={plan}
+                  onClick={onPlanClick}
+                  imageUrl={getPlanImage(plan)}
+                  showProgress={showProgress}
+                  layoutId={`plan-${plan?.id}`}
+                />
+              ))}
+            </div>
+          )}
+        </LayoutGroup>
+      </AnimatePresence>
     </div>
   )
 }

@@ -30,7 +30,7 @@ export function getPlanImage(plan: UnifiedPlan): string | null {
 
           const firstImage = exercise.images[1]
           if (firstImage) {
-            return firstImage.medium || firstImage.url || null
+            return firstImage.url || null
           }
         }
       }
