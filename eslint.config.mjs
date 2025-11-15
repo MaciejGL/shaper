@@ -1,4 +1,3 @@
-import tsPlugin from '@typescript-eslint/eslint-plugin'
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 import { resolve } from 'path'
@@ -24,10 +23,6 @@ const eslintConfig = [
   },
   {
     files: ['**/*.{ts,tsx}'],
-    plugins: {
-      // tailwindcss: tailwindcssPlugin,
-      '@typescript-eslint': tsPlugin,
-    },
     languageOptions: {
       parserOptions: {
         project,

@@ -42,7 +42,8 @@ export function PlanCarouselCard({
   // Badge when it's custom plan for me created by trainer (not from public library)
   // New - badge when it's new plan (last 3 days) and not completed
   // Personalized plan: created by another person specifically for me (not from public library)
-  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+  const now = new Date()
+  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
   const isPublicPlan =
     'sourceTrainingPlanId' in plan && plan.sourceTrainingPlanId
 
