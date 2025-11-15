@@ -24,6 +24,7 @@ interface PlanPreviewTabProps {
   isTemplate?: boolean
   selectedWeekId?: string | null
   onAccordionChange?: () => void
+  canViewDays?: boolean
 }
 
 export function PlanPreviewTab({
@@ -31,6 +32,7 @@ export function PlanPreviewTab({
   isTemplate = false,
   selectedWeekId = null,
   onAccordionChange,
+  canViewDays = false,
 }: PlanPreviewTabProps) {
   const { preferences } = useUserPreferences()
   const weekRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -124,6 +126,7 @@ export function PlanPreviewTab({
                     key={day.id}
                     day={day}
                     isTemplate={isTemplate}
+                    canViewDays={canViewDays}
                   />
                 ))}
               </Accordion>

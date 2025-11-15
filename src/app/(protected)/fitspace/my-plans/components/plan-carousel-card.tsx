@@ -1,6 +1,5 @@
 import { isAfter } from 'date-fns'
 import { motion } from 'framer-motion'
-import { Crown } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
@@ -86,6 +85,11 @@ export function PlanCarouselCard({
           )}
         </div>
         <div className="space-y-2 space-x-2 relative dark">
+          {isPremiumPlan && (
+            <Badge variant="premium" className="w-fit" size="md">
+              Premium
+            </Badge>
+          )}
           {!isPublicPlan && (
             <Badge variant="primary" className="w-fit" size="md">
               Personal Plan
@@ -105,12 +109,6 @@ export function PlanCarouselCard({
           >
             {plan.title}
           </h3>
-          {isPremiumPlan && (
-            <Badge variant="premium" className="w-fit" size="md">
-              <Crown className="size-3" />
-              Premium
-            </Badge>
-          )}
         </div>
       </CardContent>
     </Card>

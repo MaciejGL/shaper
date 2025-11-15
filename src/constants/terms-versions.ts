@@ -73,9 +73,10 @@ export const TERMS_BY_VERSION: Record<string, TermsVersion> = {
         {
           title: '1. Premium Features',
           content: [
-            'Premium access includes advanced workout tracking, nutrition planning, and progress analytics.',
+            'Premium access includes unlimited training plans, premium exercise library with video demonstrations, and advanced workout logging.',
+            'Progress tracking with personal records (PRs) and photo snapshot logging for visual progress tracking.',
+            'Advanced analytics to monitor your performance and workout history.',
             'Features are continuously updated and improved based on user feedback.',
-            'Access to exclusive workout templates and meal planning tools.',
             'Priority customer support with faster response times.',
           ],
         },
@@ -91,7 +92,8 @@ export const TERMS_BY_VERSION: Record<string, TermsVersion> = {
         {
           title: '3. Data & Privacy',
           content: [
-            'Your fitness and nutrition data will be stored securely and used to enhance your experience.',
+            'Your workout and fitness data will be stored securely and used to enhance your experience.',
+            'Photo snapshots are stored securely and you can delete them at any time.',
             'Anonymous usage analytics help us improve our platform and features.',
             'You can export or delete your data at any time through your account settings.',
           ],

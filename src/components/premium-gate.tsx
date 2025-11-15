@@ -89,15 +89,15 @@ export function PremiumGate({
               <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-                  <span>Unlimited training plans</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-                  <span>Full meal plan access</span>
+                  <span>Premium training plans</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
                   <span>Premium exercise library</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                  <span>Exercise videos</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />

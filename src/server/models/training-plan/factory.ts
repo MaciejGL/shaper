@@ -1332,7 +1332,6 @@ export async function assignTemplateToSelf(
       assignedToId: userId,
       isTemplate: false,
       templateId: planId,
-      sourceTrainingPlanId: planId,
       active: false,
     },
   })

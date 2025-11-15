@@ -86,6 +86,7 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   get premium() {
+    console.log('premium', this.data.title, this.data.premium)
     return this.data.premium
   }
 

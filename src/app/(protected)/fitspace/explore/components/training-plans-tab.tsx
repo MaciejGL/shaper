@@ -115,7 +115,7 @@ export function TrainingPlansTab({
         errorMessage.includes('Premium') ||
         errorMessage.includes('subscription')
       ) {
-        toast.error('Premium subscription required')
+        toast.error('Premium required')
         openUrl(
           `/account-management/offers?redirectUrl=/fitspace/explore/plan/${planId}`,
         )

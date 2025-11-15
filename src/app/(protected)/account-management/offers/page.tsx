@@ -97,6 +97,7 @@ export default function OffersPage() {
       <CoachingServiceTerms
         isOpen={showTermsModal}
         onClose={() => setShowTermsModal(false)}
+        serviceType="premium"
       />
     </div>
   )

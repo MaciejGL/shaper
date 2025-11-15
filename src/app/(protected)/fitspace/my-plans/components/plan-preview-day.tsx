@@ -1,4 +1,5 @@
 import { getWorkoutTypeLabel } from '@/app/(protected)/trainer/trainings/creator/components/day-components'
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import {
   AccordionContent,
   AccordionItem,
@@ -19,11 +20,13 @@ type PlanDay = NonNullable<
 interface PlanPreviewDayProps {
   day: PlanDay
   isTemplate?: boolean
+  canViewDays?: boolean
 }
 
 export function PlanPreviewDay({
   day,
   isTemplate = false,
+  canViewDays = false,
 }: PlanPreviewDayProps) {
   const dayName = getDayName(day.dayOfWeek, { short: true })
   const exercises = day.exercises || []
@@ -66,36 +69,42 @@ export function PlanPreviewDay({
 
   return (
     <AccordionItem value={day.id} className="border-none">
-      <AccordionTrigger
-        variant="outline"
-        className={cn(
-          'text-sm font-medium bg-card-on-card hover:bg-card-on-card/80',
-          'mb-0',
-        )}
+      <PremiumButtonWrapper
+        hasPremium={canViewDays}
+        tooltipText="Premium required to view day details"
       >
-        <div className="flex items-center justify-between w-full pr-2">
-          <span>
-            {dayName} {workoutTypeLabel && `• ${workoutTypeLabel}`}
-          </span>
-          {totalExercises > 0 && !isTemplate && (
-            <span
-              className={cn(
-                'text-xs',
-                completedExercises === totalExercises
-                  ? 'text-green-500'
-                  : completedExercises > 0
-                    ? 'text-amber-500'
-                    : 'text-muted-foreground',
-              )}
-            >
-              {completedExercises} / {totalExercises} completed
+        <AccordionTrigger
+          variant="outline"
+          disabled={!canViewDays}
+          className={cn(
+            'text-sm font-medium bg-card-on-card hover:bg-card-on-card/80',
+            'mb-0',
+          )}
+        >
+          <div className="flex items-center justify-between w-full pr-2">
+            <span>
+              {dayName} {workoutTypeLabel && `• ${workoutTypeLabel}`}
             </span>
-          )}
-          {isTemplate && totalExercises > 0 && (
-            <span className="text-xs">{totalExercises} exercises</span>
-          )}
-        </div>
-      </AccordionTrigger>
+            {totalExercises > 0 && !isTemplate && (
+              <span
+                className={cn(
+                  'text-xs',
+                  completedExercises === totalExercises
+                    ? 'text-green-500'
+                    : completedExercises > 0
+                      ? 'text-amber-500'
+                      : 'text-muted-foreground',
+                )}
+              >
+                {completedExercises} / {totalExercises} completed
+              </span>
+            )}
+            {isTemplate && totalExercises > 0 && (
+              <span className="text-xs">{totalExercises} exercises</span>
+            )}
+          </div>
+        </AccordionTrigger>
+      </PremiumButtonWrapper>
 
       <AccordionContent className="border-none bg-transparent pt-4 pb-0">
         <div className="space-y-2">
