@@ -329,14 +329,14 @@ export function ExerciseSet({
         </div>
       )}
 
-      <div className={cn('flex items-start gap-1 pb-1')}>
+      <div className={cn('flex items-start gap-1 pb-2', isLastSet && 'pb-0')}>
         <div
           className={cn(
             isAdvancedView
               ? sharedLayoutAdvancedStyles
               : sharedLayoutSimpleStyles,
             'text-primary relative',
-            !isAdvancedView && 'pt-1',
+            !isAdvancedView && 'pt-2',
           )}
         >
           <div className="text-sm text-muted-foreground text-center">
@@ -408,7 +408,7 @@ export function ExerciseSet({
           <div className="flex justify-center">
             <Button
               variant="tertiary"
-              size="icon-xs"
+              size="icon-sm"
               iconOnly={
                 <CheckIcon
                   className={cn(

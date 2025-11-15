@@ -84,13 +84,12 @@ export function PlanPreviewExerciseRow({
 
       {!isRestDay && (
         <div className="flex flex-col gap-2">
-          <button
-            onClick={handleImageClick}
+          <div
+            onClick={hasMultipleImages ? handleImageClick : undefined}
             className={cn(
               'relative size-32 flex-shrink-0 rounded-xl overflow-hidden bg-muted',
               hasMultipleImages && 'cursor-pointer',
             )}
-            disabled={!hasMultipleImages}
           >
             {images.length > 0 ? (
               <>
@@ -123,7 +122,7 @@ export function PlanPreviewExerciseRow({
                 </span>
               </div>
             )}
-          </button>
+          </div>
 
           {hasMultipleImages && (
             <div className="flex items-center justify-center gap-1">

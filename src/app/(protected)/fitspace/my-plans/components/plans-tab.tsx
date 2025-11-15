@@ -312,7 +312,7 @@ export function PlansTab({
         />
         <ButtonLink
           href="/fitspace/explore?tab=plans"
-          variant="outline"
+          variant="secondary"
           size="lg"
           iconEnd={<ChevronRight />}
           className="w-full mt-6"

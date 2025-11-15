@@ -229,7 +229,11 @@ export async function getPublicTrainingPlans(
             include: {
               exercises: {
                 include: {
-                  base: true,
+                  base: {
+                    include: {
+                      images: true,
+                    },
+                  },
                 },
               },
             },
@@ -1957,6 +1961,8 @@ export async function getWorkoutDay(
     throw new GraphQLError('User not found')
   }
 
+  console.log('getWorkoutDay', dayId, user)
+
   const WORKOUT_DAY_INCLUDE = {
     week: {
       select: {
@@ -2030,8 +2036,14 @@ export async function getWorkoutDay(
             active: true,
           },
         },
-        scheduledAt: todayUTC,
+        // OR: [{ scheduledAt: todayUTC }, { completedAt: null }],
+        completedAt: null,
+        isRestDay: false,
       },
+      orderBy: [
+        // Prioritize today's training, then most recent past trainings
+        { scheduledAt: 'desc' },
+      ],
       include: WORKOUT_DAY_INCLUDE,
     })
 
@@ -2050,6 +2062,8 @@ export async function getWorkoutDay(
       })
     }
   }
+
+  console.log('day', day)
 
   if (!day) {
     throw new GraphQLError('Day not found')
@@ -2160,7 +2174,7 @@ export async function getWorkoutDay(
       },
     },
     orderBy: [{ completedAt: 'desc' }],
-    take: 30,
+    take: 100,
   })
 
   const seenBaseIds = new Set<string>()
@@ -2229,7 +2243,7 @@ export async function getWorkoutDay(
         },
       },
       orderBy: [{ completedAt: 'desc' }],
-      take: 30,
+      take: 50,
     })
 
     // Add fallback exercises that meet the criteria
@@ -2596,7 +2610,7 @@ export async function getQuickWorkoutDay(
       { day: { week: { weekNumber: 'desc' } } },
       { day: { dayOfWeek: 'desc' } },
     ],
-    take: 30,
+    take: 50,
   })
 
   // Group by baseId and keep only the most recent occurrence

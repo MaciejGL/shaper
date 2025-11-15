@@ -17,7 +17,7 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 p-4">
         <LoadingSkeleton count={3} variant="lg" />
       </div>
     )

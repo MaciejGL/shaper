@@ -50,7 +50,7 @@ export function PlanCard({ plan, onClick, status }: PlanCardProps) {
       )}
       <CardContent
         className={cn(
-          'relative flex gap-2 items-end',
+          'relative flex gap-2 justify-between items-end',
           status !== PlanStatus.Active && 'items-center',
         )}
       >
