@@ -1,4 +1,5 @@
 import { Crown, User } from 'lucide-react'
+import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardTitle } from '@/components/ui/card'
@@ -11,13 +12,13 @@ interface PlanCardProps {
   plan: UnifiedPlan
   onClick: (plan: UnifiedPlan) => void
   status: PlanStatus
+  imageUrl?: string | null
 }
 
-export function PlanCard({ plan, onClick, status }: PlanCardProps) {
+export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
   if (!plan) return null
 
   const isPremiumPlan = 'premium' in plan && plan.premium
-  const heroImageUrl = 'heroImageUrl' in plan ? plan.heroImageUrl : null
 
   const trainerInfo = 'createdBy' in plan ? plan.createdBy : null
   const trainerName = trainerInfo
@@ -37,27 +38,26 @@ export function PlanCard({ plan, onClick, status }: PlanCardProps) {
       className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative bg-card gap-2"
       variant={status === PlanStatus.Active ? 'premium' : 'tertiary'}
     >
-      {heroImageUrl && (
-        <div className="absolute inset-0 opacity-100 group-hover:opacity-30 transition-opacity">
-          <div
-            className="w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${heroImageUrl})`,
-            }}
+      {imageUrl && (
+        <div className="absolute inset-0 transition-opacity">
+          <Image
+            src={imageUrl}
+            alt={plan.title}
+            fill
+            className="object-cover"
+            quality={100}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
         </div>
       )}
       <CardContent
         className={cn(
-          'relative flex gap-2 items-end',
+          'relative flex gap-2 justify-between aspect-[10/4]',
           status !== PlanStatus.Active && 'items-center',
         )}
       >
-        <div>
-          <CardTitle className="text-foreground text-lg">
-            {plan.title}
-          </CardTitle>
+        <div className="self-end space-y-2">
           <div className="flex items-end gap-2 empty:hidden mt-2">
             {status === PlanStatus.Active && (
               <Badge variant="primary" className="w-fit" size="md">
@@ -77,9 +77,12 @@ export function PlanCard({ plan, onClick, status }: PlanCardProps) {
               </Badge>
             )}
           </div>
+          <CardTitle className="text-foreground text-lg">
+            {plan.title}
+          </CardTitle>
         </div>
         {hasProgress && (
-          <div className="flex items-center shrink-0 bg-background/70 rounded-full p-1">
+          <div className="flex self-start items-center shrink-0 bg-background/70 rounded-full p-1">
             <ProgressCircle
               progress={progressPercentage}
               size={status === PlanStatus.Active ? 48 : 32}

@@ -19,6 +19,8 @@ query FitspaceMyPlans {
       active
       premium
       heroImageUrl
+      isPublic
+      sourceTrainingPlanId
 
       weeks {
         id
@@ -70,6 +72,7 @@ query FitspaceMyPlans {
       updatedAt
       active
       createdAt
+      isPublic
       weeks {
         id
         weekNumber
@@ -127,6 +130,8 @@ query FitspaceMyPlans {
       createdAt
       premium
       heroImageUrl
+      isPublic
+      sourceTrainingPlanId
       weeks {
         id
         weekNumber
@@ -186,6 +191,8 @@ query FitspaceMyPlans {
       active
       createdAt
       premium
+      isPublic
+      sourceTrainingPlanId
       userReview {
         id
         rating

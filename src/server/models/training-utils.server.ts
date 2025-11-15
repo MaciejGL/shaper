@@ -178,6 +178,11 @@ export async function duplicatePlan({
           templateId: asTemplate ? null : plan.templateId,
           createdById: createdById || plan.createdById,
           assignedToId: plan.assignedToId,
+          premium: plan.premium,
+          targetGoals: plan.targetGoals,
+          focusTags: plan.focusTags,
+          heroImageUrl: plan.heroImageUrl,
+          sourceTrainingPlanId: plan.id,
         },
       })
 

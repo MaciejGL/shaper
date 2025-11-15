@@ -55,15 +55,21 @@ export function PremiumBenefitsList({
 export const PREMIUM_BENEFITS = [
   'Premium training plans',
   'Premium exercise library',
+  'Exercise video',
   'Unlimited training plans',
-  'Advanced analytics',
-  'Personal Record tracking',
+  'Advanced logging & analytics',
+  'Progress tracking & PRs',
+  'Photo Snapshots',
+  'Priority support',
 ] as const
 
 export const UPGRADE_BENEFITS = [
   'Premium training plans',
   'Premium exercise library',
+  'Exercise video',
   'Unlimited training plans',
-  'Advanced analytics',
-  'Personal Record tracking',
+  'Advanced logging & analytics',
+  'Progress tracking & PRs',
+  'Photo Snapshots',
+  'Priority support',
 ] as const

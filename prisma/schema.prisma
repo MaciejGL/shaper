@@ -1163,6 +1163,7 @@ enum SubscriptionDuration {
 
 enum SubscriptionStatus {
   ACTIVE
+  CANCELLED_ACTIVE
   EXPIRED
   CANCELLED
   PENDING

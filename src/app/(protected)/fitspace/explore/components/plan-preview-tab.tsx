@@ -61,44 +61,52 @@ interface DayCardProps {
 }
 
 function DayCard({ day }: DayCardProps) {
-  const firstExercise = day.exercises?.[0]
+  const firstExercise = day.exercises?.[1]
   // firstExercise?.images?.[0]?.thumbnail ||firstExercise?.images?.[0]?.medium ||
-  const firstImage = firstExercise?.images?.[0]?.url || '/rest-day.jpg'
+  const firstImage = firstExercise?.images?.[1]?.url || '/rest-day.jpg'
 
   return (
     <Card
       variant="tertiary"
       className={cn(
-        'aspect-[18/8] overflow-hidden relative border-none',
-        'flex items-center justify-center',
+        'aspect-[18/8] overflow-hidden relative border-none p-0',
+        day.isRestDay && 'aspect-[18/6] opacity-90',
       )}
     >
-      <CardContent>
+      <CardContent className="flex p-0 h-full items-center">
         {firstImage && (
-          <div className="absolute inset-0">
+          <div className="w-1/2 h-full">
             <Image
               src={firstImage}
               alt={firstExercise?.name || 'Exercise'}
-              fill
-              className="object-cover"
+              width={300}
+              height={300}
+              className="object-cover size-full"
               quality={100}
               // sizes="(max-width: 768px) 90vw, 90vw"
             />
             <div
               className={cn(
-                'absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent',
+                'absolute inset-0 bg-gradient-to-l from-black/80 via-black/30 to-transparent',
                 day.isRestDay && 'bg-black/60',
               )}
             />
           </div>
         )}
-        <div className="relative z-10 text-center bg-black/50 px-4 py-2 rounded-2xl backdrop-blur-sm">
-          <p className="text-2xl font-semibold text-white drop-shadow-lg line-clamp-2">
-            {day.isRestDay ? 'Rest' : formatWorkoutType(day.workoutType)}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Day {day.dayOfWeek + 1}
-          </p>
+        <div className="flex-center grow">
+          <div className="relative z-10 text-center px-4 py-2 rounded-2xl backdrop-blur-sm">
+            <p
+              className={cn(
+                'text-2xl font-semibold text-white drop-shadow-lg line-clamp-2',
+                day.isRestDay && 'text-muted-foreground',
+              )}
+            >
+              {day.isRestDay ? 'Rest' : formatWorkoutType(day.workoutType)}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Day {day.dayOfWeek + 1}
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>

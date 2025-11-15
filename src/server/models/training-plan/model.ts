@@ -69,6 +69,10 @@ export default class TrainingPlan implements GQLTrainingPlan {
     return this.data.isPublic
   }
 
+  get sourceTrainingPlanId() {
+    return this.data.sourceTrainingPlanId
+  }
+
   get isTemplate() {
     return this.data.isTemplate
   }
@@ -391,7 +395,7 @@ export default class TrainingPlan implements GQLTrainingPlan {
     if (!this.data.weeks || this.data.weeks.length === 0) return null
 
     const totalSessions = this.data.weeks.reduce((total, week) => {
-      return total + (week.days?.length || 0)
+      return total + (week.days?.filter((day) => !day.isRestDay).length || 0)
     }, 0)
 
     return Math.round(totalSessions / this.data.weeks.length)

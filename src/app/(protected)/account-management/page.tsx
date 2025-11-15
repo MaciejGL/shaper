@@ -9,6 +9,7 @@ import { usePostPaymentSuccess } from '@/hooks/use-post-payment-success'
 
 import { AccountSection } from '../fitspace/settings/components/account-section'
 
+import { ReturnToApp } from './components/return-to-app'
 import { SubscriptionManagementSection } from './components/subscription-management-section'
 
 export default function AccountManagementPage() {
@@ -29,6 +30,7 @@ export default function AccountManagementPage() {
         <div>
           {/* Header */}
           <div className="mb-8">
+            <ReturnToApp variant="back" redirectUrl="/fitspace/workout" />
             <div className="flex items-center flex-col mb-4 gap-4">
               <div className="size-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex-center shrink-0">
                 <UserRoundCogIcon className="w-6 h-6 text-white" />

@@ -36,6 +36,7 @@ export interface CurrentSubscription {
     daysRemaining: number
     failedRetries: number
   } | null
+  hasUsedTrial?: boolean
 }
 
 export function useCurrentSubscription(

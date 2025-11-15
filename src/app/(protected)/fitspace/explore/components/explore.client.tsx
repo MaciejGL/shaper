@@ -71,10 +71,13 @@ export function ExploreClient({
   const handleAssignTemplate = async (planId: string) => {
     try {
       await assignTemplate({ planId })
-      queryClient.invalidateQueries({
+
+      toast.success('Plan added to My Plans')
+
+      await queryClient.refetchQueries({
         queryKey: ['FitspaceMyPlans'],
       })
-      toast.success('Training plan added to your plans')
+
       router.push('/fitspace/my-plans')
     } catch (error) {
       const errorMessage =
@@ -84,12 +87,12 @@ export function ExploreClient({
         errorMessage.includes('Premium') ||
         errorMessage.includes('subscription')
       ) {
-        toast.error('Premium subscription required')
+        toast.error('Premium required')
         openUrl(
           `/account-management/offers?redirectUrl=/fitspace/explore/plan/${planId}`,
         )
       } else {
-        toast.error('Failed to start training plan')
+        toast.error('Failed to add training plan')
       }
     }
   }

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { BookmarkIcon, ChevronRight, SparklesIcon } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -24,6 +25,7 @@ interface EmptyWorkoutOptionsProps {
 }
 
 export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
+  const pathname = usePathname()
   const { hasPremium: hasPremiumAccess, isLoading: isLoadingUser } = useUser()
   const { openUrl, isLoading: isOpeningUrl } = useOpenUrl()
   const [showAiWizard, setShowAiWizard] = useState(false)
@@ -77,7 +79,9 @@ export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
                     <Button
                       onClick={(e) => {
                         e.stopPropagation()
-                        openUrl('/account-management/offers')
+                        openUrl(
+                          `/account-management/offers?redirectUrl=${encodeURIComponent(pathname)}`,
+                        )
                       }}
                       size="xs"
                       variant="gradient"

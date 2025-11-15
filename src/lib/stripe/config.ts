@@ -114,7 +114,8 @@ export const API_CONFIG = {
 // Helper functions for working with enums
 export const SUBSCRIPTION_HELPERS = {
   isActive: (status: SubscriptionStatus) =>
-    status === SubscriptionStatus.ACTIVE,
+    status === SubscriptionStatus.ACTIVE ||
+    status === SubscriptionStatus.CANCELLED_ACTIVE,
   isPending: (status: SubscriptionStatus) =>
     status === SubscriptionStatus.PENDING,
   isCancelled: (status: SubscriptionStatus) =>
@@ -127,7 +128,12 @@ export const SUBSCRIPTION_HELPERS = {
     isInTrial: boolean,
     isInGracePeriod: boolean,
   ) => {
-    return status === SubscriptionStatus.ACTIVE || isInTrial || isInGracePeriod
+    return (
+      status === SubscriptionStatus.ACTIVE ||
+      status === SubscriptionStatus.CANCELLED_ACTIVE ||
+      isInTrial ||
+      isInGracePeriod
+    )
   },
 } as const
 

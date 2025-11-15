@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Dumbbell, Star, Users } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -95,14 +96,13 @@ export function TrainingPlansTab({
       await assignTemplate({
         planId,
       })
-      setIsPreviewOpen(false)
-      setSelectedPlan(null)
-      queryClient.invalidateQueries({
+
+      toast.success('Plan added to My Plans')
+
+      await queryClient.refetchQueries({
         queryKey: ['FitspaceMyPlans'],
       })
-      toast.success('Training plan added to your plans')
 
-      // Redirect to my-plans page
       router.push('/fitspace/my-plans')
     } catch (error) {
       console.error('Failed to add training plan to your plans:', error)
@@ -115,12 +115,12 @@ export function TrainingPlansTab({
         errorMessage.includes('Premium') ||
         errorMessage.includes('subscription')
       ) {
-        toast.error('Premium subscription required')
+        toast.error('Premium required')
         openUrl(
           `/account-management/offers?redirectUrl=/fitspace/explore/plan/${planId}`,
         )
       } else {
-        toast.error('Failed to start training plan')
+        toast.error('Failed to add training plan')
       }
     }
   }
@@ -275,11 +275,13 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
       {/* Hero image background */}
       {plan.heroImageUrl && (
         <div className="absolute inset-0 opacity-100 group-hover:opacity-30 transition-opacity">
-          <div
-            className="w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${plan.heroImageUrl})`,
-            }}
+          <Image
+            src={plan.heroImageUrl}
+            alt={plan.title}
+            fill
+            className="object-cover"
+            quality={100}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
         </div>

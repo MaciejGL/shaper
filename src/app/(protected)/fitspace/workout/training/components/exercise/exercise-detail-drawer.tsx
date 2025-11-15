@@ -31,7 +31,7 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button variant="tertiary" size="icon-sm" iconOnly={<VideoIcon />} />
+        <Button variant="tertiary" size="icon-md" iconOnly={<VideoIcon />} />
       </DrawerTrigger>
       <DrawerContent
         dialogTitle="Exercise Metadata"

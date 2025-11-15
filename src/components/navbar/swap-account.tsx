@@ -26,14 +26,16 @@ export function SwapAccountButton() {
   const trainerEmails = JSON.parse(
     process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL || '[]',
   ) as string[]
-  const handleSwap = (email?: string) => {
+  const handleSwap = async (email?: string) => {
     if (!email) {
       console.warn('No email provided')
       return
     }
-    signIn('account-swap', {
+    await signIn('account-swap', {
       email,
+      redirect: false,
     })
+    window.location.reload()
   }
 
   const CLIENTS = clientEmails.map((email) => ({

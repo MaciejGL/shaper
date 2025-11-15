@@ -1,16 +1,9 @@
-import { differenceInDays } from 'date-fns'
 import { ChevronRight, Dumbbell } from 'lucide-react'
 import { useState } from 'react'
 
 import { BiggyIcon } from '@/components/biggy-icon'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent } from '@/components/ui/card'
 import { GQLTrainingPlan } from '@/generated/graphql-client'
@@ -25,8 +18,8 @@ import {
   getPlanStatus,
 } from '../types'
 
-import { PlanCard } from './plan-card'
 import { PlanDetailsDrawer } from './plan-details-drawer'
+import { PlanSection } from './plan-section'
 
 interface PlansTabProps {
   activePlan: ActivePlan | null
@@ -131,25 +124,6 @@ function EmptyStatusCard({ status }: EmptyStatusCardProps) {
   )
 }
 
-// Status divider with count badge
-interface StatusDividerProps {
-  status: PlanStatus
-  count: number
-}
-
-function StatusDivider({ status, count }: StatusDividerProps) {
-  return (
-    <div className="flex items-center gap-3 w-full">
-      <div className="flex items-center gap-2">
-        <span className="capitalize">{status}</span>
-        <span className="flex-center size-5 rounded-full bg-muted text-xs font-medium text-muted-foreground">
-          {count}
-        </span>
-      </div>
-    </div>
-  )
-}
-
 // Plans list component with status dividers
 interface PlansListProps {
   plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[]
@@ -158,7 +132,6 @@ interface PlansListProps {
 }
 
 function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
-  // When filter is "all", show sections with dividers
   const templatePlans = plans.filter(
     ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Template,
   )
@@ -169,84 +142,33 @@ function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
     ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Completed,
   )
 
-  const hasNewTemplatePlans = templatePlans.some(
-    ({ plan }) =>
-      plan.createdAt &&
-      differenceInDays(new Date(), new Date(plan.createdAt)) < 3,
-  )
-
   return (
-    <div className="space-y-2">
+    <div className="space-y-6">
       {!hasActivePlan && <EmptyStatusCard status={PlanStatus.Active} />}
-      <Accordion
-        type="single"
-        collapsible
-        defaultValue={
-          !hasActivePlan || hasNewTemplatePlans ? 'template-plans' : undefined
-        }
-        className="space-y-2"
-      >
-        <AccordionItem value="template-plans" className="border-0">
-          <AccordionTrigger variant="default">
-            <StatusDivider
-              status={PlanStatus.Template}
-              count={templatePlans.length}
-            />
-          </AccordionTrigger>
-          <AccordionContent variant="grid" className="space-y-2 p-2 pr-0">
-            {templatePlans.map(({ plan }) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                onClick={onPlanClick}
-                status={PlanStatus.Template}
-              />
-            ))}
-          </AccordionContent>
-        </AccordionItem>
-        {pausedPlans.length > 0 ? (
-          <AccordionItem value="paused-plans" className="border-0">
-            <AccordionTrigger variant="default">
-              <StatusDivider
-                status={PlanStatus.Paused}
-                count={pausedPlans.length}
-              />
-            </AccordionTrigger>
-            <AccordionContent variant="grid" className="p-2 pr-0">
-              <div className="space-y-2 ">
-                {pausedPlans.map(({ plan }) => (
-                  <PlanCard
-                    key={plan.id}
-                    plan={plan}
-                    onClick={onPlanClick}
-                    status={PlanStatus.Paused}
-                  />
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ) : null}
-        {completedPlans.length > 0 ? (
-          <AccordionItem value="completed-plans" className="border-0">
-            <AccordionTrigger variant="default">
-              <StatusDivider
-                status={PlanStatus.Completed}
-                count={completedPlans.length}
-              />
-            </AccordionTrigger>
-            <AccordionContent variant="grid" className="space-y-2 p-2 pr-0">
-              {completedPlans.map(({ plan }) => (
-                <PlanCard
-                  key={plan.id}
-                  plan={plan}
-                  onClick={onPlanClick}
-                  status={PlanStatus.Completed}
-                />
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-        ) : null}
-      </Accordion>
+
+      <PlanSection
+        title="Template Plans"
+        plans={templatePlans.map(({ plan }) => plan)}
+        onPlanClick={onPlanClick}
+        showProgress={false}
+        showEmptyState={templatePlans.length === 0}
+      />
+
+      <PlanSection
+        title="Paused Plans"
+        plans={pausedPlans.map(({ plan }) => plan)}
+        onPlanClick={onPlanClick}
+        showProgress={true}
+        showEmptyState={false}
+      />
+
+      <PlanSection
+        title="Completed Plans"
+        plans={completedPlans.map(({ plan }) => plan)}
+        onPlanClick={onPlanClick}
+        showProgress={true}
+        showEmptyState={false}
+      />
     </div>
   )
 }
@@ -312,7 +234,7 @@ export function PlansTab({
         />
         <ButtonLink
           href="/fitspace/explore?tab=plans"
-          variant="outline"
+          variant="secondary"
           size="lg"
           iconEnd={<ChevronRight />}
           className="w-full mt-6"

@@ -1,6 +1,7 @@
 'use client'
 
 import { Crown } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { cloneElement, isValidElement } from 'react'
 
 import { useOpenUrl } from '@/hooks/use-open-url'
@@ -37,6 +38,7 @@ export function PremiumButtonWrapper({
   tooltipText = 'Premium feature required',
   showIndicator = true,
 }: PremiumButtonWrapperProps) {
+  const pathname = usePathname()
   const { openUrl, isLoading } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
   })
@@ -52,7 +54,9 @@ export function PremiumButtonWrapper({
   }
 
   const handleViewPlans = () => {
-    openUrl('/account-management')
+    openUrl(
+      `/account-management/offers?redirectUrl=${encodeURIComponent(pathname)}`,
+    )
   }
 
   // Clone the button element and add relative class + crown badge
@@ -93,7 +97,7 @@ export function PremiumButtonWrapper({
           loading={isLoading}
           disabled={isLoading}
         >
-          View Plans
+          Upgrade
         </Button>
       </TooltipContent>
     </Tooltip>

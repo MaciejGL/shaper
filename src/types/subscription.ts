@@ -25,6 +25,7 @@ export enum SubscriptionStatus {
   ACTIVE = 'ACTIVE',
   EXPIRED = 'EXPIRED',
   CANCELLED = 'CANCELLED',
+  CANCELLED_ACTIVE = 'CANCELLED_ACTIVE',
   PENDING = 'PENDING',
 }
 

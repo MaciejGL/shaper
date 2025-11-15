@@ -42,6 +42,7 @@ type TrainingPlan {
   avgSessionTime: Int
   equipment: [String!]!
   heroImageUrl: String
+  sourceTrainingPlanId: String
   timesStarted: Int!
 
   createdAt: String!

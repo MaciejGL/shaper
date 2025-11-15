@@ -17,7 +17,7 @@ export function ProgramDetailsSection({
     <div>
       <div className="grid grid-cols-2 gap-2 text-sm">
         <Badge
-          variant="outline"
+          variant="secondary"
           size="lg"
           className="w-full justify-between py-2"
         >
@@ -29,7 +29,7 @@ export function ProgramDetailsSection({
 
         {sessionsPerWeek && (
           <Badge
-            variant="outline"
+            variant="secondary"
             size="lg"
             className="w-full justify-between py-2"
           >
@@ -41,7 +41,7 @@ export function ProgramDetailsSection({
         )}
         {avgSessionTime && (
           <Badge
-            variant="outline"
+            variant="secondary"
             size="lg"
             className="w-full justify-between py-2"
           >
@@ -53,7 +53,7 @@ export function ProgramDetailsSection({
         )}
         {formattedUserCount && (
           <Badge
-            variant="outline"
+            variant="secondary"
             size="lg"
             className="w-full justify-between py-2"
           >

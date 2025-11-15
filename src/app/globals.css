@@ -48,10 +48,10 @@
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.9791 0 0);
+  --background: oklch(0.9731 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
-  --card-on-card: oklch(0.96 0 0);
+  --card-on-card: oklch(0.94 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
@@ -176,9 +176,9 @@
       calc(env(safe-area-inset-bottom, 0px) - 18px)
     ); /* Navigation bars - tight (34px → 16px on iPhone) */
     --safe-area-bottom-content: max(
-      8px,
+      16px,
       calc(env(safe-area-inset-bottom, 0px) - 12px)
-    ); /* Content areas - moderate (34px → 22px on iPhone) */
+    ); /* Content areas - moderate (34px → 22px on iPhone, 16px on desktop) */
   }
 }
 

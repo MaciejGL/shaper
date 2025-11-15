@@ -272,6 +272,7 @@ export function PlanDetailsDrawer({
                   isTemplate={status === PlanStatus.Template}
                   selectedWeekId={selectedWeekId}
                   onAccordionChange={() => setSelectedWeekId(null)}
+                  canViewDays={canActivate}
                 />
               </TabsContent>
             </Tabs>

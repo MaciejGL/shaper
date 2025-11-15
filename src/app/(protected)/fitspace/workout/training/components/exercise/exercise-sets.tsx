@@ -251,7 +251,7 @@ export function ExerciseSets({
         </div>
       </div>
 
-      <div className={cn('flex flex-col gap-0', !isAdvancedView && 'pb-1')}>
+      <div className={cn('flex flex-col gap-0', !isAdvancedView && 'pb-3')}>
         {(exercise.substitutedBy?.sets || exercise.sets).map((set, index) => {
           const previousWeightLog = getPreviousSetValue(set.order, 'weight')
           const previousRepsLog = getPreviousSetValue(set.order, 'reps')
@@ -279,7 +279,7 @@ export function ExerciseSets({
         })}
 
         {isAdvancedView && (
-          <div className={cn('flex items-center justify-end gap-2 m-2 mt-4')}>
+          <div className={cn('flex items-center justify-end gap-2 m-3 mt-4')}>
             {exercise.sets.some((set) => set.isExtra) &&
               exercise.sets.length > 1 && (
                 <>

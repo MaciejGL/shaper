@@ -229,7 +229,11 @@ export async function getPublicTrainingPlans(
             include: {
               exercises: {
                 include: {
-                  base: true,
+                  base: {
+                    include: {
+                      images: true,
+                    },
+                  },
                 },
               },
             },
@@ -1310,19 +1314,6 @@ export async function assignTemplateToSelf(
     throw new Error('Training plan template not found')
   }
 
-  // Mark any existing active plan (except Quick Workout) as completed
-  await prisma.trainingPlan.updateMany({
-    where: {
-      assignedToId: userId,
-      active: true,
-      title: { not: 'Quick Workout' },
-    },
-    data: {
-      active: false,
-      completedAt: new Date(),
-    },
-  })
-
   // Duplicate the plan
   const duplicated = await duplicatePlan({
     plan: fullPlan,
@@ -1334,27 +1325,16 @@ export async function assignTemplateToSelf(
     throw new Error('Failed to assign template')
   }
 
-  // Update plan metadata
+  // Assign the plan to user without activating it
   await prisma.trainingPlan.update({
     where: { id: duplicated.id },
     data: {
       assignedToId: userId,
       isTemplate: false,
       templateId: planId,
-      sourceTrainingPlanId: planId,
+      active: false,
     },
   })
-
-  // Use existing activatePlan logic to schedule and activate
-  const startDate = getWeekStartUTC(new Date())
-  await activatePlan(
-    {
-      planId: duplicated.id,
-      startDate: startDate.toISOString(),
-      resume: false,
-    },
-    context,
-  )
 
   return duplicated.id
 }
@@ -2030,8 +2010,14 @@ export async function getWorkoutDay(
             active: true,
           },
         },
-        scheduledAt: todayUTC,
+        // OR: [{ scheduledAt: todayUTC }, { completedAt: null }],
+        completedAt: null,
+        isRestDay: false,
       },
+      orderBy: [
+        // Prioritize today's training, then most recent past trainings
+        { scheduledAt: 'desc' },
+      ],
       include: WORKOUT_DAY_INCLUDE,
     })
 
@@ -2160,7 +2146,7 @@ export async function getWorkoutDay(
       },
     },
     orderBy: [{ completedAt: 'desc' }],
-    take: 30,
+    take: 100,
   })
 
   const seenBaseIds = new Set<string>()
@@ -2229,7 +2215,7 @@ export async function getWorkoutDay(
         },
       },
       orderBy: [{ completedAt: 'desc' }],
-      take: 30,
+      take: 50,
     })
 
     // Add fallback exercises that meet the criteria
@@ -2596,7 +2582,7 @@ export async function getQuickWorkoutDay(
       { day: { week: { weekNumber: 'desc' } } },
       { day: { dayOfWeek: 'desc' } },
     ],
-    take: 30,
+    take: 50,
   })
 
   // Group by baseId and keep only the most recent occurrence

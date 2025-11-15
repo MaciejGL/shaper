@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { ChevronRight, PlusIcon, SparklesIcon } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -24,6 +25,7 @@ export function EmptyFavouriteOptions({
   onOpenAddExercise,
   hasExercises = false,
 }: EmptyFavouriteOptionsProps) {
+  const pathname = usePathname()
   const { hasPremium: hasPremiumAccess, isLoading: isLoadingUser } = useUser()
   const { openUrl, isLoading: isOpeningUrl } = useOpenUrl()
 
@@ -60,7 +62,9 @@ export function EmptyFavouriteOptions({
                   <Button
                     onClick={(e) => {
                       e.stopPropagation()
-                      openUrl('/account-management/offers')
+                      openUrl(
+                        `/account-management/offers?redirectUrl=${encodeURIComponent(pathname)}`,
+                      )
                     }}
                     size="xs"
                     variant="gradient"
