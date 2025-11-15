@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronRight, Crown } from 'lucide-react'
+import Image from 'next/image'
 import { toast } from 'sonner'
 
 import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
@@ -108,11 +109,13 @@ function HeroImage({
 }: HeroImageProps) {
   return (
     <div className="relative h-52 w-full overflow-hidden rounded-t-2xl">
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${imageUrl})`,
-        }}
+      <Image
+        src={imageUrl}
+        alt={`${workoutType} workout`}
+        fill
+        className="object-cover"
+        quality={100}
+        sizes="(max-width: 768px) 100vw, 50vw"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
 

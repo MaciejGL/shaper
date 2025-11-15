@@ -39,12 +39,16 @@ export function getPlanStatus(
   }
 
   // Check if it's an active plan
-  if (isActive) {
+  if (isActive || ('active' in plan && plan.active)) {
     return PlanStatus.Active
   }
 
-  // Check if it's paused (has startDate but not currently active)
-  if ('startDate' in plan && plan.startDate) {
+  // Check if it's paused (has startDate but not currently active and not completed)
+  if (
+    'startDate' in plan &&
+    plan.startDate &&
+    !('completedAt' in plan && plan.completedAt)
+  ) {
     return PlanStatus.Paused
   }
 

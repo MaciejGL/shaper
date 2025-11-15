@@ -149,5 +149,6 @@ const addSpacesToCamelCase = (str: string) => {
 
 export const getWorkoutTypeLabel = (workoutType?: GQLWorkoutType | null) => {
   if (!workoutType) return ''
+  if (workoutType === GQLWorkoutType.Custom) return ''
   return addSpacesToCamelCase(workoutType)
 }

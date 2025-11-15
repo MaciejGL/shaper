@@ -69,6 +69,10 @@ export default class TrainingPlan implements GQLTrainingPlan {
     return this.data.isPublic
   }
 
+  get sourceTrainingPlanId() {
+    return this.data.sourceTrainingPlanId
+  }
+
   get isTemplate() {
     return this.data.isTemplate
   }

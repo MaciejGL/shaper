@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Dumbbell, Users } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -181,11 +182,13 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
     >
       {day.heroImageUrl && (
         <div className="absolute inset-0 opacity-100 group-hover:opacity-30 transition-opacity overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${day.heroImageUrl})`,
-            }}
+          <Image
+            src={day.heroImageUrl}
+            alt={`${formatWorkoutType(workoutType)} workout`}
+            fill
+            className="object-cover"
+            quality={100}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
         </div>

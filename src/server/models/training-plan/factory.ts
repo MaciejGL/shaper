@@ -1314,19 +1314,6 @@ export async function assignTemplateToSelf(
     throw new Error('Training plan template not found')
   }
 
-  // Mark any existing active plan (except Quick Workout) as completed
-  await prisma.trainingPlan.updateMany({
-    where: {
-      assignedToId: userId,
-      active: true,
-      title: { not: 'Quick Workout' },
-    },
-    data: {
-      active: false,
-      completedAt: new Date(),
-    },
-  })
-
   // Duplicate the plan
   const duplicated = await duplicatePlan({
     plan: fullPlan,
@@ -1338,7 +1325,7 @@ export async function assignTemplateToSelf(
     throw new Error('Failed to assign template')
   }
 
-  // Update plan metadata
+  // Assign the plan to user without activating it
   await prisma.trainingPlan.update({
     where: { id: duplicated.id },
     data: {
@@ -1346,19 +1333,9 @@ export async function assignTemplateToSelf(
       isTemplate: false,
       templateId: planId,
       sourceTrainingPlanId: planId,
+      active: false,
     },
   })
-
-  // Use existing activatePlan logic to schedule and activate
-  const startDate = getWeekStartUTC(new Date())
-  await activatePlan(
-    {
-      planId: duplicated.id,
-      startDate: startDate.toISOString(),
-      resume: false,
-    },
-    context,
-  )
 
   return duplicated.id
 }

@@ -176,9 +176,9 @@
       calc(env(safe-area-inset-bottom, 0px) - 18px)
     ); /* Navigation bars - tight (34px → 16px on iPhone) */
     --safe-area-bottom-content: max(
-      8px,
+      16px,
       calc(env(safe-area-inset-bottom, 0px) - 12px)
-    ); /* Content areas - moderate (34px → 22px on iPhone) */
+    ); /* Content areas - moderate (34px → 22px on iPhone, 16px on desktop) */
   }
 }
 

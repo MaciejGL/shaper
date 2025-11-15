@@ -3348,6 +3348,7 @@ export type GQLTrainingPlan = {
   rating?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   reviews: EntireFieldWrapper<Array<GQLReview>>;
   sessionsPerWeek?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  sourceTrainingPlanId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   startDate?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   targetGoals: EntireFieldWrapper<Array<GQLTargetGoal>>;
   timesStarted: EntireFieldWrapper<Scalars['Int']['output']>;
@@ -5815,6 +5816,7 @@ export type GQLTrainingPlanResolvers<ContextType = GQLContext, ParentType extend
   rating?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   reviews?: Resolver<Array<GQLResolversTypes['Review']>, ParentType, ContextType>;
   sessionsPerWeek?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  sourceTrainingPlanId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   startDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   targetGoals?: Resolver<Array<GQLResolversTypes['TargetGoal']>, ParentType, ContextType>;
   timesStarted?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;

@@ -118,7 +118,7 @@ export function PlanPreviewTab({
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-2 p-2">
+              <Accordion type="multiple" className="space-y-2 p-2">
                 {sortedDays.map((day) => (
                   <PlanPreviewDay
                     key={day.id}
@@ -126,7 +126,7 @@ export function PlanPreviewTab({
                     isTemplate={isTemplate}
                   />
                 ))}
-              </div>
+              </Accordion>
             </AccordionContent>
           </AccordionItem>
         )

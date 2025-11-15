@@ -25,7 +25,7 @@ export function TrainingPlanPreviewFooter({
   const { data: subscriptionData } = useCurrentSubscription(user?.id)
   const hasPremium = subscriptionData?.hasPremiumAccess || false
 
-  const handleStartPlan = () => {
+  const handleAddPlan = () => {
     // If user doesn't have premium, redirect to offers page
     // This prevents hitting the backend training plan limit error
     if (!hasPremium) {
@@ -35,7 +35,7 @@ export function TrainingPlanPreviewFooter({
       return
     }
 
-    // Premium users can start the plan directly
+    // Add the plan to user's plans (they can activate it later from My Plans)
     onAssignTemplate(plan.id)
   }
 
@@ -46,12 +46,12 @@ export function TrainingPlanPreviewFooter({
       <Button
         className="w-full"
         size="lg"
-        onClick={handleStartPlan}
+        onClick={handleAddPlan}
         disabled={isLoading}
         loading={isLoading}
         iconStart={plan.premium ? <Crown /> : <Dumbbell />}
       >
-        Start Training Plan
+        Add to My Plans
       </Button>
     </DrawerFooter>
   )

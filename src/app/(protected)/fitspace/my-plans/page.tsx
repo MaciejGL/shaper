@@ -18,6 +18,7 @@ import { PlanDetailsDrawer } from './components/plan-details-drawer'
 import { PlansTab } from './components/plans-tab'
 import { EnhancedQuickWorkoutTab } from './components/quick-workout-plan-tab/enhanced-quick-workout-tab'
 import { PlanTab, getPlanStatus } from './types'
+import { getPlanImage } from './utils'
 
 export default function MyPlansPage() {
   const [tab, setTab] = useQueryState<PlanTab>(
@@ -101,6 +102,7 @@ export default function MyPlansPage() {
                 plan={activePlan}
                 onClick={handleActivePlanClick}
                 status={getPlanStatus(activePlan, activePlan.active)}
+                imageUrl={getPlanImage(activePlan)}
               />
             </div>
           ) : isLoadingPlans ? (

@@ -66,6 +66,9 @@ export function PlanPreviewExerciseRow({
   }
 
   const borderColor = getBorderColor()
+  if (isRestDay) {
+    return null
+  }
 
   return (
     <div
@@ -75,12 +78,14 @@ export function PlanPreviewExerciseRow({
       )}
     >
       {/* Colored border line on the left */}
-      <div
-        className={cn(
-          'absolute left-0 top-0 bottom-0 w-[3px] rounded-full',
-          borderColor,
-        )}
-      />
+      {!isRestDay && (
+        <div
+          className={cn(
+            'absolute left-0 top-0 bottom-0 w-[3px] rounded-full',
+            borderColor,
+          )}
+        />
+      )}
 
       {!isRestDay && (
         <div className="flex flex-col gap-2">
@@ -143,13 +148,18 @@ export function PlanPreviewExerciseRow({
           )}
         </div>
       )}
-      <div
-        className={cn('flex flex-col gap-2', hasMultipleImages && 'pb-[14px]')}
-      >
-        <span className="text-base flex-1">
-          {isRestDay ? 'Rest Day' : exercise?.name || 'Exercise name'}
-        </span>
-      </div>
+      {!isRestDay && (
+        <div
+          className={cn(
+            'flex flex-col gap-2',
+            hasMultipleImages && 'pb-[14px]',
+          )}
+        >
+          <span className="text-base flex-1">
+            {exercise?.name || 'Exercise name'}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

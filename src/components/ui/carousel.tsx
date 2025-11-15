@@ -231,6 +231,74 @@ function CarouselNext({
   )
 }
 
+function CarouselDots({
+  className,
+  count,
+  ...props
+}: React.ComponentProps<'div'> & { count: number }) {
+  const { api } = useCarousel()
+  const [currentSlide, setCurrentSlide] = React.useState(0)
+
+  const updateCurrentSlide = React.useCallback(
+    (api: CarouselApi) => {
+      if (!api) return
+
+      const slidesInView = api.slidesInView()
+
+      if (slidesInView.length === 0) {
+        setCurrentSlide(0)
+        return
+      }
+
+      if (slidesInView.length === 1) {
+        setCurrentSlide(slidesInView[0] ?? 0)
+        return
+      }
+
+      const scrollProgress = api.scrollProgress()
+      const slideCount = api.scrollSnapList().length
+      const calculatedIndex = Math.round(scrollProgress * (slideCount - 1))
+      setCurrentSlide(Math.min(calculatedIndex, count - 1))
+    },
+    [count],
+  )
+
+  React.useEffect(() => {
+    if (!api) return
+
+    updateCurrentSlide(api)
+    api.on('select', updateCurrentSlide)
+    api.on('scroll', updateCurrentSlide)
+
+    return () => {
+      api.off('select', updateCurrentSlide)
+      api.off('scroll', updateCurrentSlide)
+    }
+  }, [api, updateCurrentSlide])
+
+  return (
+    <div
+      data-slot="carousel-dots"
+      className={cn('flex items-center justify-center gap-1', className)}
+      {...props}
+    >
+      {Array.from({ length: count }).map((_, index) => (
+        <button
+          key={index}
+          onClick={() => api?.scrollTo(index)}
+          className={cn(
+            'h-1.5 rounded-full transition-all',
+            index === currentSlide
+              ? 'w-6 bg-primary dark:bg-primary/80'
+              : 'w-1.5 bg-muted-foreground/30',
+          )}
+          aria-label={`Go to slide ${index + 1}`}
+        />
+      ))}
+    </div>
+  )
+}
+
 export {
   type CarouselApi,
   Carousel,
@@ -238,4 +306,5 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselDots,
 }
