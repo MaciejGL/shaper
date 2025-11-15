@@ -37,6 +37,8 @@ export default class UserSubscription implements GQLUserSubscription {
     switch (this.data.status) {
       case SubscriptionStatus.ACTIVE:
         return GQLSubscriptionStatus.Active
+      case SubscriptionStatus.CANCELLED_ACTIVE:
+        return GQLSubscriptionStatus.CancelledActive
       case SubscriptionStatus.EXPIRED:
         return GQLSubscriptionStatus.Expired
       case SubscriptionStatus.CANCELLED:
@@ -73,7 +75,8 @@ export default class UserSubscription implements GQLUserSubscription {
 
   get isActive() {
     return (
-      this.data.status === SubscriptionStatus.ACTIVE &&
+      (this.data.status === SubscriptionStatus.ACTIVE ||
+        this.data.status === SubscriptionStatus.CANCELLED_ACTIVE) &&
       this.data.endDate > new Date()
     )
   }

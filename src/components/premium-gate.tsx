@@ -1,6 +1,7 @@
 'use client'
 
 import { Crown, Lock, Sparkles } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 import { useUser } from '@/context/user-context'
 import { useOpenUrl } from '@/hooks/use-open-url'
@@ -27,6 +28,7 @@ export function PremiumGate({
   compact = false,
   className,
 }: PremiumGateProps) {
+  const pathname = usePathname()
   const { hasPremium, isLoading } = useUser()
   const { openUrl, isLoading: isOpeningUrl } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
@@ -38,7 +40,9 @@ export function PremiumGate({
   }
 
   const handleViewPlans = () => {
-    openUrl('/account-management')
+    openUrl(
+      `/account-management/offers?redirectUrl=${encodeURIComponent(pathname)}`,
+    )
   }
 
   // Show premium gate
@@ -113,7 +117,7 @@ export function PremiumGate({
               loading={isOpeningUrl}
               disabled={isOpeningUrl}
             >
-              View Plans
+              Upgrade
             </Button>
           </div>
         </CardContent>

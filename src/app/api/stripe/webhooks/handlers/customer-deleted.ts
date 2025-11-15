@@ -65,6 +65,7 @@ async function cancelActiveSubscriptions(
   const activeSubscriptions = user.subscriptions.filter(
     (sub: UserSubscription) =>
       sub.status === SubscriptionStatus.ACTIVE ||
+      sub.status === SubscriptionStatus.CANCELLED_ACTIVE ||
       sub.status === SubscriptionStatus.PENDING,
   )
 
@@ -73,7 +74,11 @@ async function cancelActiveSubscriptions(
       where: {
         userId: user.id,
         status: {
-          in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING],
+          in: [
+            SubscriptionStatus.ACTIVE,
+            SubscriptionStatus.CANCELLED_ACTIVE,
+            SubscriptionStatus.PENDING,
+          ],
         },
       },
       data: {

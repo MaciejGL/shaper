@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         userId,
         OR: [
           { status: SubscriptionStatus.ACTIVE },
+          { status: SubscriptionStatus.CANCELLED_ACTIVE }, // Include cancelled but active
           { status: SubscriptionStatus.PENDING }, // Include pending for grace period check
         ],
       },
@@ -38,6 +39,40 @@ export async function GET(request: NextRequest) {
 
     const now = new Date()
 
+    // Check if user has ever used a trial (for trial eligibility)
+    const hasUsedTrialInDB = await prisma.userSubscription.findFirst({
+      where: {
+        userId,
+        OR: [{ isTrialActive: true }, { trialStart: { not: null } }],
+      },
+    })
+
+    // Get user's Stripe customer to check metadata
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { stripeCustomerId: true },
+    })
+
+    let hasUsedTrial = !!hasUsedTrialInDB
+
+    // Also check Stripe metadata if customer exists
+    if (user?.stripeCustomerId && !hasUsedTrial) {
+      try {
+        const stripeCustomer = await stripe.customers.retrieve(
+          user.stripeCustomerId,
+        )
+
+        if (
+          'metadata' in stripeCustomer &&
+          stripeCustomer.metadata?.hasUsedTrial === 'true'
+        ) {
+          hasUsedTrial = true
+        }
+      } catch (error) {
+        console.error('Failed to fetch Stripe customer metadata:', error)
+      }
+    }
+
     if (subscriptions.length === 0) {
       return NextResponse.json({
         hasPremiumAccess: false,
@@ -45,36 +80,16 @@ export async function GET(request: NextRequest) {
         subscription: null,
         trial: null,
         gracePeriod: null,
+        hasUsedTrial,
       })
     }
 
-    // Check cancellation status for all subscriptions to prioritize correctly
-    // Also get the correct end date from Stripe for cancelled subscriptions
-    const subscriptionsWithCancellation = await Promise.all(
-      subscriptions.map(async (sub) => {
-        let isCancelledButActive = false
-        let stripeEndDate = sub.endDate // Use database endDate as fallback
-
-        if (sub.stripeSubscriptionId) {
-          try {
-            const stripeSubscription = await stripe.subscriptions.retrieve(
-              sub.stripeSubscriptionId,
-            )
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const stripeSub = stripeSubscription as any
-            isCancelledButActive = stripeSub.cancel_at_period_end || false
-
-            // For cancelled subscriptions, use Stripe's current_period_end as source of truth
-            if (isCancelledButActive && stripeSub.current_period_end) {
-              stripeEndDate = new Date(stripeSub.current_period_end * 1000)
-            }
-          } catch (error) {
-            console.error('Error retrieving Stripe subscription:', error)
-          }
-        }
-        return { ...sub, isCancelledButActive, stripeEndDate }
-      }),
-    )
+    // Use database status instead of fetching Stripe (much faster!)
+    const subscriptionsWithCancellation = subscriptions.map((sub) => ({
+      ...sub,
+      isCancelledButActive: sub.status === SubscriptionStatus.CANCELLED_ACTIVE,
+      stripeEndDate: sub.endDate,
+    }))
 
     // Filter subscriptions based on type or specific lookup key
     let filteredSubscriptions = subscriptionsWithCancellation
@@ -104,6 +119,7 @@ export async function GET(request: NextRequest) {
         subscription: null,
         trial: null,
         gracePeriod: null,
+        hasUsedTrial,
       })
     }
 
@@ -176,7 +192,8 @@ export async function GET(request: NextRequest) {
         ? subscription.trialEnd
         : primarySubscription.stripeEndDate
     const isSubscriptionValid =
-      subscription.status === SubscriptionStatus.ACTIVE &&
+      (subscription.status === SubscriptionStatus.ACTIVE ||
+        subscription.status === SubscriptionStatus.CANCELLED_ACTIVE) &&
       now <= effectiveEndDate
 
     // Premium access already calculated above based on subscription types
@@ -204,13 +221,18 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Determine status
+    // Determine status - check cancellation first
     let status = 'EXPIRED'
-    if (isInTrial) {
+    const isCancelled =
+      primarySubscription.status === SubscriptionStatus.CANCELLED_ACTIVE
+
+    if (isCancelled && isInTrial) {
+      status = 'CANCELLED_ACTIVE' // Cancelled during trial
+    } else if (isInTrial) {
       status = 'TRIAL'
     } else if (isInGracePeriod) {
       status = 'GRACE_PERIOD'
-    } else if (isSubscriptionValid && isCancelledButActive) {
+    } else if (isSubscriptionValid && isCancelled) {
       status = 'CANCELLED_ACTIVE'
     } else if (isSubscriptionValid) {
       status = 'ACTIVE'
@@ -262,6 +284,7 @@ export async function GET(request: NextRequest) {
             failedRetries: subscription.failedPaymentRetries,
           }
         : null,
+      hasUsedTrial,
     })
   } catch (error) {
     console.error('Error checking subscription status:', error)

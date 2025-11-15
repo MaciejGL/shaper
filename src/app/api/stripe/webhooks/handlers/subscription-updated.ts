@@ -19,7 +19,20 @@ export async function handleSubscriptionUpdated(
       return
     }
 
-    const status = mapStripeStatusToSubscriptionStatus(subscription.status)
+    // Check if subscription is cancelled but still active
+    // For trials: cancel_at is set to trial end
+    // For paid: cancel_at_period_end is true
+    const cancelledButActive = !!(
+      subscription.cancel_at || subscription.cancel_at_period_end
+    )
+    const isStillActive =
+      subscription.status === 'active' || subscription.status === 'trialing'
+
+    const status =
+      cancelledButActive && isStillActive
+        ? SubscriptionStatus.CANCELLED_ACTIVE
+        : mapStripeStatusToSubscriptionStatus(subscription.status)
+
     const endDate = new Date(
       subscription.items.data[0].current_period_end * 1000,
     )
@@ -79,7 +92,11 @@ export async function handleSubscriptionUpdated(
       data: { status, endDate },
     })
 
-    console.info(`✅ Subscription ${subscription.id} updated to ${status}`)
+    console.info(
+      `✅ Subscription ${subscription.id} updated to ${status}${
+        cancelledButActive ? ' (cancelled but active until end)' : ''
+      }`,
+    )
   } catch (error) {
     console.error('Error handling subscription updated:', error)
   }
@@ -90,6 +107,7 @@ function mapStripeStatusToSubscriptionStatus(
 ): SubscriptionStatus {
   switch (stripeStatus) {
     case 'active':
+    case 'trialing':
       return SubscriptionStatus.ACTIVE
     case 'canceled':
       return SubscriptionStatus.CANCELLED

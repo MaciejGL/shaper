@@ -8,12 +8,10 @@ import { CoachingServiceTerms } from '@/components/subscription/coaching-service
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
-import { useGetActivePackageTemplatesQuery } from '@/generated/graphql-client'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
-import { UpgradeCard } from '../../fitspace/settings/components/upgrade-card'
-import { useSubscriptionActions } from '../../fitspace/settings/hooks/use-subscription-actions'
+import { PremiumPricingSelector } from './premium-pricing-selector'
 
 export function SubscriptionManagementSection() {
   const { user } = useUser()
@@ -23,41 +21,42 @@ export function SubscriptionManagementSection() {
     error: subscriptionError,
   } = useCurrentSubscription(user?.id)
 
-  // Fetch available packages for upgrade options
-  const {
-    data: packagesData,
-    isLoading: isLoadingPackages,
-    error: packagesError,
-  } = useGetActivePackageTemplatesQuery({})
-  const availablePackages = packagesData?.getActivePackageTemplates || []
+  const isLoading = isLoadingSubscription
+  const hasError = subscriptionError
 
-  // Combined loading state - wait for both queries
-  const isLoading = isLoadingSubscription || isLoadingPackages
-  const hasError = subscriptionError || packagesError
-
-  // Get monthly and yearly packages using lookup keys
-  const monthlyPackage = availablePackages.find(
-    (pkg) =>
-      pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY &&
-      pkg.isActive,
-  )
-  const yearlyPackage = availablePackages.find(
-    (pkg) =>
-      pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY && pkg.isActive,
-  )
-
-  // Terms modal state
   const [showTermsModal, setShowTermsModal] = useState(false)
+  const [isSubscribing, setIsSubscribing] = useState(false)
 
-  // Subscription upgrade logic
-  const { isUpgrading, handleUpgrade } = useSubscriptionActions({
-    userId: user?.id || '',
-    premiumPackage: monthlyPackage
-      ? {
-          id: monthlyPackage.id,
-        }
-      : undefined,
-  })
+  const handleSubscribe = async (lookupKey: string) => {
+    if (!user?.id) return
+
+    setIsSubscribing(true)
+
+    try {
+      const response = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          lookupKey,
+          returnUrl: `${window.location.origin}/account-management`,
+          cancelUrl: `${window.location.origin}/account-management`,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session')
+      }
+
+      const { checkoutUrl } = await response.json()
+      window.location.href = checkoutUrl
+    } catch (error) {
+      console.error('Subscription error:', error)
+      setIsSubscribing(false)
+    }
+  }
 
   const handleManageSubscription = async () => {
     try {
@@ -258,48 +257,15 @@ export function SubscriptionManagementSection() {
         <>
           {/* No subscription - show upgrade options directly */}
           <div className="space-y-6">
-            {/* Upgrade Card with pricing options */}
-            <UpgradeCard
-              monthlyPackage={
-                monthlyPackage
-                  ? {
-                      ...monthlyPackage,
-                      description: monthlyPackage.description || undefined,
-                    }
-                  : undefined
-              }
-              yearlyPackage={
-                yearlyPackage
-                  ? {
-                      ...yearlyPackage,
-                      description: yearlyPackage.description || undefined,
-                    }
-                  : undefined
-              }
-              isUpgrading={isUpgrading}
-              onUpgrade={handleUpgrade}
+            <PremiumPricingSelector
+              hasPremium={subscriptionData?.hasPremiumAccess}
+              hasUsedTrial={subscriptionData?.hasUsedTrial}
+              isSubscribing={isSubscribing}
+              onSubscribe={handleSubscribe}
+              showTrialBadge={true}
+              showTermsLink={true}
+              onShowTerms={() => setShowTermsModal(true)}
             />
-
-            {/* Terms Agreement Text */}
-            <p className="text-xs text-center text-muted-foreground">
-              By subscribing, you agree to our{' '}
-              <button
-                type="button"
-                onClick={() => setShowTermsModal(true)}
-                className="text-primary hover:text-primary/80 underline"
-              >
-                terms of service
-              </button>
-              {' and '}
-              <a
-                href="/privacy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:text-primary/80 underline"
-              >
-                privacy policy
-              </a>
-            </p>
 
             {/* Show billing portal access if user has previous Stripe subscription */}
             {hasStripeHistory && (

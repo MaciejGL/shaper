@@ -3108,6 +3108,7 @@ export type GQLSubscriptionStats = {
 export enum GQLSubscriptionStatus {
   Active = 'ACTIVE',
   Cancelled = 'CANCELLED',
+  CancelledActive = 'CANCELLED_ACTIVE',
   Expired = 'EXPIRED',
   Pending = 'PENDING'
 }

@@ -30,7 +30,7 @@ export function TrainingPlanPreviewFooter({
     // This prevents hitting the backend training plan limit error
     if (!hasPremium) {
       openUrl(
-        `/account-management/offers?redirectUrl=/fitspace/explore/plan/${plan.id}`,
+        '/account-management/offers?redirectUrl=/fitspace/explore?tab=premium-plans',
       )
       return
     }

@@ -8,9 +8,13 @@ import { getBaseUrl } from '@/lib/get-base-url'
 
 interface ReturnToAppProps {
   variant?: 'back' | 'complete'
+  redirectUrl?: string | null
 }
 
-export function ReturnToApp({ variant = 'complete' }: ReturnToAppProps) {
+export function ReturnToApp({
+  variant = 'complete',
+  redirectUrl,
+}: ReturnToAppProps) {
   const isMobileDevice = useIsMobileDevice()
 
   const handleReturn = () => {
@@ -18,18 +22,18 @@ export function ReturnToApp({ variant = 'complete' }: ReturnToAppProps) {
     if (isMobileDevice) {
       // This page is excluded from universal links and opens in Safari/Chrome,
       // so we use hypro:// scheme to return to the app
-      const deepLink = `hypro://fitspace/settings`
+      const deepLink = `hypro://${redirectUrl || 'fitspace/workout'}`
 
       // Try deep link first (will open app if installed)
       window.location.href = deepLink
 
       // Fallback to web URL after a delay if deep link fails
       setTimeout(() => {
-        window.location.href = `${getBaseUrl()}/fitspace/settings`
+        window.location.href = `${getBaseUrl()}/${redirectUrl || 'fitspace/workout'}`
       }, 2000)
     } else {
       // Desktop users: just navigate to web URL
-      window.location.href = `${getBaseUrl()}/fitspace/settings`
+      window.location.href = `${getBaseUrl()}/${redirectUrl || 'fitspace/workout'}`
     }
   }
 
