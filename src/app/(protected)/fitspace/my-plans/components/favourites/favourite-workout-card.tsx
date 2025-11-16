@@ -39,7 +39,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 
-import { QuickWorkoutAiWizard } from '../../../workout/quick-workout/components/quick-workout-ai-wizard'
+// import { QuickWorkoutAiWizard } from '../../../workout/quick-workout/components/quick-workout-ai-wizard'
 
 import { AddExerciseToFavouriteDrawer } from './add-exercise-to-favourite-drawer'
 import { EditFavouriteMetadataDrawer } from './edit-favourite-metadata-drawer'
@@ -66,7 +66,7 @@ export function FavouriteWorkoutCard({
   workoutStatus,
   isLoading,
 }: FavouriteWorkoutCardProps) {
-  const [showAiWizard, setShowAiWizard] = useState(false)
+  // const [showAiWizard, setShowAiWizard] = useState(false)
   const [showAddExercise, setShowAddExercise] = useState(false)
   const [showEditMetadata, setShowEditMetadata] = useState(false)
 
@@ -214,7 +214,6 @@ export function FavouriteWorkoutCard({
               <CardContent className="pt-0  space-y-4">
                 {isEmpty ? (
                   <EmptyFavouriteOptions
-                    onOpenAiWizard={() => setShowAiWizard(true)}
                     onOpenAddExercise={() => setShowAddExercise(true)}
                   />
                 ) : (
@@ -266,8 +265,8 @@ export function FavouriteWorkoutCard({
         </AccordionItem>
       </Accordion>
 
-      {/* AI Wizard */}
-      {showAiWizard && (
+      {/* AI Wizard - HIDDEN */}
+      {/* {showAiWizard && (
         <QuickWorkoutAiWizard
           mode="favourite"
           open={showAiWizard}
@@ -275,7 +274,7 @@ export function FavouriteWorkoutCard({
           favouriteId={favourite.id}
           favouriteTitle={favourite.title}
         />
-      )}
+      )} */}
 
       {/* Add Exercise Drawer */}
       {showAddExercise && (
