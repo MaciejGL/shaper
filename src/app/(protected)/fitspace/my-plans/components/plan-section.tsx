@@ -26,6 +26,7 @@ interface PlanSectionProps {
   onPlanClick: (plan: UnifiedPlan) => void
   showProgress?: boolean
   showEmptyState?: boolean
+  isTrainerPlans?: boolean
 }
 
 export function PlanSection({
@@ -34,6 +35,7 @@ export function PlanSection({
   onPlanClick,
   showProgress = true,
   showEmptyState = false,
+  isTrainerPlans = false,
 }: PlanSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -44,7 +46,7 @@ export function PlanSection({
   if (plans.length === 0 && showEmptyState) {
     return (
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold">{title}</h2>
         </div>
         <CardContent className="flex items-center gap-4 py-6">
@@ -113,12 +115,17 @@ export function PlanSection({
                 className="w-screen space-y-3 -mx-4"
               >
                 <CarouselContent className="ml-0">
-                  {plans.slice(0, maxPlans).map((plan) => (
+                  {plans.slice(0, maxPlans).map((plan, _, array) => (
                     <CarouselItem
                       key={
                         plan?.id ? `${plan.id}-carousel-item` : `carousel-item`
                       }
-                      className="basis-[70%] md:basis-[20%] pl-4"
+                      className={cn(
+                        'basis-[60%] md:basis-[20%] pl-4',
+                        array.length === 1 &&
+                          isTrainerPlans &&
+                          'basis-full pr-4',
+                      )}
                     >
                       <PlanCarouselCard
                         key={plan?.id}
