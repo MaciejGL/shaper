@@ -2,6 +2,7 @@
 
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,7 @@ import { UnifiedPlan } from '../types'
 import { getPlanImage } from '../utils'
 
 import { PlanCarouselCard } from './plan-carousel-card'
+import { PromoPlanCard } from './promo-plan-card'
 
 interface PlanSectionProps {
   title: string
@@ -26,7 +28,8 @@ interface PlanSectionProps {
   onPlanClick: (plan: UnifiedPlan) => void
   showProgress?: boolean
   showEmptyState?: boolean
-  isTrainerPlans?: boolean
+  showPromoCard?: boolean
+  titleLink?: string
 }
 
 export function PlanSection({
@@ -35,11 +38,12 @@ export function PlanSection({
   onPlanClick,
   showProgress = true,
   showEmptyState = false,
-  isTrainerPlans = false,
+  showPromoCard = false,
+  titleLink,
 }: PlanSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
-  if (plans.length === 0 && !showEmptyState) {
+  if (plans.length === 0 && !showEmptyState && !showPromoCard) {
     return null
   }
 
@@ -68,15 +72,43 @@ export function PlanSection({
     )
   }
 
+  // Show promo card when no plans but promo is enabled
+  if (showPromoCard) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          {titleLink ? (
+            <Link href={titleLink} className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold">{title}</h2>{' '}
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <h2 className="text-lg font-semibold">{title}</h2>
+          )}
+        </div>
+        <div className="w-[60%]">
+          <PromoPlanCard />
+        </div>
+      </div>
+    )
+  }
+
   const maxPlans = 6
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{title}</h2>
+        {titleLink ? (
+          <Link href={titleLink} className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold">{title}</h2>{' '}
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+        ) : (
+          <h2 className="text-lg font-semibold">{title}</h2>
+        )}
         {plans.length > 2 && (
           <Button
-            variant="secondary"
+            variant="outline"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
             iconEnd={
@@ -115,17 +147,12 @@ export function PlanSection({
                 className="w-screen space-y-3 -mx-4"
               >
                 <CarouselContent className="ml-0">
-                  {plans.slice(0, maxPlans).map((plan, _, array) => (
+                  {plans.slice(0, maxPlans).map((plan) => (
                     <CarouselItem
                       key={
                         plan?.id ? `${plan.id}-carousel-item` : `carousel-item`
                       }
-                      className={cn(
-                        'basis-[60%] md:basis-[20%] pl-4',
-                        array.length === 1 &&
-                          isTrainerPlans &&
-                          'basis-full pr-4',
-                      )}
+                      className={cn('basis-[60%] md:basis-[20%] pl-4')}
                     >
                       <PlanCarouselCard
                         key={plan?.id}

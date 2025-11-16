@@ -86,17 +86,10 @@ function EmptyStatusCard({ status }: EmptyStatusCardProps) {
           <div className="flex-1 min-w-0">
             <h4 className="font-semibold text-base mb-1">Activate Plan</h4>
             <p className="text-sm text-muted-foreground">
-              Select one of your available plans to get started or select one of
-              our pre-made plans
+              Select one of plans from your personal plans or explore our
+              ready-made programs
             </p>
           </div>
-          <ButtonLink
-            href="/fitspace/explore?tab=plans"
-            size="sm"
-            iconEnd={<ChevronRight />}
-          >
-            Find Plan
-          </ButtonLink>
         </CardContent>
       </Card>
     )
@@ -160,12 +153,11 @@ function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
 
       {trainerPlans.length > 0 && (
         <PlanSection
-          title="From My Trainer"
+          title="Perosnal Plans"
           plans={trainerPlans.map(({ plan }) => plan)}
           onPlanClick={onPlanClick}
           showProgress={false}
           showEmptyState={false}
-          isTrainerPlans
         />
       )}
 
@@ -175,6 +167,8 @@ function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
         onPlanClick={onPlanClick}
         showProgress={false}
         showEmptyState={templatePlans.length === 0}
+        showPromoCard={readymadePlans.length === 0}
+        titleLink="/fitspace/explore?tab=premium-plans"
       />
 
       <PlanSection
