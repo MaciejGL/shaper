@@ -456,9 +456,9 @@ model PersonalRecord {
   achievedAt     DateTime     @default(now())
   createdAt      DateTime     @default(now())
   dayId          String
-  baseExercise   BaseExercise @relation(fields: [baseExerciseId], references: [id])
-  day            TrainingDay  @relation(fields: [dayId], references: [id])
-  user           User         @relation(fields: [userId], references: [id])
+  baseExercise   BaseExercise @relation(fields: [baseExerciseId], references: [id], onDelete: Cascade)
+  day            TrainingDay  @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, baseExerciseId, dayId])
   @@index([userId])

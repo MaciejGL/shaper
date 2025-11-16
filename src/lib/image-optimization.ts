@@ -82,11 +82,19 @@ async function createAndStoreImageVariants(originalS3Key: string): Promise<{
       large: null as string | null,
     }
 
-    // Create thumbnail (150x200)
+    // Create thumbnail (200x267) - Higher quality for crisp small images
     try {
       const thumbnailBuffer = await sharp(imageBuffer)
-        .resize(150, 200, { fit: 'inside', withoutEnlargement: true })
-        .webp({ quality: 70 })
+        .resize(200, 267, {
+          fit: 'inside',
+          withoutEnlargement: true,
+          kernel: 'lanczos3',
+        })
+        .webp({
+          quality: 92,
+          smartSubsample: false,
+          effort: 6,
+        })
         .toBuffer()
 
       const thumbnailKey = `${basePath}/${filenameWithoutExt}_thumbnail.webp`
@@ -105,11 +113,19 @@ async function createAndStoreImageVariants(originalS3Key: string): Promise<{
       console.error('Error creating thumbnail:', error)
     }
 
-    // Create medium (400x500)
+    // Create medium (500x667) - High quality for standard display
     try {
       const mediumBuffer = await sharp(imageBuffer)
-        .resize(400, 500, { fit: 'inside', withoutEnlargement: true })
-        .webp({ quality: 80 })
+        .resize(500, 667, {
+          fit: 'inside',
+          withoutEnlargement: true,
+          kernel: 'lanczos3',
+        })
+        .webp({
+          quality: 94,
+          smartSubsample: false,
+          effort: 6,
+        })
         .toBuffer()
 
       const mediumKey = `${basePath}/${filenameWithoutExt}_medium.webp`
@@ -128,11 +144,19 @@ async function createAndStoreImageVariants(originalS3Key: string): Promise<{
       console.error('Error creating medium variant:', error)
     }
 
-    // Create large (800x1000)
+    // Create large (900x1200) - Near-lossless for detailed views
     try {
       const largeBuffer = await sharp(imageBuffer)
-        .resize(800, 1000, { fit: 'inside', withoutEnlargement: true })
-        .webp({ quality: 85 })
+        .resize(900, 1200, {
+          fit: 'inside',
+          withoutEnlargement: true,
+          kernel: 'lanczos3',
+        })
+        .webp({
+          quality: 96,
+          smartSubsample: false,
+          effort: 6,
+        })
         .toBuffer()
 
       const largeKey = `${basePath}/${filenameWithoutExt}_large.webp`
