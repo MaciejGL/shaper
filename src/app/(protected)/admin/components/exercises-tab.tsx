@@ -10,7 +10,6 @@ import {
   RefreshCw,
   Search,
   Sparkles,
-  X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -782,7 +781,7 @@ export function ExercisesTab() {
                                   </h5>
                                   <div className="flex items-center gap-1">
                                     {plan.planActive && (
-                                      <Badge variant="default">Active</Badge>
+                                      <Badge variant="premium">Active</Badge>
                                     )}
                                     {plan.planIsTemplate && (
                                       <Badge variant="outline">Template</Badge>
