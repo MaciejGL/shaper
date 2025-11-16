@@ -1,12 +1,11 @@
 import * as crypto from 'crypto'
-import { addDays, addWeeks, differenceInCalendarDays } from 'date-fns'
+import { addWeeks } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
 import {
   GQLMutationActivatePlanArgs,
   GQLMutationClosePlanArgs,
   GQLMutationDeletePlanArgs,
-  GQLMutationExtendPlanArgs,
   GQLMutationPausePlanArgs,
   GQLQueryGetClientActivePlanArgs,
 } from '@/generated/graphql-client'
@@ -1596,125 +1595,6 @@ export async function deletePlan(
   return true
 }
 
-export async function extendPlan(args: GQLMutationExtendPlanArgs) {
-  const { planId, weeks } = args
-
-  const plan = await getFullPlanById(planId)
-  if (!plan) throw new GraphQLError('Training plan not found')
-
-  const toClone = plan.weeks
-    .filter((w) => weeks.includes(w.id))
-    .sort((a, b) => a.weekNumber - b.weekNumber)
-
-  if (toClone.length === 0) throw new GraphQLError('No weeks to extend')
-
-  const maxWeekNumber = Math.max(...plan.weeks.map((w) => w.weekNumber))
-  let nextWeekNumber = maxWeekNumber + 1
-  let nextWeekStart = plan.weeks
-    .sort((a, b) => a.weekNumber - b.weekNumber)
-    .at(-1)?.scheduledAt
-
-  // Prepare bulk data for all entities across all weeks
-  const weeksData = []
-  const daysData = []
-  const exercisesData = []
-  const setsData = []
-
-  // Build up all the data for bulk operations
-  for (const week of toClone) {
-    nextWeekStart = nextWeekStart ? addWeeks(nextWeekStart, 1) : null
-    const newWeekId = crypto.randomUUID()
-
-    weeksData.push({
-      id: newWeekId,
-      planId,
-      name: week.name,
-      description: week.description,
-      weekNumber: nextWeekNumber++,
-      scheduledAt: nextWeekStart,
-      completedAt: null,
-      isExtra: true,
-    })
-
-    for (const day of week.days) {
-      const offset =
-        week.scheduledAt && day.scheduledAt
-          ? differenceInCalendarDays(day.scheduledAt, week.scheduledAt)
-          : null
-
-      const scheduledAt =
-        offset != null && nextWeekStart ? addDays(nextWeekStart, offset) : null
-
-      const newDayId = crypto.randomUUID()
-      daysData.push({
-        id: newDayId,
-        weekId: newWeekId,
-        dayOfWeek: day.dayOfWeek,
-        workoutType: day.workoutType,
-        isRestDay: day.isRestDay,
-        scheduledAt,
-        completedAt: null,
-        isExtra: true,
-      })
-
-      for (const ex of day.exercises) {
-        const newExerciseId = crypto.randomUUID()
-        exercisesData.push({
-          id: newExerciseId,
-          dayId: newDayId,
-          name: ex.name,
-          baseId: ex.baseId,
-          restSeconds: ex.restSeconds,
-          order: ex.order,
-          isExtra: true,
-          additionalInstructions: ex.additionalInstructions,
-          completedAt: null,
-          description: ex.description,
-          instructions: ex.instructions,
-          tips: ex.tips,
-          difficulty: ex.difficulty,
-          tempo: ex.tempo,
-          type: ex.type,
-          warmupSets: ex.warmupSets,
-        })
-
-        for (const set of ex.sets) {
-          setsData.push({
-            id: crypto.randomUUID(),
-            exerciseId: newExerciseId,
-            reps: set.reps,
-            weight: set.weight,
-            rpe: set.rpe,
-            order: set.order,
-            isExtra: true,
-            maxReps: set.maxReps,
-            minReps: set.minReps,
-            completedAt: null,
-          })
-        }
-      }
-    }
-  }
-
-  // Execute bulk operations in parallel for maximum performance
-  await Promise.all([
-    weeksData.length > 0
-      ? prisma.trainingWeek.createMany({ data: weeksData })
-      : Promise.resolve(),
-    daysData.length > 0
-      ? prisma.trainingDay.createMany({ data: daysData })
-      : Promise.resolve(),
-    exercisesData.length > 0
-      ? prisma.trainingExercise.createMany({ data: exercisesData })
-      : Promise.resolve(),
-    setsData.length > 0
-      ? prisma.exerciseSet.createMany({ data: setsData })
-      : Promise.resolve(),
-  ])
-
-  return true
-}
-
 export async function removeWeek(
   args: { planId: string; weekId: string },
   context: GQLContext,
@@ -1817,6 +1697,58 @@ export async function createDraftTemplate(context: GQLContext) {
   return new TrainingPlan(trainingPlan, context)
 }
 
+async function autoScheduleUnscheduledWeeks(
+  plan: {
+    startDate: Date | null
+    weeks: {
+      id: string
+      weekNumber: number
+      scheduledAt: Date | null
+      days: { id: string; dayOfWeek: number; scheduledAt: Date | null }[]
+    }[]
+  },
+  weekStartsOn: 0 | 1,
+): Promise<boolean> {
+  if (!plan.startDate || !plan.weeks.length) return false
+
+  const unscheduledWeeks = plan.weeks.filter((w) => !w.scheduledAt)
+  if (unscheduledWeeks.length === 0) return false
+
+  const weekUpdates = []
+  const dayUpdates = []
+
+  for (const week of unscheduledWeeks) {
+    const weekIndex = week.weekNumber - 1
+    const weekScheduledAt = addWeeks(plan.startDate, weekIndex)
+
+    weekUpdates.push(
+      prisma.trainingWeek.update({
+        where: { id: week.id },
+        data: { scheduledAt: weekScheduledAt },
+      }),
+    )
+
+    for (const day of week.days) {
+      const dayScheduledAt = calculateTrainingDayScheduledDate(
+        plan.startDate,
+        weekIndex,
+        day.dayOfWeek,
+        weekStartsOn,
+      )
+
+      dayUpdates.push(
+        prisma.trainingDay.update({
+          where: { id: day.id },
+          data: { scheduledAt: dayScheduledAt },
+        }),
+      )
+    }
+  }
+
+  await Promise.all([...weekUpdates, ...dayUpdates])
+  return true
+}
+
 export async function getWorkoutNavigation(
   args: GQLQueryGetWorkoutNavigationArgs,
   context: GQLContext,
@@ -1830,6 +1762,8 @@ export async function getWorkoutNavigation(
   if (!trainingId) {
     return null
   }
+
+  const weekStartsOn = (user.user.profile?.weekStartsOn ?? 1) as 0 | 1
 
   // Lightweight query optimized for navigation - only fetch weeks and days without exercises/sets
   const plan = await prisma.trainingPlan.findUnique({
@@ -1869,6 +1803,39 @@ export async function getWorkoutNavigation(
   })
 
   if (plan) {
+    if (plan.startDate && plan.active) {
+      const hasUpdates = await autoScheduleUnscheduledWeeks(plan, weekStartsOn)
+
+      // Refetch plan if we made updates to ensure we return fresh data
+      if (hasUpdates) {
+        const updatedPlan = await prisma.trainingPlan.findUnique({
+          where: { id: plan.id },
+          include: {
+            weeks: {
+              orderBy: { weekNumber: 'asc' },
+              include: {
+                days: {
+                  orderBy: { dayOfWeek: 'asc' },
+                  select: {
+                    id: true,
+                    dayOfWeek: true,
+                    isRestDay: true,
+                    completedAt: true,
+                    scheduledAt: true,
+                    _count: { select: { exercises: true } },
+                  },
+                },
+              },
+            },
+          },
+        })
+
+        if (updatedPlan) {
+          return { plan: new TrainingPlan(updatedPlan, context) }
+        }
+      }
+    }
+
     return {
       plan: new TrainingPlan(plan, context),
     }
@@ -1919,6 +1886,44 @@ export async function getWorkoutNavigation(
     defaultPlan.assignedToId === user.user.id &&
     defaultPlan.createdById === user.user.id
   ) {
+    if (defaultPlan.startDate && defaultPlan.active) {
+      const hasUpdates = await autoScheduleUnscheduledWeeks(
+        defaultPlan,
+        weekStartsOn,
+      )
+
+      // Refetch plan if we made updates to ensure we return fresh data
+      if (hasUpdates) {
+        const updatedPlan = await prisma.trainingPlan.findUnique({
+          where: { id: defaultPlan.id },
+          include: {
+            weeks: {
+              orderBy: { weekNumber: 'asc' },
+              include: {
+                days: {
+                  orderBy: { dayOfWeek: 'asc' },
+                  select: {
+                    id: true,
+                    dayOfWeek: true,
+                    isRestDay: true,
+                    completedAt: true,
+                    scheduledAt: true,
+                    exercises: {
+                      select: { id: true, completedAt: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        })
+
+        if (updatedPlan) {
+          return { plan: new TrainingPlan(updatedPlan, context) }
+        }
+      }
+    }
+
     return {
       plan: new TrainingPlan(defaultPlan, context),
     }

@@ -55,7 +55,7 @@ export function PlanCarouselCard({
   const cardContent = (
     <Card
       onClick={() => onClick(plan)}
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[4/5] w-full"
+      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[5/6] w-full"
       variant="tertiary"
     >
       {imageUrl && (
@@ -70,7 +70,7 @@ export function PlanCarouselCard({
             priority={false}
             key={imageUrl}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         </div>
       )}
       <CardContent className="h-full flex flex-col justify-between p-4">

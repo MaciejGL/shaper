@@ -1,8 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ChevronRight, PlusIcon, SparklesIcon } from 'lucide-react'
-import { usePathname } from 'next/navigation'
+import { ChevronRight, PlusIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -11,32 +10,33 @@ import {
   CardDescription,
   CardTitle,
 } from '@/components/ui/card'
-import { useUser } from '@/context/user-context'
-import { useOpenUrl } from '@/hooks/use-open-url'
+
+// import { useUser } from '@/context/user-context'
+// import { useOpenUrl } from '@/hooks/use-open-url'
 
 interface EmptyFavouriteOptionsProps {
-  onOpenAiWizard: () => void
+  // onOpenAiWizard: () => void
   onOpenAddExercise: () => void
   hasExercises?: boolean
 }
 
 export function EmptyFavouriteOptions({
-  onOpenAiWizard,
+  // onOpenAiWizard,
   onOpenAddExercise,
-  hasExercises = false,
+  // hasExercises = false,
 }: EmptyFavouriteOptionsProps) {
-  const pathname = usePathname()
-  const { hasPremium: hasPremiumAccess, isLoading: isLoadingUser } = useUser()
-  const { openUrl, isLoading: isOpeningUrl } = useOpenUrl()
+  // const pathname = usePathname()
+  // const { hasPremium: hasPremiumAccess, isLoading: isLoadingUser } = useUser()
+  // const { openUrl, isLoading: isOpeningUrl } = useOpenUrl()
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground text-center">
+      {/* <p className="text-sm text-muted-foreground text-center">
         Choose how you'd like to build your template
-      </p>
+      </p> */}
 
-      {/* AI Quick Workout Generator - Only show if no exercises yet */}
-      {!hasExercises && (
+      {/* AI Quick Workout Generator - HIDDEN */}
+      {/* {!hasExercises && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -82,7 +82,7 @@ export function EmptyFavouriteOptions({
             </CardContent>
           </Card>
         </motion.div>
-      )}
+      )} */}
 
       {/* Add Single Exercise */}
       <motion.div

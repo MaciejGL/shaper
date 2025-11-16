@@ -86,17 +86,10 @@ function EmptyStatusCard({ status }: EmptyStatusCardProps) {
           <div className="flex-1 min-w-0">
             <h4 className="font-semibold text-base mb-1">Activate Plan</h4>
             <p className="text-sm text-muted-foreground">
-              Select one of your available plans to get started or select one of
-              our pre-made plans
+              Select one of plans from your personal plans or explore our
+              ready-made programs
             </p>
           </div>
-          <ButtonLink
-            href="/fitspace/explore?tab=plans"
-            size="sm"
-            iconEnd={<ChevronRight />}
-          >
-            Find Plan
-          </ButtonLink>
         </CardContent>
       </Card>
     )
@@ -107,9 +100,9 @@ function EmptyStatusCard({ status }: EmptyStatusCardProps) {
     <div className="space-y-3">
       <CardContent className="flex items-center gap-4 py-6">
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm mb-1">No Template Plans</h4>
+          <h4 className="font-semibold text-sm mb-1">No Plans Yet</h4>
           <p className="text-sm text-muted-foreground">
-            Explore ready-made plans or get a personalized one from a trainer
+            Get plans from your trainer or explore our ready-made programs
           </p>
         </div>
         <ButtonLink
@@ -135,6 +128,18 @@ function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
   const templatePlans = plans.filter(
     ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Template,
   )
+
+  // Split template plans by origin
+  // Ready-made plans have sourceTrainingPlanId (public plans that were assigned)
+  const readymadePlans = templatePlans.filter(
+    ({ plan }) => 'sourceTrainingPlanId' in plan && plan.sourceTrainingPlanId,
+  )
+  // Trainer plans don't have sourceTrainingPlanId (created by trainer for user)
+  const trainerPlans = templatePlans.filter(
+    ({ plan }) =>
+      !('sourceTrainingPlanId' in plan) || !plan.sourceTrainingPlanId,
+  )
+
   const pausedPlans = plans.filter(
     ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Paused,
   )
@@ -146,12 +151,24 @@ function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
     <div className="space-y-6">
       {!hasActivePlan && <EmptyStatusCard status={PlanStatus.Active} />}
 
+      {trainerPlans.length > 0 && (
+        <PlanSection
+          title="Perosnal Plans"
+          plans={trainerPlans.map(({ plan }) => plan)}
+          onPlanClick={onPlanClick}
+          showProgress={false}
+          showEmptyState={false}
+        />
+      )}
+
       <PlanSection
-        title="Template Plans"
-        plans={templatePlans.map(({ plan }) => plan)}
+        title="Ready-made Plans"
+        plans={readymadePlans.map(({ plan }) => plan)}
         onPlanClick={onPlanClick}
         showProgress={false}
         showEmptyState={templatePlans.length === 0}
+        showPromoCard={readymadePlans.length === 0}
+        titleLink="/fitspace/explore?tab=premium-plans"
       />
 
       <PlanSection

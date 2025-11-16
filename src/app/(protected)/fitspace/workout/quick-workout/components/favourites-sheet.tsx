@@ -60,11 +60,11 @@ export function FavouritesSheet({
   return (
     <Drawer open={open} onOpenChange={onClose}>
       <DrawerContent
-        dialogTitle="Select Favourite Workout"
+        dialogTitle="Select Custom Workout"
         className="max-h-[85vh]"
       >
         <DrawerHeader>
-          <DrawerTitle>From Favourites</DrawerTitle>
+          <DrawerTitle>My Custom</DrawerTitle>
           <DrawerDescription>
             Select a saved workout to add to your day
           </DrawerDescription>

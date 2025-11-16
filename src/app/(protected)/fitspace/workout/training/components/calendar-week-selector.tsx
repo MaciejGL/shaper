@@ -219,12 +219,13 @@ export function CalendarWeekSelector({
               pending:
                 'bg-amber-200 dark:bg-amber-500/50 font-medium hover:bg-yellow-400 rounded-xl',
               restDay: cn('rounded-xl opacity-50 bg-card-on-card'),
-              empty: 'rounded-xl bg-card-on-card/80',
+              empty: 'rounded-xl bg-card-on-card',
               today: cn(
                 'outline-primary outline-offset-1 outline-2 rounded-xl',
               ),
+              outside: 'opacity-50',
             }}
-            className="w-full max-w-sm mx-auto [&_button]:!rounded-xl [&_*]:font-medium [&_[data-selected=true]_button]:bg-primary bg-background"
+            className="w-full max-w-sm mx-auto [&_button]:!rounded-xl [&_*]:font-medium [&_[data-selected=true]_button]:bg-primary bg-background dark:bg-sidebar"
           />
         </DrawerContent>
       </Drawer>
