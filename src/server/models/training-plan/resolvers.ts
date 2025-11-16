@@ -29,7 +29,6 @@ import {
   deletePlan,
   deleteTrainingPlan,
   duplicateTrainingPlan,
-  extendPlan,
   getActivePlanId,
   getClientActivePlan,
   getClientTrainingPlans,
@@ -151,9 +150,6 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   },
   deletePlan: async (_, args, context) => {
     return deletePlan(args, context)
-  },
-  extendPlan: async (_, args) => {
-    return extendPlan(args)
   },
   removeWeek: async (_, args, context) => {
     return removeWeek(args, context)

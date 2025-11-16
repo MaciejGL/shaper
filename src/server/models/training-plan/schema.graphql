@@ -128,7 +128,6 @@ type Mutation {
   pausePlan(planId: ID!): Boolean!
   closePlan(planId: ID!): Boolean!
   deletePlan(planId: ID!): Boolean!
-  extendPlan(planId: ID!, weeks: [ID!]!): Boolean!
   removeWeek(planId: ID!, weekId: ID!): Boolean!
 
   # Granular update mutations - more efficient than full plan updates
