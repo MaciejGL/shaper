@@ -1218,7 +1218,6 @@ export type GQLMutation = {
   duplicateTrainingPlan: Scalars['ID']['output'];
   duplicateTrainingWeek: Scalars['ID']['output'];
   editMessage: GQLMessage;
-  extendPlan: Scalars['Boolean']['output'];
   generateAiWorkout: GQLAiWorkoutResult;
   getAiExerciseSuggestions: Array<GQLAiExerciseSuggestion>;
   giveLifetimePremium: GQLUserSubscription;
@@ -1666,12 +1665,6 @@ export type GQLMutationDuplicateTrainingWeekArgs = {
 
 export type GQLMutationEditMessageArgs = {
   input: GQLEditMessageInput;
-};
-
-
-export type GQLMutationExtendPlanArgs = {
-  planId: Scalars['ID']['input'];
-  weeks: Array<Scalars['ID']['input']>;
 };
 
 
@@ -4142,14 +4135,6 @@ export type GQLDeleteReviewMutationVariables = Exact<{
 
 
 export type GQLDeleteReviewMutation = { __typename?: 'Mutation', deleteReview: boolean };
-
-export type GQLExtendPlanMutationVariables = Exact<{
-  planId: Scalars['ID']['input'];
-  weeks: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
-}>;
-
-
-export type GQLExtendPlanMutation = { __typename?: 'Mutation', extendPlan: boolean };
 
 export type GQLRemoveWeekMutationVariables = Exact<{
   planId: Scalars['ID']['input'];
@@ -7444,30 +7429,6 @@ useDeleteReviewMutation.getKey = () => ['DeleteReview'];
 
 
 useDeleteReviewMutation.fetcher = (variables: GQLDeleteReviewMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteReviewMutation, GQLDeleteReviewMutationVariables>(DeleteReviewDocument, variables, options);
-
-export const ExtendPlanDocument = `
-    mutation ExtendPlan($planId: ID!, $weeks: [ID!]!) {
-  extendPlan(planId: $planId, weeks: $weeks)
-}
-    `;
-
-export const useExtendPlanMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLExtendPlanMutation, TError, GQLExtendPlanMutationVariables, TContext>) => {
-    
-    return useMutation<GQLExtendPlanMutation, TError, GQLExtendPlanMutationVariables, TContext>(
-      {
-    mutationKey: ['ExtendPlan'],
-    mutationFn: (variables?: GQLExtendPlanMutationVariables) => fetchData<GQLExtendPlanMutation, GQLExtendPlanMutationVariables>(ExtendPlanDocument, variables)(),
-    ...options
-  }
-    )};
-
-useExtendPlanMutation.getKey = () => ['ExtendPlan'];
-
-
-useExtendPlanMutation.fetcher = (variables: GQLExtendPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLExtendPlanMutation, GQLExtendPlanMutationVariables>(ExtendPlanDocument, variables, options);
 
 export const RemoveWeekDocument = `
     mutation RemoveWeek($planId: ID!, $weekId: ID!) {

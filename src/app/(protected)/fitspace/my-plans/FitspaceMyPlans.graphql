@@ -289,10 +289,6 @@ mutation DeleteReview($input: DeleteReviewInput!) {
   deleteReview(input: $input)
 }
 
-mutation ExtendPlan($planId: ID!, $weeks: [ID!]!) {
-  extendPlan(planId: $planId, weeks: $weeks)
-}
-
 mutation RemoveWeek($planId: ID!, $weekId: ID!) {
   removeWeek(planId: $planId, weekId: $weekId)
 }

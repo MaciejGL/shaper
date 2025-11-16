@@ -1220,7 +1220,6 @@ export type GQLMutation = {
   duplicateTrainingPlan: EntireFieldWrapper<Scalars['ID']['output']>;
   duplicateTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
   editMessage: EntireFieldWrapper<GQLMessage>;
-  extendPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   generateAiWorkout: EntireFieldWrapper<GQLAiWorkoutResult>;
   getAiExerciseSuggestions: EntireFieldWrapper<Array<GQLAiExerciseSuggestion>>;
   giveLifetimePremium: EntireFieldWrapper<GQLUserSubscription>;
@@ -1668,12 +1667,6 @@ export type GQLMutationDuplicateTrainingWeekArgs = {
 
 export type GQLMutationEditMessageArgs = {
   input: GQLEditMessageInput;
-};
-
-
-export type GQLMutationExtendPlanArgs = {
-  planId: Scalars['ID']['input'];
-  weeks: Array<Scalars['ID']['input']>;
 };
 
 
@@ -5096,7 +5089,6 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   duplicateTrainingPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingPlanArgs, 'id'>>;
   duplicateTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingWeekArgs, 'input'>>;
   editMessage?: Resolver<GQLResolversTypes['Message'], ParentType, ContextType, RequireFields<GQLMutationEditMessageArgs, 'input'>>;
-  extendPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationExtendPlanArgs, 'planId' | 'weeks'>>;
   generateAiWorkout?: Resolver<GQLResolversTypes['AiWorkoutResult'], ParentType, ContextType, RequireFields<GQLMutationGenerateAiWorkoutArgs, 'input'>>;
   getAiExerciseSuggestions?: Resolver<Array<GQLResolversTypes['AiExerciseSuggestion']>, ParentType, ContextType, RequireFields<GQLMutationGetAiExerciseSuggestionsArgs, 'dayId'>>;
   giveLifetimePremium?: Resolver<GQLResolversTypes['UserSubscription'], ParentType, ContextType, RequireFields<GQLMutationGiveLifetimePremiumArgs, 'userId'>>;
