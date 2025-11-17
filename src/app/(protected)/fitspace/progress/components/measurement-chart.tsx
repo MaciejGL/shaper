@@ -37,7 +37,7 @@ export function MeasurementChart({
   label,
   unit,
   className,
-  withAverage = true,
+  withAverage = false,
 }: MeasurementChartProps) {
   // First, prepare the filtered and sorted data with values
   const filteredData = measurements

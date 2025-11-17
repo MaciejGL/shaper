@@ -71,95 +71,81 @@ export function PlanPreviewExerciseRow({
   }
 
   return (
-    <div
-      className={cn(
-        'flex items-center gap-3 pl-3 relative',
-        isRestDay && 'py-3',
-      )}
-    >
+    <div className={cn('flex items-center gap-3 pl-3 relative')}>
       {/* Colored border line on the left */}
-      {!isRestDay && (
+      <div
+        className={cn(
+          'absolute left-0 top-0 bottom-0 w-[3px] rounded-full',
+          borderColor,
+        )}
+      />
+
+      <div className="flex flex-col gap-2">
         <div
+          onClick={hasMultipleImages ? handleImageClick : undefined}
           className={cn(
-            'absolute left-0 top-0 bottom-0 w-[3px] rounded-full',
-            borderColor,
+            'relative size-32 flex-shrink-0 rounded-xl overflow-hidden bg-muted',
+            hasMultipleImages && 'cursor-pointer',
           )}
-        />
-      )}
-
-      {!isRestDay && (
-        <div className="flex flex-col gap-2">
-          <div
-            onClick={hasMultipleImages ? handleImageClick : undefined}
-            className={cn(
-              'relative size-32 flex-shrink-0 rounded-xl overflow-hidden bg-muted',
-              hasMultipleImages && 'cursor-pointer',
-            )}
-          >
-            {images.length > 0 ? (
-              <>
-                {images.map((image, index) => {
-                  const url = image.url || image.medium || image.thumbnail
-                  if (!url) return null
-                  return (
-                    <Image
-                      key={image.id || index}
-                      width={128}
-                      height={128}
-                      src={url}
-                      alt={exercise?.name || 'Exercise image'}
-                      className={cn(
-                        'w-full h-full object-cover absolute inset-0 transition-opacity duration-200',
-                        index === currentImageIndex
-                          ? 'opacity-100'
-                          : 'opacity-0 pointer-events-none',
-                      )}
-                      loading="eager"
-                    />
-                  )
-                })}
-                {videoUrl && <VideoOverlayButton videoUrl={videoUrl} />}
-              </>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-center px-1">
-                <span className="text-[10px] text-muted-foreground leading-tight">
-                  No image
-                </span>
-              </div>
-            )}
-          </div>
-
-          {hasMultipleImages && (
-            <div className="flex items-center justify-center gap-1">
-              {images.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleDotClick(index)}
-                  className={cn(
-                    'h-1.5 rounded-full transition-all',
-                    index === currentImageIndex
-                      ? 'w-6 bg-primary'
-                      : 'w-1.5 bg-muted-foreground/30',
-                  )}
-                  aria-label={`Go to image ${index + 1}`}
-                />
-              ))}
+        >
+          {images.length > 0 ? (
+            <>
+              {images.map((image, index) => {
+                const url = image.url || image.medium || image.thumbnail
+                if (!url) return null
+                return (
+                  <Image
+                    key={image.id || index}
+                    width={128}
+                    height={128}
+                    src={url}
+                    alt={exercise?.name || 'Exercise image'}
+                    className={cn(
+                      'w-full h-full object-cover absolute inset-0 transition-opacity duration-200',
+                      index === currentImageIndex
+                        ? 'opacity-100'
+                        : 'opacity-0 pointer-events-none',
+                    )}
+                    loading="eager"
+                  />
+                )
+              })}
+              {videoUrl && <VideoOverlayButton videoUrl={videoUrl} />}
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-center px-1">
+              <span className="text-[10px] text-muted-foreground leading-tight">
+                No image
+              </span>
             </div>
           )}
         </div>
-      )}
-      {!isRestDay && (
-        <div
-          className={cn(
-            'flex flex-col gap-2',
-            hasMultipleImages && 'pb-[14px]',
-          )}
-        >
-          <span className="text-base flex-1">
-            {exercise?.name || 'Exercise name'}
-          </span>
-        </div>
-      )}
+
+        {hasMultipleImages && (
+          <div className="flex items-center justify-center gap-1">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => handleDotClick(index)}
+                className={cn(
+                  'h-1.5 rounded-full transition-all',
+                  index === currentImageIndex
+                    ? 'w-6 bg-primary'
+                    : 'w-1.5 bg-muted-foreground/30',
+                )}
+                aria-label={`Go to image ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      <div
+        className={cn('flex flex-col gap-2', hasMultipleImages && 'pb-[14px]')}
+      >
+        <span className="text-base flex-1">
+          {exercise?.name || 'Exercise name'}
+        </span>
+      </div>
     </div>
   )
 }

@@ -3029,10 +3029,12 @@ async function calculateBodyCompositionForPlan(
     endWeight,
     weightChange,
     unit: profile.weightUnit || 'kg',
-    progressLogs: bodyMeasurements.map((m) => ({
-      measuredAt: m.measuredAt.toISOString(),
-      weight: m.weight,
-    })),
+    progressLogs: bodyMeasurements
+      .filter((m) => m.weight != null)
+      .map((m) => ({
+        measuredAt: m.measuredAt.toISOString(),
+        weight: m.weight as number,
+      })),
     startSnapshot: firstSnapshot
       ? {
           loggedAt: firstSnapshot.loggedAt.toISOString(),

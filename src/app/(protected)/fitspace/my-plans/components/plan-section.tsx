@@ -144,7 +144,7 @@ export function PlanSection({
                   align: 'start',
                   dragFree: true,
                 }}
-                className="w-screen space-y-3 -mx-4"
+                className="w-screen md:w-[calc(100%+2rem)] space-y-3 -mx-4"
               >
                 <CarouselContent className="ml-0">
                   {plans.slice(0, maxPlans).map((plan) => (
@@ -152,7 +152,7 @@ export function PlanSection({
                       key={
                         plan?.id ? `${plan.id}-carousel-item` : `carousel-item`
                       }
-                      className={cn('basis-[60%] md:basis-[20%] pl-4')}
+                      className={cn('basis-[55%]  pl-4')}
                     >
                       <PlanCarouselCard
                         key={plan?.id}

@@ -52,7 +52,7 @@ export function PlanSummaryTab({ planId }: PlanSummaryTabProps) {
   const summary = data.getPlanSummary
 
   return (
-    <div className="space-y-8 py-4">
+    <div className="space-y-12 pb-4">
       <JourneyOverview summary={summary} />
 
       {summary.bodyComposition && <BodyComposition summary={summary} />}

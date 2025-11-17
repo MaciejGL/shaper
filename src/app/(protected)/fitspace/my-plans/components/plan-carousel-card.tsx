@@ -70,7 +70,7 @@ export function PlanCarouselCard({
             priority={false}
             key={imageUrl}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black to-black/5 dark:to-black/10" />
         </div>
       )}
       <CardContent className="h-full flex flex-col justify-between p-4">

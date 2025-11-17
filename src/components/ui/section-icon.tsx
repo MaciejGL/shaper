@@ -19,6 +19,7 @@ const sectionIconVariants = cva(
         indigo: 'bg-gradient-to-br from-indigo-500 to-indigo-600',
         amber: 'bg-gradient-to-br from-amber-500 to-amber-600',
         sky: 'bg-gradient-to-br from-sky-500 to-sky-600',
+        primary: 'bg-gradient-to-br from-sky-400 to-emerald-600',
       },
       size: {
         xs: 'w-6 h-6 [&>svg]:w-3.5 [&>svg]:h-3.5 rounded-lg',

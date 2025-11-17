@@ -1,12 +1,4 @@
-import { formatDate } from 'date-fns'
-import {
-  ArrowRightIcon,
-  BicepsFlexed,
-  Calendar,
-  CheckCircle,
-  Trash,
-  Users,
-} from 'lucide-react'
+import { ArrowRightIcon, Trash } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { CollapsibleText } from '@/components/collapsible-text'
@@ -22,17 +14,10 @@ import {
   DrawerFooter,
   DrawerHeader,
 } from '@/components/ui/drawer'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 
-import {
-  AvailablePlan,
-  CompletedPlan,
-  PlanAction,
-  PlanStatus,
-  UnifiedPlan,
-  getPlanStatus,
-} from '../types'
+import { PlanAction, PlanStatus, UnifiedPlan, getPlanStatus } from '../types'
 
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'
@@ -96,7 +81,7 @@ export function PlanDetailsDrawer({
                 <div className="flex items-center gap-2 w-full justify-between">
                   {/* Plan Status and Basic Info */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <PlanStatusBadge status={status} plan={plan} />
+                    <PlanStatusBadge status={status} />
                     {plan.difficulty && (
                       <Badge variant="outline" className="capitalize">
                         {plan.difficulty.toLowerCase()}
@@ -119,38 +104,32 @@ export function PlanDetailsDrawer({
           </DrawerHeader>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-2">
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList
-                className="w-full"
-                variant="secondary"
+              <PrimaryTabList
+                options={[
+                  { label: 'Summary', value: 'summary' },
+                  { label: 'Info', value: 'info' },
+                  { label: 'Preview', value: 'preview' },
+                ]}
+                onClick={setActiveTab}
+                active={activeTab}
                 size="lg"
-                rounded="3xl"
-              >
-                {!isTemplate && (
-                  <TabsTrigger value="summary" className="flex-1" rounded="3xl">
-                    Summary
-                  </TabsTrigger>
-                )}
-                <TabsTrigger value="info" className="flex-1" rounded="3xl">
-                  Info
-                </TabsTrigger>
-                <TabsTrigger value="preview" className="flex-1" rounded="3xl">
-                  Preview
-                </TabsTrigger>
-              </TabsList>
+                className="grid grid-cols-3"
+                classNameButton="text-sm px-3"
+              />
 
               {!isTemplate && (
-                <TabsContent value="summary">
+                <TabsContent value="summary" className="px-2 py-4">
                   <PlanSummaryTab planId={plan.id} />
                 </TabsContent>
               )}
 
-              <TabsContent value="info" className="space-y-6">
+              <TabsContent value="info" className="space-y-6 p-4">
                 <div className="space-y-4">
                   {/* Progress Overview */}
                   {plan.completedWorkoutsDays > 0 || plan.adherence ? (
@@ -266,7 +245,7 @@ export function PlanDetailsDrawer({
                 )}
               </TabsContent>
 
-              <TabsContent value="preview">
+              <TabsContent value="preview" className="p-4">
                 <PlanPreviewTab
                   weeks={'weeks' in plan ? plan.weeks : null}
                   isTemplate={status === PlanStatus.Template}
@@ -335,43 +314,32 @@ export function PlanDetailsDrawer({
   )
 }
 
-function PlanStatusBadge({
-  status,
-  plan,
-}: {
-  status: PlanStatus
-  plan: UnifiedPlan
-}) {
+function PlanStatusBadge({ status }: { status: PlanStatus }) {
   const getStatusConfig = (
     status: PlanStatus,
   ): {
     variant: BadgeProps['variant']
-    icon: React.ReactNode
     label: string
   } => {
     switch (status) {
       case PlanStatus.Active:
         return {
           variant: 'primary',
-          icon: <BicepsFlexed className="h-3 w-3" />,
           label: 'Active',
         }
       case PlanStatus.Paused:
         return {
           variant: 'warning',
-          icon: <Calendar className="h-3 w-3" />,
-          label: `Paused ${formatDate(new Date((plan as AvailablePlan).updatedAt), 'MMM d, yyyy')}`,
+          label: `Paused`,
         }
       case PlanStatus.Completed:
         return {
           variant: 'success',
-          icon: <CheckCircle className="h-3 w-3" />,
-          label: `Completed ${formatDate(new Date((plan as CompletedPlan).completedAt!), 'MMM d, yyyy')}`,
+          label: `Completed`,
         }
       case PlanStatus.Template:
         return {
           variant: 'secondary',
-          icon: <Users className="h-3 w-3" />,
           label: 'Template',
         }
     }
@@ -379,10 +347,5 @@ function PlanStatusBadge({
 
   const config = getStatusConfig(status)
 
-  return (
-    <Badge variant={config.variant}>
-      {config.icon}
-      <span className="ml-1">{config.label}</span>
-    </Badge>
-  )
+  return <Badge variant={config.variant}>{config.label}</Badge>
 }

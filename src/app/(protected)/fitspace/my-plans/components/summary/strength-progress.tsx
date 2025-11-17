@@ -39,7 +39,7 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
       </div>
 
       <motion.div
-        className="space-y-2"
+        className="space-y-3"
         variants={{
           hidden: { opacity: 0 },
           show: {
@@ -78,7 +78,6 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                       %
                     </Badge>
                   </div>
-
                   {/* Chart */}
                   {progression.allPerformances &&
                     progression.allPerformances.length > 0 && (
@@ -87,13 +86,9 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                         exerciseName={progression.exerciseName}
                       />
                     )}
-
                   {/* Before/After comparison */}
                   <div className="flex items-center justify-between text-sm px-2">
                     <div className="flex flex-col">
-                      {/* <span className="text-xs text-muted-foreground">
-                        Start
-                      </span> */}
                       <span className="text-base font-medium">
                         {toDisplayWeight(
                           progression.firstPerformance.estimated1RM,
@@ -111,7 +106,6 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                     <ArrowRight className="size-4 text-muted-foreground" />
 
                     <div className="flex flex-col text-right">
-                      {/* <span className="text-xs text-muted-foreground">End</span> */}
                       <span className="text-base font-medium text-green-600 dark:text-green-400">
                         {toDisplayWeight(
                           progression.lastPerformance.estimated1RM,
@@ -126,12 +120,6 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                       </span>
                     </div>
                   </div>
-
-                  {/* Sessions count */}
-                  {/* <div className="text-xs text-muted-foreground">
-                    {progression.totalSessions} session
-                    {progression.totalSessions !== 1 ? 's' : ''} logged
-                  </div> */}
                 </div>
               </CardContent>
             </Card>
