@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { debounce, isNil } from 'lodash'
-import { CheckIcon, TrophyIcon } from 'lucide-react'
+import { CheckIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import React, {
   startTransition,
@@ -463,26 +463,10 @@ export function ExerciseSet({
               >
                 <div
                   className={cn(
-                    'flex items-center justify-between h-full',
+                    'flex items-center justify-end h-full',
                     'px-4 gap-4',
                   )}
                 >
-                  <div className="flex items-center flex-col justify-center animate-pulse">
-                    <TrophyIcon
-                      className={cn(
-                        'text-yellow-500 dark:text-amber-400 shrink-0',
-                        'size-4',
-                      )}
-                    />
-                    <span
-                      className={cn(
-                        'text-[10px] font-medium whitespace-nowrap',
-                        'text-[10px]',
-                      )}
-                    >
-                      New PR!
-                    </span>
-                  </div>
                   <motion.div
                     key="pr-overlay-content-inner"
                     initial={{ opacity: 0 }}
@@ -495,7 +479,7 @@ export function ExerciseSet({
                       stiffness: 200,
                       damping: 25,
                     }}
-                    className="flex items-baseline justify-center gap-4 overflow-hidden"
+                    className="flex justify-center items-center gap-4 overflow-hidden"
                   >
                     <div
                       className={cn(
@@ -503,6 +487,14 @@ export function ExerciseSet({
                         'text-lg',
                       )}
                     >
+                      <p
+                        className={cn(
+                          'text-[10px] font-medium whitespace-nowrap',
+                          'text-[10px]',
+                        )}
+                      >
+                        New PR!
+                      </p>
                       {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(1)}{' '}
                       {preferences.weightUnit}
                     </div>
