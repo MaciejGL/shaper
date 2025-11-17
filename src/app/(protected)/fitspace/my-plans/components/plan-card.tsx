@@ -85,8 +85,8 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
           <div className="flex self-start items-center shrink-0 bg-background/70 rounded-full p-1">
             <ProgressCircle
               progress={progressPercentage}
-              size={status === PlanStatus.Active ? 48 : 32}
-              strokeWidth={status === PlanStatus.Active ? 4 : 3}
+              size={status === PlanStatus.Active ? 40 : 32}
+              strokeWidth={3}
               showValue={true}
             />
           </div>

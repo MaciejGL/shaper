@@ -28,11 +28,17 @@ type BodyCompositionSnapshot {
   image3Url: String
 }
 
+type WeightProgressLog {
+  measuredAt: String!
+  weight: Float!
+}
+
 type BodyCompositionChange {
   startWeight: Float
   endWeight: Float
   weightChange: Float
   unit: String!
+  progressLogs: [WeightProgressLog!]!
   startSnapshot: BodyCompositionSnapshot
   endSnapshot: BodyCompositionSnapshot
 }

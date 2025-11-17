@@ -462,7 +462,9 @@ export async function getMyPlansOverview(context: GQLContext) {
   const availablePlans = plans.filter(
     (plan) => plan.completedAt === null && plan.active === false,
   )
-  const completedPlans = plans.filter((plan) => plan.completedAt !== null)
+  const completedPlans = plans.filter(
+    (plan) => plan.completedAt && !plan.active,
+  )
 
   return {
     activePlan: activePlan ? new TrainingPlan(activePlan, context) : null,
@@ -539,7 +541,9 @@ export async function getMyPlansOverviewLite(context: GQLContext) {
   const availablePlans = plans.filter(
     (plan) => plan.completedAt === null && plan.active === false,
   )
-  const completedPlans = plans.filter((plan) => plan.completedAt !== null)
+  const completedPlans = plans.filter(
+    (plan) => plan.completedAt && !plan.active,
+  )
 
   return {
     activePlan: activePlan ? new TrainingPlan(activePlan, context) : null,
@@ -667,7 +671,9 @@ export async function getMyPlansOverviewFull(context: GQLContext) {
   const availablePlans = plans.filter(
     (plan) => plan.completedAt === null && plan.active === false,
   )
-  const completedPlans = plans.filter((plan) => plan.completedAt !== null)
+  const completedPlans = plans.filter(
+    (plan) => plan.completedAt && !plan.active,
+  )
 
   return {
     activePlan: activePlan ? new TrainingPlan(activePlan, context) : null,
@@ -3017,6 +3023,10 @@ async function calculateBodyCompositionForPlan(
     endWeight,
     weightChange,
     unit: profile.weightUnit || 'kg',
+    progressLogs: bodyMeasurements.map((m) => ({
+      measuredAt: m.measuredAt.toISOString(),
+      weight: m.weight,
+    })),
     startSnapshot: firstSnapshot
       ? {
           loggedAt: firstSnapshot.loggedAt.toISOString(),

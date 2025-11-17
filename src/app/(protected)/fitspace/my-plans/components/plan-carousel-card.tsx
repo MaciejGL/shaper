@@ -79,7 +79,7 @@ export function PlanCarouselCard({
             <div className="dark top-4 right-4 absolute flex items-center shrink-0 bg-background/80 backdrop-blur-sm rounded-full p-1 transition-all">
               <ProgressCircle
                 progress={progressPercentage}
-                size={isExpanded ? 34 : 40}
+                size={34}
                 strokeWidth={3}
                 showValue={true}
               />

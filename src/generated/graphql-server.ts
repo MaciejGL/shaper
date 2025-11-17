@@ -265,6 +265,7 @@ export type GQLBodyCompositionChange = {
   __typename?: 'BodyCompositionChange';
   endSnapshot?: EntireFieldWrapper<Maybe<GQLBodyCompositionSnapshot>>;
   endWeight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  progressLogs: EntireFieldWrapper<Array<GQLWeightProgressLog>>;
   startSnapshot?: EntireFieldWrapper<Maybe<GQLBodyCompositionSnapshot>>;
   startWeight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   unit: EntireFieldWrapper<Scalars['String']['output']>;
@@ -3873,6 +3874,12 @@ export type GQLVolumeEntry = {
   week: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
+export type GQLWeightProgressLog = {
+  __typename?: 'WeightProgressLog';
+  measuredAt: EntireFieldWrapper<Scalars['String']['output']>;
+  weight: EntireFieldWrapper<Scalars['Float']['output']>;
+};
+
 export enum GQLWeightUnit {
   Kg = 'kg',
   Lbs = 'lbs'
@@ -4234,6 +4241,7 @@ export type GQLResolversTypes = {
   UserWithSubscription: ResolverTypeWrapper<GQLUserWithSubscription>;
   UsersWithSubscriptionsResult: ResolverTypeWrapper<GQLUsersWithSubscriptionsResult>;
   VolumeEntry: ResolverTypeWrapper<GQLVolumeEntry>;
+  WeightProgressLog: ResolverTypeWrapper<GQLWeightProgressLog>;
   WeightUnit: GQLWeightUnit;
   WorkoutExerciseNotes: ResolverTypeWrapper<GQLWorkoutExerciseNotes>;
   WorkoutSessionEvent: GQLWorkoutSessionEvent;
@@ -4460,6 +4468,7 @@ export type GQLResolversParentTypes = {
   UserWithSubscription: GQLUserWithSubscription;
   UsersWithSubscriptionsResult: GQLUsersWithSubscriptionsResult;
   VolumeEntry: GQLVolumeEntry;
+  WeightProgressLog: GQLWeightProgressLog;
   WorkoutExerciseNotes: GQLWorkoutExerciseNotes;
 };
 
@@ -4572,6 +4581,7 @@ export type GQLBaseExerciseSubstituteResolvers<ContextType = GQLContext, ParentT
 export type GQLBodyCompositionChangeResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BodyCompositionChange'] = GQLResolversParentTypes['BodyCompositionChange']> = {
   endSnapshot?: Resolver<Maybe<GQLResolversTypes['BodyCompositionSnapshot']>, ParentType, ContextType>;
   endWeight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  progressLogs?: Resolver<Array<GQLResolversTypes['WeightProgressLog']>, ParentType, ContextType>;
   startSnapshot?: Resolver<Maybe<GQLResolversTypes['BodyCompositionSnapshot']>, ParentType, ContextType>;
   startWeight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   unit?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -5998,6 +6008,12 @@ export type GQLVolumeEntryResolvers<ContextType = GQLContext, ParentType extends
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLWeightProgressLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WeightProgressLog'] = GQLResolversParentTypes['WeightProgressLog']> = {
+  measuredAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  weight?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLWorkoutExerciseNotesResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WorkoutExerciseNotes'] = GQLResolversParentTypes['WorkoutExerciseNotes']> = {
   exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   notes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType>;
@@ -6111,6 +6127,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   UserWithSubscription?: GQLUserWithSubscriptionResolvers<ContextType>;
   UsersWithSubscriptionsResult?: GQLUsersWithSubscriptionsResultResolvers<ContextType>;
   VolumeEntry?: GQLVolumeEntryResolvers<ContextType>;
+  WeightProgressLog?: GQLWeightProgressLogResolvers<ContextType>;
   WorkoutExerciseNotes?: GQLWorkoutExerciseNotesResolvers<ContextType>;
 };
 

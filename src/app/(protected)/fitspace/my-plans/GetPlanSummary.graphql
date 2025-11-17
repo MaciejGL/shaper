@@ -33,6 +33,10 @@ query GetPlanSummary($planId: ID!) {
       endWeight
       weightChange
       unit
+      progressLogs {
+        measuredAt
+        weight
+      }
       startSnapshot {
         loggedAt
         weight
