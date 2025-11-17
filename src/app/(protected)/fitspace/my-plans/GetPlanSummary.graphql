@@ -24,6 +24,12 @@ query GetPlanSummary($planId: ID!) {
         estimated1RM
         date
       }
+      allPerformances {
+        weight
+        reps
+        estimated1RM
+        date
+      }
       improvementPercentage
       totalSessions
     }

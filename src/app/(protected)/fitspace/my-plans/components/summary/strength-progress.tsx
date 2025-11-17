@@ -4,12 +4,13 @@ import { ArrowRight, BicepsFlexed } from 'lucide-react'
 import { AnimateNumber } from '@/components/animate-number'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetPlanSummaryQuery } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import { getTopProgressions } from '../../utils/summary-helpers'
+
+import { StrengthProgressChart } from './strength-progress-chart'
 
 interface StrengthProgressProps {
   summary: GQLGetPlanSummaryQuery['getPlanSummary']
@@ -77,15 +78,18 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                       %
                     </Badge>
                   </div>
-                  {/* Progress bar */}
-                  <Progress
-                    value={progression.improvementPercentage}
-                    className="h-2 w-full "
-                    classNameIndicator="bg-gradient-to-r from-blue-500 to-green-500 rounded-full"
-                  />
+
+                  {/* Chart */}
+                  {progression.allPerformances &&
+                    progression.allPerformances.length > 0 && (
+                      <StrengthProgressChart
+                        performances={progression.allPerformances}
+                        exerciseName={progression.exerciseName}
+                      />
+                    )}
 
                   {/* Before/After comparison */}
-                  <div className="flex items-center justify-between text-sm bg-card-on-card p-2 rounded-xl">
+                  <div className="flex items-center justify-between text-sm px-2">
                     <div className="flex flex-col">
                       {/* <span className="text-xs text-muted-foreground">
                         Start

@@ -2906,6 +2906,12 @@ function calculateStrengthProgressionsForPlan(plan: PlanWithProgressionData) {
         estimated1RM: last1RM,
         date: bestLastPerf.date.toISOString(),
       },
+      allPerformances: data.performances.map((perf) => ({
+        weight: perf.weight,
+        reps: perf.reps,
+        estimated1RM: calculateEstimated1RM(perf.weight, perf.reps),
+        date: perf.date.toISOString(),
+      })),
       improvementPercentage: Math.round(improvementPercentage * 10) / 10,
       totalSessions: data.performances.length,
     })

@@ -16,6 +16,7 @@ type StrengthProgression {
   baseExerciseId: String
   firstPerformance: PerformanceData!
   lastPerformance: PerformanceData!
+  allPerformances: [PerformanceData!]!
   improvementPercentage: Float!
   totalSessions: Int!
 }

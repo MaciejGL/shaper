@@ -3079,6 +3079,7 @@ export type GQLStartWorkoutFromFavouriteInput = {
 
 export type GQLStrengthProgression = {
   __typename?: 'StrengthProgression';
+  allPerformances: EntireFieldWrapper<Array<GQLPerformanceData>>;
   baseExerciseId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   exerciseName: EntireFieldWrapper<Scalars['String']['output']>;
   firstPerformance: EntireFieldWrapper<GQLPerformanceData>;
@@ -5638,6 +5639,7 @@ export type GQLStartFreeWorkoutResultResolvers<ContextType = GQLContext, ParentT
 };
 
 export type GQLStrengthProgressionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['StrengthProgression'] = GQLResolversParentTypes['StrengthProgression']> = {
+  allPerformances?: Resolver<Array<GQLResolversTypes['PerformanceData']>, ParentType, ContextType>;
   baseExerciseId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   firstPerformance?: Resolver<GQLResolversTypes['PerformanceData'], ParentType, ContextType>;

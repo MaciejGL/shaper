@@ -55,7 +55,7 @@ export function PlanCarouselCard({
   const cardContent = (
     <Card
       onClick={() => onClick(plan)}
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[5/6] w-full"
+      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[5/6] w-full border-none"
       variant="tertiary"
     >
       {imageUrl && (
@@ -88,17 +88,29 @@ export function PlanCarouselCard({
         </div>
         <div className="space-y-2 space-x-2 relative dark">
           {isPremiumPlan && (
-            <Badge variant="premium" className="w-fit" size="md">
+            <Badge
+              variant="premium"
+              className="w-fit"
+              size={isExpanded ? 'xs' : 'md'}
+            >
               Premium
             </Badge>
           )}
           {!isPublicPlan && (
-            <Badge variant="primary" className="w-fit" size="md">
-              Personal Plan
+            <Badge
+              variant="primary"
+              className="w-fit"
+              size={isExpanded ? 'xs' : 'md'}
+            >
+              Personal
             </Badge>
           )}
           {isNewPlan && (
-            <Badge variant="success" className="w-fit" size="md">
+            <Badge
+              variant="success"
+              className="w-fit"
+              size={isExpanded ? 'xs' : 'md'}
+            >
               New
             </Badge>
           )}

@@ -5,7 +5,7 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
-  'inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden',
+  'inline-flex items-center justify-center rounded-lg border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden',
   {
     variants: {
       variant: {
@@ -51,10 +51,10 @@ const badgeVariants = cva(
         '2xs': cn(
           'text-[10px] px-[3px] py-[1px] rounded-[3px] [&>svg]:size-2.5',
         ),
-        xs: cn(' text-xs px-[6px] py-[1px] rounded-sm [&>svg]:size-3'),
+        xs: cn(' text-xs px-[6px] py-[1px] [&>svg]:size-3'),
         sm: cn('text-xs px-1.5 py-0.5 [&>svg]:size-3'),
         md: 'text-xs px-2 py-0.5 [&>svg]:size-3',
-        lg: 'text-sm px-3 py-1 [&>svg]:size-4 rounded-xl',
+        lg: 'text-sm px-3 py-1 [&>svg]:size-4',
       },
     },
     defaultVariants: {

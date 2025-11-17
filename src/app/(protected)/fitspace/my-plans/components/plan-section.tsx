@@ -108,7 +108,7 @@ export function PlanSection({
         )}
         {plans.length > 2 && (
           <Button
-            variant="outline"
+            variant="link"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
             iconEnd={
@@ -180,6 +180,7 @@ export function PlanSection({
                   plan={plan}
                   onClick={onPlanClick}
                   imageUrl={getPlanImage(plan)}
+                  isExpanded
                   showProgress={showProgress}
                   layoutId={`plan-${plan?.id}`}
                 />

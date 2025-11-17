@@ -3077,6 +3077,7 @@ export type GQLStartWorkoutFromFavouriteInput = {
 
 export type GQLStrengthProgression = {
   __typename?: 'StrengthProgression';
+  allPerformances: Array<GQLPerformanceData>;
   baseExerciseId?: Maybe<Scalars['String']['output']>;
   exerciseName: Scalars['String']['output'];
   firstPerformance: GQLPerformanceData;
@@ -4156,7 +4157,7 @@ export type GQLGetPlanSummaryQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetPlanSummaryQuery = { __typename?: 'Query', getPlanSummary: { __typename?: 'PlanSummary', adherence: number, workoutsCompleted: number, totalWorkouts: number, totalVolumeLifted: number, totalPRsAchieved: number, duration: { __typename?: 'PlanSummaryDuration', weeks: number, startDate: string, endDate?: string | undefined | null }, strengthProgress: Array<{ __typename?: 'StrengthProgression', exerciseName: string, baseExerciseId?: string | undefined | null, improvementPercentage: number, totalSessions: number, firstPerformance: { __typename?: 'PerformanceData', weight?: number | undefined | null, reps?: number | undefined | null, estimated1RM?: number | undefined | null, date: string }, lastPerformance: { __typename?: 'PerformanceData', weight?: number | undefined | null, reps?: number | undefined | null, estimated1RM?: number | undefined | null, date: string } }>, bodyComposition?: { __typename?: 'BodyCompositionChange', startWeight?: number | undefined | null, endWeight?: number | undefined | null, weightChange?: number | undefined | null, unit: string, progressLogs: Array<{ __typename?: 'WeightProgressLog', measuredAt: string, weight: number }>, startSnapshot?: { __typename?: 'BodyCompositionSnapshot', loggedAt: string, weight?: number | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null } | undefined | null, endSnapshot?: { __typename?: 'BodyCompositionSnapshot', loggedAt: string, weight?: number | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null } | undefined | null } | undefined | null, personalRecords: Array<{ __typename?: 'PersonalRecordSummary', exerciseName: string, baseExerciseId: string, bestEstimated1RM: number, weight: number, reps: number, achievedDate: string, weekNumber?: number | undefined | null }> } };
+export type GQLGetPlanSummaryQuery = { __typename?: 'Query', getPlanSummary: { __typename?: 'PlanSummary', adherence: number, workoutsCompleted: number, totalWorkouts: number, totalVolumeLifted: number, totalPRsAchieved: number, duration: { __typename?: 'PlanSummaryDuration', weeks: number, startDate: string, endDate?: string | undefined | null }, strengthProgress: Array<{ __typename?: 'StrengthProgression', exerciseName: string, baseExerciseId?: string | undefined | null, improvementPercentage: number, totalSessions: number, firstPerformance: { __typename?: 'PerformanceData', weight?: number | undefined | null, reps?: number | undefined | null, estimated1RM?: number | undefined | null, date: string }, lastPerformance: { __typename?: 'PerformanceData', weight?: number | undefined | null, reps?: number | undefined | null, estimated1RM?: number | undefined | null, date: string }, allPerformances: Array<{ __typename?: 'PerformanceData', weight?: number | undefined | null, reps?: number | undefined | null, estimated1RM?: number | undefined | null, date: string }> }>, bodyComposition?: { __typename?: 'BodyCompositionChange', startWeight?: number | undefined | null, endWeight?: number | undefined | null, weightChange?: number | undefined | null, unit: string, progressLogs: Array<{ __typename?: 'WeightProgressLog', measuredAt: string, weight: number }>, startSnapshot?: { __typename?: 'BodyCompositionSnapshot', loggedAt: string, weight?: number | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null } | undefined | null, endSnapshot?: { __typename?: 'BodyCompositionSnapshot', loggedAt: string, weight?: number | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null } | undefined | null } | undefined | null, personalRecords: Array<{ __typename?: 'PersonalRecordSummary', exerciseName: string, baseExerciseId: string, bestEstimated1RM: number, weight: number, reps: number, achievedDate: string, weekNumber?: number | undefined | null }> } };
 
 export type GQLGetMyTrainerQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -7482,6 +7483,12 @@ export const GetPlanSummaryDocument = `
         date
       }
       lastPerformance {
+        weight
+        reps
+        estimated1RM
+        date
+      }
+      allPerformances {
         weight
         reps
         estimated1RM

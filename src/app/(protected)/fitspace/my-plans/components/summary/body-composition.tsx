@@ -64,25 +64,29 @@ export function BodyComposition({ summary }: BodyCompositionProps) {
   }
 
   // Transform progressLogs to match MeasurementChart expected format
+  // MeasurementChart expects data in descending order (newest first), so reverse it
   const chartMeasurements =
-    bodyComp.progressLogs?.map((log, index) => ({
-      __typename: 'UserBodyMeasure' as const,
-      id: `progress-${index}`,
-      measuredAt: log.measuredAt,
-      weight: log.weight,
-      chest: null,
-      waist: null,
-      hips: null,
-      neck: null,
-      bicepsLeft: null,
-      bicepsRight: null,
-      thighLeft: null,
-      thighRight: null,
-      calfLeft: null,
-      calfRight: null,
-      bodyFat: null,
-      notes: null,
-    })) || []
+    bodyComp.progressLogs
+      ?.slice()
+      .reverse()
+      .map((log, index) => ({
+        __typename: 'UserBodyMeasure' as const,
+        id: `progress-${index}`,
+        measuredAt: log.measuredAt,
+        weight: log.weight,
+        chest: null,
+        waist: null,
+        hips: null,
+        neck: null,
+        bicepsLeft: null,
+        bicepsRight: null,
+        thighLeft: null,
+        thighRight: null,
+        calfLeft: null,
+        calfRight: null,
+        bodyFat: null,
+        notes: null,
+      })) || []
 
   const images = [
     {
