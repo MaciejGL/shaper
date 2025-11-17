@@ -1,6 +1,6 @@
 'use client'
 
-import { Lightbulb, VideoIcon, XIcon } from 'lucide-react'
+import { ChevronLeft, Lightbulb, VideoIcon } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +14,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer'
 import { SectionIcon } from '@/components/ui/section-icon'
-import { getYouTubeEmbedUrl } from '@/lib/get-youtube-embed-url'
+import { YouTubePlayer } from '@/components/youtube-player'
 import { cn } from '@/lib/utils'
 
 import { WorkoutExercise } from '../workout-day'
@@ -29,35 +29,33 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
 
   if (!images.length) return null
   return (
-    <Drawer>
+    <Drawer direction="right" disablePreventScroll>
       <DrawerTrigger asChild>
         <Button variant="tertiary" size="icon-md" iconOnly={<VideoIcon />} />
       </DrawerTrigger>
       <DrawerContent
         dialogTitle="Exercise Metadata"
-        className="data-[vaul-drawer-direction=bottom]:max-h-[93vh] overflow-hidden"
+        className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden"
         grabber={false}
       >
         <div className="overflow-y-auto overscroll-behavior-y-contain">
           <DrawerClose asChild>
             <Button
-              variant="tertiary"
-              size="icon-sm"
-              iconOnly={<XIcon />}
-              className="absolute top-2 right-2 rounded-full z-10"
+              variant="secondary"
+              size="icon-lg"
+              iconOnly={<ChevronLeft />}
+              className="absolute top-2 left-2 rounded-full z-10 bg-black/50 dark:bg-black/50 border-none backdrop-blur-md transition-opacity"
             />
           </DrawerClose>
           {/* Exercise Video */}
           {videoUrl && (
             <div className="aspect-video w-full">
-              <iframe
-                src={getYouTubeEmbedUrl(videoUrl, {
-                  autoplay: true,
-                  mute: true,
-                  loop: true,
-                })}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowFullScreen
+              <YouTubePlayer
+                videoUrl={videoUrl}
+                autoplay={true}
+                mute={true}
+                loop={true}
+                minimal={true}
                 className="w-full h-full"
               />
             </div>
