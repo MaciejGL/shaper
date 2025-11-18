@@ -24,10 +24,6 @@ import { cn } from '@/lib/utils'
 import { createOptimisticRemoveSetUpdate } from '../optimistic-updates'
 
 import { ExerciseSet } from './exercise-set'
-import {
-  sharedLayoutAdvancedStyles,
-  sharedLayoutSimpleStyles,
-} from './shared-styles'
 import { ExerciseSetsProps } from './types'
 
 export function ExerciseSets({
@@ -51,9 +47,12 @@ export function ExerciseSets({
     const initialState: Record<string, { weight: string; reps: string }> = {}
     const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
     exerciseSets.forEach((set) => {
+      const previousWeightLog = previousLogs?.find((log) => log.order === set.order)?.log?.weight
+      const previousRepsLog = previousLogs?.find((log) => log.order === set.order)?.log?.reps
+      
       initialState[set.id] = {
-        weight: set.log?.weight?.toString() ?? '',
-        reps: set.log?.reps?.toString() ?? '',
+        weight: set.log?.weight?.toString() ?? previousWeightLog?.toString() ?? '',
+        reps: set.log?.reps?.toString() ?? previousRepsLog?.toString() ?? '',
       }
     })
     return initialState
@@ -68,11 +67,13 @@ export function ExerciseSets({
       // Add new sets or update existing sets with new log values
       exerciseSets.forEach((set) => {
         const currentState = updated[set.id]
-        const newLogWeight = set.log?.weight?.toString() ?? ''
-        const newLogReps = set.log?.reps?.toString() ?? ''
+        const previousWeightLog = previousLogs?.find((log) => log.order === set.order)?.log?.weight
+        const previousRepsLog = previousLogs?.find((log) => log.order === set.order)?.log?.reps
+        const newLogWeight = set.log?.weight?.toString() ?? previousWeightLog?.toString() ?? ''
+        const newLogReps = set.log?.reps?.toString() ?? previousRepsLog?.toString() ?? ''
 
         if (!currentState) {
-          // New set - add it
+          // New set - add it with previous log values as defaults
           updated[set.id] = {
             weight: newLogWeight,
             reps: newLogReps,
@@ -99,7 +100,7 @@ export function ExerciseSets({
 
       return updated
     })
-  }, [exercise.substitutedBy?.sets, exercise.sets])
+  }, [exercise.substitutedBy?.sets, exercise.sets, previousLogs])
 
   // Notify parent when setsLogs changes
   useEffect(() => {
@@ -233,26 +234,9 @@ export function ExerciseSets({
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
 
   return (
-    <div className="flex flex-col rounded-[0.45rem] ">
-      <div className="flex items-center gap-1">
-        <div
-          className={cn(
-            isAdvancedView
-              ? sharedLayoutAdvancedStyles
-              : sharedLayoutSimpleStyles,
-            'text-[0.625rem] py-2 font-medium',
-          )}
-        >
-          <div className="text-center">SET</div>
-          {isAdvancedView && <div className="text-center">PREVIOUS</div>}
-          <div className="text-center">REPS</div>
-          <div className="text-center uppercase">{preferences.weightUnit}</div>
-          <div className="text-center"></div>
-        </div>
-      </div>
-
-      <div className={cn('flex flex-col gap-0', !isAdvancedView && 'pb-3')}>
-        {(exercise.substitutedBy?.sets || exercise.sets).map((set, index) => {
+    <div className="flex flex-col rounded-[0.45rem] px-2 mb-12">
+      <div className={cn('flex flex-col gap-0 space-y-2')}>
+        {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
           const previousWeightLog = getPreviousSetValue(set.order, 'weight')
           const previousRepsLog = getPreviousSetValue(set.order, 'reps')
 
@@ -267,8 +251,6 @@ export function ExerciseSets({
                 weight={setsLogs[set.id]?.weight ?? ''}
                 onRepsChange={(reps) => handleRepsChange(reps, set.id)}
                 onWeightChange={(weight) => handleWeightChange(weight, set.id)}
-                onDelete={() => removeSet({ setId: set.id })}
-                isLastSet={index === exercise.sets.length - 1}
                 onSetCompleted={(skipTimer) =>
                   handleSetCompleted(set.id, skipTimer)
                 }
@@ -279,13 +261,13 @@ export function ExerciseSets({
         })}
 
         {isAdvancedView && (
-          <div className={cn('flex items-center justify-end gap-2 m-3 mt-4')}>
+          <div className={cn('flex items-center justify-end gap-2')}>
             {exercise.sets.some((set) => set.isExtra) &&
               exercise.sets.length > 1 && (
                 <>
                   <Button
                     variant="tertiary"
-                    size="xs"
+                    size="md"
                     iconStart={<PlusIcon className="rotate-45" />}
                     className=""
                     loading={isRemovingSet}
@@ -299,7 +281,7 @@ export function ExerciseSets({
               )}
             <Button
               variant="tertiary"
-              size="xs"
+              size="md"
               iconStart={<PlusIcon />}
               className=""
               loading={isAddingSet}

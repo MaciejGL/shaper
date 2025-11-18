@@ -10,6 +10,7 @@ import {
   Replace,
   TrashIcon,
 } from 'lucide-react'
+import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import React, { useState } from 'react'
@@ -99,12 +100,32 @@ export function ExerciseMetadata({
 
   return (
     <div>
-      <div className="flex gap-2 items-start pl-1">
-        <p className="text-lg font-medium self-center">
+      {exercise.images.length > 0 && (
+        <div className="grid grid-cols-2 gap-2 bg-black p-2">
+          {exercise.images.map((image) => (
+            <div
+              key={image.id}
+              className="relative overflow-hidden aspect-square rounded-md"
+            >
+              <Image
+                src={image.url || image.medium || image.thumbnail || ''}
+                alt={exercise.name}
+                width={500}
+                height={500}
+                className="object-cover"
+                quality={100}
+                priority={true}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex gap-2 items-start mt-4 px-2">
+        <p className="text-2xl font-medium self-center">
           <span className="text-muted-foreground">{exercise.order}.</span>{' '}
           {exercise.name}
         </p>
-
         <div className="flex gap-2 ml-auto">
           <ExerciseDetailDrawer exercise={exercise} />
           <ExerciseNotebook exercise={exercise} />
@@ -156,7 +177,16 @@ export function ExerciseMetadata({
         </div>
       </div>
 
-      <div className={cn('flex flex-wrap gap-2 mt-8 empty:hidden')}>
+      {exercise.additionalInstructions && (
+        <div className="text-sm dark:text-muted-foreground  flex items-center gap-2 my-4 mx-2">
+          <InfoIcon className="size-3 text-blue-500 flex-shrink-0 self-start mt-0.5" />
+          <p className="whitespace-pre-wrap">
+            {exercise.additionalInstructions}
+          </p>
+        </div>
+      )}
+
+      <div className={cn('flex flex-wrap gap-2 mt-8 mb-4 empty:hidden px-2')}>
         {isSuperset && (
           <Badge variant="secondary" size="md">
             <ArrowLeftRight className="text-red-500" />
@@ -232,15 +262,6 @@ export function ExerciseMetadata({
           </div>
         )}
       </div>
-
-      {exercise.additionalInstructions && (
-        <div className="text-xs dark:text-muted-foreground bg-muted/50 p-3 rounded-lg mt-2 flex items-center gap-2">
-          <InfoIcon className="size-3 text-blue-500 flex-shrink-0 self-start mt-0.5" />
-          <p className="whitespace-pre-wrap">
-            {exercise.additionalInstructions}
-          </p>
-        </div>
-      )}
 
       <SwapExerciseDrawer
         exercise={exercise}

@@ -12,7 +12,7 @@ const badgeVariants = cva(
         primary:
           'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
         secondary: cn(
-          'border-transparent bg-card-on-card dark:bg-card-on-card text-secondary-foreground [a&]:hover:bg-muted-foreground/20',
+          'border-transparent bg-sidebar dark:bg-background text-secondary-foreground [a&]:hover:bg-muted-foreground/20',
         ),
 
         success:
