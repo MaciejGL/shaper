@@ -24,7 +24,6 @@ import { EmptyWorkoutOptions } from './empty-workout-options'
 import { Exercise } from './exercise'
 import { ExerciseMiniMap } from './exercise-mini-map'
 import { RestDay } from './rest-day'
-import { WorkoutActions } from './workout-actions'
 
 interface ExercisesProps {
   day?: NonNullable<GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']>['day']
@@ -227,7 +226,6 @@ export function Exercises({
               </div>
             </div>
           )}
-          <WorkoutActions />
         </div>
       </div>
     </LayoutGroup>
