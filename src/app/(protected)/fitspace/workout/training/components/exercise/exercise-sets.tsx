@@ -263,7 +263,7 @@ export function ExerciseSets({
       exercise.sets.some((set) => set.isExtra)) &&
     exercise.sets.length > 1
   return (
-    <div className="flex flex-col rounded-[0.45rem] px-2 mb-12">
+    <div className="flex flex-col rounded-[0.45rem] px-4 mb-12">
       <div className={cn('flex flex-col gap-0 space-y-2')}>
         {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
           const previousWeightLog = getPreviousSetValue(set.order, 'weight')

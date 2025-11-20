@@ -152,7 +152,7 @@ export function ExerciseMetadata({
           </p>
         </div>
       )}
-      <div className="px-2 empty:hidden mt-8 mb-3">
+      <div className="px-4 empty:hidden mt-8 mb-3">
         <div className={cn('flex flex-wrap gap-2 empty:hidden')}>
           {exercise.restSeconds && (
             <CountdownTimer

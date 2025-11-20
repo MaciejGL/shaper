@@ -22,6 +22,7 @@ import { AddToFavouritesButton } from './add-to-favourites-button'
 import { ClearWorkoutModal } from './clear-workout-modal'
 import { EmptyWorkoutOptions } from './empty-workout-options'
 import { Exercise } from './exercise'
+import { ExerciseMiniMap } from './exercise-mini-map'
 import { RestDay } from './rest-day'
 import { WorkoutActions } from './workout-actions'
 
@@ -142,9 +143,18 @@ export function Exercises({
     )
   }
 
+  // Prepare mini-map data
+  const miniMapExercises = exercises.map((ex) => ({
+    id: ex.id,
+    name: ex.name,
+    order: ex.order,
+    completedAt: ex.completedAt ?? null,
+  }))
+
   // Main workout view
   return (
     <LayoutGroup>
+      {hasExercises && <ExerciseMiniMap exercises={miniMapExercises} />}
       <div>
         <div className="flex flex-col pb-4 space-y-2 w-full px-2">
           {hasNamedWorkoutType && (
