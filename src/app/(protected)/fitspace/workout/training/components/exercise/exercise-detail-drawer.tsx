@@ -31,7 +31,7 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
   return (
     <Drawer direction="right" disablePreventScroll>
       <DrawerTrigger asChild>
-        <Button variant="tertiary" size="icon-md" iconOnly={<VideoIcon />} />
+        <Button variant="secondary" size="icon-lg" iconOnly={<VideoIcon />} />
       </DrawerTrigger>
       <DrawerContent
         dialogTitle="Exercise Metadata"

@@ -69,9 +69,10 @@ export default function NutritionPage() {
 
   return (
     <ExtendHeader
+      classNameHeader="w-full max-w-screen"
       headerChildren={
-        <div className="dark space-y-6 pt-4 pb-4">
-          <div className="grid grid-cols-4 gap-2">
+        <div className="dark space-y-6 pt-4 pb-4 w-full">
+          <div className="grid grid-cols-4">
             {(isLoading || macroTargets?.calories) && (
               <MacroCard
                 label="Calories"

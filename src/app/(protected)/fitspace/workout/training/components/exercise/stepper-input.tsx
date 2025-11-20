@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 
 interface StepperInputProps {
   value?: string | number
-  label?: string
+  label?: React.ReactNode
   htmlFor?: string
   onIncrement: () => void
   onDecrement: () => void
@@ -35,19 +35,19 @@ export function StepperInput({
         <Button
           type="button"
           size="icon-lg"
-          variant="tertiary"
+          variant="secondary"
           iconOnly={<Minus />}
           onClick={onDecrement}
-          className="shrink-0 rounded-r-none"
+          className="shrink-0 rounded-r-none shadow-none bg-input"
         />
         {children}
         <Button
           type="button"
           size="icon-lg"
-          variant="tertiary"
+          variant="secondary"
           iconOnly={<Plus />}
           onClick={onIncrement}
-          className="shrink-0 rounded-l-none"
+          className="shrink-0 rounded-l-none shadow-none bg-input"
         />
       </div>
     </div>

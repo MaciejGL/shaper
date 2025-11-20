@@ -29,8 +29,8 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
       <DrawerTrigger asChild suppressHydrationWarning>
         <div className="flex items-center gap-1 relative">
           <Button
-            variant="tertiary"
-            size="icon-md"
+            variant="secondary"
+            size="icon-lg"
             iconOnly={<NotebookPenIcon />}
           />
           {notesCount > 0 && (

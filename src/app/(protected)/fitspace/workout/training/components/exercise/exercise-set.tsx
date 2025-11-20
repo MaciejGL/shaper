@@ -291,7 +291,7 @@ export function ExerciseSet({
 
   const [isEditing, setIsEditing] = useState(false)
   const isCompleted = !!set.completedAt
-  const showInputs = !isCompleted || isEditing
+  const showInputs = isAdvancedView && (!isCompleted || isEditing)
 
   return (
     <motion.div
@@ -300,7 +300,7 @@ export function ExerciseSet({
       animate={{ height: 'auto' }}
       exit={{ height: 0 }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
-      className={cn('relative', 'bg-card rounded-xl overflow-hidden')}
+      className={cn('relative', 'bg-card shadow-sm rounded-xl overflow-hidden')}
     >
       <motion.div
         animate={{ height: 'auto' }}
@@ -308,7 +308,11 @@ export function ExerciseSet({
       >
         <div className={cn('flex items-start gap-1')}>
           <div
-            className={cn('p-4 w-full', showInputs ? 'space-y-2' : 'space-y-0')}
+            className={cn(
+              'p-2 py-2 w-full',
+              showInputs ? 'space-y-2' : 'space-y-0',
+              isAdvancedView ? 'space-y-2' : 'space-y-0',
+            )}
           >
             <SetHeader
               setOrder={set.order}
@@ -318,32 +322,10 @@ export function ExerciseSet({
               onEditClick={() => setIsEditing((prev) => !prev)}
               loggedReps={reps ? +reps : null}
               loggedWeight={weight ? +weight : null}
+              isAdvancedView={isAdvancedView}
+              repRange={repRange}
+              plannedWeight={set.weight ?? null}
             />
-            {/* <motion.div
-              key="previous-values"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.2, ease: 'easeInOut' }}
-              className="text-sm text-foreground"
-            >
-              <Badge
-                size="md"
-                variant="secondary"
-                className="flex items-center gap-2"
-              >
-                <HistoryIcon />
-                <span>
-                  {typeof previousReps === 'number'
-                    ? `${previousReps} reps`
-                    : ''}
-                  {!isNil(previousWeight) && !isNil(previousReps) && ' x '}
-                  {typeof previousWeight === 'number'
-                    ? `${toDisplayWeight(previousWeight)?.toString()} ${preferences.weightUnit}`
-                    : ''}
-                </span>
-              </Badge>
-            </motion.div> */}
 
             <AnimatePresence mode="wait">
               {showInputs && (
@@ -366,6 +348,8 @@ export function ExerciseSet({
                     onRepsChange={onRepsChange}
                     onWeightChange={onWeightChange}
                     handleInputChange={handleInputChange}
+                    previousRepsLog={previousSetRepsLog}
+                    previousWeightLog={previousSetWeightLog}
                   />
                 </motion.div>
               )}
@@ -391,28 +375,34 @@ interface SetHeaderProps {
   onEditClick: () => void
   loggedReps: number | null
   loggedWeight: number | null
+  isAdvancedView: boolean
+  repRange?: string | number | null
+  plannedWeight?: number | null
 }
 
 function SetHeader({
   setOrder,
-
   isCompleted,
   isEditing,
   onCheckClick,
   onEditClick,
   loggedReps,
   loggedWeight,
+  isAdvancedView,
+  repRange,
+  plannedWeight,
 }: SetHeaderProps) {
   const { preferences } = useUserPreferences()
   const { toDisplayWeight } = useWeightConversion()
 
-  const showLoggedValues = isCompleted && !isEditing
-
+  const showLoggedValues = isAdvancedView && isCompleted && !isEditing
+  const showPlannedValues = !isAdvancedView
+  plannedWeight = 40
   return (
     <div className="flex justify-between items-center gap-2">
-      <p className="text-lg font-medium text-foreground">Set {setOrder}</p>
+      <p className="text-lg font-medium text-foreground pl-1">Set {setOrder}</p>
 
-      <div className="flex items-center gap-2 flex-1 justify-end">
+      <div className="flex items-center gap-4 flex-1 justify-end">
         <div className="relative min-h-[20px]">
           <AnimatePresence mode="wait">
             {showLoggedValues && (
@@ -434,12 +424,26 @@ function SetHeader({
                 </span>
               </motion.div>
             )}
+            {showPlannedValues && (
+              <div className="text-sm flex items-center gap-1">
+                {repRange && <span>{repRange} reps</span>}
+                {plannedWeight && (
+                  <>
+                    {repRange && <span>×</span>}
+                    <span>
+                      {toDisplayWeight(plannedWeight)?.toString()}{' '}
+                      {preferences.weightUnit}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
           </AnimatePresence>
         </div>
 
-        <div className="flex gap-1">
+        <div className="flex gap-2">
           <AnimatePresence mode="wait">
-            {isCompleted && (
+            {isCompleted && isAdvancedView && (
               <motion.div
                 key="edit-button"
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -448,7 +452,7 @@ function SetHeader({
                 transition={{ duration: 0.15 }}
               >
                 <Button
-                  variant="tertiary"
+                  variant="outline"
                   size="icon-md"
                   iconOnly={
                     <Edit2Icon className="size-4 text-muted-foreground" />
@@ -459,18 +463,19 @@ function SetHeader({
             )}
           </AnimatePresence>
           <Button
-            variant="tertiary"
+            variant={isCompleted ? 'default' : 'outline'}
             size="icon-md"
             iconOnly={
               <CheckIcon
                 className={cn(
                   'transition-colors',
-                  isCompleted ? 'text-green-500' : 'text-muted-foreground/40',
+                  isCompleted ? 'text-green-600' : '',
                 )}
               />
             }
             onClick={onCheckClick}
             className={cn(
+              'shadow-xs',
               isCompleted &&
                 'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
             )}
@@ -482,6 +487,8 @@ function SetHeader({
 }
 
 interface SetInputsProps {
+  previousRepsLog?: number | null
+  previousWeightLog?: number | null
   setId: string
   reps: string
   weight: string
@@ -498,6 +505,8 @@ interface SetInputsProps {
 }
 
 function SetInputs({
+  previousRepsLog,
+  previousWeightLog,
   setId,
   reps,
   weight,
@@ -512,8 +521,53 @@ function SetInputs({
   const { preferences } = useUserPreferences()
   const { toDisplayWeight, toStorageWeight } = useWeightConversion()
 
+  const getWeightLabel = () => {
+    const unit = preferences.weightUnit
+    const displayPlanned = plannedWeight
+      ? toDisplayWeight(plannedWeight)?.toString()
+      : null
+    const displayPrevious = previousWeightLog
+      ? toDisplayWeight(previousWeightLog)?.toString()
+      : null
+
+    if (displayPlanned && displayPrevious) {
+      return (
+        <>
+          {displayPlanned}
+          {unit}{' '}
+          <span className="text-muted-foreground">({displayPrevious})</span>
+        </>
+      )
+    }
+    if (displayPrevious) {
+      return (
+        <span className="text-muted-foreground">
+          ({displayPrevious} {unit})
+        </span>
+      )
+    }
+    return unit
+  }
+
+  const getRepsLabel = () => {
+    if (!repRange) return ''
+
+    if (previousRepsLog) {
+      return (
+        <span className="flex items-center gap-1">
+          <span className="text-muted-foreground flex items-center gap-1">
+            ({previousRepsLog})
+          </span>{' '}
+          {repRange} reps
+        </span>
+      )
+    }
+
+    return `${repRange} reps`
+  }
+
   return (
-    <div className="grid grid-cols-[3fr_4fr] items-end gap-2">
+    <div className="grid grid-cols-2 items-end gap-2">
       {isAdvancedView ? (
         <StepperInput
           value={reps}
@@ -527,7 +581,7 @@ function SetInputs({
             const newReps = decrementValue(reps, () => 1)
             onRepsChange(newReps)
           }}
-          label={repRange ? `${repRange} reps` : ''}
+          label={getRepsLabel()}
           htmlFor={`set-${setId}-reps`}
         >
           <Input
@@ -537,7 +591,7 @@ function SetInputs({
             inputMode="decimal"
             variant={'secondary'}
             placeholder=""
-            className="text-center text-lg rounded-none border-x border-card"
+            className="text-center text-lg rounded-none border-x border-card focus-visible:ring-0"
             size="lg"
           />
         </StepperInput>
@@ -547,12 +601,7 @@ function SetInputs({
       {isAdvancedView && (
         <StepperInput
           value={weight || '0'}
-          label={
-            plannedWeight
-              ? toDisplayWeight(plannedWeight)?.toString() +
-                preferences.weightUnit
-              : ''
-          }
+          label={getWeightLabel()}
           htmlFor={`set-${setId}-weight`}
           onIncrement={() => {
             hasUserEditedRef.current = true

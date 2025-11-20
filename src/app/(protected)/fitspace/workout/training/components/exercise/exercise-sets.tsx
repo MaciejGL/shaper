@@ -40,6 +40,7 @@ export function ExerciseSets({
   const { preferences } = useUserPreferences()
   const invalidateQuery = useInvalidateQuery()
   const [isRemovingSet, setIsRemovingSet] = useState(false)
+  const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
   // Initialize state with current log values for each set
   const [setsLogs, setSetsLogs] = useState<
     Record<string, { weight: string; reps: string }>
@@ -47,12 +48,20 @@ export function ExerciseSets({
     const initialState: Record<string, { weight: string; reps: string }> = {}
     const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
     exerciseSets.forEach((set) => {
-      const previousWeightLog = previousLogs?.find((log) => log.order === set.order)?.log?.weight
-      const previousRepsLog = previousLogs?.find((log) => log.order === set.order)?.log?.reps
-      
+      const previousWeightLog = previousLogs?.find(
+        (log) => log.order === set.order,
+      )?.log?.weight
+      const previousRepsLog = previousLogs?.find(
+        (log) => log.order === set.order,
+      )?.log?.reps
+
       initialState[set.id] = {
-        weight: set.log?.weight?.toString() ?? previousWeightLog?.toString() ?? '',
-        reps: set.log?.reps?.toString() ?? previousRepsLog?.toString() ?? '',
+        weight:
+          set.log?.weight?.toString() ??
+          (isAdvancedView ? (previousWeightLog?.toString() ?? '') : ''),
+        reps:
+          set.log?.reps?.toString() ??
+          (isAdvancedView ? (previousRepsLog?.toString() ?? '') : ''),
       }
     })
     return initialState
@@ -67,16 +76,29 @@ export function ExerciseSets({
       // Add new sets or update existing sets with new log values
       exerciseSets.forEach((set) => {
         const currentState = updated[set.id]
-        const previousWeightLog = previousLogs?.find((log) => log.order === set.order)?.log?.weight
-        const previousRepsLog = previousLogs?.find((log) => log.order === set.order)?.log?.reps
-        const newLogWeight = set.log?.weight?.toString() ?? previousWeightLog?.toString() ?? ''
-        const newLogReps = set.log?.reps?.toString() ?? previousRepsLog?.toString() ?? ''
+        const previousWeightLog = previousLogs?.find(
+          (log) => log.order === set.order,
+        )?.log?.weight
+        const previousRepsLog = previousLogs?.find(
+          (log) => log.order === set.order,
+        )?.log?.reps
+        const newLogWeight =
+          set.log?.weight?.toString() ??
+          (isAdvancedView ? (previousWeightLog?.toString() ?? '') : '')
+        const newLogReps =
+          set.log?.reps?.toString() ??
+          (isAdvancedView ? (previousRepsLog?.toString() ?? '') : '')
 
         if (!currentState) {
-          // New set - add it with previous log values as defaults
+          // New set - add it with last set's actual logged values as defaults
+          const currentIndex = exerciseSets.findIndex((s) => s.id === set.id)
+          const lastSetId =
+            currentIndex > 0 ? exerciseSets[currentIndex - 1].id : null
+          const lastSetValues = lastSetId ? prev[lastSetId] : null
+
           updated[set.id] = {
-            weight: newLogWeight,
-            reps: newLogReps,
+            weight: lastSetValues?.weight ?? newLogWeight,
+            reps: lastSetValues?.reps ?? newLogReps,
           }
         } else {
           // Existing set - update only if the log values changed and user hasn't edited
@@ -100,7 +122,12 @@ export function ExerciseSets({
 
       return updated
     })
-  }, [exercise.substitutedBy?.sets, exercise.sets, previousLogs])
+  }, [
+    exercise.substitutedBy?.sets,
+    exercise.sets,
+    previousLogs,
+    isAdvancedView,
+  ])
 
   // Notify parent when setsLogs changes
   useEffect(() => {
@@ -231,8 +258,10 @@ export function ExerciseSets({
     return previousSet ? previousSet.log?.[type] : null
   }
 
-  const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
-
+  const hasExtraSets =
+    (exercise.substitutedBy?.sets?.some((set) => set.isExtra) ||
+      exercise.sets.some((set) => set.isExtra)) &&
+    exercise.sets.length > 1
   return (
     <div className="flex flex-col rounded-[0.45rem] px-2 mb-12">
       <div className={cn('flex flex-col gap-0 space-y-2')}>
@@ -260,37 +289,30 @@ export function ExerciseSets({
           )
         })}
 
-        {isAdvancedView && (
-          <div className={cn('flex items-center justify-end gap-2')}>
-            {exercise.sets.some((set) => set.isExtra) &&
-              exercise.sets.length > 1 && (
-                <>
-                  <Button
-                    variant="tertiary"
-                    size="md"
-                    iconStart={<PlusIcon className="rotate-45" />}
-                    className=""
-                    loading={isRemovingSet}
-                    disabled={isRemovingSet}
-                    onClick={handleRemoveLastSet}
-                  >
-                    Remove Last Set
-                  </Button>
-                  {/* <div className="h-full w-[1px] bg-border" /> */}
-                </>
-              )}
-            <Button
-              variant="tertiary"
-              size="md"
-              iconStart={<PlusIcon />}
-              className=""
-              loading={isAddingSet}
-              onClick={handleAddSet}
-            >
-              Add set
-            </Button>
-          </div>
-        )}
+        <div className={cn('grid grid-cols-2 items-center gap-2 mt-2')}>
+          {hasExtraSets && (
+            <>
+              <Button
+                variant="secondary"
+                iconStart={<PlusIcon className="rotate-45" />}
+                loading={isRemovingSet}
+                disabled={isRemovingSet}
+                onClick={handleRemoveLastSet}
+              >
+                Remove Last Set
+              </Button>
+            </>
+          )}
+          <Button
+            variant="secondary"
+            iconStart={<PlusIcon />}
+            className={cn(hasExtraSets ? '' : 'col-start-2')}
+            loading={isAddingSet}
+            onClick={handleAddSet}
+          >
+            Add set
+          </Button>
+        </div>
       </div>
     </div>
   )
