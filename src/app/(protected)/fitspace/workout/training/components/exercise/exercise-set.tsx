@@ -300,7 +300,10 @@ export function ExerciseSet({
       animate={{ height: 'auto' }}
       exit={{ height: 0 }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
-      className={cn('relative', 'bg-card shadow-sm rounded-xl overflow-hidden')}
+      className={cn(
+        'relative',
+        'bg-card shadow-xs border border-border rounded-xl overflow-hidden',
+      )}
     >
       <motion.div
         animate={{ height: 'auto' }}
@@ -589,9 +592,9 @@ function SetInputs({
             value={reps}
             onChange={(e) => handleInputChange(e, 'reps')}
             inputMode="decimal"
-            variant={'secondary'}
+            variant={'ghost'}
             placeholder=""
-            className="text-center text-lg rounded-none border-x border-card focus-visible:ring-0"
+            className="text-center text-lg rounded-none border-x border-border focus-visible:ring-0"
             size="lg"
           />
         </StepperInput>

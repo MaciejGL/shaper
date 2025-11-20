@@ -30,7 +30,10 @@ export function StepperInput({
         </label>
       )}
       <div
-        className={cn('grid grid-cols-[auto_1fr_auto] items-center', className)}
+        className={cn(
+          'grid grid-cols-[auto_1fr_auto] items-center border border-border rounded-xl overflow-hidden',
+          className,
+        )}
       >
         <Button
           type="button"
@@ -38,7 +41,7 @@ export function StepperInput({
           variant="secondary"
           iconOnly={<Minus />}
           onClick={onDecrement}
-          className="shrink-0 rounded-r-none shadow-none bg-input"
+          className="shrink-0 border-none rounded-none"
         />
         {children}
         <Button
@@ -47,7 +50,7 @@ export function StepperInput({
           variant="secondary"
           iconOnly={<Plus />}
           onClick={onIncrement}
-          className="shrink-0 rounded-l-none shadow-none bg-input"
+          className="shrink-0 border-none rounded-none"
         />
       </div>
     </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
 import {
   LogInIcon,
   LogOutIcon,
@@ -23,7 +22,6 @@ import {
   useNotificationsQuery,
 } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
-import { useScrollVisibility } from '@/hooks/use-scroll-visibility'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
@@ -96,7 +94,6 @@ export const Navbar = ({
   withSidebar?: boolean
 }) => {
   const pathname = usePathname()
-  const { isVisible } = useScrollVisibility({ initialVisible: true })
   const { user: userContext } = useUser()
   const { totalUnreadCount, notifications } = useUnreadMessageCount(userContext)
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
@@ -113,29 +110,13 @@ export const Navbar = ({
     (user?.user?.role === GQLUserRole.Client && user?.user?.trainerId) ||
     isTrainer
 
-  const isWorkoutPage = pathname.startsWith('/fitspace/workout')
-
   return (
     <>
-      {user && !isTrainer && (
-        <motion.div
-          className={cn('h-[60px] bg-sidebar', isWorkoutPage && 'bg-sidebar')}
-        />
-      )}
-
-      <div
-        className={!isTrainer ? 'z-10 fixed top-0 left-0 right-0' : 'relative'}
-      >
+      <div className="relative">
         <div
-          data-visible={isVisible}
           className={cn(
-            'py-3 px-4 flex justify-between items-center bg-sidebar h-[60px]',
-            'transition-[transform,opacity,translate] duration-200',
-            'data-[visible=true]:opacity-100 data-[visible=true]:translate-y-0',
-            'data-[visible=false]:opacity-0 data-[visible=false]:translate-y-[-100px]',
+            'py-3 px-4 flex justify-between items-center bg-sidebar',
             'mt-[var(--safe-area-inset-top)]',
-            // isFitspace && !isWorkoutPage && 'border-border border-b',
-            // isWorkoutPage && showBorder && 'border-b border-border',
           )}
         >
           <div className="flex items-center gap-2">

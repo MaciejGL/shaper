@@ -294,6 +294,7 @@ export function ExerciseSets({
             <>
               <Button
                 variant="secondary"
+                size="lg"
                 iconStart={<PlusIcon className="rotate-45" />}
                 loading={isRemovingSet}
                 disabled={isRemovingSet}
@@ -305,6 +306,7 @@ export function ExerciseSets({
           )}
           <Button
             variant="secondary"
+            size="lg"
             iconStart={<PlusIcon />}
             className={cn(hasExtraSets ? '' : 'col-start-2')}
             loading={isAddingSet}
