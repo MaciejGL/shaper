@@ -10,6 +10,7 @@ type PreviousDayLogs = NonNullable<
 
 export interface ExerciseProps {
   exercise: WorkoutExercise
+  exercises?: WorkoutExercise[]
   previousDayLogs?: PreviousDayLogs
 }
 
@@ -50,6 +51,7 @@ export interface ExerciseSetProps {
 
 export interface ExerciseMetadataProps {
   exercise: WorkoutExercise
+  exercises?: WorkoutExercise[]
   handleMarkAsCompleted: (checked: boolean) => void
   isCompleted: boolean
   handleRemoveExercise: () => void

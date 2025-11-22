@@ -11,7 +11,7 @@ import {
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -50,6 +50,7 @@ import { ExerciseMetadataProps } from './types'
 
 export function ExerciseMetadata({
   exercise,
+  exercises,
   handleMarkAsCompleted,
   isCompleted,
   handleRemoveExercise,
@@ -101,6 +102,46 @@ export function ExerciseMetadata({
   const isSuperset =
     exercise.type === GQLExerciseType.Superset_1A ||
     exercise.type === GQLExerciseType.Superset_1B
+
+  const supersetInfo = useMemo(() => {
+    if (!isSuperset) return null
+
+    if (!exercises) {
+      return {
+        type: exercise.type === GQLExerciseType.Superset_1A ? 'A' : 'B',
+        group: 1,
+      }
+    }
+
+    const supersetExercises = exercises
+      .filter(
+        (e) =>
+          e.type === GQLExerciseType.Superset_1A ||
+          e.type === GQLExerciseType.Superset_1B,
+      )
+      .sort((a, b) => a.order - b.order)
+
+    let currentGroupIndex = 1
+    let lastType: GQLExerciseType | null | undefined = null
+    const map = new Map<string, { type: 'A' | 'B'; group: number }>()
+
+    for (const ex of supersetExercises) {
+      if (
+        ex.type === GQLExerciseType.Superset_1A &&
+        lastType === GQLExerciseType.Superset_1B
+      ) {
+        currentGroupIndex++
+      }
+
+      map.set(ex.id, {
+        type: ex.type === GQLExerciseType.Superset_1A ? 'A' : 'B',
+        group: currentGroupIndex,
+      })
+      lastType = ex.type
+    }
+
+    return map.get(exercise.id)
+  }, [exercise.id, exercise.type, exercises, isSuperset])
 
   return (
     <div className="border-t border-border">
@@ -220,14 +261,20 @@ export function ExerciseMetadata({
           </div>
         </div>
         <div className="flex flex-wrap gap-2 mt-3 empty:hidden">
-          {isSuperset && (
+          {supersetInfo && (
             <Badge
               variant="secondary"
               size="lg"
               className="bg-card dark:bg-card-on-card shadow-xs"
             >
-              <ArrowLeftRight className="text-red-500" />
-              Superset A/B
+              <ArrowLeftRight
+                className={cn(
+                  'mr-1',
+                  supersetInfo.type === 'A' ? 'text-red-500' : 'text-blue-500',
+                )}
+              />
+              Superset {supersetInfo.group > 1 ? `${supersetInfo.group}` : ''}
+              {supersetInfo.type}
             </Badge>
           )}
 

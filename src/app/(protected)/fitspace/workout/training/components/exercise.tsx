@@ -21,7 +21,11 @@ import { ExerciseSets } from './exercise/exercise-sets'
 import { ExerciseProps } from './exercise/types'
 import { createOptimisticExerciseUpdate } from './optimistic-updates'
 
-export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
+export function Exercise({
+  exercise,
+  exercises,
+  previousDayLogs,
+}: ExerciseProps) {
   const invalidateQuery = useInvalidateQuery()
   const { trainingId } = useParams<{ trainingId: string }>()
   const [dayId] = useQueryState('day')
@@ -279,6 +283,7 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
       <div className="" id={exercise.id}>
         <ExerciseMetadata
           exercise={exercise}
+          exercises={exercises}
           handleMarkAsCompleted={handleMarkAsCompleted}
           isCompleted={isExerciseCompleted}
           handleRemoveExercise={handleRemoveExercise}

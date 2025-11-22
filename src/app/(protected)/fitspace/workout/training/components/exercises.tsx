@@ -136,6 +136,7 @@ export function Exercises({
             <Exercise
               key={exercise.id}
               exercise={exercise}
+              exercises={exercises}
               previousDayLogs={previousDayLogs}
             />
           ))}
