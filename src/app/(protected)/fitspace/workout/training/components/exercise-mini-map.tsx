@@ -1,9 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { BarChart, Check, ChevronLeft, List, ListCheck } from 'lucide-react'
+import { BarChart, Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
+import { ProgressCircle } from '@/components/ui/progress-circle'
 import { cn } from '@/lib/utils'
 
 import { WorkoutSummaryDrawer } from './workout-summary-drawer'
@@ -15,24 +16,197 @@ interface Exercise {
   completedAt: string | null
 }
 
-interface ExerciseMiniMapProps {
+interface SharedProps {
   exercises: Exercise[]
+  startedAt?: string | null
 }
 
-export function ExerciseMiniMap({ exercises }: ExerciseMiniMapProps) {
+// Expanded list item for the dropdown (kept for the expandable pill menu)
+function ExpandedExerciseListItem({
+  exercise,
+  isCurrent,
+  onClick,
+}: {
+  exercise: Exercise
+  isCurrent: boolean
+  onClick: () => void
+}) {
+  const isCompleted = !!exercise.completedAt
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all shadow-sm backdrop-blur-md border',
+        isCurrent
+          ? 'bg-secondary/50 border-secondary/90 dark:bg-secondary dark:border-primary/50'
+          : 'bg-card/90 hover:bg-card/98 border-white/5',
+      )}
+    >
+      <div className="flex-shrink-0">
+        {isCompleted ? (
+          <div className="size-6 rounded-full bg-green-600 dark:bg-green-500 flex-center shadow-lg shadow-green-500/20">
+            <Check className="size-4 text-white" />
+          </div>
+        ) : (
+          <div
+            className={cn(
+              'size-6 rounded-full flex-center font-bold text-sm shadow-inner',
+              isCurrent
+                ? 'bg-primary text-primary-foreground shadow-primary/25'
+                : 'bg-muted text-muted-foreground',
+            )}
+          >
+            {exercise.order}
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p
+          className={cn(
+            'font-medium text-sm',
+            isCurrent ? 'text-foreground font-semibold' : 'text-foreground/80',
+          )}
+        >
+          {exercise.name}
+        </p>
+      </div>
+    </button>
+  )
+}
+
+// Reusable Smart Pill Component
+function SmartPillContent({
+  progressPercentage,
+  completedCount,
+  totalCount,
+  currentExerciseName,
+  allExercisesCompleted,
+  isExpanded,
+  onToggleExpand,
+  onShowSummary,
+  isStaticOverview,
+  layoutId,
+  className,
+}: {
+  progressPercentage: number
+  completedCount: number
+  totalCount: number
+  currentExerciseName: string
+  allExercisesCompleted: boolean
+  isExpanded: boolean
+  onToggleExpand: () => void
+  onShowSummary: () => void
+  isStaticOverview: boolean
+  layoutId?: string
+  className?: string
+}) {
+  return (
+    <motion.div
+      layoutId={layoutId}
+      className={cn(
+        'pointer-events-auto flex items-center gap-0 bg-white/95 dark:bg-zinc-900/80 backdrop-blur-xl border border-white dark:border-border shadow-lg rounded-full pl-1 pr-3 py-1 max-w-full overflow-hidden w-full',
+        className,
+      )}
+    >
+      <button
+        onClick={onToggleExpand}
+        className={cn(
+          'flex items-center justify-center size-8 rounded-full transition-all mr-2 shrink-0 relative',
+          'hover:bg-white/5 active:scale-95',
+        )}
+      >
+        <div className="relative flex-center">
+          <ProgressCircle
+            progress={progressPercentage}
+            size={28}
+            strokeWidth={3}
+            className="text-primary"
+            hideCheckmark={true}
+          />
+          <div className="absolute inset-0 flex-center">
+            <span className="text-[9px] font-medium whitespace-nowrap">
+              {completedCount}/{totalCount}
+            </span>
+          </div>
+        </div>
+      </button>
+
+      <div
+        className={cn(
+          'flex flex-col justify-center min-w-0 px-2 border-l border-white dark:border-border h-6 flex-1',
+          'cursor-pointer',
+        )}
+        onClick={onToggleExpand}
+      >
+        {isStaticOverview && (
+          <div className="flex items-center gap-1 justify-between">
+            <span className={cn('text-sm font-medium leading-none')}>
+              {isExpanded ? 'Select Exercise' : 'Exercises Overview'}
+            </span>
+            <ChevronDown
+              className={cn(
+                'size-4 transition-transform duration-200',
+                isExpanded && 'rotate-180',
+              )}
+            />
+          </div>
+        )}
+        {!isStaticOverview && (
+          <div className="flex items-center gap-1 justify-between">
+            <span className="text-sm font-medium truncate leading-tight text-foreground">
+              {currentExerciseName}
+            </span>
+            <ChevronDown
+              className={cn(
+                'size-4 transition-transform duration-200',
+                isExpanded && 'rotate-180',
+              )}
+            />
+          </div>
+        )}
+      </div>
+
+      {allExercisesCompleted && (
+        <div className="flex items-center gap-2 pl-3 border-l border-white h-6 shrink-0">
+          <button
+            onClick={onShowSummary}
+            className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+          >
+            <BarChart className="size-3.5" />
+            <span>Summary</span>
+          </button>
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
+export function WorkoutSmartPill({
+  exercises,
+  isOverviewVisible,
+}: SharedProps & { isOverviewVisible: boolean }) {
   const [currentExerciseId, setCurrentExerciseId] = useState<string | null>(
     null,
   )
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
   const observersRef = useRef<IntersectionObserver[]>([])
 
-  // Track which exercise is currently in view
+  // Close expanded menu if overview becomes visible (scrolled to top)
   useEffect(() => {
+    if (isOverviewVisible && isExpanded) {
+      setIsExpanded(false)
+    }
+  }, [isOverviewVisible, isExpanded])
+
+  // Only track scrolling when the sticky pill is active (overview NOT visible)
+  useEffect(() => {
+    if (isOverviewVisible) return
+
     const observerOptions: IntersectionObserverInit = {
       threshold: 0.5,
-      rootMargin: '-20% 0px -20% 0px',
+      rootMargin: '-10% 0px -40% 0px',
     }
 
     const callback: IntersectionObserverCallback = (entries) => {
@@ -43,7 +217,6 @@ export function ExerciseMiniMap({ exercises }: ExerciseMiniMapProps) {
       })
     }
 
-    // Create observers for each exercise
     exercises.forEach((exercise) => {
       const element = document.getElementById(exercise.id)
       if (element) {
@@ -57,220 +230,276 @@ export function ExerciseMiniMap({ exercises }: ExerciseMiniMapProps) {
       observersRef.current.forEach((observer) => observer.disconnect())
       observersRef.current = []
     }
-  }, [exercises])
+  }, [exercises, isOverviewVisible])
 
-  // Detect keyboard open/close
+  // Close on scroll logic
   useEffect(() => {
-    const handleResize = () => {
-      if (window.visualViewport) {
-        const viewportHeight = window.visualViewport.height
-        const windowHeight = window.innerHeight
-        const isKeyboard = viewportHeight < windowHeight * 0.75
-        setIsKeyboardOpen(isKeyboard)
+    if (!isExpanded) return
+
+    const handleScroll = () => {
+      if (isExpanded) {
+        setIsExpanded(false)
       }
     }
 
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize)
-      return () => {
-        window.visualViewport?.removeEventListener('resize', handleResize)
-      }
-    }
-  }, [])
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isExpanded])
 
   const scrollToExercise = (exerciseId: string) => {
     const element = document.getElementById(exerciseId)
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      const yOffset = -120
+      const y =
+        element.getBoundingClientRect().top + window.pageYOffset + yOffset
+      window.scrollTo({ top: y, behavior: 'smooth' })
       setIsExpanded(false)
     }
   }
 
-  const currentExerciseIndex = exercises.findIndex(
-    (e) => e.id === currentExerciseId,
-  )
-  const currentExercise = exercises[currentExerciseIndex]
-  const isCurrentCompleted = !!currentExercise?.completedAt
+  // Determine current exercise logic
+  // If overview is visible, we show the "first" incomplete exercise or just "Overview"
+  // If scrolling, we show the tracked exercise
+  const currentExercise =
+    exercises.find((e) => e.id === currentExerciseId) ?? exercises[0]
 
-  const progressLabel =
-    currentExerciseIndex !== -1
-      ? `${currentExerciseIndex + 1} / ${exercises.length}`
-      : `${exercises.length}`
+  const currentExerciseName = isOverviewVisible
+    ? 'Overview'
+    : currentExercise
+      ? currentExercise.name
+      : 'Overview'
 
-  const allExercisesCompleted = exercises.every(
-    (exercise) => exercise.completedAt,
-  )
+  const completedCount = exercises.filter((e) => e.completedAt).length
+  const totalCount = exercises.length
+  const progressPercentage =
+    totalCount > 0 ? (completedCount / totalCount) * 100 : 0
+  const allExercisesCompleted = exercises.every((e) => e.completedAt)
 
   return (
     <>
-      {/* Expanded List Overlay */}
+      {/* Gradient Backdrop (Below Pill) */}
       <AnimatePresence>
-        {isExpanded && (
+        {isExpanded && !isOverviewVisible && (
           <>
-            {/* Gradient Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[4] bg-gradient-to-t from-black/75 via-black/40 to-transparent pointer-events-none"
+              className="fixed inset-0 z-[38] bg-gradient-to-b from-black/40 via-black/50 to-transparent pointer-events-none"
             />
             {/* Clickable area to close */}
             <div
-              className="fixed inset-0 z-[5]"
+              className="fixed inset-0 z-[39]"
               onClick={() => setIsExpanded(false)}
             />
-
-            {/* Floating List (Upward from bottom left) */}
-            <div className="fixed left-4 bottom-[calc(8rem+env(safe-area-inset-bottom))] z-[6] w-72 max-h-dvh overflow-y-auto no-scrollbar flex flex-col-reverse gap-2 pb-2">
-              {[...exercises].reverse().map((exercise, i) => {
-                const isCompleted = !!exercise.completedAt
-                const isCurrent = exercise.id === currentExerciseId
-
-                return (
-                  <motion.button
-                    key={exercise.id}
-                    custom={i}
-                    initial={{ opacity: 0, y: 0, scale: 0.95 }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      scale: 1,
-                      transition: {
-                        delay: i * 0.03,
-                        duration: 0.15,
-                        ease: 'linear',
-                      },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: 20,
-                      scale: 0.95,
-                      transition: {
-                        delay: (exercises.length - 1 - i) * 0.02,
-                        duration: 0.15,
-                        ease: 'easeIn',
-                      },
-                    }}
-                    onClick={() => scrollToExercise(exercise.id)}
-                    className={cn(
-                      'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all shadow-sm backdrop-blur-md border',
-                      isCurrent
-                        ? 'bg-primary/50 border-secondary/90 dark:bg-primary/10 dark:border-primary/50'
-                        : 'bg-card/90 hover:bg-card/98 border-white/5',
-                    )}
-                  >
-                    <div className="flex-shrink-0">
-                      {isCompleted ? (
-                        <div className="size-6 rounded-full bg-green-600 dark:bg-green-500 flex-center shadow-lg shadow-green-500/20">
-                          <Check className="size-4 text-white" />
-                        </div>
-                      ) : (
-                        <div
-                          data-completed={isCompleted}
-                          className={cn(
-                            'size-6 rounded-full flex-center font-bold text-sm shadow-inner',
-                            isCurrent
-                              ? 'bg-primary text-primary-foreground shadow-primary/25'
-                              : 'bg-muted text-muted-foreground',
-                          )}
-                        >
-                          {exercise.order}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={cn(
-                          'font-medium text-sm',
-                          isCurrent
-                            ? 'text-secondary dark:text-foreground font-semibold'
-                            : 'text-foreground/80',
-                        )}
-                      >
-                        {exercise.name}
-                      </p>
-                    </div>
-                  </motion.button>
-                )
-              })}
-              {/* <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex items-center justify-between px-2 py-2"
-              >
-                <h3 className="text-lg font-semibold">Exercises</h3>
-              </motion.div> */}
-            </div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Floating Trigger Button */}
+      {/* Fixed Sticky Pill (When scrolled down) */}
       <AnimatePresence>
+        {!isOverviewVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-1 left-0 right-0 z-[40] px-1 flex justify-center pointer-events-none"
+          >
+            <SmartPillContent
+              progressPercentage={progressPercentage}
+              completedCount={completedCount}
+              totalCount={totalCount}
+              currentExerciseName={currentExerciseName}
+              allExercisesCompleted={allExercisesCompleted}
+              isExpanded={isExpanded}
+              onToggleExpand={() => setIsExpanded(!isExpanded)}
+              onShowSummary={() => setShowSummary(true)}
+              isStaticOverview={false}
+              layoutId="sticky-pill"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Dropdown List (Below the pill) */}
+      <AnimatePresence>
+        {isExpanded && !isOverviewVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-16 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+          >
+            {exercises.map((exercise, i) => (
+              <motion.div
+                key={exercise.id}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: { delay: i * 0.05 },
+                }}
+              >
+                <ExpandedExerciseListItem
+                  exercise={exercise}
+                  isCurrent={exercise.id === currentExerciseId}
+                  onClick={() => scrollToExercise(exercise.id)}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <WorkoutSummaryDrawer open={showSummary} onOpenChange={setShowSummary} />
+    </>
+  )
+}
+
+export function WorkoutOverviewPill({
+  exercises,
+  onInViewChange,
+}: SharedProps & { onInViewChange?: (inView: boolean) => void }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  // Close overview pill when scrolling down significantly (when it's about to become sticky)
+  // We can use the intersection observer onInViewChange logic inversely in the parent
+  // But for direct scroll interaction within the expanded state:
+  useEffect(() => {
+    if (!isExpanded) return
+
+    const handleScroll = () => {
+      // Close if scrolled more than 50px while expanded
+      if (window.scrollY > 50) {
+        setIsExpanded(false)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isExpanded])
+
+  const completedCount = exercises.filter((e) => e.completedAt).length
+  const totalCount = exercises.length
+  const progressPercentage =
+    totalCount > 0 ? (completedCount / totalCount) * 100 : 0
+  const allExercisesCompleted = exercises.every((e) => e.completedAt)
+
+  const scrollToExercise = (exerciseId: string) => {
+    const element = document.getElementById(exerciseId)
+    if (element) {
+      const yOffset = -120
+      const y =
+        element.getBoundingClientRect().top + window.pageYOffset + yOffset
+      window.scrollTo({ top: y, behavior: 'smooth' })
+      setIsExpanded(false)
+    }
+  }
+
+  // Intersection observer to trigger the fixed pill
+  useEffect(() => {
+    const element = ref.current
+    if (!element || !onInViewChange) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        onInViewChange(entry.isIntersecting)
+      },
+      { threshold: 0 }, // Trigger as soon as it leaves viewport
+    )
+
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [onInViewChange])
+
+  return (
+    <>
+      <div
+        ref={ref}
+        // Increase z-index when expanded to ensure it's above the backdrop
+        className={cn('relative h-[56px]', isExpanded ? 'z-[45]' : 'z-[35]')}
+      >
         <motion.div
           layout
-          initial={{ opacity: 0, x: '-100%' }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: '-100%' }}
           className={cn(
-            'fixed left-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[6] transition-all duration-300 flex items-center gap-2',
-            isKeyboardOpen && 'opacity-0 pointer-events-none translate-y-10',
+            'w-full ',
+            // Ensure the pill itself is above the backdrop (z-38)
+            isExpanded ? 'fixed top-2 left-0 right-0 px-2 z-[45]' : 'relative',
           )}
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
         >
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-r-2xl shadow-sm backdrop-blur-md transition-all duration-300 bg-card/70 hover:bg-card/90 text-foreground"
-          >
-            {isExpanded ? (
-              <>
-                <div className="flex items-center justify-center size-6 rounded-full bg-muted text-muted-foreground">
-                  <ChevronLeft className="size-3.5" />
-                </div>
-                <span className="font-semibold text-sm">Close</span>
-              </>
-            ) : (
-              <>
-                <div
-                  className={cn(
-                    'flex items-center justify-center size-6 rounded-full transition-colors',
-                    isCurrentCompleted
-                      ? 'bg-emerald-500/10 text-emerald-500'
-                      : 'bg-primary/10 text-primary',
-                  )}
-                >
-                  {allExercisesCompleted ? (
-                    <ListCheck className="size-3.5" />
-                  ) : isCurrentCompleted ? (
-                    <Check className="size-3.5" />
-                  ) : (
-                    <List className="size-3.5" />
-                  )}
-                </div>
-                <span className="font-semibold text-sm">{progressLabel}</span>
-              </>
+          <SmartPillContent
+            progressPercentage={progressPercentage}
+            completedCount={completedCount}
+            totalCount={totalCount}
+            currentExerciseName="Overview"
+            allExercisesCompleted={allExercisesCompleted}
+            isExpanded={isExpanded}
+            onToggleExpand={() => setIsExpanded(!isExpanded)}
+            onShowSummary={() => setShowSummary(true)}
+            isStaticOverview={true}
+            layoutId="overview-pill"
+            className={cn(
+              !isExpanded && 'rounded-none h-[56px] border-0 !bg-background',
             )}
-          </button>
-
-          {allExercisesCompleted && (
-            <motion.button
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              onClick={() => setShowSummary(true)}
-              className="flex items-center gap-2 px-4 py-3 rounded-2xl shadow-xs backdrop-blur-md transition-all duration-300 bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              <BarChart className="size-4" />
-              <span className="font-semibold text-sm">View Summary</span>
-            </motion.button>
-          )}
-          <WorkoutSummaryDrawer
-            open={showSummary}
-            onOpenChange={setShowSummary}
           />
         </motion.div>
+      </div>
+
+      {/* Gradient Backdrop (Below Pill) */}
+      <AnimatePresence>
+        {isExpanded && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[38] bg-gradient-to-b from-black/40 via-black/50 to-transparent pointer-events-none"
+            />
+            {/* Clickable area to close */}
+            <div
+              className="fixed inset-0 z-[39]"
+              onClick={() => setIsExpanded(false)}
+            />
+          </>
+        )}
       </AnimatePresence>
+
+      {/* Dropdown List for Static Overview Pill */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-16 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+          >
+            {exercises.map((exercise, i) => (
+              <motion.div
+                key={exercise.id}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: { delay: i * 0.05 },
+                }}
+              >
+                <ExpandedExerciseListItem
+                  exercise={exercise}
+                  isCurrent={false} // Overview dropdown doesn't track current scroll
+                  onClick={() => scrollToExercise(exercise.id)}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <WorkoutSummaryDrawer open={showSummary} onOpenChange={setShowSummary} />
     </>
   )
 }

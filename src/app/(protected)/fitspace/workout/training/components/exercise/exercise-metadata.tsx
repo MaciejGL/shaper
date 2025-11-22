@@ -161,7 +161,7 @@ export function ExerciseMetadata({
               autoStart={activeTimerSetId !== null}
               onComplete={onTimerComplete}
               onPause={onTimerComplete}
-              size="lg"
+              size="md"
               variant="secondary"
               className="w-auto"
             />
@@ -183,7 +183,7 @@ export function ExerciseMetadata({
               >
                 <Button
                   variant="secondary"
-                  size="icon-lg"
+                  size="icon-md"
                   iconOnly={<MoreHorizontalIcon />}
                 />
               </DropdownMenuTrigger>
@@ -206,7 +206,7 @@ export function ExerciseMetadata({
             </DropdownMenu>
             <Button
               variant="secondary"
-              size="icon-lg"
+              size="icon-md"
               iconOnly={
                 <CheckIcon className={cn(isCompleted && 'text-green-600')} />
               }
