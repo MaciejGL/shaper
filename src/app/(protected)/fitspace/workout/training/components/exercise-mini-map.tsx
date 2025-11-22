@@ -39,7 +39,7 @@ function ExpandedExerciseListItem({
       className={cn(
         'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all shadow-sm backdrop-blur-md border',
         isCurrent
-          ? 'bg-primary/50 border-secondary/90 dark:bg-primary dark:border-primary/50'
+          ? 'bg-secondary/50 border-secondary/90 dark:bg-secondary dark:border-primary/50'
           : 'bg-card/90 hover:bg-card/98 border-white/5',
       )}
     >
@@ -65,9 +65,7 @@ function ExpandedExerciseListItem({
         <p
           className={cn(
             'font-medium text-sm',
-            isCurrent
-              ? 'text-secondary dark:text-foreground font-semibold'
-              : 'text-foreground/80',
+            isCurrent ? 'text-foreground font-semibold' : 'text-foreground/80',
           )}
         >
           {exercise.name}
@@ -89,6 +87,7 @@ function SmartPillContent({
   onShowSummary,
   isStaticOverview,
   layoutId,
+  className,
 }: {
   progressPercentage: number
   completedCount: number
@@ -100,11 +99,15 @@ function SmartPillContent({
   onShowSummary: () => void
   isStaticOverview: boolean
   layoutId?: string
+  className?: string
 }) {
   return (
     <motion.div
       layoutId={layoutId}
-      className="pointer-events-auto flex items-center gap-0 bg-white/95 dark:bg-zinc-900/80 backdrop-blur-xl border border-white dark:border-border shadow-lg rounded-full pl-1 pr-3 py-1 max-w-full overflow-hidden w-full"
+      className={cn(
+        'pointer-events-auto flex items-center gap-0 bg-white/95 dark:bg-zinc-900/80 backdrop-blur-xl border border-white dark:border-border shadow-lg rounded-full pl-1 pr-3 py-1 max-w-full overflow-hidden w-full',
+        className,
+      )}
     >
       <button
         onClick={onToggleExpand}
@@ -190,6 +193,13 @@ export function WorkoutSmartPill({
   const [showSummary, setShowSummary] = useState(false)
   const observersRef = useRef<IntersectionObserver[]>([])
 
+  // Close expanded menu if overview becomes visible (scrolled to top)
+  useEffect(() => {
+    if (isOverviewVisible && isExpanded) {
+      setIsExpanded(false)
+    }
+  }, [isOverviewVisible, isExpanded])
+
   // Only track scrolling when the sticky pill is active (overview NOT visible)
   useEffect(() => {
     if (isOverviewVisible) return
@@ -221,6 +231,20 @@ export function WorkoutSmartPill({
       observersRef.current = []
     }
   }, [exercises, isOverviewVisible])
+
+  // Close on scroll logic
+  useEffect(() => {
+    if (!isExpanded) return
+
+    const handleScroll = () => {
+      if (isExpanded) {
+        setIsExpanded(false)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isExpanded])
 
   const scrollToExercise = (exerciseId: string) => {
     const element = document.getElementById(exerciseId)
@@ -341,6 +365,23 @@ export function WorkoutOverviewPill({
   const [showSummary, setShowSummary] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
+  // Close overview pill when scrolling down significantly (when it's about to become sticky)
+  // We can use the intersection observer onInViewChange logic inversely in the parent
+  // But for direct scroll interaction within the expanded state:
+  useEffect(() => {
+    if (!isExpanded) return
+
+    const handleScroll = () => {
+      // Close if scrolled more than 50px while expanded
+      if (window.scrollY > 50) {
+        setIsExpanded(false)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isExpanded])
+
   const completedCount = exercises.filter((e) => e.completedAt).length
   const totalCount = exercises.length
   const progressPercentage =
@@ -379,13 +420,12 @@ export function WorkoutOverviewPill({
       <div
         ref={ref}
         // Increase z-index when expanded to ensure it's above the backdrop
-        className={cn('p-2 relative', isExpanded ? 'z-[45]' : 'z-[35]')}
-        style={{ height: 56 }} // Reserve space to prevent layout shift
+        className={cn('relative h-[56px]', isExpanded ? 'z-[45]' : 'z-[35]')}
       >
         <motion.div
           layout
           className={cn(
-            'w-full',
+            'w-full ',
             // Ensure the pill itself is above the backdrop (z-38)
             isExpanded ? 'fixed top-2 left-0 right-0 px-2 z-[45]' : 'relative',
           )}
@@ -402,6 +442,9 @@ export function WorkoutOverviewPill({
             onShowSummary={() => setShowSummary(true)}
             isStaticOverview={true}
             layoutId="overview-pill"
+            className={cn(
+              !isExpanded && 'rounded-none h-[56px] border-0 !bg-background',
+            )}
           />
         </motion.div>
       </div>
