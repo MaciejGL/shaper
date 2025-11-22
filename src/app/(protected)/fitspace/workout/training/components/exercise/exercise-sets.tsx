@@ -19,6 +19,7 @@ import {
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
+import { cn } from '@/lib/utils'
 
 import { createOptimisticRemoveSetUpdate } from '../optimistic-updates'
 
@@ -264,7 +265,7 @@ export function ExerciseSets({
   return (
     <div className="flex flex-col w-full bg-card shadow-xs overflow-hidden mb-12">
       {/* Table Header */}
-      <div className="grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-3 items-center text-xs font-medium text-muted-foreground py-2 border-b border-border/50">
+      <div className="grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-3 items-center text-xs font-medium text-muted-foreground py-2 border-b border-border/70">
         <div className="text-center">Set</div>
         <div className="text-center">Previous</div>
         <div className="text-center">Reps</div>
@@ -300,7 +301,7 @@ export function ExerciseSets({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center border-t border-border/50">
+      <div className="grid grid-cols-[1fr_1fr] items-center border-t border-border/70 w-full">
         {hasExtraSets && (
           <Button
             variant="ghost"
@@ -317,7 +318,10 @@ export function ExerciseSets({
         <Button
           variant="ghost"
           size="lg"
-          className="flex-1 text-muted-foreground hover:text-foreground  rounded-none"
+          className={cn(
+            'text-muted-foreground hover:text-foreground  rounded-none',
+            hasExtraSets ? 'col-span-1' : 'col-span-full',
+          )}
           loading={isAddingSet}
           onClick={handleAddSet}
           iconStart={<PlusIcon className="size-3" />}
