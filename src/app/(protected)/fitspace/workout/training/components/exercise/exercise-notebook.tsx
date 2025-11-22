@@ -30,7 +30,7 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
         <div className="flex items-center gap-1 relative">
           <Button
             variant="secondary"
-            size="icon-lg"
+            size="icon-md"
             iconOnly={<NotebookPenIcon />}
           />
           {notesCount > 0 && (

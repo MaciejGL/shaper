@@ -221,7 +221,7 @@ export function ExerciseMiniMap({ exercises }: ExerciseMiniMapProps) {
         >
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-r-2xl shadow-sm backdrop-blur-md transition-all duration-300 bg-card/70 hover:bg-card/90 text-foreground"
+            className="flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-r-2xl shadow-sm backdrop-blur-md transition-all duration-300 bg-card/70 hover:bg-card/90 text-foreground border-y border-r"
           >
             {isExpanded ? (
               <>

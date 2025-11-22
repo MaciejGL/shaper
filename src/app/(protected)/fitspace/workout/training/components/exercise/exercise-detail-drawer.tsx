@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, Lightbulb, VideoIcon } from 'lucide-react'
+import { Lightbulb, VideoIcon, XIcon } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
@@ -31,7 +31,7 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
   return (
     <Drawer direction="right" disablePreventScroll>
       <DrawerTrigger asChild>
-        <Button variant="secondary" size="icon-lg" iconOnly={<VideoIcon />} />
+        <Button variant="secondary" size="icon-md" iconOnly={<VideoIcon />} />
       </DrawerTrigger>
       <DrawerContent
         dialogTitle="Exercise Metadata"
@@ -43,8 +43,8 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
             <Button
               variant="secondary"
               size="icon-lg"
-              iconOnly={<ChevronLeft className="dark text-white" />}
-              className="dark absolute top-4 left-4 rounded-full z-10 bg-black/30 dark:bg-black/30 border-none backdrop-blur-md transition-opacity"
+              iconOnly={<XIcon className="dark text-white" />}
+              className="dark absolute top-4 right-4 rounded-full z-10 bg-black/30 dark:bg-black/30 border-none backdrop-blur-md transition-opacity"
             />
           </DrawerClose>
           {/* Exercise Video */}

@@ -305,7 +305,7 @@ export function ExerciseSets({
           <Button
             variant="ghost"
             size="lg"
-            className=" flex-1 text-muted-foreground hover:text-foreground rounded-none border-r border-border"
+            className=" flex-1 text-muted-foreground hover:text-foreground rounded-none outline-r outline-border"
             loading={isRemovingSet}
             disabled={isRemovingSet}
             onClick={handleRemoveLastSet}
