@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit3, Plus, Reply, Send, Share, Trash2 } from 'lucide-react'
+import { Edit3, Reply, Send, Share, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { AnimateHeightItem } from '@/components/animations/animated-container'
@@ -71,7 +71,6 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
   const [editingText, setEditingText] = useState('')
   const [editingShareWithTrainer, setEditingShareWithTrainer] = useState(false)
-  const [isCreating, setIsCreating] = useState(false)
   const [newNoteText, setNewNoteText] = useState('')
   const [newNoteShareWithTrainer, setNewNoteShareWithTrainer] = useState(false)
 
@@ -81,7 +80,6 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
       setEditingNoteId(null)
       setEditingText('')
       setEditingShareWithTrainer(false)
-      setIsCreating(false)
       setNewNoteText('')
       setNewNoteShareWithTrainer(false)
     }
@@ -187,7 +185,6 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
     // Clear form immediately
     setNewNoteText('')
     setNewNoteShareWithTrainer(false)
-    setIsCreating(false)
 
     // Add note to cache immediately - user sees it right away
     const optimisticNote = createOptimisticNote(noteText, shareWithTrainer)
@@ -204,21 +201,10 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
       // Server sync will happen via refetch
       setNewNoteText(noteText)
       setNewNoteShareWithTrainer(shareWithTrainer)
-      setIsCreating(true)
     }
 
     // Always refetch to sync with server
     invalidateQueries()
-  }
-
-  const handleCancelCreate = () => {
-    setIsCreating(false)
-    setNewNoteText('')
-    setNewNoteShareWithTrainer(false)
-  }
-
-  const handleOpenCreateNote = () => {
-    setIsCreating((p) => !p)
   }
 
   return (
@@ -228,22 +214,6 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
       header={
         <div className="flex justify-between gap-2 items-center">
           <DrawerTitle>Exercise Notes</DrawerTitle>
-          <Button
-            variant="tertiary"
-            size="sm"
-            onClick={handleOpenCreateNote}
-            className="h-8 px-3 text-sm"
-            iconStart={
-              <Plus
-                className={cn(
-                  'h-4 w-4 transition-transform duration-200',
-                  isCreating && 'rotate-45',
-                )}
-              />
-            }
-          >
-            Add Note
-          </Button>
         </div>
       }
     >
@@ -251,23 +221,17 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
         <div className="space-y-6">
           {/* Create Note Form */}
           <CreateNoteForm
-            isCreating={isCreating}
             newNoteText={newNoteText}
             newNoteShareWithTrainer={newNoteShareWithTrainer}
             isCreatingNote={isCreatingNote}
             onNewNoteTextChange={setNewNoteText}
             onNewNoteShareWithTrainerChange={setNewNoteShareWithTrainer}
             onCreateNote={handleCreateNote}
-            onCancelCreate={handleCancelCreate}
           />
 
-          {notes.length === 0 && !isCreating ? (
+          {notes.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-sm text-muted-foreground">
-                {isCreating
-                  ? 'Add your first note above'
-                  : 'No notes yet. Click "Add Note" to start.'}
-              </p>
+              <p className="text-sm text-muted-foreground">No notes yet.</p>
             </div>
           ) : null}
 
@@ -302,26 +266,20 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
 
 // Create note form component
 function CreateNoteForm({
-  isCreating,
   newNoteText,
   newNoteShareWithTrainer,
   isCreatingNote,
   onNewNoteTextChange,
   onNewNoteShareWithTrainerChange,
   onCreateNote,
-  onCancelCreate,
 }: {
-  isCreating: boolean
   newNoteText: string
   newNoteShareWithTrainer: boolean
   isCreatingNote: boolean
   onNewNoteTextChange: (text: string) => void
   onNewNoteShareWithTrainerChange: (share: boolean) => void
   onCreateNote: () => void
-  onCancelCreate: () => void
 }) {
-  if (!isCreating) return null
-
   return (
     <div className="space-y-4">
       <Textarea
@@ -334,7 +292,7 @@ function CreateNoteForm({
         autoFocus
       />
 
-      <div className="flex items-center justify-between pt-2 border-t border-border">
+      <div className="flex items-center justify-between ">
         <div className="flex items-center space-x-2">
           <Switch
             id="share-new-note-trainer"
@@ -350,15 +308,6 @@ function CreateNoteForm({
         </div>
 
         <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onCancelCreate}
-            disabled={isCreatingNote}
-            className="h-8 px-3"
-          >
-            Cancel
-          </Button>
           <Button
             size="sm"
             onClick={onCreateNote}
