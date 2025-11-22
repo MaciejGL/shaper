@@ -60,6 +60,7 @@ const checkIfPersonalRecord = async (
 
 const markSetAsCompletedRelatedData = async (
   setId: string,
+  userId: string,
   reps?: number | null,
   weight?: number | null,
 ) => {
@@ -97,10 +98,19 @@ const markSetAsCompletedRelatedData = async (
   })
 
   if (incompleteSets === 0) {
-    await prisma.trainingExercise.update({
+    const exercise = await prisma.trainingExercise.update({
       where: { id: exerciseId },
       data: { completedAt: new Date() },
+      select: { dayId: true },
     })
+
+    if (userId) {
+      try {
+        await saveExercisePR(exerciseId, exercise.dayId, userId)
+      } catch (error) {
+        console.error('Error saving exercise PR:', error)
+      }
+    }
   } else {
     return null
   }
@@ -181,7 +191,7 @@ const markSetAsCompletedRelatedData = async (
   return true
 }
 
-const unmarkSetCompletedRelatedData = async (setId: string) => {
+const unmarkSetCompletedRelatedData = async (setId: string, userId: string) => {
   const set = await prisma.exerciseSet.update({
     where: { id: setId },
     data: {
@@ -208,6 +218,7 @@ const unmarkSetCompletedRelatedData = async (setId: string) => {
       },
     },
     select: {
+      exerciseId: true,
       exercise: {
         select: {
           dayId: true,
@@ -217,6 +228,14 @@ const unmarkSetCompletedRelatedData = async (setId: string) => {
   })
 
   updateWorkoutSessionEvent(set.exercise.dayId, GQLWorkoutSessionEvent.Progress)
+
+  if (userId) {
+    try {
+      await saveExercisePR(set.exerciseId, set.exercise.dayId, userId)
+    } catch (error) {
+      console.error('Error recalculating exercise PR:', error)
+    }
+  }
 
   return true
 }
@@ -230,7 +249,7 @@ export const markSetAsCompleted = async (
 
   // 1. Mark set as incomplete with all the related data
   if (!completed) {
-    await unmarkSetCompletedRelatedData(setId)
+    await unmarkSetCompletedRelatedData(setId, userId || '')
     return {
       success: true,
       isPersonalRecord: false,
@@ -239,7 +258,7 @@ export const markSetAsCompleted = async (
   }
 
   // 2. Mark set as completed in database
-  await markSetAsCompletedRelatedData(setId, reps, weight)
+  await markSetAsCompletedRelatedData(setId, userId || '', reps, weight)
 
   // 3. Check if this is a personal record (only if we have weight and reps)
   let prInfo = { isPersonalRecord: false, improvement: 0 }
@@ -411,6 +430,127 @@ export const markExerciseAsCompleted = async (
   }
 
   return true
+}
+
+const saveExercisePR = async (
+  exerciseId: string,
+  dayId: string,
+  userId: string,
+) => {
+  const completedSets = await prisma.exerciseSet.findMany({
+    where: {
+      exerciseId,
+      completedAt: { not: null },
+      log: {
+        weight: { not: null },
+        reps: { not: null },
+      },
+    },
+    include: {
+      log: true,
+      exercise: {
+        select: { baseId: true },
+      },
+    },
+  })
+
+  if (completedSets.length === 0) {
+    return
+  }
+
+  const baseExerciseId = completedSets[0]?.exercise.baseId
+  if (!baseExerciseId) {
+    return
+  }
+
+  let best1RM = 0
+  let bestWeight = 0
+  let bestReps = 0
+
+  for (const set of completedSets) {
+    if (!set.log?.weight || !set.log?.reps) continue
+
+    const reps = set.log.reps
+    const weight = set.log.weight
+    const estimated1RM = calculateEstimated1RM(weight, reps)
+
+    if (estimated1RM > best1RM) {
+      best1RM = estimated1RM
+      bestWeight = weight
+      bestReps = reps
+    }
+  }
+
+  if (best1RM === 0) {
+    return
+  }
+
+  const existingDayPR = await prisma.personalRecord.findUnique({
+    where: {
+      userId_baseExerciseId_dayId: {
+        userId,
+        baseExerciseId,
+        dayId,
+      },
+    },
+  })
+
+  const currentBestPRs = await prisma.$queryRaw<{ maxEstimated1RM: number }[]>`
+    SELECT 
+      MAX("estimated1RM") as "maxEstimated1RM"
+    FROM "PersonalRecord" 
+    WHERE "userId" = ${userId}
+      AND "baseExerciseId" = ${baseExerciseId}
+      AND "dayId" != ${dayId}
+  `
+
+  const currentBest = currentBestPRs[0]?.maxEstimated1RM || 0
+
+  if (currentBest <= 0) {
+    return
+  }
+
+  const isAboveThreshold = best1RM > currentBest * 1.01
+  if (!isAboveThreshold) {
+    if (existingDayPR) {
+      await prisma.personalRecord.delete({
+        where: { id: existingDayPR.id },
+      })
+    }
+    return
+  }
+
+  const improvement = ((best1RM - currentBest) / currentBest) * 100
+  const isRealisticPR = improvement <= 50
+
+  if (isRealisticPR) {
+    if (existingDayPR) {
+      await prisma.personalRecord.update({
+        where: { id: existingDayPR.id },
+        data: {
+          estimated1RM: best1RM,
+          weight: bestWeight,
+          reps: bestReps,
+          achievedAt: new Date(),
+        },
+      })
+    } else {
+      await prisma.personalRecord.create({
+        data: {
+          userId,
+          baseExerciseId,
+          dayId,
+          estimated1RM: best1RM,
+          weight: bestWeight,
+          reps: bestReps,
+        },
+      })
+    }
+  } else if (existingDayPR) {
+    await prisma.personalRecord.delete({
+      where: { id: existingDayPR.id },
+    })
+  }
 }
 
 const saveWorkoutPRs = async (dayId: string, userId: string) => {

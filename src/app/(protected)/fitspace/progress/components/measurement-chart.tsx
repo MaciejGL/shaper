@@ -19,6 +19,7 @@ interface MeasurementChartProps {
   label: string
   unit: string
   className?: string
+  withAverage?: boolean
 }
 
 // Calculate running average (cumulative average from start to each point)
@@ -36,6 +37,7 @@ export function MeasurementChart({
   label,
   unit,
   className,
+  withAverage = false,
 }: MeasurementChartProps) {
   // First, prepare the filtered and sorted data with values
   const filteredData = measurements
@@ -77,12 +79,14 @@ export function MeasurementChart({
           label: `${label} (${unit})`,
           color: 'var(--chart-1)',
         },
-        [`${field}Average`]: {
-          label: `Weekly Average (${unit})`,
-          color: 'var(--chart-2)',
-        },
+        ...(withAverage && {
+          [`${field}Average`]: {
+            label: `Weekly Average (${unit})`,
+            color: 'var(--chart-2)',
+          },
+        }),
       }) satisfies ChartConfig,
-    [field, label, unit],
+    [field, label, unit, withAverage],
   )
 
   // Custom legend formatter to use chartConfig labels
@@ -135,14 +139,16 @@ export function MeasurementChart({
             fill: 'transparent',
           }}
         />
-        <Line
-          dataKey={`${field}Average`}
-          type="monotone"
-          stroke={`var(--color-${field}Average)`}
-          strokeWidth={1}
-          dot={false}
-          connectNulls={false}
-        />
+        {withAverage && (
+          <Line
+            dataKey={`${field}Average`}
+            type="monotone"
+            stroke={`var(--color-${field}Average)`}
+            strokeWidth={1}
+            dot={false}
+            connectNulls={false}
+          />
+        )}
         <Legend
           verticalAlign="bottom"
           height={20}

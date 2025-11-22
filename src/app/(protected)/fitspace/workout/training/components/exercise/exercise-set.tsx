@@ -1,9 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { debounce, isNil } from 'lodash'
-import { CheckIcon, TrophyIcon } from 'lucide-react'
+import { debounce } from 'lodash'
+import { CheckIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import React, {
+import {
   startTransition,
   useCallback,
   useEffect,
@@ -24,19 +24,14 @@ import {
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
-import { formatDecimalInput } from '@/lib/format-tempo'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
 import { calculateEstimated1RM } from '@/utils/one-rm-calculator'
 
-import { getSetRange } from '../../../utils'
 import { ExerciseWeightInput } from '../exercise-weight-input'
 import { createOptimisticSetUpdate } from '../optimistic-updates'
 
-import {
-  sharedLayoutAdvancedStyles,
-  sharedLayoutSimpleStyles,
-} from './shared-styles'
+import { sharedLayoutAdvancedStyles } from './shared-styles'
 import { ExerciseSetProps } from './types'
 
 export function ExerciseSet({
@@ -47,15 +42,13 @@ export function ExerciseSet({
   weight,
   onRepsChange,
   onWeightChange,
-  isLastSet,
   onSetCompleted,
   onSetUncompleted,
 }: ExerciseSetProps) {
   const [dayId] = useQueryState('day')
   const { preferences } = useUserPreferences()
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
-  const hasUserEdited = useRef(false)
-  const { toDisplayWeight } = useWeightConversion()
+  const hasUserEditedRef = useRef(false)
   const queryClient = useQueryClient()
   const [skipTimer, setSkipTimer] = useState(false)
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -184,7 +177,7 @@ export function ExerciseSet({
   const debouncedUpdate = useMemo(
     () =>
       debounce(async (repsValue: string, weightValue: string) => {
-        if (!hasUserEdited.current) return
+        if (!hasUserEditedRef.current) return
         await updateSetLog({
           input: {
             setId: set.id,
@@ -201,37 +194,6 @@ export function ExerciseSet({
     return () => debouncedUpdate.cancel()
   }, [reps, weight, debouncedUpdate])
 
-  const repRange = useMemo(() => getSetRange(set), [set])
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    key: 'reps' | 'weight',
-  ) => {
-    const sanitizedValue =
-      key === 'weight'
-        ? formatDecimalInput(e) // For weight, use the standard function that supports comma/period
-        : e.target.value.replace(/[^0-9]/g, '') // For reps, only allow digits
-
-    hasUserEdited.current = true
-
-    if (key === 'reps') {
-      onRepsChange(sanitizedValue)
-    } else {
-      onWeightChange(sanitizedValue)
-    }
-  }
-
-  // Get data from previous workout for the "PREVIOUS" column (same set order from most recent workout with data)
-  const getPreviousSetForColumn = () => {
-    if (!previousSetRepsLog && !previousSetWeightLog) return null
-    return {
-      reps: previousSetRepsLog,
-      weight: previousSetWeightLog,
-    }
-  }
-
-  const thisSet = getPreviousSetForColumn()
-
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -247,13 +209,11 @@ export function ExerciseSet({
       const repsValue = reps ? +reps : previousSetRepsLog || null
       const weightValue = weight ? +weight : previousSetWeightLog || null
 
-      // Set skip timer flag for double clicks
       if (isDoubleClick) {
         setSkipTimer(true)
       }
 
       startTransition(() => {
-        // Close timer immediately for uncompleting
         if (!willBeCompleted) {
           onSetUncompleted()
         }
@@ -268,7 +228,6 @@ export function ExerciseSet({
         })
       } catch (error) {
         console.error('Failed to toggle set completion:', error)
-        // Reset timer states on error (error handling is also done in the mutation onError)
         setSkipTimer(false)
       }
     },
@@ -285,242 +244,234 @@ export function ExerciseSet({
   )
 
   const handleClick = useCallback(() => {
-    // Clear any existing timeout
     if (clickTimeoutRef.current) {
       clearTimeout(clickTimeoutRef.current)
     }
 
-    // Set timeout for single click
     clickTimeoutRef.current = setTimeout(() => {
-      handleToggleSetCompletion(false) // Single click
-    }, 250) // 250ms delay to detect double click
+      handleToggleSetCompletion(false)
+    }, 250)
   }, [handleToggleSetCompletion])
+
+  const isCompleted = !!set.completedAt
+  const { toDisplayWeight } = useWeightConversion()
+
+  const previousDisplayWeight = previousSetWeightLog
+    ? toDisplayWeight(previousSetWeightLog)?.toString()
+    : null
+
+  const targetDisplayWeight = set.weight
+    ? toDisplayWeight(set.weight)?.toString()
+    : null
+
+  const displayWeight = isAdvancedView
+    ? null
+    : weight
+      ? weight
+      : (targetDisplayWeight ?? '-')
+
+  const displayReps = isAdvancedView
+    ? null
+    : reps
+      ? reps
+      : set.reps
+        ? `${set.reps}`
+        : set.minReps
+          ? `${set.minReps}-${set.maxReps}`
+          : '-'
 
   return (
     <motion.div
       key={`set-${set.id}`}
-      initial={{ height: 0 }}
-      animate={{ height: 'auto' }}
-      exit={{ height: 0 }}
-      transition={{ duration: 0.15, ease: 'linear' }}
-      className={cn('relative', !isLastSet && 'border-b border-border/50')}
+      layout
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.2, ease: 'easeInOut' }}
+      className={cn(
+        'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-3 items-center py-1.5 not-last-of-type:border-b border-border/50',
+      )}
     >
-      {isAdvancedView && (
-        <div className="flex items-center gap-1 mb-0.5">
-          <div
-            className={cn(
-              isAdvancedView
-                ? sharedLayoutAdvancedStyles
-                : sharedLayoutSimpleStyles,
-              'pb-0.5 pt-1 leading-none',
-              set.isExtra && !repRange && 'opacity-0 h-0',
-            )}
-          >
-            <div />
-            <div />
-            <div className="text-[0.75rem] text-muted-foreground text-center">
-              {set.isExtra && !repRange ? 'Extra' : repRange}
-            </div>
-            <div className="text-[0.75rem] text-muted-foreground text-center">
-              {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
-            </div>
-            <div />
-          </div>
+      {/* Set Number */}
+      <div
+        className={cn(
+          'text-xs font-medium text-center rounded-full size-5 flex items-center justify-center mx-auto',
+          'bg-muted text-muted-foreground',
+        )}
+      >
+        {set.order}
+      </div>
+
+      {/* Previous Log */}
+      <div className="text-xs text-muted-foreground text-center truncate">
+        {previousSetRepsLog ? `${previousSetRepsLog} × ` : ''}
+        {previousDisplayWeight
+          ? `${previousDisplayWeight}${preferences.weightUnit}`
+          : '-'}
+      </div>
+
+      {/* Reps Input / Text */}
+      {isAdvancedView ? (
+        <Input
+          id={`set-${set.id}-reps`}
+          value={reps}
+          onChange={(e) => {
+            hasUserEditedRef.current = true
+            const val = e.target.value.replace(/[^0-9]/g, '')
+            onRepsChange(val)
+          }}
+          inputMode="numeric"
+          variant="secondary"
+          placeholder={set.minReps ? `${set.minReps}` : '-'}
+          className="text-center h-8 focus-visible:ring-0 text-sm w-full"
+        />
+      ) : (
+        <div className="text-center text-sm font-medium">{displayReps}</div>
+      )}
+
+      {/* Weight Input / Text */}
+      {isAdvancedView ? (
+        <ExerciseWeightInput
+          setId={set.id}
+          weightInKg={weight ? parseFloat(weight) : null}
+          onWeightChange={(weightInKg) => {
+            hasUserEditedRef.current = true
+            onWeightChange(weightInKg?.toString() || '')
+          }}
+          showWeightUnit={false}
+        />
+      ) : (
+        <div className="text-center text-sm font-medium">
+          {displayWeight}
+          {displayWeight !== '-' && (
+            <span className="text-xs text-muted-foreground ml-0.5">
+              {preferences.weightUnit}
+            </span>
+          )}
         </div>
       )}
 
-      <div className={cn('flex items-start gap-1 pb-2', isLastSet && 'pb-0')}>
-        <div
+      {/* Check Button */}
+      <div className="flex justify-center">
+        <Button
+          variant={isCompleted ? 'default' : 'secondary'}
+          size="icon-sm"
+          iconOnly={
+            <CheckIcon className={cn(isCompleted && 'text-green-600')} />
+          }
+          onClick={handleClick}
           className={cn(
-            isAdvancedView
-              ? sharedLayoutAdvancedStyles
-              : sharedLayoutSimpleStyles,
-            'text-primary relative',
-            !isAdvancedView && 'pt-2',
+            isCompleted &&
+              'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
           )}
-        >
-          <div className="text-sm text-muted-foreground text-center">
-            {set.order}
-          </div>
-          {isAdvancedView && (
-            <div className="text-xs text-muted-foreground text-center">
-              <div>
-                {!isNil(thisSet?.reps || thisSet?.weight) ? (
-                  <p>
-                    {typeof thisSet?.reps === 'number'
-                      ? thisSet.reps.toString()
-                      : ''}
-                    {!isNil(thisSet?.weight) && !isNil(thisSet?.reps) && ' x '}
-                    {typeof thisSet?.weight === 'number'
-                      ? toDisplayWeight(thisSet.weight)?.toString() +
-                        preferences.weightUnit
-                      : ''}
-                  </p>
-                ) : (
-                  <div className="bg-muted w-6 h-0.5 rounded-md mx-auto" />
-                )}
-              </div>
-            </div>
-          )}
-          {isAdvancedView ? (
-            <Input
-              id={`set-${set.id}-reps`}
-              value={reps}
-              onChange={(e) => handleInputChange(e, 'reps')}
-              inputMode="decimal"
-              variant={'secondary'}
-              placeholder={previousSetRepsLog?.toString() || ''}
-              className="text-center"
-              size="sm"
-            />
-          ) : (
-            <div className="text-center text-sm">
-              {repRange || (previousSetRepsLog?.toString() ?? '--')}
-            </div>
-          )}
-          {isAdvancedView ? (
-            <ExerciseWeightInput
-              setId={set.id}
-              weightInKg={weight ? parseFloat(weight) : null}
-              onWeightChange={(weightInKg) => {
-                hasUserEdited.current = true
-                onWeightChange(weightInKg?.toString() || '')
-              }}
-              placeholder={
-                previousSetWeightLog
-                  ? toDisplayWeight(previousSetWeightLog)?.toString()
-                  : ''
-              }
-              disabled={false}
-              showWeightUnit={false}
-            />
-          ) : (
-            <div className="text-center text-sm text-muted-foreground">
-              {set.log?.weight
-                ? toDisplayWeight(set.log.weight)?.toFixed(1)
-                : set.weight
-                  ? toDisplayWeight(set.weight)?.toFixed(1)
-                  : previousSetWeightLog
-                    ? toDisplayWeight(previousSetWeightLog)?.toFixed(1)
-                    : '--'}
-            </div>
-          )}
-          <div className="flex justify-center">
-            <Button
-              variant="tertiary"
-              size="icon-sm"
-              iconOnly={
-                <CheckIcon
-                  className={cn(
-                    'size-4 transition-colors',
-                    set.completedAt
-                      ? 'text-green-500'
-                      : 'text-muted-foreground/40',
-                  )}
-                />
-              }
-              onClick={handleClick}
-              className={cn(
-                'self-center',
-                set.completedAt &&
-                  'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
-              )}
-            />
-          </div>
-        </div>
+        />
       </div>
 
-      {/* PR Celebration Overlay */}
-      {isAdvancedView && (
-        <AnimatePresence mode="wait">
-          {prData?.show && (
-            <motion.div
-              key="pr-overlay"
-              initial={{ width: 0 }}
-              animate={{ width: '100%' }}
-              exit={{ width: 0 }}
-              transition={{
-                duration: 1,
-                type: 'spring',
-                stiffness: 400,
-                damping: 25,
-              }}
-              onClick={() => setPRData(null)}
+      <PROverlay
+        isAdvancedView={isAdvancedView}
+        prData={prData}
+        onClose={() => setPRData(null)}
+      />
+    </motion.div>
+  )
+}
+
+interface PROverlayProps {
+  isAdvancedView: boolean
+  prData: {
+    show: boolean
+    improvement: number
+    estimated1RM: number
+  } | null
+  onClose: () => void
+}
+
+function PROverlay({ isAdvancedView, prData, onClose }: PROverlayProps) {
+  const { preferences } = useUserPreferences()
+  const { toDisplayWeight } = useWeightConversion()
+
+  if (!isAdvancedView) return null
+
+  return (
+    <AnimatePresence mode="wait">
+      {prData?.show && (
+        <motion.div
+          key="pr-overlay"
+          initial={{ width: 0 }}
+          animate={{ width: '100%' }}
+          exit={{ width: 0 }}
+          transition={{
+            duration: 1,
+            type: 'spring',
+            stiffness: 400,
+            damping: 25,
+          }}
+          onClick={onClose}
+          className={cn(
+            sharedLayoutAdvancedStyles,
+            'absolute left-0 top-0 bottom-0 z-10 h-full px-0',
+          )}
+        >
+          <motion.div
+            key="pr-overlay-content"
+            initial={{ width: 0 }}
+            animate={{ width: '100%' }}
+            exit={{ width: 0 }}
+            className={cn(
+              'bg-gradient-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/2 dark:to-amber-600/60 backdrop-blur-[5px] rounded-r-lg h-full overflow-hidden',
+              'col-span-3',
+            )}
+          >
+            <div
               className={cn(
-                sharedLayoutAdvancedStyles,
-                'absolute left-0 top-0 bottom-0 z-10 h-full px-0',
+                'flex items-center justify-end h-full',
+                'px-4 gap-4',
               )}
             >
               <motion.div
-                key="pr-overlay-content"
-                initial={{ width: 0 }}
-                animate={{ width: '100%' }}
-                exit={{ width: 0 }}
-                className={cn(
-                  'bg-gradient-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/2 dark:to-amber-600/60 backdrop-blur-[5px] rounded-r-lg h-full overflow-hidden',
-                  'col-span-3',
-                )}
+                key="pr-overlay-content-inner"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  duration: 0.2,
+                  delay: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+                className="flex justify-center items-center gap-4 overflow-hidden"
               >
                 <div
                   className={cn(
-                    'flex items-center justify-between h-full',
-                    'px-4 gap-4',
+                    'text-lg font-semibold whitespace-nowrap',
+                    'text-lg',
                   )}
                 >
-                  <div className="flex items-center flex-col justify-center animate-pulse">
-                    <TrophyIcon
-                      className={cn(
-                        'text-yellow-500 dark:text-amber-400 shrink-0',
-                        'size-4',
-                      )}
-                    />
-                    <span
-                      className={cn(
-                        'text-[10px] font-medium whitespace-nowrap',
-                        'text-[10px]',
-                      )}
-                    >
-                      New PR!
-                    </span>
-                  </div>
-                  <motion.div
-                    key="pr-overlay-content-inner"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{
-                      duration: 0.2,
-                      delay: 0.2,
-                      type: 'spring',
-                      stiffness: 200,
-                      damping: 25,
-                    }}
-                    className="flex items-baseline justify-center gap-4 overflow-hidden"
+                  <p
+                    className={cn(
+                      'text-[10px] font-medium whitespace-nowrap',
+                      'text-[10px]',
+                    )}
                   >
-                    <div
-                      className={cn(
-                        'text-lg font-semibold whitespace-nowrap',
-                        'text-lg',
-                      )}
-                    >
-                      {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(1)}{' '}
-                      {preferences.weightUnit}
-                    </div>
-                    <div
-                      className={cn(
-                        'text-base font-medium flex items-center gap-1 text-green-600 dark:text-amber-300 whitespace-nowrap',
-                        'text-base',
-                      )}
-                    >
-                      +{prData?.improvement.toFixed(1) || 3}%{' '}
-                    </div>
-                  </motion.div>
+                    New PR!
+                  </p>
+                  {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(1)}{' '}
+                  {preferences.weightUnit}
+                </div>
+                <div
+                  className={cn(
+                    'text-base font-medium flex items-center gap-1 text-green-600 dark:text-amber-300 whitespace-nowrap',
+                    'text-base',
+                  )}
+                >
+                  +{prData?.improvement.toFixed(1) || 3}%{' '}
                 </div>
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
-    </motion.div>
+    </AnimatePresence>
   )
 }

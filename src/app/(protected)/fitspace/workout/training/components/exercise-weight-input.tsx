@@ -21,7 +21,7 @@ export function ExerciseWeightInput({
   placeholder,
   disabled = false,
   showWeightUnit = true,
-  decimals = 1,
+  decimals = 2,
 }: ExerciseWeightInputProps) {
   const { toDisplayWeight, toStorageWeight, weightUnit } = useWeightConversion()
 
@@ -99,9 +99,9 @@ export function ExerciseWeightInput({
         placeholder={placeholder}
         disabled={disabled}
         inputMode="decimal"
-        className="min-w-[80px] text-center"
+        className="text-center h-8 focus-visible:ring-0 text-sm w-full"
         variant="secondary"
-        size="sm"
+        size="lg"
         iconEnd={
           showWeightUnit ? (
             <div className="text-xs text-muted-foreground pointer-events-none">

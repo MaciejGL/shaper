@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
   cn(
-    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-200 disabled:pointer-events-none [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 [&_svg]:size-4 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive relative flex cursor-pointer',
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 disabled:pointer-events-none [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 [&_svg]:size-4 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive relative flex cursor-pointer',
     // Improved loading state with text dimming instead of transparency
     'data-[loading=true]:pointer-events-none data-[loading=true]:opacity-80',
   ),
@@ -30,12 +30,12 @@ const buttonVariants = cva(
           'data-[loading=true]:bg-accent/30 data-[loading=true]:text-accent-foreground/30 disabled:bg-input/20 disabled:text-foreground/30',
         ),
         secondary: cn(
-          'bg-card hover:bg-secondary/80 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80',
+          'bg-card hover:bg-secondary/80 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 border border-border',
           // Loading state for secondary variant
-          'data-[loading=true]:bg-card/90 data-[loading=true]:text-secondary-foreground/30 disabled:bg-card/50 disabled:text-secondary-foreground/40 border',
+          'data-[loading=true]:bg-card/90 data-[loading=true]:text-secondary-foreground/30 disabled:bg-card/50 disabled:text-secondary-foreground/40',
         ),
         tertiary: cn(
-          'bg-card-on-card hover:bg-primary/15 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 disabled:dark:opacity-40',
+          'bg-card-on-card hover:bg-primary/15 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 disabled:dark:opacity-40 shadow-xs',
           // Loading state for tertiary variant
           'data-[loading=true]:bg-card-on-card/12 data-[loading=true]:text-foreground/10 disabled:bg-card-on-card/5 disabled:text-foreground/30',
         ),
@@ -65,13 +65,13 @@ const buttonVariants = cva(
         xs: 'h-7 rounded-lg px-2.5 has-[>svg]:px-2 text-xs [&_svg]:size-3',
         sm: 'h-8 rounded-lg px-3 has-[>svg]:px-2.5 [&_svg]:size-3.5',
         md: 'h-9 px-4 py-2 has-[>svg]:px-3 [&_svg]:size-4',
-        lg: 'h-10 text-sm rounded-xl px-6 has-[>svg]:px-4 [&_svg]:size-5',
-        xl: 'h-12 text-md rounded-xl px-8 has-[>svg]:px-5 [&_svg]:size-6',
+        lg: 'h-10 text-sm px-6 has-[>svg]:px-4 [&_svg]:size-4.5',
+        xl: 'h-12 text-md px-8 has-[>svg]:px-5 [&_svg]:size-6',
         'icon-xs': 'size-7 [&_svg]:size-4 rounded-lg',
         'icon-sm': 'size-8 [&_svg]:size-4 rounded-lg',
-        'icon-md': 'size-9 [&_svg]:size-4 rounded-xl',
-        'icon-lg': 'size-10 [&_svg]:size-4 rounded-xl',
-        'icon-xl': 'size-12 [&_svg]:size-4 rounded-xl',
+        'icon-md': 'size-9 [&_svg]:size-4',
+        'icon-lg': 'size-10 [&_svg]:size-4',
+        'icon-xl': 'size-12 [&_svg]:size-4',
       },
     },
     defaultVariants: {

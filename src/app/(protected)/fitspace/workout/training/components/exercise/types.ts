@@ -44,8 +44,6 @@ export interface ExerciseSetProps {
   weight: string
   onRepsChange: (reps: string) => void
   onWeightChange: (weight: string) => void
-  onDelete: () => void
-  isLastSet: boolean
   onSetCompleted: (skipTimer?: boolean) => void
   onSetUncompleted: () => void
 }

@@ -79,7 +79,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   weekStartsOn: DEFAULT_WEEK_START,
   weightUnit: GQLWeightUnit.Kg,
   heightUnit: GQLHeightUnit.Cm,
-  theme: GQLTheme.System,
+  theme: GQLTheme.Dark,
   timeFormat: GQLTimeFormat.H24,
   trainingView: GQLTrainingView.Advanced,
   notifications: DEFAULT_NOTIFICATIONS,

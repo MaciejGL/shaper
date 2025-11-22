@@ -1,6 +1,6 @@
 'use client'
 
-import { Lightbulb, VideoIcon, XIcon } from 'lucide-react'
+import { ChevronLeft, Lightbulb, VideoIcon } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +14,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer'
 import { SectionIcon } from '@/components/ui/section-icon'
-import { getYouTubeEmbedUrl } from '@/lib/get-youtube-embed-url'
+import { YouTubePlayer } from '@/components/youtube-player'
 import { cn } from '@/lib/utils'
 
 import { WorkoutExercise } from '../workout-day'
@@ -29,35 +29,33 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
 
   if (!images.length) return null
   return (
-    <Drawer>
+    <Drawer direction="right" disablePreventScroll>
       <DrawerTrigger asChild>
-        <Button variant="tertiary" size="icon-md" iconOnly={<VideoIcon />} />
+        <Button variant="secondary" size="icon-lg" iconOnly={<VideoIcon />} />
       </DrawerTrigger>
       <DrawerContent
         dialogTitle="Exercise Metadata"
-        className="data-[vaul-drawer-direction=bottom]:max-h-[93vh] overflow-hidden"
+        className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
         grabber={false}
       >
         <div className="overflow-y-auto overscroll-behavior-y-contain">
           <DrawerClose asChild>
             <Button
-              variant="tertiary"
-              size="icon-sm"
-              iconOnly={<XIcon />}
-              className="absolute top-2 right-2 rounded-full z-10"
+              variant="secondary"
+              size="icon-lg"
+              iconOnly={<ChevronLeft className="dark text-white" />}
+              className="dark absolute top-4 left-4 rounded-full z-10 bg-black/30 dark:bg-black/30 border-none backdrop-blur-md transition-opacity"
             />
           </DrawerClose>
           {/* Exercise Video */}
           {videoUrl && (
             <div className="aspect-video w-full">
-              <iframe
-                src={getYouTubeEmbedUrl(videoUrl, {
-                  autoplay: true,
-                  mute: true,
-                  loop: true,
-                })}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowFullScreen
+              <YouTubePlayer
+                videoUrl={videoUrl}
+                autoplay={true}
+                mute={true}
+                loop={true}
+                minimal={true}
                 className="w-full h-full"
               />
             </div>
@@ -77,9 +75,6 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
                     className="object-cover"
                     sizes="(max-width: 768px) 50vw, 33vw"
                   />
-                  <div className="absolute size-6 top-2 left-2 flex-center rounded-full bg-black/70 text-white font-semibold text-sm p-1">
-                    {index + 1}
-                  </div>
                 </div>
               ))}
             </div>
@@ -97,7 +92,7 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
               <div className="flex flex-wrap gap-1">
                 {exercise.muscleGroups &&
                   exercise.muscleGroups.length > 0 &&
-                  exercise.muscleGroups.slice(0, 2).map((muscleGroup) => (
+                  exercise.muscleGroups.slice(0, 1).map((muscleGroup) => (
                     <Badge
                       variant="secondary"
                       className="w-fit capitalize"
@@ -139,9 +134,6 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
                         fill
                         className="object-cover"
                       />
-                      <div className="absolute size-6 top-2 left-2 flex-center rounded-full bg-black/70 text-white font-semibold text-sm p-1">
-                        {index + 1}
-                      </div>
                     </div>
                   ))}
                 </div>

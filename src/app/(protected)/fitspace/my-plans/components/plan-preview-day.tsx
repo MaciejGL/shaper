@@ -28,7 +28,7 @@ export function PlanPreviewDay({
   isTemplate = false,
   canViewDays = false,
 }: PlanPreviewDayProps) {
-  const dayName = getDayName(day.dayOfWeek, { short: true })
+  const dayName = getDayName(day.dayOfWeek)
   const exercises = day.exercises || []
   const totalExercises = exercises.length
   const completedExercises = exercises.filter(
@@ -37,7 +37,7 @@ export function PlanPreviewDay({
 
   if (day.isRestDay || exercises.length === 0) {
     return (
-      <div className="opacity-75">
+      <div className="opacity-50">
         <div
           className={cn(
             'text-sm font-medium mb-2 bg-card-on-card p-4 rounded-xl flex items-center justify-between',
@@ -49,12 +49,6 @@ export function PlanPreviewDay({
             {day.isRestDay && <span className="ml-2 text-xs">Rest Day</span>}
           </div>
         </div>
-
-        {day.isRestDay && (
-          <div className="pl-0 space-y-2">
-            <PlanPreviewExerciseRow isRestDay />
-          </div>
-        )}
 
         {!day.isRestDay && exercises.length === 0 && (
           <p className="text-xs text-muted-foreground pl-4">
@@ -73,14 +67,7 @@ export function PlanPreviewDay({
         hasPremium={canViewDays}
         tooltipText="Premium required to view day details"
       >
-        <AccordionTrigger
-          variant="outline"
-          disabled={!canViewDays}
-          className={cn(
-            'text-sm font-medium bg-card-on-card hover:bg-card-on-card/80',
-            'mb-0',
-          )}
-        >
+        <AccordionTrigger variant="default" disabled={!canViewDays}>
           <div className="flex items-center justify-between w-full pr-2">
             <span>
               {dayName} {workoutTypeLabel && `• ${workoutTypeLabel}`}
@@ -96,7 +83,7 @@ export function PlanPreviewDay({
                       : 'text-muted-foreground',
                 )}
               >
-                {completedExercises} / {totalExercises} completed
+                {completedExercises} / {totalExercises}
               </span>
             )}
             {isTemplate && totalExercises > 0 && (

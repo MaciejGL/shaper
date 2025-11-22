@@ -56,7 +56,6 @@ export const WorkoutDay = ({
   const { data: dayData } = use(dayDataPromise)
   const queryClient = useQueryClient()
   const router = useRouter()
-
   // Handle both getWorkoutDay (trainer plans) and getQuickWorkoutDay (quick workouts)
   const initialDay =
     'getWorkoutDay' in (dayData ?? {})

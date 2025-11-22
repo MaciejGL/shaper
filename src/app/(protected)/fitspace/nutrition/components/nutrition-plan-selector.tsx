@@ -117,13 +117,16 @@ export function NutritionPlanSelector({
   const effectiveSelectedPlan = selectedPlanId || localSelectedPlan
 
   return (
-    <div className="w-full flex items-center gap-2 dark">
+    <div className="grid grid-cols-[auto_1fr] items-center gap-2 dark">
       <Select
         value={effectiveSelectedPlan || ''}
         onValueChange={handlePlanChange}
       >
-        <SelectTrigger className="w-full" variant="default">
-          <SelectValue placeholder="Select a nutrition plan" />
+        <SelectTrigger variant="default" className="truncate overflow-hidden">
+          <SelectValue
+            placeholder="Select a nutrition plan"
+            className="truncate overflow-hidden"
+          />
         </SelectTrigger>
         <SelectContent>
           {sortedPlans.map((plan) => (

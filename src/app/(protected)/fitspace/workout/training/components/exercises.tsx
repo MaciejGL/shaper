@@ -1,5 +1,6 @@
 'use client'
 
+import { LayoutGroup, motion } from 'framer-motion'
 import { CheckCheck } from 'lucide-react'
 import React from 'react'
 
@@ -21,8 +22,8 @@ import { AddToFavouritesButton } from './add-to-favourites-button'
 import { ClearWorkoutModal } from './clear-workout-modal'
 import { EmptyWorkoutOptions } from './empty-workout-options'
 import { Exercise } from './exercise'
+import { ExerciseMiniMap } from './exercise-mini-map'
 import { RestDay } from './rest-day'
-import { WorkoutActions } from './workout-actions'
 
 interface ExercisesProps {
   day?: NonNullable<GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']>['day']
@@ -38,6 +39,32 @@ export function Exercises({
   isQuickWorkout = false,
 }: ExercisesProps) {
   const { preferences, setTrainingView } = useUserPreferences()
+
+  const progressBarRef = React.useRef<HTMLDivElement>(null)
+  const [isProgressBarAtTop, setIsProgressBarAtTop] = React.useState(false)
+
+  React.useEffect(() => {
+    const element = progressBarRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsProgressBarAtTop(
+          !entry.isIntersecting && entry.boundingClientRect.top <= 0,
+        )
+      },
+      {
+        threshold: [0, 1],
+        rootMargin: '0px',
+      },
+    )
+
+    observer.observe(element)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   // Calculate last activity timestamp from most recent set log
   const lastActivityTimestamp = React.useMemo(() => {
@@ -115,63 +142,91 @@ export function Exercises({
     )
   }
 
+  // Prepare mini-map data
+  const miniMapExercises = exercises.map((ex) => ({
+    id: ex.id,
+    name: ex.name,
+    order: ex.order,
+    completedAt: ex.completedAt ?? null,
+  }))
+
   // Main workout view
   return (
-    <div>
-      <div className="flex flex-col pb-4 space-y-2 w-full">
-        {hasNamedWorkoutType && (
-          <p className="text-lg font-medium text-center pb-2">
-            {formatWorkoutType(day.workoutType!)}
-          </p>
-        )}
-        <div className="grid grid-flow-col gap-2 bg-background">
-          <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card border border-border w-full rounded-2xl">
-            <Switch
-              checked={preferences.trainingView === GQLTrainingView.Advanced}
-              onCheckedChange={() =>
-                setTrainingView(
-                  preferences.trainingView === GQLTrainingView.Advanced
-                    ? GQLTrainingView.Simple
-                    : GQLTrainingView.Advanced,
-                )
-              }
+    <LayoutGroup>
+      {hasExercises && <ExerciseMiniMap exercises={miniMapExercises} />}
+      <div>
+        <div className="flex flex-col pb-4 space-y-2 w-full px-2">
+          {hasNamedWorkoutType && (
+            <p className="text-lg font-medium text-center pb-2">
+              {formatWorkoutType(day.workoutType!)}
+            </p>
+          )}
+          <div className="grid grid-cols-2 gap-2 bg-background">
+            <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card dark:bg-background text-secondary-foreground [a&]:hover:bg-muted-foreground/20 border border-border rounded-2xl">
+              <Switch
+                size="lg"
+                checked={preferences.trainingView === GQLTrainingView.Advanced}
+                onCheckedChange={() =>
+                  setTrainingView(
+                    preferences.trainingView === GQLTrainingView.Advanced
+                      ? GQLTrainingView.Simple
+                      : GQLTrainingView.Advanced,
+                  )
+                }
+              />
+              Logging Mode
+            </Label>
+
+            <ExercisesCompleted
+              completedExercises={completedExercises}
+              totalExercises={exercises.length}
             />
-            Logging Mode
-          </Label>
-
-          <ExercisesCompleted
-            completedExercises={completedExercises}
-            totalExercises={exercises.length}
-          />
-        </div>
-        <Progress value={progressPercentage} />
-      </div>
-
-      <div className="space-y-6">
-        {exercises.map((exercise) => (
-          <Exercise
-            key={exercise.id}
-            exercise={exercise}
-            previousDayLogs={previousDayLogs}
-          />
-        ))}
-        {isQuickWorkout && day.id && (
-          <div className="grid grid-cols-[auto_1fr] gap-2 pb-4">
-            <div>
-              <ClearWorkoutModal dayId={day.id} />
-            </div>
-            <div>
-              <AddSingleExercise dayId={day.id} variant="button" />
-            </div>
-
-            <div className="col-span-full empty:hidden">
-              <AddToFavouritesButton day={day} />
-            </div>
           </div>
+          <div ref={progressBarRef} className="sticky top-0">
+            <motion.div layout layoutId="workout-progress">
+              <Progress value={progressPercentage} />
+            </motion.div>
+          </div>
+        </div>
+
+        {isProgressBarAtTop && (
+          <motion.div
+            layout
+            layoutId="workout-progress"
+            className="fixed top-0 left-0 right-0 z-50"
+          >
+            <Progress
+              value={progressPercentage}
+              className="rounded-none bg-background/50"
+            />
+          </motion.div>
         )}
-        <WorkoutActions />
+
+        <div>
+          {exercises.map((exercise) => (
+            <Exercise
+              key={exercise.id}
+              exercise={exercise}
+              previousDayLogs={previousDayLogs}
+            />
+          ))}
+          {isQuickWorkout && day.id && (
+            <div className="grid grid-cols-[auto_1fr] gap-2 pb-4">
+              <div>
+                <ClearWorkoutModal dayId={day.id} />
+              </div>
+              <div>
+                <AddSingleExercise dayId={day.id} variant="button" />
+              </div>
+
+              <div className="col-span-full empty:hidden">
+                <AddToFavouritesButton day={day} />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </LayoutGroup>
   )
 }
 

@@ -4,12 +4,13 @@ import { ArrowRight, BicepsFlexed } from 'lucide-react'
 import { AnimateNumber } from '@/components/animate-number'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetPlanSummaryQuery } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import { getTopProgressions } from '../../utils/summary-helpers'
+
+import { StrengthProgressChart } from './strength-progress-chart'
 
 interface StrengthProgressProps {
   summary: GQLGetPlanSummaryQuery['getPlanSummary']
@@ -38,7 +39,7 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
       </div>
 
       <motion.div
-        className="space-y-2"
+        className="space-y-3"
         variants={{
           hidden: { opacity: 0 },
           show: {
@@ -77,19 +78,17 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                       %
                     </Badge>
                   </div>
-                  {/* Progress bar */}
-                  <Progress
-                    value={progression.improvementPercentage}
-                    className="h-2 w-full "
-                    classNameIndicator="bg-gradient-to-r from-blue-500 to-green-500 rounded-full"
-                  />
-
+                  {/* Chart */}
+                  {progression.allPerformances &&
+                    progression.allPerformances.length > 0 && (
+                      <StrengthProgressChart
+                        performances={progression.allPerformances}
+                        exerciseName={progression.exerciseName}
+                      />
+                    )}
                   {/* Before/After comparison */}
-                  <div className="flex items-center justify-between text-sm bg-card-on-card p-2 rounded-xl">
+                  <div className="flex items-center justify-between text-sm px-2">
                     <div className="flex flex-col">
-                      {/* <span className="text-xs text-muted-foreground">
-                        Start
-                      </span> */}
                       <span className="text-base font-medium">
                         {toDisplayWeight(
                           progression.firstPerformance.estimated1RM,
@@ -107,7 +106,6 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                     <ArrowRight className="size-4 text-muted-foreground" />
 
                     <div className="flex flex-col text-right">
-                      {/* <span className="text-xs text-muted-foreground">End</span> */}
                       <span className="text-base font-medium text-green-600 dark:text-green-400">
                         {toDisplayWeight(
                           progression.lastPerformance.estimated1RM,
@@ -122,12 +120,6 @@ export function StrengthProgress({ summary }: StrengthProgressProps) {
                       </span>
                     </div>
                   </div>
-
-                  {/* Sessions count */}
-                  {/* <div className="text-xs text-muted-foreground">
-                    {progression.totalSessions} session
-                    {progression.totalSessions !== 1 ? 's' : ''} logged
-                  </div> */}
                 </div>
               </CardContent>
             </Card>

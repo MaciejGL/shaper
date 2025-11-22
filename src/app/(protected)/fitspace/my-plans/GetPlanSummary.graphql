@@ -24,6 +24,12 @@ query GetPlanSummary($planId: ID!) {
         estimated1RM
         date
       }
+      allPerformances {
+        weight
+        reps
+        estimated1RM
+        date
+      }
       improvementPercentage
       totalSessions
     }
@@ -33,6 +39,10 @@ query GetPlanSummary($planId: ID!) {
       endWeight
       weightChange
       unit
+      progressLogs {
+        measuredAt
+        weight
+      }
       startSnapshot {
         loggedAt
         weight

@@ -1,4 +1,4 @@
-import { differenceInDays, differenceInWeeks, format } from 'date-fns'
+import { differenceInDays, differenceInWeeks, format, getYear } from 'date-fns'
 
 import type { GQLGetPlanSummaryQuery } from '@/generated/graphql-client'
 
@@ -25,8 +25,17 @@ export function formatDuration(startDate: string, endDate: string | null) {
  * Format date range for display
  */
 export function formatDateRange(startDate: string, endDate: string | null) {
-  const start = format(new Date(startDate), 'MMM d, yyyy')
-  const end = endDate ? format(new Date(endDate), 'MMM d, yyyy') : 'Present'
+  const startDateObj = new Date(startDate)
+  const endDateObj = endDate ? new Date(endDate) : null
+
+  if (endDateObj && getYear(startDateObj) === getYear(endDateObj)) {
+    const start = format(startDateObj, 'd MMM')
+    const end = format(endDateObj, 'd MMM yyyy')
+    return `${start} - ${end}`
+  }
+
+  const start = format(startDateObj, 'd MMM yyyy')
+  const end = endDateObj ? format(endDateObj, 'd MMM yyyy') : 'Present'
 
   return `${start} - ${end}`
 }
@@ -86,16 +95,6 @@ export function formatVolume(volume: number) {
     return `${(volume / 1000).toFixed(1)}K`
   }
   return volume.toFixed(0)
-}
-
-/**
- * Get adherence color class
- */
-export function getAdherenceColor(adherence: number) {
-  if (adherence >= 90) return 'text-green-600 dark:text-green-400'
-  if (adherence >= 75) return 'text-yellow-600 dark:text-yellow-400'
-  if (adherence >= 50) return 'text-orange-600 dark:text-orange-400'
-  return 'text-orange-600 dark:text-orange-400'
 }
 
 /**

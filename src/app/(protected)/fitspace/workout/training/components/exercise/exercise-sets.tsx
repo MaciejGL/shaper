@@ -19,15 +19,10 @@ import {
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
-import { cn } from '@/lib/utils'
 
 import { createOptimisticRemoveSetUpdate } from '../optimistic-updates'
 
 import { ExerciseSet } from './exercise-set'
-import {
-  sharedLayoutAdvancedStyles,
-  sharedLayoutSimpleStyles,
-} from './shared-styles'
 import { ExerciseSetsProps } from './types'
 
 export function ExerciseSets({
@@ -44,6 +39,7 @@ export function ExerciseSets({
   const { preferences } = useUserPreferences()
   const invalidateQuery = useInvalidateQuery()
   const [isRemovingSet, setIsRemovingSet] = useState(false)
+  const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
   // Initialize state with current log values for each set
   const [setsLogs, setSetsLogs] = useState<
     Record<string, { weight: string; reps: string }>
@@ -51,9 +47,20 @@ export function ExerciseSets({
     const initialState: Record<string, { weight: string; reps: string }> = {}
     const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
     exerciseSets.forEach((set) => {
+      const previousWeightLog = previousLogs?.find(
+        (log) => log.order === set.order,
+      )?.log?.weight
+      const previousRepsLog = previousLogs?.find(
+        (log) => log.order === set.order,
+      )?.log?.reps
+
       initialState[set.id] = {
-        weight: set.log?.weight?.toString() ?? '',
-        reps: set.log?.reps?.toString() ?? '',
+        weight:
+          set.log?.weight?.toString() ??
+          (isAdvancedView ? (previousWeightLog?.toString() ?? '') : ''),
+        reps:
+          set.log?.reps?.toString() ??
+          (isAdvancedView ? (previousRepsLog?.toString() ?? '') : ''),
       }
     })
     return initialState
@@ -68,14 +75,29 @@ export function ExerciseSets({
       // Add new sets or update existing sets with new log values
       exerciseSets.forEach((set) => {
         const currentState = updated[set.id]
-        const newLogWeight = set.log?.weight?.toString() ?? ''
-        const newLogReps = set.log?.reps?.toString() ?? ''
+        const previousWeightLog = previousLogs?.find(
+          (log) => log.order === set.order,
+        )?.log?.weight
+        const previousRepsLog = previousLogs?.find(
+          (log) => log.order === set.order,
+        )?.log?.reps
+        const newLogWeight =
+          set.log?.weight?.toString() ??
+          (isAdvancedView ? (previousWeightLog?.toString() ?? '') : '')
+        const newLogReps =
+          set.log?.reps?.toString() ??
+          (isAdvancedView ? (previousRepsLog?.toString() ?? '') : '')
 
         if (!currentState) {
-          // New set - add it
+          // New set - add it with last set's actual logged values as defaults
+          const currentIndex = exerciseSets.findIndex((s) => s.id === set.id)
+          const lastSetId =
+            currentIndex > 0 ? exerciseSets[currentIndex - 1].id : null
+          const lastSetValues = lastSetId ? prev[lastSetId] : null
+
           updated[set.id] = {
-            weight: newLogWeight,
-            reps: newLogReps,
+            weight: lastSetValues?.weight ?? newLogWeight,
+            reps: lastSetValues?.reps ?? newLogReps,
           }
         } else {
           // Existing set - update only if the log values changed and user hasn't edited
@@ -99,7 +121,12 @@ export function ExerciseSets({
 
       return updated
     })
-  }, [exercise.substitutedBy?.sets, exercise.sets])
+  }, [
+    exercise.substitutedBy?.sets,
+    exercise.sets,
+    previousLogs,
+    isAdvancedView,
+  ])
 
   // Notify parent when setsLogs changes
   useEffect(() => {
@@ -230,29 +257,24 @@ export function ExerciseSets({
     return previousSet ? previousSet.log?.[type] : null
   }
 
-  const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
-
+  const hasExtraSets =
+    (exercise.substitutedBy?.sets?.some((set) => set.isExtra) ||
+      exercise.sets.some((set) => set.isExtra)) &&
+    exercise.sets.length > 1
   return (
-    <div className="flex flex-col rounded-[0.45rem] ">
-      <div className="flex items-center gap-1">
-        <div
-          className={cn(
-            isAdvancedView
-              ? sharedLayoutAdvancedStyles
-              : sharedLayoutSimpleStyles,
-            'text-[0.625rem] py-2 font-medium',
-          )}
-        >
-          <div className="text-center">SET</div>
-          {isAdvancedView && <div className="text-center">PREVIOUS</div>}
-          <div className="text-center">REPS</div>
-          <div className="text-center uppercase">{preferences.weightUnit}</div>
-          <div className="text-center"></div>
-        </div>
+    <div className="flex flex-col w-full bg-card shadow-xs overflow-hidden mb-12">
+      {/* Table Header */}
+      <div className="grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-3 items-center text-xs font-medium text-muted-foreground py-2 border-b border-border/50">
+        <div className="text-center">Set</div>
+        <div className="text-center">Previous</div>
+        <div className="text-center">Reps</div>
+        <div className="text-center uppercase">{preferences.weightUnit}</div>
+        <div />
       </div>
 
-      <div className={cn('flex flex-col gap-0', !isAdvancedView && 'pb-3')}>
-        {(exercise.substitutedBy?.sets || exercise.sets).map((set, index) => {
+      {/* Sets Rows */}
+      <div>
+        {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
           const previousWeightLog = getPreviousSetValue(set.order, 'weight')
           const previousRepsLog = getPreviousSetValue(set.order, 'reps')
 
@@ -267,8 +289,6 @@ export function ExerciseSets({
                 weight={setsLogs[set.id]?.weight ?? ''}
                 onRepsChange={(reps) => handleRepsChange(reps, set.id)}
                 onWeightChange={(weight) => handleWeightChange(weight, set.id)}
-                onDelete={() => removeSet({ setId: set.id })}
-                isLastSet={index === exercise.sets.length - 1}
                 onSetCompleted={(skipTimer) =>
                   handleSetCompleted(set.id, skipTimer)
                 }
@@ -277,38 +297,33 @@ export function ExerciseSets({
             </AnimatePresence>
           )
         })}
+      </div>
 
-        {isAdvancedView && (
-          <div className={cn('flex items-center justify-end gap-2 m-3 mt-4')}>
-            {exercise.sets.some((set) => set.isExtra) &&
-              exercise.sets.length > 1 && (
-                <>
-                  <Button
-                    variant="tertiary"
-                    size="xs"
-                    iconStart={<PlusIcon className="rotate-45" />}
-                    className=""
-                    loading={isRemovingSet}
-                    disabled={isRemovingSet}
-                    onClick={handleRemoveLastSet}
-                  >
-                    Remove Last Set
-                  </Button>
-                  {/* <div className="h-full w-[1px] bg-border" /> */}
-                </>
-              )}
-            <Button
-              variant="tertiary"
-              size="xs"
-              iconStart={<PlusIcon />}
-              className=""
-              loading={isAddingSet}
-              onClick={handleAddSet}
-            >
-              Add set
-            </Button>
-          </div>
+      {/* Actions */}
+      <div className="flex items-center border-t border-border/50">
+        {hasExtraSets && (
+          <Button
+            variant="ghost"
+            size="lg"
+            className=" flex-1 text-muted-foreground hover:text-foreground rounded-none border-r border-border"
+            loading={isRemovingSet}
+            disabled={isRemovingSet}
+            onClick={handleRemoveLastSet}
+            iconStart={<PlusIcon className="rotate-45 size-3" />}
+          >
+            Remove Set
+          </Button>
         )}
+        <Button
+          variant="ghost"
+          size="lg"
+          className="flex-1 text-muted-foreground hover:text-foreground  rounded-none"
+          loading={isAddingSet}
+          onClick={handleAddSet}
+          iconStart={<PlusIcon className="size-3" />}
+        >
+          Add Set
+        </Button>
       </div>
     </div>
   )

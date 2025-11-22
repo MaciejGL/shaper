@@ -4,7 +4,6 @@ import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { useState } from 'react'
 
-import { Card } from '@/components/ui/card'
 import {
   GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceMarkExerciseAsCompletedMutation,
@@ -276,8 +275,8 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
   }
 
   return (
-    <Card className="p-0 gap-2 overflow-hidden">
-      <div className="p-3" id={exercise.id}>
+    <div className="gap-2 overflow-hidden">
+      <div className="" id={exercise.id}>
         <ExerciseMetadata
           exercise={exercise}
           handleMarkAsCompleted={handleMarkAsCompleted}
@@ -295,6 +294,6 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
         onSetUncompleted={handleSetUncompleted}
         onSetsLogsChange={handleSetsLogsChange}
       />
-    </Card>
+    </div>
   )
 }

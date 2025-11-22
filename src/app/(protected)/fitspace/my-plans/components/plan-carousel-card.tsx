@@ -55,7 +55,7 @@ export function PlanCarouselCard({
   const cardContent = (
     <Card
       onClick={() => onClick(plan)}
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[5/6] w-full"
+      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[5/6] w-full border-none"
       variant="tertiary"
     >
       {imageUrl && (
@@ -70,7 +70,7 @@ export function PlanCarouselCard({
             priority={false}
             key={imageUrl}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black to-black/5 dark:to-black/10" />
         </div>
       )}
       <CardContent className="h-full flex flex-col justify-between p-4">
@@ -79,7 +79,7 @@ export function PlanCarouselCard({
             <div className="dark top-4 right-4 absolute flex items-center shrink-0 bg-background/80 backdrop-blur-sm rounded-full p-1 transition-all">
               <ProgressCircle
                 progress={progressPercentage}
-                size={isExpanded ? 34 : 40}
+                size={34}
                 strokeWidth={3}
                 showValue={true}
               />
@@ -88,17 +88,29 @@ export function PlanCarouselCard({
         </div>
         <div className="space-y-2 space-x-2 relative dark">
           {isPremiumPlan && (
-            <Badge variant="premium" className="w-fit" size="md">
+            <Badge
+              variant="premium"
+              className="w-fit"
+              size={isExpanded ? 'xs' : 'md'}
+            >
               Premium
             </Badge>
           )}
           {!isPublicPlan && (
-            <Badge variant="primary" className="w-fit" size="md">
-              Personal Plan
+            <Badge
+              variant="primary"
+              className="w-fit"
+              size={isExpanded ? 'xs' : 'md'}
+            >
+              Personal
             </Badge>
           )}
           {isNewPlan && (
-            <Badge variant="success" className="w-fit" size="md">
+            <Badge
+              variant="success"
+              className="w-fit"
+              size={isExpanded ? 'xs' : 'md'}
+            >
               New
             </Badge>
           )}

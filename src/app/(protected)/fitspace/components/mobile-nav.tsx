@@ -144,7 +144,7 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
               setClickedItem(item.label)
               setPendingNavigation(item.href)
               // Scroll the main content container to top
-              document.getElementById('main-content')?.scrollTo(0, 0)
+              window.scrollTo(0, 0)
 
               // If using deep links, trigger navigation via href change
               if (shouldUseDeepLink) {

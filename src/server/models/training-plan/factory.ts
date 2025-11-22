@@ -462,7 +462,9 @@ export async function getMyPlansOverview(context: GQLContext) {
   const availablePlans = plans.filter(
     (plan) => plan.completedAt === null && plan.active === false,
   )
-  const completedPlans = plans.filter((plan) => plan.completedAt !== null)
+  const completedPlans = plans.filter(
+    (plan) => plan.completedAt && !plan.active,
+  )
 
   return {
     activePlan: activePlan ? new TrainingPlan(activePlan, context) : null,
@@ -539,7 +541,9 @@ export async function getMyPlansOverviewLite(context: GQLContext) {
   const availablePlans = plans.filter(
     (plan) => plan.completedAt === null && plan.active === false,
   )
-  const completedPlans = plans.filter((plan) => plan.completedAt !== null)
+  const completedPlans = plans.filter(
+    (plan) => plan.completedAt && !plan.active,
+  )
 
   return {
     activePlan: activePlan ? new TrainingPlan(activePlan, context) : null,
@@ -667,7 +671,9 @@ export async function getMyPlansOverviewFull(context: GQLContext) {
   const availablePlans = plans.filter(
     (plan) => plan.completedAt === null && plan.active === false,
   )
-  const completedPlans = plans.filter((plan) => plan.completedAt !== null)
+  const completedPlans = plans.filter(
+    (plan) => plan.completedAt && !plan.active,
+  )
 
   return {
     activePlan: activePlan ? new TrainingPlan(activePlan, context) : null,
@@ -2900,6 +2906,12 @@ function calculateStrengthProgressionsForPlan(plan: PlanWithProgressionData) {
         estimated1RM: last1RM,
         date: bestLastPerf.date.toISOString(),
       },
+      allPerformances: data.performances.map((perf) => ({
+        weight: perf.weight,
+        reps: perf.reps,
+        estimated1RM: calculateEstimated1RM(perf.weight, perf.reps),
+        date: perf.date.toISOString(),
+      })),
       improvementPercentage: Math.round(improvementPercentage * 10) / 10,
       totalSessions: data.performances.length,
     })
@@ -3017,6 +3029,12 @@ async function calculateBodyCompositionForPlan(
     endWeight,
     weightChange,
     unit: profile.weightUnit || 'kg',
+    progressLogs: bodyMeasurements
+      .filter((m) => m.weight != null)
+      .map((m) => ({
+        measuredAt: m.measuredAt.toISOString(),
+        weight: m.weight as number,
+      })),
     startSnapshot: firstSnapshot
       ? {
           loggedAt: firstSnapshot.loggedAt.toISOString(),

@@ -1,16 +1,12 @@
 import { motion } from 'framer-motion'
-import { Calendar, CheckCircle, Target } from 'lucide-react'
+import { Calendar, CheckCircle } from 'lucide-react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { StatsItem } from '@/components/stats-item'
-import { Progress } from '@/components/ui/progress'
 import type { GQLGetPlanSummaryQuery } from '@/generated/graphql-client'
 
-import {
-  formatDateRange,
-  formatDuration,
-  getAdherenceColor,
-} from '../../utils/summary-helpers'
+import { formatDateRange, formatDuration } from '../../utils/summary-helpers'
+import { CompletionStats } from '../completion-stats'
 
 interface JourneyOverviewProps {
   summary: GQLGetPlanSummaryQuery['getPlanSummary']
@@ -25,9 +21,6 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
     summary.duration.startDate,
     summary.duration.endDate || null,
   )
-  const adherencePercent = Math.round(summary.adherence)
-  const adherenceColor = getAdherenceColor(adherencePercent)
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -48,6 +41,18 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
         initial="hidden"
         animate="show"
       >
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 10 },
+            show: { opacity: 1, y: 0 },
+          }}
+        >
+          <CompletionStats
+            completedWorkoutsDays={summary.workoutsCompleted}
+            totalWorkouts={summary.totalWorkouts}
+            title={false}
+          />
+        </motion.div>
         <div className="grid grid-cols-2 items-stretch gap-2">
           <motion.div
             variants={{
@@ -75,7 +80,7 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
             <StatsItem
               className="h-full flex items-center"
               icon={<CheckCircle className="text-violet-500" />}
-              label="Completed Workouts"
+              label="Workouts"
               value={
                 <div>
                   <AnimateNumber value={summary.workoutsCompleted} />/
@@ -87,29 +92,6 @@ export function JourneyOverview({ summary }: JourneyOverviewProps) {
             />
           </motion.div>
         </div>
-
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, y: 10 },
-            show: { opacity: 1, y: 0 },
-          }}
-        >
-          <StatsItem
-            className="h-full"
-            icon={<Target className="text-green-600" />}
-            label="Adherence"
-            value={
-              <div className="space-y-2 w-full mb-1">
-                <span className={adherenceColor}>
-                  <AnimateNumber value={adherencePercent} />%
-                </span>
-                <Progress value={adherencePercent} className="h-2 w-full" />
-              </div>
-            }
-            variant="secondary"
-            border
-          />
-        </motion.div>
       </motion.div>
     </motion.div>
   )

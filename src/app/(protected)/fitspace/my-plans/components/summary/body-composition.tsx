@@ -11,6 +11,7 @@ import {
 import Image from 'next/image'
 import React, { useCallback, useState } from 'react'
 
+import { MeasurementChart } from '@/app/(protected)/fitspace/progress/components/measurement-chart'
 import { Card, CardContent } from '@/components/ui/card'
 import {
   Carousel,
@@ -62,6 +63,31 @@ export function BodyComposition({ summary }: BodyCompositionProps) {
     return null
   }
 
+  // Transform progressLogs to match MeasurementChart expected format
+  // MeasurementChart expects data in descending order (newest first), so reverse it
+  const chartMeasurements =
+    bodyComp.progressLogs
+      ?.slice()
+      .reverse()
+      .map((log, index) => ({
+        __typename: 'UserBodyMeasure' as const,
+        id: `progress-${index}`,
+        measuredAt: log.measuredAt,
+        weight: log.weight,
+        chest: null,
+        waist: null,
+        hips: null,
+        neck: null,
+        bicepsLeft: null,
+        bicepsRight: null,
+        thighLeft: null,
+        thighRight: null,
+        calfLeft: null,
+        calfRight: null,
+        bodyFat: null,
+        notes: null,
+      })) || []
+
   const images = [
     {
       label: 'Front',
@@ -111,7 +137,7 @@ export function BodyComposition({ summary }: BodyCompositionProps) {
 
             <div
               className={cn(
-                'flex items-center gap-1 px-3 py-1.5 rounded-lg',
+                'flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm',
                 isWeightLoss &&
                   'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
                 isWeightGain &&
@@ -129,19 +155,18 @@ export function BodyComposition({ summary }: BodyCompositionProps) {
             </div>
           </div>
 
-          {/* Visual indicator */}
-          <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className={cn(
-                'absolute inset-y-0 rounded-full',
-                isWeightLoss && 'bg-green-500',
-                isWeightGain && 'bg-blue-500',
-              )}
-              style={{
-                width: `${Math.min(Math.abs(weightChange / (bodyComp.startWeight || 1)) * 100 * 10, 100)}%`,
-              }}
-            />
-          </div>
+          {/* Weight progression chart */}
+          {chartMeasurements.length >= 2 && (
+            <div className="mt-4">
+              <MeasurementChart
+                measurements={chartMeasurements}
+                field="weight"
+                label="Weight"
+                unit={bodyComp.unit}
+                withAverage={false}
+              />
+            </div>
+          )}
 
           {/* Snapshots comparison carousel */}
           {hasSnapshots && images.length > 0 && (

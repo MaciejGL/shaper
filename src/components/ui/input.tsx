@@ -11,7 +11,7 @@ type InputProps = Omit<React.ComponentProps<'input'>, 'size'> & {
   id: string
   errorMessage?: string
   error?: boolean
-  size?: 'sm' | 'md'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
 const inputVariants = cva(
@@ -31,6 +31,8 @@ const inputVariants = cva(
       size: {
         sm: 'h-8 text-sm',
         md: 'h-9',
+        lg: 'h-10',
+        xl: 'h-11',
       },
     },
     defaultVariants: {
