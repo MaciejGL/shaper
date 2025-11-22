@@ -1,5 +1,4 @@
-import { LoaderIcon } from 'lucide-react'
-
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { useGetPlanSummaryQuery } from '@/generated/graphql-client'
 
 import { BodyComposition } from './summary/body-composition'
@@ -22,14 +21,8 @@ export function PlanSummaryTab({ planId }: PlanSummaryTabProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 space-y-4">
-        <LoaderIcon className="size-8 animate-spin text-primary" />
-        <div className="text-center">
-          <h3 className="text-lg font-semibold">Loading Your Summary</h3>
-          <p className="text-sm text-muted-foreground">
-            Calculating your progress...
-          </p>
-        </div>
+      <div className="space-y-4">
+        <LoadingSkeleton variant="light" count={3} />
       </div>
     )
   }

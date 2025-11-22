@@ -124,6 +124,7 @@ query FitspaceMyPlans {
       startDate
       endDate
       updatedAt
+      isTemplate
       focusTags
       targetGoals
       active

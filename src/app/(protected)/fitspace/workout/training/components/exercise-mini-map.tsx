@@ -369,7 +369,9 @@ export function WorkoutSmartPill({
 export function WorkoutOverviewPill({
   exercises,
   onInViewChange,
-}: SharedProps & { onInViewChange?: (inView: boolean) => void }) {
+}: SharedProps & {
+  onInViewChange?: (inView: boolean) => void
+}) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
   const ref = useRef<HTMLDivElement>(null)

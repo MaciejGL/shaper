@@ -232,7 +232,7 @@ export function PlansTab({
   if (loading) {
     return (
       <div className="space-y-4">
-        <LoadingSkeleton count={6} variant="md" cardVariant="secondary" />
+        <LoadingSkeleton count={3} variant="light" />
       </div>
     )
   }

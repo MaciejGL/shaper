@@ -3,12 +3,8 @@
 import { LayoutGroup } from 'framer-motion'
 import React, { useState } from 'react'
 
-import {
-  GQLFitspaceGetWorkoutDayQuery,
-  GQLWorkoutType,
-} from '@/generated/graphql-client'
+import { GQLFitspaceGetWorkoutDayQuery } from '@/generated/graphql-client'
 import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
-import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { AddSingleExercise } from './add-single-exercise'
 import { AddToFavouritesButton } from './add-to-favourites-button'
@@ -72,8 +68,8 @@ export function Exercises({
   const exercises = day.exercises
   const hasExercises = exercises.length > 0
   const isEmptyWorkout = !hasExercises && !day.isRestDay
-  const hasNamedWorkoutType =
-    day.workoutType && day.workoutType !== GQLWorkoutType.Custom
+  // const hasNamedWorkoutType =
+  //   day.workoutType && day.workoutType !== GQLWorkoutType.Custom
 
   // Early returns for special states
   if (day.isRestDay) {
@@ -82,7 +78,7 @@ export function Exercises({
 
   if (isEmptyWorkout) {
     return (
-      <div>
+      <div className="px-4 ">
         {isQuickWorkout ? (
           <EmptyWorkoutOptions dayId={day.id} />
         ) : (
@@ -113,15 +109,13 @@ export function Exercises({
         />
       )}
       <div>
-        {/* Workout Title */}
-        {hasNamedWorkoutType && (
+        {/* {!hasNamedWorkoutType && (
           <div className="flex flex-col  space-y-2 w-full p-2">
             <p className="text-lg font-medium text-center pb-2">
-              {formatWorkoutType(day.workoutType!)}
+              {formatWorkoutType('Push')}
             </p>
           </div>
-        )}
-
+        )} */}
         {/* Overview Pill (static at top) */}
         {hasExercises && (
           <WorkoutOverviewPill
@@ -130,7 +124,6 @@ export function Exercises({
             onInViewChange={setIsOverviewVisible}
           />
         )}
-
         <div>
           {exercises.map((exercise) => (
             <Exercise
@@ -141,17 +134,12 @@ export function Exercises({
             />
           ))}
           {isQuickWorkout && day.id && (
-            <div className="grid grid-cols-[auto_1fr] gap-2 pb-4">
-              <div>
-                <ClearWorkoutModal dayId={day.id} />
-              </div>
-              <div>
+            <div className="grid grid-cols-2 gap-2 pb-4 px-4">
+              <div className="col-span-full">
                 <AddSingleExercise dayId={day.id} variant="button" />
               </div>
-
-              <div className="col-span-full empty:hidden">
-                <AddToFavouritesButton day={day} />
-              </div>
+              <ClearWorkoutModal dayId={day.id} />
+              <AddToFavouritesButton day={day} />
             </div>
           )}
         </div>

@@ -11,6 +11,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerTrigger,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -114,16 +115,17 @@ export function AddToFavouritesButton({ day }: AddToFavouritesButtonProps) {
 
   return (
     <>
-      <Button
-        variant="tertiary"
-        iconStart={<BookmarkIcon />}
-        onClick={() => setOpen(true)}
-        className="w-full"
-      >
-        Add to Favourites
-      </Button>
-
       <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
+          <Button
+            variant="tertiary"
+            iconStart={<BookmarkIcon />}
+            onClick={() => setOpen(true)}
+            className="w-full"
+          >
+            Add to Favourites
+          </Button>
+        </DrawerTrigger>
         <DrawerContent
           dialogTitle="Save as Favourite Workout"
           className="max-h-[85vh]"

@@ -73,10 +73,10 @@ export function PlanCarouselCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black to-black/5 dark:to-black/10" />
         </div>
       )}
-      <CardContent className="h-full flex flex-col justify-between p-4">
+      <CardContent className="h-full flex flex-col justify-between">
         <div className="flex justify-end">
           {hasProgress && (
-            <div className="dark top-4 right-4 absolute flex items-center shrink-0 bg-background/80 backdrop-blur-sm rounded-full p-1 transition-all">
+            <div className="dark top-2 right-2 absolute flex items-center shrink-0 bg-background/80 backdrop-blur-sm rounded-full p-1 transition-all">
               <ProgressCircle
                 progress={progressPercentage}
                 size={34}
@@ -116,9 +116,9 @@ export function PlanCarouselCard({
           )}
           <h3
             className={cn(
-              'font-semibold',
+              'font-medium',
               imageUrl ? 'text-white' : 'text-foreground',
-              isExpanded ? 'text-sm' : 'text-lg',
+              isExpanded ? 'text-sm' : 'text-base',
             )}
           >
             {plan.title}

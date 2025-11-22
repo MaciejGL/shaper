@@ -10,11 +10,25 @@ export function LoadingSkeleton({
   className,
 }: {
   count?: number
-  variant?: 'lg' | 'md' | 'sm'
+  variant?: 'lg' | 'md' | 'sm' | 'light'
   cardVariant?: CardProps['variant']
   withBorder?: boolean
   className?: string
 }) {
+  if (variant === 'light') {
+    return Array.from({ length: count }).map((_, index) => (
+      <div className="space-y-3" key={index}>
+        <Skeleton className="h-7 w-1/3" />
+        <Skeleton className="h-6 w-2/3" />
+        <Skeleton className="h-12 w-full" />
+        <div className="flex gap-2">
+          <Skeleton className="h-12 w-1/2" />
+          <Skeleton className="h-12 w-1/2" />
+        </div>
+      </div>
+    ))
+  }
+
   if (variant === 'lg') {
     return Array.from({ length: count }).map((_, index) => (
       <Card

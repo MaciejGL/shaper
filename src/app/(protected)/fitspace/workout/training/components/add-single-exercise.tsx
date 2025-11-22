@@ -112,7 +112,7 @@ export function AddSingleExercise({
         <DrawerTrigger asChild>
           <Button
             variant="tertiary"
-            size="md"
+            size="lg"
             iconStart={<PlusIcon />}
             className="w-full"
           >

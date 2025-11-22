@@ -1,5 +1,5 @@
 import { ArrowRightIcon, Trash } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { CollapsibleText } from '@/components/collapsible-text'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
@@ -49,6 +49,7 @@ export function PlanDetailsDrawer({
   const isCompleted = status === PlanStatus.Completed
   const [activeTab, setActiveTab] = useState(isTemplate ? 'info' : 'summary')
   const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Reset to summary tab when drawer opens with a completed plan
   useEffect(() => {
@@ -104,24 +105,38 @@ export function PlanDetailsDrawer({
           </DrawerHeader>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-2">
+          <div className="flex-1 overflow-y-auto p-2" ref={scrollContainerRef}>
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <PrimaryTabList
-                options={[
-                  { label: 'Summary', value: 'summary' },
-                  { label: 'Info', value: 'info' },
-                  { label: 'Preview', value: 'preview' },
-                ]}
-                onClick={setActiveTab}
-                active={activeTab}
-                size="lg"
-                className="grid grid-cols-3"
-                classNameButton="text-sm px-3"
-              />
+              {isTemplate ? (
+                <PrimaryTabList
+                  options={[
+                    { label: 'Info', value: 'info' },
+                    { label: 'Preview', value: 'preview' },
+                  ]}
+                  onClick={setActiveTab}
+                  active={activeTab}
+                  size="lg"
+                  className="grid grid-cols-2"
+                  classNameButton="text-sm px-3"
+                />
+              ) : (
+                <PrimaryTabList
+                  options={[
+                    { label: 'Summary', value: 'summary' },
+                    { label: 'Info', value: 'info' },
+                    { label: 'Preview', value: 'preview' },
+                  ]}
+                  onClick={setActiveTab}
+                  active={activeTab}
+                  size="lg"
+                  className="grid grid-cols-3"
+                  classNameButton="text-sm px-3"
+                />
+              )}
 
               {!isTemplate && (
                 <TabsContent value="summary" className="px-2 py-4">
@@ -252,6 +267,7 @@ export function PlanDetailsDrawer({
                   selectedWeekId={selectedWeekId}
                   onAccordionChange={() => setSelectedWeekId(null)}
                   canViewDays={canActivate}
+                  scrollRef={scrollContainerRef}
                 />
               </TabsContent>
             </Tabs>

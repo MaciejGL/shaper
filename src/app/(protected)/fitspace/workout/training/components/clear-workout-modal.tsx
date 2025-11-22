@@ -48,11 +48,12 @@ export function ClearWorkoutModal({
     <>
       <Button
         variant="destructive"
-        size="icon-md"
+        size="md"
         onClick={() => setOpen(true)}
-        iconOnly={<Trash2 />}
+        iconStart={<Trash2 />}
+        className="w-full"
       >
-        Clear All Exercises
+        Clear Workout
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
