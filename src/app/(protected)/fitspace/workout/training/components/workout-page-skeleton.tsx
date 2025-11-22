@@ -1,10 +1,7 @@
 import { formatDate } from 'date-fns'
 
 import { ExtendHeader } from '@/components/extend-header'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { GQLWorkoutType } from '@/generated/graphql-client'
 import { getDayName } from '@/lib/date-utils'
@@ -103,6 +100,44 @@ const DUMMY_WEEK = {
           log: null,
         })),
       },
+      {
+        id: `skeleton-exercise-${i}-3`,
+        name: 'Third Loading Exercise',
+        restSeconds: 60,
+        tempo: '2-0-2-0',
+        warmupSets: 0,
+        description: 'Loading third exercise...',
+        tips: ['Loading tips...'],
+        difficulty: 'beginner',
+        instructions: ['Loading instructions...'],
+        additionalInstructions: null,
+        order: 3,
+        videoUrl: null,
+        images: [],
+        completedAt: null,
+        isExtra: false,
+        substitutedBy: null,
+        substitutes: [],
+        muscleGroups: [
+          {
+            id: 'skeleton-muscle-3',
+            alias: 'Biceps',
+            groupSlug: 'biceps',
+          },
+        ],
+        sets: Array.from({ length: 2 }, (_, setIndex) => ({
+          id: `skeleton-set-${i}-3-${setIndex}`,
+          order: setIndex + 1,
+          reps: 15,
+          minReps: 12,
+          maxReps: 18,
+          weight: 20,
+          rpe: 8,
+          isExtra: false,
+          completedAt: null,
+          log: null,
+        })),
+      },
     ],
   })),
 }
@@ -111,7 +146,8 @@ export function WorkoutPageSkeleton() {
   return (
     <ExtendHeader
       headerChildren={<SkeletonNavigation />}
-      classNameHeader="px-2 pt-2"
+      classNameHeader="pt-2"
+      classNameContent="px-0 pt-0"
     >
       <SkeletonExercises />
     </ExtendHeader>
@@ -183,105 +219,21 @@ function SkeletonDay() {
 export function SkeletonExercises() {
   const activeDay = DUMMY_WEEK.days[0]
 
-  const completedExercises = 0
-  const progressPercentage = 0 // Show some progress for skeleton
-
   return (
     <div id={activeDay.id}>
-      {!activeDay.isRestDay && (
-        <div className="flex flex-col pb-4 space-y-3 w-full">
-          <Skeleton className="h-7 w-1/3 mx-auto" />
-          <div className="grid grid-cols-2 gap-2">
-            <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card-on-card w-full rounded-2xl masked-placeholder-text">
-              Loading
-            </Label>
-
-            <SkeletonExercisesCompleted
-              completedExercises={completedExercises}
-              totalExercises={activeDay.exercises.length}
-            />
-          </div>
-          <Progress
-            value={progressPercentage}
-            className={cn('masked-placeholder-text')}
-          />
-        </div>
-      )}
-      <div className="space-y-6">
+      <div className="space-y-6 mt-4 px-4">
         {activeDay.exercises.map((exercise) => (
-          <SkeletonExercise key={exercise.id} />
+          <div key={exercise.id} className="space-y-3">
+            <Skeleton className="h-7 w-1/3" />
+            <Skeleton className="h-6 w-2/3" />
+            <Skeleton className="h-12 w-full" />
+            <div className="flex gap-2">
+              <Skeleton className="h-12 w-1/2" />
+              <Skeleton className="h-12 w-1/2" />
+            </div>
+          </div>
         ))}
       </div>
     </div>
-  )
-}
-
-function SkeletonExercisesCompleted({
-  completedExercises,
-  totalExercises,
-}: {
-  completedExercises: number
-  totalExercises: number
-}) {
-  return (
-    <Badge
-      variant="secondary"
-      size="lg"
-      className={cn(
-        'w-full bg-card-on-card dark:bg-card-on-card',
-        'masked-placeholder-text',
-      )}
-    >
-      {completedExercises}/{totalExercises} completed
-    </Badge>
-  )
-}
-
-function SkeletonExercise() {
-  const exercise = DUMMY_WEEK.days[0].exercises[0]
-  return (
-    <div className="space-y-3 p-4 rounded-lg bg-card">
-      <div className="space-y-2">
-        <h3
-          className={cn(
-            'text-lg font-semibold bg-muted-foreground/30 dark:bg-muted-foreground/10',
-            'masked-placeholder-text',
-          )}
-        >
-          {exercise.name}
-        </h3>
-        <p
-          className={cn(
-            'text-sm text-muted-foreground w-max bg-muted-foreground/30 dark:bg-muted-foreground/10',
-            'masked-placeholder-text',
-          )}
-        >
-          {exercise.description}
-        </p>
-        <div className="flex gap-2">
-          {exercise.muscleGroups.map((muscle) => (
-            <Badge
-              key={muscle.id}
-              variant="secondary"
-              size="sm"
-              className={cn('masked-placeholder-text')}
-            >
-              {muscle.alias}
-            </Badge>
-          ))}
-        </div>
-      </div>
-      <div className="space-y-2">
-        {exercise.sets.map((_, index: number) => (
-          <SkeletonSet key={index} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function SkeletonSet() {
-  return (
-    <div className="flex items-center gap-3 p-3 rounded bg-muted-foreground/30 dark:bg-muted-foreground/10 animate-pulse h-12" />
   )
 }
