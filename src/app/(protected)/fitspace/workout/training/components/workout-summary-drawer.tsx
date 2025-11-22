@@ -446,7 +446,7 @@ function Content({
               <CheckCheck className=" text-green-600" />
             </Badge>
           </div>
-          <div className="space-y-2 bg-card-on-card/60 dark:bg-card-on-card rounded-lg py-2">
+          <div className="space-y-2 border border-border dark:bg-card-on-card rounded-2xl py-2">
             <div>
               {exercises.map((exercise) => (
                 <Fragment key={exercise.id}>
