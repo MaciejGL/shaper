@@ -99,8 +99,8 @@ export function ExerciseWeightInput({
         placeholder={placeholder}
         disabled={disabled}
         inputMode="decimal"
-        className="text-center text-lg rounded-none border-x border-border px-1 focus-visible:ring-0"
-        variant="ghost"
+        className="text-center h-8 focus-visible:ring-0 text-sm w-full"
+        variant="secondary"
         size="lg"
         iconEnd={
           showWeightUnit ? (

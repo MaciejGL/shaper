@@ -183,11 +183,9 @@ export function Exercises({
             />
           </div>
           <div ref={progressBarRef} className="sticky top-0">
-            {!isProgressBarAtTop && (
-              <motion.div layout layoutId="workout-progress">
-                <Progress value={progressPercentage} />
-              </motion.div>
-            )}
+            <motion.div layout layoutId="workout-progress">
+              <Progress value={progressPercentage} />
+            </motion.div>
           </div>
         </div>
 

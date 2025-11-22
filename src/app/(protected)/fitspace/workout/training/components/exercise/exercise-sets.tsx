@@ -19,7 +19,6 @@ import {
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
-import { cn } from '@/lib/utils'
 
 import { createOptimisticRemoveSetUpdate } from '../optimistic-updates'
 
@@ -263,8 +262,18 @@ export function ExerciseSets({
       exercise.sets.some((set) => set.isExtra)) &&
     exercise.sets.length > 1
   return (
-    <div className="flex flex-col rounded-[0.45rem] px-4 mb-12">
-      <div className={cn('flex flex-col gap-0 space-y-2')}>
+    <div className="flex flex-col w-full bg-card shadow-xs overflow-hidden mb-12">
+      {/* Table Header */}
+      <div className="grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-3 items-center text-xs font-medium text-muted-foreground py-2 border-b border-border/50">
+        <div className="text-center">Set</div>
+        <div className="text-center">Previous</div>
+        <div className="text-center">Reps</div>
+        <div className="text-center uppercase">{preferences.weightUnit}</div>
+        <div />
+      </div>
+
+      {/* Sets Rows */}
+      <div>
         {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
           const previousWeightLog = getPreviousSetValue(set.order, 'weight')
           const previousRepsLog = getPreviousSetValue(set.order, 'reps')
@@ -288,33 +297,33 @@ export function ExerciseSets({
             </AnimatePresence>
           )
         })}
+      </div>
 
-        <div className={cn('grid grid-cols-2 items-center gap-2 mt-2')}>
-          {hasExtraSets && (
-            <>
-              <Button
-                variant="secondary"
-                size="lg"
-                iconStart={<PlusIcon className="rotate-45" />}
-                loading={isRemovingSet}
-                disabled={isRemovingSet}
-                onClick={handleRemoveLastSet}
-              >
-                Remove Last Set
-              </Button>
-            </>
-          )}
+      {/* Actions */}
+      <div className="flex items-center border-t border-border/50">
+        {hasExtraSets && (
           <Button
-            variant="secondary"
-            size="lg"
-            iconStart={<PlusIcon />}
-            className={cn(hasExtraSets ? '' : 'col-start-2')}
-            loading={isAddingSet}
-            onClick={handleAddSet}
+            variant="ghost"
+            size="md"
+            className=" flex-1 text-muted-foreground hover:text-foreground rounded-none border-r border-border"
+            loading={isRemovingSet}
+            disabled={isRemovingSet}
+            onClick={handleRemoveLastSet}
+            iconStart={<PlusIcon className="rotate-45 size-3" />}
           >
-            Add set
+            Remove Set
           </Button>
-        </div>
+        )}
+        <Button
+          variant="ghost"
+          size="md"
+          className="flex-1 text-muted-foreground hover:text-foreground  rounded-none"
+          loading={isAddingSet}
+          onClick={handleAddSet}
+          iconStart={<PlusIcon className="size-3" />}
+        >
+          Add Set
+        </Button>
       </div>
     </div>
   )

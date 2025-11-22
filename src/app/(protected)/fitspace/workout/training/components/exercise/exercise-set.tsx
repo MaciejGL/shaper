@@ -1,9 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { debounce, isNil } from 'lodash'
-import { CheckIcon, Edit2Icon } from 'lucide-react'
+import { debounce } from 'lodash'
+import { CheckIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import React, {
+import {
   startTransition,
   useCallback,
   useEffect,
@@ -24,22 +24,14 @@ import {
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
-import { formatDecimalInput } from '@/lib/format-tempo'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
 import { calculateEstimated1RM } from '@/utils/one-rm-calculator'
 
-import { getSetRange } from '../../../utils'
 import { ExerciseWeightInput } from '../exercise-weight-input'
 import { createOptimisticSetUpdate } from '../optimistic-updates'
 
 import { sharedLayoutAdvancedStyles } from './shared-styles'
-import {
-  StepperInput,
-  decrementValue,
-  getWeightIncrement,
-  incrementValue,
-} from './stepper-input'
 import { ExerciseSetProps } from './types'
 
 export function ExerciseSet({
@@ -202,26 +194,6 @@ export function ExerciseSet({
     return () => debouncedUpdate.cancel()
   }, [reps, weight, debouncedUpdate])
 
-  const repRange = useMemo(() => getSetRange(set), [set])
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    key: 'reps' | 'weight',
-  ) => {
-    const sanitizedValue =
-      key === 'weight'
-        ? formatDecimalInput(e)
-        : e.target.value.replace(/[^0-9]/g, '')
-
-    hasUserEditedRef.current = true
-
-    if (key === 'reps') {
-      onRepsChange(sanitizedValue)
-    } else {
-      onWeightChange(sanitizedValue)
-    }
-  }
-
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -237,16 +209,11 @@ export function ExerciseSet({
       const repsValue = reps ? +reps : previousSetRepsLog || null
       const weightValue = weight ? +weight : previousSetWeightLog || null
 
-      // Set skip timer flag for double clicks
       if (isDoubleClick) {
         setSkipTimer(true)
       }
 
-      // Close editing mode when toggling completion
-      setIsEditing(false)
-
       startTransition(() => {
-        // Close timer immediately for uncompleting
         if (!willBeCompleted) {
           onSetUncompleted()
         }
@@ -261,7 +228,6 @@ export function ExerciseSet({
         })
       } catch (error) {
         console.error('Failed to toggle set completion:', error)
-        // Reset timer states on error (error handling is also done in the mutation onError)
         setSkipTimer(false)
       }
     },
@@ -278,88 +244,128 @@ export function ExerciseSet({
   )
 
   const handleClick = useCallback(() => {
-    // Clear any existing timeout
     if (clickTimeoutRef.current) {
       clearTimeout(clickTimeoutRef.current)
     }
 
-    // Set timeout for single click
     clickTimeoutRef.current = setTimeout(() => {
-      handleToggleSetCompletion(false) // Single click
-    }, 250) // 250ms delay to detect double click
+      handleToggleSetCompletion(false)
+    }, 250)
   }, [handleToggleSetCompletion])
 
-  const [isEditing, setIsEditing] = useState(false)
   const isCompleted = !!set.completedAt
-  const showInputs = isAdvancedView && (!isCompleted || isEditing)
+  const { toDisplayWeight } = useWeightConversion()
+
+  const previousDisplayWeight = previousSetWeightLog
+    ? toDisplayWeight(previousSetWeightLog)?.toString()
+    : null
+
+  const targetDisplayWeight = set.weight
+    ? toDisplayWeight(set.weight)?.toString()
+    : null
+
+  const displayWeight = isAdvancedView
+    ? null
+    : weight
+      ? weight
+      : (targetDisplayWeight ?? '-')
+
+  const displayReps = isAdvancedView
+    ? null
+    : reps
+      ? reps
+      : set.reps
+        ? `${set.reps}`
+        : set.minReps
+          ? `${set.minReps}-${set.maxReps}`
+          : '-'
 
   return (
     <motion.div
       key={`set-${set.id}`}
-      initial={{ height: 0 }}
-      animate={{ height: 'auto' }}
-      exit={{ height: 0 }}
+      layout
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
       className={cn(
-        'relative',
-        'bg-card shadow-xs border border-border rounded-xl overflow-hidden',
+        'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-3 items-center py-1.5 not-last-of-type:border-b border-border/50',
       )}
     >
-      <motion.div
-        animate={{ height: 'auto' }}
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
+      {/* Set Number */}
+      <div
+        className={cn(
+          'text-xs font-medium text-center rounded-full size-5 flex items-center justify-center mx-auto',
+          'bg-muted text-muted-foreground',
+        )}
       >
-        <div className={cn('flex items-start gap-1')}>
-          <div
-            className={cn(
-              'p-2 py-2 w-full',
-              showInputs ? 'space-y-2' : 'space-y-0',
-              isAdvancedView ? 'space-y-2' : 'space-y-0',
-            )}
-          >
-            <SetHeader
-              setOrder={set.order}
-              isCompleted={isCompleted}
-              isEditing={isEditing}
-              onCheckClick={handleClick}
-              onEditClick={() => setIsEditing((prev) => !prev)}
-              loggedReps={reps ? +reps : null}
-              loggedWeight={weight ? +weight : null}
-              isAdvancedView={isAdvancedView}
-              repRange={repRange}
-              plannedWeight={set.weight ?? null}
-            />
+        {set.order}
+      </div>
 
-            <AnimatePresence mode="wait">
-              {showInputs && (
-                <motion.div
-                  key="set-inputs"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2, ease: 'easeInOut' }}
-                  className="overflow-hidden"
-                >
-                  <SetInputs
-                    setId={set.id}
-                    reps={reps}
-                    weight={weight}
-                    repRange={repRange}
-                    plannedWeight={set.weight ?? null}
-                    isAdvancedView={isAdvancedView}
-                    hasUserEditedRef={hasUserEditedRef}
-                    onRepsChange={onRepsChange}
-                    onWeightChange={onWeightChange}
-                    handleInputChange={handleInputChange}
-                    previousRepsLog={previousSetRepsLog}
-                    previousWeightLog={previousSetWeightLog}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+      {/* Previous Log */}
+      <div className="text-xs text-muted-foreground text-center truncate">
+        {previousSetRepsLog ? `${previousSetRepsLog} × ` : ''}
+        {previousDisplayWeight
+          ? `${previousDisplayWeight}${preferences.weightUnit}`
+          : '-'}
+      </div>
+
+      {/* Reps Input / Text */}
+      {isAdvancedView ? (
+        <Input
+          id={`set-${set.id}-reps`}
+          value={reps}
+          onChange={(e) => {
+            hasUserEditedRef.current = true
+            const val = e.target.value.replace(/[^0-9]/g, '')
+            onRepsChange(val)
+          }}
+          inputMode="numeric"
+          variant="secondary"
+          placeholder={set.minReps ? `${set.minReps}` : '-'}
+          className="text-center h-8 focus-visible:ring-0 text-sm w-full"
+        />
+      ) : (
+        <div className="text-center text-sm font-medium">{displayReps}</div>
+      )}
+
+      {/* Weight Input / Text */}
+      {isAdvancedView ? (
+        <ExerciseWeightInput
+          setId={set.id}
+          weightInKg={weight ? parseFloat(weight) : null}
+          onWeightChange={(weightInKg) => {
+            hasUserEditedRef.current = true
+            onWeightChange(weightInKg?.toString() || '')
+          }}
+          showWeightUnit={false}
+        />
+      ) : (
+        <div className="text-center text-sm font-medium">
+          {displayWeight}
+          {displayWeight !== '-' && (
+            <span className="text-xs text-muted-foreground ml-0.5">
+              {preferences.weightUnit}
+            </span>
+          )}
         </div>
-      </motion.div>
+      )}
+
+      {/* Check Button */}
+      <div className="flex justify-center">
+        <Button
+          variant={isCompleted ? 'default' : 'secondary'}
+          size="icon-sm"
+          iconOnly={
+            <CheckIcon className={cn(isCompleted && 'text-green-600')} />
+          }
+          onClick={handleClick}
+          className={cn(
+            isCompleted &&
+              'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
+          )}
+        />
+      </div>
 
       <PROverlay
         isAdvancedView={isAdvancedView}
@@ -367,290 +373,6 @@ export function ExerciseSet({
         onClose={() => setPRData(null)}
       />
     </motion.div>
-  )
-}
-
-interface SetHeaderProps {
-  setOrder: number
-  isCompleted: boolean
-  isEditing: boolean
-  onCheckClick: () => void
-  onEditClick: () => void
-  loggedReps: number | null
-  loggedWeight: number | null
-  isAdvancedView: boolean
-  repRange?: string | number | null
-  plannedWeight?: number | null
-}
-
-function SetHeader({
-  setOrder,
-  isCompleted,
-  isEditing,
-  onCheckClick,
-  onEditClick,
-  loggedReps,
-  loggedWeight,
-  isAdvancedView,
-  repRange,
-  plannedWeight,
-}: SetHeaderProps) {
-  const { preferences } = useUserPreferences()
-  const { toDisplayWeight } = useWeightConversion()
-
-  const showLoggedValues = isAdvancedView && isCompleted && !isEditing
-  const showPlannedValues = !isAdvancedView
-  plannedWeight = 40
-  return (
-    <div className="flex justify-between items-center gap-2">
-      <p className="text-lg font-medium text-foreground pl-1">Set {setOrder}</p>
-
-      <div className="flex items-center gap-4 flex-1 justify-end">
-        <div className="relative min-h-[20px]">
-          <AnimatePresence mode="wait">
-            {showLoggedValues && (
-              <motion.div
-                key="logged-values"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.08, ease: 'easeInOut' }}
-                className="text-sm text-foreground font-medium"
-              >
-                <span>
-                  {typeof loggedReps === 'number' ? `${loggedReps} reps` : '--'}
-                  {!isNil(loggedWeight) && !isNil(loggedReps) && ' x '}
-                  {typeof loggedWeight === 'number'
-                    ? toDisplayWeight(loggedWeight)?.toString() +
-                      preferences.weightUnit
-                    : ''}
-                </span>
-              </motion.div>
-            )}
-            {showPlannedValues && (
-              <div className="text-sm flex items-center gap-1">
-                {repRange && <span>{repRange} reps</span>}
-                {plannedWeight && (
-                  <>
-                    {repRange && <span>×</span>}
-                    <span>
-                      {toDisplayWeight(plannedWeight)?.toString()}{' '}
-                      {preferences.weightUnit}
-                    </span>
-                  </>
-                )}
-              </div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className="flex gap-2">
-          <AnimatePresence mode="wait">
-            {isCompleted && isAdvancedView && (
-              <motion.div
-                key="edit-button"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.15 }}
-              >
-                <Button
-                  variant="outline"
-                  size="icon-md"
-                  iconOnly={
-                    <Edit2Icon className="size-4 text-muted-foreground" />
-                  }
-                  onClick={onEditClick}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <Button
-            variant={isCompleted ? 'default' : 'outline'}
-            size="icon-md"
-            iconOnly={
-              <CheckIcon
-                className={cn(
-                  'transition-colors',
-                  isCompleted ? 'text-green-600' : '',
-                )}
-              />
-            }
-            onClick={onCheckClick}
-            className={cn(
-              'shadow-xs',
-              isCompleted &&
-                'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
-            )}
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-interface SetInputsProps {
-  previousRepsLog?: number | null
-  previousWeightLog?: number | null
-  setId: string
-  reps: string
-  weight: string
-  repRange: string | number | null | undefined
-  plannedWeight: number | null
-  isAdvancedView: boolean
-  hasUserEditedRef: React.MutableRefObject<boolean>
-  onRepsChange: (value: string) => void
-  onWeightChange: (value: string) => void
-  handleInputChange: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    key: 'reps' | 'weight',
-  ) => void
-}
-
-function SetInputs({
-  previousRepsLog,
-  previousWeightLog,
-  setId,
-  reps,
-  weight,
-  repRange,
-  plannedWeight,
-  isAdvancedView,
-  hasUserEditedRef,
-  onRepsChange,
-  onWeightChange,
-  handleInputChange,
-}: SetInputsProps) {
-  const { preferences } = useUserPreferences()
-  const { toDisplayWeight, toStorageWeight } = useWeightConversion()
-
-  const getWeightLabel = () => {
-    const unit = preferences.weightUnit
-    const displayPlanned = plannedWeight
-      ? toDisplayWeight(plannedWeight)?.toString()
-      : null
-    const displayPrevious = previousWeightLog
-      ? toDisplayWeight(previousWeightLog)?.toString()
-      : null
-
-    if (displayPlanned && displayPrevious) {
-      return (
-        <>
-          {displayPlanned}
-          {unit}{' '}
-          <span className="text-muted-foreground">({displayPrevious})</span>
-        </>
-      )
-    }
-    if (displayPrevious) {
-      return (
-        <span className="text-muted-foreground">
-          ({displayPrevious} {unit})
-        </span>
-      )
-    }
-    return unit
-  }
-
-  const getRepsLabel = () => {
-    if (!repRange) return ''
-
-    if (previousRepsLog) {
-      return (
-        <span className="flex items-center gap-1">
-          <span className="text-muted-foreground flex items-center gap-1">
-            ({previousRepsLog})
-          </span>{' '}
-          {repRange} reps
-        </span>
-      )
-    }
-
-    return `${repRange} reps`
-  }
-
-  return (
-    <div className="grid grid-cols-2 items-end gap-2">
-      {isAdvancedView ? (
-        <StepperInput
-          value={reps}
-          onIncrement={() => {
-            hasUserEditedRef.current = true
-            const newReps = incrementValue(reps, () => 1)
-            onRepsChange(newReps)
-          }}
-          onDecrement={() => {
-            hasUserEditedRef.current = true
-            const newReps = decrementValue(reps, () => 1)
-            onRepsChange(newReps)
-          }}
-          label={getRepsLabel()}
-          htmlFor={`set-${setId}-reps`}
-        >
-          <Input
-            id={`set-${setId}-reps`}
-            value={reps}
-            onChange={(e) => handleInputChange(e, 'reps')}
-            inputMode="decimal"
-            variant={'ghost'}
-            placeholder=""
-            className="text-center text-lg rounded-none border-x border-border focus-visible:ring-0"
-            size="lg"
-          />
-        </StepperInput>
-      ) : (
-        <div className="text-center text-sm">{repRange}</div>
-      )}
-      {isAdvancedView && (
-        <StepperInput
-          value={weight || '0'}
-          label={getWeightLabel()}
-          htmlFor={`set-${setId}-weight`}
-          onIncrement={() => {
-            hasUserEditedRef.current = true
-            const displayWeight = toDisplayWeight(
-              weight ? parseFloat(weight) : 0,
-            )
-            const newDisplayWeight = incrementValue(
-              displayWeight?.toString() || '0',
-              getWeightIncrement,
-            )
-            const newWeightInKg = toStorageWeight(parseFloat(newDisplayWeight))
-            if (newWeightInKg !== null) {
-              const rounded = Math.round(newWeightInKg * 10000) / 10000
-              onWeightChange(rounded.toString())
-            }
-          }}
-          onDecrement={() => {
-            hasUserEditedRef.current = true
-            const displayWeight = toDisplayWeight(
-              weight ? parseFloat(weight) : 0,
-            )
-            const newDisplayWeight = decrementValue(
-              displayWeight?.toString() || '0',
-              getWeightIncrement,
-            )
-            const newWeightInKg = toStorageWeight(parseFloat(newDisplayWeight))
-            if (newWeightInKg !== null) {
-              const rounded = Math.round(newWeightInKg * 10000) / 10000
-              onWeightChange(rounded.toString())
-            }
-          }}
-        >
-          <ExerciseWeightInput
-            setId={setId}
-            weightInKg={weight ? parseFloat(weight) : null}
-            onWeightChange={(weightInKg) => {
-              hasUserEditedRef.current = true
-              onWeightChange(weightInKg?.toString() || '')
-            }}
-            placeholder=""
-            disabled={false}
-            showWeightUnit={false}
-          />
-        </StepperInput>
-      )}
-    </div>
   )
 }
 
