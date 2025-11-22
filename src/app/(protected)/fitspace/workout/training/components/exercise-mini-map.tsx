@@ -101,6 +101,7 @@ function SmartPillContent({
   layoutId?: string
   className?: string
 }) {
+  const showBiggerPill = isStaticOverview || isExpanded
   return (
     <motion.div
       layoutId={layoutId}
@@ -114,13 +115,15 @@ function SmartPillContent({
         className={cn(
           'flex items-center justify-center size-8 rounded-full transition-all mr-2 shrink-0 relative',
           'hover:bg-white/5 active:scale-95',
+
+          showBiggerPill && 'size-10',
         )}
       >
         <div className="relative flex-center">
           <ProgressCircle
             progress={progressPercentage}
-            size={28}
-            strokeWidth={3}
+            size={showBiggerPill ? 32 : 28}
+            strokeWidth={2.5}
             className="text-primary"
             hideCheckmark={true}
           />
@@ -134,8 +137,9 @@ function SmartPillContent({
 
       <div
         className={cn(
-          'flex flex-col justify-center min-w-0 px-2 border-l border-white dark:border-border h-6 flex-1',
+          'flex flex-col justify-center min-w-0 px-2 py-1 border-l border-border dark:border-border flex-1',
           'cursor-pointer',
+          showBiggerPill && 'py-2.5',
         )}
         onClick={onToggleExpand}
       >
@@ -168,7 +172,12 @@ function SmartPillContent({
       </div>
 
       {allExercisesCompleted && (
-        <div className="flex items-center gap-2 pl-3 border-l border-white h-6 shrink-0">
+        <div
+          className={cn(
+            'flex items-center gap-2 pl-3 py-1 border-l border-border dark:border-border shrink-0',
+            showBiggerPill && 'py-2.5',
+          )}
+        >
           <button
             onClick={onShowSummary}
             className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
@@ -329,7 +338,7 @@ export function WorkoutSmartPill({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-16 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+            className="fixed top-18 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
           >
             {exercises.map((exercise, i) => (
               <motion.div
@@ -476,7 +485,7 @@ export function WorkoutOverviewPill({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-16 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+            className="fixed top-18 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
           >
             {exercises.map((exercise, i) => (
               <motion.div
