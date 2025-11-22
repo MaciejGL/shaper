@@ -13,6 +13,7 @@ import { useWorkoutPrefetch } from '../hooks/use-workout-prefetch'
 import { CalendarWeekSelector } from './calendar-week-selector'
 import { getDefaultSelection } from './navigation-utils'
 import { NavigationDay, NavigationPlan } from './workout-day'
+import { WorkoutOptionsDropdown } from './workout-options'
 
 interface NavigationProps {
   plan?: NavigationPlan | null
@@ -167,7 +168,7 @@ function WeekSelector({ plan }: { plan: NavigationPlan }) {
         activeDayId={effectiveDayId}
         onWeekDaySelect={handleWeekDaySelect}
       />
-      {/* Add Select for Quick Workout and Preassigned plan if available */}
+      <WorkoutOptionsDropdown />
     </div>
   )
 }

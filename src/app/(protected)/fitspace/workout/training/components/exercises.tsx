@@ -5,13 +5,9 @@ import { CheckCheck } from 'lucide-react'
 import React from 'react'
 
 import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { Switch } from '@/components/ui/switch'
-import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutDayQuery,
-  GQLTrainingView,
   GQLWorkoutType,
 } from '@/generated/graphql-client'
 import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
@@ -38,8 +34,6 @@ export function Exercises({
   previousDayLogs,
   isQuickWorkout = false,
 }: ExercisesProps) {
-  const { preferences, setTrainingView } = useUserPreferences()
-
   const progressBarRef = React.useRef<HTMLDivElement>(null)
   const [isProgressBarAtTop, setIsProgressBarAtTop] = React.useState(false)
 
@@ -161,27 +155,10 @@ export function Exercises({
               {formatWorkoutType(day.workoutType!)}
             </p>
           )}
-          <div className="grid grid-cols-2 gap-2 bg-background">
-            <Label className="flex items-center justify-center gap-2 whitespace-nowrap p-1.5 bg-card dark:bg-background text-secondary-foreground [a&]:hover:bg-muted-foreground/20 border border-border rounded-2xl">
-              <Switch
-                size="lg"
-                checked={preferences.trainingView === GQLTrainingView.Advanced}
-                onCheckedChange={() =>
-                  setTrainingView(
-                    preferences.trainingView === GQLTrainingView.Advanced
-                      ? GQLTrainingView.Simple
-                      : GQLTrainingView.Advanced,
-                  )
-                }
-              />
-              Logging Mode
-            </Label>
-
-            <ExercisesCompleted
-              completedExercises={completedExercises}
-              totalExercises={exercises.length}
-            />
-          </div>
+          <ExercisesCompleted
+            completedExercises={completedExercises}
+            totalExercises={exercises.length}
+          />
           <div ref={progressBarRef} className="sticky top-0">
             <motion.div layout layoutId="workout-progress">
               <Progress value={progressPercentage} />
