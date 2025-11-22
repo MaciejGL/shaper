@@ -221,7 +221,11 @@ export function ExerciseMetadata({
         </div>
         <div className="flex flex-wrap gap-2 mt-3 empty:hidden">
           {isSuperset && (
-            <Badge variant="secondary" size="lg" className="bg-card shadow-xs">
+            <Badge
+              variant="secondary"
+              size="lg"
+              className="bg-card dark:bg-card-on-card shadow-xs"
+            >
               <ArrowLeftRight className="text-red-500" />
               Superset A/B
             </Badge>
@@ -233,7 +237,7 @@ export function ExerciseMetadata({
                 <Badge
                   variant="secondary"
                   size="lg"
-                  className="cursor-pointer h-full bg-card shadow-xs"
+                  className="cursor-pointer h-full bg-card dark:bg-card-on-card shadow-xs"
                 >
                   <GaugeIcon className="text-green-500" />
                   Tempo {exercise.tempo}
