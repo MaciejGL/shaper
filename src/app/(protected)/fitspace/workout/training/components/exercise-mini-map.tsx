@@ -452,7 +452,8 @@ export function WorkoutOverviewPill({
             isStaticOverview={true}
             layoutId="overview-pill"
             className={cn(
-              !isExpanded && 'rounded-none h-[56px] border-0 !bg-background',
+              !isExpanded &&
+                'rounded-none h-[56px] border-0 !bg-background shadow-none',
             )}
           />
         </motion.div>
