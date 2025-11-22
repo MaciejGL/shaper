@@ -1,11 +1,8 @@
 'use client'
 
-import { LayoutGroup, motion } from 'framer-motion'
-import { CheckCheck } from 'lucide-react'
-import React from 'react'
+import { LayoutGroup } from 'framer-motion'
+import React, { useState } from 'react'
 
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import {
   GQLFitspaceGetWorkoutDayQuery,
   GQLWorkoutType,
@@ -18,7 +15,7 @@ import { AddToFavouritesButton } from './add-to-favourites-button'
 import { ClearWorkoutModal } from './clear-workout-modal'
 import { EmptyWorkoutOptions } from './empty-workout-options'
 import { Exercise } from './exercise'
-import { ExerciseMiniMap } from './exercise-mini-map'
+import { WorkoutOverviewPill, WorkoutSmartPill } from './exercise-mini-map'
 import { RestDay } from './rest-day'
 
 interface ExercisesProps {
@@ -34,32 +31,6 @@ export function Exercises({
   previousDayLogs,
   isQuickWorkout = false,
 }: ExercisesProps) {
-  const progressBarRef = React.useRef<HTMLDivElement>(null)
-  const [isProgressBarAtTop, setIsProgressBarAtTop] = React.useState(false)
-
-  React.useEffect(() => {
-    const element = progressBarRef.current
-    if (!element) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsProgressBarAtTop(
-          !entry.isIntersecting && entry.boundingClientRect.top <= 0,
-        )
-      },
-      {
-        threshold: [0, 1],
-        rootMargin: '0px',
-      },
-    )
-
-    observer.observe(element)
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
-
   // Calculate last activity timestamp from most recent set log
   const lastActivityTimestamp = React.useMemo(() => {
     if (!day?.exercises) return undefined
@@ -91,6 +62,8 @@ export function Exercises({
 
   const isCompleted = day?.completedAt ? true : false
 
+  const [isOverviewVisible, setIsOverviewVisible] = useState(true)
+
   useTrackWorkoutSession(day?.id, isActive, isCompleted, lastActivityTimestamp)
 
   if (!day) return <div>No day data available</div>
@@ -101,21 +74,6 @@ export function Exercises({
   const isEmptyWorkout = !hasExercises && !day.isRestDay
   const hasNamedWorkoutType =
     day.workoutType && day.workoutType !== GQLWorkoutType.Custom
-
-  const completedExercises = exercises.filter(
-    (exercise) => exercise.completedAt,
-  ).length
-
-  const completedSets = exercises.reduce((acc, exercise) => {
-    return acc + exercise.sets.filter((set) => set.completedAt).length
-  }, 0)
-
-  const totalSets = exercises.reduce((acc, exercise) => {
-    return acc + exercise.sets.length
-  }, 0)
-
-  const progressPercentage =
-    totalSets > 0 ? (completedSets / totalSets) * 100 : 0
 
   // Early returns for special states
   if (day.isRestDay) {
@@ -147,36 +105,30 @@ export function Exercises({
   // Main workout view
   return (
     <LayoutGroup>
-      {hasExercises && <ExerciseMiniMap exercises={miniMapExercises} />}
+      {hasExercises && (
+        <WorkoutSmartPill
+          exercises={miniMapExercises}
+          startedAt={day.startedAt}
+          isOverviewVisible={isOverviewVisible}
+        />
+      )}
       <div>
-        <div className="flex flex-col pb-4 space-y-2 w-full px-2">
-          {hasNamedWorkoutType && (
+        {/* Workout Title */}
+        {hasNamedWorkoutType && (
+          <div className="flex flex-col  space-y-2 w-full p-2">
             <p className="text-lg font-medium text-center pb-2">
               {formatWorkoutType(day.workoutType!)}
             </p>
-          )}
-          <ExercisesCompleted
-            completedExercises={completedExercises}
-            totalExercises={exercises.length}
-          />
-          <div ref={progressBarRef} className="sticky top-0">
-            <motion.div layout layoutId="workout-progress">
-              <Progress value={progressPercentage} />
-            </motion.div>
           </div>
-        </div>
+        )}
 
-        {isProgressBarAtTop && (
-          <motion.div
-            layout
-            layoutId="workout-progress"
-            className="fixed top-0 left-0 right-0 z-50"
-          >
-            <Progress
-              value={progressPercentage}
-              className="rounded-none bg-background/50"
-            />
-          </motion.div>
+        {/* Overview Pill (static at top) */}
+        {hasExercises && (
+          <WorkoutOverviewPill
+            exercises={miniMapExercises}
+            startedAt={day.startedAt}
+            onInViewChange={setIsOverviewVisible}
+          />
         )}
 
         <div>
@@ -204,28 +156,5 @@ export function Exercises({
         </div>
       </div>
     </LayoutGroup>
-  )
-}
-
-function ExercisesCompleted({
-  completedExercises,
-  totalExercises,
-}: {
-  completedExercises: number
-  totalExercises: number
-}) {
-  return (
-    <Badge
-      variant="secondary"
-      size="lg"
-      className="w-full bg-card border border-border rounded-2xl"
-    >
-      {completedExercises}/{totalExercises} completed{' '}
-      {completedExercises === totalExercises ? (
-        <CheckCheck className="text-emerald-600" />
-      ) : (
-        ''
-      )}
-    </Badge>
   )
 }

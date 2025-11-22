@@ -11,6 +11,7 @@ interface ProgressCircleProps {
   className?: string
   strokeWidth?: number
   showValue?: boolean
+  hideCheckmark?: boolean
 }
 
 export function ProgressCircle({
@@ -19,6 +20,7 @@ export function ProgressCircle({
   className,
   strokeWidth = 2,
   showValue = false,
+  hideCheckmark = false,
 }: ProgressCircleProps) {
   const [displayProgress, setDisplayProgress] = useState(0)
 
@@ -102,7 +104,7 @@ export function ProgressCircle({
       </svg>
 
       {/* Center content */}
-      {isComplete ? (
+      {isComplete && !hideCheckmark ? (
         <Check
           className="text-green-500 animate-in scale-in-50 duration-300"
           style={{ width: size * 0.6, height: size * 0.6 }}
