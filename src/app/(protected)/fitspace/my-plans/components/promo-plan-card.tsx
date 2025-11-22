@@ -10,7 +10,7 @@ export function PromoPlanCard() {
   return (
     <Card
       onClick={() => router.push('/fitspace/explore?tab=premium-plans')}
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[5/6]"
+      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-video"
       variant="tertiary"
     >
       <CardContent className="relative flex gap-2 justify-between items-center h-full">

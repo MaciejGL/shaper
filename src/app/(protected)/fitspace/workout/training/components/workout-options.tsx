@@ -43,9 +43,9 @@ export function WorkoutOptionsDropdown() {
             e.preventDefault()
             toggleLoggingMode()
           }}
-          className="flex cursor-pointer items-center justify-between"
+          className="flex cursor-pointer items-center justify-betweenl"
         >
-          <span>Logging Mode</span>
+          <span className="w-full">Logging Mode</span>
           <Switch checked={isAdvanced} />
         </DropdownMenuItem>
       </DropdownMenuContent>

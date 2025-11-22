@@ -269,7 +269,7 @@ export function ExerciseSets({
         <div className="text-center">Set</div>
         <div className="text-center">Previous</div>
         <div className="text-center">Reps</div>
-        <div className="text-center uppercase">{preferences.weightUnit}</div>
+        <div className="text-center">Weight ({preferences.weightUnit})</div>
         <div />
       </div>
 

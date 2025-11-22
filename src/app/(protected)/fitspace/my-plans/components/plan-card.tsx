@@ -1,4 +1,4 @@
-import { Crown, User } from 'lucide-react'
+import { ChevronRight, Crown, User } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
@@ -48,16 +48,16 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
             quality={100}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
         </div>
       )}
       <CardContent
         className={cn(
-          'relative flex gap-2 justify-between aspect-[10/4]',
+          'relative flex gap-2 justify-between aspect-[12/4]',
           status !== PlanStatus.Active && 'items-center',
         )}
       >
-        <div className="self-end space-y-2">
+        <div className="self-end space-y-2 w-full">
           <div className="flex items-end gap-2 empty:hidden mt-2">
             {status === PlanStatus.Active && (
               <Badge variant="primary" className="w-fit" size="md">
@@ -77,12 +77,12 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
               </Badge>
             )}
           </div>
-          <CardTitle className="text-foreground text-lg">
-            {plan.title}
+          <CardTitle className="text-foreground text-lg grid grid-cols-[1fr_auto] items-center gap-4">
+            <p>{plan.title}</p> <ChevronRight className="size-4" />
           </CardTitle>
         </div>
         {hasProgress && (
-          <div className="flex self-start items-center shrink-0 bg-background/70 rounded-full p-1">
+          <div className="flex self-start items-center shrink-0 bg-background/90 rounded-full p-1 absolute right-4 top-0">
             <ProgressCircle
               progress={progressPercentage}
               size={status === PlanStatus.Active ? 40 : 32}

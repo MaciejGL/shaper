@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { use, useEffect, useMemo } from 'react'
 
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { WorkoutProvider } from '@/context/workout-context/workout-context'
 import {
   GQLFitspaceGetQuickWorkoutDayQuery,
@@ -15,7 +16,6 @@ import {
 import { cn } from '@/lib/utils'
 
 import { Exercises } from './exercises'
-import { SkeletonExercises } from './workout-page-skeleton'
 
 // Navigation pagination types
 export type NavigationPlan = NonNullable<
@@ -173,7 +173,9 @@ export const WorkoutDay = ({
     >
       <div className={cn('pb-4')}>
         {isLoadingNewDay ? (
-          <SkeletonExercises />
+          <div className="px-4 pt-4 space-y-6">
+            <LoadingSkeleton variant="light" count={3} />
+          </div>
         ) : (
           (dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day) && (
             <Exercises

@@ -86,7 +86,7 @@ export function PlanSection({
             <h2 className="text-lg font-semibold">{title}</h2>
           )}
         </div>
-        <div className="w-[60%]">
+        <div className="w-[100%]">
           <PromoPlanCard />
         </div>
       </div>
@@ -152,7 +152,7 @@ export function PlanSection({
                       key={
                         plan?.id ? `${plan.id}-carousel-item` : `carousel-item`
                       }
-                      className={cn('basis-[55%]  pl-4')}
+                      className={cn('basis-[40%]  pl-4')}
                     >
                       <PlanCarouselCard
                         key={plan?.id}
@@ -167,7 +167,7 @@ export function PlanSection({
                   <div className="w-4 shrink-0" />
                 </CarouselContent>
 
-                {plans.length > 1 && (
+                {plans.length > 2 && (
                   <CarouselDots count={plans.length} className="px-4" />
                 )}
               </Carousel>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { RefObject, useEffect, useRef, useState } from 'react'
 
 import {
   Accordion,
@@ -25,6 +25,7 @@ interface PlanPreviewTabProps {
   selectedWeekId?: string | null
   onAccordionChange?: () => void
   canViewDays?: boolean
+  scrollRef?: RefObject<HTMLDivElement | null>
 }
 
 export function PlanPreviewTab({
@@ -33,6 +34,7 @@ export function PlanPreviewTab({
   selectedWeekId = null,
   onAccordionChange,
   canViewDays = false,
+  scrollRef,
 }: PlanPreviewTabProps) {
   const { preferences } = useUserPreferences()
   const weekRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -45,10 +47,26 @@ export function PlanPreviewTab({
 
       // Scroll to the selected week
       setTimeout(() => {
-        weekRefs.current[selectedWeekId]?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        })
+        const element = weekRefs.current[selectedWeekId]
+        if (element) {
+          if (scrollRef?.current) {
+            const container = scrollRef.current
+            const elementRect = element.getBoundingClientRect()
+            const containerRect = container.getBoundingClientRect()
+            const relativeTop = elementRect.top - containerRect.top
+            const targetScroll = container.scrollTop + relativeTop - 16 // 16px padding
+
+            container.scrollTo({
+              top: targetScroll,
+              behavior: 'smooth',
+            })
+          } else {
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            })
+          }
+        }
       }, 150) // Small delay to ensure accordion is open
 
       // Notify parent that we've handled the selection
@@ -56,7 +74,7 @@ export function PlanPreviewTab({
         onAccordionChange()
       }
     }
-  }, [selectedWeekId, onAccordionChange])
+  }, [selectedWeekId, onAccordionChange, scrollRef])
 
   if (!weeks || weeks.length === 0) {
     return (

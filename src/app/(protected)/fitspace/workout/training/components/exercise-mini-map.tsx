@@ -369,7 +369,9 @@ export function WorkoutSmartPill({
 export function WorkoutOverviewPill({
   exercises,
   onInViewChange,
-}: SharedProps & { onInViewChange?: (inView: boolean) => void }) {
+}: SharedProps & {
+  onInViewChange?: (inView: boolean) => void
+}) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -452,7 +454,8 @@ export function WorkoutOverviewPill({
             isStaticOverview={true}
             layoutId="overview-pill"
             className={cn(
-              !isExpanded && 'rounded-none h-[56px] border-0 !bg-background',
+              !isExpanded &&
+                'rounded-none h-[56px] border-0 !bg-background shadow-none',
             )}
           />
         </motion.div>
