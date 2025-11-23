@@ -273,7 +273,9 @@ export function ExerciseSet({
   const displayReps = set.reps
     ? `${set.reps}`
     : set.minReps
-      ? `${set.minReps}-${set.maxReps}`
+      ? set.minReps === set.maxReps
+        ? `${set.minReps}`
+        : `${set.minReps}-${set.maxReps}`
       : '-'
 
   return (
