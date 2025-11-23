@@ -39,49 +39,101 @@ export const DisputeAlertEmail = ({
     <EmailWrapper
       previewText={`URGENT: Payment Dispute - ${amount} ${currency} (Evidence due: ${evidenceDueBy})`}
     >
-      <EmailHeader brandName="Hypro" backgroundColor="#7f1d1d" />
+      <EmailHeader brandName="Hypro" />
 
       <EmailContent>
-        <EmailHeading size={2} marginBottom="16px">
-          🚨 URGENT: Payment Dispute
-        </EmailHeading>
+        <EmailHeading as="h1">URGENT: Payment Dispute</EmailHeading>
 
-        <EmailText marginBottom="24px">
-          {adminName ? `Hi ${adminName}` : 'Hi Admin'},
-        </EmailText>
+        <EmailText>{adminName ? `Hi ${adminName}` : 'Hi Admin'},</EmailText>
 
-        <EmailAlert type="error">
-          ⚠️ <strong>A client has disputed a payment.</strong> Immediate action
+        <EmailAlert>
+          <strong>A client has disputed a payment.</strong> Immediate action
           required to respond before the deadline.
         </EmailAlert>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           A payment dispute has been filed and requires your attention in the
           Stripe Dashboard.
         </EmailText>
 
         <EmailCard>
-          <EmailText marginBottom="8px" size={5} color="primary" weight={600}>
-            Dispute ID: {disputeId}
+          <EmailText style={{ marginBottom: '12px', fontWeight: '600' }}>
+            Dispute Details
           </EmailText>
-          <EmailText marginBottom="8px" size={5} color="primary">
-            Amount: {amount} {currency}
-          </EmailText>
-          <EmailText marginBottom="8px" size={5} color="primary">
-            Reason: {reason}
-          </EmailText>
-          <EmailText marginBottom="8px" size={5} weight={600} color="primary">
-            Evidence Due: {evidenceDueBy}
-          </EmailText>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Dispute ID</span>
+            <span style={{ fontWeight: '600' }}>{disputeId}</span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Amount</span>
+            <span style={{ fontWeight: '600' }}>
+              {amount} {currency}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Reason</span>
+            <span style={{ fontWeight: '600' }}>{reason}</span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+              color: '#dc2626',
+            }}
+          >
+            <span style={{ fontWeight: '600' }}>Evidence Due</span>
+            <span style={{ fontWeight: '600' }}>{evidenceDueBy}</span>
+          </div>
+
           {trainerName && (
-            <EmailText marginBottom="8px" size={5} color="primary">
-              Trainer: {trainerName}
-            </EmailText>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '8px',
+                fontSize: '16px',
+              }}
+            >
+              <span style={{ color: '#6b7280' }}>Trainer</span>
+              <span style={{ fontWeight: '600' }}>{trainerName}</span>
+            </div>
           )}
+
           {clientName && (
-            <EmailText marginBottom="0" size={5} color="primary">
-              Client: {clientName}
-            </EmailText>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '8px',
+                fontSize: '16px',
+              }}
+            >
+              <span style={{ color: '#6b7280' }}>Client</span>
+              <span style={{ fontWeight: '600' }}>{clientName}</span>
+            </div>
           )}
         </EmailCard>
 
@@ -91,21 +143,24 @@ export const DisputeAlertEmail = ({
 
         <EmailDivider />
 
-        <EmailText marginBottom="16px" size={5} weight={600}>
+        <EmailText style={{ marginBottom: '12px', fontWeight: '600' }}>
           Next Steps:
         </EmailText>
-        <EmailText marginBottom="16px" color="muted" size={5}>
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           1. Click the button above to view the dispute in Stripe
-          <br />
+        </EmailText>
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           2. Review the client's claim and gather evidence
-          <br />
+        </EmailText>
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           3. Submit your response before the deadline
-          <br />
+        </EmailText>
+        <EmailText color="muted" size="14px" style={{ marginBottom: '16px' }}>
           4. Monitor the dispute status in Stripe Dashboard
         </EmailText>
 
-        <EmailAlert type="warning">
-          ⏰ <strong>Time-sensitive:</strong> If you don't respond by{' '}
+        <EmailAlert>
+          <strong>Time-sensitive:</strong> If you don't respond by{' '}
           {evidenceDueBy}, you may automatically lose the dispute and the funds
           will be returned to the customer.
         </EmailAlert>

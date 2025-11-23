@@ -38,13 +38,11 @@ export const PaymentReceivedEmail = ({
       <EmailHeader brandName="Hypro" />
 
       <EmailContent>
-        <EmailHeading size={2} marginBottom="16px">
-          💰 Payment Received
-        </EmailHeading>
+        <EmailHeading as="h1">Payment Received</EmailHeading>
 
-        <EmailText marginBottom="24px">Hi {trainerName},</EmailText>
+        <EmailText>Hi {trainerName},</EmailText>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           Great news! <strong>{clientName}</strong> ({clientEmail}) has
           successfully paid for{' '}
           {paymentType === 'subscription'
@@ -54,44 +52,87 @@ export const PaymentReceivedEmail = ({
         </EmailText>
 
         <EmailCard>
-          <EmailText marginBottom="12px" size={5} color="primary" weight={600}>
+          <EmailText style={{ marginBottom: '12px', fontWeight: '600' }}>
             Payment Details
           </EmailText>
-          <EmailText marginBottom="8px" size={5} color="primary">
-            <strong>Amount:</strong> {totalAmount} {currency.toUpperCase()}
-          </EmailText>
-          <EmailText marginBottom="8px" size={5} color="primary">
-            <strong>Type:</strong>{' '}
-            {paymentType === 'one-time' ? 'One-time Payment' : 'Subscription'}
-          </EmailText>
-          <EmailText marginBottom="12px" size={5} color="primary">
-            <strong>Packages:</strong>
-          </EmailText>
-          {packageNames.map((packageName, index) => (
-            <EmailText key={index} marginBottom="4px" size={5} color="primary">
-              • {packageName}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Amount</span>
+            <span style={{ fontWeight: '600' }}>
+              {totalAmount} {currency.toUpperCase()}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Type</span>
+            <span style={{ fontWeight: '600' }}>
+              {paymentType === 'one-time' ? 'One-time Payment' : 'Subscription'}
+            </span>
+          </div>
+
+          <div
+            style={{
+              marginTop: '16px',
+              paddingTop: '16px',
+              borderTop: '1px solid #e5e7eb',
+            }}
+          >
+            <EmailText
+              style={{
+                marginBottom: '8px',
+                fontSize: '14px',
+                color: '#6b7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+            >
+              Packages
             </EmailText>
-          ))}
+            {packageNames.map((packageName, index) => (
+              <div
+                key={index}
+                style={{ marginBottom: '4px', fontSize: '16px' }}
+              >
+                {packageName}
+              </div>
+            ))}
+          </div>
         </EmailCard>
 
         <EmailButton href={clientProfileUrl}>View Client Profile</EmailButton>
 
         <EmailDivider />
 
-        <EmailText color="muted" size={5} marginBottom="8px">
-          <strong>What happens next?</strong>
+        <EmailText
+          color="muted"
+          size="14px"
+          style={{ marginBottom: '8px', fontWeight: '600' }}
+        >
+          What happens next?
         </EmailText>
-        <EmailText color="muted" size={5} marginBottom="4px">
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           • Funds will be transferred to your connected Stripe account according
           to your payout schedule
         </EmailText>
-        <EmailText color="muted" size={5} marginBottom="4px">
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           • Platform fees have been automatically deducted
         </EmailText>
-        <EmailText color="muted" size={5} marginBottom="4px">
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           • You can view full transaction details in your Stripe Dashboard
         </EmailText>
-        <EmailText color="muted" size={5} marginBottom="0">
+        <EmailText color="muted" size="14px" style={{ marginBottom: 0 }}>
           • Service delivery tasks have been created for this purchase
         </EmailText>
       </EmailContent>

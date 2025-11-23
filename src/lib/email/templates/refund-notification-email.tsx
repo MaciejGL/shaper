@@ -2,7 +2,6 @@ import {
   EmailAlert,
   EmailCard,
   EmailContent,
-  EmailDivider,
   EmailFooter,
   EmailHeader,
   EmailHeading,
@@ -34,42 +33,62 @@ export const RefundNotificationEmail = ({
       <EmailHeader brandName="Hypro" />
 
       <EmailContent>
-        <EmailHeading size={2} marginBottom="16px">
-          Refund Processed
-        </EmailHeading>
+        <EmailHeading as="h1">Refund Processed</EmailHeading>
 
-        <EmailText marginBottom="24px">Hi {trainerName},</EmailText>
+        <EmailText>Hi {trainerName},</EmailText>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           A refund has been processed for a payment from your client{' '}
           <strong>{clientName}</strong>.
         </EmailText>
 
         <EmailCard>
-          <EmailText marginBottom="8px" size={5} color="primary" weight={600}>
-            Package: {packageName}
+          <EmailText style={{ marginBottom: '12px', fontWeight: '600' }}>
+            Refund Details
           </EmailText>
-          <EmailText marginBottom="8px" size={5} color="primary">
-            Refund Amount: {refundAmount} {currency}
-          </EmailText>
-          <EmailText marginBottom="0" size={5} color="primary">
-            Reason: {refundReason}
-          </EmailText>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Package</span>
+            <span style={{ fontWeight: '600' }}>{packageName}</span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Refund Amount</span>
+            <span style={{ fontWeight: '600' }}>
+              {refundAmount} {currency}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Reason</span>
+            <span style={{ fontWeight: '600' }}>{refundReason}</span>
+          </div>
         </EmailCard>
 
-        <EmailAlert type="info">
+        <EmailAlert>
           <strong>What happens next?</strong>
           <br />• The refund amount has been deducted from your balance
           <br />• Stripe will automatically adjust your payout
           <br />• You can view details in your Stripe Dashboard
         </EmailAlert>
-
-        <EmailDivider />
-
-        <EmailText color="muted" size={5} marginBottom="0">
-          If you have questions about this refund, please contact our support
-          team.
-        </EmailText>
       </EmailContent>
 
       <EmailFooter />

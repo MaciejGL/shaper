@@ -68,7 +68,7 @@ async function sendTrialEndingEmail(
         userName: userSubscription.user.profile?.firstName,
         daysRemaining,
         packageName: packageTemplate.name,
-        upgradeUrl: `${getBaseUrl()}/fitspace/settings`,
+        upgradeUrl: `${getBaseUrl()}/account-management`,
       })
       console.info(
         `📧 Trial ending email sent to ${userSubscription.user.email}`,

@@ -65,6 +65,7 @@ export function OfferPage({
   const [showTermsDialog, setShowTermsDialog] = useState(false)
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false)
   const [showTermsError, setShowTermsError] = useState(false)
+  const [isGeneratingToken, setIsGeneratingToken] = useState(false)
   const { isNativeApp } = useMobileApp()
 
   // Check if user has active platform premium subscription (not coaching)
@@ -200,8 +201,29 @@ export function OfferPage({
     }
   }
 
-  const handleReturnToApp = useCallback(() => {
-    const url = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
+  const handleReturnToApp = useCallback(async () => {
+    const params = new URLSearchParams({
+      tab: 'purchased-services',
+    })
+
+    let url = `${getBaseUrl()}/fitspace/my-trainer?${params.toString()}`
+
+    // Generate session token if not in native app (external browser scenario)
+    if (!isNativeApp) {
+      setIsGeneratingToken(true)
+      try {
+        const response = await fetch('/api/auth/generate-session-token', {
+          method: 'POST',
+        })
+        if (response.ok) {
+          const { sessionToken } = await response.json()
+          url += `&session_token=${encodeURIComponent(sessionToken)}`
+        }
+      } catch (error) {
+        console.error('Failed to generate session token:', error)
+      }
+      setIsGeneratingToken(false)
+    }
 
     // Universal link - opens in app if installed, otherwise in browser
     if (isNativeApp) {
@@ -242,6 +264,8 @@ export function OfferPage({
                   onClick={handleReturnToApp}
                   size="lg"
                   className="w-full"
+                  loading={isGeneratingToken}
+                  disabled={isGeneratingToken}
                 >
                   Return to App
                 </Button>
@@ -438,6 +462,8 @@ export function OfferPage({
               size="lg"
               className="w-full"
               variant="tertiary"
+              loading={isGeneratingToken}
+              disabled={isGeneratingToken}
             >
               Return to App
             </Button>

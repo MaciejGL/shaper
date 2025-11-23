@@ -1,5 +1,27 @@
 import * as React from 'react'
 
+// Updated Design Tokens for Minimalist System
+const theme = {
+  colors: {
+    background: '#ffffff',
+    text: '#1a1a1a', // Almost black
+    muted: '#6b7280', // Gray 500
+    border: '#e5e7eb', // Gray 200
+    primary: '#18181b', // Zinc 900
+    link: '#1a1a1a', // Keep links neutral for minimalism
+    headerBg: '#000000', // Black header
+    headerText: '#ffffff',
+  },
+  fonts: {
+    sans: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif',
+  },
+  spacing: {
+    s: '12px',
+    m: '24px',
+    l: '32px',
+  },
+}
+
 interface EmailWrapperProps {
   children: React.ReactNode
   previewText?: string
@@ -7,24 +29,19 @@ interface EmailWrapperProps {
 
 export const EmailWrapper = ({ children, previewText }: EmailWrapperProps) => (
   <html>
-    {/* eslint-disable-next-line */}
     <head>
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Hypro</title>
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        `}
-      </style>
     </head>
     <body
       style={{
         margin: '0',
         padding: '0',
-        backgroundColor: '#f8fafc',
-        fontFamily:
-          'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+        backgroundColor: '#f8fafc', // Light gray background for the email client view
+        fontFamily: theme.fonts.sans,
+        color: theme.colors.text,
+        lineHeight: '1.5',
       }}
     >
       {previewText && (
@@ -51,24 +68,24 @@ export const EmailWrapper = ({ children, previewText }: EmailWrapperProps) => (
         style={{
           width: '100%',
           backgroundColor: '#f8fafc',
-          fontFamily:
-            'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+          fontFamily: theme.fonts.sans,
         }}
       >
         <tr>
-          <td align="center" style={{ padding: '48px 24px' }}>
+          <td align="center" style={{ padding: '40px 0' }}>
             <table
               role="presentation"
               cellSpacing="0"
               cellPadding="0"
               border={0}
               style={{
-                maxWidth: '580px',
+                maxWidth: '600px',
                 width: '100%',
-                backgroundColor: '#ffffff',
+                backgroundColor: theme.colors.background,
                 borderRadius: '12px',
-                border: '1px solid #e2e8f0',
                 overflow: 'hidden',
+                boxShadow:
+                  '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
               }}
             >
               {children}
@@ -81,23 +98,16 @@ export const EmailWrapper = ({ children, previewText }: EmailWrapperProps) => (
 )
 
 interface EmailHeaderProps {
-  logoAlt?: string
   brandName?: string
-  backgroundColor?: string
 }
 
-export const EmailHeader = ({
-  logoAlt = 'Hypro',
-  brandName = 'Hypro',
-  backgroundColor = '#0f172a',
-}: EmailHeaderProps) => (
+export const EmailHeader = ({ brandName = 'Hypro' }: EmailHeaderProps) => (
   <tr>
     <td
       style={{
-        backgroundColor,
-        padding: '40px 48px',
+        backgroundColor: theme.colors.headerBg,
+        padding: '32px 40px',
         textAlign: 'center',
-        borderBottom: '1px solid #e2e8f0',
       }}
     >
       <div
@@ -105,30 +115,30 @@ export const EmailHeader = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          gap: '12px',
         }}
       >
         <img
-          src={'https://www.hypro.app/favicons/android-chrome-192x192.png'}
-          alt={logoAlt}
+          src="https://www.hypro.app/favicons/android-chrome-192x192.png"
+          alt="Hypro Logo"
+          width="32"
+          height="32"
           style={{
-            height: '32px',
+            display: 'block',
             width: '32px',
-            marginRight: '12px',
-            borderRadius: '50%',
+            height: '32px',
+            borderRadius: '50%', // Ensure rounded logo
           }}
         />
-        <h1
+        <span
           style={{
-            margin: '0',
-            fontSize: '20px',
-            fontWeight: '600',
-            color: '#ffffff',
-            letterSpacing: '-0.025em',
-            lineHeight: '1.2',
+            fontSize: '24px',
+            fontWeight: '500',
+            color: theme.colors.headerText,
           }}
         >
           {brandName}
-        </h1>
+        </span>
       </div>
     </td>
   </tr>
@@ -136,22 +146,16 @@ export const EmailHeader = ({
 
 interface EmailContentProps {
   children: React.ReactNode
-  padding?: string
 }
 
-export const EmailContent = ({
-  children,
-  padding = '48px',
-}: EmailContentProps) => (
+export const EmailContent = ({ children }: EmailContentProps) => (
   <tr>
-    <td style={{ padding }}>
+    <td style={{ padding: '40px' }}>
       <div
         style={{
           fontSize: '16px',
-          lineHeight: '1.7',
-          color: '#334155',
-          fontFamily:
-            'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+          lineHeight: '1.6',
+          color: theme.colors.text,
         }}
       >
         {children}
@@ -164,111 +168,84 @@ interface EmailFooterProps {
   companyName?: string
   address?: string
   unsubscribeUrl?: string
-  socialLinks?: {
-    name: string
-    url: string
-    icon?: string
-  }[]
 }
 
 export const EmailFooter = ({
   companyName = 'Hypro',
   address,
   unsubscribeUrl,
-  socialLinks,
 }: EmailFooterProps) => (
   <tr>
     <td
       style={{
+        padding: '32px 40px',
         backgroundColor: '#f8fafc',
-        padding: '32px 48px',
-        borderTop: '1px solid #e2e8f0',
+        borderTop: `1px solid ${theme.colors.border}`,
+        textAlign: 'center',
       }}
     >
-      <table
-        role="presentation"
-        cellSpacing="0"
-        cellPadding="0"
-        border={0}
-        style={{ width: '100%' }}
+      <div style={{ marginBottom: '24px' }}>
+        <p
+          style={{
+            margin: '0 0 8px 0',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: theme.colors.primary,
+          }}
+        >
+          Questions?
+        </p>
+        <p
+          style={{
+            margin: '0',
+            fontSize: '14px',
+            color: theme.colors.muted,
+          }}
+        >
+          Contact us at{' '}
+          <a
+            href="mailto:support@hypro.app"
+            style={{ color: theme.colors.primary, textDecoration: 'underline' }}
+          >
+            support@hypro.app
+          </a>
+        </p>
+      </div>
+
+      <p
+        style={{
+          margin: '0 0 12px 0',
+          fontSize: '13px',
+          color: theme.colors.muted,
+          lineHeight: '1.5',
+        }}
       >
-        {socialLinks && socialLinks.length > 0 && (
-          <tr>
-            <td style={{ textAlign: 'center', paddingBottom: '24px' }}>
-              {socialLinks.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.url}
-                  style={{
-                    display: 'inline-block',
-                    margin: '0 12px',
-                    textDecoration: 'none',
-                  }}
-                >
-                  {link.icon ? (
-                    <img
-                      src={link.icon || '/placeholder.svg'}
-                      alt={link.name}
-                      style={{ width: '20px', height: '20px' }}
-                    />
-                  ) : (
-                    <span
-                      style={{
-                        fontSize: '13px',
-                        color: '#64748b',
-                        textDecoration: 'underline',
-                        fontWeight: '500',
-                      }}
-                    >
-                      {link.name}
-                    </span>
-                  )}
-                </a>
-              ))}
-            </td>
-          </tr>
-        )}
-        <tr>
-          <td style={{ textAlign: 'center' }}>
-            <p
-              style={{
-                margin: '0 0 12px 0',
-                fontSize: '13px',
-                color: '#64748b',
-                lineHeight: '1.5',
-                fontWeight: '500',
-              }}
-            >
-              © {new Date().getFullYear()} {companyName}. All rights reserved.
-            </p>
-            {address && (
-              <p
-                style={{
-                  margin: '0 0 16px 0',
-                  fontSize: '13px',
-                  color: '#94a3b8',
-                  lineHeight: '1.5',
-                }}
-              >
-                {address}
-              </p>
-            )}
-            {unsubscribeUrl && (
-              <a
-                href={unsubscribeUrl}
-                style={{
-                  fontSize: '13px',
-                  color: '#64748b',
-                  textDecoration: 'underline',
-                  fontWeight: '500',
-                }}
-              >
-                Unsubscribe
-              </a>
-            )}
-          </td>
-        </tr>
-      </table>
+        © {new Date().getFullYear()} {companyName}. All rights reserved.
+      </p>
+      {address && (
+        <p
+          style={{
+            margin: '0 0 12px 0',
+            fontSize: '13px',
+            color: theme.colors.muted,
+            lineHeight: '1.5',
+          }}
+        >
+          {address}
+        </p>
+      )}
+      {unsubscribeUrl && (
+        <a
+          href={unsubscribeUrl}
+          style={{
+            fontSize: '13px',
+            color: theme.colors.muted,
+            textDecoration: 'underline',
+          }}
+        >
+          Unsubscribe
+        </a>
+      )}
     </td>
   </tr>
 )
@@ -276,193 +253,145 @@ export const EmailFooter = ({
 interface EmailButtonProps {
   href: string
   children: React.ReactNode
-  backgroundColor?: string
-  textColor?: string
-  borderRadius?: string
-  padding?: string
-  size?: 'sm' | 'md' | 'lg'
+  fullWidth?: boolean
 }
 
 export const EmailButton = ({
   href,
   children,
-  backgroundColor = '#0f172a',
-  textColor = '#ffffff',
-  borderRadius = '8px',
-  padding,
-  size = 'md',
-}: EmailButtonProps) => {
-  const defaultPadding = {
-    sm: '10px 20px',
-    md: '14px 28px',
-    lg: '16px 32px',
-  }[size]
-
-  const fontSize = {
-    sm: '14px',
-    md: '16px',
-    lg: '16px',
-  }[size]
-
-  return (
-    <table
-      role="presentation"
-      cellSpacing="0"
-      cellPadding="0"
-      border={0}
-      style={{ margin: '0 auto' }}
-    >
-      <tr>
-        <td
+  fullWidth,
+}: EmailButtonProps) => (
+  <table
+    role="presentation"
+    cellSpacing="0"
+    cellPadding="0"
+    border={0}
+    style={{ width: fullWidth ? '100%' : 'auto', margin: '32px auto' }} // Centered by default
+  >
+    <tr>
+      <td
+        style={{
+          borderRadius: '8px',
+          backgroundColor: theme.colors.primary,
+          textAlign: 'center',
+        }}
+      >
+        <a
+          href={href}
           style={{
-            borderRadius,
-            backgroundColor,
-            border: '1px solid transparent',
-            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            display: 'inline-block',
+            padding: '14px 32px',
+            fontSize: '16px',
+            fontWeight: '600',
+            color: '#ffffff',
+            textDecoration: 'none',
+            borderRadius: '8px',
+            width: fullWidth ? '100%' : 'auto',
+            boxSizing: 'border-box',
           }}
         >
-          <a
-            href={href}
-            style={{
-              display: 'inline-block',
-              padding: padding || defaultPadding,
-              fontSize,
-              fontWeight: '600',
-              color: textColor,
-              textDecoration: 'none',
-              borderRadius,
-              lineHeight: '1.4',
-              letterSpacing: '-0.025em',
-            }}
-          >
-            {children}
-          </a>
-        </td>
-      </tr>
-    </table>
-  )
-}
-
-const fontSize = {
-  1: '28px',
-  2: '24px',
-  3: '20px',
-  4: '16px',
-  5: '14px',
-  6: '12px',
-} as const
-
-const fontWeight = {
-  300: '300',
-  400: '400',
-  500: '500',
-  600: '600',
-  700: '700',
-} as const
-
-const fontColor = {
-  primary: '#0f172a',
-  secondary: '#475569',
-  muted: '#64748b',
-  subtle: '#94a3b8',
-} as const
+          {children}
+        </a>
+      </td>
+    </tr>
+  </table>
+)
 
 export const EmailHeading = ({
   children,
-  size = 1,
-  weight = 600,
-  color = 'primary',
-  center = false,
-  marginBottom = '24px',
+  as = 'h1',
 }: {
   children: React.ReactNode
-  size?: keyof typeof fontSize
-  weight?: keyof typeof fontWeight
-  color?: keyof typeof fontColor
-  center?: boolean
-  marginBottom?: string
+  as?: 'h1' | 'h2' | 'h3'
 }) => {
-  return (
-    <h1
-      style={{
-        margin: `0 0 ${marginBottom} 0`,
-        fontSize: fontSize[size],
-        fontWeight: fontWeight[weight],
-        color: fontColor[color],
-        textAlign: center ? 'center' : 'left',
-        lineHeight: '1.3',
-        letterSpacing: '-0.025em',
-      }}
-    >
-      {children}
-    </h1>
-  )
+  const styles = {
+    h1: {
+      fontSize: '28px',
+      fontWeight: '500',
+      margin: '0 0 24px 0',
+      letterSpacing: '-0.75px',
+      color: theme.colors.primary,
+    },
+    h2: {
+      fontSize: '22px',
+      fontWeight: '500',
+      margin: '32px 0 16px 0',
+      letterSpacing: '-0.5px',
+      color: theme.colors.primary,
+    },
+    h3: {
+      fontSize: '18px',
+      fontWeight: '500',
+      margin: '24px 0 12px 0',
+      color: theme.colors.primary,
+    },
+  }[as]
+
+  return <div style={{ ...styles }}>{children}</div>
 }
 
 export const EmailText = ({
   children,
-  color = 'secondary',
-  size = 4,
-  weight = 400,
-  center = false,
-  marginBottom = '20px',
+  color = 'text',
+  size = '16px',
+  weight = '400',
+  style = {},
 }: {
   children: React.ReactNode
-  color?: keyof typeof fontColor
-  size?: keyof typeof fontSize
-  weight?: keyof typeof fontWeight
-  center?: boolean
-  marginBottom?: string
+  color?: keyof typeof theme.colors
+  size?: string
+  weight?: string
+  style?: React.CSSProperties
 }) => (
   <p
     style={{
-      margin: `0 0 ${marginBottom} 0`,
-      fontSize: fontSize[size],
-      fontWeight: fontWeight[weight],
-      color: fontColor[color],
-      textAlign: center ? 'center' : 'left',
+      margin: '0 0 24px 0',
+      fontSize: size,
+      fontWeight: weight,
+      color: theme.colors[color] || color,
       lineHeight: '1.6',
+      ...style,
     }}
   >
     {children}
   </p>
 )
 
-// Additional utility components for modern email design
 export const EmailDivider = () => (
   <div
     style={{
       height: '1px',
-      backgroundColor: '#e2e8f0',
+      backgroundColor: theme.colors.border,
       margin: '32px 0',
     }}
   />
 )
 
+// Minimalist "Callout" or "Card" - just a bordered box
 export const EmailCard = ({
   children,
-  backgroundColor = '#f8fafc',
-  borderColor = '#e2e8f0',
   padding = '24px',
+  backgroundColor = '#ffffff',
 }: {
   children: React.ReactNode
-  backgroundColor?: string
-  borderColor?: string
   padding?: string
+  backgroundColor?: string
 }) => (
   <div
     style={{
-      backgroundColor,
-      border: `1px solid ${borderColor}`,
-      borderRadius: '8px',
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: '12px', // More rounded
       padding,
-      margin: '24px 0',
+      marginBottom: '24px',
+      backgroundColor: backgroundColor,
+      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', // Subtle shadow
     }}
   >
     {children}
   </div>
 )
 
+// Simple text-based alert
 export const EmailAlert = ({
   children,
   type = 'info',
@@ -470,33 +399,47 @@ export const EmailAlert = ({
   children: React.ReactNode
   type?: 'info' | 'warning' | 'error' | 'success'
 }) => {
-  const alertStyles = {
-    info: { bg: '#eff6ff', border: '#dbeafe', text: '#1e40af' },
-    warning: { bg: '#fefce8', border: '#fde047', text: '#a16207' },
-    error: { bg: '#fef2f2', border: '#fecaca', text: '#dc2626' },
-    success: { bg: '#f0fdf4', border: '#bbf7d0', text: '#16a34a' },
+  const styles = {
+    info: { bg: '#f8fafc', text: theme.colors.text },
+    warning: { bg: '#fffbeb', text: '#92400e' },
+    error: { bg: '#fef2f2', text: '#b91c1c' },
+    success: { bg: '#f0fdf4', text: '#15803d' },
   }[type]
 
   return (
     <div
       style={{
-        backgroundColor: alertStyles.bg,
-        border: `1px solid ${alertStyles.border}`,
-        borderRadius: '8px',
+        backgroundColor: styles.bg,
         padding: '16px',
-        margin: '24px 0',
+        borderRadius: '8px',
+        marginBottom: '24px',
+        fontSize: '14px',
+        color: styles.text,
+        border: `1px solid ${theme.colors.border}`,
       }}
     >
-      <div
-        style={{
-          fontSize: '14px',
-          fontWeight: '500',
-          color: alertStyles.text,
-          lineHeight: '1.5',
-        }}
-      >
-        {children}
-      </div>
+      {children}
     </div>
   )
 }
+
+export const EmailLink = ({
+  href,
+  children,
+}: {
+  href: string
+  children: React.ReactNode
+}) => (
+  <a
+    href={href}
+    style={{
+      color: theme.colors.primary,
+      textDecoration: 'underline',
+      textDecorationColor: theme.colors.border,
+      textUnderlineOffset: '4px',
+      fontWeight: '500',
+    }}
+  >
+    {children}
+  </a>
+)

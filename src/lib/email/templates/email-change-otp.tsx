@@ -2,7 +2,6 @@ import {
   EmailAlert,
   EmailCard,
   EmailContent,
-  EmailDivider,
   EmailFooter,
   EmailHeader,
   EmailHeading,
@@ -26,65 +25,54 @@ export const EmailChangeOtp = ({
   <EmailWrapper previewText={`Verify your new email address: ${code}`}>
     <EmailHeader brandName="Hypro" />
     <EmailContent>
-      <EmailHeading size={2} marginBottom="12px">
+      <EmailHeading as="h1">
         {userName ? `Hi ${userName},` : 'Verify your new email address'}
       </EmailHeading>
 
-      <EmailText marginBottom="20px">
+      <EmailText>
         You've requested to change your email address from{' '}
         <strong>{currentEmail}</strong> to <strong>{newEmail}</strong>.
       </EmailText>
 
-      <EmailText marginBottom="28px">
+      <EmailText>
         To complete this change, please enter the verification code below:
       </EmailText>
 
-      <EmailCard backgroundColor="#f8fafc" borderColor="#e2e8f0" padding="32px">
+      <EmailCard padding="32px">
         <EmailText
-          size={5}
+          size="14px"
           color="muted"
-          center
-          marginBottom="8px"
-          weight={500}
+          style={{
+            textAlign: 'center',
+            marginBottom: '8px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          }}
         >
-          VERIFICATION CODE
+          Verification Code
         </EmailText>
-        <EmailHeading
-          size={1}
-          center
-          weight={700}
-          marginBottom="0"
-          color="primary"
+        <div
+          style={{
+            fontSize: '32px',
+            fontWeight: '700',
+            textAlign: 'center',
+            letterSpacing: '4px',
+            color: '#18181b',
+          }}
         >
           {code}
-        </EmailHeading>
+        </div>
       </EmailCard>
 
-      <EmailAlert type="warning">
-        ⏰ This code expires in 10 minutes for your security
+      <EmailAlert>
+        This code expires in 10 minutes for your security. Your current email (
+        {currentEmail}) will remain active until this change is verified.
       </EmailAlert>
 
-      <EmailAlert type="info">
-        🔐 Your current email ({currentEmail}) will remain active until this
-        change is verified
-      </EmailAlert>
-
-      <EmailDivider />
-
-      <EmailText size={5} color="muted" marginBottom="8px">
+      <EmailText size="14px" color="muted">
         If you didn't request this email change, please ignore this email and
         your account will remain secure. You may also want to review your
         account security.
-      </EmailText>
-
-      <EmailText size={5} color="muted" marginBottom="0">
-        Need help? Contact our support team at{' '}
-        <a
-          href="mailto:support@hypro.app"
-          style={{ color: '#0f172a', textDecoration: 'underline' }}
-        >
-          support@hypro.app
-        </a>
       </EmailText>
     </EmailContent>
     <EmailFooter companyName="Hypro" />

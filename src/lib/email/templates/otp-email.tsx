@@ -1,8 +1,6 @@
 import {
   EmailAlert,
-  EmailCard,
   EmailContent,
-  EmailDivider,
   EmailFooter,
   EmailHeader,
   EmailHeading,
@@ -19,54 +17,50 @@ export const OtpEmail = ({ code, userName }: OtpEmailProps) => (
   <EmailWrapper previewText={`Your verification code: ${code}`}>
     <EmailHeader brandName="Hypro" />
     <EmailContent>
-      <EmailHeading size={2} marginBottom="12px">
+      <EmailHeading as="h1">
         {userName ? `Welcome back, ${userName}` : 'Verify your identity'}
       </EmailHeading>
 
-      <EmailText marginBottom="28px">
+      <EmailText>
         Use the verification code below to complete your sign-in to Hypro.
       </EmailText>
 
-      <EmailCard backgroundColor="#f8fafc" borderColor="#e2e8f0" padding="32px">
-        <EmailText
-          size={5}
-          color="muted"
-          center
-          marginBottom="8px"
-          weight={500}
-        >
-          VERIFICATION CODE
-        </EmailText>
-        <EmailHeading
-          size={1}
-          center
-          weight={700}
-          marginBottom="0"
-          color="primary"
-        >
-          {code}
-        </EmailHeading>
-      </EmailCard>
+      <EmailText
+        size="14px"
+        color="muted"
+        style={{
+          textAlign: 'center',
+          marginBottom: '8px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+        }}
+      >
+        Verification Code
+      </EmailText>
+      <div
+        style={{
+          fontSize: '32px',
+          fontWeight: '500',
+          textAlign: 'center',
+          letterSpacing: '2px',
+          color: '#18181b',
+          backgroundColor: '#f0f0f0',
+          padding: '8px 24px',
+          borderRadius: '12px',
+          marginBottom: '24px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          width: 'fit-content',
+        }}
+      >
+        {code}
+      </div>
 
-      <EmailAlert type="warning">
-        ⏰ This code expires in 10 minutes for your security
-      </EmailAlert>
+      <EmailAlert>This code expires in 10 minutes for your security</EmailAlert>
 
-      <EmailDivider />
-
-      <EmailText size={5} color="muted" marginBottom="8px">
+      <EmailText size="14px" color="muted">
         If you didn't request this code, please ignore this email. Your account
         remains secure.
-      </EmailText>
-
-      <EmailText size={5} color="muted" marginBottom="0">
-        Need help? Contact our support team at{' '}
-        <a
-          href="mailto:support@hypro.app"
-          style={{ color: '#0f172a', textDecoration: 'underline' }}
-        >
-          support@hypro.app
-        </a>
       </EmailText>
     </EmailContent>
     <EmailFooter companyName="Hypro" />

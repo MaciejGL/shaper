@@ -36,37 +36,33 @@ export const TeamInvitationEmail = ({
       <EmailHeader brandName="Hypro" />
 
       <EmailContent>
-        <EmailHeading size={2} marginBottom="12px">
-          Team invitation
-        </EmailHeading>
+        <EmailHeading as="h1">Team invitation</EmailHeading>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           {invitedUserName ? `Hi ${invitedUserName},` : 'Hello,'}
         </EmailText>
 
-        <EmailText marginBottom="28px">
+        <EmailText>
           <strong>{inviterName}</strong> has invited you to join their team on
           Hypro. Join their team to collaborate, share training plans, and work
           together towards your fitness goals.
         </EmailText>
 
         <EmailCard>
-          <EmailHeading size={3} marginBottom="16px" weight={600}>
-            Team Details
-          </EmailHeading>
+          <EmailHeading as="h3">Team Details</EmailHeading>
 
           <div style={{ marginBottom: '16px' }}>
             <div
               style={{
                 fontSize: '16px',
                 fontWeight: '600',
-                color: '#0f172a',
+                color: '#18181b',
                 marginBottom: '4px',
               }}
             >
               {teamName}
             </div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>
+            <div style={{ fontSize: '14px', color: '#6b7280' }}>
               Locations: {locationsText}
             </div>
           </div>
@@ -74,24 +70,19 @@ export const TeamInvitationEmail = ({
           <div
             style={{
               marginTop: '20px',
-              padding: '16px',
-              backgroundColor: '#f8fafc',
-              borderRadius: '6px',
+              paddingTop: '16px',
+              borderTop: '1px solid #e2e8f0',
             }}
           >
-            <div style={{ fontSize: '14px', color: '#475569' }}>
+            <div style={{ fontSize: '14px', color: '#4b5563' }}>
               <strong>Invited by:</strong> {inviterName}
             </div>
           </div>
         </EmailCard>
 
-        <div style={{ textAlign: 'center', margin: '32px 0' }}>
-          <EmailButton href={invitationUrl} size="lg">
-            Accept Team Invitation
-          </EmailButton>
-        </div>
+        <EmailButton href={invitationUrl}>Accept Team Invitation</EmailButton>
 
-        <EmailAlert type="info">
+        <EmailAlert>
           By accepting this invitation, you'll be able to collaborate with team
           members, share training plans, and coordinate your fitness activities
           together.
@@ -99,15 +90,8 @@ export const TeamInvitationEmail = ({
 
         <EmailDivider />
 
-        <EmailText size={5} color="muted" marginBottom="0">
-          Questions about this invitation? Contact {inviterName} directly or
-          reach out to our support team at{' '}
-          <a
-            href="mailto:support@hypro.app"
-            style={{ color: '#0f172a', textDecoration: 'underline' }}
-          >
-            support@hypro.app
-          </a>
+        <EmailText size="14px" color="muted" style={{ marginBottom: 0 }}>
+          Questions about this invitation? Contact {inviterName} directly.
         </EmailText>
       </EmailContent>
 

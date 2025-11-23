@@ -2,7 +2,6 @@ import {
   EmailAlert,
   EmailCard,
   EmailContent,
-  EmailDivider,
   EmailFooter,
   EmailHeader,
   EmailHeading,
@@ -40,157 +39,122 @@ export const SubscriptionUpgradeCreditEmail = ({
       <EmailHeader brandName="Hypro" />
 
       <EmailContent>
-        <EmailHeading size={2} marginBottom="16px">
+        <EmailHeading as="h1">
           Credit Applied from Subscription Upgrade
         </EmailHeading>
 
-        <EmailText marginBottom="24px">
-          {userName ? `Hi ${userName},` : 'Hello,'}
-        </EmailText>
+        <EmailText>{userName ? `Hi ${userName},` : 'Hello,'}</EmailText>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           Your subscription has been upgraded from{' '}
           <strong>{oldPackageName}</strong> to <strong>{newPackageName}</strong>
           .
         </EmailText>
 
         {/* Credit Amount Card - Prominent Display */}
-        <EmailCard>
-          <div style={{ textAlign: 'center', padding: '8px 0' }}>
-            <EmailText size={6} color="muted" marginBottom="8px">
-              <span
-                style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}
-              >
-                Credit Applied
-              </span>
+        <EmailCard padding="32px">
+          <div style={{ textAlign: 'center' }}>
+            <EmailText
+              size="14px"
+              color="muted"
+              style={{
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+            >
+              Credit Applied
             </EmailText>
             <div
               style={{
                 fontSize: '36px',
                 fontWeight: '700',
-                color: '#0f172a',
+                color: '#18181b',
                 marginBottom: '4px',
               }}
             >
               {creditAmount} {currency}
             </div>
-            <EmailText size={5} color="muted" marginBottom="0">
+            <EmailText size="14px" color="muted" style={{ marginBottom: 0 }}>
               Applied on {creditDate}
             </EmailText>
           </div>
         </EmailCard>
 
-        <EmailAlert type="success">
-          <strong>Your credit is ready!</strong>
-          <br />
-          The unused portion of your previous subscription has been credited to
-          your account and will automatically reduce your next payment.
+        <EmailAlert>
+          <strong>Your credit is ready!</strong> The unused portion of your
+          previous subscription has been credited to your account and will
+          automatically reduce your next payment.
         </EmailAlert>
 
-        <EmailText marginBottom="16px" weight={600}>
-          Next Billing Preview
-        </EmailText>
+        <EmailText weight="600">Next Billing Preview</EmailText>
 
         <EmailCard>
-          <table
-            cellPadding="0"
-            cellSpacing="0"
-            border={0}
-            style={{ width: '100%', borderCollapse: 'collapse' }}
+          <div
+            style={{
+              borderBottom: '1px solid #e5e7eb',
+              paddingBottom: '12px',
+              marginBottom: '12px',
+            }}
           >
-            <tbody>
-              <tr>
-                <td
-                  style={{
-                    paddingBottom: '12px',
-                    borderBottom: '1px solid #e2e8f0',
-                  }}
-                >
-                  <EmailText size={5} color="muted" marginBottom="4px">
-                    Next billing date
-                  </EmailText>
-                  <EmailText marginBottom="0" weight={600}>
-                    {nextBillingDate}
-                  </EmailText>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingTop: '12px', paddingBottom: '8px' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <EmailText marginBottom="0">{newPackageName}</EmailText>
-                    <EmailText marginBottom="0">
-                      {newPlanPrice} {currency}
-                    </EmailText>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <EmailText marginBottom="0" color="primary">
-                      Credit applied
-                    </EmailText>
-                    <EmailText marginBottom="0" color="primary">
-                      -{creditAmount} {currency}
-                    </EmailText>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    paddingTop: '12px',
-                    borderTop: '2px solid #0f172a',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <EmailText marginBottom="0" weight={600} size={4}>
-                      Amount you'll pay
-                    </EmailText>
-                    <EmailText marginBottom="0" weight={700} size={3}>
-                      {amountAfterCredit} {currency}
-                    </EmailText>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <EmailText
+              size="14px"
+              color="muted"
+              style={{ marginBottom: '4px' }}
+            >
+              Next billing date
+            </EmailText>
+            <EmailText style={{ marginBottom: 0, fontWeight: '600' }}>
+              {nextBillingDate}
+            </EmailText>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+            }}
+          >
+            <span style={{ color: '#4b5563' }}>{newPackageName}</span>
+            <span style={{ fontWeight: '600' }}>
+              {newPlanPrice} {currency}
+            </span>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '12px',
+              color: '#16a34a',
+            }}
+          >
+            <span>Credit applied</span>
+            <span style={{ fontWeight: '600' }}>
+              -{creditAmount} {currency}
+            </span>
+          </div>
+
+          <div
+            style={{
+              borderTop: '2px solid #18181b',
+              paddingTop: '12px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span style={{ fontWeight: '600' }}>Amount you'll pay</span>
+            <span style={{ fontWeight: '700', fontSize: '18px' }}>
+              {amountAfterCredit} {currency}
+            </span>
+          </div>
         </EmailCard>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           This credit will be automatically applied to your next billing cycle.
           No action is required from you.
-        </EmailText>
-
-        <EmailDivider />
-
-        <EmailText color="muted" size={5} marginBottom="0">
-          Questions about your subscription or credit? Contact our support team
-          at{' '}
-          <a
-            href="mailto:support@hypro.app"
-            style={{ color: '#0f172a', textDecoration: 'underline' }}
-          >
-            support@hypro.app
-          </a>
         </EmailText>
       </EmailContent>
 
