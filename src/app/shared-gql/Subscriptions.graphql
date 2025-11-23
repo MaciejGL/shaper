@@ -8,6 +8,9 @@ query GetMySubscriptionStatus {
     canAccessMealPlans
     subscriptionEndDate
     isInGracePeriod
+    trainingPlanLimit
+    favouriteWorkoutLimit
+    favouriteFolderLimit
   }
 }
 

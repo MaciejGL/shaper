@@ -4,21 +4,31 @@ import { useRouter } from 'next/navigation'
 import { startTransition } from 'react'
 
 import {
+  GQLCreateFavouriteWorkoutFolderInput,
   GQLCreateFavouriteWorkoutInput,
   GQLFitspaceMyPlansQuery,
   GQLStartWorkoutFromFavouriteInput,
+  GQLUpdateFavouriteWorkoutFolderInput,
   GQLUpdateFavouriteWorkoutInput,
+  useCreateFavouriteWorkoutFolderMutation,
   useCreateFavouriteWorkoutMutation,
+  useDeleteFavouriteWorkoutFolderMutation,
   useDeleteFavouriteWorkoutMutation,
   useFitspaceMyPlansQuery,
+  useGetFavouriteWorkoutFoldersQuery,
   useGetFavouriteWorkoutsQuery,
   useStartWorkoutFromFavouriteMutation,
+  useUpdateFavouriteWorkoutFolderMutation,
   useUpdateFavouriteWorkoutMutation,
 } from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
 
 export function useFavouriteWorkouts() {
   return useGetFavouriteWorkoutsQuery()
+}
+
+export function useFavouriteWorkoutFolders() {
+  return useGetFavouriteWorkoutFoldersQuery()
 }
 
 export function useCreateFavouriteWorkout() {
@@ -35,6 +45,9 @@ export function useUpdateFavouriteWorkout() {
   const queryClient = useQueryClient()
 
   return useUpdateFavouriteWorkoutMutation({
+    onSuccess: async () => {
+      await queryInvalidation.favourites(queryClient)
+    },
     onError: async () => {
       await queryInvalidation.favourites(queryClient)
     },
@@ -45,6 +58,39 @@ export function useDeleteFavouriteWorkout() {
   const queryClient = useQueryClient()
 
   return useDeleteFavouriteWorkoutMutation({
+    onSuccess: async () => {
+      await queryInvalidation.favourites(queryClient)
+    },
+  })
+}
+
+export function useCreateFavouriteWorkoutFolder() {
+  const queryClient = useQueryClient()
+
+  return useCreateFavouriteWorkoutFolderMutation({
+    onSuccess: async () => {
+      await queryInvalidation.favourites(queryClient)
+    },
+  })
+}
+
+export function useUpdateFavouriteWorkoutFolder() {
+  const queryClient = useQueryClient()
+
+  return useUpdateFavouriteWorkoutFolderMutation({
+    onSuccess: async () => {
+      await queryInvalidation.favourites(queryClient)
+    },
+    onError: async () => {
+      await queryInvalidation.favourites(queryClient)
+    },
+  })
+}
+
+export function useDeleteFavouriteWorkoutFolder() {
+  const queryClient = useQueryClient()
+
+  return useDeleteFavouriteWorkoutFolderMutation({
     onSuccess: async () => {
       await queryInvalidation.favourites(queryClient)
     },
@@ -169,5 +215,27 @@ export function useFavouriteWorkoutOperations() {
       startFromFavouriteMutation.mutateAsync({ input }),
     isStarting: startFromFavouriteMutation.isPending,
     startError: startFromFavouriteMutation.error,
+  }
+}
+
+export function useFavouriteWorkoutFolderOperations() {
+  const createFolderMutation = useCreateFavouriteWorkoutFolder()
+  const updateFolderMutation = useUpdateFavouriteWorkoutFolder()
+  const deleteFolderMutation = useDeleteFavouriteWorkoutFolder()
+
+  return {
+    createFolder: (input: GQLCreateFavouriteWorkoutFolderInput) =>
+      createFolderMutation.mutateAsync({ input }),
+    isCreatingFolder: createFolderMutation.isPending,
+    createFolderError: createFolderMutation.error,
+
+    updateFolder: (input: GQLUpdateFavouriteWorkoutFolderInput) =>
+      updateFolderMutation.mutateAsync({ input }),
+    isUpdatingFolder: updateFolderMutation.isPending,
+    updateFolderError: updateFolderMutation.error,
+
+    deleteFolder: (id: string) => deleteFolderMutation.mutateAsync({ id }),
+    isDeletingFolder: deleteFolderMutation.isPending,
+    deleteFolderError: deleteFolderMutation.error,
   }
 }

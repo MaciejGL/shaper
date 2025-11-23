@@ -1,8 +1,16 @@
 'use client'
 
-import { BookmarkIcon, ChevronRight, Clock, Dot } from 'lucide-react'
+import {
+  ArrowLeft,
+  BookmarkIcon,
+  ChevronRight,
+  Clock,
+  Dot,
+  Folder,
+} from 'lucide-react'
 import { useState } from 'react'
 
+import { FolderCard } from '@/app/(protected)/fitspace/my-plans/components/favourites/folder-card'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { StateCard } from '@/components/state-card'
 import { Badge } from '@/components/ui/badge'
@@ -17,6 +25,7 @@ import {
 } from '@/components/ui/card'
 import {
   GQLGetFavouriteWorkoutsQuery,
+  useGetFavouriteWorkoutFoldersQuery,
   useGetFavouriteWorkoutsQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
@@ -39,21 +48,84 @@ export function FavouritesStep({
   const [selectedFavouriteId, setSelectedFavouriteId] = useState<string | null>(
     null,
   )
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
 
-  const { data: favouritesData, isLoading } = useGetFavouriteWorkoutsQuery()
+  const { data: favouritesData, isLoading: isLoadingWorkouts } =
+    useGetFavouriteWorkoutsQuery()
+  const { data: foldersData, isLoading: isLoadingFolders } =
+    useGetFavouriteWorkoutFoldersQuery()
 
-  const favourites = favouritesData?.getFavouriteWorkouts || []
+  const isLoading = isLoadingWorkouts || isLoadingFolders
+
+  const allFavourites = favouritesData?.getFavouriteWorkouts || []
+  const allFolders = foldersData?.getFavouriteWorkoutFolders || []
+
+  const currentFolder = allFolders.find((f) => f.id === currentFolderId)
+
+  // Filter workouts based on current folder view
+  const displayedWorkouts = allFavourites.filter((workout) => {
+    if (currentFolderId) {
+      return workout.folderId === currentFolderId
+    }
+    return !workout.folderId // Show uncategorized at root
+  })
+
+  const displayedFolders = currentFolderId
+    ? [] // Don't show folders when inside a folder
+    : allFolders
 
   const handleSelectFavourite = (favouriteId: string) => {
     setSelectedFavouriteId(favouriteId)
     onSelectFavourite(favouriteId)
   }
 
+  if (isLoading) {
+    return <LoadingSkeleton count={4} variant="lg" />
+  }
+
+  const isEmpty =
+    displayedWorkouts.length === 0 && displayedFolders.length === 0
+
   return (
     <div className="space-y-3">
-      {isLoading && <LoadingSkeleton count={4} variant="lg" />}
-      {!isLoading &&
-        favourites
+      {/* Folder Navigation Header */}
+      {currentFolderId && (
+        <div className="flex items-center gap-2 mb-4 animate-in fade-in slide-in-from-left-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCurrentFolderId(null)}
+            iconStart={<ArrowLeft />}
+            className="-ml-2"
+          >
+            Back to Plans
+          </Button>
+          <div className="h-4 w-px bg-border mx-1" />
+          <span className="font-semibold text-sm">{currentFolder?.name}</span>
+        </div>
+      )}
+
+      {/* Folders Grid */}
+      {displayedFolders.length > 0 && (
+        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {displayedFolders.map((folder) => (
+            <FolderCard
+              key={folder.id}
+              folder={folder}
+              onClick={() => setCurrentFolderId(folder.id)}
+            />
+          ))}
+          {displayedWorkouts.length > 0 && (
+            <h3 className="text-sm font-medium text-muted-foreground mt-4 mb-2 px-1">
+              Uncategorized Workouts
+            </h3>
+          )}
+        </div>
+      )}
+
+      {/* Workouts List */}
+      <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+        {displayedWorkouts
           .filter((favourite) => favourite.exercises.length > 0)
           .map((favourite: FavouriteWorkout) => {
             const estimatedTime = estimateWorkoutTime(favourite.exercises)
@@ -108,11 +180,30 @@ export function FavouritesStep({
               </Card>
             )
           })}
-      {!isLoading && favourites.length === 0 && (
+      </div>
+
+      {isEmpty && (
         <StateCard
-          title="No Favourite Workouts"
-          description="You haven't saved any favourite workouts yet. Create and save some workouts to see them here."
-          Icon={BookmarkIcon}
+          title={
+            currentFolderId ? 'No Workouts in Folder' : 'No Favourite Workouts'
+          }
+          description={
+            currentFolderId
+              ? 'This folder is empty. Add some workouts to it from your plans page.'
+              : "You haven't saved any favourite workouts yet. Create and save some workouts to see them here."
+          }
+          Icon={currentFolderId ? Folder : BookmarkIcon}
+          action={
+            currentFolderId ? (
+              <Button
+                variant="outline"
+                onClick={() => setCurrentFolderId(null)}
+                className="mt-4"
+              >
+                Go Back
+              </Button>
+            ) : undefined
+          }
         />
       )}
     </div>

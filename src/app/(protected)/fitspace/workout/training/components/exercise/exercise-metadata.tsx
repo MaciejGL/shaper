@@ -33,6 +33,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLExerciseType,
   useFitspaceGetWorkoutDayQuery,
@@ -58,6 +59,9 @@ export function ExerciseMetadata({
   activeTimerSetId,
   onTimerComplete,
 }: ExerciseMetadataProps) {
+  const { preferences } = useUserPreferences()
+  const showImages = preferences.showImages ?? true
+
   const [isSwapExerciseOpen, setIsSwapExerciseOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedSubstituteId, setSelectedSubstituteId] = useState<
@@ -145,14 +149,14 @@ export function ExerciseMetadata({
 
   return (
     <div className="border-t border-border">
-      {exercise.images.length > 0 && (
+      {showImages && exercise.images.length > 0 && (
         <Carousel
           opts={{
             align: 'center',
             dragFree: true,
             active: exercise.images.length > 2,
           }}
-          className="w-screen md:w-[calc(100%+2rem)] bg-black py-2 space-y-3"
+          className="max-w-dvw md:w-[calc(100%+2rem)] bg-black py-2 space-y-3"
         >
           <CarouselContent className="ml-0 pr-2">
             {exercise.images.map((image) => (
@@ -194,6 +198,72 @@ export function ExerciseMetadata({
         </div>
       )}
       <div className="px-3 empty:hidden mt-8 mb-3">
+        <div className="flex flex-wrap gap-2 mb-3 empty:hidden">
+          {supersetInfo && (
+            <Badge
+              variant="secondary"
+              size="lg"
+              className="bg-card dark:bg-card-on-card shadow-xs"
+            >
+              <ArrowLeftRight
+                className={cn(
+                  'mr-1',
+                  supersetInfo.type === 'A' ? 'text-red-500' : 'text-blue-500',
+                )}
+              />
+              Superset {supersetInfo.group > 1 ? `${supersetInfo.group}` : ''}
+              {supersetInfo.type}
+            </Badge>
+          )}
+
+          {exercise.tempo && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant="secondary"
+                  size="lg"
+                  className="cursor-pointer h-full bg-card dark:bg-card-on-card shadow-xs"
+                >
+                  <GaugeIcon className="text-green-500" />
+                  Tempo {exercise.tempo}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <div className="space-y-2">
+                  <p className="font-medium mb-1 text-sm">Exercise Tempo</p>
+                  <div className="text-sm">
+                    <p className="mb-1">
+                      <strong>4-digit format:</strong> 3-1-2-1
+                    </p>
+                    <ul className="space-y-1 text-xs leading-relaxed list-disc list-outside pl-4">
+                      <li>3 sec down (eccentric)</li>
+                      <li>1 sec pause at bottom</li>
+                      <li>2 sec up (concentric)</li>
+                      <li>1 sec pause at top</li>
+                    </ul>
+                    <p className="mt-2 mb-1 text-sm">
+                      <strong>Examples:</strong>
+                    </p>
+                    <ul className="text-xs text-muted-foreground space-y-1 list-disc list-outside pl-4 leading-relaxed">
+                      <li>
+                        <strong>Squat:</strong> 3 sec down, 1 sec pause at
+                        bottom, 2 sec stand up, 1 sec pause at top
+                      </li>
+                      <li>
+                        <strong>Bicep curl:</strong> 3 sec lower weight, 1 sec
+                        pause at bottom, 2 sec curl up, 1 sec pause at top
+                      </li>
+                      <li>
+                        <strong>Bench press:</strong> 3 sec lower to chest, 1
+                        sec pause, 2 sec press up, 1 sec pause at top
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
         <div className={cn('flex flex-wrap gap-2 empty:hidden')}>
           {exercise.restSeconds && (
             <CountdownTimer
@@ -259,72 +329,6 @@ export function ExerciseMetadata({
               )}
             />
           </div>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-3 empty:hidden">
-          {supersetInfo && (
-            <Badge
-              variant="secondary"
-              size="lg"
-              className="bg-card dark:bg-card-on-card shadow-xs"
-            >
-              <ArrowLeftRight
-                className={cn(
-                  'mr-1',
-                  supersetInfo.type === 'A' ? 'text-red-500' : 'text-blue-500',
-                )}
-              />
-              Superset {supersetInfo.group > 1 ? `${supersetInfo.group}` : ''}
-              {supersetInfo.type}
-            </Badge>
-          )}
-
-          {exercise.tempo && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge
-                  variant="secondary"
-                  size="lg"
-                  className="cursor-pointer h-full bg-card dark:bg-card-on-card shadow-xs"
-                >
-                  <GaugeIcon className="text-green-500" />
-                  Tempo {exercise.tempo}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <div className="space-y-2">
-                  <p className="font-medium mb-1 text-sm">Exercise Tempo</p>
-                  <div className="text-sm">
-                    <p className="mb-1">
-                      <strong>4-digit format:</strong> 3-1-2-1
-                    </p>
-                    <ul className="space-y-1 text-xs leading-relaxed list-disc list-outside pl-4">
-                      <li>3 sec down (eccentric)</li>
-                      <li>1 sec pause at bottom</li>
-                      <li>2 sec up (concentric)</li>
-                      <li>1 sec pause at top</li>
-                    </ul>
-                    <p className="mt-2 mb-1 text-sm">
-                      <strong>Examples:</strong>
-                    </p>
-                    <ul className="text-xs text-muted-foreground space-y-1 list-disc list-outside pl-4 leading-relaxed">
-                      <li>
-                        <strong>Squat:</strong> 3 sec down, 1 sec pause at
-                        bottom, 2 sec stand up, 1 sec pause at top
-                      </li>
-                      <li>
-                        <strong>Bicep curl:</strong> 3 sec lower weight, 1 sec
-                        pause at bottom, 2 sec curl up, 1 sec pause at top
-                      </li>
-                      <li>
-                        <strong>Bench press:</strong> 3 sec lower to chest, 1
-                        sec pause, 2 sec press up, 1 sec pause at top
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          )}
         </div>
       </div>
 

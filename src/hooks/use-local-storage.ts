@@ -8,6 +8,7 @@ export enum LocalStorageKey {
   USER_PREFERENCES = 'userPreferences',
   WORKOUT_DRAFT = 'workoutDraft',
   UI_COLLAPSED_SECTIONS = 'uiCollapsedSections',
+  SHOW_EXERCISE_IMAGES = 'showExerciseImages',
 }
 
 // Type mapping for each key
@@ -16,6 +17,7 @@ type LocalStorageValueMap = {
   [LocalStorageKey.USER_PREFERENCES]: Record<string, unknown>
   [LocalStorageKey.WORKOUT_DRAFT]: Record<string, unknown>
   [LocalStorageKey.UI_COLLAPSED_SECTIONS]: Record<string, boolean>
+  [LocalStorageKey.SHOW_EXERCISE_IMAGES]: boolean
 }
 
 // Helper to check if we're on the client side

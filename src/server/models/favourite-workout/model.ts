@@ -1,12 +1,14 @@
 import {
   GQLFavouriteWorkout,
   GQLFavouriteWorkoutExercise,
+  GQLFavouriteWorkoutFolder,
   GQLFavouriteWorkoutSet,
 } from '@/generated/graphql-server'
 import {
   BaseExercise as PrismaBaseExercise,
   FavouriteWorkout as PrismaFavouriteWorkout,
   FavouriteWorkoutExercise as PrismaFavouriteWorkoutExercise,
+  FavouriteWorkoutFolder as PrismaFavouriteWorkoutFolder,
   FavouriteWorkoutSet as PrismaFavouriteWorkoutSet,
   Image as PrismaImage,
   MuscleGroup as PrismaMuscleGroup,
@@ -15,7 +17,10 @@ import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'
 
-// Flexible type for constructor - accepts what Prisma actually returns
+type FavouriteWorkoutFolderWithRelations = PrismaFavouriteWorkoutFolder & {
+  favouriteWorkouts?: PrismaFavouriteWorkout[]
+}
+
 type FavouriteWorkoutWithRelations = PrismaFavouriteWorkout & {
   exercises?: (PrismaFavouriteWorkoutExercise & {
     base?:
@@ -26,6 +31,7 @@ type FavouriteWorkoutWithRelations = PrismaFavouriteWorkout & {
       | null
     sets?: PrismaFavouriteWorkoutSet[]
   })[]
+  folder?: PrismaFavouriteWorkoutFolder | null
 }
 
 type FavouriteWorkoutExerciseWithRelations = PrismaFavouriteWorkoutExercise & {
@@ -66,6 +72,17 @@ export default class FavouriteWorkout implements GQLFavouriteWorkout {
 
   get updatedAt() {
     return this.data.updatedAt.toISOString()
+  }
+
+  get folderId() {
+    return this.data.folderId
+  }
+
+  async folder() {
+    if (this.data.folder) {
+      return new FavouriteWorkoutFolder(this.data.folder, this.context)
+    }
+    return null
   }
 
   async exercises() {
@@ -192,5 +209,44 @@ export class FavouriteWorkoutSet implements GQLFavouriteWorkoutSet {
 
   get exerciseId() {
     return this.data.exerciseId
+  }
+}
+
+export class FavouriteWorkoutFolder implements GQLFavouriteWorkoutFolder {
+  constructor(
+    protected data: FavouriteWorkoutFolderWithRelations,
+    protected context: GQLContext,
+  ) {}
+
+  get id() {
+    return this.data.id
+  }
+
+  get name() {
+    return this.data.name
+  }
+
+  get createdById() {
+    return this.data.createdById
+  }
+
+  get createdAt() {
+    return this.data.createdAt.toISOString()
+  }
+
+  get updatedAt() {
+    return this.data.updatedAt.toISOString()
+  }
+
+  async favouriteWorkouts() {
+    const workouts = this.data.favouriteWorkouts
+
+    if (workouts) {
+      return workouts.map(
+        (workout) => new FavouriteWorkout(workout, this.context),
+      )
+    }
+
+    return []
   }
 }

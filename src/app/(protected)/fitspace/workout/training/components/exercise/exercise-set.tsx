@@ -270,15 +270,13 @@ export function ExerciseSet({
       ? weight
       : (targetDisplayWeight ?? '-')
 
-  const displayReps = isAdvancedView
-    ? null
-    : reps
-      ? reps
-      : set.reps
-        ? `${set.reps}`
-        : set.minReps
-          ? `${set.minReps}-${set.maxReps}`
-          : '-'
+  const displayReps = set.reps
+    ? `${set.reps}`
+    : set.minReps
+      ? set.minReps === set.maxReps
+        ? `${set.minReps}`
+        : `${set.minReps}-${set.maxReps}`
+      : null
 
   return (
     <motion.div
@@ -288,90 +286,116 @@ export function ExerciseSet({
       animate={{ height: 'auto', opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.2, ease: 'linear' }}
-      className={cn(
-        'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-3 items-center py-1.5 not-last-of-type:border-b border-border/70',
-      )}
     >
-      {/* Set Number */}
-      <div
-        className={cn(
-          'text-xs font-medium text-center rounded-full size-5 flex items-center justify-center mx-auto',
-          'bg-muted text-muted-foreground',
-        )}
-      >
-        {set.order}
-      </div>
-
-      {/* Previous Log */}
-      <div className="text-xs text-muted-foreground text-center truncate">
-        {previousSetRepsLog ? `${previousSetRepsLog} × ` : ''}
-        {previousDisplayWeight
-          ? `${previousDisplayWeight}${preferences.weightUnit}`
-          : '-'}
-      </div>
-
-      {/* Reps Input / Text */}
-      {isAdvancedView ? (
-        <Input
-          id={`set-${set.id}-reps`}
-          value={reps}
-          onChange={(e) => {
-            hasUserEditedRef.current = true
-            const val = e.target.value.replace(/[^0-9]/g, '')
-            onRepsChange(val)
-          }}
-          inputMode="numeric"
-          variant="secondary"
-          placeholder={set.minReps ? `${set.minReps}` : '-'}
-          className="text-center h-8 focus-visible:ring-0 text-sm w-full"
-        />
-      ) : (
-        <div className="text-center text-sm font-medium">{displayReps}</div>
-      )}
-
-      {/* Weight Input / Text */}
-      {isAdvancedView ? (
-        <ExerciseWeightInput
-          setId={set.id}
-          weightInKg={weight ? parseFloat(weight) : null}
-          onWeightChange={(weightInKg) => {
-            hasUserEditedRef.current = true
-            onWeightChange(weightInKg?.toString() || '')
-          }}
-          showWeightUnit={false}
-        />
-      ) : (
-        <div className="text-center text-sm font-medium">
-          {displayWeight}
-          {displayWeight !== '-' && (
-            <span className="text-xs text-muted-foreground ml-0.5">
-              {preferences.weightUnit}
-            </span>
+      {isAdvancedView && (
+        <div
+          className={cn(
+            'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 pb-[2px] items-center',
           )}
+        >
+          <div />
+          <div />
+          <div>
+            <p className="text-xs text-muted-foreground text-center truncate self-center leading-none">
+              {displayReps}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground text-center truncate self-center">
+              {displayWeight}
+            </p>
+          </div>
+          <div />
         </div>
       )}
-
-      {/* Check Button */}
-      <div className="flex justify-center">
-        <Button
-          variant={isCompleted ? 'default' : 'secondary'}
-          size="icon-sm"
-          iconOnly={
-            <CheckIcon className={cn(isCompleted && 'text-green-600')} />
-          }
-          onClick={handleClick}
+      <div
+        className={cn(
+          'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 items-center py-1.5',
+          'bg-card shadow-xs rounded-xl',
+        )}
+      >
+        {/* Set Number */}
+        <div
           className={cn(
-            isCompleted &&
-              'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
+            'text-xs font-medium text-center rounded-full size-5 flex items-center justify-center mx-auto',
+            'bg-muted text-muted-foreground ',
           )}
+        >
+          {set.order}
+        </div>
+
+        {/* Previous Log */}
+        <div className="text-xs text-muted-foreground text-center truncate ">
+          {previousSetRepsLog ? `${previousSetRepsLog} × ` : ''}
+          {previousDisplayWeight
+            ? `${previousDisplayWeight}${preferences.weightUnit}`
+            : '-'}
+        </div>
+
+        {/* Reps Input / Text */}
+        {isAdvancedView ? (
+          <Input
+            id={`set-${set.id}-reps`}
+            value={reps}
+            onChange={(e) => {
+              hasUserEditedRef.current = true
+              const val = e.target.value.replace(/[^0-9]/g, '')
+              onRepsChange(val)
+            }}
+            inputMode="numeric"
+            variant="secondary"
+            placeholder={set.minReps ? `${set.minReps}` : ''}
+            className="text-center h-8 focus-visible:ring-0 text-sm w-full"
+          />
+        ) : (
+          <div className="text-center text-sm font-medium">{displayReps}</div>
+        )}
+
+        {/* Weight Input / Text */}
+        {isAdvancedView ? (
+          <ExerciseWeightInput
+            setId={set.id}
+            weightInKg={weight ? parseFloat(weight) : null}
+            onWeightChange={(weightInKg) => {
+              hasUserEditedRef.current = true
+              onWeightChange(weightInKg?.toString() || '')
+            }}
+            showWeightUnit={false}
+          />
+        ) : (
+          <div className="text-center text-sm font-medium">
+            {displayWeight}
+            {displayWeight !== '-' && (
+              <span className="text-xs text-muted-foreground ml-0.5">
+                {preferences.weightUnit}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Check Button */}
+        <div className="flex justify-center">
+          <Button
+            variant={isCompleted ? 'default' : 'secondary'}
+            size="icon-sm"
+            iconOnly={
+              <CheckIcon className={cn(isCompleted && 'text-green-600')} />
+            }
+            onClick={handleClick}
+            className={cn(
+              'rounded-lg',
+              isCompleted &&
+                'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
+            )}
+          />
+        </div>
+
+        <PROverlay
+          isAdvancedView={isAdvancedView}
+          prData={prData}
+          onClose={() => setPRData(null)}
         />
       </div>
-
-      <PROverlay
-        isAdvancedView={isAdvancedView}
-        prData={prData}
-        onClose={() => setPRData(null)}
-      />
     </motion.div>
   )
 }

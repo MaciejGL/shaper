@@ -101,7 +101,7 @@ export function WorkoutCreationLanding({
                   <BookmarkIcon className="size-5" />
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-lg">My Custom</CardTitle>
+                  <CardTitle className="text-lg">My Custom Plans</CardTitle>
                   <CardDescription>
                     Select from your saved workouts
                   </CardDescription>
@@ -111,7 +111,7 @@ export function WorkoutCreationLanding({
                   variant="link"
                   iconOnly={<ChevronRight />}
                 >
-                  Select Custom
+                  Select Plans
                 </Button>
               </div>
             </CardContent>

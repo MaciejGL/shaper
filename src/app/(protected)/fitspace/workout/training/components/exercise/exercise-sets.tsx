@@ -263,9 +263,9 @@ export function ExerciseSets({
       exercise.sets.some((set) => set.isExtra)) &&
     exercise.sets.length > 1
   return (
-    <div className="flex flex-col w-full bg-card shadow-xs overflow-hidden mb-12">
+    <div className="flex flex-col w-full overflow-hidden mb-12">
       {/* Table Header */}
-      <div className="grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-3 items-center text-xs font-medium text-muted-foreground py-2 border-b border-border/70">
+      <div className="grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 py-2 px-[1.25rem] items-center text-xs font-medium text-muted-foreground">
         <div className="text-center">Set</div>
         <div className="text-center">Previous</div>
         <div className="text-center">Reps</div>
@@ -274,7 +274,7 @@ export function ExerciseSets({
       </div>
 
       {/* Sets Rows */}
-      <div>
+      <div className="space-y-2 px-3">
         {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
           const previousWeightLog = getPreviousSetValue(set.order, 'weight')
           const previousRepsLog = getPreviousSetValue(set.order, 'reps')
@@ -301,13 +301,12 @@ export function ExerciseSets({
       </div>
 
       {/* Actions */}
-      <div className="grid grid-cols-[1fr_1fr] items-center border-t border-border/70 w-full">
+      <div className="grid grid-cols-[1fr_1fr] items-center mt-2 w-full gap-2 px-3">
         {hasExtraSets && (
           <Button
-            variant="ghost"
+            variant="outline"
             size="lg"
-            className=" flex-1 text-muted-foreground hover:text-foreground rounded-none outline-r outline-border"
-            loading={isRemovingSet}
+            className="flex-1"
             disabled={isRemovingSet}
             onClick={handleRemoveLastSet}
             iconStart={<PlusIcon className="rotate-45 size-3" />}
@@ -316,12 +315,9 @@ export function ExerciseSets({
           </Button>
         )}
         <Button
-          variant="ghost"
+          variant="secondary"
           size="lg"
-          className={cn(
-            'text-muted-foreground hover:text-foreground  rounded-none',
-            hasExtraSets ? 'col-span-1' : 'col-span-full',
-          )}
+          className={cn(hasExtraSets ? 'col-span-1' : 'col-span-full')}
           loading={isAddingSet}
           onClick={handleAddSet}
           iconStart={<PlusIcon className="size-3" />}

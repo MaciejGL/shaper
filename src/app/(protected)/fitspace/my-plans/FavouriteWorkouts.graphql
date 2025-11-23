@@ -7,6 +7,11 @@ query GetFavouriteWorkouts {
     createdById
     createdAt
     updatedAt
+    folderId
+    folder {
+      id
+      name
+    }
     exercises {
       id
       name
@@ -67,6 +72,11 @@ query GetFavouriteWorkout($id: ID!) {
     createdById
     createdAt
     updatedAt
+    folderId
+    folder {
+      id
+      name
+    }
     exercises {
       id
       name
@@ -193,4 +203,46 @@ mutation DeleteFavouriteWorkout($id: ID!) {
 # Start a workout from a favourite
 mutation StartWorkoutFromFavourite($input: StartWorkoutFromFavouriteInput!) {
   startWorkoutFromFavourite(input: $input)
+}
+
+# Get all favourite workout folders
+query GetFavouriteWorkoutFolders {
+  getFavouriteWorkoutFolders {
+    id
+    name
+    createdById
+    createdAt
+    updatedAt
+    favouriteWorkouts {
+      id
+      title
+    }
+  }
+}
+
+# Create a new folder
+mutation CreateFavouriteWorkoutFolder(
+  $input: CreateFavouriteWorkoutFolderInput!
+) {
+  createFavouriteWorkoutFolder(input: $input) {
+    id
+    name
+    createdAt
+  }
+}
+
+# Update a folder
+mutation UpdateFavouriteWorkoutFolder(
+  $input: UpdateFavouriteWorkoutFolderInput!
+) {
+  updateFavouriteWorkoutFolder(input: $input) {
+    id
+    name
+    updatedAt
+  }
+}
+
+# Delete a folder
+mutation DeleteFavouriteWorkoutFolder($id: ID!) {
+  deleteFavouriteWorkoutFolder(id: $id)
 }

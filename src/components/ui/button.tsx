@@ -32,7 +32,7 @@ const buttonVariants = cva(
         secondary: cn(
           'bg-card hover:bg-secondary/80 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 border border-border',
           // Loading state for secondary variant
-          'data-[loading=true]:bg-card/90 data-[loading=true]:text-secondary-foreground/30 disabled:bg-card/50 disabled:text-secondary-foreground/40',
+          'data-[loading=true]:bg-card/90 data-[loading=true]:text-secondary-foreground/30 disabled:bg-card/50 disabled:text-secondary-foreground/40 dark:disabled:bg-secondary/50 dark:disabled:text-secondary-foreground/40',
         ),
         tertiary: cn(
           'bg-card-on-card hover:bg-primary/15 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 disabled:dark:opacity-40 shadow-xs',

@@ -194,7 +194,7 @@ export function CalendarWeekSelector({
       <Drawer open={open} onOpenChange={setOpen} direction="top">
         <DrawerContent
           dialogTitle="Select Week & Day"
-          className="h-max data-[vaul-drawer-direction=top]:border-b-0 overflow-hidden"
+          className="h-max data-[vaul-drawer-direction=top]:border-b-0 overflow-hidden "
         >
           <Calendar
             mode="single"
@@ -225,7 +225,7 @@ export function CalendarWeekSelector({
               ),
               outside: 'opacity-50',
             }}
-            className="w-full max-w-sm mx-auto [&_button]:!rounded-xl [&_*]:font-medium [&_[data-selected=true]_button]:bg-primary  bg-transparent"
+            className="w-full aspect-square max-w-sm mx-auto [&_button]:!rounded-xl [&_*]:font-medium [&_[data-selected=true]_button]:bg-primary  bg-transparent"
           />
         </DrawerContent>
       </Drawer>

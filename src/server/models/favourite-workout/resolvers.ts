@@ -5,14 +5,18 @@ import {
 
 import {
   createFavouriteWorkout,
+  createFavouriteWorkoutFolder,
   deleteFavouriteWorkout,
+  deleteFavouriteWorkoutFolder,
   getFavouriteWorkout,
+  getFavouriteWorkoutFolders,
   getFavouriteWorkouts,
   removeFavouriteExercise,
   startWorkoutFromFavourite,
   updateFavouriteExerciseSets,
   updateFavouriteExercisesOrder,
   updateFavouriteWorkout,
+  updateFavouriteWorkoutFolder,
 } from './factory'
 
 export const Query: GQLQueryResolvers = {
@@ -44,6 +48,16 @@ export const Query: GQLQueryResolvers = {
     }
 
     return favouriteWorkout
+  },
+
+  getFavouriteWorkoutFolders: async (_, __, context) => {
+    const user = context.user
+
+    if (!user?.user?.id) {
+      throw new Error('User not authenticated')
+    }
+
+    return await getFavouriteWorkoutFolders(user.user.id, context)
   },
 }
 
@@ -124,5 +138,35 @@ export const Mutation: GQLMutationResolvers = {
     }
 
     return await startWorkoutFromFavourite(args, user.user.id)
+  },
+
+  createFavouriteWorkoutFolder: async (_, { input }, context) => {
+    const user = context.user
+
+    if (!user?.user?.id) {
+      throw new Error('User not authenticated')
+    }
+
+    return await createFavouriteWorkoutFolder(input, user.user.id, context)
+  },
+
+  updateFavouriteWorkoutFolder: async (_, { input }, context) => {
+    const user = context.user
+
+    if (!user?.user?.id) {
+      throw new Error('User not authenticated')
+    }
+
+    return await updateFavouriteWorkoutFolder(input, user.user.id, context)
+  },
+
+  deleteFavouriteWorkoutFolder: async (_, { id }, context) => {
+    const user = context.user
+
+    if (!user?.user?.id) {
+      throw new Error('User not authenticated')
+    }
+
+    return await deleteFavouriteWorkoutFolder(id, user.user.id)
   },
 }

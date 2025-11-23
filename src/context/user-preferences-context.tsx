@@ -20,6 +20,7 @@ import {
   GQLWeightUnit,
   useUpdateProfileMutation,
 } from '@/generated/graphql-client'
+import { LocalStorageKey, useLocalStorage } from '@/hooks/use-local-storage'
 import { DEFAULT_WEEK_START, WeekStartDay } from '@/lib/date-utils'
 import { switchThemeWithTransition } from '@/lib/theme-transition'
 
@@ -48,6 +49,7 @@ interface UserPreferences {
   trainingView: TrainingView
   notifications: NotificationPreferences
   blurProgressSnapshots?: boolean
+  showImages?: boolean
 }
 
 interface UserPreferencesContextType {
@@ -59,6 +61,7 @@ interface UserPreferencesContextType {
   setTheme: (theme: ThemePreference) => void
   setTimeFormat: (timeFormat: TimeFormat) => void
   setTrainingView: (trainingView: TrainingView) => void
+  setShowImages: (show: boolean) => void
   setNotifications: (notifications: Partial<NotificationPreferences>) => void
   registerThemeSetter: (setTheme: (theme: string) => void) => void
 }
@@ -84,6 +87,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   trainingView: GQLTrainingView.Advanced,
   notifications: DEFAULT_NOTIFICATIONS,
   blurProgressSnapshots: false,
+  showImages: true,
 }
 
 export function useUserPreferences() {
@@ -112,6 +116,11 @@ export function UserPreferencesProvider({
 
   // Store theme setter function from ThemeProvider child
   const themeSetterRef = useRef<((theme: string) => void) | null>(null)
+
+  const [showImages, setShowImages] = useLocalStorage(
+    LocalStorageKey.SHOW_EXERCISE_IMAGES,
+    DEFAULT_PREFERENCES.showImages ?? true,
+  )
 
   const [preferences, setPreferences] = useState<UserPreferences>({
     ...DEFAULT_PREFERENCES,
@@ -332,9 +341,17 @@ export function UserPreferencesProvider({
     [updatePreferences],
   )
 
+  const combinedPreferences = useMemo(
+    () => ({
+      ...preferences,
+      showImages,
+    }),
+    [preferences, showImages],
+  )
+
   const value = useMemo(
     () => ({
-      preferences,
+      preferences: combinedPreferences,
       updatePreferences,
       setWeekStartsOn,
       setWeightUnit,
@@ -342,12 +359,13 @@ export function UserPreferencesProvider({
       setTheme,
       setTimeFormat,
       setTrainingView,
+      setShowImages,
       setNotifications,
       registerThemeSetter,
       blurProgressSnapshots: preferences.blurProgressSnapshots,
     }),
     [
-      preferences,
+      combinedPreferences,
       updatePreferences,
       setWeekStartsOn,
       setWeightUnit,
@@ -355,8 +373,10 @@ export function UserPreferencesProvider({
       setTheme,
       setTimeFormat,
       setTrainingView,
+      setShowImages,
       setNotifications,
       registerThemeSetter,
+      preferences.blurProgressSnapshots,
     ],
   )
 
