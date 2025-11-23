@@ -4,31 +4,31 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useCreateFavouriteWorkout } from '@/hooks/use-favourite-workouts'
 
-interface CreateEmptyFavouriteDrawerProps {
+interface CreateEmptyFavouriteDialogProps {
   open: boolean
   onClose: () => void
   onSuccess: (favouriteId: string) => void
   currentFolderId?: string | null
 }
 
-export function CreateEmptyFavouriteDrawer({
+export function CreateEmptyFavouriteDialog({
   open,
   onClose,
   onSuccess,
   currentFolderId,
-}: CreateEmptyFavouriteDrawerProps) {
+}: CreateEmptyFavouriteDialogProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
 
@@ -65,19 +65,16 @@ export function CreateEmptyFavouriteDrawer({
   }
 
   return (
-    <Drawer open={open} onOpenChange={handleClose}>
-      <DrawerContent
-        dialogTitle="Create Custom Template"
-        className="max-h-[85vh]"
-      >
-        <DrawerHeader>
-          <DrawerTitle>Create Custom Template</DrawerTitle>
-          <DrawerDescription>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent dialogTitle="Create Custom Template">
+        <DialogHeader>
+          <DialogTitle>Create Custom Template</DialogTitle>
+          <DialogDescription>
             Give your template a name. You'll add exercises in the next step.
-          </DrawerDescription>
-        </DrawerHeader>
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="space-y-4 px-4 pb-4">
+        <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="title">Template Name *</Label>
             <Input
@@ -98,18 +95,14 @@ export function CreateEmptyFavouriteDrawer({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={500}
-              className="min-h-[150px]"
-              rows={10}
+              className="min-h-[100px]"
+              rows={4}
             />
           </div>
         </div>
 
-        <DrawerFooter>
-          <Button
-            variant="tertiary"
-            onClick={handleClose}
-            disabled={isCreating}
-          >
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={isCreating}>
             Cancel
           </Button>
           <Button
@@ -119,8 +112,9 @@ export function CreateEmptyFavouriteDrawer({
           >
             Add Day
           </Button>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
+

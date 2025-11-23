@@ -28,7 +28,7 @@ import {
 } from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 
-import { CreateEmptyFavouriteDrawer } from './create-empty-favourite-drawer'
+import { CreateEmptyFavouriteDialog } from './create-empty-favourite-dialog'
 import { FavouriteWorkoutCard } from './favourite-workout-card'
 import { FolderCard } from './folder-card'
 import { ManageFolderDialog } from './manage-folder-dialog'
@@ -96,7 +96,7 @@ export function FavouriteWorkoutsList({
           <div className="flex gap-2 ml-auto">
             {!currentFolderId && (
               <Button disabled iconStart={<FolderPlus />}>
-                New Folder
+                New Plan
               </Button>
             )}
             <Button disabled iconStart={<Plus />}>
@@ -165,7 +165,7 @@ export function FavouriteWorkoutsList({
               <Button
                 iconStart={<FolderPlus />}
                 onClick={handleCreateFolder}
-                variant="secondary"
+                variant="default"
                 disabled={hasReachedFolderLimit}
               >
                 New Plan
@@ -306,7 +306,7 @@ export function FavouriteWorkoutsList({
         )}
       </div>
 
-      <CreateEmptyFavouriteDrawer
+      <CreateEmptyFavouriteDialog
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={() => {
