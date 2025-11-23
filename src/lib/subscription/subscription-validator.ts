@@ -9,6 +9,7 @@
 import { addMonths } from 'date-fns'
 import Stripe from 'stripe'
 
+import { SUBSCRIPTION_LIMITS } from '@/config/subscription-limits'
 import { prisma } from '@/lib/db'
 import {
   getPremiumLookupKeys,
@@ -281,7 +282,15 @@ export class SubscriptionValidator {
           sub.status.toString() === 'CANCELLED' &&
           new Date(sub.endDate) > new Date(),
       ),
-      trainingPlanLimit: hasPremium ? 999 : 1, // Unlimited for premium, 1 for free
+      trainingPlanLimit: hasPremium
+        ? SUBSCRIPTION_LIMITS.PREMIUM.TRAINING_PLANS
+        : SUBSCRIPTION_LIMITS.FREE.TRAINING_PLANS,
+      favouriteWorkoutLimit: hasPremium
+        ? SUBSCRIPTION_LIMITS.PREMIUM.FAVOURITE_WORKOUTS
+        : SUBSCRIPTION_LIMITS.FREE.FAVOURITE_WORKOUTS,
+      favouriteFolderLimit: hasPremium
+        ? SUBSCRIPTION_LIMITS.PREMIUM.FAVOURITE_FOLDERS
+        : SUBSCRIPTION_LIMITS.FREE.FAVOURITE_FOLDERS,
       usageTrackers: [], // Simplified: no usage tracking
     }
   }
@@ -415,7 +424,9 @@ export class SubscriptionValidator {
    */
   async getTrainingPlanLimit(userId: string): Promise<number> {
     const hasPremium = await this.hasPremiumAccess(userId)
-    return hasPremium ? -1 : 1 // Unlimited for premium, 1 for free
+    return hasPremium
+      ? SUBSCRIPTION_LIMITS.PREMIUM.TRAINING_PLANS
+      : SUBSCRIPTION_LIMITS.FREE.TRAINING_PLANS
   }
 
   /**

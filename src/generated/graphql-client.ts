@@ -3885,10 +3885,13 @@ export type GQLUserSubscriptionStatus = {
   canAccessMealPlans: Scalars['Boolean']['output'];
   canAccessPremiumExercises: Scalars['Boolean']['output'];
   canAccessPremiumTrainingPlans: Scalars['Boolean']['output'];
+  favouriteFolderLimit: Scalars['Int']['output'];
+  favouriteWorkoutLimit: Scalars['Int']['output'];
   hasPremium: Scalars['Boolean']['output'];
   isInGracePeriod: Scalars['Boolean']['output'];
   subscriptionEndDate?: Maybe<Scalars['String']['output']>;
   trainerId?: Maybe<Scalars['ID']['output']>;
+  trainingPlanLimit: Scalars['Int']['output'];
 };
 
 export type GQLUserWithSubscription = {
@@ -5528,7 +5531,7 @@ export type GQLCreateTrainerNoteForClientMutation = { __typename?: 'Mutation', c
 export type GQLGetMySubscriptionStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetMySubscriptionStatusQuery = { __typename?: 'Query', getMySubscriptionStatus: { __typename?: 'UserSubscriptionStatus', hasPremium: boolean, trainerId?: string | undefined | null, canAccessPremiumTrainingPlans: boolean, canAccessPremiumExercises: boolean, canAccessMealPlans: boolean, subscriptionEndDate?: string | undefined | null, isInGracePeriod: boolean } };
+export type GQLGetMySubscriptionStatusQuery = { __typename?: 'Query', getMySubscriptionStatus: { __typename?: 'UserSubscriptionStatus', hasPremium: boolean, trainerId?: string | undefined | null, canAccessPremiumTrainingPlans: boolean, canAccessPremiumExercises: boolean, canAccessMealPlans: boolean, subscriptionEndDate?: string | undefined | null, isInGracePeriod: boolean, trainingPlanLimit: number, favouriteWorkoutLimit: number, favouriteFolderLimit: number } };
 
 export type GQLCheckPremiumAccessQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -16511,6 +16514,9 @@ export const GetMySubscriptionStatusDocument = `
     canAccessMealPlans
     subscriptionEndDate
     isInGracePeriod
+    trainingPlanLimit
+    favouriteWorkoutLimit
+    favouriteFolderLimit
   }
 }
     `;

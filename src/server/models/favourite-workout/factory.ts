@@ -9,6 +9,7 @@ import {
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import { getUTCWeekStart } from '@/lib/server-date-utils'
+import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
 
 import FavouriteWorkout, { FavouriteWorkoutFolder } from './model'
@@ -91,6 +92,22 @@ export async function createFavouriteWorkout(
   context: GQLContext,
 ): Promise<FavouriteWorkout> {
   const MAX_EXERCISES = 12
+
+  // Check subscription limits
+  const subscriptionStatus =
+    await subscriptionValidator.getUserSubscriptionStatus(userId)
+
+  if (!subscriptionStatus.hasPremium) {
+    const currentCount = await prisma.favouriteWorkout.count({
+      where: { createdById: userId },
+    })
+
+    if (currentCount >= subscriptionStatus.favouriteWorkoutLimit) {
+      throw new Error(
+        `Free tier limit reached (${subscriptionStatus.favouriteWorkoutLimit} workouts). Upgrade to Premium for unlimited workouts.`,
+      )
+    }
+  }
 
   // Validate exercise limit
   if (input.exercises.length > MAX_EXERCISES) {
@@ -730,6 +747,22 @@ export async function createFavouriteWorkoutFolder(
   userId: string,
   context: GQLContext,
 ): Promise<FavouriteWorkoutFolder> {
+  // Check subscription limits
+  const subscriptionStatus =
+    await subscriptionValidator.getUserSubscriptionStatus(userId)
+
+  if (!subscriptionStatus.hasPremium) {
+    const currentCount = await prisma.favouriteWorkoutFolder.count({
+      where: { createdById: userId },
+    })
+
+    if (currentCount >= subscriptionStatus.favouriteFolderLimit) {
+      throw new Error(
+        `Free tier limit reached (${subscriptionStatus.favouriteFolderLimit} folders). Upgrade to Premium for unlimited folders.`,
+      )
+    }
+  }
+
   const folder = await prisma.favouriteWorkoutFolder.create({
     data: {
       name: input.name,

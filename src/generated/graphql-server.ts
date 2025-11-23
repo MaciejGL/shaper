@@ -3887,10 +3887,13 @@ export type GQLUserSubscriptionStatus = {
   canAccessMealPlans: EntireFieldWrapper<Scalars['Boolean']['output']>;
   canAccessPremiumExercises: EntireFieldWrapper<Scalars['Boolean']['output']>;
   canAccessPremiumTrainingPlans: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  favouriteFolderLimit: EntireFieldWrapper<Scalars['Int']['output']>;
+  favouriteWorkoutLimit: EntireFieldWrapper<Scalars['Int']['output']>;
   hasPremium: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isInGracePeriod: EntireFieldWrapper<Scalars['Boolean']['output']>;
   subscriptionEndDate?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainerId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
+  trainingPlanLimit: EntireFieldWrapper<Scalars['Int']['output']>;
 };
 
 export type GQLUserWithSubscription = {
@@ -6043,10 +6046,13 @@ export type GQLUserSubscriptionStatusResolvers<ContextType = GQLContext, ParentT
   canAccessMealPlans?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   canAccessPremiumExercises?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   canAccessPremiumTrainingPlans?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  favouriteFolderLimit?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  favouriteWorkoutLimit?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   hasPremium?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isInGracePeriod?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   subscriptionEndDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
+  trainingPlanLimit?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

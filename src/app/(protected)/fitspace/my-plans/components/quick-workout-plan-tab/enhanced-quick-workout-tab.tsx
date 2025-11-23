@@ -124,6 +124,8 @@ export function EnhancedQuickWorkoutTab() {
       return workout.folderId === currentFolderId
     }) ?? []
 
+  const totalWorkoutCount = favouriteWorkouts?.getFavouriteWorkouts.length ?? 0
+
   const foldersList = (folders?.getFavouriteWorkoutFolders ??
     []) as NonNullable<
     NonNullable<typeof folders>['getFavouriteWorkoutFolders']
@@ -147,6 +149,7 @@ export function EnhancedQuickWorkoutTab() {
         onFolderClick={setCurrentFolderId}
         onBackToRoot={() => setCurrentFolderId(null)}
         folderOperations={folderOperations}
+        totalWorkoutCount={totalWorkoutCount}
       />
 
       <DeleteFavouriteDialog

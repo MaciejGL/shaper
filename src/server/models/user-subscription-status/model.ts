@@ -12,6 +12,8 @@ export interface UserSubscriptionStatusData {
   activeSubscriptions: UserSubscription[]
   cancelledSubscriptions: UserSubscription[]
   trainingPlanLimit: number
+  favouriteWorkoutLimit: number
+  favouriteFolderLimit: number
   usageTrackers: ServiceUsageTracker[]
   canAccessPremiumTrainingPlans: boolean
   canAccessPremiumExercises: boolean
@@ -33,6 +35,14 @@ export default class UserSubscriptionStatus
 
   get trainingPlanLimit() {
     return this.data.trainingPlanLimit
+  }
+
+  get favouriteWorkoutLimit() {
+    return this.data.favouriteWorkoutLimit
+  }
+
+  get favouriteFolderLimit() {
+    return this.data.favouriteFolderLimit
   }
 
   get canAccessPremiumTrainingPlans() {

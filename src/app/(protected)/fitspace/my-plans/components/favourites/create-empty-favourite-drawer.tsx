@@ -1,6 +1,5 @@
 'use client'
 
-import { BookmarkCheckIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -95,11 +94,12 @@ export function CreateEmptyFavouriteDrawer({
             <Label htmlFor="description">Description (optional)</Label>
             <Textarea
               id="description"
-              placeholder="Add notes about this template..."
+              placeholder="Add notes about this day..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={500}
-              rows={3}
+              className="min-h-[150px]"
+              rows={10}
             />
           </div>
         </div>
@@ -116,9 +116,8 @@ export function CreateEmptyFavouriteDrawer({
             onClick={handleSave}
             disabled={!title.trim() || isCreating}
             loading={isCreating}
-            iconStart={<BookmarkCheckIcon />}
           >
-            Create Template
+            Add Day
           </Button>
         </DrawerFooter>
       </DrawerContent>

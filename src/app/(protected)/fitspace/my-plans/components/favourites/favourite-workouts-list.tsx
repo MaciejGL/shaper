@@ -12,6 +12,7 @@ import {
 import { useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -56,6 +57,7 @@ interface FavouriteWorkoutsListProps {
   folderOperations: ReturnType<
     typeof import('@/hooks/use-favourite-workouts').useFavouriteWorkoutFolderOperations
   >
+  totalWorkoutCount: number
 }
 
 export function FavouriteWorkoutsList({
@@ -72,8 +74,9 @@ export function FavouriteWorkoutsList({
   onFolderClick,
   onBackToRoot,
   folderOperations,
+  totalWorkoutCount,
 }: FavouriteWorkoutsListProps) {
-  const { hasPremium } = useUser()
+  const { hasPremium, subscription } = useUser()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isManageFolderOpen, setIsManageFolderOpen] = useState(false)
   const [folderToEdit, setFolderToEdit] = useState<{
@@ -87,7 +90,7 @@ export function FavouriteWorkoutsList({
         <div className="flex justify-between items-center gap-2">
           {currentFolderId && (
             <Button variant="ghost" iconStart={<ArrowLeft />} disabled>
-              Back
+              Plans
             </Button>
           )}
           <div className="flex gap-2 ml-auto">
@@ -108,11 +111,17 @@ export function FavouriteWorkoutsList({
     )
   }
 
-  const hasReachedLimit = favouriteWorkouts.length >= (hasPremium ? 999 : 3)
+  const hasReachedWorkoutLimit =
+    !hasPremium &&
+    totalWorkoutCount >= (subscription?.favouriteWorkoutLimit ?? 3)
+  const hasReachedFolderLimit =
+    !hasPremium && folders.length >= (subscription?.favouriteFolderLimit ?? 1)
+
   const isRoot = currentFolderId === null
   const isEmpty = favouriteWorkouts.length === 0 && folders.length === 0
 
   const handleCreateFolder = () => {
+    if (hasReachedFolderLimit) return
     setFolderToEdit(null)
     setIsManageFolderOpen(true)
   }
@@ -138,30 +147,37 @@ export function FavouriteWorkoutsList({
             variant="ghost"
             iconStart={<ArrowLeft />}
             onClick={onBackToRoot}
-            className="shrink-0"
+            className="shrink-0 font-semibold -ml-4"
           >
-            Back
+            Plans
           </Button>
         ) : (
-          <h2 className="text-lg font-semibold px-1">My Library</h2>
+          <h2 className="text-lg font-semibold px-1">Plans</h2>
         )}
 
         <div className="flex gap-2 ml-auto">
           {isRoot && (
-            <Button
-              iconStart={<FolderPlus />}
-              onClick={handleCreateFolder}
-              variant="secondary"
+            <PremiumButtonWrapper
+              hasPremium={hasPremium}
+              showIndicator={hasReachedFolderLimit}
+              tooltipText="Free tier limit reached. Upgrade to create more folders."
             >
-              New Folder
-            </Button>
+              <Button
+                iconStart={<FolderPlus />}
+                onClick={handleCreateFolder}
+                variant="secondary"
+                disabled={hasReachedFolderLimit}
+              >
+                New Plan
+              </Button>
+            </PremiumButtonWrapper>
           )}
           {!isRoot && (
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     size="icon-md"
                     iconOnly={<MoreHorizontal />}
                   />
@@ -177,7 +193,7 @@ export function FavouriteWorkoutsList({
                     }
                   >
                     <Pencil className="mr-2 size-4" />
-                    Rename Folder
+                    Rename Plan
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
@@ -186,18 +202,24 @@ export function FavouriteWorkoutsList({
                     }
                   >
                     <Trash2 className="mr-2 size-4" />
-                    Delete Folder
+                    Delete Plan
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button
-                onClick={() => setIsCreateModalOpen(true)}
-                iconStart={<Plus />}
-                disabled={hasReachedLimit}
+              <PremiumButtonWrapper
+                hasPremium={hasPremium}
+                showIndicator={hasReachedWorkoutLimit}
+                tooltipText="Free tier limit reached. Upgrade to create more workouts."
               >
-                Add Day
-              </Button>
+                <Button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  iconStart={<Plus />}
+                  disabled={hasReachedWorkoutLimit}
+                >
+                  Add Day
+                </Button>
+              </PremiumButtonWrapper>
             </>
           )}
         </div>
@@ -221,6 +243,10 @@ export function FavouriteWorkoutsList({
             onCreateNew={() => setIsCreateModalOpen(true)}
             onCreateFolder={handleCreateFolder}
             workoutStatus={workoutStatus}
+            hasPremium={hasPremium}
+            hasReachedFolderLimit={hasReachedFolderLimit}
+            hasReachedWorkoutLimit={hasReachedWorkoutLimit}
+            handleCreateFolder={handleCreateFolder}
           />
         ) : (
           <div className="space-y-6">
@@ -305,12 +331,19 @@ export function FavouriteWorkoutsList({
 
 function EmptyFavouritesState({
   onCreateNew,
-  onCreateFolder,
   workoutStatus,
+  hasPremium,
+  hasReachedFolderLimit,
+  hasReachedWorkoutLimit,
+  handleCreateFolder,
 }: {
   onCreateNew: () => void
   onCreateFolder: () => void
   workoutStatus: WorkoutStatusAnalysis
+  hasPremium: boolean
+  hasReachedFolderLimit: boolean
+  hasReachedWorkoutLimit: boolean
+  handleCreateFolder: () => void
 }) {
   const canStartMessage =
     workoutStatus.status === 'active-plan-workout'
@@ -334,12 +367,32 @@ function EmptyFavouritesState({
           </p>
         )}
         <div className="flex gap-2">
-          <Button onClick={onCreateFolder} iconStart={<FolderPlus />}>
-            Create Folder
-          </Button>
-          <Button onClick={onCreateNew} iconStart={<Plus />}>
-            Create Day
-          </Button>
+          <PremiumButtonWrapper
+            hasPremium={hasPremium}
+            showIndicator={hasReachedFolderLimit}
+            tooltipText="Free tier limit reached. Upgrade to create more folders."
+          >
+            <Button
+              onClick={handleCreateFolder}
+              iconStart={<FolderPlus />}
+              disabled={hasReachedFolderLimit}
+            >
+              Create Folder
+            </Button>
+          </PremiumButtonWrapper>
+          <PremiumButtonWrapper
+            hasPremium={hasPremium}
+            showIndicator={hasReachedWorkoutLimit}
+            tooltipText="Free tier limit reached. Upgrade to create more workouts."
+          >
+            <Button
+              onClick={onCreateNew}
+              iconStart={<Plus />}
+              disabled={hasReachedWorkoutLimit}
+            >
+              Create Day
+            </Button>
+          </PremiumButtonWrapper>
         </div>
       </CardContent>
     </Card>
