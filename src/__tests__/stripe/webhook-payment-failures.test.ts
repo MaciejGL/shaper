@@ -110,7 +110,7 @@ describe('Payment Failure Webhook Handlers', () => {
           userName: 'John',
           gracePeriodDays: 3,
           packageName: 'Premium Package',
-          updatePaymentUrl: expect.stringContaining('/fitspace/settings'),
+          updatePaymentUrl: expect.stringContaining('/account-management'),
         },
       )
     })
@@ -196,7 +196,7 @@ describe('Payment Failure Webhook Handlers', () => {
           userName: 'John',
           packageName: 'Premium Package',
           daysRemaining: 1,
-          updatePaymentUrl: expect.stringContaining('/fitspace/settings'),
+          updatePaymentUrl: expect.stringContaining('/account-management'),
         },
       )
     })
