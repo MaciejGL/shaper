@@ -67,6 +67,7 @@ model User {
   clientSubscriptions      UserSubscription[]   @relation("TrainerSubscriptions")
   subscriptions            UserSubscription[]   @relation("UserSubscriptions")
   termsAgreements          UserTermsAgreement[]
+  favouriteWorkoutFolders  FavouriteWorkoutFolder[] @relation("FavouriteWorkoutFolders")
 
   @@index([trainerId])
   @@index([stripeCustomerId])
@@ -605,17 +606,32 @@ model BaseExerciseSubstitute {
   @@index([substituteId])
 }
 
-model FavouriteWorkout {
-  id          String                     @id @default(uuid())
-  title       String
-  description String?
-  createdById String
-  createdAt   DateTime                   @default(now())
-  updatedAt   DateTime                   @updatedAt
-  createdBy   User                       @relation("CreatedFavouriteWorkouts", fields: [createdById], references: [id])
-  exercises   FavouriteWorkoutExercise[]
+model FavouriteWorkoutFolder {
+  id                String             @id @default(uuid())
+  name              String
+  createdById       String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  createdBy         User               @relation("FavouriteWorkoutFolders", fields: [createdById], references: [id])
+  favouriteWorkouts FavouriteWorkout[]
 
   @@index([createdById])
+}
+
+model FavouriteWorkout {
+  id                 String                  @id @default(uuid())
+  title              String
+  description        String?
+  createdById        String
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  folderId           String?
+  createdBy          User                    @relation("CreatedFavouriteWorkouts", fields: [createdById], references: [id])
+  folder             FavouriteWorkoutFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  exercises          FavouriteWorkoutExercise[]
+
+  @@index([createdById])
+  @@index([folderId])
 }
 
 model FavouriteWorkoutExercise {
