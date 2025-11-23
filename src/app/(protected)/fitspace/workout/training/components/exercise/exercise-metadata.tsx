@@ -33,6 +33,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLExerciseType,
   useFitspaceGetWorkoutDayQuery,
@@ -58,6 +59,9 @@ export function ExerciseMetadata({
   activeTimerSetId,
   onTimerComplete,
 }: ExerciseMetadataProps) {
+  const { preferences } = useUserPreferences()
+  const showImages = preferences.showImages ?? true
+
   const [isSwapExerciseOpen, setIsSwapExerciseOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedSubstituteId, setSelectedSubstituteId] = useState<
@@ -145,7 +149,7 @@ export function ExerciseMetadata({
 
   return (
     <div className="border-t border-border">
-      {exercise.images.length > 0 && (
+      {showImages && exercise.images.length > 0 && (
         <Carousel
           opts={{
             align: 'center',

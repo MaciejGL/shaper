@@ -287,25 +287,27 @@ export function ExerciseSet({
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.2, ease: 'linear' }}
     >
-      <div
-        className={cn(
-          'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 pb-[2px] items-center',
-        )}
-      >
-        <div />
-        <div />
-        <div>
-          <p className="text-xs text-muted-foreground text-center truncate self-center leading-none">
-            {displayReps}
-          </p>
+      {isAdvancedView && (
+        <div
+          className={cn(
+            'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 pb-[2px] items-center',
+          )}
+        >
+          <div />
+          <div />
+          <div>
+            <p className="text-xs text-muted-foreground text-center truncate self-center leading-none">
+              {displayReps}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground text-center truncate self-center">
+              {displayWeight}
+            </p>
+          </div>
+          <div />
         </div>
-        <div>
-          <p className="text-xs text-muted-foreground text-center truncate self-center">
-            {displayWeight}
-          </p>
-        </div>
-        <div />
-      </div>
+      )}
       <div
         className={cn(
           'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 items-center py-1.5',
