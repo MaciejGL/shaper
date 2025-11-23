@@ -141,8 +141,8 @@ function SmartPillContent({
       >
         {isStaticOverview && (
           <div className="flex items-center gap-1 justify-between">
-            <span className={cn('text-sm font-medium leading-none')}>
-              {isExpanded ? 'Select Exercise' : 'Exercises Overview'}
+            <span className={cn('text-base font-medium leading-none')}>
+              Exercises Overview
             </span>
             <ChevronDown
               className={cn(
