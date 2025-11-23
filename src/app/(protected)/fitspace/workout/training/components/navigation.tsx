@@ -109,7 +109,7 @@ function DaySelector({ plan }: { plan: NavigationPlan }) {
   )
 
   return (
-    <div className="flex gap-[4px] w-full justify-between mt-2">
+    <div className="flex justify-between mt-2">
       {sortedDays.map((day) => (
         <Day key={day.id} day={day} isSelected={activeDayId === day.id} />
       ))}
