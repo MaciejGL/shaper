@@ -290,7 +290,7 @@ export function PlanDetailsDrawer({
                     {isActive && (
                       <Button
                         onClick={() => onAction('pause', plan)}
-                        variant="tertiary"
+                        variant="outline"
                         disabled={isButtonLoading}
                       >
                         Pause

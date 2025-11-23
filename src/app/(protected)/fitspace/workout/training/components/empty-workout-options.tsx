@@ -151,9 +151,9 @@ export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
                     className="mr-3"
                   />
                   <div className="flex-1">
-                    <CardTitle className="text-lg">My Custom</CardTitle>
+                    <CardTitle className="text-lg">My Custom Plans</CardTitle>
                     <CardDescription>
-                      Select from your saved workouts
+                      Select from your saved plans
                     </CardDescription>
                   </div>
                   <Button

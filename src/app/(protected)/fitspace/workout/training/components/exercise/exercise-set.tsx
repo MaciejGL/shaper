@@ -276,7 +276,7 @@ export function ExerciseSet({
       ? set.minReps === set.maxReps
         ? `${set.minReps}`
         : `${set.minReps}-${set.maxReps}`
-      : '-'
+      : null
 
   return (
     <motion.div
@@ -344,7 +344,7 @@ export function ExerciseSet({
             }}
             inputMode="numeric"
             variant="secondary"
-            placeholder={set.minReps ? `${set.minReps}` : '-'}
+            placeholder={set.minReps ? `${set.minReps}` : ''}
             className="text-center h-8 focus-visible:ring-0 text-sm w-full"
           />
         ) : (

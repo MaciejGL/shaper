@@ -285,14 +285,14 @@ export function FavouriteWorkoutCard({
                               />
                             ))}
                             <Button
-                              size="sm"
-                              variant="tertiary"
+                              size="md"
+                              variant="outline"
                               iconStart={<PlusIcon />}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 setShowAddExercise(true)
                               }}
-                              className="mt-1"
+                              className="mt-4"
                             >
                               Add Exercise
                             </Button>

@@ -6,10 +6,12 @@ export function StateCard({
   title,
   description,
   Icon,
+  action,
 }: {
   title: string
   description: string
   Icon: LucideIcon
+  action?: React.ReactNode
 }) {
   return (
     <Card>
@@ -21,6 +23,7 @@ export function StateCard({
           <h3 className="text-lg font-semibold">{title}</h3>
           <p className="text-muted-foreground">{description}</p>
         </div>
+        {action && <div>{action}</div>}
       </CardContent>
     </Card>
   )

@@ -64,7 +64,7 @@ export function FavouritesSheet({
         className="max-h-[85vh]"
       >
         <DrawerHeader>
-          <DrawerTitle>My Custom</DrawerTitle>
+          <DrawerTitle>My Plans</DrawerTitle>
           <DrawerDescription>
             Select a saved workout to add to your day
           </DrawerDescription>
