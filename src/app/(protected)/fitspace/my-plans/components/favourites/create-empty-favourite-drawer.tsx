@@ -21,12 +21,14 @@ interface CreateEmptyFavouriteDrawerProps {
   open: boolean
   onClose: () => void
   onSuccess: (favouriteId: string) => void
+  currentFolderId?: string | null
 }
 
 export function CreateEmptyFavouriteDrawer({
   open,
   onClose,
   onSuccess,
+  currentFolderId,
 }: CreateEmptyFavouriteDrawerProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -38,12 +40,12 @@ export function CreateEmptyFavouriteDrawer({
     if (!title.trim()) return
 
     try {
-      // Create an empty favourite workout with just metadata
       const result = await createFavourite({
         input: {
           title: title.trim(),
           description: description.trim() || null,
-          exercises: [], // Empty array - no exercises yet
+          folderId: currentFolderId || null,
+          exercises: [],
         },
       })
 

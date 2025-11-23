@@ -1,15 +1,17 @@
 import { addDays, getISOWeek, isSameWeek } from 'date-fns'
 
 import {
+  GQLCreateFavouriteWorkoutFolderInput,
   GQLCreateFavouriteWorkoutInput,
   GQLMutationStartWorkoutFromFavouriteArgs,
+  GQLUpdateFavouriteWorkoutFolderInput,
   GQLUpdateFavouriteWorkoutInput,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
-import FavouriteWorkout from './model'
+import FavouriteWorkout, { FavouriteWorkoutFolder } from './model'
 
 // Get all favourite workouts for a user
 export async function getFavouriteWorkouts(
@@ -24,6 +26,7 @@ export async function getFavouriteWorkouts(
       createdAt: 'desc',
     },
     include: {
+      folder: true,
       exercises: {
         include: {
           base: {
@@ -58,6 +61,7 @@ export async function getFavouriteWorkout(
       createdById: userId,
     },
     include: {
+      folder: true,
       exercises: {
         include: {
           base: {
@@ -98,6 +102,7 @@ export async function createFavouriteWorkout(
       title: input.title,
       description: input.description,
       createdById: userId,
+      folderId: input.folderId,
       exercises: {
         create: input.exercises.map((exercise) => ({
           name: exercise.name,
@@ -167,6 +172,20 @@ export async function updateFavouriteWorkout(
     throw new Error(`Maximum ${MAX_EXERCISES} exercises allowed per workout`)
   }
 
+  // Validate folder existence if provided
+  if (input.folderId) {
+    const folder = await prisma.favouriteWorkoutFolder.findFirst({
+      where: {
+        id: input.folderId,
+        createdById: userId,
+      },
+    })
+
+    if (!folder) {
+      throw new Error('Selected folder not found')
+    }
+  }
+
   // Handle updates with transaction for consistency
   const updatedWorkout = await prisma.$transaction(async (tx) => {
     // Update basic workout info
@@ -175,6 +194,8 @@ export async function updateFavouriteWorkout(
       data: {
         title: input.title ?? undefined,
         description: input.description ?? undefined,
+        folderId:
+          input.folderId === null ? null : (input.folderId ?? undefined),
       },
     })
 
@@ -679,4 +700,92 @@ export async function startWorkoutFromFavourite(
 
   // Return navigation info: planId|weekId|dayId
   return `${quickWorkoutPlan.id}|${weekId}|${targetDay.id}`
+}
+
+export async function getFavouriteWorkoutFolders(
+  userId: string,
+  context: GQLContext,
+): Promise<FavouriteWorkoutFolder[]> {
+  const folders = await prisma.favouriteWorkoutFolder.findMany({
+    where: {
+      createdById: userId,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      favouriteWorkouts: {
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
+    },
+  })
+
+  return folders.map((folder) => new FavouriteWorkoutFolder(folder, context))
+}
+
+export async function createFavouriteWorkoutFolder(
+  input: GQLCreateFavouriteWorkoutFolderInput,
+  userId: string,
+  context: GQLContext,
+): Promise<FavouriteWorkoutFolder> {
+  const folder = await prisma.favouriteWorkoutFolder.create({
+    data: {
+      name: input.name,
+      createdById: userId,
+    },
+    include: {
+      favouriteWorkouts: true,
+    },
+  })
+
+  return new FavouriteWorkoutFolder(folder, context)
+}
+
+export async function updateFavouriteWorkoutFolder(
+  input: GQLUpdateFavouriteWorkoutFolderInput,
+  userId: string,
+  context: GQLContext,
+): Promise<FavouriteWorkoutFolder> {
+  const existingFolder = await prisma.favouriteWorkoutFolder.findFirst({
+    where: {
+      id: input.id,
+      createdById: userId,
+    },
+  })
+
+  if (!existingFolder) {
+    throw new Error('Folder not found or access denied')
+  }
+
+  const folder = await prisma.favouriteWorkoutFolder.update({
+    where: { id: input.id },
+    data: {
+      name: input.name ?? existingFolder.name,
+    },
+    include: {
+      favouriteWorkouts: {
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
+    },
+  })
+
+  return new FavouriteWorkoutFolder(folder, context)
+}
+
+export async function deleteFavouriteWorkoutFolder(
+  id: string,
+  userId: string,
+): Promise<boolean> {
+  const result = await prisma.favouriteWorkoutFolder.deleteMany({
+    where: {
+      id,
+      createdById: userId,
+    },
+  })
+
+  return result.count > 0
 }

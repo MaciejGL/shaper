@@ -5,7 +5,18 @@ type FavouriteWorkout {
   createdById: ID!
   createdAt: String!
   updatedAt: String!
+  folderId: ID
+  folder: FavouriteWorkoutFolder
   exercises: [FavouriteWorkoutExercise!]!
+}
+
+type FavouriteWorkoutFolder {
+  id: ID!
+  name: String!
+  createdById: ID!
+  createdAt: String!
+  updatedAt: String!
+  favouriteWorkouts: [FavouriteWorkout!]!
 }
 
 type FavouriteWorkoutExercise {
@@ -39,6 +50,7 @@ type FavouriteWorkoutSet {
 input CreateFavouriteWorkoutInput {
   title: String!
   description: String
+  folderId: ID
   exercises: [CreateFavouriteWorkoutExerciseInput!]!
 }
 
@@ -69,6 +81,7 @@ input UpdateFavouriteWorkoutInput {
   id: ID!
   title: String
   description: String
+  folderId: ID
   additionalInstructions: String
   instructions: [String!]
   tips: [String!]
@@ -107,12 +120,24 @@ input StartWorkoutFromFavouriteInput {
   dayId: ID # Optional: if provided, add to this specific day; otherwise add to today
 }
 
+input CreateFavouriteWorkoutFolderInput {
+  name: String!
+}
+
+input UpdateFavouriteWorkoutFolderInput {
+  id: ID!
+  name: String
+}
+
 extend type Query {
   # Get all favourite workouts for the current user
   getFavouriteWorkouts: [FavouriteWorkout!]!
 
   # Get a specific favourite workout by ID
   getFavouriteWorkout(id: ID!): FavouriteWorkout
+
+  # Get all favourite workout folders for the current user
+  getFavouriteWorkoutFolders: [FavouriteWorkoutFolder!]!
 }
 
 extend type Mutation {
@@ -139,6 +164,19 @@ extend type Mutation {
 
   # Start a workout from a favourite (copy to quick workout plan)
   startWorkoutFromFavourite(input: StartWorkoutFromFavouriteInput!): ID!
+
+  # Create a new favourite workout folder
+  createFavouriteWorkoutFolder(
+    input: CreateFavouriteWorkoutFolderInput!
+  ): FavouriteWorkoutFolder!
+
+  # Update an existing favourite workout folder
+  updateFavouriteWorkoutFolder(
+    input: UpdateFavouriteWorkoutFolderInput!
+  ): FavouriteWorkoutFolder!
+
+  # Delete a favourite workout folder
+  deleteFavouriteWorkoutFolder(id: ID!): Boolean!
 }
 
 input ExerciseOrderInput {

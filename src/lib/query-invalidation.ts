@@ -96,10 +96,15 @@ export const queryInvalidation = {
   },
 
   /**
-   * Invalidate favourite workouts
+   * Invalidate favourite workouts and folders
    */
   favourites: async (queryClient: QueryClient) => {
-    await queryClient.invalidateQueries({ queryKey: ['GetFavouriteWorkouts'] })
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['GetFavouriteWorkouts'] }),
+      queryClient.invalidateQueries({
+        queryKey: ['GetFavouriteWorkoutFolders'],
+      }),
+    ])
   },
 
   /**

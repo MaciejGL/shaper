@@ -16,9 +16,11 @@ import { CSS } from '@dnd-kit/utilities'
 import {
   ChevronRight,
   Clock,
-  Edit,
+  FolderInput,
   Grip,
   MinusIcon,
+  MoreHorizontal,
+  Pencil,
   PlusIcon,
   Trash2,
   X,
@@ -32,18 +34,30 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
+  GQLGetFavouriteWorkoutFoldersQuery,
+  GQLGetFavouriteWorkoutsQuery,
+} from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
-
-// import { QuickWorkoutAiWizard } from '../../../workout/quick-workout/components/quick-workout-ai-wizard'
 
 import { AddExerciseToFavouriteDrawer } from './add-exercise-to-favourite-drawer'
 import { EditFavouriteMetadataDrawer } from './edit-favourite-metadata-drawer'
 import { EmptyFavouriteOptions } from './empty-favourite-options'
+import { MoveToFolderDrawer } from './move-to-folder-drawer'
 import { useFavouriteCardData } from './use-favourite-card-data'
 import { useFavouriteCardMutations } from './use-favourite-card-mutations'
 
@@ -56,6 +70,9 @@ interface FavouriteWorkoutCardProps {
   onDelete: () => void
   workoutStatus: WorkoutStatusAnalysis
   isLoading: boolean
+  folders?: NonNullable<
+    NonNullable<GQLGetFavouriteWorkoutFoldersQuery>['getFavouriteWorkoutFolders']
+  >
 }
 
 export function FavouriteWorkoutCard({
@@ -65,10 +82,11 @@ export function FavouriteWorkoutCard({
   onDelete,
   workoutStatus,
   isLoading,
+  folders = [],
 }: FavouriteWorkoutCardProps) {
-  // const [showAiWizard, setShowAiWizard] = useState(false)
   const [showAddExercise, setShowAddExercise] = useState(false)
   const [showEditMetadata, setShowEditMetadata] = useState(false)
+  const [showMoveToFolder, setShowMoveToFolder] = useState(false)
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -79,7 +97,7 @@ export function FavouriteWorkoutCard({
     }),
   )
 
-  // Get computed data (totalSets, isEmpty, uniqueMuscleGroups, estimatedMinutes, buttonProps)
+  // Get computed data
   const {
     totalSets,
     isEmpty,
@@ -98,9 +116,6 @@ export function FavouriteWorkoutCard({
   const hasMuscleGroups = uniqueMuscleGroups.length > 0
   const hasExercises = favourite.exercises.length > 0
   const showBadges = hasMuscleGroups || hasExercises
-
-  const showCardHeader =
-    favourite.description || totalSets > 0 || estimatedTime > 0
 
   return (
     <>
@@ -143,75 +158,104 @@ export function FavouriteWorkoutCard({
 
           <AccordionContent>
             <div className="pt-4">
-              {showCardHeader && (
-                <CardHeader className="space-y-2 pb-4">
-                  {buttonProps.subtext && (
-                    <Alert
-                      className="flex items-center gap-2 col-span-full"
-                      variant="warning"
-                      withoutTitle
-                      size="sm"
-                    >
-                      <AlertDescription>{buttonProps.subtext}</AlertDescription>
-                    </Alert>
-                  )}
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      size="icon-sm"
-                      onClick={onDelete}
-                      variant="outline"
-                      iconOnly={<Trash2 />}
-                    >
-                      Remove
-                    </Button>
-                    <Button
-                      size="icon-sm"
-                      variant="outline"
-                      iconOnly={<Edit />}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setShowEditMetadata(true)
-                      }}
-                    >
-                      Edit
-                    </Button>
-
-                    {!isEmpty && (
+              <CardHeader className="space-y-2 pb-4">
+                <div className="flex justify-end items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                       <Button
-                        onClick={onStart}
-                        size="sm"
-                        variant={buttonProps.variant}
-                        disabled={buttonProps.disabled}
-                        loading={buttonProps.loading}
-                        iconEnd={<ChevronRight />}
+                        variant="outline"
+                        size="icon-sm"
+                        iconOnly={<MoreHorizontal />}
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setShowEditMetadata(true)
+                        }}
                       >
-                        {buttonProps.text}
-                      </Button>
+                        <Pencil className="mr-2 size-4" />
+                        Edit Details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setShowMoveToFolder(true)
+                        }}
+                      >
+                        <FolderInput className="mr-2 size-4" />
+                        Move to Folder
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onDelete()
+                        }}
+                      >
+                        <Trash2 className="mr-2 size-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {!isEmpty && (
+                    <>
+                      {buttonProps.disabled && buttonProps.subtext ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Button
+                                size="sm"
+                                variant={buttonProps.variant}
+                                disabled={buttonProps.disabled}
+                                loading={buttonProps.loading}
+                                iconEnd={<ChevronRight />}
+                              >
+                                {buttonProps.text}
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>{buttonProps.subtext}</TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <Button
+                          onClick={onStart}
+                          size="sm"
+                          variant={buttonProps.variant}
+                          disabled={buttonProps.disabled}
+                          loading={buttonProps.loading}
+                          iconEnd={<ChevronRight />}
+                        >
+                          {buttonProps.text}
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <div className="flex justify-between">
+                  {favourite.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {favourite.description}
+                    </p>
+                  )}
+
+                  <div className="flex gap-1 flex-wrap ml-auto">
+                    {totalSets > 0 && (
+                      <Badge variant="secondary">{totalSets} sets</Badge>
+                    )}
+                    {estimatedTime > 0 && (
+                      <Badge variant="secondary">
+                        <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
+                      </Badge>
                     )}
                   </div>
+                </div>
+              </CardHeader>
 
-                  <div className="flex justify-between">
-                    {favourite.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {favourite.description}
-                      </p>
-                    )}
-
-                    <div className="flex gap-1 flex-wrap">
-                      {totalSets > 0 && (
-                        <Badge variant="secondary">{totalSets} sets</Badge>
-                      )}
-                      {estimatedTime > 0 && (
-                        <Badge variant="secondary">
-                          <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-              )}
-
-              <CardContent className="pt-0  space-y-4">
+              <CardContent className="pt-0 space-y-4">
                 {isEmpty ? (
                   <EmptyFavouriteOptions
                     onOpenAddExercise={() => setShowAddExercise(true)}
@@ -220,7 +264,6 @@ export function FavouriteWorkoutCard({
                   <>
                     {/* Exercise Preview */}
                     <div className="space-y-1">
-                      {/* <h4 className="text-sm font-medium">Exercises</h4> */}
                       <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
@@ -265,17 +308,6 @@ export function FavouriteWorkoutCard({
         </AccordionItem>
       </Accordion>
 
-      {/* AI Wizard - HIDDEN */}
-      {/* {showAiWizard && (
-        <QuickWorkoutAiWizard
-          mode="favourite"
-          open={showAiWizard}
-          onClose={() => setShowAiWizard(false)}
-          favouriteId={favourite.id}
-          favouriteTitle={favourite.title}
-        />
-      )} */}
-
       {/* Add Exercise Drawer */}
       {showAddExercise && (
         <AddExerciseToFavouriteDrawer
@@ -293,6 +325,18 @@ export function FavouriteWorkoutCard({
           favouriteId={favourite.id}
           currentTitle={favourite.title}
           currentDescription={favourite.description}
+          onSuccess={onRefetch}
+        />
+      )}
+
+      {/* Move to Folder Drawer */}
+      {showMoveToFolder && (
+        <MoveToFolderDrawer
+          open={showMoveToFolder}
+          onClose={() => setShowMoveToFolder(false)}
+          favouriteId={favourite.id}
+          currentFolderId={favourite.folderId}
+          folders={folders}
           onSuccess={onRefetch}
         />
       )}

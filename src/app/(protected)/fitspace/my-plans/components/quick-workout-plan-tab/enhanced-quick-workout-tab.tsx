@@ -4,6 +4,8 @@ import { useState } from 'react'
 
 import { GQLFavouriteWorkout } from '@/generated/graphql-client'
 import {
+  useFavouriteWorkoutFolderOperations,
+  useFavouriteWorkoutFolders,
   useFavouriteWorkoutOperations,
   useFavouriteWorkoutStatus,
   useFavouriteWorkouts,
@@ -22,6 +24,7 @@ export function EnhancedQuickWorkoutTab() {
     null,
   )
   const [isStarting, setIsStarting] = useState(false)
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
 
   // Favourite workouts hooks
   const {
@@ -29,7 +32,10 @@ export function EnhancedQuickWorkoutTab() {
     isLoading: isLoadingFavourites,
     refetch,
   } = useFavouriteWorkouts()
+  const { data: folders, isLoading: isLoadingFolders } =
+    useFavouriteWorkoutFolders()
   const favouriteOperations = useFavouriteWorkoutOperations()
+  const folderOperations = useFavouriteWorkoutFolderOperations()
 
   // Workout status analysis
   const workoutStatus = useFavouriteWorkoutStatus()
@@ -110,19 +116,39 @@ export function EnhancedQuickWorkoutTab() {
     setFavouriteToDelete(null)
   }
 
+  const filteredWorkouts =
+    favouriteWorkouts?.getFavouriteWorkouts.filter((workout) => {
+      if (currentFolderId === null) {
+        return !workout.folderId
+      }
+      return workout.folderId === currentFolderId
+    }) ?? []
+
+  const foldersList = (folders?.getFavouriteWorkoutFolders ??
+    []) as NonNullable<
+    NonNullable<typeof folders>['getFavouriteWorkoutFolders']
+  >
+  const currentFolder = (foldersList.find((f) => f.id === currentFolderId) ??
+    null) as (typeof foldersList)[number] | null
+
   return (
     <div className="space-y-6">
       <FavouriteWorkoutsList
-        favouriteWorkouts={favouriteWorkouts?.getFavouriteWorkouts ?? []}
-        loading={isLoadingFavourites}
+        favouriteWorkouts={filteredWorkouts}
+        folders={foldersList}
+        currentFolder={currentFolder}
+        loading={isLoadingFavourites || isLoadingFolders}
         onStartWorkout={handleStartFromFavourite}
         onDeleteWorkout={handleDeleteFavourite}
         onRefetch={refetch}
         workoutStatus={workoutStatus}
         isStarting={isStarting}
+        currentFolderId={currentFolderId}
+        onFolderClick={setCurrentFolderId}
+        onBackToRoot={() => setCurrentFolderId(null)}
+        folderOperations={folderOperations}
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeleteFavouriteDialog
         open={deleteDialogOpen}
         favourite={favouriteToDelete}
@@ -131,7 +157,6 @@ export function EnhancedQuickWorkoutTab() {
         isDeleting={favouriteOperations.isDeleting}
       />
 
-      {/* Replacement Confirmation Dialog */}
       <ReplacementConfirmationDialog
         open={replacementDialogOpen}
         onClose={handleCancelReplacement}
