@@ -1,10 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence } from 'framer-motion'
 import { PlusIcon } from 'lucide-react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
 
+import { revalidatePlanPages } from '@/app/actions/revalidate'
 import { useIsFirstRender } from '@/components/animated-grid'
 import { Button } from '@/components/ui/button'
 import { useUserPreferences } from '@/context/user-preferences-context'
@@ -35,6 +36,7 @@ export function ExerciseSets({
 }: ExerciseSetsProps) {
   const isFirstRender = useIsFirstRender()
   const { trainingId } = useParams<{ trainingId: string }>()
+  const router = useRouter()
   const [dayId] = useQueryState('day')
   const queryClient = useQueryClient()
   const { preferences } = useUserPreferences()
@@ -189,7 +191,16 @@ export function ExerciseSets({
 
         // Also invalidate navigation to update day progress
         invalidateQuery({
+          queryKey: ['navigation'],
+        })
+        invalidateQuery({
           queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
+        })
+        invalidateQuery({
+          queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+        })
+        revalidatePlanPages().then(() => {
+          router.refresh()
         })
       },
     })
@@ -205,6 +216,36 @@ export function ExerciseSets({
     updateFn: (oldData, { setId }) => {
       const updateFn = createOptimisticRemoveSetUpdate(setId)
       return updateFn(oldData)
+    },
+    onSuccess: () => {
+      // Invalidate all navigation queries to update day progress and completion status
+      invalidateQuery({
+        queryKey: ['navigation'],
+      })
+      invalidateQuery({
+        queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
+      })
+      invalidateQuery({
+        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+      })
+      revalidatePlanPages().then(() => {
+        router.refresh()
+      })
+    },
+    onError: () => {
+      // Also invalidate on error to ensure consistency
+      invalidateQuery({
+        queryKey: ['navigation'],
+      })
+      invalidateQuery({
+        queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
+      })
+      invalidateQuery({
+        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+      })
+      revalidatePlanPages().then(() => {
+        router.refresh()
+      })
     },
   })
 
@@ -263,9 +304,9 @@ export function ExerciseSets({
       exercise.sets.some((set) => set.isExtra)) &&
     exercise.sets.length > 1
   return (
-    <div className="flex flex-col w-full overflow-hidden mb-12">
+    <div className="flex flex-col mx-2 overflow-hidden mb-12 bg-card rounded-2xl pt-2 shadow-sm border border-border">
       {/* Table Header */}
-      <div className="grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 py-2 px-[1.25rem] items-center text-xs font-medium text-muted-foreground">
+      <div className="grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 py-2 px-2 items-center text-xs font-semibold">
         <div className="text-center">Set</div>
         <div className="text-center">Previous</div>
         <div className="text-center">Reps</div>
@@ -274,7 +315,7 @@ export function ExerciseSets({
       </div>
 
       {/* Sets Rows */}
-      <div className="space-y-2 px-3">
+      <div className="space-y-2">
         {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
           const previousWeightLog = getPreviousSetValue(set.order, 'weight')
           const previousRepsLog = getPreviousSetValue(set.order, 'reps')
@@ -301,12 +342,12 @@ export function ExerciseSets({
       </div>
 
       {/* Actions */}
-      <div className="grid grid-cols-[1fr_1fr] items-center mt-2 w-full gap-2 px-3">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center w-full">
         {hasExtraSets && (
           <Button
-            variant="outline"
+            variant="ghost"
             size="lg"
-            className="flex-1"
+            className="flex-1 rounded-none"
             disabled={isRemovingSet}
             onClick={handleRemoveLastSet}
             iconStart={<PlusIcon className="rotate-45 size-3" />}
@@ -314,10 +355,14 @@ export function ExerciseSets({
             Remove Set
           </Button>
         )}
+        {hasExtraSets && <div className="h-full w-[1px] bg-border" />}
         <Button
-          variant="secondary"
+          variant="ghost"
           size="lg"
-          className={cn(hasExtraSets ? 'col-span-1' : 'col-span-full')}
+          className={cn(
+            'rounded-none',
+            hasExtraSets ? 'col-span-1' : 'col-span-full',
+          )}
           loading={isAddingSet}
           onClick={handleAddSet}
           iconStart={<PlusIcon className="size-3" />}

@@ -129,7 +129,7 @@ export function FavouriteWorkoutCard({
                 </h3>
               </div>
               {showBadges && (
-                <div className="flex items-center gap-1 mt-2">
+                <div className="flex items-center gap-1 mt-2 flex-wrap">
                   {hasExercises && (
                     <Badge variant="secondary" size="sm">
                       {favourite.exercises.length} exercises
@@ -149,6 +149,16 @@ export function FavouriteWorkoutCard({
                   {hasMuscleGroups && uniqueMuscleGroups.length > 2 && (
                     <Badge variant="muscle" size="sm">
                       +{uniqueMuscleGroups.length - 2}
+                    </Badge>
+                  )}
+                  {totalSets > 0 && (
+                    <Badge variant="secondary" size="sm">
+                      {totalSets} sets
+                    </Badge>
+                  )}
+                  {estimatedTime > 0 && (
+                    <Badge variant="secondary" size="sm">
+                      <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
                     </Badge>
                   )}
                 </div>

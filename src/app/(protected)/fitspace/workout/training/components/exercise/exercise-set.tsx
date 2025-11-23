@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { debounce } from 'lodash'
 import { CheckIcon } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import {
   startTransition,
@@ -12,6 +13,7 @@ import {
   useState,
 } from 'react'
 
+import { revalidatePlanPages } from '@/app/actions/revalidate'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useUserPreferences } from '@/context/user-preferences-context'
@@ -20,6 +22,7 @@ import {
   GQLFitspaceMarkSetAsCompletedMutation,
   GQLTrainingView,
   useFitspaceGetWorkoutDayQuery,
+  useFitspaceGetWorkoutNavigationQuery,
   useFitspaceMarkSetAsCompletedMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
@@ -46,6 +49,8 @@ export function ExerciseSet({
   onSetUncompleted,
 }: ExerciseSetProps) {
   const [dayId] = useQueryState('day')
+  const { trainingId } = useParams<{ trainingId: string }>()
+  const router = useRouter()
   const { preferences } = useUserPreferences()
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
   const hasUserEditedRef = useRef(false)
@@ -130,9 +135,18 @@ export function ExerciseSet({
         })
         return updateFn(oldData)
       },
-      onSuccess: (data, variables) => {
-        // Invalidate navigation to update progress bars
-        queryClient.invalidateQueries({ queryKey: ['navigation'] })
+      onSuccess: async (data, variables) => {
+        // Invalidate all navigation queries to update progress bars and day completion status
+        await queryClient.invalidateQueries({ queryKey: ['navigation'] })
+        await queryClient.invalidateQueries({
+          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+        })
+
+        await revalidatePlanPages()
+        router.refresh()
 
         // Check if it's a PR and trigger overlay
         if (data?.markSetAsCompleted?.isPersonalRecord && variables.completed) {
@@ -160,11 +174,20 @@ export function ExerciseSet({
         }
         setSkipTimer(false)
       },
-      onError: (error, variables) => {
+      onError: async (error, variables) => {
         console.error('Failed to mark set as completed:', error, variables)
 
-        // Invalidate navigation to ensure consistency
-        queryClient.invalidateQueries({ queryKey: ['navigation'] })
+        // Invalidate all navigation queries to ensure consistency
+        await queryClient.invalidateQueries({ queryKey: ['navigation'] })
+        await queryClient.invalidateQueries({
+          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
+        })
+        await queryClient.invalidateQueries({
+          queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+        })
+
+        await revalidatePlanPages()
+        router.refresh()
 
         // On error, sync cache with server to fix inconsistencies
         queryClient.invalidateQueries({
@@ -296,7 +319,7 @@ export function ExerciseSet({
       {isAdvancedView && (
         <div
           className={cn(
-            'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 pb-[2px] items-center',
+            'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-4 pb-[2px] items-center',
           )}
         >
           <div />
@@ -316,14 +339,14 @@ export function ExerciseSet({
       )}
       <div
         className={cn(
-          'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 items-center py-1.5',
-          'bg-card shadow-xs rounded-xl',
+          'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 items-center pb-2',
+          'border-b border-border',
         )}
       >
         {/* Set Number */}
         <div
           className={cn(
-            'text-xs font-medium text-center rounded-full size-5 flex items-center justify-center mx-auto',
+            'text-xs font-medium text-center rounded-full size-6 flex items-center justify-center mx-auto',
             'bg-muted text-muted-foreground ',
           )}
         >
