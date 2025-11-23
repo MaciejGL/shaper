@@ -129,7 +129,7 @@ export function FavouriteWorkoutCard({
                 </h3>
               </div>
               {showBadges && (
-                <div className="flex items-center gap-1 mt-2">
+                <div className="flex items-center gap-1 mt-2 flex-wrap">
                   {hasExercises && (
                     <Badge variant="secondary" size="sm">
                       {favourite.exercises.length} exercises
@@ -159,7 +159,48 @@ export function FavouriteWorkoutCard({
           <AccordionContent>
             <div className="pt-4">
               <CardHeader className="space-y-2 pb-4">
-                <div className="flex justify-end items-center gap-2">
+                {favourite.description ? (
+                  <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
+                    {favourite.description}
+                  </p>
+                ) : null}
+                <div className="flex justify-between items-start gap-2 mb-6">
+                  {!isEmpty && (
+                    <div className="w-full">
+                      {buttonProps.disabled && buttonProps.subtext ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="w-full">
+                              <Button
+                                className="w-full"
+                                size="sm"
+                                variant={buttonProps.variant}
+                                disabled={buttonProps.disabled}
+                                loading={buttonProps.loading}
+                                iconEnd={<ChevronRight />}
+                              >
+                                {buttonProps.text}
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>{buttonProps.subtext}</TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <Button
+                          className="w-full"
+                          onClick={onStart}
+                          size="sm"
+                          variant={buttonProps.variant}
+                          disabled={buttonProps.disabled}
+                          loading={buttonProps.loading}
+                          iconEnd={<ChevronRight />}
+                        >
+                          {buttonProps.text}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -199,59 +240,17 @@ export function FavouriteWorkoutCard({
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-
-                  {!isEmpty && (
-                    <>
-                      {buttonProps.disabled && buttonProps.subtext ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div>
-                              <Button
-                                size="sm"
-                                variant={buttonProps.variant}
-                                disabled={buttonProps.disabled}
-                                loading={buttonProps.loading}
-                                iconEnd={<ChevronRight />}
-                              >
-                                {buttonProps.text}
-                              </Button>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>{buttonProps.subtext}</TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <Button
-                          onClick={onStart}
-                          size="sm"
-                          variant={buttonProps.variant}
-                          disabled={buttonProps.disabled}
-                          loading={buttonProps.loading}
-                          iconEnd={<ChevronRight />}
-                        >
-                          {buttonProps.text}
-                        </Button>
-                      )}
-                    </>
-                  )}
                 </div>
 
-                <div className="flex justify-between">
-                  {favourite.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {favourite.description}
-                    </p>
+                <div className="flex gap-1 flex-wrap">
+                  {totalSets > 0 && (
+                    <Badge variant="secondary">{totalSets} sets</Badge>
                   )}
-
-                  <div className="flex gap-1 flex-wrap ml-auto">
-                    {totalSets > 0 && (
-                      <Badge variant="secondary">{totalSets} sets</Badge>
-                    )}
-                    {estimatedTime > 0 && (
-                      <Badge variant="secondary">
-                        <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
-                      </Badge>
-                    )}
-                  </div>
+                  {estimatedTime > 0 && (
+                    <Badge variant="secondary">
+                      <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
 
@@ -383,14 +382,21 @@ function SortableExerciseItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="grid grid-cols-[auto_1fr_auto] items-center gap-1 w-full"
+      className="grid grid-cols-[auto_1fr] items-center gap-1 w-full"
     >
-      <span className="text-sm text-muted-foreground w-4 shrink-0">
-        {index + 1}.
-      </span>
+      <button
+        {...attributes}
+        {...listeners}
+        className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shrink-0 touch-none"
+      >
+        <Grip className="size-4" />
+      </button>
       <Card variant="tertiary" className="flex-1 p-2 gap-2">
         <CardHeader className="flex items-center justify-between p-0">
           <p className="justify-start whitespace-normal font-medium font-base">
+            <span className="text-sm text-muted-foreground w-4 shrink-0">
+              {index + 1}.
+            </span>{' '}
             {exercise.name}
           </p>
           <Button
@@ -445,14 +451,6 @@ function SortableExerciseItem({
           </div>
         </CardContent>
       </Card>
-
-      <button
-        {...attributes}
-        {...listeners}
-        className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shrink-0 touch-none"
-      >
-        <Grip className="size-4" />
-      </button>
     </div>
   )
 }

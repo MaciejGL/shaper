@@ -39,3 +39,22 @@ export function getPlanImage(plan: UnifiedPlan): string | null {
 
   return null
 }
+
+interface DayWithImages {
+  exercises?: {
+    images?: {
+      url?: string | null
+      order?: number | null
+      thumbnail?: string | null
+      medium?: string | null
+    }[]
+  }[]
+}
+
+export function getDayImage(day?: DayWithImages | null): string | null {
+  if (!day) return null
+
+  const firstExercise = day.exercises?.[1]
+  const firstImage = firstExercise?.images?.[1]?.url || '/rest-day.jpg'
+  return firstImage
+}

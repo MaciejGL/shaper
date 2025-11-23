@@ -7,6 +7,8 @@ import { sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
+import { getDayImage } from '../../my-plans/utils'
+
 type PlanWeeks = NonNullable<
   GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]['weeks']
 >
@@ -63,14 +65,13 @@ interface DayCardProps {
 function DayCard({ day }: DayCardProps) {
   const firstExercise = day.exercises?.[1]
   // firstExercise?.images?.[0]?.thumbnail ||firstExercise?.images?.[0]?.medium ||
-  const firstImage = firstExercise?.images?.[1]?.url || '/rest-day.jpg'
-
+  const firstImage = getDayImage(day)
   return (
     <Card
       variant="tertiary"
       className={cn(
-        'aspect-[18/8] overflow-hidden relative border-none p-0',
-        day.isRestDay && 'aspect-[18/6] opacity-90',
+        'aspect-[18/8] overflow-hidden relative border-none p-0 bg-neutral-900',
+        day.isRestDay && 'aspect-[18/5]',
       )}
     >
       <CardContent className="flex p-0 h-full items-center">
@@ -81,15 +82,11 @@ function DayCard({ day }: DayCardProps) {
               alt={firstExercise?.name || 'Exercise'}
               width={300}
               height={300}
-              className="object-cover size-full"
-              quality={100}
-              // sizes="(max-width: 768px) 90vw, 90vw"
-            />
-            <div
               className={cn(
-                'absolute inset-0 bg-gradient-to-l from-black/80 via-black/30 to-transparent',
-                day.isRestDay && 'bg-black/60',
+                'object-cover size-full',
+                day.isRestDay && 'grayscale opacity-50',
               )}
+              quality={100}
             />
           </div>
         )}
@@ -97,8 +94,9 @@ function DayCard({ day }: DayCardProps) {
           <div className="relative z-10 text-center px-4 py-2 rounded-2xl backdrop-blur-sm">
             <p
               className={cn(
-                'text-2xl font-semibold text-white drop-shadow-lg line-clamp-2',
-                day.isRestDay && 'text-muted-foreground',
+                'text-2xl font-medium text-white drop-shadow-lg line-clamp-2',
+                day.isRestDay &&
+                  'text-muted/80 dark:text-muted-foreground font-normal text-lg',
               )}
             >
               {day.isRestDay ? 'Rest' : formatWorkoutType(day.workoutType)}
