@@ -1,8 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { isToday } from 'date-fns'
 import { useRouter } from 'next/navigation'
-import { startTransition } from 'react'
 
+import { revalidatePlanPages } from '@/app/actions/revalidate'
 import {
   GQLCreateFavouriteWorkoutFolderInput,
   GQLCreateFavouriteWorkoutInput,
@@ -107,18 +107,16 @@ export function useStartWorkoutFromFavourite() {
 
       const parts = data.startWorkoutFromFavourite.split('|')
 
+      await revalidatePlanPages()
       await queryInvalidation.favouriteWorkoutStart(queryClient)
+      router.refresh()
 
-      startTransition(() => {
-        if (parts.length === 3) {
-          const [, weekId, dayId] = parts
-          router.push(`/fitspace/workout?week=${weekId}&day=${dayId}`)
-        } else {
-          router.push(`/fitspace/workout`)
-        }
-
-        router.refresh()
-      })
+      if (parts.length === 3) {
+        const [, weekId, dayId] = parts
+        router.push(`/fitspace/workout?week=${weekId}&day=${dayId}`)
+      } else {
+        router.push(`/fitspace/workout`)
+      }
     },
   })
 }
