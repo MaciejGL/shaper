@@ -101,7 +101,6 @@ function SmartPillContent({
   layoutId?: string
   className?: string
 }) {
-  const showBiggerPill = isStaticOverview || isExpanded
   return (
     <motion.div
       layoutId={layoutId}
@@ -114,15 +113,13 @@ function SmartPillContent({
         onClick={onToggleExpand}
         className={cn(
           'flex items-center justify-center size-8 rounded-full transition-all mr-2 shrink-0 relative',
-          'hover:bg-white/5 active:scale-95',
-
-          showBiggerPill && 'size-10',
+          'hover:bg-white/5 active:scale-95 size-10',
         )}
       >
         <div className="relative flex-center">
           <ProgressCircle
             progress={progressPercentage}
-            size={showBiggerPill ? 32 : 28}
+            size={32}
             strokeWidth={2.5}
             className="text-primary"
             hideCheckmark={true}
@@ -137,9 +134,8 @@ function SmartPillContent({
 
       <div
         className={cn(
-          'flex flex-col justify-center min-w-0 px-2 py-1 border-l border-border dark:border-border flex-1',
-          'cursor-pointer',
-          showBiggerPill && 'py-2.5',
+          'flex flex-col justify-center min-w-0 p-2 border-l border-border dark:border-border flex-1',
+          'cursor-pointer ',
         )}
         onClick={onToggleExpand}
       >
@@ -174,8 +170,7 @@ function SmartPillContent({
       {allExercisesCompleted && (
         <div
           className={cn(
-            'flex items-center gap-2 pl-3 py-1 border-l border-border dark:border-border shrink-0',
-            showBiggerPill && 'py-2.5',
+            'flex items-center gap-2 p-2 border-l border-border dark:border-border shrink-0',
           )}
         >
           <button
@@ -377,8 +372,6 @@ export function WorkoutOverviewPill({
   const ref = useRef<HTMLDivElement>(null)
 
   // Close overview pill when scrolling down significantly (when it's about to become sticky)
-  // We can use the intersection observer onInViewChange logic inversely in the parent
-  // But for direct scroll interaction within the expanded state:
   useEffect(() => {
     if (!isExpanded) return
 
@@ -428,40 +421,29 @@ export function WorkoutOverviewPill({
 
   return (
     <>
-      <div
-        ref={ref}
-        // Increase z-index when expanded to ensure it's above the backdrop
-        className={cn('relative h-[56px]', isExpanded ? 'z-[45]' : 'z-[35]')}
-      >
-        <motion.div
-          layout
-          className={cn(
-            'w-full ',
-            // Ensure the pill itself is above the backdrop (z-38)
-            isExpanded ? 'fixed top-2 left-0 right-0 px-2 z-[45]' : 'relative',
-          )}
-          transition={{ type: 'spring', bounce: 0.2, duration: 0.3 }}
-        >
-          <SmartPillContent
-            progressPercentage={progressPercentage}
-            completedCount={completedCount}
-            totalCount={totalCount}
-            currentExerciseName="Overview"
-            allExercisesCompleted={allExercisesCompleted}
-            isExpanded={isExpanded}
-            onToggleExpand={() => setIsExpanded(!isExpanded)}
-            onShowSummary={() => setShowSummary(true)}
-            isStaticOverview={true}
-            layoutId="overview-pill"
-            className={cn(
-              !isExpanded &&
+      <div ref={ref} className="relative h-[56px] z-[35]">
+        {!isExpanded && (
+          <div className="relative w-full">
+            <SmartPillContent
+              progressPercentage={progressPercentage}
+              completedCount={completedCount}
+              totalCount={totalCount}
+              currentExerciseName="Overview"
+              allExercisesCompleted={allExercisesCompleted}
+              isExpanded={false}
+              onToggleExpand={() => setIsExpanded(true)}
+              onShowSummary={() => setShowSummary(true)}
+              isStaticOverview={true}
+              layoutId="overview-pill"
+              className={cn(
                 'rounded-none h-[56px] border-0 !bg-background shadow-none',
-            )}
-          />
-        </motion.div>
+              )}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Gradient Backdrop (Below Pill) */}
+      {/* Expanded Overlay Elements */}
       <AnimatePresence>
         {isExpanded && (
           <>
@@ -477,37 +459,50 @@ export function WorkoutOverviewPill({
               className="fixed inset-0 z-[39]"
               onClick={() => setIsExpanded(false)}
             />
-          </>
-        )}
-      </AnimatePresence>
 
-      {/* Dropdown List for Static Overview Pill */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-18 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
-          >
-            {exercises.map((exercise, i) => (
-              <motion.div
-                key={exercise.id}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  transition: { delay: i * 0.05 },
-                }}
-              >
-                <ExpandedExerciseListItem
-                  exercise={exercise}
-                  isCurrent={false} // Overview dropdown doesn't track current scroll
-                  onClick={() => scrollToExercise(exercise.id)}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
+            {/* The Expanded Pill - Rendered at root level for correct stacking */}
+            <div className="fixed top-2 left-0 right-0 px-2 z-[45] pointer-events-none flex justify-center">
+              <SmartPillContent
+                progressPercentage={progressPercentage}
+                completedCount={completedCount}
+                totalCount={totalCount}
+                currentExerciseName="Overview"
+                allExercisesCompleted={allExercisesCompleted}
+                isExpanded={true}
+                onToggleExpand={() => setIsExpanded(false)}
+                onShowSummary={() => setShowSummary(true)}
+                isStaticOverview={true}
+                layoutId="overview-pill"
+                className="w-full"
+              />
+            </div>
+
+            {/* Dropdown List */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="fixed top-18 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+            >
+              {exercises.map((exercise, i) => (
+                <motion.div
+                  key={exercise.id}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    transition: { delay: i * 0.05 },
+                  }}
+                >
+                  <ExpandedExerciseListItem
+                    exercise={exercise}
+                    isCurrent={false}
+                    onClick={() => scrollToExercise(exercise.id)}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
