@@ -304,7 +304,7 @@ export function ExerciseSets({
       exercise.sets.some((set) => set.isExtra)) &&
     exercise.sets.length > 1
   return (
-    <div className="flex flex-col mx-2 overflow-hidden mb-12 bg-card rounded-2xl pt-2 shadow-sm border border-border">
+    <div className="flex flex-col mx-2 overflow-hidden mb-12 bg-card rounded-2xl pt-2 shadow-xs border border-border">
       {/* Table Header */}
       <div className="grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 py-2 px-2 items-center text-xs font-semibold">
         <div className="text-center">Set</div>
