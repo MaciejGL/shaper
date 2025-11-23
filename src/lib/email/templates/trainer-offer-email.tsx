@@ -51,23 +51,17 @@ export const TrainerOfferEmail = ({
       <EmailHeader brandName="Hypro" />
 
       <EmailContent>
-        <EmailHeading size={2} marginBottom="12px">
-          Training package offer
-        </EmailHeading>
+        <EmailHeading as="h1">Training package offer</EmailHeading>
 
-        <EmailText marginBottom="24px">
-          {clientName ? `Hi ${clientName},` : 'Hello,'}
-        </EmailText>
+        <EmailText>{clientName ? `Hi ${clientName},` : 'Hello,'}</EmailText>
 
-        <EmailText marginBottom="28px">
+        <EmailText>
           <strong>{trainerName}</strong> has created a personalized training
           package designed specifically for your fitness goals.
         </EmailText>
 
         <EmailCard>
-          <EmailHeading size={3} marginBottom="16px" weight={600}>
-            Your Training Bundle
-          </EmailHeading>
+          <EmailHeading as="h3">Your Training Bundle</EmailHeading>
 
           {bundleItems.map((item, index) => (
             <div
@@ -83,13 +77,13 @@ export const TrainerOfferEmail = ({
                 style={{
                   fontSize: '16px',
                   fontWeight: '600',
-                  color: '#0f172a',
+                  color: '#18181b',
                   marginBottom: '4px',
                 }}
               >
                 {item.quantity}x {item.packageName}
               </div>
-              <div style={{ fontSize: '14px', color: '#64748b' }}>
+              <div style={{ fontSize: '14px', color: '#6b7280' }}>
                 Includes: {item.services.join(', ')}
               </div>
             </div>
@@ -98,29 +92,28 @@ export const TrainerOfferEmail = ({
           <div
             style={{
               marginTop: '20px',
-              padding: '16px',
-              backgroundColor: '#f8fafc',
-              borderRadius: '6px',
+              paddingTop: '16px',
+              borderTop: '1px solid #e2e8f0',
             }}
           >
             <div
               style={{
                 fontSize: '14px',
-                color: '#475569',
+                color: '#4b5563',
                 marginBottom: '4px',
               }}
             >
               <strong>Total packages:</strong> {totalPackages}
             </div>
-            <div style={{ fontSize: '14px', color: '#475569' }}>
+            <div style={{ fontSize: '14px', color: '#4b5563' }}>
               <strong>Your trainer:</strong> {trainerName}
             </div>
           </div>
         </EmailCard>
 
         {personalMessage && (
-          <EmailCard backgroundColor="#fefce8" borderColor="#fde047">
-            <EmailText size={5} weight={600} color="primary" marginBottom="8px">
+          <EmailCard backgroundColor="#fafafa">
+            <EmailText size="14px" weight="600" style={{ marginBottom: '8px' }}>
               Personal message from {trainerName}:
             </EmailText>
             <p
@@ -128,7 +121,7 @@ export const TrainerOfferEmail = ({
                 margin: '0',
                 fontSize: '16px',
                 fontStyle: 'italic',
-                color: '#a16207',
+                color: '#4b5563',
                 lineHeight: '1.6',
               }}
             >
@@ -137,28 +130,17 @@ export const TrainerOfferEmail = ({
           </EmailCard>
         )}
 
-        <div style={{ textAlign: 'center', margin: '32px 0' }}>
-          <EmailButton href={offerUrl} size="lg">
-            View Training Package
-          </EmailButton>
-        </div>
+        <EmailButton href={offerUrl}>View Training Package</EmailButton>
 
-        <EmailAlert type="warning">
+        <EmailAlert>
           This offer expires on <strong>{expirationTime}</strong>. Training
           packages are customized specifically for your goals and fitness level.
         </EmailAlert>
 
         <EmailDivider />
 
-        <EmailText size={5} color="muted" marginBottom="0">
-          Questions about this offer? Contact {trainerName} directly or reach
-          out to our support team at{' '}
-          <a
-            href="mailto:support@hypro.app"
-            style={{ color: '#0f172a', textDecoration: 'underline' }}
-          >
-            support@hypro.app
-          </a>
+        <EmailText size="14px" color="muted" style={{ marginBottom: 0 }}>
+          Questions about this offer? Contact {trainerName} directly.
         </EmailText>
       </EmailContent>
 

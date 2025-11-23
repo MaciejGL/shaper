@@ -7,6 +7,7 @@ import {
   EmailFooter,
   EmailHeader,
   EmailHeading,
+  EmailLink,
   EmailText,
   EmailWrapper,
 } from './components'
@@ -33,173 +34,54 @@ export function TrialEndingEmail({
     >
       <EmailHeader brandName="Hypro" />
       <EmailContent>
-        <EmailHeading size={2} marginBottom="12px">
-          Your trial is ending soon
-        </EmailHeading>
+        <EmailHeading as="h1">Your trial is ending soon</EmailHeading>
 
-        <EmailText marginBottom="24px">
-          {userName ? `Hi ${userName},` : 'Hello,'}
-        </EmailText>
+        <EmailText>{userName ? `Hi ${userName},` : 'Hello,'}</EmailText>
 
-        <EmailAlert type="warning">
+        <EmailAlert>
           Your <strong>{packageName}</strong> trial will end in{' '}
           <strong>
             {daysRemaining} {dayText}
           </strong>
         </EmailAlert>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           Don't lose access to your premium features. Continue your fitness
           journey with unlimited access to:
         </EmailText>
 
         <EmailCard>
-          <table
-            cellPadding="0"
-            cellSpacing="0"
-            border={0}
-            style={{ width: '100%', borderCollapse: 'collapse' }}
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
           >
-            <tbody>
-              <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>Unlimited training plans</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>Premium training plans library</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>
-                            Advanced tracking and logging in progress page
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>
-                            Access to exercise videos and instructions
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '0' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>AI-powered workout generator</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
+              <span>Unlimited training plans</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
+              <span>Premium training plans library</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
+              <span>Advanced tracking and logging</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
+              <span>Exercise videos and instructions</span>
+            </div>
+          </div>
         </EmailCard>
 
-        <div style={{ textAlign: 'center', margin: '32px 0' }}>
-          <EmailButton href={upgradeUrl} size="lg">
-            Continue with {packageName}
-          </EmailButton>
-        </div>
+        <EmailButton href={upgradeUrl}>Continue with {packageName}</EmailButton>
 
         <EmailDivider />
 
-        <EmailText size={5} color="muted" marginBottom="0">
-          Questions about your subscription? Contact our team at{' '}
-          <a
-            href="mailto:support@hypro.app"
-            style={{ color: '#0f172a', textDecoration: 'underline' }}
-          >
+        <EmailText size="14px" color="muted" style={{ marginBottom: 0 }}>
+          If you have any questions contact us at{' '}
+          <EmailLink href="mailto:support@hypro.app">
             support@hypro.app
-          </a>
+          </EmailLink>
         </EmailText>
       </EmailContent>
       <EmailFooter companyName="Hypro" />
@@ -227,28 +109,21 @@ export function PaymentFailedEmail({
     >
       <EmailHeader brandName="Hypro" />
       <EmailContent>
-        <EmailHeading size={2} marginBottom="12px">
-          Payment unsuccessful
-        </EmailHeading>
+        <EmailHeading as="h1">Payment unsuccessful</EmailHeading>
 
-        <EmailText marginBottom="24px">
-          {userName ? `Hi ${userName},` : 'Hello,'}
-        </EmailText>
+        <EmailText>{userName ? `Hi ${userName},` : 'Hello,'}</EmailText>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           We encountered an issue processing the payment for your{' '}
           <strong>{packageName}</strong> subscription.
         </EmailText>
 
-        <EmailAlert type="info">
-          <strong>No worries!</strong> You have {gracePeriodDays} days to update
-          your payment method and maintain uninterrupted access to your premium
-          features.
+        <EmailAlert>
+          You have {gracePeriodDays} days to update your payment method and
+          maintain uninterrupted access to your premium features.
         </EmailAlert>
 
-        <EmailText marginBottom="16px">
-          Common reasons for payment issues:
-        </EmailText>
+        <EmailText>Common reasons for payment issues:</EmailText>
 
         <EmailCard>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -256,26 +131,18 @@ export function PaymentFailedEmail({
             <div>• Insufficient account balance</div>
             <div>• Card issuer security restrictions</div>
             <div>• Billing address verification mismatch</div>
-            <div>• Card network connectivity issues</div>
           </div>
         </EmailCard>
 
-        <div style={{ textAlign: 'center', margin: '32px 0' }}>
-          <EmailButton href={updatePaymentUrl} size="lg">
-            Update Payment Method
-          </EmailButton>
-        </div>
+        <EmailButton href={updatePaymentUrl}>Update Payment Method</EmailButton>
 
         <EmailDivider />
 
-        <EmailText size={5} color="muted" marginBottom="0">
-          Need assistance? Our support team is ready to help at{' '}
-          <a
-            href="mailto:support@hypro.app"
-            style={{ color: '#0f172a', textDecoration: 'underline' }}
-          >
+        <EmailText size="14px" color="muted" style={{ marginBottom: 0 }}>
+          If you have any questions contact us at{' '}
+          <EmailLink href="mailto:support@hypro.app">
             support@hypro.app
-          </a>
+          </EmailLink>
         </EmailText>
       </EmailContent>
       <EmailFooter companyName="Hypro" />
@@ -303,50 +170,39 @@ export function SubscriptionCancelledEmail({
     >
       <EmailHeader brandName="Hypro" />
       <EmailContent>
-        <EmailHeading size={2} marginBottom="12px">
-          Subscription cancelled
-        </EmailHeading>
+        <EmailHeading as="h1">Subscription cancelled</EmailHeading>
 
-        <EmailText marginBottom="24px">
-          {userName ? `Hi ${userName},` : 'Hello,'}
-        </EmailText>
+        <EmailText>{userName ? `Hi ${userName},` : 'Hello,'}</EmailText>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           We've successfully cancelled your <strong>{packageName}</strong>{' '}
           subscription as requested.
         </EmailText>
 
-        <EmailAlert type="info">
+        <EmailAlert>
           You'll continue to have full access to all premium features until{' '}
           <strong>{endDate}</strong>
         </EmailAlert>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           Changed your mind? You can easily reactivate your subscription anytime
           before it expires.
         </EmailText>
 
-        <div style={{ textAlign: 'center', margin: '32px 0' }}>
-          <EmailButton href={reactivateUrl} size="lg">
-            Reactivate Subscription
-          </EmailButton>
-        </div>
+        <EmailButton href={reactivateUrl}>Reactivate Subscription</EmailButton>
 
         <EmailDivider />
 
-        <EmailText size={5} color="muted" marginBottom="8px">
+        <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
           We're sorry to see you go. Your feedback helps us improve - we'd love
           to hear about your experience.
         </EmailText>
 
-        <EmailText size={5} color="muted" marginBottom="0">
-          Reply to this email or contact us at{' '}
-          <a
-            href="mailto:support@hypro.app"
-            style={{ color: '#0f172a', textDecoration: 'underline' }}
-          >
+        <EmailText size="14px" color="muted" style={{ marginBottom: 0 }}>
+          If you have any questions contact us at{' '}
+          <EmailLink href="mailto:support@hypro.app">
             support@hypro.app
-          </a>
+          </EmailLink>
         </EmailText>
       </EmailContent>
       <EmailFooter companyName="Hypro" />
@@ -368,39 +224,32 @@ export function SubscriptionDeletedEmail({
     <EmailWrapper previewText={`Your ${packageName} subscription has ended`}>
       <EmailHeader brandName="Hypro" />
       <EmailContent>
-        <EmailHeading size={2} marginBottom="12px">
-          Subscription ended
-        </EmailHeading>
+        <EmailHeading as="h1">Subscription ended</EmailHeading>
 
-        <EmailText marginBottom="24px">
-          {userName ? `Hi ${userName},` : 'Hello,'}
-        </EmailText>
+        <EmailText>{userName ? `Hi ${userName},` : 'Hello,'}</EmailText>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           Your <strong>{packageName}</strong> subscription has ended and has
           been removed from your account.
         </EmailText>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           You can still access your basic Hypro account and create a new
           subscription anytime to regain access to premium features.
         </EmailText>
 
         <EmailDivider />
 
-        <EmailText size={5} color="muted" marginBottom="8px">
+        <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
           We're sorry to see you go. Your feedback is valuable to us - we'd love
           to hear about your experience.
         </EmailText>
 
-        <EmailText size={5} color="muted" marginBottom="0">
-          Contact us anytime at{' '}
-          <a
-            href="mailto:support@hypro.app"
-            style={{ color: '#0f172a', textDecoration: 'underline' }}
-          >
+        <EmailText size="14px" color="muted" style={{ marginBottom: 0 }}>
+          If you have any questions contact us at{' '}
+          <EmailLink href="mailto:support@hypro.app">
             support@hypro.app
-          </a>
+          </EmailLink>
         </EmailText>
       </EmailContent>
       <EmailFooter companyName="Hypro" />
@@ -437,167 +286,46 @@ export function WelcomeEmail({
     >
       <EmailHeader brandName="Hypro" />
       <EmailContent>
-        <EmailHeading size={2} marginBottom="12px">
-          {greeting}
-        </EmailHeading>
+        <EmailHeading as="h1">{greeting}</EmailHeading>
 
-        <EmailText marginBottom="24px">
-          {userName ? `Hi ${userName},` : 'Hello,'}
-        </EmailText>
+        <EmailText>{userName ? `Hi ${userName},` : 'Hello,'}</EmailText>
 
-        <EmailText marginBottom="28px">{message}</EmailText>
+        <EmailText>{message}</EmailText>
 
-        <EmailText marginBottom="16px">
-          Your premium membership includes:
-        </EmailText>
+        <EmailText>Your premium membership includes:</EmailText>
 
         <EmailCard>
-          <table
-            cellPadding="0"
-            cellSpacing="0"
-            border={0}
-            style={{ width: '100%', borderCollapse: 'collapse' }}
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
           >
-            <tbody>
-              <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>Unlimited training plans</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>Premium training plans library</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>
-                            Advanced tracking and logging in progress page
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '12px' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>
-                            Access to exercise videos and instructions
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ paddingBottom: '0' }}>
-                  <table cellPadding="0" cellSpacing="0" border={0}>
-                    <tbody>
-                      <tr>
-                        <td
-                          style={{
-                            paddingRight: '8px',
-                            verticalAlign: 'middle',
-                          }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: '600' }}>
-                            ✓
-                          </span>
-                        </td>
-                        <td style={{ verticalAlign: 'middle' }}>
-                          <span>AI-powered workout generator</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
+              <span>Unlimited training plans</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
+              <span>Premium training plans library</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
+              <span>Advanced tracking and logging</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
+              <span>Exercise videos and instructions</span>
+            </div>
+          </div>
         </EmailCard>
 
-        <div style={{ textAlign: 'center', margin: '32px 0' }}>
-          <EmailButton href={dashboardUrl} size="lg">
-            Start Training Now
-          </EmailButton>
-        </div>
+        <EmailButton href={dashboardUrl}>Start Training Now</EmailButton>
 
         <EmailDivider />
 
-        <EmailText size={5} color="muted" marginBottom="0">
-          Need help getting started? Our support team is here for you at{' '}
-          <a
-            href="mailto:support@hypro.app"
-            style={{ color: '#0f172a', textDecoration: 'underline' }}
-          >
+        <EmailText size="14px" color="muted" style={{ marginBottom: 0 }}>
+          If you have any questions contact us at{' '}
+          <EmailLink href="mailto:support@hypro.app">
             support@hypro.app
-          </a>
+          </EmailLink>
         </EmailText>
       </EmailContent>
       <EmailFooter companyName="Hypro" />
@@ -627,15 +355,11 @@ export function GracePeriodEndingEmail({
     >
       <EmailHeader brandName="Hypro" />
       <EmailContent>
-        <EmailHeading size={2} marginBottom="12px">
-          Final notice: Action required
-        </EmailHeading>
+        <EmailHeading as="h1">Final notice: Action required</EmailHeading>
 
-        <EmailText marginBottom="24px">
-          {userName ? `Hi ${userName},` : 'Hello,'}
-        </EmailText>
+        <EmailText>{userName ? `Hi ${userName},` : 'Hello,'}</EmailText>
 
-        <EmailAlert type="error">
+        <EmailAlert>
           <strong>
             Your {packageName} subscription will be cancelled in {daysRemaining}{' '}
             {dayText}
@@ -643,53 +367,35 @@ export function GracePeriodEndingEmail({
           due to payment issues.
         </EmailAlert>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           This is your final reminder to update your payment method and maintain
           your premium access.
         </EmailText>
 
-        <EmailAlert type="warning">
+        <EmailText>
           After {daysRemaining} {dayText}, you'll lose access to all premium
           features including:
-          <div
-            style={{
-              marginTop: '12px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-            }}
-          >
+        </EmailText>
+
+        <EmailCard>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>• Unlimited workout plans</div>
             <div>• Progress tracking tools</div>
             <div>• Premium exercise library</div>
-            <div>• Meal planning features</div>
           </div>
-        </EmailAlert>
+        </EmailCard>
 
-        <div style={{ textAlign: 'center', margin: '32px 0' }}>
-          <EmailButton
-            href={updatePaymentUrl}
-            size="lg"
-            backgroundColor="#dc2626"
-          >
-            Update Payment Method Now
-          </EmailButton>
-        </div>
+        <EmailButton href={updatePaymentUrl}>
+          Update Payment Method Now
+        </EmailButton>
 
         <EmailDivider />
 
-        <EmailText size={5} color="muted" marginBottom="0">
-          Need immediate assistance? Contact our support team at{' '}
-          <a
-            href="mailto:support@hypro.app"
-            style={{
-              color: '#dc2626',
-              textDecoration: 'underline',
-              fontWeight: '600',
-            }}
-          >
+        <EmailText size="14px" color="muted" style={{ marginBottom: 0 }}>
+          If you have any questions contact us at{' '}
+          <EmailLink href="mailto:support@hypro.app">
             support@hypro.app
-          </a>
+          </EmailLink>
         </EmailText>
       </EmailContent>
       <EmailFooter companyName="Hypro" />

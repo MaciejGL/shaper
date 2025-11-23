@@ -30,46 +30,65 @@ export const OfferExpiredEmail = ({
       <EmailHeader brandName="Hypro" />
 
       <EmailContent>
-        <EmailHeading size={2} marginBottom="16px">
-          Offer Expired
-        </EmailHeading>
+        <EmailHeading as="h1">Offer Expired</EmailHeading>
 
-        <EmailText marginBottom="24px">Hi {trainerName},</EmailText>
+        <EmailText>Hi {trainerName},</EmailText>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           Your training offer to <strong>{clientEmail}</strong> has expired
           without payment.
         </EmailText>
 
         <EmailCard>
-          <EmailText marginBottom="8px" size={5} color="primary" weight={600}>
-            Package: {bundleDescription}
+          <EmailText style={{ marginBottom: '12px', fontWeight: '600' }}>
+            Offer Details
           </EmailText>
-          <EmailText marginBottom="0" size={5} color="primary">
-            Expired: {expiresAt}
-          </EmailText>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Package</span>
+            <span style={{ fontWeight: '600' }}>{bundleDescription}</span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Expired</span>
+            <span style={{ fontWeight: '600' }}>{expiresAt}</span>
+          </div>
         </EmailCard>
 
-        <EmailAlert type="info">
+        <EmailAlert>
           The client did not complete the checkout within the offer validity
           period. You can create a new offer if they're still interested.
         </EmailAlert>
 
         <EmailDivider />
 
-        <EmailText marginBottom="16px" size={5} weight={600}>
+        <EmailText style={{ marginBottom: '12px', fontWeight: '600' }}>
           Next Steps:
         </EmailText>
-        <EmailText marginBottom="16px" color="muted" size={5}>
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           • Follow up with {clientEmail} to see if they're still interested
-          <br />
+        </EmailText>
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           • Create a new offer if needed
-          <br />• Consider extending the offer validity period for busy clients
+        </EmailText>
+        <EmailText color="muted" size="14px" style={{ marginBottom: '16px' }}>
+          • Consider extending the offer validity period for busy clients
         </EmailText>
 
-        <EmailText color="muted" size={5} marginBottom="0">
-          This is an automatic notification. No action is required unless you
-          want to follow up with the client.
+        <EmailText color="muted" size="14px" style={{ marginBottom: 0 }}>
+          This is an automatic notification.
         </EmailText>
       </EmailContent>
 

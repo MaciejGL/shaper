@@ -126,7 +126,7 @@ async function sendCustomerDeletionEmail(
           month: 'long',
           day: 'numeric',
         }),
-        reactivateUrl: `${getBaseUrl()}/fitspace/settings`,
+        reactivateUrl: `${getBaseUrl()}/account-management`,
       })
       console.info(
         `📧 Customer deletion notification email sent to ${user.email}`,

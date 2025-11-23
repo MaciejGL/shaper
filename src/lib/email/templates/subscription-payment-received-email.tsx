@@ -40,54 +40,91 @@ export const SubscriptionPaymentReceivedEmail = ({
       <EmailHeader brandName="Hypro" />
 
       <EmailContent>
-        <EmailHeading size={2} marginBottom="16px">
-          🔄 Subscription Payment Received
-        </EmailHeading>
+        <EmailHeading as="h1">Subscription Payment Received</EmailHeading>
 
-        <EmailText marginBottom="24px">Hi {trainerName},</EmailText>
+        <EmailText>Hi {trainerName},</EmailText>
 
-        <EmailText marginBottom="24px">
+        <EmailText>
           <strong>{clientName}</strong> ({clientEmail}) has successfully renewed
           their coaching subscription.
         </EmailText>
 
         <EmailCard>
-          <EmailText marginBottom="12px" size={5} color="primary" weight={600}>
+          <EmailText style={{ marginBottom: '12px', fontWeight: '600' }}>
             Subscription Details
           </EmailText>
-          <EmailText marginBottom="8px" size={5} color="primary">
-            <strong>Plan:</strong> {subscriptionType}
-          </EmailText>
-          <EmailText marginBottom="8px" size={5} color="primary">
-            <strong>Amount:</strong> {amount} {currency.toUpperCase()}
-          </EmailText>
-          <EmailText marginBottom="8px" size={5} color="primary">
-            <strong>Billing:</strong>{' '}
-            {billingPeriod === 'monthly' ? 'Monthly' : 'Yearly'}
-          </EmailText>
-          <EmailText marginBottom="0" size={5} color="primary">
-            <strong>Next Billing:</strong> {nextBillingDate}
-          </EmailText>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Plan</span>
+            <span style={{ fontWeight: '600' }}>{subscriptionType}</span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Amount</span>
+            <span style={{ fontWeight: '600' }}>
+              {amount} {currency.toUpperCase()}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Billing</span>
+            <span style={{ fontWeight: '600' }}>
+              {billingPeriod === 'monthly' ? 'Monthly' : 'Yearly'}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+              fontSize: '16px',
+            }}
+          >
+            <span style={{ color: '#6b7280' }}>Next Billing</span>
+            <span style={{ fontWeight: '600' }}>{nextBillingDate}</span>
+          </div>
         </EmailCard>
 
         <EmailButton href={clientProfileUrl}>View Client Profile</EmailButton>
 
         <EmailDivider />
 
-        <EmailText color="muted" size={5} marginBottom="8px">
-          <strong>What happens next?</strong>
+        <EmailText
+          color="muted"
+          size="14px"
+          style={{ marginBottom: '8px', fontWeight: '600' }}
+        >
+          What happens next?
         </EmailText>
-        <EmailText color="muted" size={5} marginBottom="4px">
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           • Funds will be transferred to your connected Stripe account according
           to your payout schedule
         </EmailText>
-        <EmailText color="muted" size={5} marginBottom="4px">
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           • The subscription will automatically renew on the next billing date
         </EmailText>
-        <EmailText color="muted" size={5} marginBottom="4px">
+        <EmailText color="muted" size="14px" style={{ marginBottom: '4px' }}>
           • You can view full subscription details in your Stripe Dashboard
         </EmailText>
-        <EmailText color="muted" size={5} marginBottom="0">
+        <EmailText color="muted" size="14px" style={{ marginBottom: 0 }}>
           • Continue providing great coaching to keep your client engaged
         </EmailText>
       </EmailContent>

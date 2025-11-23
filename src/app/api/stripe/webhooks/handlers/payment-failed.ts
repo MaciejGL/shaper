@@ -109,7 +109,7 @@ async function sendPaymentFailedEmail(
         userName: user.profile?.firstName,
         gracePeriodDays: SUBSCRIPTION_CONFIG.GRACE_PERIOD_DAYS,
         packageName: packageTemplate.name,
-        updatePaymentUrl: `${getBaseUrl()}/fitspace/settings`,
+        updatePaymentUrl: `${getBaseUrl()}/account-management`,
       })
       console.info(`📧 Payment failed email sent to ${user.email}`)
     } catch (emailError) {
@@ -149,7 +149,7 @@ async function handleGracePeriodWarning(
             userName: user.profile?.firstName,
             packageName: packageTemplate.name,
             daysRemaining: daysUntilCancellation,
-            updatePaymentUrl: `${getBaseUrl()}/fitspace/settings`,
+            updatePaymentUrl: `${getBaseUrl()}/account-management`,
           })
           console.info(`📧 Grace period ending email sent to ${user.email}`)
         } catch (emailError) {

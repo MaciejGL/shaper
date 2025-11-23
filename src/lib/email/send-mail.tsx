@@ -19,11 +19,11 @@ import {
   TrialEndingEmail,
   WelcomeEmail,
 } from './templates/subscription-emails'
-import { SubscriptionUpgradeCreditEmail } from './templates/subscription-upgrade-credit-email'
 import {
   SubscriptionPaymentReceivedEmail,
   SubscriptionPaymentReceivedEmailProps,
 } from './templates/subscription-payment-received-email'
+import { SubscriptionUpgradeCreditEmail } from './templates/subscription-upgrade-credit-email'
 import { TeamInvitationEmail } from './templates/team-invitation-email'
 import { TrainerOfferEmail } from './templates/trainer-offer-email'
 
@@ -61,10 +61,10 @@ export const sendEmail = {
           newEmail={newEmail}
         />,
       )
-      subject = 'Verify your new email address'
+      subject = `Verify your new email address`
     } else {
       html = await render(<OtpEmail code={otp} userName={userName} />)
-      subject = 'Your Hypro verification code'
+      subject = `Hypro verification code: ${otp}`
     }
 
     try {

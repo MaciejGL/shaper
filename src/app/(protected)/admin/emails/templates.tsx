@@ -62,7 +62,7 @@ export const emailTemplates: EmailTemplateConfig[] = [
       userName: 'John Doe',
       packageName: 'Pro Plan',
       isReactivation: false,
-      dashboardUrl: 'https://hypro.app/dashboard',
+      dashboardUrl: 'https://hypro.app/workout',
     },
   },
   {
@@ -74,7 +74,7 @@ export const emailTemplates: EmailTemplateConfig[] = [
       userName: 'John Doe',
       daysRemaining: 3,
       packageName: 'Pro Plan',
-      upgradeUrl: 'https://hypro.app/settings/billing',
+      upgradeUrl: 'https://hypro.app/account-management',
     },
   },
   {
@@ -86,7 +86,7 @@ export const emailTemplates: EmailTemplateConfig[] = [
       userName: 'John Doe',
       packageName: 'Pro Plan',
       daysRemaining: 2,
-      updatePaymentUrl: 'https://hypro.app/settings/billing',
+      updatePaymentUrl: 'https://hypro.app/account-management',
     },
   },
   {
@@ -98,7 +98,7 @@ export const emailTemplates: EmailTemplateConfig[] = [
       userName: 'John Doe',
       gracePeriodDays: 7,
       packageName: 'Pro Plan',
-      updatePaymentUrl: 'https://hypro.app/settings/billing',
+      updatePaymentUrl: 'https://hypro.app/account-management',
     },
   },
   {
@@ -110,7 +110,7 @@ export const emailTemplates: EmailTemplateConfig[] = [
       userName: 'John Doe',
       packageName: 'Pro Plan',
       endDate: 'December 31, 2025',
-      reactivateUrl: 'https://hypro.app/settings/billing',
+      reactivateUrl: 'https://hypro.app/account-management',
     },
   },
   {
@@ -231,9 +231,7 @@ export const emailTemplates: EmailTemplateConfig[] = [
       ],
       personalMessage: "Hey Jane, here's the package we discussed!",
       offerUrl: 'https://hypro.app/offers/123',
-      expiresAt: new Date(
-        Date.now() + 7 * 24 * 60 * 60 * 1000,
-      ).toISOString(), // 7 days from now
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
     },
   },
   {
@@ -262,4 +260,3 @@ export const emailTemplates: EmailTemplateConfig[] = [
     },
   },
 ]
-
