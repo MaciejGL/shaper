@@ -102,12 +102,18 @@ export function Exercise({
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
         })
+        invalidateQuery({
+          queryKey: ['navigation'],
+        })
       },
       onError: () => {
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutDayQuery.getKey({
             dayId: dayId ?? '',
           }),
+        })
+        invalidateQuery({
+          queryKey: ['navigation'],
         })
       },
     })
@@ -165,18 +171,21 @@ export function Exercise({
       })
       setIsRemoving(false)
     },
-    onError: () => {
-      // On error, revert by invalidating the day query (for both types)
-      invalidateQuery({
-        queryKey: useFitspaceGetWorkoutDayQuery.getKey({
-          dayId: dayId ?? '',
-        }),
-      })
-      invalidateQuery({
-        queryKey: ['FitspaceGetQuickWorkoutDay'],
-      })
-      setIsRemoving(false)
-    },
+      onError: () => {
+        // On error, revert by invalidating the day query (for both types)
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+            dayId: dayId ?? '',
+          }),
+        })
+        invalidateQuery({
+          queryKey: ['FitspaceGetQuickWorkoutDay'],
+        })
+        invalidateQuery({
+          queryKey: ['navigation'],
+        })
+        setIsRemoving(false)
+      },
   })
 
   const handleMarkAsCompleted = async (checked: boolean) => {

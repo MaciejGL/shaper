@@ -215,8 +215,8 @@ importers:
         specifier: 2.4.3
         version: 2.4.3(next@16.0.3(@babel/core@7.28.5)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
       openai:
-        specifier: 5.12.1
-        version: 5.12.1(ws@8.18.3)(zod@4.0.15)
+        specifier: 6.9.1
+        version: 6.9.1(ws@8.18.3)(zod@4.0.15)
       pg:
         specifier: 8.16.3
         version: 8.16.3
@@ -5783,12 +5783,12 @@ packages:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
     engines: {node: '>=6'}
 
-  openai@5.12.1:
-    resolution: {integrity: sha512-26s536j4Fi7P3iUma1S9H33WRrw0Qu8pJ2nYJHffrlKHPU0JK4d0r3NcMgqEcAeTdNLGYNyoFsqN4g4YE9vutg==}
+  openai@6.9.1:
+    resolution: {integrity: sha512-vQ5Rlt0ZgB3/BNmTa7bIijYFhz3YBceAA3Z4JuoMSBftBF9YqFHIEhZakSs+O/Ad7EaoEimZvHxD5ylRjN11Lg==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
-      zod: ^3.23.8
+      zod: ^3.25 || ^4.0
     peerDependenciesMeta:
       ws:
         optional: true
@@ -13587,7 +13587,7 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@5.12.1(ws@8.18.3)(zod@4.0.15):
+  openai@6.9.1(ws@8.18.3)(zod@4.0.15):
     optionalDependencies:
       ws: 8.18.3
       zod: 4.0.15
