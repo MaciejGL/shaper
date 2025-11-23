@@ -131,6 +131,9 @@ export function ExerciseSet({
         return updateFn(oldData)
       },
       onSuccess: (data, variables) => {
+        // Invalidate navigation to update progress bars
+        queryClient.invalidateQueries({ queryKey: ['navigation'] })
+
         // Check if it's a PR and trigger overlay
         if (data?.markSetAsCompleted?.isPersonalRecord && variables.completed) {
           const improvement = data.markSetAsCompleted.improvement || 0
@@ -159,6 +162,9 @@ export function ExerciseSet({
       },
       onError: (error, variables) => {
         console.error('Failed to mark set as completed:', error, variables)
+
+        // Invalidate navigation to ensure consistency
+        queryClient.invalidateQueries({ queryKey: ['navigation'] })
 
         // On error, sync cache with server to fix inconsistencies
         queryClient.invalidateQueries({
