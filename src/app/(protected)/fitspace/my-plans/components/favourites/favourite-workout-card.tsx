@@ -164,7 +164,7 @@ export function FavouriteWorkoutCard({
                     {favourite.description}
                   </p>
                 ) : null}
-                <div className="flex justify-between items-start gap-2">
+                <div className="flex justify-between items-start gap-2 mb-6">
                   {!isEmpty && (
                     <div className="w-full">
                       {buttonProps.disabled && buttonProps.subtext ? (
@@ -382,14 +382,21 @@ function SortableExerciseItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="grid grid-cols-[auto_1fr_auto] items-center gap-1 w-full"
+      className="grid grid-cols-[auto_1fr] items-center gap-1 w-full"
     >
-      <span className="text-sm text-muted-foreground w-4 shrink-0">
-        {index + 1}.
-      </span>
+      <button
+        {...attributes}
+        {...listeners}
+        className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shrink-0 touch-none"
+      >
+        <Grip className="size-4" />
+      </button>
       <Card variant="tertiary" className="flex-1 p-2 gap-2">
         <CardHeader className="flex items-center justify-between p-0">
           <p className="justify-start whitespace-normal font-medium font-base">
+            <span className="text-sm text-muted-foreground w-4 shrink-0">
+              {index + 1}.
+            </span>{' '}
             {exercise.name}
           </p>
           <Button
@@ -444,14 +451,6 @@ function SortableExerciseItem({
           </div>
         </CardContent>
       </Card>
-
-      <button
-        {...attributes}
-        {...listeners}
-        className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shrink-0 touch-none"
-      >
-        <Grip className="size-4" />
-      </button>
     </div>
   )
 }
