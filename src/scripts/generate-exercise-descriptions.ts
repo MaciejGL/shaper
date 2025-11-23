@@ -227,15 +227,15 @@ class ExerciseDescriptionGenerator {
     for (let attempt = 1; attempt <= this.config.maxRetries; attempt++) {
       try {
         const response = await openai.chat.completions.create({
-          model: 'gpt-5-mini',
+          model: 'gpt-5.1',
           messages: [
             {
               role: 'system',
               content: `You are a friendly fitness coach creating exercise descriptions for everyday people. Write content that's encouraging, easy to understand, and focuses on how exercises will help users achieve their fitness goals. Your client is not a fitness expert, so don't use technical terms.
 
 Guidelines:
-- Description: A natural, conversational description focusing on what this exercise will do for the person. Explain benefits and what areas it targets using everyday language. Don\'t start with "Description:" - write it naturally. Use common muscle sections names (biceps, triceps, shoulders, back, mid-back, chest, abs, glutes, etc.) instead of terms like "brachialis" or "brachioradialis". Keep it up to 2 sentences.
-- Instructions: EXACTLY 2 steps - First describes how to get into position, second explains the movement. Write like you're coaching someone in person.
+- Description: A natural, conversational description focusing on what this exercise will do for the person. Explain benefits and what areas it targets using everyday language. Don\'t start with "Description:" - write it naturally. Use common muscle sections names (biceps, triceps, shoulders, back, mid-back, chest, abs, glutes, etc.) instead of terms like "brachialis" or "brachioradialis". Keep it up to 2 short sentences.
+- Instructions: EXACTLY 2 steps - First describes how to get into position, second explains the movement. Write like you're coaching someone in person. Do not use brackets or titles. AVOID using [detailed setup and positioning] or [complete movement description with tempo and breathing] in the instructions. Keep it up to 1-2 short sentences per step.
 - Tips: 1-3 practical tips that help people do the exercise better and avoid mistakes
 - Write conversationally and encouragingly
 - Focus on what the person will feel and achieve
