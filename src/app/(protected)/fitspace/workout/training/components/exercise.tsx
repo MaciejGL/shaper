@@ -280,8 +280,8 @@ export function Exercise({
   }
 
   return (
-    <div className="gap-2 overflow-hidden">
-      <div className="" id={exercise.id}>
+    <div className="bg-gradient-to-b from-white via-white to-background dark:from-background-subtle dark:via-background-subtle dark:to-background pb-12">
+      <div id={exercise.id}>
         <ExerciseMetadata
           exercise={exercise}
           exercises={exercises}

@@ -36,7 +36,7 @@ export function WorkoutOptionsDropdown() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="tertiary"
-          size="icon-sm"
+          size="icon-md"
           iconOnly={<Settings2Icon className="size-4" />}
         />
       </DropdownMenuTrigger>

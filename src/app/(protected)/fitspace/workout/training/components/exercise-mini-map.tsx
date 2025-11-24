@@ -135,7 +135,7 @@ function SmartPillContent({
       <div
         className={cn(
           'flex flex-col justify-center min-w-0 p-2 border-l border-border dark:border-border flex-1',
-          'cursor-pointer ',
+          'cursor-pointer',
         )}
         onClick={onToggleExpand}
       >
@@ -290,7 +290,7 @@ export function WorkoutSmartPill({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[38] bg-gradient-to-b from-black/40 via-black/50 to-transparent pointer-events-none"
+              className="fixed inset-0 z-[38] bg-gradient-to-b from-black/60 via-black/70 to-transparent pointer-events-none backdrop-blur-xs"
             />
             {/* Clickable area to close */}
             <div
@@ -436,7 +436,7 @@ export function WorkoutOverviewPill({
               isStaticOverview={true}
               layoutId="overview-pill"
               className={cn(
-                'rounded-none h-[56px] border-0 !bg-background shadow-none',
+                'rounded-none h-[56px] border-0 bg-white dark:bg-background-subtle shadow-none',
               )}
             />
           </div>
@@ -452,7 +452,7 @@ export function WorkoutOverviewPill({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[38] bg-gradient-to-b from-black/40 via-black/50 to-transparent pointer-events-none"
+              className="fixed inset-0 z-[38] bg-gradient-to-b from-black/60 via-black/70 to-transparent pointer-events-none backdrop-blur-xs"
             />
             {/* Clickable area to close */}
             <div

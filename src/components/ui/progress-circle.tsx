@@ -107,7 +107,7 @@ export function ProgressCircle({
       {isComplete && !hideCheckmark ? (
         <Check
           className="text-green-500 animate-in scale-in-50 duration-300"
-          style={{ width: size * 0.6, height: size * 0.6 }}
+          style={{ width: size * 0.5, height: size * 0.5 }}
         />
       ) : showValue ? (
         <span

@@ -55,7 +55,7 @@ export function PlanCarouselCard({
   const cardContent = (
     <Card
       onClick={() => onClick(plan)}
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[5/6] w-full border-none"
+      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[5/6] w-full border-none bg-sidebar"
       variant="tertiary"
     >
       {imageUrl && (
@@ -80,7 +80,7 @@ export function PlanCarouselCard({
               <ProgressCircle
                 progress={progressPercentage}
                 size={34}
-                strokeWidth={3}
+                strokeWidth={plan.createdAt ? 2 : 3}
                 showValue={true}
               />
             </div>

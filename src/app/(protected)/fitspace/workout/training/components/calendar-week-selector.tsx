@@ -145,15 +145,6 @@ export function CalendarWeekSelector({
 
     const weekLabel = `Week ${activeWeek.weekNumber}`
 
-    if (activeWeek.completedAt) {
-      return (
-        <span className="flex items-center gap-1.5">
-          {weekLabel}
-          <BadgeCheckIcon className="text-green-500 size-3.5" />
-        </span>
-      )
-    }
-
     if (activeWeek.scheduledAt) {
       const weekStart = new Date(activeWeek.scheduledAt)
       const weekEnd = new Date(weekStart)
@@ -170,7 +161,10 @@ export function CalendarWeekSelector({
         <span className="flex items-center gap-1.5 text-sm">
           {weekLabel}
           <span className="text-muted-foreground text-xs">
-            {formatDate(weekStart)} - {formatDate(weekEnd)}
+            {formatDate(weekStart)} - {formatDate(weekEnd)}{' '}
+            {activeWeek.completedAt ? (
+              <BadgeCheckIcon className="text-green-500 size-3.5" />
+            ) : null}
           </span>
         </span>
       )
@@ -183,7 +177,7 @@ export function CalendarWeekSelector({
     <>
       <Button
         variant="tertiary"
-        size="sm"
+        size="md"
         onClick={() => setOpen(true)}
         className=""
         iconStart={<CalendarIcon />}

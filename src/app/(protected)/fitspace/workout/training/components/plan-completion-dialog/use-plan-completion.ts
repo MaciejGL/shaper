@@ -16,6 +16,13 @@ export function usePlanCompletion(planId: string | null) {
         adherence: data.getPlanSummary.adherence,
         workoutsCompleted: data.getPlanSummary.workoutsCompleted,
         totalWorkouts: data.getPlanSummary.totalWorkouts,
+        totalVolumeLifted: data.getPlanSummary.totalVolumeLifted,
+        totalPRsAchieved: data.getPlanSummary.totalPRsAchieved,
+        duration: {
+          weeks: data.getPlanSummary.duration.weeks,
+          startDate: data.getPlanSummary.duration.startDate,
+          endDate: data.getPlanSummary.duration.endDate,
+        },
       }
     : null
 
