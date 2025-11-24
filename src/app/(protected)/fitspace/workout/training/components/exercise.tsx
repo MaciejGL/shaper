@@ -1,6 +1,7 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { useState } from 'react'
 
@@ -8,12 +9,10 @@ import {
   GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceMarkExerciseAsCompletedMutation,
   useFitspaceGetWorkoutDayQuery,
-  useFitspaceGetWorkoutNavigationQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
   useFitspaceMarkSetAsCompletedMutation,
   useFitspaceRemoveExerciseFromWorkoutMutation,
 } from '@/generated/graphql-client'
-import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 
 import { ExerciseMetadata } from './exercise/exercise-metadata'
@@ -26,8 +25,8 @@ export function Exercise({
   exercises,
   previousDayLogs,
 }: ExerciseProps) {
-  const invalidateQuery = useInvalidateQuery()
-  const { trainingId } = useParams<{ trainingId: string }>()
+  const queryClient = useQueryClient()
+  const router = useRouter()
   const [dayId] = useQueryState('day')
 
   // Timer state management - only one timer can be active at a time
@@ -98,23 +97,20 @@ export function Exercise({
         )
         return updateFn(oldData)
       },
-      onSuccess: () => {
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
-        })
-        invalidateQuery({
-          queryKey: ['navigation'],
-        })
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: ['navigation'] })
+        router.refresh()
       },
-      onError: () => {
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
-            dayId: dayId ?? '',
+      onError: async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['navigation'] }),
+          queryClient.invalidateQueries({
+            queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+              dayId: dayId ?? '',
+            }),
           }),
-        })
-        invalidateQuery({
-          queryKey: ['navigation'],
-        })
+        ])
+        router.refresh()
       },
     })
 
@@ -158,34 +154,26 @@ export function Exercise({
         },
       }
     },
-    onSuccess: () => {
-      // Invalidate navigation to update counts (for both trainer plans and quick workouts)
-      invalidateQuery({
-        queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
-      })
-      invalidateQuery({
-        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-      })
-      invalidateQuery({
-        queryKey: ['navigation'],
-      })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['navigation'] })
+      router.refresh()
       setIsRemoving(false)
     },
-      onError: () => {
-        // On error, revert by invalidating the day query (for both types)
-        invalidateQuery({
+    onError: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['navigation'] }),
+        queryClient.invalidateQueries({
           queryKey: useFitspaceGetWorkoutDayQuery.getKey({
             dayId: dayId ?? '',
           }),
-        })
-        invalidateQuery({
+        }),
+        queryClient.invalidateQueries({
           queryKey: ['FitspaceGetQuickWorkoutDay'],
-        })
-        invalidateQuery({
-          queryKey: ['navigation'],
-        })
-        setIsRemoving(false)
-      },
+        }),
+      ])
+      router.refresh()
+      setIsRemoving(false)
+    },
   })
 
   const handleMarkAsCompleted = async (checked: boolean) => {
@@ -229,14 +217,18 @@ export function Exercise({
         })
 
         // ✅ Only sync cache on error - optimistic updates handle success case
-        Promise.all(setCompletionPromises).catch((error) => {
+        Promise.all(setCompletionPromises).catch(async (error) => {
           console.error('Failed to save set completions:', error)
           // On error, sync with server to fix inconsistencies
-          invalidateQuery({
-            queryKey: useFitspaceGetWorkoutDayQuery.getKey({
-              dayId: dayId ?? '',
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['navigation'] }),
+            queryClient.invalidateQueries({
+              queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+                dayId: dayId ?? '',
+              }),
             }),
-          })
+          ])
+          router.refresh()
         })
       }
     } catch (error) {

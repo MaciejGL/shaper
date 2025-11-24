@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { debounce } from 'lodash'
 import { CheckIcon } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import {
   startTransition,
@@ -22,7 +22,6 @@ import {
   GQLFitspaceMarkSetAsCompletedMutation,
   GQLTrainingView,
   useFitspaceGetWorkoutDayQuery,
-  useFitspaceGetWorkoutNavigationQuery,
   useFitspaceMarkSetAsCompletedMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
@@ -49,14 +48,11 @@ export function ExerciseSet({
   onSetUncompleted,
 }: ExerciseSetProps) {
   const [dayId] = useQueryState('day')
-  const { trainingId } = useParams<{ trainingId: string }>()
   const router = useRouter()
   const { preferences } = useUserPreferences()
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
   const hasUserEditedRef = useRef(false)
   const queryClient = useQueryClient()
-  const [skipTimer, setSkipTimer] = useState(false)
-  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [prData, setPRData] = useState<{
     show: boolean
     improvement: number
@@ -136,14 +132,7 @@ export function ExerciseSet({
         return updateFn(oldData)
       },
       onSuccess: async (data, variables) => {
-        // Invalidate all navigation queries to update progress bars and day completion status
         await queryClient.invalidateQueries({ queryKey: ['navigation'] })
-        await queryClient.invalidateQueries({
-          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
-        })
-        await queryClient.invalidateQueries({
-          queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-        })
 
         await revalidatePlanPages()
         router.refresh()
@@ -168,35 +157,23 @@ export function ExerciseSet({
           setTimeout(() => setPRData(null), 5000)
         }
 
-        // Timer logic
-        if (variables.completed && !skipTimer) {
+        if (variables.completed) {
           onSetCompleted(false)
         }
-        setSkipTimer(false)
       },
       onError: async (error, variables) => {
         console.error('Failed to mark set as completed:', error, variables)
 
-        // Invalidate all navigation queries to ensure consistency
         await queryClient.invalidateQueries({ queryKey: ['navigation'] })
-        await queryClient.invalidateQueries({
-          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
-        })
-        await queryClient.invalidateQueries({
-          queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-        })
 
         await revalidatePlanPages()
         router.refresh()
 
-        // On error, sync cache with server to fix inconsistencies
         queryClient.invalidateQueries({
           queryKey: useFitspaceGetWorkoutDayQuery.getKey({
             dayId: dayId ?? '',
           }),
         })
-        // Reset timer states on error
-        setSkipTimer(false)
       },
     })
 
@@ -223,64 +200,37 @@ export function ExerciseSet({
     return () => debouncedUpdate.cancel()
   }, [reps, weight, debouncedUpdate])
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (clickTimeoutRef.current) {
-        clearTimeout(clickTimeoutRef.current)
+  const handleToggleSetCompletion = useCallback(async () => {
+    const willBeCompleted = !set.completedAt
+    const repsValue = reps ? +reps : previousSetRepsLog || null
+    const weightValue = weight ? +weight : previousSetWeightLog || null
+
+    startTransition(() => {
+      if (!willBeCompleted) {
+        onSetUncompleted()
       }
-    }
-  }, [])
+    })
 
-  const handleToggleSetCompletion = useCallback(
-    async (isDoubleClick = false) => {
-      const willBeCompleted = !set.completedAt
-      const repsValue = reps ? +reps : previousSetRepsLog || null
-      const weightValue = weight ? +weight : previousSetWeightLog || null
-
-      if (isDoubleClick) {
-        setSkipTimer(true)
-      }
-
-      startTransition(() => {
-        if (!willBeCompleted) {
-          onSetUncompleted()
-        }
+    try {
+      await markSetAsCompletedOptimistic({
+        setId: set.id,
+        completed: willBeCompleted,
+        reps: repsValue,
+        weight: weightValue,
       })
-
-      try {
-        await markSetAsCompletedOptimistic({
-          setId: set.id,
-          completed: willBeCompleted,
-          reps: repsValue,
-          weight: weightValue,
-        })
-      } catch (error) {
-        console.error('Failed to toggle set completion:', error)
-        setSkipTimer(false)
-      }
-    },
-    [
-      markSetAsCompletedOptimistic,
-      set.completedAt,
-      set.id,
-      reps,
-      weight,
-      previousSetRepsLog,
-      previousSetWeightLog,
-      onSetUncompleted,
-    ],
-  )
-
-  const handleClick = useCallback(() => {
-    if (clickTimeoutRef.current) {
-      clearTimeout(clickTimeoutRef.current)
+    } catch (error) {
+      console.error('Failed to toggle set completion:', error)
     }
-
-    clickTimeoutRef.current = setTimeout(() => {
-      handleToggleSetCompletion(false)
-    }, 250)
-  }, [handleToggleSetCompletion])
+  }, [
+    markSetAsCompletedOptimistic,
+    set.completedAt,
+    set.id,
+    reps,
+    weight,
+    previousSetRepsLog,
+    previousSetWeightLog,
+    onSetUncompleted,
+  ])
 
   const isCompleted = !!set.completedAt
   const { toDisplayWeight } = useWeightConversion()
@@ -410,7 +360,7 @@ export function ExerciseSet({
             iconOnly={
               <CheckIcon className={cn(isCompleted && 'text-green-600')} />
             }
-            onClick={handleClick}
+            onClick={handleToggleSetCompletion}
             className={cn(
               'rounded-lg',
               isCompleted &&

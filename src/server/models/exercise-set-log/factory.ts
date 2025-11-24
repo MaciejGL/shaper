@@ -773,7 +773,7 @@ export const markWorkoutAsCompleted = async (
     select: { weekId: true },
   })
 
-  if (!day) return true
+  if (!day) return { success: true, planCompleted: false, planId: null }
 
   const week = await prisma.trainingWeek.findUnique({
     where: { id: day.weekId },
@@ -784,7 +784,7 @@ export const markWorkoutAsCompleted = async (
     },
   })
 
-  if (!week) return true
+  if (!week) return { success: true, planCompleted: false, planId: null }
 
   const allDaysCompleted = week.days
     .filter((d) => !d.isRestDay)
@@ -801,6 +801,9 @@ export const markWorkoutAsCompleted = async (
     select: {
       id: true,
       title: true,
+      completedAt: true,
+      createdById: true,
+      assignedToId: true,
       assignedTo: {
         select: {
           id: true,
@@ -810,14 +813,21 @@ export const markWorkoutAsCompleted = async (
     },
   })
 
-  if (!plan) return true
+  if (!plan) return { success: true, planCompleted: false, planId: null }
 
   const allWeeksCompleted = plan.weeks.every((w) => w.completedAt)
-  if (allWeeksCompleted) {
+  let planJustCompleted = false
+
+  // Check if this is a Quick Workout plan (self-created and self-assigned)
+  const isQuickWorkout = plan.createdById === plan.assignedToId
+
+  if (allWeeksCompleted && !plan.completedAt && !isQuickWorkout) {
     await prisma.trainingPlan.update({
       where: { id: plan.id },
       data: { completedAt: now },
     })
+
+    planJustCompleted = true
 
     // Send plan completion notification
     if (plan.assignedTo) {
@@ -825,7 +835,11 @@ export const markWorkoutAsCompleted = async (
     }
   }
 
-  return true
+  return {
+    success: true,
+    planCompleted: planJustCompleted,
+    planId: planJustCompleted ? plan.id : null,
+  }
 }
 
 const updateWorkoutSessionEvent = async (

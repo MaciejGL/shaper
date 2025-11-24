@@ -1,8 +1,8 @@
 'use client'
 
-import { formatDate } from 'date-fns'
+import { differenceInHours, formatDate } from 'date-fns'
 import { useQueryState } from 'nuqs'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { getDayName, sortDaysForDisplay } from '@/lib/date-utils'
@@ -12,6 +12,7 @@ import { useWorkoutPrefetch } from '../hooks/use-workout-prefetch'
 
 import { CalendarWeekSelector } from './calendar-week-selector'
 import { getDefaultSelection } from './navigation-utils'
+import { PlanCompletionDialog } from './plan-completion-dialog/plan-completion-dialog'
 import { NavigationDay, NavigationPlan } from './workout-day'
 import { WorkoutOptionsDropdown } from './workout-options'
 
@@ -20,6 +21,19 @@ interface NavigationProps {
 }
 
 export function Navigation({ plan }: NavigationProps) {
+  const [isPlanCompleted, setIsPlanCompleted] = useState(false)
+  const onComplete = () => {
+    setIsPlanCompleted(false)
+  }
+
+  useEffect(() => {
+    if (plan?.completedAt) {
+      setIsPlanCompleted(
+        differenceInHours(new Date(), new Date(plan.completedAt)) < 1,
+      )
+    }
+  }, [plan?.completedAt])
+
   if (!plan) return null
 
   return (
@@ -27,6 +41,14 @@ export function Navigation({ plan }: NavigationProps) {
       <div className="mx-auto max-w-sm dark">
         <WeekSelector plan={plan} />
         <DaySelector plan={plan} />
+        {isPlanCompleted && (
+          <PlanCompletionDialog
+            open={isPlanCompleted}
+            onOpenChange={setIsPlanCompleted}
+            planId={plan.id}
+            onComplete={onComplete}
+          />
+        )}
       </div>
     </div>
   )

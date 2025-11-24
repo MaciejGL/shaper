@@ -1251,7 +1251,7 @@ export type GQLMutation = {
   markMessagesAsRead: EntireFieldWrapper<Scalars['Boolean']['output']>;
   markNotificationRead: EntireFieldWrapper<GQLNotification>;
   markSetAsCompleted: EntireFieldWrapper<GQLSetCompletionResult>;
-  markWorkoutAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
+  markWorkoutAsCompleted: EntireFieldWrapper<GQLWorkoutCompletionResult>;
   moderateReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   moveExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   pauseClientCoachingSubscription: EntireFieldWrapper<GQLPauseCoachingResult>;
@@ -3931,6 +3931,13 @@ export enum GQLWeightUnit {
   Lbs = 'lbs'
 }
 
+export type GQLWorkoutCompletionResult = {
+  __typename?: 'WorkoutCompletionResult';
+  planCompleted: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  planId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  success: EntireFieldWrapper<Scalars['Boolean']['output']>;
+};
+
 export type GQLWorkoutExerciseNotes = {
   __typename?: 'WorkoutExerciseNotes';
   exerciseName: EntireFieldWrapper<Scalars['String']['output']>;
@@ -4292,6 +4299,7 @@ export type GQLResolversTypes = {
   VolumeEntry: ResolverTypeWrapper<GQLVolumeEntry>;
   WeightProgressLog: ResolverTypeWrapper<GQLWeightProgressLog>;
   WeightUnit: GQLWeightUnit;
+  WorkoutCompletionResult: ResolverTypeWrapper<GQLWorkoutCompletionResult>;
   WorkoutExerciseNotes: ResolverTypeWrapper<GQLWorkoutExerciseNotes>;
   WorkoutSessionEvent: GQLWorkoutSessionEvent;
   WorkoutType: GQLWorkoutType;
@@ -4521,6 +4529,7 @@ export type GQLResolversParentTypes = {
   UsersWithSubscriptionsResult: GQLUsersWithSubscriptionsResult;
   VolumeEntry: GQLVolumeEntry;
   WeightProgressLog: GQLWeightProgressLog;
+  WorkoutCompletionResult: GQLWorkoutCompletionResult;
   WorkoutExerciseNotes: GQLWorkoutExerciseNotes;
 };
 
@@ -5176,7 +5185,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   markMessagesAsRead?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationMarkMessagesAsReadArgs, 'input'>>;
   markNotificationRead?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationMarkNotificationReadArgs, 'id'>>;
   markSetAsCompleted?: Resolver<GQLResolversTypes['SetCompletionResult'], ParentType, ContextType, RequireFields<GQLMutationMarkSetAsCompletedArgs, 'completed' | 'setId'>>;
-  markWorkoutAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkWorkoutAsCompletedArgs, 'dayId'>>;
+  markWorkoutAsCompleted?: Resolver<GQLResolversTypes['WorkoutCompletionResult'], ParentType, ContextType, RequireFields<GQLMutationMarkWorkoutAsCompletedArgs, 'dayId'>>;
   moderateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationModerateReviewArgs, 'input'>>;
   moveExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationMoveExerciseArgs, 'input'>>;
   pauseClientCoachingSubscription?: Resolver<GQLResolversTypes['PauseCoachingResult'], ParentType, ContextType, RequireFields<GQLMutationPauseClientCoachingSubscriptionArgs, 'clientId'>>;
@@ -6086,6 +6095,13 @@ export type GQLWeightProgressLogResolvers<ContextType = GQLContext, ParentType e
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLWorkoutCompletionResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WorkoutCompletionResult'] = GQLResolversParentTypes['WorkoutCompletionResult']> = {
+  planCompleted?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  planId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLWorkoutExerciseNotesResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WorkoutExerciseNotes'] = GQLResolversParentTypes['WorkoutExerciseNotes']> = {
   exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   notes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType>;
@@ -6201,6 +6217,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   UsersWithSubscriptionsResult?: GQLUsersWithSubscriptionsResultResolvers<ContextType>;
   VolumeEntry?: GQLVolumeEntryResolvers<ContextType>;
   WeightProgressLog?: GQLWeightProgressLogResolvers<ContextType>;
+  WorkoutCompletionResult?: GQLWorkoutCompletionResultResolvers<ContextType>;
   WorkoutExerciseNotes?: GQLWorkoutExerciseNotesResolvers<ContextType>;
 };
 

@@ -26,6 +26,7 @@
     "generate": "prisma generate",
     "migrate": "prisma migrate dev --create-only",
     "codegen": "graphql-codegen --config codegen.ts --watch",
+    "codegen:once": "graphql-codegen --config codegen.ts",
     "seed": "npx prisma db seed",
     "stripe:listen": "stripe listen --forward-to localhost:4000/api/stripe/webhooks",
     "analyze": "ANALYZE=true npm run build",

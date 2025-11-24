@@ -1249,7 +1249,7 @@ export type GQLMutation = {
   markMessagesAsRead: Scalars['Boolean']['output'];
   markNotificationRead: GQLNotification;
   markSetAsCompleted: GQLSetCompletionResult;
-  markWorkoutAsCompleted?: Maybe<Scalars['Boolean']['output']>;
+  markWorkoutAsCompleted: GQLWorkoutCompletionResult;
   moderateReview: Scalars['Boolean']['output'];
   moveExercise: Scalars['Boolean']['output'];
   pauseClientCoachingSubscription: GQLPauseCoachingResult;
@@ -3929,6 +3929,13 @@ export enum GQLWeightUnit {
   Lbs = 'lbs'
 }
 
+export type GQLWorkoutCompletionResult = {
+  __typename?: 'WorkoutCompletionResult';
+  planCompleted: Scalars['Boolean']['output'];
+  planId?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type GQLWorkoutExerciseNotes = {
   __typename?: 'WorkoutExerciseNotes';
   exerciseName: Scalars['String']['output'];
@@ -4488,7 +4495,7 @@ export type GQLFitspaceGetWorkoutNavigationQueryVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGetWorkoutNavigationQuery = { __typename?: 'Query', getWorkoutNavigation?: { __typename?: 'GetWorkoutNavigationPayload', plan: { __typename?: 'TrainingPlan', id: string, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercisesCount: number }> }> } } | undefined | null };
+export type GQLFitspaceGetWorkoutNavigationQuery = { __typename?: 'Query', getWorkoutNavigation?: { __typename?: 'GetWorkoutNavigationPayload', plan: { __typename?: 'TrainingPlan', id: string, startDate?: string | undefined | null, completedAt?: string | undefined | null, title: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercisesCount: number }> }> } } | undefined | null };
 
 export type GQLFitspaceGetAiExerciseSuggestionsMutationVariables = Exact<{
   dayId: Scalars['ID']['input'];
@@ -4542,7 +4549,7 @@ export type GQLFitspaceMarkWorkoutAsCompletedMutationVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceMarkWorkoutAsCompletedMutation = { __typename?: 'Mutation', markWorkoutAsCompleted?: boolean | undefined | null };
+export type GQLFitspaceMarkWorkoutAsCompletedMutation = { __typename?: 'Mutation', markWorkoutAsCompleted: { __typename?: 'WorkoutCompletionResult', success: boolean, planCompleted: boolean, planId?: string | undefined | null } };
 
 export type GQLFitspaceAddExercisesToWorkoutMutationVariables = Exact<{
   input: GQLAddExercisesToWorkoutInput;
@@ -9950,6 +9957,8 @@ export const FitspaceGetWorkoutNavigationDocument = `
     plan {
       id
       startDate
+      completedAt
+      title
       weeks {
         id
         weekNumber
@@ -10199,7 +10208,11 @@ useFitspaceLogWorkoutProgressMutation.fetcher = (variables: GQLFitspaceLogWorkou
 
 export const FitspaceMarkWorkoutAsCompletedDocument = `
     mutation FitspaceMarkWorkoutAsCompleted($dayId: ID!) {
-  markWorkoutAsCompleted(dayId: $dayId)
+  markWorkoutAsCompleted(dayId: $dayId) {
+    success
+    planCompleted
+    planId
+  }
 }
     `;
 

@@ -213,6 +213,8 @@ query FitspaceGetWorkoutNavigation($trainingId: ID!) {
     plan {
       id
       startDate
+      completedAt
+      title
       weeks {
         id
         weekNumber
@@ -305,7 +307,11 @@ mutation FitspaceLogWorkoutProgress($dayId: ID!, $tick: Int!) {
 }
 
 mutation FitspaceMarkWorkoutAsCompleted($dayId: ID!) {
-  markWorkoutAsCompleted(dayId: $dayId)
+  markWorkoutAsCompleted(dayId: $dayId) {
+    success
+    planCompleted
+    planId
+  }
 }
 
 mutation FitspaceAddExercisesToWorkout($input: AddExercisesToWorkoutInput!) {
