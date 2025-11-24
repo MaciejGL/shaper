@@ -197,7 +197,7 @@ export function ExerciseMetadata({
           </p>
         </div>
       )}
-      <div className="px-3 empty:hidden mt-8 mb-3">
+      <div className="px-3 empty:hidden mt-12 mb-3">
         <div className="flex flex-wrap gap-2 mb-3 empty:hidden">
           {supersetInfo && (
             <Badge
