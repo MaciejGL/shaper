@@ -32,57 +32,73 @@ export function SuccessPage({
 }: SuccessPageProps) {
   const [countdown, setCountdown] = useState(30)
   const { isNativeApp } = useMobileApp()
-  const [isGeneratingToken, setIsGeneratingToken] = useState(false)
+  const [isGeneratingToken, setIsGeneratingToken] = useState(true)
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
 
   const packageSummary = offer.packageSummary as unknown as PackageSummaryItem[]
 
-  const handleReturnToApp = useCallback(async () => {
+  const buildRedirectUrl = useCallback(() => {
     const packageIds = packageSummary.map((item) => item.packageId).join(',')
-
-    // Build URL with query params
     const params = new URLSearchParams({
       tab: 'purchased-services',
       token: offer.token,
       trainer: offer.trainerId,
       packages: packageIds,
     })
+    return `${getBaseUrl()}/fitspace/my-trainer?${params.toString()}`
+  }, [offer.token, offer.trainerId, packageSummary])
 
-    let url = `${getBaseUrl()}/fitspace/my-trainer?${params.toString()}`
-
-    // Generate session token if not in native app (external browser scenario)
-    if (!isNativeApp) {
-      setIsGeneratingToken(true)
-      try {
-        const response = await fetch('/api/auth/generate-session-token', {
-          method: 'POST',
-        })
-        if (response.ok) {
-          const { sessionToken } = await response.json()
-          url += `&session_token=${encodeURIComponent(sessionToken)}`
-        }
-      } catch (error) {
-        console.error('Failed to generate session token:', error)
-      }
-      setIsGeneratingToken(false)
-    }
-
-    // Universal link - opens in app if installed, otherwise in browser
-    if (isNativeApp) {
-      window.location.href = url
-    } else {
-      window.open(url, '_blank')
-    }
-  }, [isNativeApp, offer.token, offer.trainerId, packageSummary])
-
-  // Auto-redirect countdown for mobile
+  // Generate session token on mount and prepare redirect URL
   useEffect(() => {
+    const prepareRedirectUrl = async () => {
+      setIsGeneratingToken(true)
+      const baseUrl = buildRedirectUrl()
+
+      if (!isNativeApp) {
+        try {
+          const response = await fetch('/api/auth/generate-session-token', {
+            method: 'POST',
+          })
+          if (response.ok) {
+            const { sessionToken } = await response.json()
+            setRedirectUrl(
+              `${baseUrl}&session_token=${encodeURIComponent(sessionToken)}`,
+            )
+          } else {
+            setRedirectUrl(baseUrl)
+          }
+        } catch (error) {
+          console.error('Failed to generate session token:', error)
+          setRedirectUrl(baseUrl)
+        } finally {
+          setIsGeneratingToken(false)
+        }
+      } else {
+        setRedirectUrl(baseUrl)
+        setIsGeneratingToken(false)
+      }
+    }
+
+    prepareRedirectUrl()
+  }, [isNativeApp, buildRedirectUrl])
+
+  const handleReturnToApp = useCallback(() => {
+    if (redirectUrl) {
+      window.location.href = redirectUrl
+    }
+  }, [redirectUrl])
+
+  // Auto-redirect countdown - waits until redirect URL is ready
+  useEffect(() => {
+    if (!redirectUrl || isGeneratingToken) return
+
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
       return () => clearTimeout(timer)
     } else if (countdown === 0) {
       handleReturnToApp()
     }
-  }, [countdown, handleReturnToApp])
+  }, [countdown, redirectUrl, isGeneratingToken, handleReturnToApp])
 
   const serviceLabels: Record<ServiceType, string> = {
     MEAL_PLAN: 'Personalized Meal Plan',
@@ -215,7 +231,7 @@ export function SuccessPage({
               size="lg"
               className="w-full mb-6"
               loading={isGeneratingToken}
-              disabled={isGeneratingToken}
+              disabled={isGeneratingToken || !redirectUrl}
             >
               Return to App Now
             </Button>
