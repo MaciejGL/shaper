@@ -170,7 +170,7 @@ export function Sidebar({
   ])
 
   return (
-    <div className="relative bg-card dark:bg-card-on-card shadow-xs rounded-lg h-full max-h-full min-w-[340px] max-w-[340px] flex flex-col overflow-y-auto compact-scrollbar min-h-0">
+    <div className="relative bg-card dark:bg-sidebar shadow-xs rounded-lg h-full max-h-full min-w-[340px] max-w-[340px] flex flex-col overflow-y-auto compact-scrollbar min-h-0">
       <div className="flex-shrink-0 p-4 border-b border-border">
         <div className="space-y-3">
           <div className="space-y-1">

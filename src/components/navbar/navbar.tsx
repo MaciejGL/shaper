@@ -117,6 +117,7 @@ export const Navbar = ({
           className={cn(
             'py-3 px-4 flex justify-between items-center bg-sidebar',
             'mt-[var(--safe-area-inset-top)]',
+            withSidebar && 'border-b border-border',
           )}
         >
           <div className="flex items-center gap-2">

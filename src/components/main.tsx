@@ -33,7 +33,7 @@ export const Main = ({
       <div className={cn('w-full grid bg-sidebar')}>
         <div
           className={cn('w-full h-full bg-background safe-area-bottom', {
-            'md:rounded-md p-2 md:px-4 lg:px-8': isTrainer,
+            'p-2 md:p-4 lg:p-8': isTrainer,
             'pt-[calc(var(--safe-area-inset-top))] grow': !isTrainer,
           })}
         >

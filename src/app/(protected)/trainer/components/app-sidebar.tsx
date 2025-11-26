@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
   ChefHat,
-  ChevronRight,
   DumbbellIcon,
   FileIcon,
   FilesIcon,
@@ -22,15 +21,14 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
-import { Divider } from '@/components/divider'
-import { Button } from '@/components/ui/button'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroupContent,
+  SidebarGroup,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -50,21 +48,21 @@ import { cn } from '@/lib/utils'
 
 type SidebarItemType = {
   title: string
-  url?: string
-  onClick?: () => void
-  loading?: boolean
+  url: string
   icon: React.ElementType
   disabled?: boolean
   subItems?: SidebarSubItem[]
+  action?: {
+    icon: React.ElementType
+    onClick: () => void
+    loading?: boolean
+  }
 }
 
 type SidebarSubItem = {
   title: string
-  url?: string
-  onClick?: () => void
-  loading?: boolean
+  url: string
   icon: React.ElementType
-  disabled?: boolean
 }
 
 // Define placeholder data types
@@ -145,13 +143,11 @@ export function AppSidebar() {
     useCreateDraftTemplateMutation({
       onSuccess: (data) => {
         const newPlan = data.createDraftTemplate
-
         queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
-
         router.push(`/trainer/trainings/creator/${newPlan.id}`)
       },
       onError: (error) => {
-        console.error('❌ Failed to create draft template:', error)
+        console.error('Failed to create draft template:', error)
       },
     })
 
@@ -162,7 +158,6 @@ export function AppSidebar() {
 
   const items: SidebarItemType[] = useMemo(
     () => [
-      // Clients item
       {
         title: TRAINER_LINKS.clients.label,
         url: TRAINER_LINKS.clients.href,
@@ -172,48 +167,38 @@ export function AppSidebar() {
           title: client.firstName
             ? `${client.firstName} ${client.lastName}`
             : client.email,
-          url: TRAINER_LINKS.clients.href + `/${client.id}`,
+          url: `${TRAINER_LINKS.clients.href}/${client.id}`,
           icon: UserRoundCogIcon,
-          disabled: false,
         })),
       },
-      // Trainings item
       {
         title: TRAINER_LINKS.trainings.label,
         url: TRAINER_LINKS.trainings.href,
         icon: FilesIcon,
         disabled: TRAINER_LINKS.trainings.disabled,
-        subItems: [
-          {
-            title: 'Create',
-            onClick: () => createDraftTemplate({}),
-            icon: PlusCircleIcon,
-            loading: isCreatingDraftTemplate,
-            disabled: false,
-          },
-          ...templates.map((template) => ({
-            title: template.title,
-            url: TRAINER_LINKS.trainings.href + `/creator/${template.id}`,
-            icon: FileIcon,
-            disabled: false,
-          })),
-        ],
+        action: {
+          icon: PlusCircleIcon,
+          onClick: () => createDraftTemplate({}),
+          loading: isCreatingDraftTemplate,
+        },
+        subItems: templates.map((template) => ({
+          title: template.title,
+          url: `${TRAINER_LINKS.trainings.href}/creator/${template.id}`,
+          icon: FileIcon,
+        })),
       },
-      // Exercises item
       {
         title: TRAINER_LINKS.exercises.label,
         url: TRAINER_LINKS.exercises.href,
         icon: DumbbellIcon,
         disabled: TRAINER_LINKS.exercises.disabled,
       },
-      // Meals item
       {
         title: TRAINER_LINKS.meals.label,
         url: TRAINER_LINKS.meals.href,
         icon: ChefHat,
         disabled: TRAINER_LINKS.meals.disabled,
       },
-      // Teams item - only show if feature flag is enabled and not loading
       ...(isTeamsEnabled && !isTeamsFeatureLoading
         ? [
             {
@@ -237,7 +222,7 @@ export function AppSidebar() {
 
   const isAdmin = session?.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL
 
-  const footerItems = [
+  const footerItems: SidebarItemType[] = [
     {
       title: TRAINER_LINKS.profile.label,
       url: TRAINER_LINKS.profile.href,
@@ -256,7 +241,6 @@ export function AppSidebar() {
       icon: Settings,
       disabled: TRAINER_LINKS.settings.disabled,
     },
-    // Exercise Management item (for moderators only)
     ...(isModerator
       ? [
           {
@@ -267,44 +251,41 @@ export function AppSidebar() {
           },
         ]
       : []),
-    isAdmin && {
-      title: 'Admin',
-      url: '/admin',
-      icon: ShieldIcon,
-      disabled: false,
-    },
-  ].filter(Boolean) as SidebarItemType[]
+    ...(isAdmin
+      ? [
+          {
+            title: 'Admin',
+            url: '/admin',
+            icon: ShieldIcon,
+            disabled: false,
+          },
+        ]
+      : []),
+  ]
 
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar variant="sidebar" collapsible="icon" className="dark">
       <SidebarHeaderComponent />
-      <SidebarContent className="mt-8">
-        <SidebarGroupContent>
+      <SidebarContent>
+        <SidebarGroup>
           <SidebarMenu>
-            {items.map((item, index) => (
+            {items.map((item) => (
               <SidebarItem
-                key={item.title + index}
+                key={item.title}
                 item={item}
                 isLoading={isPlaceholderClients || isPlaceholderTemplates}
               />
             ))}
           </SidebarMenu>
-        </SidebarGroupContent>
-        <SidebarFooter>
-          <SidebarGroupContent>
-            <Divider className="mb-2" />
-            <SidebarMenu>
-              {footerItems.map((item, index) => (
-                <SidebarItem
-                  key={item.title + index}
-                  item={item}
-                  isLoading={false}
-                />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarFooter>
+        </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          {footerItems.map((item) => (
+            <SidebarItem key={item.title} item={item} isLoading={false} />
+          ))}
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
@@ -320,7 +301,6 @@ function SidebarItem({
   const isActive = item.url === pathname
   const { setOpenMobile, isMobile } = useSidebar()
 
-  // Helper function to close mobile sidebar on navigation
   const handleMobileNavigation = () => {
     if (isMobile) {
       setOpenMobile(false)
@@ -328,69 +308,40 @@ function SidebarItem({
   }
 
   return (
-    <SidebarMenuItem key={item.title}>
-      <SidebarMenuButton asChild disabled={item.disabled} size="md">
-        {item.url ? (
-          <Link
-            href={item.url}
-            className="inline-flex py-4"
-            onClick={handleMobileNavigation}
-            scroll
-          >
-            <item.icon />
-            <span>{item.title}</span>
-            {isActive && <ChevronRight className="ml-auto size-4 opacity-60" />}
-          </Link>
-        ) : (
-          <Button
-            onClick={item.onClick}
-            variant="variantless"
-            size="lg"
-            className="inline-flex w-full text-left justify-start pl-0"
-            disabled={item.disabled}
-            loading={item.loading}
-          >
-            <item.icon />
-            <span>{item.title}</span>
-            {isActive && <ChevronRight className="ml-auto size-4 opacity-60" />}
-          </Button>
-        )}
+    <SidebarMenuItem className="dark">
+      <SidebarMenuButton asChild isActive={isActive} disabled={item.disabled}>
+        <Link href={item.url} onClick={handleMobileNavigation} className="dark">
+          <item.icon className="text-sidebar-foreground" />
+          <span className="text-sidebar-foreground">{item.title}</span>
+        </Link>
       </SidebarMenuButton>
+      {item.action && (
+        <SidebarMenuAction
+          onClick={item.action.onClick}
+          disabled={item.action.loading}
+        >
+          <item.action.icon />
+        </SidebarMenuAction>
+      )}
       {item.subItems && item.subItems.length > 0 && (
         <SidebarMenuSub>
-          {item.subItems.map((subItem, index) => (
-            <SidebarMenuSubItem key={subItem.title + index}>
-              <SidebarMenuSubButton asChild size="md">
-                {subItem.url ? (
-                  <Link
-                    href={subItem.url}
-                    className={cn(
-                      'w-full',
-                      isLoading && 'masked-placeholder-text',
-                    )}
-                    onClick={handleMobileNavigation}
-                  >
+          {item.subItems.map((subItem) => {
+            const isSubActive = subItem.url === pathname
+            return (
+              <SidebarMenuSubItem key={subItem.url}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={isSubActive}
+                  className={cn(isLoading && 'masked-placeholder-text')}
+                >
+                  <Link href={subItem.url} onClick={handleMobileNavigation}>
                     <subItem.icon />
-                    <span className="truncate">{subItem.title}</span>
-                    {subItem.url === pathname && (
-                      <ChevronRight className="ml-auto h-4 w-4 opacity-60" />
-                    )}
-                  </Link>
-                ) : (
-                  <Button
-                    onClick={subItem.onClick}
-                    variant="variantless"
-                    className="inline-flex w-full text-left justify-start [&_svg]:size-4 pl-2"
-                    disabled={subItem.disabled}
-                    loading={subItem.loading}
-                    iconStart={<subItem.icon />}
-                  >
                     <span>{subItem.title}</span>
-                  </Button>
-                )}
-              </SidebarMenuSubButton>
-            </SidebarMenuSubItem>
-          ))}
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            )
+          })}
         </SidebarMenuSub>
       )}
     </SidebarMenuItem>
@@ -419,7 +370,7 @@ function SidebarHeaderComponent() {
         }}
         initial="hidden"
         animate={open ? 'visible' : 'hidden'}
-        className="w-max"
+        className="w-max text-sidebar-foreground"
       >
         <AnimatedLogoText className="whitespace-nowrap" />
       </motion.div>
