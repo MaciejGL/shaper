@@ -2686,7 +2686,7 @@ export type GQLQueryGetMessengerInitialDataArgs = {
 
 
 export type GQLQueryGetMyServiceDeliveriesArgs = {
-  status?: InputMaybe<GQLDeliveryStatus>;
+  statuses?: InputMaybe<Array<GQLDeliveryStatus>>;
 };
 
 
@@ -2742,7 +2742,7 @@ export type GQLQueryGetTraineeMeetingsArgs = {
 
 
 export type GQLQueryGetTrainerDeliveriesArgs = {
-  status?: InputMaybe<GQLDeliveryStatus>;
+  statuses?: InputMaybe<Array<GQLDeliveryStatus>>;
   trainerId: Scalars['ID']['input'];
 };
 

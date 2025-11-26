@@ -77,7 +77,7 @@ export function WeeklyProgress({ plan, clientId }: WeeklyProgressProps) {
         onValueChange={setSelectedWeekId}
         className="w-full"
       >
-        <TabsList className="w-full grid grid-cols-7 space-y-1 h-auto p-1">
+        <TabsList className="w-full grid grid-cols-7 items-center space-y-1 h-auto p-1">
           {plan.weeks.map((week, index) => {
             const weekTotalSets = week.days.reduce(
               (sum, d) =>
@@ -98,15 +98,17 @@ export function WeeklyProgress({ plan, clientId }: WeeklyProgressProps) {
               weekTotalSets > 0 ? (weekCompletedSets / weekTotalSets) * 100 : 0
 
             return (
-              <TabsTrigger key={week.id} value={week.id}>
-                <div className="flex items-center gap-1.5">
-                  <ProgressCircle
-                    progress={weekProgress}
-                    size={16}
-                    strokeWidth={1.5}
-                  />
-                  {week.name || ` ${index + 1}`}
-                </div>
+              <TabsTrigger
+                key={week.id}
+                value={week.id}
+                className="flex !items-center gap-1.5"
+              >
+                <ProgressCircle
+                  progress={weekProgress}
+                  size={16}
+                  strokeWidth={1.5}
+                />
+                <p>{week.name || ` ${index + 1}`}</p>
               </TabsTrigger>
             )
           })}

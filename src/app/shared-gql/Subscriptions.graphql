@@ -45,8 +45,8 @@ query GetMySubscriptions {
 }
 
 # Service delivery tracking (replaces complex usage tracking)
-query GetMyServiceDeliveries($status: DeliveryStatus) {
-  getMyServiceDeliveries(status: $status) {
+query GetMyServiceDeliveries($statuses: [DeliveryStatus!]) {
+  getMyServiceDeliveries(statuses: $statuses) {
     id
     serviceType
     packageName
@@ -65,8 +65,8 @@ query GetMyServiceDeliveries($status: DeliveryStatus) {
 }
 
 # Trainer: Get deliveries to manage
-query GetTrainerDeliveries($trainerId: ID!, $status: DeliveryStatus) {
-  getTrainerDeliveries(trainerId: $trainerId, status: $status) {
+query GetTrainerDeliveries($trainerId: ID!, $statuses: [DeliveryStatus!]) {
+  getTrainerDeliveries(trainerId: $trainerId, statuses: $statuses) {
     id
     serviceType
     packageName

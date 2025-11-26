@@ -1,5 +1,8 @@
-query GetTrainerServiceDeliveries($trainerId: ID!) {
-  getTrainerDeliveries(trainerId: $trainerId) {
+query GetTrainerServiceDeliveries(
+  $trainerId: ID!
+  $statuses: [DeliveryStatus!]
+) {
+  getTrainerDeliveries(trainerId: $trainerId, statuses: $statuses) {
     id
     serviceType
     packageName

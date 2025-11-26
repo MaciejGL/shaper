@@ -128,6 +128,9 @@ export async function updateServiceTask(
     },
   })
 
+  // Update delivery status based on task completion
+  await checkAndUpdateDeliveryStatus(task.serviceDeliveryId)
+
   return new ServiceTask(updatedTask, context)
 }
 
@@ -144,15 +147,15 @@ export async function completeTaskByAction({
   action,
   relatedItemId,
 }: CompleteTaskByActionParams) {
-  // Find the first pending task that matches this auto-complete action
-  const pendingTask = await prisma.serviceTask.findFirst({
+  // Find the first pending or in-progress task that matches this auto-complete action
+  const task = await prisma.serviceTask.findFirst({
     where: {
       serviceDelivery: {
         trainerId,
         clientId,
         status: { in: ['PENDING', 'IN_PROGRESS'] },
       },
-      status: TaskStatus.PENDING,
+      status: { in: [TaskStatus.PENDING, TaskStatus.IN_PROGRESS] },
       metadata: {
         path: ['autoCompleteOn'],
         equals: action,
@@ -161,56 +164,96 @@ export async function completeTaskByAction({
     orderBy: [{ createdAt: 'asc' }, { order: 'asc' }],
   })
 
-  if (!pendingTask) {
+  if (!task) {
     return null
   }
 
+  interface TaskMetadata {
+    autoCompleteOn?: string
+    requiredCompletions?: number
+    completions?: number
+    completedItems?: { relatedItemId?: string; completedAt: string }[]
+    completedBy?: string
+  }
+
+  const metadata = (task.metadata as TaskMetadata) || {}
+  const requiredCompletions = metadata.requiredCompletions || 1
+  const currentCompletions = (metadata.completions || 0) + 1
+  const completedItems = [...(metadata.completedItems || [])]
+
+  // Add the new completion
+  completedItems.push({
+    relatedItemId,
+    completedAt: new Date().toISOString(),
+  })
+
+  // Check if we've reached the required number of completions
+  const isFullyCompleted = currentCompletions >= requiredCompletions
+
   const updatedTask = await prisma.serviceTask.update({
-    where: { id: pendingTask.id },
+    where: { id: task.id },
     data: {
-      status: TaskStatus.COMPLETED,
-      completedAt: new Date(),
+      status: isFullyCompleted ? TaskStatus.COMPLETED : TaskStatus.IN_PROGRESS,
+      ...(isFullyCompleted && { completedAt: new Date() }),
       metadata: {
-        ...(pendingTask.metadata as object),
-        completedBy: 'auto',
-        relatedItemId,
+        ...metadata,
+        completions: currentCompletions,
+        requiredCompletions,
+        completedItems,
+        ...(isFullyCompleted && { completedBy: 'auto' }),
       },
     },
   })
 
   console.info(
-    `✅ Auto-completed task "${updatedTask.title}" for client ${clientId} (action: ${action})`,
+    `✅ Progress on task "${updatedTask.title}" for client ${clientId}: ${currentCompletions}/${requiredCompletions} completions (action: ${action})`,
   )
 
   // Check if all tasks for the delivery are complete
-  await checkAndUpdateDeliveryStatus(pendingTask.serviceDeliveryId)
+  if (isFullyCompleted) {
+    await checkAndUpdateDeliveryStatus(task.serviceDeliveryId)
+  }
 
   return updatedTask
 }
 
-async function checkAndUpdateDeliveryStatus(serviceDeliveryId: string) {
+export async function checkAndUpdateDeliveryStatus(serviceDeliveryId: string) {
   const tasks = await prisma.serviceTask.findMany({
     where: { serviceDeliveryId },
   })
 
-  const allCompleted = tasks.every(
+  if (tasks.length === 0) return
+
+  const completedCount = tasks.filter(
     (t) =>
       t.status === TaskStatus.COMPLETED || t.status === TaskStatus.CANCELLED,
-  )
+  ).length
+  const totalCount = tasks.length
 
-  if (allCompleted && tasks.length > 0) {
-    await prisma.serviceDelivery.update({
-      where: { id: serviceDeliveryId },
-      data: {
-        status: 'COMPLETED',
-        deliveredAt: new Date(),
-      },
-    })
-
-    console.info(
-      `✅ All tasks complete - marked ServiceDelivery ${serviceDeliveryId} as COMPLETED`,
-    )
+  // Determine new delivery status based on task completion:
+  // - All tasks completed → COMPLETED
+  // - Some tasks completed → IN_PROGRESS
+  // - No tasks completed → PENDING
+  let newStatus: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'
+  if (completedCount === totalCount) {
+    newStatus = 'COMPLETED'
+  } else if (completedCount > 0) {
+    newStatus = 'IN_PROGRESS'
+  } else {
+    newStatus = 'PENDING'
   }
+
+  await prisma.serviceDelivery.update({
+    where: { id: serviceDeliveryId },
+    data: {
+      status: newStatus,
+      ...(newStatus === 'COMPLETED' && { deliveredAt: new Date() }),
+    },
+  })
+
+  console.info(
+    `📦 Updated ServiceDelivery ${serviceDeliveryId} status to ${newStatus} (${completedCount}/${totalCount} tasks complete)`,
+  )
 }
 
 export async function createTasksForDelivery(
@@ -230,7 +273,7 @@ export async function createTasksForDelivery(
     return []
   }
 
-  // Add autoCompleteOn to metadata
+  // Add autoCompleteOn and requiredCompletions to metadata
   const tasksWithMetadata = taskData.map((task) => ({
     serviceDeliveryId: task.serviceDeliveryId,
     templateId: task.templateId,
@@ -239,9 +282,12 @@ export async function createTasksForDelivery(
     status: task.status,
     order: task.order,
     isRequired: task.isRequired,
-    metadata: task.autoCompleteOn
-      ? { autoCompleteOn: task.autoCompleteOn }
-      : undefined,
+    metadata: {
+      ...(task.autoCompleteOn && { autoCompleteOn: task.autoCompleteOn }),
+      requiredCompletions: task.requiredCompletions || 1,
+      completions: 0,
+      completedItems: [],
+    },
   }))
 
   await prisma.serviceTask.createMany({

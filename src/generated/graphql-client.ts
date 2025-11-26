@@ -2684,7 +2684,7 @@ export type GQLQueryGetMessengerInitialDataArgs = {
 
 
 export type GQLQueryGetMyServiceDeliveriesArgs = {
-  status?: InputMaybe<GQLDeliveryStatus>;
+  statuses?: InputMaybe<Array<GQLDeliveryStatus>>;
 };
 
 
@@ -2740,7 +2740,7 @@ export type GQLQueryGetTraineeMeetingsArgs = {
 
 
 export type GQLQueryGetTrainerDeliveriesArgs = {
-  status?: InputMaybe<GQLDeliveryStatus>;
+  statuses?: InputMaybe<Array<GQLDeliveryStatus>>;
   trainerId: Scalars['ID']['input'];
 };
 
@@ -4838,6 +4838,7 @@ export type GQLSearchUsersQuery = { __typename?: 'Query', searchUsers: Array<{ _
 
 export type GQLGetTrainerServiceDeliveriesQueryVariables = Exact<{
   trainerId: Scalars['ID']['input'];
+  statuses?: InputMaybe<Array<GQLDeliveryStatus> | GQLDeliveryStatus>;
 }>;
 
 
@@ -5540,7 +5541,7 @@ export type GQLGetMySubscriptionsQueryVariables = Exact<{ [key: string]: never; 
 export type GQLGetMySubscriptionsQuery = { __typename?: 'Query', getMySubscriptions: Array<{ __typename?: 'UserSubscription', id: string, userId: string, packageId: string, trainerId?: string | undefined | null, status: GQLSubscriptionStatus, startDate: string, endDate: string, stripeSubscriptionId?: string | undefined | null, stripeLookupKey?: string | undefined | null, isActive: boolean, daysUntilExpiry: number, createdAt: string, updatedAt: string, trainer?: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } | undefined | null }> };
 
 export type GQLGetMyServiceDeliveriesQueryVariables = Exact<{
-  status?: InputMaybe<GQLDeliveryStatus>;
+  statuses?: InputMaybe<Array<GQLDeliveryStatus> | GQLDeliveryStatus>;
 }>;
 
 
@@ -5548,7 +5549,7 @@ export type GQLGetMyServiceDeliveriesQuery = { __typename?: 'Query', getMyServic
 
 export type GQLGetTrainerDeliveriesQueryVariables = Exact<{
   trainerId: Scalars['ID']['input'];
-  status?: InputMaybe<GQLDeliveryStatus>;
+  statuses?: InputMaybe<Array<GQLDeliveryStatus> | GQLDeliveryStatus>;
 }>;
 
 
@@ -12229,8 +12230,8 @@ useInfiniteSearchUsersQuery.getKey = (variables: GQLSearchUsersQueryVariables) =
 useSearchUsersQuery.fetcher = (variables: GQLSearchUsersQueryVariables, options?: RequestInit['headers']) => fetchData<GQLSearchUsersQuery, GQLSearchUsersQueryVariables>(SearchUsersDocument, variables, options);
 
 export const GetTrainerServiceDeliveriesDocument = `
-    query GetTrainerServiceDeliveries($trainerId: ID!) {
-  getTrainerDeliveries(trainerId: $trainerId) {
+    query GetTrainerServiceDeliveries($trainerId: ID!, $statuses: [DeliveryStatus!]) {
+  getTrainerDeliveries(trainerId: $trainerId, statuses: $statuses) {
     id
     serviceType
     packageName
@@ -16606,8 +16607,8 @@ useInfiniteGetMySubscriptionsQuery.getKey = (variables?: GQLGetMySubscriptionsQu
 useGetMySubscriptionsQuery.fetcher = (variables?: GQLGetMySubscriptionsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMySubscriptionsQuery, GQLGetMySubscriptionsQueryVariables>(GetMySubscriptionsDocument, variables, options);
 
 export const GetMyServiceDeliveriesDocument = `
-    query GetMyServiceDeliveries($status: DeliveryStatus) {
-  getMyServiceDeliveries(status: $status) {
+    query GetMyServiceDeliveries($statuses: [DeliveryStatus!]) {
+  getMyServiceDeliveries(statuses: $statuses) {
     id
     serviceType
     packageName
@@ -16669,8 +16670,8 @@ useInfiniteGetMyServiceDeliveriesQuery.getKey = (variables?: GQLGetMyServiceDeli
 useGetMyServiceDeliveriesQuery.fetcher = (variables?: GQLGetMyServiceDeliveriesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMyServiceDeliveriesQuery, GQLGetMyServiceDeliveriesQueryVariables>(GetMyServiceDeliveriesDocument, variables, options);
 
 export const GetTrainerDeliveriesDocument = `
-    query GetTrainerDeliveries($trainerId: ID!, $status: DeliveryStatus) {
-  getTrainerDeliveries(trainerId: $trainerId, status: $status) {
+    query GetTrainerDeliveries($trainerId: ID!, $statuses: [DeliveryStatus!]) {
+  getTrainerDeliveries(trainerId: $trainerId, statuses: $statuses) {
     id
     serviceType
     packageName

@@ -28,6 +28,7 @@ interface TaskTemplate {
   isInitialOnly: boolean
   isRecurring: boolean
   autoCompleteOn?: AutoCompleteAction
+  requiredCompletions?: number // How many times this action needs to be completed
 }
 
 export const TASK_TEMPLATES: Record<ServiceType, TaskTemplate[]> = {
@@ -53,34 +54,26 @@ export const TASK_TEMPLATES: Record<ServiceType, TaskTemplate[]> = {
       autoCompleteOn: 'nutrition_plan_shared',
     },
     {
-      id: 'checkin_1',
-      title: 'Check-in Meeting (Week 1-2)',
+      id: 'checkin_biweekly',
+      title: 'Bi-weekly Check-ins (2x per month)',
       taskType: TaskType.MEETING_CHECKIN,
       order: 3,
       isRequired: true,
       isInitialOnly: false,
       isRecurring: true,
       autoCompleteOn: 'meeting_checkin_completed',
+      requiredCompletions: 2, // Needs 2 check-in meetings to complete
     },
     {
-      id: 'checkin_2',
-      title: 'Check-in Meeting (Week 3-4)',
-      taskType: TaskType.MEETING_CHECKIN,
+      id: 'in_person',
+      title: 'In-Person Workout Session (1x per month)',
+      taskType: TaskType.MEETING_IN_PERSON,
       order: 4,
       isRequired: true,
       isInitialOnly: false,
       isRecurring: true,
-      autoCompleteOn: 'meeting_checkin_completed',
-    },
-    {
-      id: 'in_person',
-      title: 'In-Person Workout Session',
-      taskType: TaskType.MEETING_IN_PERSON,
-      order: 5,
-      isRequired: true,
-      isInitialOnly: false,
-      isRecurring: true,
       autoCompleteOn: 'meeting_in_person_completed',
+      requiredCompletions: 1, // Needs 1 in-person session to complete
     },
   ],
 
@@ -156,6 +149,7 @@ export function generateTasks({
       order: template.order,
       isRequired: template.isRequired,
       autoCompleteOn: template.autoCompleteOn || null,
+      requiredCompletions: template.requiredCompletions || 1,
     })
   }
 

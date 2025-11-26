@@ -237,25 +237,25 @@ async function createRecurringServiceDelivery(
 
     // Create new service delivery with recurring tasks (meetings only, not plans)
     const delivery = await prisma.serviceDelivery.create({
-      data: {
+        data: {
         stripePaymentIntentId: invoice.id!,
-        trainerId: subscription.trainerId!,
-        clientId: subscription.userId,
-        serviceType: ServiceType.COACHING_COMPLETE,
-        packageName: `${packageTemplate.name} - ${monthYear}`,
-        quantity: 1,
-        status: 'PENDING',
-        metadata: {
-          subscriptionId: subscription.id,
-          stripeSubscriptionId: subscription.stripeSubscriptionId,
-          invoiceId: invoice.id,
-          billingPeriodStart: invoice.period_start,
-          billingPeriodEnd: invoice.period_end,
-          recurringPayment: true,
-          monthYear,
-        } as Prisma.InputJsonValue,
-      },
-    })
+          trainerId: subscription.trainerId!,
+          clientId: subscription.userId,
+          serviceType: ServiceType.COACHING_COMPLETE,
+          packageName: `${packageTemplate.name} - ${monthYear}`,
+          quantity: 1,
+          status: 'PENDING',
+          metadata: {
+            subscriptionId: subscription.id,
+            stripeSubscriptionId: subscription.stripeSubscriptionId,
+            invoiceId: invoice.id,
+            billingPeriodStart: invoice.period_start,
+            billingPeriodEnd: invoice.period_end,
+            recurringPayment: true,
+            monthYear,
+          } as Prisma.InputJsonValue,
+        },
+      })
 
     // Create ONLY recurring tasks (meetings) - plans are one-time and already delivered
     await createTasksForDelivery(
@@ -264,9 +264,9 @@ async function createRecurringServiceDelivery(
       true, // isRecurringPayment = true -> only creates meeting tasks
     )
 
-    console.info(
-      `✅ Created recurring service delivery for ${monthYear}: ${delivery.id} (Client: ${subscription.userId}, Trainer: ${subscription.trainerId})`,
-    )
+      console.info(
+        `✅ Created recurring service delivery for ${monthYear}: ${delivery.id} (Client: ${subscription.userId}, Trainer: ${subscription.trainerId})`,
+      )
   } catch (error) {
     console.error('Failed to create recurring service delivery:', error)
   }

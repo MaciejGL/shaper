@@ -80,7 +80,10 @@ export async function getMyServiceDeliveries(
 
   const where = {
     clientId: context.user.user.id,
-    ...(args.status && { status: args.status }),
+    // If statuses array is provided, filter by those statuses
+    ...(args.statuses && args.statuses.length > 0
+      ? { status: { in: args.statuses } }
+      : {}),
   }
 
   const deliveries = await prisma.serviceDelivery.findMany({
@@ -127,15 +130,35 @@ export async function getTrainerDeliveries(
     throw new Error('Authentication required')
   }
 
-  // Only allow trainers to view their own deliveries (or admin)
+  // Allow trainers to view their own deliveries or team members' deliveries
   if (requestingUserId !== args.trainerId) {
-    // TODO: Add admin check here if needed
-    throw new Error('Unauthorized: Can only view your own deliveries')
+    // Check if requesting user is a team owner and the trainerId is a team member
+    const teamMembership = await prisma.teamMember.findFirst({
+      where: {
+        userId: args.trainerId,
+        team: {
+          members: {
+            some: {
+              userId: requestingUserId,
+            },
+          },
+        },
+      },
+    })
+
+    if (!teamMembership) {
+      throw new Error(
+        'Unauthorized: Can only view your own deliveries or team members deliveries',
+      )
+    }
   }
 
   const where = {
     trainerId: args.trainerId,
-    ...(args.status && { status: args.status }),
+    // If statuses array is provided, filter by those statuses
+    ...(args.statuses && args.statuses.length > 0
+      ? { status: { in: args.statuses } }
+      : {}),
   }
 
   const deliveries = await prisma.serviceDelivery.findMany({
@@ -188,6 +211,7 @@ export async function updateServiceDelivery(
   // Find the delivery and verify trainer ownership
   const delivery = await prisma.serviceDelivery.findUnique({
     where: { id: deliveryId },
+    include: { tasks: true },
   })
 
   if (!delivery) {
@@ -219,6 +243,28 @@ export async function updateServiceDelivery(
   // Update notes if provided
   if (notes !== undefined) {
     updateData.deliveryNotes = notes
+  }
+
+  // When marking delivery as completed, also complete all pending tasks
+  if (status === 'COMPLETED' && delivery.tasks.length > 0) {
+    const pendingTaskIds = delivery.tasks
+      .filter((t) => t.status !== 'COMPLETED' && t.status !== 'CANCELLED')
+      .map((t) => t.id)
+
+    if (pendingTaskIds.length > 0) {
+      await prisma.serviceTask.updateMany({
+        where: { id: { in: pendingTaskIds } },
+        data: {
+          status: 'COMPLETED',
+          completedAt: new Date(),
+          updatedAt: new Date(),
+        },
+      })
+
+      console.info(
+        `✅ Auto-completed ${pendingTaskIds.length} tasks for delivery ${deliveryId}`,
+      )
+    }
   }
 
   const updatedDelivery = await prisma.serviceDelivery.update({

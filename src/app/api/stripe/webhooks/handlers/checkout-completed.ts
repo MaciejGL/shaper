@@ -462,28 +462,28 @@ async function createSingleServiceDelivery({
       return null
     }
 
-    // Create service delivery (always quantity = 1)
-    const packageName = deliveryNumber
-      ? `${packageTemplate.name}`
-      : packageTemplate.name
+      // Create service delivery (always quantity = 1)
+      const packageName = deliveryNumber
+        ? `${packageTemplate.name}`
+        : packageTemplate.name
 
     const delivery = await prisma.serviceDelivery.create({
-      data: {
-        stripePaymentIntentId,
-        trainerId,
-        clientId,
-        serviceType,
-        packageName,
-        quantity: 1, // Always 1 for individual deliveries
-        status: 'PENDING',
-        metadata: metadata as Prisma.InputJsonValue,
-      },
-    })
+        data: {
+          stripePaymentIntentId,
+          trainerId,
+          clientId,
+          serviceType,
+          packageName,
+          quantity: 1, // Always 1 for individual deliveries
+          status: 'PENDING',
+          metadata: metadata as Prisma.InputJsonValue,
+        },
+      })
 
     // Create tasks for this delivery (initial purchase = all tasks)
     await createTasksForDelivery(delivery.id, serviceType, false)
 
-    return delivery
+      return delivery
   } catch (error) {
     console.error('Failed to create service delivery:', error)
     return null

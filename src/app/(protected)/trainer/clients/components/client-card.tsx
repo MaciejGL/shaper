@@ -9,6 +9,7 @@ import {
   Dumbbell,
 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -18,6 +19,7 @@ import { GQLGetTrainerServiceDeliveriesQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 import { Client } from './clients-tabs'
+import { DeliveryCountdownBadge } from './delivery-countdown-badge'
 
 type Delivery = NonNullable<
   GQLGetTrainerServiceDeliveriesQuery['getTrainerDeliveries']
@@ -150,18 +152,19 @@ export default function ClientCard({
             </div>
 
             <div className="space-y-2 max-h-48 overflow-y-auto">
-              {deliveries.slice(0, 3).map((delivery) => {
+              {deliveries.map((delivery) => {
                 const isCompleted = delivery.status === 'COMPLETED'
                 const dueDate = new Date(delivery.dueDate)
 
                 return (
-                  <div
+                  <Link
                     key={delivery.id}
+                    href={`/trainer/clients/${client.id}?tab=services`}
                     className={cn(
-                      'flex items-center justify-between p-3 rounded-md',
+                      'flex items-center justify-between p-3 rounded-xl transition-all hover:shadow-sm',
                       delivery.isOverdue && !isCompleted
-                        ? 'bg-destructive/10'
-                        : 'bg-muted',
+                        ? 'bg-destructive/10 hover:bg-destructive/15'
+                        : 'bg-muted hover:bg-muted/80',
                     )}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -188,7 +191,13 @@ export default function ClientCard({
                         </p>
                       </div>
                     </div>
-                  </div>
+                    <DeliveryCountdownBadge
+                      daysUntilDue={delivery.daysUntilDue}
+                      isOverdue={delivery.isOverdue}
+                      isCompleted={isCompleted}
+                    />
+                    <ChevronRight className="size-4 ml-4 text-muted-foreground flex-shrink-0" />
+                  </Link>
                 )
               })}
 

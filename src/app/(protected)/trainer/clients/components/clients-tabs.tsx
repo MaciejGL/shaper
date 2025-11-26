@@ -11,6 +11,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import {
+  GQLDeliveryStatus,
   GQLGetClientsQuery,
   GQLGetTrainerServiceDeliveriesQuery,
   useGetClientsQuery,
@@ -59,10 +60,16 @@ export function ClientsTabs() {
     },
   )
 
+  // Fetch deliveries for the current trainer or selected team member
+  // Only fetch non-completed deliveries (PENDING, IN_PROGRESS) at the database level
+  const activeTrainerId = selectedTeamMember?.memberId || user?.id || ''
   const { data: deliveriesData } = useGetTrainerServiceDeliveriesQuery(
-    { trainerId: user?.id || '' },
     {
-      enabled: !!user?.id,
+      trainerId: activeTrainerId,
+      statuses: [GQLDeliveryStatus.Pending, GQLDeliveryStatus.InProgress],
+    },
+    {
+      enabled: !!activeTrainerId,
       placeholderData: (previousData) => previousData,
     },
   )
@@ -85,6 +92,7 @@ export function ClientsTabs() {
 
     const grouped: Record<string, Delivery[]> = {}
 
+    // Group deliveries by client (already filtered at DB level)
     deliveriesData.getTrainerDeliveries.forEach((delivery) => {
       const clientId = delivery.client?.id
       if (clientId) {

@@ -143,10 +143,10 @@ type Query {
   getPackageTemplate(id: ID!): PackageTemplate
 
   # Service delivery (replaces complex usage tracking)
-  getMyServiceDeliveries(status: DeliveryStatus): [ServiceDelivery!]!
+  getMyServiceDeliveries(statuses: [DeliveryStatus!]): [ServiceDelivery!]!
   getTrainerDeliveries(
     trainerId: ID!
-    status: DeliveryStatus
+    statuses: [DeliveryStatus!]
   ): [ServiceDelivery!]!
 
   # Basic subscription info (simplified)
