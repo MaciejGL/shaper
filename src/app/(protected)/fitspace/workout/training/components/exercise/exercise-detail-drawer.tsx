@@ -1,6 +1,6 @@
 'use client'
 
-import { Lightbulb, VideoIcon, XIcon } from 'lucide-react'
+import { BookIcon, ImageIcon, Lightbulb, VideoIcon, XIcon } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
@@ -26,12 +26,23 @@ interface ExerciseDetailDrawerProps {
 export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
   const videoUrl = exercise.videoUrl
   const images = exercise.images
+  const instructions = exercise.instructions
+  const tips = exercise.tips
+  const description = exercise.description
 
-  if (!images.length) return null
+  if (!images.length && !instructions?.length && !tips?.length && !description)
+    return null
+
+  const getIcon = () => {
+    if (videoUrl) return <VideoIcon />
+    if (images.length) return <ImageIcon />
+    if (instructions?.length || tips?.length || description) return <BookIcon />
+  }
+
   return (
     <Drawer direction="right" disablePreventScroll>
       <DrawerTrigger asChild>
-        <Button variant="secondary" size="icon-md" iconOnly={<VideoIcon />} />
+        <Button variant="secondary" size="icon-md" iconOnly={getIcon()} />
       </DrawerTrigger>
       <DrawerContent
         dialogTitle="Exercise Metadata"

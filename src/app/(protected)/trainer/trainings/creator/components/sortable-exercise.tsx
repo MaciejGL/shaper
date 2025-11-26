@@ -17,6 +17,12 @@ import { InfoIcon, Plus, X } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import React from 'react'
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -604,7 +610,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
     <div className="gap-2">
       <DialogHeader className="mb-8">
         <DialogTitle className="flex flex-row items-center gap-2">
-          Edit exercise
+          {exercise?.name}
           {hasPendingMutations && <Loader2 className="w-4 h-4 animate-spin" />}
         </DialogTitle>
         <DialogDescription>
@@ -612,39 +618,6 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-8">
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="exerciseName" className="text-sm">
-            Name
-          </Label>
-          <Input
-            id="exerciseName"
-            variant="ghost"
-            disabled={disabled}
-            value={exercise?.name ?? ''}
-            onChange={(e) =>
-              updateExercise({
-                name: e.target.value,
-                type: exercise?.type,
-                description: exercise?.description,
-                tips: exercise?.tips,
-                difficulty: exercise?.difficulty,
-                instructions: exercise?.instructions,
-                additionalInstructions: exercise?.additionalInstructions,
-                restSeconds: exercise?.restSeconds,
-                warmupSets: exercise?.warmupSets,
-                tempo: exercise?.tempo,
-                sets: exercise?.sets?.map((set) => ({
-                  id: set.id,
-                  order: set.order,
-                  minReps: set.minReps,
-                  maxReps: set.maxReps,
-                  weight: set.weight,
-                  rpe: set.rpe,
-                })),
-              })
-            }
-          />
-        </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm items-end">
           <div className="flex flex-col gap-1">
             <Label htmlFor="exerciseType" className="text-sm">
@@ -655,12 +628,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               disabled={disabled}
               onValueChange={(value) =>
                 updateExercise({
-                  name: exercise?.name,
                   type: value === 'none' ? null : (value as GQLExerciseType),
-                  description: exercise?.description,
-                  tips: exercise?.tips,
-                  difficulty: exercise?.difficulty,
-                  instructions: exercise?.instructions,
                   additionalInstructions: exercise?.additionalInstructions,
                   restSeconds: exercise?.restSeconds,
                   warmupSets: exercise?.warmupSets,
@@ -705,12 +673,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 const restSeconds =
                   e.target.value === '' ? undefined : Number(e.target.value)
                 updateExercise({
-                  name: exercise?.name,
                   type: exercise?.type,
-                  description: exercise?.description,
-                  tips: exercise?.tips,
-                  difficulty: exercise?.difficulty,
-                  instructions: exercise?.instructions,
                   additionalInstructions: exercise?.additionalInstructions,
                   restSeconds,
                   warmupSets: exercise?.warmupSets,
@@ -745,12 +708,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 const warmupSets =
                   e.target.value === '' ? undefined : Number(e.target.value)
                 updateExercise({
-                  name: exercise?.name,
                   type: exercise?.type,
-                  description: exercise?.description,
-                  instructions: exercise?.instructions,
-                  tips: exercise?.tips,
-                  difficulty: exercise?.difficulty,
                   additionalInstructions: exercise?.additionalInstructions,
                   restSeconds: exercise?.restSeconds,
                   warmupSets,
@@ -783,12 +741,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               onChange={(e) => {
                 const formattedValue = formatTempoInput(e)
                 updateExercise({
-                  name: exercise?.name,
                   type: exercise?.type,
-                  description: exercise?.description,
-                  instructions: exercise?.instructions,
-                  tips: exercise?.tips,
-                  difficulty: exercise?.difficulty,
                   additionalInstructions: exercise?.additionalInstructions,
                   restSeconds: exercise?.restSeconds,
                   warmupSets: exercise?.warmupSets,
@@ -860,43 +813,6 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
           <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-2">
               <Label
-                htmlFor="instructions"
-                className="flex flex-col items-start text-sm"
-              >
-                <p>Instructions (Visible in exercise menu)</p>
-              </Label>
-              <Textarea
-                id="instructions"
-                className="min-h-24"
-                variant="ghost"
-                disabled={disabled}
-                value={exercise?.description ?? ''}
-                onChange={(e) =>
-                  updateExercise({
-                    name: exercise?.name,
-                    type: exercise?.type,
-                    description: e.target.value,
-                    instructions: exercise?.instructions,
-                    tips: exercise?.tips,
-                    difficulty: exercise?.difficulty,
-                    additionalInstructions: exercise?.additionalInstructions,
-                    restSeconds: exercise?.restSeconds,
-                    warmupSets: exercise?.warmupSets,
-                    tempo: exercise?.tempo,
-                    sets: exercise?.sets?.map((set) => ({
-                      id: set.id,
-                      order: set.order,
-                      minReps: set.minReps,
-                      maxReps: set.maxReps,
-                      weight: set.weight,
-                      rpe: set.rpe,
-                    })),
-                  })
-                }
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label
                 htmlFor="additionalInstructions"
                 className="flex flex-col items-start text-sm"
               >
@@ -914,11 +830,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 value={exercise?.additionalInstructions ?? ''}
                 onChange={(e) =>
                   updateExercise({
-                    name: exercise?.name,
                     type: exercise?.type,
-                    instructions: exercise?.instructions,
-                    tips: exercise?.tips,
-                    difficulty: exercise?.difficulty,
                     additionalInstructions: e.target.value,
                     restSeconds: exercise?.restSeconds,
                     warmupSets: exercise?.warmupSets,
@@ -952,6 +864,60 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
             )}
           </div>
         </div>
+
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="base-exercise-info">
+            <AccordionTrigger>Base Exercise Information</AccordionTrigger>
+            <AccordionContent className="px-4 py-4 space-y-4">
+              {exercise?.description && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Description</p>
+                  <p className="text-sm text-muted-foreground">
+                    {exercise.description}
+                  </p>
+                </div>
+              )}
+
+              {exercise?.instructions && exercise.instructions.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Instructions</p>
+                  <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-1">
+                    {exercise.instructions.map((instruction, index) => (
+                      <li key={index}>{instruction}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {exercise?.tips && exercise.tips.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Tips</p>
+                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                    {exercise.tips.map((tip, index) => (
+                      <li key={index}>{tip}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {exercise?.difficulty && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Difficulty</p>
+                  <Badge variant="secondary">{exercise.difficulty}</Badge>
+                </div>
+              )}
+
+              {!exercise?.description &&
+                !exercise?.instructions?.length &&
+                !exercise?.tips?.length &&
+                !exercise?.difficulty && (
+                  <p className="text-sm text-muted-foreground">
+                    No base exercise information available.
+                  </p>
+                )}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
       <DialogFooter className="flex flex-row justify-between mt-4">
         {!disabled && (

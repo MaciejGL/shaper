@@ -56,6 +56,10 @@ export default class TrainingExercise implements GQLTrainingExercise {
   }
 
   get name() {
+    if (this.data.base?.name) {
+      return this.data.base.name
+    }
+
     return this.data.name
   }
 
@@ -276,19 +280,19 @@ export class ExerciseSubstitute implements GQLSubstitute {
   }
 
   get description() {
-    return this.data.description
+    return this.data.base?.description
   }
 
   get instructions() {
-    return this.data.instructions
+    return this.data.base?.instructions
   }
 
   get tips() {
-    return this.data.tips
+    return this.data.base?.tips
   }
 
   get difficulty() {
-    return this.data.difficulty
+    return this.data.base?.difficulty
   }
 
   get additionalInstructions() {
