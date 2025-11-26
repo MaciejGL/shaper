@@ -69,6 +69,10 @@ export function ClientServiceDeliveriesSection({
     )
   }
 
+  if (paidOffers.length === 0) {
+    return null
+  }
+
   return <PurchasedOffersCard offers={paidOffers} />
 }
 
