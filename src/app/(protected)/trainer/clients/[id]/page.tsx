@@ -15,7 +15,7 @@ import { ClientInfo } from './components/client-info/client-info'
 import { ClientMeasurements } from './components/client-measurements'
 import { ClientMeetingsDashboard } from './components/client-meetings-dashboard/client-meetings-dashboard'
 import { ClientNotes } from './components/client-notes/client-notes'
-import { ClientPrograms } from './components/client-programs/client-programs'
+import { ClientProgramsDashboard } from './components/client-programs-dashboard/client-programs-dashboard'
 import { ClientServicesDashboard } from './components/client-services-dashboard/client-services-dashboard'
 
 type Tab = 'info' | 'programs' | 'measurements' | 'services' | 'meetings'
@@ -104,7 +104,7 @@ export default function ClientDetailPage({
         </TabsContent>
 
         <TabsContent value="programs">
-          <ClientPrograms
+          <ClientProgramsDashboard
             client={client}
             clientName={clientName}
             plans={data?.getClientTrainingPlans}
