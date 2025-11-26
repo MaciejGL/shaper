@@ -99,6 +99,10 @@ mutation UpdateServiceDelivery(
     status
     deliveredAt
     deliveryNotes
+    dueDate
+    isOverdue
+    daysUntilDue
+    deliverableLabel
     updatedAt
   }
 }

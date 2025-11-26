@@ -7,13 +7,11 @@ import {
 import {
   Meeting as PrismaMeeting,
   ServiceDelivery as PrismaServiceDelivery,
-  ServiceTask as PrismaServiceTask,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
 } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
-import { ServiceTask } from '../service-task/model'
 import { ServiceDelivery } from '../subscription/model'
 import UserPublic from '../user-public/model'
 
@@ -36,7 +34,6 @@ export class Meeting implements GQLMeeting {
             }
           })
         | null
-      serviceTask?: PrismaServiceTask | null
     },
     protected context: GQLContext,
   ) {}
@@ -101,10 +98,6 @@ export class Meeting implements GQLMeeting {
     return this.data.serviceDeliveryId
   }
 
-  get serviceTaskId() {
-    return this.data.serviceTaskId
-  }
-
   get coach() {
     if (!this.data.coach) {
       throw new Error('Coach data not loaded')
@@ -124,13 +117,6 @@ export class Meeting implements GQLMeeting {
       return null
     }
     return new ServiceDelivery(this.data.serviceDelivery, this.context)
-  }
-
-  get serviceTask() {
-    if (!this.data.serviceTask) {
-      return null
-    }
-    return new ServiceTask(this.data.serviceTask, this.context)
   }
 
   get createdAt() {

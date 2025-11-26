@@ -80,10 +80,15 @@ type ServiceDelivery {
   deliveredAt: String
   deliveryNotes: String
 
+  # Computed deadline fields (based on createdAt + serviceType config)
+  dueDate: String!
+  isOverdue: Boolean!
+  daysUntilDue: Int!
+  deliverableLabel: String!
+
   # Relations
   trainer: User!
   client: User!
-  tasks: [ServiceTask!]!
 
   createdAt: String!
   updatedAt: String!

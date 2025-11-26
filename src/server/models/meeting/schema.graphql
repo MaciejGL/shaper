@@ -43,13 +43,11 @@ type Meeting {
 
   # Service delivery link (optional)
   serviceDeliveryId: ID
-  serviceTaskId: ID
 
   # Relations
   coach: UserPublic!
   trainee: UserPublic!
   serviceDelivery: ServiceDelivery
-  serviceTask: ServiceTask
 
   createdAt: String!
   updatedAt: String!
@@ -67,7 +65,6 @@ input CreateMeetingInput {
   title: String!
   description: String
   serviceDeliveryId: ID
-  serviceTaskId: ID
 }
 
 input UpdateMeetingInput {

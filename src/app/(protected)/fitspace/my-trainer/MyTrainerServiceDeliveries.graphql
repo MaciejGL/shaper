@@ -27,18 +27,6 @@ query FitGetMyTrainerOffers(
       status
       deliveredAt
       deliveryNotes
-      tasks {
-        id
-        title
-        taskType
-        status
-        isRequired
-        requiresScheduling
-        scheduledAt
-        completedAt
-        notes
-        order
-      }
       createdAt
       updatedAt
     }

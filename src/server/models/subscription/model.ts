@@ -1,4 +1,10 @@
 import {
+  calculateDueDate,
+  getDaysUntilDue,
+  getDeliverableLabel,
+  isOverdue,
+} from '@/constants/deliverable-config'
+import {
   GQLDeliveryStatus,
   GQLPackageTemplate,
   GQLServiceDelivery,
@@ -8,13 +14,12 @@ import {
 import {
   PackageTemplate as PrismaPackageTemplate,
   ServiceDelivery as PrismaServiceDelivery,
-  ServiceTask as PrismaServiceTask,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
+  ServiceType,
 } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
-import ServiceTask from '../service-task/model'
 import User from '../user/model'
 
 export class PackageTemplate implements GQLPackageTemplate {
@@ -108,7 +113,6 @@ export class ServiceDelivery implements GQLServiceDelivery {
             profile?: PrismaUserProfile | null
           })
         | null
-      tasks?: PrismaServiceTask[]
     },
     protected context: GQLContext,
   ) {}
@@ -184,10 +188,28 @@ export class ServiceDelivery implements GQLServiceDelivery {
     return new User(this.data.client, this.context)
   }
 
-  get tasks() {
-    if (!this.data.tasks) {
-      return []
-    }
-    return this.data.tasks.map((task) => new ServiceTask(task, this.context))
+  private get prismaServiceType(): ServiceType {
+    return this.data.serviceType as ServiceType
+  }
+
+  get dueDate(): string {
+    const due = calculateDueDate(this.data.createdAt, this.prismaServiceType)
+    return due.toISOString()
+  }
+
+  get isOverdue(): boolean {
+    return isOverdue(
+      this.data.createdAt,
+      this.prismaServiceType,
+      this.data.status,
+    )
+  }
+
+  get daysUntilDue(): number {
+    return getDaysUntilDue(this.data.createdAt, this.prismaServiceType)
+  }
+
+  get deliverableLabel(): string {
+    return getDeliverableLabel(this.prismaServiceType)
   }
 }

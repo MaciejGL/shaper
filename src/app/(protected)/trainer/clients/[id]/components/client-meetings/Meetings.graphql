@@ -22,10 +22,6 @@ query GetTraineeMeetings($traineeId: ID!) {
       id
       packageName
     }
-    serviceTask {
-      id
-      title
-    }
     createdAt
     updatedAt
   }

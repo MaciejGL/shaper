@@ -12,9 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import {
   GQLGetClientsQuery,
+  GQLGetTrainerServiceDeliveriesQuery,
   useGetClientsQuery,
   useGetTrainerServiceDeliveriesQuery,
-  useGetTrainerTasksQuery,
   useMyCoachingRequestsQuery,
   useMyTeamsQuery,
 } from '@/generated/graphql-client'
@@ -27,36 +27,23 @@ import { PendingCoachingRequests } from './pending-coaching-requests'
 
 export type Client = NonNullable<GQLGetClientsQuery['myClients']>[number]
 
-interface TaskWithDelivery {
-  id: string
-  title: string
-  status: string
-  taskType: string
-  requiresScheduling?: boolean
-  scheduledAt?: string | null
-  serviceDelivery: {
-    packageName: string
-    serviceType: string
-  }
-}
+type Delivery = NonNullable<
+  GQLGetTrainerServiceDeliveriesQuery['getTrainerDeliveries']
+>[number]
 
 export function ClientsTabs() {
   const { user } = useUser()
   const { isEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.teams)
-  // Tab query parameter from URL
   const [tabParam, setTabParam] = useQueryState('tab')
-  // State for selected team member
   const [selectedTeamMember, setSelectedTeamMember] = useState<{
     memberId: string
     memberName: string
     teamId: string
   } | null>(null)
 
-  // Fetch coaching requests
   const { data: requestsData, isLoading: isLoadingRequests } =
     useMyCoachingRequestsQuery()
 
-  // Fetch teams
   const { data: teamsData, isLoading: teamsLoading } = useMyTeamsQuery(
     {},
     {
@@ -65,7 +52,6 @@ export function ClientsTabs() {
     },
   )
 
-  // Get clients - use selected team member's ID if available
   const { data, isLoading: isLoadingTeamMemberClients } = useGetClientsQuery(
     { trainerId: selectedTeamMember?.memberId || undefined },
     {
@@ -73,16 +59,7 @@ export function ClientsTabs() {
     },
   )
 
-  // Fetch service deliveries and tasks
   const { data: deliveriesData } = useGetTrainerServiceDeliveriesQuery(
-    { trainerId: user?.id || '' },
-    {
-      enabled: !!user?.id,
-      placeholderData: (previousData) => previousData,
-    },
-  )
-
-  const { data: tasksData } = useGetTrainerTasksQuery(
     { trainerId: user?.id || '' },
     {
       enabled: !!user?.id,
@@ -96,45 +73,30 @@ export function ClientsTabs() {
   const teams = teamsData?.myTeams ?? []
   const isLoadingTeams = isLoading || teamsLoading
 
-  // Filter for incoming coaching requests (where current user is the recipient/trainer)
   const coachingRequests = requestsData?.coachingRequests || []
   const incomingRequests = coachingRequests.filter(
     (req) => req.recipient.id === user?.id && req.status === 'PENDING',
   )
 
-  // Group tasks by client
-  const tasksByClient = useMemo(() => {
-    if (!deliveriesData?.getTrainerDeliveries || !tasksData?.getTrainerTasks) {
+  const deliveriesByClient = useMemo(() => {
+    if (!deliveriesData?.getTrainerDeliveries) {
       return {}
     }
 
-    const grouped: Record<string, TaskWithDelivery[]> = {}
+    const grouped: Record<string, Delivery[]> = {}
 
     deliveriesData.getTrainerDeliveries.forEach((delivery) => {
       const clientId = delivery.client?.id
       if (clientId) {
-        const deliveryTasks = tasksData.getTrainerTasks.filter(
-          (task) => task.serviceDeliveryId === delivery.id,
-        )
-
         if (!grouped[clientId]) {
           grouped[clientId] = []
         }
-
-        deliveryTasks.forEach((task) => {
-          grouped[clientId].push({
-            ...task,
-            serviceDelivery: {
-              packageName: delivery.packageName,
-              serviceType: delivery.serviceType?.toString() || 'Unknown',
-            },
-          })
-        })
+        grouped[clientId].push(delivery)
       }
     })
 
     return grouped
-  }, [deliveriesData, tasksData])
+  }, [deliveriesData])
 
   const filteredClients = smartSearch<Client>(clients, search, [
     'firstName',
@@ -180,7 +142,6 @@ export function ClientsTabs() {
             ))}
         </TabsList>
 
-        {/* Coaching Requests Tab */}
         <TabsContent value="requests" className="space-y-4">
           {isLoadingRequests ? (
             <LoadingSkeleton count={2} variant="lg" />
@@ -193,7 +154,6 @@ export function ClientsTabs() {
           )}
         </TabsContent>
 
-        {/* My Clients Tab */}
         <TabsContent value="my-clients" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
             {isLoadingTeamMemberClients && (
@@ -203,7 +163,7 @@ export function ClientsTabs() {
               <ClientCard
                 key={client.id}
                 client={client}
-                tasks={tasksByClient[client.id] || []}
+                deliveries={deliveriesByClient[client.id] || []}
               />
             ))}
             {!isLoadingTeamMemberClients && filteredClients.length === 0 && (
@@ -214,11 +174,9 @@ export function ClientsTabs() {
           </div>
         </TabsContent>
 
-        {/* Team Tabs */}
         {isEnabled &&
           teams.map((team) => (
             <TabsContent key={team.id} value={team.id} className="space-y-6">
-              {/* Always show trainers */}
               <div className="space-y-4 @container/section">
                 <h3 className="text-lg font-medium">Team Members</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 @4xl/section:grid-cols-3 gap-4">
@@ -281,7 +239,6 @@ export function ClientsTabs() {
                 </div>
               </div>
 
-              {/* Show selected trainer's clients */}
               {selectedTeamMember?.teamId === team.id && (
                 <div className="space-y-4">
                   <div>
@@ -303,7 +260,7 @@ export function ClientsTabs() {
                         <ClientCard
                           key={client.id}
                           client={client}
-                          tasks={[]} // Don't show tasks for team member clients
+                          deliveries={[]}
                         />
                       ))}
                       {filteredClients.length === 0 && (

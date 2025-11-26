@@ -5,7 +5,6 @@ import {
 } from '@/generated/graphql-server'
 import {
   ServiceDelivery as PrismaServiceDelivery,
-  ServiceTask as PrismaServiceTask,
   TrainerOffer as PrismaTrainerOffer,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
@@ -21,9 +20,7 @@ export default class TrainerOffer implements GQLTrainerOffer {
       trainer?: PrismaUser & {
         profile?: PrismaUserProfile | null
       }
-      serviceDeliveries?: (PrismaServiceDelivery & {
-        tasks?: PrismaServiceTask[]
-      })[]
+      serviceDeliveries?: PrismaServiceDelivery[]
     },
     protected context: GQLContext,
   ) {}

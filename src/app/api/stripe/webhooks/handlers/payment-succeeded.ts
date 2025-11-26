@@ -1,6 +1,5 @@
 import Stripe from 'stripe'
 
-import { generateTasks } from '@/constants/task-templates'
 import { GQLNotificationType } from '@/generated/graphql-server'
 import {
   Prisma,
@@ -235,42 +234,31 @@ async function createRecurringServiceDelivery(
       year: 'numeric',
     })
 
-    // Create new service delivery and tasks in transaction
-    await prisma.$transaction(async (tx) => {
-      const delivery = await tx.serviceDelivery.create({
-        data: {
-          stripePaymentIntentId: invoice.id!, // Use invoice ID for recurring payments
-          trainerId: subscription.trainerId!,
-          clientId: subscription.userId,
-          serviceType: ServiceType.COACHING_COMPLETE,
-          packageName: `${packageTemplate.name} - ${monthYear}`,
-          quantity: 1,
-          status: 'PENDING',
-          metadata: {
-            subscriptionId: subscription.id,
-            stripeSubscriptionId: subscription.stripeSubscriptionId,
-            invoiceId: invoice.id,
-            billingPeriodStart: invoice.period_start,
-            billingPeriodEnd: invoice.period_end,
-            recurringPayment: true,
-            monthYear,
-          } as Prisma.InputJsonValue,
-        },
-      })
-
-      // Generate and create tasks for this delivery
-      const taskData = generateTasks(delivery.id, ServiceType.COACHING_COMPLETE)
-      if (taskData.length > 0) {
-        await tx.serviceTask.createMany({ data: taskData })
-        console.info(
-          `📋 Generated ${taskData.length} tasks for recurring COACHING_COMPLETE delivery`,
-        )
-      }
-
-      console.info(
-        `✅ Created recurring service delivery for ${monthYear}: ${delivery.id} (Client: ${subscription.userId}, Trainer: ${subscription.trainerId})`,
-      )
+    // Create new service delivery (no tasks - using simplified deliverables system)
+    const delivery = await prisma.serviceDelivery.create({
+      data: {
+        stripePaymentIntentId: invoice.id!,
+        trainerId: subscription.trainerId!,
+        clientId: subscription.userId,
+        serviceType: ServiceType.COACHING_COMPLETE,
+        packageName: `${packageTemplate.name} - ${monthYear}`,
+        quantity: 1,
+        status: 'PENDING',
+        metadata: {
+          subscriptionId: subscription.id,
+          stripeSubscriptionId: subscription.stripeSubscriptionId,
+          invoiceId: invoice.id,
+          billingPeriodStart: invoice.period_start,
+          billingPeriodEnd: invoice.period_end,
+          recurringPayment: true,
+          monthYear,
+        } as Prisma.InputJsonValue,
+      },
     })
+
+    console.info(
+      `✅ Created recurring service delivery for ${monthYear}: ${delivery.id} (Client: ${subscription.userId}, Trainer: ${subscription.trainerId})`,
+    )
   } catch (error) {
     console.error('Failed to create recurring service delivery:', error)
   }

@@ -1,6 +1,5 @@
 import Stripe from 'stripe'
 
-import { generateTasks } from '@/constants/task-templates'
 import { GQLNotificationType } from '@/generated/graphql-server'
 import { PackageTemplate, Prisma, ServiceType } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
@@ -481,13 +480,6 @@ async function createSingleServiceDelivery({
           metadata: metadata as Prisma.InputJsonValue,
         },
       })
-
-      // Generate and create tasks (no quantity needed since it's always 1)
-      const taskData = generateTasks(delivery.id, serviceType)
-      if (taskData.length > 0) {
-        await tx.serviceTask.createMany({ data: taskData })
-        console.info(`📋 Generated ${taskData.length} tasks for ${serviceType}`)
-      }
 
       return delivery
     })

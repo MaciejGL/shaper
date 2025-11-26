@@ -1,13 +1,20 @@
 'use client'
 
-import { LayoutDashboard } from 'lucide-react'
+import { ClipboardList } from 'lucide-react'
 
 import { DashboardHeader } from '../components/dashboard-header'
 
+import { DeliverablesList } from './components/deliverables-list'
+
 export default function Page() {
   return (
-    <div className="container h-full">
-      <DashboardHeader title="Dashboard" icon={LayoutDashboard} />
+    <div className="container h-full pb-8">
+      <DashboardHeader
+        title="Deliverables"
+        description="Track and complete client deliverables"
+        icon={ClipboardList}
+      />
+      <DeliverablesList />
     </div>
   )
 }

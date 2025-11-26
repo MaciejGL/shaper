@@ -8,32 +8,15 @@ query GetTrainerServiceDeliveries($trainerId: ID!) {
     deliveredAt
     deliveryNotes
     createdAt
+    dueDate
+    isOverdue
+    daysUntilDue
+    deliverableLabel
     client {
       id
       name
       email
+      image
     }
-  }
-}
-
-query GetTrainerTasks($trainerId: ID!, $status: TaskStatus) {
-  getTrainerTasks(trainerId: $trainerId, status: $status) {
-    id
-    serviceDeliveryId
-    templateId
-    title
-    taskType
-    status
-    order
-    isRequired
-    completedAt
-    notes
-    requiresScheduling
-    scheduledAt
-    estimatedDuration
-    location
-    isRecurring
-    createdAt
-    updatedAt
   }
 }

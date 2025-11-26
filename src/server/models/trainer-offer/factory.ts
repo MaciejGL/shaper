@@ -9,7 +9,6 @@ import {
 import {
   Prisma,
   ServiceDelivery as PrismaServiceDelivery,
-  ServiceTask as PrismaServiceTask,
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
@@ -85,20 +84,13 @@ export async function getClientTrainerOffers(
   const enrichedOffers = await Promise.all(
     offers.map(async (offer) => {
       if (offer.status === 'PAID') {
-        let serviceDeliveries: (PrismaServiceDelivery & {
-          tasks: PrismaServiceTask[]
-        })[] = []
+        let serviceDeliveries: PrismaServiceDelivery[] = []
 
         if (offer.stripePaymentIntentId) {
           // Try to find service deliveries by payment intent ID (payment mode)
           serviceDeliveries = await prisma.serviceDelivery.findMany({
             where: {
               stripePaymentIntentId: offer.stripePaymentIntentId,
-            },
-            include: {
-              tasks: {
-                orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
-              },
             },
           })
         }
@@ -108,11 +100,6 @@ export async function getClientTrainerOffers(
           serviceDeliveries = await prisma.serviceDelivery.findMany({
             where: {
               stripePaymentIntentId: offer.stripeCheckoutSessionId,
-            },
-            include: {
-              tasks: {
-                orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
-              },
             },
           })
         }
