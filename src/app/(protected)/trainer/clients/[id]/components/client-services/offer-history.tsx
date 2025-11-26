@@ -342,13 +342,8 @@ export function OfferHistory({ clientId, trainerId }: OfferHistoryProps) {
                 <div className="space-y-4">
                   {/* Personal Message */}
                   {offer.personalMessage && (
-                    <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
-                      <p className="text-sm text-blue-800">
-                        <span className="font-medium">Your message:</span>
-                      </p>
-                      <p className="text-sm text-blue-700 mt-1">
-                        {offer.personalMessage}
-                      </p>
+                    <div className="bg-card-on-card border-l-4 border-primary p-3 rounded">
+                      <p className="text-sm mt-1">{offer.personalMessage}</p>
                     </div>
                   )}
 

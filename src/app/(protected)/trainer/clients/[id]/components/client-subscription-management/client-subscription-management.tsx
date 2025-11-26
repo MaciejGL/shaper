@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Pause, Play } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -87,12 +88,9 @@ export function ClientSubscriptionManagement({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Coaching Subscription</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <p className="text-sm text-muted-foreground">Status</p>
-          <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 justify-between w-full">
+          <CardTitle>Coaching Subscription</CardTitle>
+          <Badge variant={isPaused ? 'warning' : 'success'}>
             {isPaused ? (
               <>
                 <Pause className="size-4 text-orange-500" />
@@ -104,9 +102,10 @@ export function ClientSubscriptionManagement({
                 <p className="font-medium text-green-500">Active</p>
               </>
             )}
-          </div>
+          </Badge>
         </div>
-
+      </CardHeader>
+      <CardContent className="space-y-4">
         {isPaused ? (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
@@ -142,8 +141,8 @@ export function ClientSubscriptionManagement({
 
         <div className="text-xs text-muted-foreground border-t pt-3 mt-3">
           <p>
-            ℹ️ While paused, client won't be charged and their yearly premium
-            (if any) remains paused.
+            While paused, client won't be charged and their yearly premium (if
+            any) remains paused.
           </p>
         </div>
       </CardContent>

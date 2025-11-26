@@ -10,16 +10,15 @@ import { useGetClientByIdQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../components/dashboard-header'
 
-import { ClientActivePlan } from './components/client-active-plan'
 import { ClientAssessment } from './components/client-assessment'
 import { ClientInfo } from './components/client-info/client-info'
 import { ClientMeasurements } from './components/client-measurements'
-import { ClientMeetings } from './components/client-meetings/client-meetings'
+import { ClientMeetingsDashboard } from './components/client-meetings-dashboard/client-meetings-dashboard'
 import { ClientNotes } from './components/client-notes/client-notes'
-import { ClientNutrition } from './components/client-nutrition/client-nutrition'
-import { ClientServiceDeliveries } from './components/client-service-deliveries/client-service-deliveries'
-import { ClientServices } from './components/client-services/client-services'
-import { SharedPlansWithClient } from './components/shared-plans'
+import { ClientPrograms } from './components/client-programs/client-programs'
+import { ClientServicesDashboard } from './components/client-services-dashboard/client-services-dashboard'
+
+type Tab = 'info' | 'programs' | 'measurements' | 'services' | 'meetings'
 
 export default function ClientDetailPage({
   params,
@@ -31,25 +30,14 @@ export default function ClientDetailPage({
     id,
   })
 
-  // Controlled tab state with nuqs
   const [activeTab, setActiveTab] = useQueryState(
     'tab',
-    parseAsStringEnum<
-      | 'info'
-      | 'plans'
-      | 'active-plan'
-      | 'measurements'
-      | 'nutrition'
-      | 'services'
-      | 'tasks'
-    >([
+    parseAsStringEnum<Tab>([
       'info',
-      'plans',
-      'active-plan',
+      'programs',
       'measurements',
-      'nutrition',
       'services',
-      'tasks',
+      'meetings',
     ])
       .withDefault('info')
       .withOptions({ clearOnDefault: true }),
@@ -64,7 +52,6 @@ export default function ClientDetailPage({
     client.firstName && client.lastName
       ? `${client.firstName} ${client.lastName}`
       : client.email
-  const hasAssignedPlans = data?.getClientTrainingPlans.length > 0
 
   return (
     <div className="container @container/client-detail-page mx-auto">
@@ -76,34 +63,21 @@ export default function ClientDetailPage({
 
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as typeof activeTab)}
+        onValueChange={(value) => setActiveTab(value as Tab)}
       >
         <div className="overflow-x-auto hide-scrollbar -mx-2 px-2 mb-4">
           <TabsList size="lg" className="w-max min-w-full">
             <TabsTrigger size="lg" value="info">
-              Client Info
+              Overview
             </TabsTrigger>
-            <TabsTrigger size="lg" value="plans">
-              Assigned Plans
-            </TabsTrigger>
-            <TabsTrigger
-              size="lg"
-              value="active-plan"
-              disabled={!hasAssignedPlans}
-            >
-              Active Plan
+            <TabsTrigger size="lg" value="programs">
+              Programs
             </TabsTrigger>
             <TabsTrigger size="lg" value="measurements">
-              Body Progress
-            </TabsTrigger>
-            <TabsTrigger size="lg" value="nutrition">
-              Nutrition
+              Progress
             </TabsTrigger>
             <TabsTrigger size="lg" value="services">
-              Send Offer
-            </TabsTrigger>
-            <TabsTrigger size="lg" value="tasks">
-              Task Management
+              Services
             </TabsTrigger>
             <TabsTrigger size="lg" value="meetings">
               Meetings
@@ -129,21 +103,12 @@ export default function ClientDetailPage({
           </div>
         </TabsContent>
 
-        <TabsContent value="plans">
-          <SharedPlansWithClient
-            plans={data?.getClientTrainingPlans}
-            clientName={clientName}
-            clientId={client.id}
-            activePlan={activePlan}
-          />
-        </TabsContent>
-
-        <TabsContent value="active-plan">
-          <ClientActivePlan
+        <TabsContent value="programs">
+          <ClientPrograms
             client={client}
             clientName={clientName}
+            plans={data?.getClientTrainingPlans}
             activePlan={activePlan}
-            hasAssignedPlans={hasAssignedPlans}
           />
         </TabsContent>
 
@@ -151,27 +116,19 @@ export default function ClientDetailPage({
           <ClientMeasurements client={client} clientName={clientName} />
         </TabsContent>
 
-        <TabsContent value="nutrition">
-          <ClientNutrition clientId={client.id} />
-        </TabsContent>
-
         <TabsContent value="services">
-          <ClientServices
+          <ClientServicesDashboard
             clientId={client.id}
             clientName={clientName}
             clientEmail={client.email}
           />
         </TabsContent>
 
-        <TabsContent value="tasks">
-          <ClientServiceDeliveries
+        <TabsContent value="meetings">
+          <ClientMeetingsDashboard
             clientId={client.id}
             clientName={clientName}
           />
-        </TabsContent>
-
-        <TabsContent value="meetings">
-          <ClientMeetings clientId={client.id} clientName={clientName} />
         </TabsContent>
       </Tabs>
     </div>

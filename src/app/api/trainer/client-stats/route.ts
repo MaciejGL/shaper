@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/getUser'
 import { stripe } from '@/lib/stripe/stripe'
+
+interface PaymentRecord {
+  id: string
+  amount: number
+  currency: string
+  description: string | null
+  created: number
+  type: 'one-time' | 'subscription'
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -41,35 +49,159 @@ export async function GET(req: NextRequest) {
     // Initialize stats
     let totalSpent = 0
     let completedPurchases = 0
-    let stripePayments: Stripe.PaymentIntent[] = []
+    const allPayments: PaymentRecord[] = []
 
     // Query Stripe directly for payment data if client has a Stripe customer ID
+    console.info('[client-stats] Client:', {
+      id: client.id,
+      email: client.email,
+      stripeCustomerId: client.stripeCustomerId,
+    })
+
     if (client.stripeCustomerId) {
       try {
-        // Get all payment intents for this client that involve this trainer
+        // 1. Get one-time payment intents with trainer metadata
         const payments = await stripe.paymentIntents.list({
           customer: client.stripeCustomerId,
-          limit: 100, // Get last 100 payments
+          limit: 100,
         })
 
-        // Filter for successful payments that involve this trainer
-        stripePayments = payments.data.filter((payment) => {
-          return (
+        // Filter for successful one-time payments that involve this trainer
+        for (const payment of payments.data) {
+          if (
             payment.status === 'succeeded' &&
             payment.metadata?.trainerId === trainerId
-          )
+          ) {
+            allPayments.push({
+              id: payment.id,
+              amount: payment.amount,
+              currency: payment.currency,
+              description: payment.description,
+              created: payment.created,
+              type: 'one-time',
+            })
+          }
+        }
+
+        // 2. Get subscription payments (invoices) for subscriptions with this trainer
+        // First, check ALL subscriptions for this client in our database
+        const allDbSubscriptions = await prisma.userSubscription.findMany({
+          where: { userId: clientId },
+          select: {
+            stripeSubscriptionId: true,
+            trainerId: true,
+            status: true,
+          },
         })
 
-        // Calculate statistics from Stripe data
-        totalSpent = stripePayments.reduce(
-          (sum, payment) => sum + payment.amount,
-          0,
+        console.info(
+          '[client-stats] ALL DB subscriptions for client:',
+          allDbSubscriptions,
         )
-        completedPurchases = stripePayments.length
+
+        // Filter for this trainer
+        const dbSubscriptions = allDbSubscriptions.filter(
+          (s) => s.trainerId === trainerId,
+        )
+
+        console.info(
+          '[client-stats] DB subscriptions for trainer:',
+          dbSubscriptions,
+        )
+
+        const dbSubscriptionIds = dbSubscriptions
+          .map((s) => s.stripeSubscriptionId)
+          .filter((id): id is string => id !== null)
+
+        // Also check Stripe metadata as fallback
+        const stripeSubscriptions = await stripe.subscriptions.list({
+          customer: client.stripeCustomerId,
+          limit: 100,
+          status: 'all',
+        })
+
+        console.info(
+          '[client-stats] Stripe subscriptions:',
+          stripeSubscriptions.data.map((s) => ({
+            id: s.id,
+            status: s.status,
+            metadata: s.metadata,
+          })),
+        )
+
+        const stripeTrainerSubIds = stripeSubscriptions.data
+          .filter((sub) => sub.metadata?.trainerId === trainerId)
+          .map((sub) => sub.id)
+
+        // Combine both sources
+        const trainerSubscriptionIds = [
+          ...new Set([...dbSubscriptionIds, ...stripeTrainerSubIds]),
+        ]
+
+        console.info(
+          '[client-stats] Trainer subscription IDs:',
+          trainerSubscriptionIds,
+        )
+
+        // Fetch invoices directly by subscription ID (more reliable)
+        for (const subId of trainerSubscriptionIds) {
+          try {
+            const subInvoices = await stripe.invoices.list({
+              subscription: subId,
+              limit: 100,
+            })
+
+            console.info(
+              `[client-stats] Invoices for subscription ${subId}:`,
+              subInvoices.data.map((inv) => ({
+                id: inv.id,
+                status: inv.status,
+                amount_paid: inv.amount_paid,
+                created: new Date(inv.created * 1000).toISOString(),
+              })),
+            )
+
+            // Add all paid invoices
+            for (const invoice of subInvoices.data) {
+              if (invoice.status === 'paid' && invoice.amount_paid > 0) {
+                const alreadyAdded = allPayments.some(
+                  (p) => p.id === invoice.id,
+                )
+
+                if (!alreadyAdded) {
+                  allPayments.push({
+                    id: invoice.id,
+                    amount: invoice.amount_paid,
+                    currency: invoice.currency,
+                    description:
+                      invoice.lines.data[0]?.description ||
+                      'Subscription payment',
+                    created: invoice.created,
+                    type: 'subscription',
+                  })
+                }
+              }
+            }
+          } catch (error) {
+            console.error(
+              `[client-stats] Error fetching invoices for subscription ${subId}:`,
+              error,
+            )
+          }
+        }
+
+        // Calculate totals
+        totalSpent = allPayments.reduce((sum, p) => sum + p.amount, 0)
+        completedPurchases = allPayments.length
+
+        console.info('[client-stats] Final payments found:', allPayments)
+        console.info('[client-stats] Total spent (cents):', totalSpent)
       } catch (error) {
-        console.error('Error fetching Stripe payments:', error)
+        console.error('[client-stats] Error fetching Stripe payments:', error)
         // Continue with empty data if Stripe fails
       }
+    } else {
+      console.info('[client-stats] No stripeCustomerId for client')
     }
 
     // Get trainer offers for this client (simplified)
@@ -90,24 +222,25 @@ export async function GET(req: NextRequest) {
     // Calculate commission (90% of total spent)
     const totalCommission = Math.round((totalSpent * 0.9) / 100)
 
-    // Get recent activity from Stripe payments
-    const recentActivity = stripePayments
-      .slice(0, 10) // Get last 10 payments
-      .map((payment) => ({
-        id: `payment-${payment.id}`,
-        type: 'payment',
-        item: payment.description || 'Training Package',
-        amount: Math.round(payment.amount / 100), // Convert cents to dollars
-        status: 'completed',
-        date: new Date(payment.created * 1000).toISOString(),
-      }))
+    // Get recent activity from all payments (sorted by date)
+    const sortedPayments = [...allPayments].sort(
+      (a, b) => b.created - a.created,
+    )
+    const recentActivity = sortedPayments.slice(0, 10).map((payment) => ({
+      id: `payment-${payment.id}`,
+      type: payment.type,
+      item: payment.description || 'Training Package',
+      amount: Math.round(payment.amount / 100),
+      status: 'completed',
+      date: new Date(payment.created * 1000).toISOString(),
+    }))
 
     // Simplified offer processing
     const processedOffers = offers.map((offer) => {
       // Get payment data from Stripe if offer is linked
       let actualPaymentData = null
       if (offer.stripePaymentIntentId) {
-        const matchingPayment = stripePayments.find(
+        const matchingPayment = allPayments.find(
           (payment) => payment.id === offer.stripePaymentIntentId,
         )
         if (matchingPayment) {
