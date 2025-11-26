@@ -89,6 +89,8 @@ type Mutation {
 input CreateExerciseInput {
   name: String!
   description: String
+  instructions: [String!]
+  tips: [String!]
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!
@@ -100,6 +102,8 @@ input CreateExerciseInput {
 input UpdateExerciseInput {
   name: String
   description: String
+  instructions: [String!]
+  tips: [String!]
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!

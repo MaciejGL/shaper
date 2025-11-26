@@ -470,10 +470,12 @@ export type GQLCreateExerciseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   equipment?: InputMaybe<GQLEquipment>;
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
+  instructions?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
   secondaryMuscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  tips?: InputMaybe<Array<Scalars['String']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -3464,10 +3466,12 @@ export type GQLUpdateExerciseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   equipment?: InputMaybe<GQLEquipment>;
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
+  instructions?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   secondaryMuscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  tips?: InputMaybe<Array<Scalars['String']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
 

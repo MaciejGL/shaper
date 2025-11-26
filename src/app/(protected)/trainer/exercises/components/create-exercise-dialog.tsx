@@ -1,9 +1,11 @@
 'use client'
 
+import { Plus, X } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Divider } from '@/components/divider'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -53,6 +55,8 @@ interface CreateExerciseDialogProps {
 export type CreateExerciseFormData = {
   name: string
   description?: string | null
+  instructions: string[]
+  tips: string[]
   equipment?: GQLEquipment
   videoUrl?: string | null
   muscleGroups: { id: string }[]
@@ -73,6 +77,8 @@ export function CreateExerciseDialog({
   const [formData, setFormData] = useState<CreateExerciseFormData>({
     name: exercise?.name ?? '',
     description: exercise?.description ?? '',
+    instructions: exercise?.instructions ?? ['', ''],
+    tips: exercise?.tips ?? [],
     equipment: exercise?.equipment ?? undefined,
     videoUrl: exercise?.videoUrl ?? '',
     muscleGroups: exercise?.muscleGroups.map((mg) => ({ id: mg.id })) ?? [],
@@ -81,6 +87,9 @@ export function CreateExerciseDialog({
     substituteIds: [],
     imageUrls: [],
   })
+
+  // Track original image URLs to detect changes
+  const [originalImageUrls, setOriginalImageUrls] = useState<string[]>([])
 
   // Load existing substitute IDs when editing
   const {
@@ -112,6 +121,7 @@ export function CreateExerciseDialog({
       const existingImageUrls = exerciseWithSubstitutes.exercise.images.map(
         (img) => img.url,
       )
+      setOriginalImageUrls(existingImageUrls)
       setFormData((prev) => ({
         ...prev,
         imageUrls: existingImageUrls,
@@ -166,37 +176,58 @@ export function CreateExerciseDialog({
     e.preventDefault()
     if (!formData.name.trim()) return
 
+    // Trim and filter out empty strings from instructions and tips
+    const filteredInstructions = formData.instructions
+      .map((instruction) => instruction.trim())
+      .filter((instruction) => instruction !== '')
+    const filteredTips = formData.tips
+      .map((tip) => tip.trim())
+      .filter((tip) => tip !== '')
+
+    // Check if images have changed (for updates only)
+    const imagesChanged =
+      exercise?.id &&
+      (formData.imageUrls.length !== originalImageUrls.length ||
+        formData.imageUrls.some((url, idx) => url !== originalImageUrls[idx]))
+
+    // Prepare base cleaned data
+    const baseData = {
+      name: formData.name.trim(),
+      description: formData.description?.trim() || null,
+      videoUrl: formData.videoUrl?.trim() || null,
+      equipment: formData.equipment,
+      instructions: filteredInstructions,
+      tips: filteredTips,
+      muscleGroups: formData.muscleGroups.map((mg) => mg.id),
+      secondaryMuscleGroups: formData.secondaryMuscleGroups.map((mg) => mg.id),
+      substituteIds: formData.substituteIds,
+    }
+
+    // Only include imageUrls if:
+    // - Creating new exercise (no exercise.id), OR
+    // - Updating and images have changed
+    const cleanedData =
+      !exercise?.id || imagesChanged
+        ? { ...baseData, imageUrls: formData.imageUrls }
+        : baseData
+
     try {
       if (exercise?.id) {
         await updateExercise({
           id: exercise.id,
-          input: {
-            ...formData,
-            muscleGroups: formData.muscleGroups.map((mg) => mg.id),
-            secondaryMuscleGroups: formData.secondaryMuscleGroups.map(
-              (mg) => mg.id,
-            ),
-            substituteIds: formData.substituteIds,
-            imageUrls: formData.imageUrls,
-          },
+          input: cleanedData,
         })
       } else {
         await createExercise({
-          input: {
-            ...formData,
-            muscleGroups: formData.muscleGroups.map((mg) => mg.id),
-            secondaryMuscleGroups: formData.secondaryMuscleGroups.map(
-              (mg) => mg.id,
-            ),
-            substituteIds: formData.substituteIds,
-            imageUrls: formData.imageUrls,
-          },
+          input: cleanedData,
         })
       }
       // Reset form
       setFormData({
         name: '',
         description: '',
+        instructions: ['', ''],
+        tips: [],
         equipment: undefined,
         videoUrl: '',
         muscleGroups: [],
@@ -262,142 +293,293 @@ export function CreateExerciseDialog({
       <DialogContent
         dialogTitle={title}
         fullScreen
-        className="sm:max-w-[900px]"
+        className="sm:max-w-[900px] !pb-0 !px-0"
       >
-        <DialogHeader>
+        <DialogHeader className="px-6 py-4">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 overflow-y-auto hide-scrollbar"
+          className="px-6 pt-6 overflow-y-auto hide-scrollbar"
         >
-          <div className="space-y-2">
-            <Label htmlFor="name">Exercise Name *</Label>
-            <Input
-              id="name"
-              variant="secondary"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, name: e.target.value }))
-              }
-              placeholder="e.g., Barbell Bench Press"
-              required
-              errorMessage={
-                isNameTakenError?.level === 'user'
-                  ? isNameTakenError.error
-                  : undefined
-              }
-            />
-            {isNameTakenError && (
-              <p
-                className={cn(
-                  'text-sm text-orange-400',
-                  isNameTakenError.level === 'user' && 'text-red-500',
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground/80 uppercase tracking-wide">
+              Basic Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Exercise Name *</Label>
+                <Input
+                  id="name"
+                  variant="secondary"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  placeholder="e.g., Barbell Bench Press"
+                  required
+                  errorMessage={
+                    isNameTakenError?.level === 'user'
+                      ? isNameTakenError.error
+                      : undefined
+                  }
+                />
+                {isNameTakenError && (
+                  <p
+                    className={cn(
+                      'text-sm text-orange-400',
+                      isNameTakenError.level === 'user' && 'text-red-500',
+                    )}
+                  >
+                    {isNameTakenError.error}
+                  </p>
                 )}
-              >
-                {isNameTakenError.error}
-              </p>
-            )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="equipment">Equipment</Label>
+                <Select
+                  value={formData.equipment}
+                  onValueChange={(value: GQLEquipment) =>
+                    setFormData((prev) => ({ ...prev, equipment: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select equipment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EQUIPMENT_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              variant="ghost"
-              value={formData.description ?? ''}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-              placeholder="Describe the exercise technique and form..."
-              rows={3}
-            />
+          <Divider className="my-8" />
+
+          {/* Instructions & Tips */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground/80 uppercase tracking-wide">
+              Instructions & Tips
+            </h3>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    variant="ghost"
+                    value={formData.description ?? ''}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
+                    placeholder="Describe the exercise technique and form..."
+                    className="min-h-42"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1  gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="starting-position">Starting Position</Label>
+                    <Textarea
+                      id="starting-position"
+                      variant="ghost"
+                      value={formData.instructions[0] ?? ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          instructions: [
+                            e.target.value,
+                            prev.instructions[1] ?? '',
+                          ],
+                        }))
+                      }
+                      placeholder="Describe the starting position..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="execution">Execution</Label>
+                    <Textarea
+                      id="execution"
+                      variant="ghost"
+                      value={formData.instructions[1] ?? ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          instructions: [
+                            prev.instructions[0] ?? '',
+                            e.target.value,
+                          ],
+                        }))
+                      }
+                      placeholder="Describe how to execute the movement..."
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-6">
+                  <Label>Tips</Label>
+
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    iconOnly={<Plus />}
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        tips: [...prev.tips, ''],
+                      }))
+                    }
+                  >
+                    Add Tip
+                  </Button>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  Training cues, common mistakes, coaching points
+                </span>
+                {formData.tips.length > 0 && (
+                  <div className="space-y-2 w-full">
+                    {formData.tips.map((tip, index) => (
+                      <div
+                        key={index}
+                        className="grid grid-cols-[1fr_auto] gap-2 items-center w-full"
+                      >
+                        <Input
+                          id={`tip-${index}`}
+                          variant="ghost"
+                          value={tip}
+                          onChange={(e) => {
+                            const newTips = [...formData.tips]
+                            newTips[index] = e.target.value
+                            setFormData((prev) => ({ ...prev, tips: newTips }))
+                          }}
+                          placeholder={`Tip ${index + 1}`}
+                          className="flex-1 grow"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-md"
+                          iconOnly={<X />}
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              tips: prev.tips.filter((_, i) => i !== index),
+                            }))
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="videoUrl">Video URL</Label>
-            <Input
-              id="videoUrl"
-              type="url"
-              variant="secondary"
-              value={formData.videoUrl ?? ''}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, videoUrl: e.target.value }))
-              }
-              placeholder="https://youtube.com/watch?v=..."
-            />
+          <Divider className="my-8" />
+
+          {/* Muscle Groups & Targeting */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground/80 uppercase tracking-wide">
+              Muscle Groups & Substitutes
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <MuscleGroupSelector
+                  categories={categories}
+                  selectedPrimaryMuscleGroups={formData.muscleGroups}
+                  selectedSecondaryMuscleGroups={formData.secondaryMuscleGroups}
+                  onPrimaryMuscleGroupsChange={handlePrimaryMuscleGroupsChange}
+                  onSecondaryMuscleGroupsChange={
+                    handleSecondaryMuscleGroupsChange
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <SubstituteExercisesManager
+                  exerciseId={exercise?.id}
+                  selectedMuscleGroupIds={
+                    formData.muscleGroups.length > 0
+                      ? formData.muscleGroups.map((mg) => mg.id)
+                      : (categories?.map((mg) => mg.id) ?? [])
+                  }
+                  availableExercises={{
+                    userExercises: userExercises || [],
+                    publicExercises: publicExercises || [],
+                  }}
+                  selectedSubstituteIds={formData.substituteIds}
+                  onSubstitutesChange={(substituteIds: string[]) => {
+                    setFormData((prev) => ({ ...prev, substituteIds }))
+                  }}
+                  isLoading={isLoadingExerciseWithSubstitutes}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="equipment">Equipment</Label>
-            <Select
-              value={formData.equipment}
-              onValueChange={(value: GQLEquipment) =>
-                setFormData((prev) => ({ ...prev, equipment: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select equipment" />
-              </SelectTrigger>
-              <SelectContent>
-                {EQUIPMENT_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Divider className="my-8" />
 
-          <div className="space-y-2">
-            <MuscleGroupSelector
-              categories={categories}
-              selectedPrimaryMuscleGroups={formData.muscleGroups}
-              selectedSecondaryMuscleGroups={formData.secondaryMuscleGroups}
-              onPrimaryMuscleGroupsChange={handlePrimaryMuscleGroupsChange}
-              onSecondaryMuscleGroupsChange={handleSecondaryMuscleGroupsChange}
-            />
-          </div>
+          {/* Media & Resources */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground/80 uppercase tracking-wide">
+              Media & Resources
+            </h3>
+            <div className="space-y-2.5">
+              <div className="space-y-2">
+                <Label htmlFor="videoUrl">
+                  Video URL
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                    YouTube, Vimeo, or direct link
+                  </span>
+                </Label>
+                <Input
+                  id="videoUrl"
+                  type="url"
+                  variant="secondary"
+                  value={formData.videoUrl ?? ''}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      videoUrl: e.target.value,
+                    }))
+                  }
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
 
-          <div className="space-y-2">
-            <SubstituteExercisesManager
-              exerciseId={exercise?.id}
-              selectedMuscleGroupIds={
-                formData.muscleGroups.length > 0
-                  ? formData.muscleGroups.map((mg) => mg.id)
-                  : (categories?.map((mg) => mg.id) ?? [])
-              }
-              availableExercises={{
-                userExercises: userExercises || [],
-                publicExercises: publicExercises || [],
-              }}
-              selectedSubstituteIds={formData.substituteIds}
-              onSubstitutesChange={(substituteIds: string[]) => {
-                setFormData((prev) => ({ ...prev, substituteIds }))
-              }}
-              isLoading={isLoadingExerciseWithSubstitutes}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Exercise Images</Label>
-            <MultiImageUpload
-              imageType="exercise"
-              currentImageUrls={formData.imageUrls}
-              onImagesChange={(imageUrls: string[]) => {
-                setFormData((prev) => ({ ...prev, imageUrls }))
-              }}
-              maxImages={4}
-              disabled={isCreatingExercise || isUpdatingExercise}
-            />
+              <div className="space-y-2">
+                <Label>Exercise Images</Label>
+                <MultiImageUpload
+                  imageType="exercise"
+                  currentImageUrls={formData.imageUrls}
+                  onImagesChange={(imageUrls: string[]) => {
+                    setFormData((prev) => ({ ...prev, imageUrls }))
+                  }}
+                  maxImages={4}
+                  disabled={isCreatingExercise || isUpdatingExercise}
+                />
+              </div>
+            </div>
           </div>
         </form>
-        <DialogFooter className="flex flex-row gap-2">
+        <DialogFooter className="flex flex-row gap-2 border-t p-4">
           {exercise?.id && (
             <Button
               type="button"

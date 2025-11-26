@@ -1,8 +1,134 @@
 'use client'
 
+import { Check, ChevronsUpDown, X } from 'lucide-react'
+import { useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
 import { Label } from '@/components/ui/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { GQLMuscleGroupCategoriesQuery } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
+
+interface MuscleGroupMultiSelectProps {
+  label: string
+  categories?: GQLMuscleGroupCategoriesQuery['muscleGroupCategories']
+  selectedIds: string[]
+  onSelect: (ids: string[]) => void
+  required?: boolean
+}
+
+function MuscleGroupMultiSelect({
+  label,
+  categories,
+  selectedIds,
+  onSelect,
+  required,
+}: MuscleGroupMultiSelectProps) {
+  const [open, setOpen] = useState(false)
+
+  const allMuscles =
+    categories?.flatMap((c) =>
+      c.muscles.map((m) => ({ ...m, categoryName: c.name })),
+    ) ?? []
+
+  const selectedMuscles = allMuscles.filter((m) => selectedIds.includes(m.id))
+
+  const handleSelect = (muscleId: string) => {
+    if (selectedIds.includes(muscleId)) {
+      onSelect(selectedIds.filter((id) => id !== muscleId))
+    } else {
+      onSelect([...selectedIds, muscleId])
+    }
+  }
+
+  const handleRemove = (muscleId: string) => {
+    onSelect(selectedIds.filter((id) => id !== muscleId))
+  }
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-sm font-medium">
+        {label} {required && <span className="text-red-500">*</span>}
+      </Label>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between"
+          >
+            {selectedIds.length > 0
+              ? `${selectedIds.length} selected`
+              : 'Select muscle groups...'}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0" align="start">
+          <Command>
+            <CommandInput placeholder="Search muscle groups..." />
+            <CommandList>
+              <CommandEmpty>No muscle group found.</CommandEmpty>
+              {categories?.map((category) => (
+                <CommandGroup key={category.id} heading={category.name}>
+                  {category.muscles.map((muscle) => (
+                    <CommandItem
+                      key={muscle.id}
+                      value={`${muscle.name} ${muscle.alias || ''}`}
+                      onSelect={() => handleSelect(muscle.id)}
+                    >
+                      <Check
+                        className={cn(
+                          'mr-2 h-4 w-4',
+                          selectedIds.includes(muscle.id)
+                            ? 'opacity-100'
+                            : 'opacity-0',
+                        )}
+                      />
+                      {muscle.alias || muscle.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ))}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+
+      {selectedMuscles.length > 0 && (
+        <div className="flex flex-wrap gap-2 pt-1">
+          {selectedMuscles.map((muscle) => (
+            <Badge key={muscle.id} variant="secondary" className="pr-1">
+              {muscle.alias || muscle.name}
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="h-4 w-4 ml-1 hover:bg-transparent"
+                onClick={() => handleRemove(muscle.id)}
+              >
+                <X className="h-3 w-3" />
+                <span className="sr-only">Remove {muscle.name}</span>
+              </Button>
+            </Badge>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 interface MuscleGroupSelectorProps {
   categories?: GQLMuscleGroupCategoriesQuery['muscleGroupCategories']
@@ -31,111 +157,26 @@ export function MuscleGroupSelector({
   onPrimaryMuscleGroupsChange,
   onSecondaryMuscleGroupsChange,
 }: MuscleGroupSelectorProps) {
-  const handlePrimaryMuscleToggle = (
-    muscle: GQLMuscleGroupCategoriesQuery['muscleGroupCategories'][number]['muscles'][number],
-  ) => {
-    const isSelected = selectedPrimaryMuscleGroups.some(
-      (mg) => mg.id === muscle.id,
-    )
-
-    if (isSelected) {
-      onPrimaryMuscleGroupsChange(
-        selectedPrimaryMuscleGroups.filter((mg) => mg.id !== muscle.id),
-      )
-    } else {
-      onPrimaryMuscleGroupsChange([
-        ...selectedPrimaryMuscleGroups,
-        { id: muscle.id },
-      ])
-    }
-  }
-
-  const handleSecondaryMuscleToggle = (
-    muscle: GQLMuscleGroupCategoriesQuery['muscleGroupCategories'][number]['muscles'][number],
-  ) => {
-    const isSelected = selectedSecondaryMuscleGroups.some(
-      (mg) => mg.id === muscle.id,
-    )
-
-    if (isSelected) {
-      onSecondaryMuscleGroupsChange(
-        selectedSecondaryMuscleGroups.filter((mg) => mg.id !== muscle.id),
-      )
-    } else {
-      onSecondaryMuscleGroupsChange([
-        ...selectedSecondaryMuscleGroups,
-        { id: muscle.id },
-      ])
-    }
-  }
-
-  const isPrimaryMuscleSelected = (muscleId: string) => {
-    return selectedPrimaryMuscleGroups.some((mg) => mg.id === muscleId)
-  }
-
-  const isSecondaryMuscleSelected = (muscleId: string) => {
-    return selectedSecondaryMuscleGroups.some((mg) => mg.id === muscleId)
-  }
-
-  const renderMuscleSection = (
-    title: string,
-    description: string,
-    handleToggle: (
-      muscle: GQLMuscleGroupCategoriesQuery['muscleGroupCategories'][number]['muscles'][number],
-    ) => void,
-    isSelected: (muscleId: string) => boolean,
-    required = false,
-  ) => (
-    <div className="space-y-2 w-full">
-      <div>
-        <Label className="text-sm font-medium">
-          {title} {required && <span className="text-red-500">*</span>}
-        </Label>
-        <p className="text-xs text-muted-foreground mt-1">{description}</p>
-      </div>
-      <div className="space-y-2 bg-card rounded-lg p-4">
-        {categories?.map((category) => (
-          <div
-            key={category.id}
-            className="space-y-1 grid grid-cols-[2fr_5fr] gap-4 not-last:border-b border-border pb-2 items-center"
-          >
-            <p className="font-medium text-xs">{category.name}</p>
-            <div className="flex flex-wrap gap-2">
-              {category.muscles?.map((muscle) => (
-                <Badge
-                  key={muscle.id}
-                  variant={isSelected(muscle.id) ? 'primary' : 'outline'}
-                  className="cursor-pointer"
-                  size="sm"
-                  onClick={() => handleToggle(muscle)}
-                >
-                  {muscle.alias || muscle.name}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-
   return (
-    <div className="flex gap-4 w-full">
-      {renderMuscleSection(
-        'Primary Muscle Groups',
-        'Main muscles targeted by this exercise',
-        handlePrimaryMuscleToggle,
-        isPrimaryMuscleSelected,
-        true,
-      )}
+    <div className="grid grid-cols-1 gap-6 w-full">
+      <MuscleGroupMultiSelect
+        label="Primary Muscles"
+        categories={categories}
+        selectedIds={selectedPrimaryMuscleGroups.map((mg) => mg.id)}
+        onSelect={(ids) =>
+          onPrimaryMuscleGroupsChange(ids.map((id) => ({ id })))
+        }
+        required
+      />
 
-      {renderMuscleSection(
-        'Secondary Muscle Groups',
-        'Muscles that assist or are worked secondarily (optional)',
-        handleSecondaryMuscleToggle,
-        isSecondaryMuscleSelected,
-        false,
-      )}
+      <MuscleGroupMultiSelect
+        label="Secondary Muscle"
+        categories={categories}
+        selectedIds={selectedSecondaryMuscleGroups.map((mg) => mg.id)}
+        onSelect={(ids) =>
+          onSecondaryMuscleGroupsChange(ids.map((id) => ({ id })))
+        }
+      />
     </div>
   )
 }

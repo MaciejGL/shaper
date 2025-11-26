@@ -352,7 +352,7 @@ export function MultiImageUpload({
       {canAddMore && (
         <div
           className={cn(
-            'border border-dashed rounded-lg p-6 text-center transition-colors relative',
+            'border border-dashed rounded-lg p-4 text-center transition-colors relative',
             dragActive
               ? 'border-primary bg-primary/5'
               : 'border-gray-300 dark:border-gray-600',
@@ -377,25 +377,21 @@ export function MultiImageUpload({
             </div>
           )}
 
-          <div className="flex flex-col items-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Plus className="w-6 h-6 text-primary" />
+          <div className="flex flex-col items-center space-y-2">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Plus className="w-5 h-5 text-primary" />
             </div>
             <div>
               <p className="text-sm font-medium">
                 {hasUploadingImages ? 'Uploading Images...' : 'Add Images'}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {hasUploadingImages
                   ? 'Please wait while images are being uploaded'
                   : 'Drag & drop or click to browse'}
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                Up to {maxImages} images • Max {config.maxSize / (1024 * 1024)}
-                MB each
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                {currentImageUrls.length}/{maxImages} uploaded
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                Up to {maxImages} images • Max {config.maxSize / (1024 * 1024)}MB each • {currentImageUrls.length}/{maxImages} uploaded
               </p>
             </div>
           </div>

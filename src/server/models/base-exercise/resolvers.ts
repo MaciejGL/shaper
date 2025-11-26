@@ -360,6 +360,8 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       data: {
         name: input.name,
         description: input.description,
+        instructions: input.instructions ?? [],
+        tips: input.tips ?? [],
         videoUrl: input.videoUrl,
         equipment: input.equipment,
         muscleGroups: {
@@ -487,6 +489,8 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       data: {
         name: input.name ?? undefined,
         description: input.description ?? undefined,
+        instructions: input.instructions ?? undefined,
+        tips: input.tips ?? undefined,
         videoUrl: input.videoUrl,
         equipment: input.equipment,
         muscleGroups: {
@@ -621,6 +625,19 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new GraphQLError('Exercise not found or access denied')
     }
 
+    // Check if exercise is used in any training plans
+    const trainingExerciseCount = await prisma.trainingExercise.count({
+      where: {
+        baseId: id,
+      },
+    })
+
+    if (trainingExerciseCount > 0) {
+      throw new GraphQLError(
+        `Cannot delete exercise. It is currently used in ${trainingExerciseCount} training plan${trainingExerciseCount === 1 ? '' : 's'}. Please remove it from all training plans before deleting.`,
+      )
+    }
+
     // Get exercise images to clean up from S3
     const exerciseImages = await prisma.image.findMany({
       where: {
@@ -628,6 +645,14 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         entityId: id,
       },
       select: { url: true },
+    })
+
+    // Delete images from database first
+    await prisma.image.deleteMany({
+      where: {
+        entityType: 'exercise',
+        entityId: id,
+      },
     })
 
     // Delete images and all variants from S3
@@ -639,7 +664,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       await Promise.all(deletePromises)
     }
 
-    // Delete the exercise (this will cascade delete images via foreign key)
+    // Delete the exercise
     await prisma.baseExercise.delete({
       where: { id },
     })

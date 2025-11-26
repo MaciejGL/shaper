@@ -36,7 +36,7 @@ const Textarea = React.forwardRef<
     ref,
   ) => {
     return (
-      <div className="space-y-1 w-full">
+      <div className="space-y-1 w-full flex flex-col">
         {label && (
           <Label htmlFor={id} className="text-sm font-medium">
             {label}
