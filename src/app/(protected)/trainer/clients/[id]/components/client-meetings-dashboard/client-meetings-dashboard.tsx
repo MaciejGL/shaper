@@ -5,16 +5,15 @@ import {
   Calendar,
   CalendarPlus,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Edit,
   MapPin,
   Plus,
+  UserCheck,
   Video,
   XCircle,
-  ChevronDown,
-  ChevronUp,
-  UserCheck,
-  Target,
 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -47,8 +46,8 @@ import { useTimeFormatting } from '@/hooks/use-time-formatting'
 import { cn } from '@/lib/utils'
 import { addToCalendar } from '@/utils/calendar-utils'
 
-import { EditMeetingModal } from '../client-meetings/edit-meeting-modal'
-import { ScheduleMeetingModal } from '../client-meetings/schedule-meeting-modal'
+import { EditMeetingModal } from './edit-meeting-modal'
+import { ScheduleMeetingModal } from './schedule-meeting-modal'
 
 type Meeting = NonNullable<
   GQLGetTraineeMeetingsQuery['getTraineeMeetings']
@@ -650,4 +649,3 @@ function CompactMeetingCard({
     </>
   )
 }
-

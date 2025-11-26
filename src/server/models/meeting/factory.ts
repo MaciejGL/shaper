@@ -300,23 +300,6 @@ export async function createMeeting(
     }
   }
 
-  // Validate service task link if provided
-  if (input.serviceTaskId) {
-    const serviceTask = await prisma.serviceTask.findFirst({
-      where: {
-        id: input.serviceTaskId,
-        serviceDelivery: {
-          trainerId: currentUserId,
-          clientId: input.traineeId,
-        },
-      },
-    })
-
-    if (!serviceTask) {
-      throw new Error('Service task not found or access denied')
-    }
-  }
-
   const scheduledAt = new Date(input.scheduledAt)
 
   const meeting = await prisma.meeting.create({
@@ -334,7 +317,6 @@ export async function createMeeting(
       title: input.title,
       description: input.description || null,
       serviceDeliveryId: input.serviceDeliveryId || null,
-      serviceTaskId: input.serviceTaskId || null,
     },
     include: {
       coach: {

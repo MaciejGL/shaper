@@ -47,7 +47,6 @@ interface ScheduleMeetingModalProps {
   traineeId: string
   traineeName: string
   serviceDeliveryId?: string
-  serviceTaskId?: string
 }
 
 const scheduleMeetingSchema = z
@@ -120,7 +119,6 @@ export function ScheduleMeetingModal({
   traineeId,
   traineeName,
   serviceDeliveryId,
-  serviceTaskId,
 }: ScheduleMeetingModalProps) {
   const queryClient = useQueryClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -190,7 +188,6 @@ export function ScheduleMeetingModal({
           title: values.title,
           description: values.description || null,
           serviceDeliveryId: serviceDeliveryId || null,
-          serviceTaskId: serviceTaskId || null,
         },
       })
 

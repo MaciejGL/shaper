@@ -19,6 +19,7 @@ describe('navigation-utils', () => {
       const plan: NavigationPlan = {
         id: '1',
         startDate: null,
+        title: 'Quick Workout',
         weeks: [
           {
             id: 'w1',
@@ -36,6 +37,7 @@ describe('navigation-utils', () => {
       const plan: NavigationPlan = {
         id: '1',
         startDate: '2025-01-01T00:00:00Z',
+        title: 'Quick Workout',
         weeks: [
           {
             id: 'w1',
@@ -323,6 +325,7 @@ describe('navigation-utils', () => {
       const plan: NavigationPlan = {
         id: '1',
         startDate: null,
+        title: 'Quick Workout',
         weeks: [],
       }
 
@@ -334,6 +337,7 @@ describe('navigation-utils', () => {
       const plan: NavigationPlan = {
         id: '1',
         startDate: null,
+        title: 'Quick Workout',
         weeks: [
           {
             id: 'w40',
@@ -403,6 +407,7 @@ describe('navigation-utils', () => {
       const plan: NavigationPlan = {
         id: '1',
         startDate: '2025-10-01T00:00:00Z', // Oct 1, 2025
+        title: 'Quick Workout',
         weeks: [
           {
             id: 'w1',
