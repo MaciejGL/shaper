@@ -6,12 +6,17 @@ import { MeasurementCategoryDrawer } from '@/app/(protected)/fitspace/progress/c
 import { MeasurementChart } from '@/app/(protected)/fitspace/progress/components/measurement-chart'
 import { measurementCategories } from '@/app/(protected)/fitspace/progress/components/measurement-constants'
 import { StatCard } from '@/app/(protected)/fitspace/progress/components/stat-card'
-import { Card, CardContent } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { useCircumferenceConversion } from '@/hooks/use-circumference-conversion'
 import { useDynamicUnitResolver } from '@/hooks/use-dynamic-unit-resolver'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
-
-import { ClientHeader } from '../header'
 
 import { useBodyMeasurementsContext } from './client-measurements-context'
 
@@ -23,13 +28,11 @@ export function ClientMeasurementsContent({
   const { bodyMeasures, getLatestMeasurement, getTrend } =
     useBodyMeasurementsContext()
 
-  // User preference conversion hooks - same pattern as DetailedMeasurements
   const { toDisplayWeight, weightUnit } = useWeightConversion()
   const { toDisplayCircumference, circumferenceUnit } =
     useCircumferenceConversion()
   const { resolveUnit } = useDynamicUnitResolver()
 
-  // List of circumference measurement fields (same as DetailedMeasurements)
   const circumferenceFields = [
     'chest',
     'waist',
@@ -42,135 +45,161 @@ export function ClientMeasurementsContent({
     'calfLeft',
     'calfRight',
   ]
+  const totalLogs = bodyMeasures.length
 
   return (
-    <div className="space-y-8">
-      {/* Quick Stats Overview - Read-only for trainer */}
-      <div className="space-y-4">
-        <ClientHeader title="Measurements" />
-        {bodyMeasures.length === 0 && (
-          <ClientMeasurementsEmptyState clientName={clientName} />
-        )}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MeasurementCategoryDrawer
-            key={'weight'}
-            category={measurementCategories[0]}
-            measurements={bodyMeasures}
-            focusField={'weight'}
-            drawerDirection="right"
-          >
-            <button className="text-left w-full">
-              <StatCard
-                label="Weight"
-                value={
-                  toDisplayWeight(getLatestMeasurement('weight')) || undefined
-                }
-                unit={weightUnit}
-                trend={getTrend('weight')}
-              />
-            </button>
-          </MeasurementCategoryDrawer>
-          <MeasurementCategoryDrawer
-            key={'bodyFat'}
-            category={measurementCategories[1]}
-            measurements={bodyMeasures}
-            focusField={'bodyFat'}
-            drawerDirection="right"
-          >
-            <button className="text-left w-full">
-              <StatCard
-                label="Body Fat"
-                value={getLatestMeasurement('bodyFat')}
-                unit="%"
-                trend={getTrend('bodyFat')}
-              />
-            </button>
-          </MeasurementCategoryDrawer>
-        </div>
-      </div>
+    <div className="space-y-6">
+      {bodyMeasures.length === 0 && (
+        <ClientMeasurementsEmptyState clientName={clientName} />
+      )}
+
+      {/* Quick Stats Overview */}
+      {bodyMeasures.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Measurements Overview</CardTitle>
+            <CardDescription>Latest body metrics</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-2 gap-4">
+              <MeasurementCategoryDrawer
+                key={'weight'}
+                category={measurementCategories[0]}
+                measurements={bodyMeasures}
+                focusField={'weight'}
+                drawerDirection="right"
+              >
+                <button className="text-left w-full">
+                  <StatCard
+                    label="Weight"
+                    value={
+                      toDisplayWeight(getLatestMeasurement('weight')) ||
+                      undefined
+                    }
+                    unit={weightUnit}
+                    trend={getTrend('weight')}
+                    isOnCard
+                  />
+                </button>
+              </MeasurementCategoryDrawer>
+              <MeasurementCategoryDrawer
+                key={'bodyFat'}
+                category={measurementCategories[1]}
+                measurements={bodyMeasures}
+                focusField={'bodyFat'}
+                drawerDirection="right"
+              >
+                <button className="text-left w-full">
+                  <StatCard
+                    label="Body Fat"
+                    value={getLatestMeasurement('bodyFat')}
+                    unit="%"
+                    trend={getTrend('bodyFat')}
+                    isOnCard
+                  />
+                </button>
+              </MeasurementCategoryDrawer>
+            </div>
+          </CardContent>
+          <CardFooter className="pt-4 border-t flex flex-row">
+            <div className="flex items-center justify-between w-full">
+              <span className="text-sm text-muted-foreground">Total Logs</span>
+              <span className="text-lg font-semibold">{totalLogs}</span>
+            </div>
+          </CardFooter>
+        </Card>
+      )}
 
       {/* Weight Progress Chart */}
       {bodyMeasures.length > 1 && (
-        <div className="space-y-4 max-w-lg">
-          <h3 className="text-lg font-medium">Weight Progress</h3>
-          <MeasurementChart
-            measurements={bodyMeasures}
-            field="weight"
-            label="Weight"
-            unit={weightUnit}
-            className="h-full w-full min-h-0 bg-card dark:bg-black/20 rounded-lg p-2"
-          />
-        </div>
+        <Card>
+          <CardContent>
+            <h4 className="font-medium mb-4">Weight Progress</h4>
+            <MeasurementChart
+              measurements={bodyMeasures}
+              field="weight"
+              label="Weight"
+              unit={weightUnit}
+              className="h-[200px] w-full"
+            />
+          </CardContent>
+        </Card>
       )}
 
       {/* Detailed Measurements by Category */}
-      <div className="space-y-6">
-        <h3 className="text-lg font-medium">Detailed Measurements</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {measurementCategories.slice(1).map((category) => (
-            <div key={category.id} className="space-y-4">
-              <h4 className="font-medium">{category.title}</h4>
-              <div className="grid grid-cols-2 gap-3">
-                {category.fields.map((field) => {
-                  const hasFieldData = bodyMeasures.some(
-                    (measurement) =>
-                      measurement[field.key] !== null &&
-                      measurement[field.key] !== undefined,
-                  )
+      {bodyMeasures.length > 0 && (
+        <div className="space-y-6">
+          <h4 className="font-medium">Detailed Measurements</h4>
+          <div className="grid gap-6">
+            {measurementCategories.slice(1).map((category) => (
+              <Card key={category.id}>
+                <CardContent className="pt-6">
+                  <h5 className="font-medium mb-4">{category.title}</h5>
+                  <div className="grid grid-cols-2 @xl/client-detail-page:grid-cols-3 gap-3">
+                    {category.fields.map((field) => {
+                      const hasFieldData = bodyMeasures.some(
+                        (measurement) =>
+                          measurement[field.key] !== null &&
+                          measurement[field.key] !== undefined,
+                      )
 
-                  if (!hasFieldData) {
-                    return (
-                      <StatCard
-                        key={field.key}
-                        label={field.label}
-                        value={getLatestMeasurement(field.key)}
-                        unit={resolveUnit(field.key, field.unit)}
-                        trend={getTrend(field.key)}
-                      />
-                    )
-                  }
+                      if (!hasFieldData) {
+                        return (
+                          <StatCard
+                            key={field.key}
+                            label={field.label}
+                            value={getLatestMeasurement(field.key)}
+                            unit={resolveUnit(field.key, field.unit)}
+                            trend={getTrend(field.key)}
+                            isOnCard
+                          />
+                        )
+                      }
 
-                  return (
-                    <MeasurementCategoryDrawer
-                      key={field.key}
-                      category={category}
-                      measurements={bodyMeasures}
-                      focusField={field.key}
-                      drawerDirection="right"
-                    >
-                      <button className="text-left w-full">
-                        <StatCard
+                      return (
+                        <MeasurementCategoryDrawer
                           key={field.key}
-                          label={field.label}
-                          value={
-                            field.key === 'weight'
-                              ? toDisplayWeight(
-                                  getLatestMeasurement(field.key),
-                                ) || undefined
-                              : circumferenceFields.includes(field.key)
-                                ? toDisplayCircumference(
-                                    getLatestMeasurement(field.key),
-                                  ) || undefined
-                                : getLatestMeasurement(field.key)
-                          }
-                          unit={
-                            field.key === 'weight'
-                              ? weightUnit
-                              : circumferenceFields.includes(field.key)
-                                ? circumferenceUnit
-                                : field.unit
-                          }
-                          trend={getTrend(field.key)}
-                        />
-                      </button>
-                    </MeasurementCategoryDrawer>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
+                          category={category}
+                          measurements={bodyMeasures}
+                          focusField={field.key}
+                          drawerDirection="right"
+                        >
+                          <button className="text-left w-full">
+                            <StatCard
+                              key={field.key}
+                              label={field.label}
+                              value={
+                                field.key === 'weight'
+                                  ? toDisplayWeight(
+                                      getLatestMeasurement(field.key),
+                                    ) || undefined
+                                  : circumferenceFields.includes(field.key)
+                                    ? toDisplayCircumference(
+                                        getLatestMeasurement(field.key),
+                                      ) || undefined
+                                    : getLatestMeasurement(field.key)
+                              }
+                              unit={
+                                field.key === 'weight'
+                                  ? weightUnit
+                                  : circumferenceFields.includes(field.key)
+                                    ? circumferenceUnit
+                                    : field.unit
+                              }
+                              trend={getTrend(field.key)}
+                              isOnCard
+                            />
+                          </button>
+                        </MeasurementCategoryDrawer>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

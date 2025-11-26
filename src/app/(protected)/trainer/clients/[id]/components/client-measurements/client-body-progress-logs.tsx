@@ -5,10 +5,14 @@ import { Camera } from 'lucide-react'
 
 import { Loader } from '@/components/loader'
 import { ProgressImageGallery } from '@/components/private-images/image-gallery'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { useClientBodyProgressLogsQuery } from '@/generated/graphql-client'
-
-import { ClientHeader } from '../header'
 
 interface ClientBodyProgressLogsProps {
   clientId: string
@@ -27,66 +31,59 @@ export function ClientBodyProgressLogs({
 
   if (isLoading) {
     return (
-      <div>
-        <ClientHeader title="Body Progress Snapshots" />
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5" />
-              Body Progress Snapshots
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center py-8">
-              <Loader />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Progress Photos</CardTitle>
+          <CardDescription>Body transformation snapshots</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center py-8">
+            <Loader />
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   if (progressLogs.length === 0) {
     return (
-      <div>
-        <ClientHeader title="Body Progress Snapshots" />
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5" />
-              Body Progress Snapshots
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="font-semibold mb-2">No Shared Snapshots Yet</h3>
-              <p className="text-muted-foreground text-sm">
-                {clientName} hasn't shared any body progress snapshots with you
-                yet.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Progress Photos</CardTitle>
+          <CardDescription>Body transformation snapshots</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="font-semibold mb-2">No Photos Yet</h3>
+            <p className="text-muted-foreground text-sm">
+              {clientName} hasn't shared any progress photos with you yet.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <div>
-      <ClientHeader title="Body Progress Snapshots" />
-
-      <div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Progress Photos</CardTitle>
+        <CardDescription>
+          {progressLogs.length}{' '}
+          {progressLogs.length === 1 ? 'snapshot' : 'snapshots'} shared
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <div className="space-y-6">
           {progressLogs.map((log) => (
-            <div key={log.id} className="space-y-2">
-              {/* Header with date and shared badge */}
-              <div className="flex gap-2 items-center">
-                <div className="text-sm self-end">
-                  {format(new Date(log.loggedAt), 'd. MMM yyyy')}
+            <div key={log.id} className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium">
+                  {format(new Date(log.loggedAt), 'MMM d, yyyy')}
                 </div>
               </div>
-              {/* Image gallery */}
+
               <ProgressImageGallery
                 images={[
                   log.image1 || null,
@@ -96,18 +93,21 @@ export function ClientBodyProgressLogs({
                 imageLabels={['Front', 'Side', 'Back']}
               />
 
-              {/* Notes if present */}
               {log.notes && (
-                <div className="mt-3 p-3 bg-muted rounded-lg">
+                <div className="p-3 bg-muted rounded-lg">
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {log.notes}
                   </p>
                 </div>
               )}
+
+              {progressLogs.indexOf(log) < progressLogs.length - 1 && (
+                <div className="border-t pt-6" />
+              )}
             </div>
           ))}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

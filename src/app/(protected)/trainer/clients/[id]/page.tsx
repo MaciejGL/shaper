@@ -74,7 +74,7 @@ export default function ClientDetailPage({
               Programs
             </TabsTrigger>
             <TabsTrigger size="lg" value="measurements">
-              Progress
+              Measurements
             </TabsTrigger>
             <TabsTrigger size="lg" value="services">
               Services

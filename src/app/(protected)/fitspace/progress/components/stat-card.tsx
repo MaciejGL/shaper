@@ -47,7 +47,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'rounded-lg bg-card dark:bg-card h-full',
+        'rounded-lg bg-card dark:bg-card h-full cursor-pointer',
         size === 'sm' ? 'p-3' : 'p-3',
         isOnCard && 'bg-card-on-card dark:bg-card-on-card',
       )}

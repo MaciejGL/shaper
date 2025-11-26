@@ -51,13 +51,16 @@ export function ClientMeasurements({
   const measurements = data?.clientBodyMeasures || []
 
   return (
-    <div className="space-y-6 @container/client-measurements">
-      <div className="grid grid-cols-1 @[1000px]/client-measurements:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_minmax(400px,2fr)] gap-6">
+      {/* Left Column: Main Content */}
+      <div className="space-y-6">
         <ClientMeasurementsProvider measurements={measurements}>
           <ClientMeasurementsContent clientName={clientName} />
         </ClientMeasurementsProvider>
+      </div>
 
-        {/* Body Progress Snapshots */}
+      {/* Right Column: Stats & Progress */}
+      <div className="space-y-6">
         <ClientBodyProgressLogs clientId={client.id} clientName={clientName} />
       </div>
     </div>
