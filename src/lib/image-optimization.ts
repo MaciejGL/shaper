@@ -82,16 +82,16 @@ async function createAndStoreImageVariants(originalS3Key: string): Promise<{
       large: null as string | null,
     }
 
-    // Create thumbnail (200x267) - Higher quality for crisp small images
+    // Create thumbnail (400x533) - Higher quality for crisp small images
     try {
       const thumbnailBuffer = await sharp(imageBuffer)
-        .resize(200, 267, {
+        .resize(400, 533, {
           fit: 'inside',
           withoutEnlargement: true,
           kernel: 'lanczos3',
         })
         .webp({
-          quality: 92,
+          quality: 95,
           smartSubsample: false,
           effort: 6,
         })
@@ -113,16 +113,16 @@ async function createAndStoreImageVariants(originalS3Key: string): Promise<{
       console.error('Error creating thumbnail:', error)
     }
 
-    // Create medium (500x667) - High quality for standard display
+    // Create medium (800x1067) - High quality for standard display
     try {
       const mediumBuffer = await sharp(imageBuffer)
-        .resize(500, 667, {
+        .resize(800, 1067, {
           fit: 'inside',
           withoutEnlargement: true,
           kernel: 'lanczos3',
         })
         .webp({
-          quality: 94,
+          quality: 97,
           smartSubsample: false,
           effort: 6,
         })
@@ -144,16 +144,16 @@ async function createAndStoreImageVariants(originalS3Key: string): Promise<{
       console.error('Error creating medium variant:', error)
     }
 
-    // Create large (900x1200) - Near-lossless for detailed views
+    // Create large (1200x1600) - Near-lossless for detailed views
     try {
       const largeBuffer = await sharp(imageBuffer)
-        .resize(900, 1200, {
+        .resize(1200, 1600, {
           fit: 'inside',
           withoutEnlargement: true,
           kernel: 'lanczos3',
         })
         .webp({
-          quality: 96,
+          quality: 98,
           smartSubsample: false,
           effort: 6,
         })
