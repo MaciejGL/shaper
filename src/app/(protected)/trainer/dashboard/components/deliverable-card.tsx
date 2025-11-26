@@ -1,12 +1,27 @@
 'use client'
 
 import { format, formatDistanceToNow } from 'date-fns'
-import { AlertCircle, Calendar, CheckCircle2, Clock, User } from 'lucide-react'
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle2,
+  ChevronDown,
+  Circle,
+  Clock,
+  User,
+} from 'lucide-react'
+import { useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
+import { Progress } from '@/components/ui/progress'
 import {
   Select,
   SelectContent,
@@ -14,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { GQLDeliveryStatus } from '@/generated/graphql-client'
+import { GQLDeliveryStatus, GQLTaskStatus } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 import { Delivery } from './types'
@@ -22,14 +37,17 @@ import { Delivery } from './types'
 interface DeliverableCardProps {
   delivery: Delivery
   onStatusChange: (deliveryId: string, status: GQLDeliveryStatus) => void
+  onTaskStatusChange?: (taskId: string, status: GQLTaskStatus) => void
   isUpdating: boolean
 }
 
 export function DeliverableCard({
   delivery,
   onStatusChange,
+  onTaskStatusChange,
   isUpdating,
 }: DeliverableCardProps) {
+  const [isTasksOpen, setIsTasksOpen] = useState(false)
   const isCompleted = delivery.status === GQLDeliveryStatus.Completed
   const clientName =
     delivery.client?.name || delivery.client?.email || 'Unknown'
@@ -43,6 +61,9 @@ export function DeliverableCard({
   const dueDate = new Date(delivery.dueDate)
   const dueDateFormatted = format(dueDate, 'MMM d')
   const dueTimeAgo = formatDistanceToNow(dueDate, { addSuffix: true })
+
+  const hasTasks = delivery.tasks && delivery.tasks.length > 0
+  const taskProgress = delivery.taskProgress ?? 0
 
   return (
     <Card
@@ -64,7 +85,7 @@ export function DeliverableCard({
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex-1 min-w-0 space-y-2">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p
@@ -89,7 +110,66 @@ export function DeliverableCard({
               />
             </div>
 
-            <div className="flex items-center justify-between gap-2 pt-2">
+            {hasTasks && (
+              <Collapsible open={isTasksOpen} onOpenChange={setIsTasksOpen}>
+                <div className="flex items-center gap-2">
+                  <Progress value={taskProgress} className="h-1.5 flex-1" />
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {delivery.completedTaskCount}/{delivery.totalTaskCount}
+                  </span>
+                  <CollapsibleTrigger className="p-1 hover:bg-muted rounded">
+                    <ChevronDown
+                      className={cn(
+                        'size-4 transition-transform',
+                        isTasksOpen && 'rotate-180',
+                      )}
+                    />
+                  </CollapsibleTrigger>
+                </div>
+                <CollapsibleContent className="pt-2">
+                  <div className="space-y-1 pl-1">
+                    {delivery.tasks?.map((task) => {
+                      const isTaskCompleted =
+                        task.status === GQLTaskStatus.Completed
+                      return (
+                        <button
+                          key={task.id}
+                          className={cn(
+                            'flex items-center gap-2 w-full text-left py-1 px-2 rounded hover:bg-muted/50 transition-colors',
+                            isUpdating && 'pointer-events-none opacity-50',
+                          )}
+                          onClick={() =>
+                            onTaskStatusChange?.(
+                              task.id,
+                              isTaskCompleted
+                                ? GQLTaskStatus.Pending
+                                : GQLTaskStatus.Completed,
+                            )
+                          }
+                        >
+                          {isTaskCompleted ? (
+                            <CheckCircle2 className="size-4 text-primary shrink-0" />
+                          ) : (
+                            <Circle className="size-4 text-muted-foreground shrink-0" />
+                          )}
+                          <span
+                            className={cn(
+                              'text-sm flex-1',
+                              isTaskCompleted &&
+                                'line-through text-muted-foreground',
+                            )}
+                          >
+                            {task.title}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+
+            <div className="flex items-center justify-between gap-2 pt-1">
               <ButtonLink
                 variant="ghost"
                 size="sm"

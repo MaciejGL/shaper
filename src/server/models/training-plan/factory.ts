@@ -45,6 +45,7 @@ import { calculateEstimated1RM } from '@/utils/one-rm-calculator'
 
 import ExerciseSet from '../exercise-set/model'
 import { createNotification } from '../notification/factory'
+import { completeTaskByAction } from '../service-task/factory'
 import TrainingDay from '../training-day/model'
 import { duplicatePlan, getFullPlanById } from '../training-utils.server'
 
@@ -1216,6 +1217,18 @@ export async function assignTrainingPlanToClient(
     )
   } catch (error) {
     console.error('Error sending push notification:', error)
+  }
+
+  // Auto-complete "Deliver Training Plan" task for this client
+  try {
+    await completeTaskByAction({
+      trainerId: user.user.id,
+      clientId,
+      action: 'training_plan_assigned',
+      relatedItemId: duplicated.id,
+    })
+  } catch (error) {
+    console.error('Error auto-completing training plan task:', error)
   }
 
   return true

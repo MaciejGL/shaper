@@ -11,6 +11,7 @@ import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { notifyTrainerSubscriptionPayment } from '@/lib/notifications/push-notification-service'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
+import { createTasksForDelivery } from '@/server/models/service-task/factory'
 
 import { StripeServiceType } from '../../enums'
 
@@ -234,7 +235,7 @@ async function createRecurringServiceDelivery(
       year: 'numeric',
     })
 
-    // Create new service delivery (no tasks - using simplified deliverables system)
+    // Create new service delivery with recurring tasks (meetings only, not plans)
     const delivery = await prisma.serviceDelivery.create({
       data: {
         stripePaymentIntentId: invoice.id!,
@@ -255,6 +256,13 @@ async function createRecurringServiceDelivery(
         } as Prisma.InputJsonValue,
       },
     })
+
+    // Create ONLY recurring tasks (meetings) - plans are one-time and already delivered
+    await createTasksForDelivery(
+      delivery.id,
+      ServiceType.COACHING_COMPLETE,
+      true, // isRecurringPayment = true -> only creates meeting tasks
+    )
 
     console.info(
       `✅ Created recurring service delivery for ${monthYear}: ${delivery.id} (Client: ${subscription.userId}, Trainer: ${subscription.trainerId})`,

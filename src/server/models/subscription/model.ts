@@ -4,6 +4,7 @@ import {
   getDeliverableLabel,
   isOverdue,
 } from '@/constants/deliverable-config'
+import { TaskStatus } from '@/constants/task-templates'
 import {
   GQLDeliveryStatus,
   GQLPackageTemplate,
@@ -14,12 +15,14 @@ import {
 import {
   PackageTemplate as PrismaPackageTemplate,
   ServiceDelivery as PrismaServiceDelivery,
+  ServiceTask as PrismaServiceTask,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
   ServiceType,
 } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
+import ServiceTask from '../service-task/model'
 import User from '../user/model'
 
 export class PackageTemplate implements GQLPackageTemplate {
@@ -113,6 +116,7 @@ export class ServiceDelivery implements GQLServiceDelivery {
             profile?: PrismaUserProfile | null
           })
         | null
+      tasks?: PrismaServiceTask[]
     },
     protected context: GQLContext,
   ) {}
@@ -211,5 +215,27 @@ export class ServiceDelivery implements GQLServiceDelivery {
 
   get deliverableLabel(): string {
     return getDeliverableLabel(this.prismaServiceType)
+  }
+
+  get tasks() {
+    if (!this.data.tasks) {
+      return []
+    }
+    return this.data.tasks.map((task) => new ServiceTask(task, this.context))
+  }
+
+  get totalTaskCount(): number {
+    return this.data.tasks?.length || 0
+  }
+
+  get completedTaskCount(): number {
+    if (!this.data.tasks) return 0
+    return this.data.tasks.filter((t) => t.status === TaskStatus.COMPLETED)
+      .length
+  }
+
+  get taskProgress(): number {
+    if (this.totalTaskCount === 0) return 100
+    return Math.round((this.completedTaskCount / this.totalTaskCount) * 100)
   }
 }

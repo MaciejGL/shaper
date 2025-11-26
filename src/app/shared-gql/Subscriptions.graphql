@@ -74,6 +74,24 @@ query GetTrainerDeliveries($trainerId: ID!, $status: DeliveryStatus) {
     status
     deliveredAt
     deliveryNotes
+    dueDate
+    isOverdue
+    daysUntilDue
+    deliverableLabel
+    taskProgress
+    completedTaskCount
+    totalTaskCount
+    tasks {
+      id
+      templateId
+      title
+      taskType
+      status
+      order
+      isRequired
+      completedAt
+      notes
+    }
     client {
       id
       name

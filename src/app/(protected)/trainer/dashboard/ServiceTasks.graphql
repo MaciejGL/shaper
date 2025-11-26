@@ -1,0 +1,8 @@
+mutation UpdateServiceTask($taskId: ID!, $input: UpdateServiceTaskInput!) {
+  updateServiceTask(taskId: $taskId, input: $input) {
+    id
+    status
+    completedAt
+    notes
+  }
+}

@@ -12,6 +12,8 @@ import {
 } from '@/lib/notifications/push-notification-service'
 import { GQLContext } from '@/types/gql-context'
 
+import { completeTaskByAction } from '../service-task/factory'
+
 import Meeting from './model'
 
 // Helper function to send meeting notification via messenger and push
@@ -516,6 +518,34 @@ export async function updateMeeting(
       },
       changedFields,
     )
+  }
+
+  // Auto-complete meeting task when status changes to COMPLETED
+  if (
+    input.status === 'COMPLETED' &&
+    existingMeeting.status !== 'COMPLETED' &&
+    isCoachUpdate
+  ) {
+    try {
+      // Determine task type based on meeting type
+      const action =
+        meeting.type === 'CHECK_IN'
+          ? 'meeting_checkin_completed'
+          : meeting.type === 'IN_PERSON_TRAINING'
+            ? 'meeting_in_person_completed'
+            : null
+
+      if (action) {
+        await completeTaskByAction({
+          trainerId: existingMeeting.coachId,
+          clientId: existingMeeting.traineeId,
+          action,
+          relatedItemId: meetingId,
+        })
+      }
+    } catch (error) {
+      console.error('Error auto-completing meeting task:', error)
+    }
   }
 
   return new Meeting(meeting, context)

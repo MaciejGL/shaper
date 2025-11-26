@@ -86,6 +86,12 @@ type ServiceDelivery {
   daysUntilDue: Int!
   deliverableLabel: String!
 
+  # Task progress
+  tasks: [ServiceTask!]!
+  taskProgress: Int! # Percentage (0-100)
+  completedTaskCount: Int!
+  totalTaskCount: Int!
+
   # Relations
   trainer: User!
   client: User!

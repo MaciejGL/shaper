@@ -7,6 +7,8 @@ import { requireAuth } from '@/lib/getUser'
 import { notifyNutritionPlanShared } from '@/lib/meal-plan-notifications'
 import { GQLContext } from '@/types/gql-context'
 
+import { completeTaskByAction } from '../service-task/factory'
+
 import {
   addDayToNutritionPlan,
   addMealToNutritionPlanDay,
@@ -141,6 +143,18 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Send notifications to client
     await notifyNutritionPlanShared(id, user.user.id, context)
+
+    // Auto-complete "Deliver Nutrition/Meal Plan" task for this client
+    try {
+      await completeTaskByAction({
+        trainerId: user.user.id,
+        clientId: nutritionPlan.clientId,
+        action: 'nutrition_plan_shared',
+        relatedItemId: id,
+      })
+    } catch (error) {
+      console.error('Error auto-completing nutrition plan task:', error)
+    }
 
     return new NutritionPlan(nutritionPlan, context)
   },

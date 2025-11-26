@@ -1314,6 +1314,7 @@ export type GQLMutation = {
   updatePushSubscription: GQLPushSubscription;
   updateReview: Scalars['Boolean']['output'];
   updateServiceDelivery: GQLServiceDelivery;
+  updateServiceTask: GQLServiceTask;
   updateSetLog?: Maybe<GQLExerciseSetLog>;
   updateSubstituteExercise: Scalars['Boolean']['output'];
   updateTeam: GQLTeam;
@@ -2096,6 +2097,12 @@ export type GQLMutationUpdateServiceDeliveryArgs = {
 };
 
 
+export type GQLMutationUpdateServiceTaskArgs = {
+  input: GQLUpdateServiceTaskInput;
+  taskId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationUpdateSetLogArgs = {
   input: GQLLogSetInput;
 };
@@ -2502,11 +2509,13 @@ export type GQLQuery = {
   getQuickWorkoutNavigation?: Maybe<GQLGetWorkoutNavigationPayload>;
   getQuickWorkoutPlan: GQLTrainingPlan;
   getServiceDeliveryMeetings: Array<GQLMeeting>;
+  getServiceDeliveryTasks: Array<GQLServiceTask>;
   getSubscriptionStats: GQLSubscriptionStats;
   getTemplates: Array<GQLTrainingPlan>;
   getTotalUnreadCount: Scalars['Int']['output'];
   getTraineeMeetings: Array<GQLMeeting>;
   getTrainerDeliveries: Array<GQLServiceDelivery>;
+  getTrainerTasks: Array<GQLServiceTask>;
   getTrainingExercise?: Maybe<GQLTrainingExercise>;
   getTrainingPlanById: GQLTrainingPlan;
   getUserPRHistory: Array<GQLPersonalRecordHistory>;
@@ -2714,6 +2723,11 @@ export type GQLQueryGetServiceDeliveryMeetingsArgs = {
 };
 
 
+export type GQLQueryGetServiceDeliveryTasksArgs = {
+  serviceDeliveryId: Scalars['ID']['input'];
+};
+
+
 export type GQLQueryGetTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -2727,6 +2741,13 @@ export type GQLQueryGetTraineeMeetingsArgs = {
 
 export type GQLQueryGetTrainerDeliveriesArgs = {
   status?: InputMaybe<GQLDeliveryStatus>;
+  trainerId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetTrainerTasksArgs = {
+  serviceDeliveryId?: InputMaybe<Scalars['ID']['input']>;
+  status?: InputMaybe<GQLTaskStatus>;
   trainerId: Scalars['ID']['input'];
 };
 
@@ -3008,6 +3029,7 @@ export type GQLServiceDelivery = {
   __typename?: 'ServiceDelivery';
   client: GQLUser;
   clientId: Scalars['ID']['output'];
+  completedTaskCount: Scalars['Int']['output'];
   createdAt: Scalars['String']['output'];
   daysUntilDue: Scalars['Int']['output'];
   deliverableLabel: Scalars['String']['output'];
@@ -3020,8 +3042,30 @@ export type GQLServiceDelivery = {
   quantity: Scalars['Int']['output'];
   serviceType?: Maybe<GQLServiceType>;
   status: GQLDeliveryStatus;
+  taskProgress: Scalars['Int']['output'];
+  tasks: Array<GQLServiceTask>;
+  totalTaskCount: Scalars['Int']['output'];
   trainer: GQLUser;
   trainerId: Scalars['ID']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLServiceTask = {
+  __typename?: 'ServiceTask';
+  autoCompleteOn?: Maybe<Scalars['String']['output']>;
+  completedAt?: Maybe<Scalars['String']['output']>;
+  completedBy?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isRequired: Scalars['Boolean']['output'];
+  notes?: Maybe<Scalars['String']['output']>;
+  order: Scalars['Int']['output'];
+  serviceDelivery: GQLServiceDelivery;
+  serviceDeliveryId: Scalars['ID']['output'];
+  status: GQLTaskStatus;
+  taskType: GQLTaskType;
+  templateId: Scalars['String']['output'];
+  title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
 };
 
@@ -3151,6 +3195,19 @@ export enum GQLTargetGoal {
   MarathonTraining = 'MARATHON_TRAINING',
   PowerliftingCompetition = 'POWERLIFTING_COMPETITION',
   StressRelief = 'STRESS_RELIEF'
+}
+
+export enum GQLTaskStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING'
+}
+
+export enum GQLTaskType {
+  MeetingCheckin = 'MEETING_CHECKIN',
+  MeetingInPerson = 'MEETING_IN_PERSON',
+  PlanDelivery = 'PLAN_DELIVERY'
 }
 
 export type GQLTeam = {
@@ -3584,6 +3641,11 @@ export type GQLUpdateReviewInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   rating?: InputMaybe<Scalars['Int']['input']>;
   reviewId: Scalars['ID']['input'];
+};
+
+export type GQLUpdateServiceTaskInput = {
+  notes?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<GQLTaskStatus>;
 };
 
 export type GQLUpdateSubstituteExerciseInput = {
@@ -4779,7 +4841,15 @@ export type GQLGetTrainerServiceDeliveriesQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetTrainerServiceDeliveriesQuery = { __typename?: 'Query', getTrainerDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, dueDate: string, isOverdue: boolean, daysUntilDue: number, deliverableLabel: string, client: { __typename?: 'User', id: string, name?: string | undefined | null, email: string, image?: string | undefined | null } }> };
+export type GQLGetTrainerServiceDeliveriesQuery = { __typename?: 'Query', getTrainerDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, dueDate: string, isOverdue: boolean, daysUntilDue: number, deliverableLabel: string, taskProgress: number, completedTaskCount: number, totalTaskCount: number, tasks: Array<{ __typename?: 'ServiceTask', id: string, templateId: string, title: string, taskType: GQLTaskType, status: GQLTaskStatus, order: number, isRequired: boolean, completedAt?: string | undefined | null, notes?: string | undefined | null }>, client: { __typename?: 'User', id: string, name?: string | undefined | null, email: string, image?: string | undefined | null } }> };
+
+export type GQLUpdateServiceTaskMutationVariables = Exact<{
+  taskId: Scalars['ID']['input'];
+  input: GQLUpdateServiceTaskInput;
+}>;
+
+
+export type GQLUpdateServiceTaskMutation = { __typename?: 'Mutation', updateServiceTask: { __typename?: 'ServiceTask', id: string, status: GQLTaskStatus, completedAt?: string | undefined | null, notes?: string | undefined | null } };
 
 export type GQLMuscleGroupCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5482,7 +5552,7 @@ export type GQLGetTrainerDeliveriesQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetTrainerDeliveriesQuery = { __typename?: 'Query', getTrainerDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, updatedAt: string, client: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
+export type GQLGetTrainerDeliveriesQuery = { __typename?: 'Query', getTrainerDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, dueDate: string, isOverdue: boolean, daysUntilDue: number, deliverableLabel: string, taskProgress: number, completedTaskCount: number, totalTaskCount: number, createdAt: string, updatedAt: string, tasks: Array<{ __typename?: 'ServiceTask', id: string, templateId: string, title: string, taskType: GQLTaskType, status: GQLTaskStatus, order: number, isRequired: boolean, completedAt?: string | undefined | null, notes?: string | undefined | null }>, client: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
 
 export type GQLUpdateServiceDeliveryMutationVariables = Exact<{
   deliveryId: Scalars['ID']['input'];
@@ -12173,6 +12243,20 @@ export const GetTrainerServiceDeliveriesDocument = `
     isOverdue
     daysUntilDue
     deliverableLabel
+    taskProgress
+    completedTaskCount
+    totalTaskCount
+    tasks {
+      id
+      templateId
+      title
+      taskType
+      status
+      order
+      isRequired
+      completedAt
+      notes
+    }
     client {
       id
       name
@@ -12224,6 +12308,35 @@ useInfiniteGetTrainerServiceDeliveriesQuery.getKey = (variables: GQLGetTrainerSe
 
 
 useGetTrainerServiceDeliveriesQuery.fetcher = (variables: GQLGetTrainerServiceDeliveriesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetTrainerServiceDeliveriesQuery, GQLGetTrainerServiceDeliveriesQueryVariables>(GetTrainerServiceDeliveriesDocument, variables, options);
+
+export const UpdateServiceTaskDocument = `
+    mutation UpdateServiceTask($taskId: ID!, $input: UpdateServiceTaskInput!) {
+  updateServiceTask(taskId: $taskId, input: $input) {
+    id
+    status
+    completedAt
+    notes
+  }
+}
+    `;
+
+export const useUpdateServiceTaskMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateServiceTaskMutation, TError, GQLUpdateServiceTaskMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateServiceTaskMutation, TError, GQLUpdateServiceTaskMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateServiceTask'],
+    mutationFn: (variables?: GQLUpdateServiceTaskMutationVariables) => fetchData<GQLUpdateServiceTaskMutation, GQLUpdateServiceTaskMutationVariables>(UpdateServiceTaskDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateServiceTaskMutation.getKey = () => ['UpdateServiceTask'];
+
+
+useUpdateServiceTaskMutation.fetcher = (variables: GQLUpdateServiceTaskMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateServiceTaskMutation, GQLUpdateServiceTaskMutationVariables>(UpdateServiceTaskDocument, variables, options);
 
 export const MuscleGroupCategoriesDocument = `
     query MuscleGroupCategories {
@@ -16565,6 +16678,24 @@ export const GetTrainerDeliveriesDocument = `
     status
     deliveredAt
     deliveryNotes
+    dueDate
+    isOverdue
+    daysUntilDue
+    deliverableLabel
+    taskProgress
+    completedTaskCount
+    totalTaskCount
+    tasks {
+      id
+      templateId
+      title
+      taskType
+      status
+      order
+      isRequired
+      completedAt
+      notes
+    }
     client {
       id
       name

@@ -141,6 +141,9 @@ export async function getTrainerDeliveries(
   const deliveries = await prisma.serviceDelivery.findMany({
     where,
     include: {
+      tasks: {
+        orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+      },
       client: {
         include: {
           profile: true,
@@ -222,6 +225,9 @@ export async function updateServiceDelivery(
     where: { id: deliveryId },
     data: updateData,
     include: {
+      tasks: {
+        orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+      },
       trainer: {
         include: {
           profile: true,

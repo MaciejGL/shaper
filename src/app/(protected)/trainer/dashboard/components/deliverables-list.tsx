@@ -14,8 +14,10 @@ import {
 import { useUser } from '@/context/user-context'
 import {
   GQLDeliveryStatus,
+  GQLTaskStatus,
   useGetTrainerServiceDeliveriesQuery,
   useUpdateServiceDeliveryMutation,
+  useUpdateServiceTaskMutation,
 } from '@/generated/graphql-client'
 
 import { DeliverableCard } from './deliverable-card'
@@ -103,6 +105,7 @@ export function DeliverablesList() {
   )
 
   const updateMutation = useUpdateServiceDeliveryMutation()
+  const updateTaskMutation = useUpdateServiceTaskMutation()
 
   const handleStatusChange = async (
     deliveryId: string,
@@ -127,6 +130,59 @@ export function DeliverablesList() {
         deliveryId,
         status: newStatus,
       })
+    } catch {
+      queryClient.setQueryData(queryKey, previousData)
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const handleTaskStatusChange = async (
+    taskId: string,
+    newStatus: GQLTaskStatus,
+  ) => {
+    setUpdatingId(taskId)
+
+    const previousData = queryClient.getQueryData<typeof data>(queryKey)
+
+    // Optimistically update task status
+    queryClient.setQueryData<typeof data>(queryKey, (old) => {
+      if (!old?.getTrainerDeliveries) return old
+      return {
+        ...old,
+        getTrainerDeliveries: old.getTrainerDeliveries.map((d) => ({
+          ...d,
+          tasks: d.tasks?.map((t) =>
+            t.id === taskId ? { ...t, status: newStatus } : t,
+          ),
+          completedTaskCount:
+            d.tasks?.filter((t) =>
+              t.id === taskId
+                ? newStatus === GQLTaskStatus.Completed
+                : t.status === GQLTaskStatus.Completed,
+            ).length ?? 0,
+          taskProgress: (() => {
+            const total = d.tasks?.length ?? 0
+            if (total === 0) return 100
+            const completed =
+              d.tasks?.filter((t) =>
+                t.id === taskId
+                  ? newStatus === GQLTaskStatus.Completed
+                  : t.status === GQLTaskStatus.Completed,
+              ).length ?? 0
+            return Math.round((completed / total) * 100)
+          })(),
+        })),
+      }
+    })
+
+    try {
+      await updateTaskMutation.mutateAsync({
+        taskId,
+        input: { status: newStatus },
+      })
+      // Refetch to get accurate server state
+      queryClient.invalidateQueries({ queryKey })
     } catch {
       queryClient.setQueryData(queryKey, previousData)
     } finally {
@@ -187,7 +243,11 @@ export function DeliverablesList() {
                   key={delivery.id}
                   delivery={delivery}
                   onStatusChange={handleStatusChange}
-                  isUpdating={updatingId === delivery.id}
+                  onTaskStatusChange={handleTaskStatusChange}
+                  isUpdating={
+                    updatingId === delivery.id ||
+                    delivery.tasks?.some((t) => t.id === updatingId)
+                  }
                 />
               ))}
             </div>
@@ -224,7 +284,11 @@ export function DeliverablesList() {
                   key={delivery.id}
                   delivery={delivery}
                   onStatusChange={handleStatusChange}
-                  isUpdating={updatingId === delivery.id}
+                  onTaskStatusChange={handleTaskStatusChange}
+                  isUpdating={
+                    updatingId === delivery.id ||
+                    delivery.tasks?.some((t) => t.id === updatingId)
+                  }
                 />
               ))}
             </div>
