@@ -1,6 +1,9 @@
 'use client'
 
+import { differenceInDays, formatDate } from 'date-fns'
 import {
+  Activity,
+  Award,
   Calendar,
   Clock,
   Dumbbell,
@@ -15,6 +18,7 @@ import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { CollapsibleText } from '@/components/collapsible-text'
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -37,6 +41,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   GQLGetClientByIdQuery,
   useGetClientByIdQuery,
+  useGetClientMacroTargetsQuery,
   useRemoveTrainingPlanFromClientMutation,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
@@ -46,8 +51,6 @@ import { ClientMacroTargets } from '../client-macro-targets'
 import { NutritionPlansSection } from '../client-nutrition/nutrition-plans-section'
 import { AssignPlanDialog } from '../plan-assignment/assignment-dialog'
 import { NoPlanCard } from '../plan-assignment/no-plan-card'
-import { PlanDetails } from '../plan-assignment/plan-details'
-import { ProgressOverview } from '../plan-assignment/progress-overview'
 import { WeeklyProgress } from '../plan-assignment/weekly-progress'
 
 type ProgramSubTab = 'training' | 'active' | 'nutrition'
@@ -75,7 +78,7 @@ export function ClientProgramsDashboard({
   const hasAssignedPlans = plans && plans.length > 0
 
   return (
-    <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_2fr] gap-6">
+    <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_minmax(400px,2fr)] gap-6">
       {/* Left Column: Main Content */}
       <div className="space-y-6">
         <Tabs
@@ -125,13 +128,12 @@ export function ClientProgramsDashboard({
 
       {/* Right Column: Dynamic Stats based on active tab */}
       <div className="space-y-6">
-        {subTab === 'training' && (
+        {(subTab === 'training' || subTab === 'active') && (
           <TrainingStatsCard plans={plans || []} activePlan={activePlan} />
         )}
-        {subTab === 'active' && activePlan && (
-          <ActivePlanStatsCard activePlan={activePlan} />
+        {subTab === 'nutrition' && (
+          <NutritionOverviewCard clientId={client.id} />
         )}
-        {subTab === 'nutrition' && <NutritionStatsCard />}
       </div>
     </div>
   )
@@ -306,9 +308,8 @@ function PlanCard({ plan, clientName, clientId }: PlanCardProps) {
                 title="Options"
                 variant="ghost"
                 size="icon-md"
-              >
-                <MoreVertical className="size-4" />
-              </Button>
+                iconOnly={<MoreVertical />}
+              />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
@@ -375,13 +376,157 @@ function ActivePlanSection({
         </ButtonLink>
       </div>
 
-      <PlanDetails assignedPlan={activePlan} />
-
       <div className="space-y-6">
-        <ProgressOverview plan={activePlan} />
         <WeeklyProgress plan={activePlan} clientId={client.id} />
       </div>
     </div>
+  )
+}
+
+interface ActivePlanOverviewCardProps {
+  activePlan: NonNullable<GQLGetClientByIdQuery['getClientActivePlan']>
+}
+
+function ActivePlanOverviewCard({ activePlan }: ActivePlanOverviewCardProps) {
+  // Calculate stats locally
+  const daysToEnd = activePlan.endDate
+    ? differenceInDays(new Date(activePlan.endDate), new Date())
+    : 0
+
+  const completedWorkouts = activePlan.weeks.flatMap((week) =>
+    week.days.filter((day) => !day.isRestDay && day.completedAt),
+  )
+
+  const totalDurationMinutes =
+    activePlan.weeks.reduce((acc, week) => {
+      return (
+        acc +
+        week.days.reduce((acc, day) => {
+          return acc + (day?.duration ?? 0)
+        }, 0)
+      )
+    }, 0) / 60
+
+  const averageSessionLength =
+    completedWorkouts.length > 0
+      ? Math.round(totalDurationMinutes / completedWorkouts.length)
+      : 0
+
+  const totalWorkouts = activePlan.totalWorkouts || 0
+  const completedWorkoutsCount = activePlan.completedWorkoutsDays || 0
+  const currentWeek = activePlan.currentWeekNumber || 0
+  const adherence = activePlan.adherence || 0
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle>Plan Overview</CardTitle>
+        <CardDescription>Current progress and statistics</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Header Info */}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {activePlan.difficulty && (
+              <Badge variant="secondary" className="capitalize">
+                {activePlan.difficulty.toLowerCase()}
+              </Badge>
+            )}
+            <Badge variant="secondary">
+              {activePlan.weekCount}{' '}
+              {activePlan.weekCount === 1 ? 'week' : 'weeks'}
+            </Badge>
+          </div>
+          <div className="max-w-2xl">
+            <CollapsibleText maxWords={40} text={activePlan.description} />
+          </div>
+        </div>
+
+        {/* Key Metrics Grid */}
+        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+          {/* Current Week */}
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/10 rounded-md">
+              <Target className="size-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Current Week</p>
+              <p className="text-base font-semibold">
+                {currentWeek}
+                <span className="text-xs text-muted-foreground font-normal">
+                  /{activePlan.weekCount}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          {/* Adherence */}
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/10 rounded-md">
+              <Activity className="size-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Adherence</p>
+              <p className="text-base font-semibold">{adherence}%</p>
+            </div>
+          </div>
+
+          {/* Avg Session */}
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-amber-500/10 rounded-md">
+              <Award className="size-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Avg Session</p>
+              <p className="text-base font-semibold">{averageSessionLength}m</p>
+            </div>
+          </div>
+
+          {/* End Date */}
+          {activePlan.endDate && (
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-muted/50 rounded-md">
+                <Calendar className="size-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Ends</p>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">
+                    {formatDate(activePlan.endDate, 'MMM d')}
+                  </span>
+                  {daysToEnd < 14 && daysToEnd > 0 && (
+                    <span
+                      className={cn(
+                        'text-[10px]',
+                        daysToEnd < 3 ? 'text-destructive' : 'text-amber-600',
+                      )}
+                    >
+                      {daysToEnd} days left
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Progress Bars Section */}
+        <div className="space-y-4 pt-4 border-t">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">
+                Plan Completion ({completedWorkoutsCount}/{totalWorkouts}{' '}
+                workouts)
+              </span>
+              <span className="font-medium">
+                {Math.round(activePlan.progress ?? 0)}%
+              </span>
+            </div>
+            <Progress value={activePlan.progress ?? 0} className="h-2" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -392,8 +537,17 @@ interface NutritionSectionProps {
 function NutritionSection({ clientId }: NutritionSectionProps) {
   return (
     <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold">Daily Macro Targets</h3>
+        <p className="text-sm text-muted-foreground">
+          Set nutritional goals for your client
+        </p>
+      </div>
       <ClientMacroTargets clientId={clientId} />
-      <NutritionPlansSection clientId={clientId} />
+
+      <div className="pt-6">
+        <NutritionPlansSection clientId={clientId} />
+      </div>
     </div>
   )
 }
@@ -406,8 +560,6 @@ interface TrainingStatsCardProps {
 }
 
 function TrainingStatsCard({ plans, activePlan }: TrainingStatsCardProps) {
-  const totalWeeks = plans.reduce((sum, plan) => sum + plan.weekCount, 0)
-
   return (
     <>
       <Card>
@@ -423,164 +575,74 @@ function TrainingStatsCard({ plans, activePlan }: TrainingStatsCardProps) {
             </div>
             <span className="text-2xl font-semibold">{plans.length}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Calendar className="size-4 text-muted-foreground" />
-              Total Weeks
-            </div>
-            <span className="text-2xl font-semibold">{totalWeeks}</span>
-          </div>
         </CardContent>
       </Card>
 
-      {activePlan && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Current Plan</CardTitle>
-            <CardDescription className="line-clamp-1">
-              {activePlan.title}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Duration</p>
-                <p className="text-lg font-semibold">{activePlan.weekCount}w</p>
-              </div>
-              {activePlan.weeks?.[0]?.days && (
-                <div className="p-3 bg-muted/50 rounded-lg">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Days/Week
-                  </p>
-                  <p className="text-lg font-semibold">
-                    {
-                      activePlan.weeks[0].days.filter((d) => !d.isRestDay)
-                        .length
-                    }
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Progress</span>
-                <span className="text-sm font-semibold">
-                  {activePlan.progress || 0}%
-                </span>
-              </div>
-              <Progress value={activePlan.progress || 0} className="h-2" />
-            </div>
-            <ButtonLink
-              href={`/trainer/trainings/creator/${activePlan.id}`}
-              size="sm"
-              variant="secondary"
-              iconStart={<Edit />}
-              className="w-full"
-            >
-              Edit Plan
-            </ButtonLink>
-          </CardContent>
-        </Card>
-      )}
+      {activePlan && <ActivePlanOverviewCard activePlan={activePlan} />}
     </>
   )
 }
 
-interface ActivePlanStatsCardProps {
-  activePlan: NonNullable<GQLGetClientByIdQuery['getClientActivePlan']>
-}
+function NutritionOverviewCard({ clientId }: { clientId: string }) {
+  const { data } = useGetClientMacroTargetsQuery({ clientId })
+  const macroTargets = data?.getClientMacroTargets
 
-function ActivePlanStatsCard({ activePlan }: ActivePlanStatsCardProps) {
-  const totalWorkouts = activePlan.totalWorkouts || 0
-  const completedWorkouts = activePlan.completedWorkoutsDays || 0
-  const currentWeek = activePlan.currentWeekNumber || 0
-  const adherence = activePlan.adherence || 0
-
-  return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Plan Statistics</CardTitle>
-          <CardDescription>Overall performance metrics</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-              <div className="flex items-center gap-2 mb-1">
-                <Target className="size-3.5 text-primary" />
-                <p className="text-xs text-muted-foreground">Current Week</p>
-              </div>
-              <p className="text-2xl font-semibold text-primary">
-                {currentWeek}
-              </p>
-            </div>
-            <div className="p-3 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Total Weeks</p>
-              <p className="text-2xl font-semibold">{activePlan.weekCount}</p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Workouts</span>
-                <span className="text-sm text-muted-foreground">
-                  {completedWorkouts}/{totalWorkouts}
-                </span>
-              </div>
-              <Progress
-                value={(completedWorkouts / totalWorkouts) * 100}
-                className="h-2"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Adherence</span>
-                <span className="text-sm font-semibold text-primary">
-                  {adherence}%
-                </span>
-              </div>
-              <Progress value={adherence} className="h-2" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {activePlan.nextSession && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Next Session</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-              <Clock className="size-5 text-muted-foreground" />
-              <p className="text-sm font-medium">{activePlan.nextSession}</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </>
-  )
-}
-
-function NutritionStatsCard() {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Nutrition Overview</CardTitle>
-        <CardDescription>Macro targets and meal plans</CardDescription>
+        <CardDescription>Current macro targets</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-          <Utensils className="size-6 text-muted-foreground" />
-          <div>
-            <p className="text-sm font-medium">Macro Targets Set</p>
-            <p className="text-xs text-muted-foreground">
-              Track daily nutrition goals
-            </p>
+      <CardContent className="space-y-4">
+        {macroTargets ? (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Calories</p>
+                <p className="text-2xl font-semibold text-primary">
+                  {macroTargets.calories || '-'}
+                </p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Protein</p>
+                <p className="text-2xl font-semibold">
+                  {macroTargets.protein || '-'}
+                  <span className="text-sm text-muted-foreground font-normal">
+                    g
+                  </span>
+                </p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Carbs</p>
+                <p className="text-2xl font-semibold">
+                  {macroTargets.carbs || '-'}
+                  <span className="text-sm text-muted-foreground font-normal">
+                    g
+                  </span>
+                </p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Fat</p>
+                <p className="text-2xl font-semibold">
+                  {macroTargets.fat || '-'}
+                  <span className="text-sm text-muted-foreground font-normal">
+                    g
+                  </span>
+                </p>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+            <Utensils className="size-6 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">No targets set</p>
+              <p className="text-xs text-muted-foreground">
+                Set macro targets to track nutrition
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   )

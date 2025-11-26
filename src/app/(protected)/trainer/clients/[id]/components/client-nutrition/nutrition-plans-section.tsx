@@ -5,7 +5,13 @@ import { useState } from 'react'
 
 import { ConfirmationModal } from '@/components/confirmation-modal'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   type GQLCreateNutritionPlanInput,
   type GQLGetClientNutritionPlansQuery,
@@ -16,8 +22,6 @@ import {
   useUnshareNutritionPlanFromClientMutation,
 } from '@/generated/graphql-client'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
-
-import { ClientHeader } from '../header'
 
 import { ImportPlanCombobox } from './import-plan-combobox'
 import { NutritionPlanCard } from './nutrition-plan-card'
@@ -190,58 +194,63 @@ export function NutritionPlansSection({
 
   if (isLoading) {
     return (
-      <div>
-        <ClientHeader title="Nutrition Plans" />
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-center items-center py-8">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Nutrition Plans</CardTitle>
+          <CardDescription>Meal plans for your client</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   if (error) {
     return (
-      <div>
-        <ClientHeader title="Nutrition Plans" />
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <p className="text-destructive">Failed to load nutrition plans</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {error instanceof Error
-                  ? error.message
-                  : 'Unknown error occurred'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Nutrition Plans</CardTitle>
+          <CardDescription>Meal plans for your client</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <p className="text-destructive">Failed to load nutrition plans</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {error instanceof Error
+                ? error.message
+                : 'Unknown error occurred'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   const nutritionPlans = data?.getClientNutritionPlans || []
 
   return (
-    <div>
-      <ClientHeader
-        title="Nutrition Plans"
-        action={
-          <div className="flex gap-2">
-            <ImportPlanCombobox clientId={clientId} />
-            <Button
-              onClick={handleCreatePlan}
-              disabled={isCreating || isLoading}
-              size="sm"
-            >
-              {isCreating ? 'Creating...' : 'Create New Plan'}
-            </Button>
-          </div>
-        }
-      />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Nutrition Plans</h3>
+          <p className="text-sm text-muted-foreground">
+            Meal plans for your client
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <ImportPlanCombobox clientId={clientId} />
+          <Button
+            onClick={handleCreatePlan}
+            disabled={isCreating || isLoading}
+            size="sm"
+          >
+            Create New Plan
+          </Button>
+        </div>
+      </div>
 
       {nutritionPlans.length === 0 ? (
         <Card>
@@ -255,7 +264,7 @@ export function NutritionPlansSection({
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 @xl/client-detail-page:grid-cols-2">
           {nutritionPlans.map((plan) => (
             <NutritionPlanCard
               key={plan.id}
@@ -267,7 +276,6 @@ export function NutritionPlansSection({
         </div>
       )}
 
-      {/* Delete confirmation dialog */}
       <ConfirmationModal
         open={deleteConfirmId !== null}
         onOpenChange={(open) => !open && setDeleteConfirmId(null)}

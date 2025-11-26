@@ -1,14 +1,7 @@
 'use client'
 
 import { formatDate } from 'date-fns'
-import {
-  CheckCircle,
-  ChevronDown,
-  Circle,
-  MessageSquare,
-  Reply,
-  Send,
-} from 'lucide-react'
+import { ChevronDown, MessageSquare, Reply, Send } from 'lucide-react'
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -20,6 +13,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import { ProgressCircle } from '@/components/ui/progress-circle'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import type { GQLGetClientByIdQuery } from '@/generated/graphql-client'
@@ -83,15 +77,39 @@ export function WeeklyProgress({ plan, clientId }: WeeklyProgressProps) {
         onValueChange={setSelectedWeekId}
         className="w-full"
       >
-        <TabsList className="w-full">
-          {plan.weeks.map((week, index) => (
-            <TabsTrigger key={week.id} value={week.id}>
-              {week.completedAt && (
-                <CheckCircle className="size-3 text-green-600" />
-              )}
-              {week.name || `Week ${index + 1}`}
-            </TabsTrigger>
-          ))}
+        <TabsList className="w-full grid grid-cols-7 space-y-1 h-auto p-1">
+          {plan.weeks.map((week, index) => {
+            const weekTotalSets = week.days.reduce(
+              (sum, d) =>
+                sum + d.exercises.reduce((s, ex) => s + ex.sets.length, 0),
+              0,
+            )
+            const weekCompletedSets = week.days.reduce(
+              (sum, d) =>
+                sum +
+                d.exercises.reduce(
+                  (s, ex) =>
+                    s + ex.sets.filter((set) => set.completedAt).length,
+                  0,
+                ),
+              0,
+            )
+            const weekProgress =
+              weekTotalSets > 0 ? (weekCompletedSets / weekTotalSets) * 100 : 0
+
+            return (
+              <TabsTrigger key={week.id} value={week.id}>
+                <div className="flex items-center gap-1.5">
+                  <ProgressCircle
+                    progress={weekProgress}
+                    size={16}
+                    strokeWidth={1.5}
+                  />
+                  {week.name || ` ${index + 1}`}
+                </div>
+              </TabsTrigger>
+            )
+          })}
         </TabsList>
 
         {plan.weeks.map((week) => (
@@ -129,11 +147,15 @@ const DayCard = ({
 }) => {
   const [isOpen, setIsOpen] = useState(shouldExpand || false)
 
-  const checkIcons = {
-    completed: <CheckCircle className="size-4 text-green-600" />,
-    planned: <Circle className="size-4 text-muted-foreground" />,
-    rest: <div className="size-4 bg-muted-foreground/10 rounded-full" />,
-  }
+  const totalSets =
+    day.exercises?.reduce((sum, ex) => sum + ex.sets.length, 0) || 0
+  const completedSets =
+    day.exercises?.reduce(
+      (sum, ex) => sum + ex.sets.filter((set) => set.completedAt).length,
+      0,
+    ) || 0
+  const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0
+
   return (
     <Collapsible
       open={isOpen}
@@ -150,29 +172,23 @@ const DayCard = ({
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {
-                checkIcons[
-                  day.completedAt
-                    ? 'completed'
-                    : day.isRestDay
-                      ? 'rest'
-                      : 'planned'
-                ]
-              }
+              <ProgressCircle progress={progress} size={24} strokeWidth={2} />
               <div>
-                <CardTitle className="text-base font-medium">
-                  {dayNames[day.dayOfWeek]}
-                </CardTitle>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 ">
+                  <CardTitle className="text-base font-medium">
+                    {dayNames[day.dayOfWeek]}
+                  </CardTitle>
                   {day.isRestDay ? (
                     <Badge variant="secondary" size="sm">
                       Rest Day
                     </Badge>
                   ) : (
                     <>
-                      <Badge variant="outline" size="sm">
-                        {day.workoutType}
-                      </Badge>
+                      {day.workoutType && (
+                        <Badge variant="outline" size="sm">
+                          {day.workoutType}
+                        </Badge>
+                      )}
                       <span className="text-xs text-muted-foreground">
                         {day.exercises.length} exercises
                       </span>
@@ -322,7 +338,7 @@ const ExerciseCard = ({
               <div className="flex items-center gap-1">
                 <span className="font-medium w-8">{set.order}</span>
                 {isCompleted && (
-                  <CheckCircle className="size-3 text-green-600" />
+                  <ProgressCircle progress={100} size={16} strokeWidth={1.5} />
                 )}
               </div>
 
