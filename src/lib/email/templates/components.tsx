@@ -29,6 +29,7 @@ interface EmailWrapperProps {
 
 export const EmailWrapper = ({ children, previewText }: EmailWrapperProps) => (
   <html>
+    {/* eslint-disable-next-line @next/next/no-head-element */}
     <head>
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
