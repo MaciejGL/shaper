@@ -3,7 +3,7 @@
  * Replaces basic WebView with full functionality
  */
 import { useNetInfo } from '@react-native-community/netinfo'
-import * as FileSystem from 'expo-file-system'
+import { File, Paths } from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import * as SplashScreen from 'expo-splash-screen'
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
@@ -231,28 +231,43 @@ function setupHistoryOverrides(): string {
   `
 }
 
+function base64ToUint8Array(base64: string): Uint8Array {
+  const binaryString = atob(base64)
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+  return bytes
+}
+
 async function handleFileDownload(data: {
   base64Data: string
   filename: string
   mimeType: string
 }) {
   try {
-    const binaryString = atob(data.base64Data)
-    const bytes = new Uint8Array(binaryString.length)
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i)
-    }
+    // Ensure valid filename
+    const cleanFilename = data.filename.replace(/[^a-zA-Z0-9._-]/g, '_')
+    const filename = cleanFilename.endsWith('.pdf')
+      ? cleanFilename
+      : `${cleanFilename}.pdf`
 
-    const file = new FileSystem.File(FileSystem.Paths.document, data.filename)
-    const writer = file.writableStream().getWriter()
-    await writer.write(bytes)
-    await writer.close()
+    // Create file in cache directory using new expo-file-system API
+    const file = new File(Paths.cache, filename)
 
+    // Convert base64 to Uint8Array and write to file
+    const bytes = base64ToUint8Array(data.base64Data)
+    file.write(bytes)
+
+    // Use sharing to allow user to save/share the file
+    // On iOS: Opens share sheet with "Save to Files" option
+    // On Android: Opens share sheet with "Save to device" options
     await Sharing.shareAsync(file.uri, {
-      UTI: data.mimeType,
+      UTI: 'com.adobe.pdf',
       mimeType: data.mimeType,
     })
   } catch (error) {
+    console.error('File download failed:', error)
     Alert.alert(
       'Download Failed',
       'Could not download the file. Please try again.',
