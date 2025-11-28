@@ -1,5 +1,6 @@
 import {
   GQLCoachingRequestStatus,
+  GQLLogType,
   GQLMutationResolvers,
   GQLNotificationType,
   GQLQueryResolvers,
@@ -28,6 +29,13 @@ import { createNotification } from '../notification/factory'
 import UserPublic from '../user-public/model'
 
 import AdminUserListItem from './admin-user-list-item'
+import {
+  buildDateFilter,
+  calculateDateRange,
+  cancelUserStripeSubscriptionsImmediately,
+  collectUserImageUrls,
+  deleteUserImages,
+} from './cleanup-helpers'
 import User from './model'
 import PublicTrainer from './public-trainer'
 
@@ -695,131 +703,191 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     return true
   },
 
-  resetUserLogs: async (_, __, context) => {
+  resetUserLogs: async (_, { input }, context) => {
     const user = context.user
     if (!user) {
       throw new Error('User not authenticated')
     }
 
     const userId = user.user.id
+    const profileId = user.user.profile?.id
+    const { logTypes } = input
+    const { fromDate, toDate } = calculateDateRange(input)
+    const dateFilter = buildDateFilter(fromDate, toDate)
 
     try {
-      // Use a transaction to ensure all deletions succeed or fail together
+      const progressPhotoUrls: string[] = []
+
       await prisma.$transaction(async (tx) => {
-        // Delete exercise logs
-        await tx.exerciseLog.deleteMany({
-          where: { userId },
-        })
+        // WORKOUT_LOGS: ExerciseLog, ExerciseSetLog, WorkoutSessionEvent, clear completion status
+        if (logTypes.includes(GQLLogType.WorkoutLogs)) {
+          await tx.exerciseLog.deleteMany({
+            where: {
+              userId,
+              ...(dateFilter && { performedAt: dateFilter }),
+            },
+          })
 
-        // Delete exercise set logs for user's exercises (bulk operation)
-        // First get all set IDs for user's exercises, then delete their logs
-        const userSetIds = await tx.exerciseSet.findMany({
-          where: {
-            exercise: {
-              day: {
-                week: {
-                  plan: {
-                    assignedToId: userId,
+          const userSetIds = await tx.exerciseSet.findMany({
+            where: {
+              exercise: {
+                day: {
+                  week: {
+                    plan: { assignedToId: userId },
                   },
                 },
               },
+              ...(dateFilter && { completedAt: dateFilter }),
             },
-          },
-          select: { logId: true },
-        })
-
-        const logIds = userSetIds
-          .map((set) => set.logId)
-          .filter((id): id is string => id !== null)
-
-        if (logIds.length > 0) {
-          await tx.exerciseSetLog.deleteMany({
-            where: { id: { in: logIds } },
+            select: { logId: true, id: true },
           })
-        }
 
-        // Delete workout session events for user's days (bulk operation)
-        await tx.workoutSessionEvent.deleteMany({
-          where: {
-            day: {
-              week: {
-                plan: {
-                  assignedToId: userId,
-                },
-              },
-            },
-          },
-        })
+          const logIds = userSetIds
+            .map((set) => set.logId)
+            .filter((id): id is string => id !== null)
 
-        // Delete body measurements (keep profile)
-        if (user.user.profile?.id) {
-          await tx.userBodyMeasure.deleteMany({
-            where: { userProfileId: user.user.profile.id },
-          })
-        }
+          const setIds = userSetIds.map((set) => set.id)
 
-        // Delete reviews
-        await tx.review.deleteMany({
-          where: { createdById: userId },
-        })
+          // IMPORTANT: Clear logId reference BEFORE deleting logs to prevent cascade delete of sets
+          if (setIds.length > 0) {
+            await tx.exerciseSet.updateMany({
+              where: { id: { in: setIds } },
+              data: { completedAt: null, logId: null },
+            })
+          }
 
-        // Clear completion status for user's training plans (bulk operations)
-        await tx.exerciseSet.updateMany({
-          where: {
-            exercise: {
+          // Now safe to delete the logs
+          if (logIds.length > 0) {
+            await tx.exerciseSetLog.deleteMany({
+              where: { id: { in: logIds } },
+            })
+          }
+
+          await tx.workoutSessionEvent.deleteMany({
+            where: {
               day: {
                 week: {
-                  plan: {
-                    assignedToId: userId,
-                  },
+                  plan: { assignedToId: userId },
                 },
               },
+              ...(dateFilter && { timestamp: dateFilter }),
             },
-          },
-          data: {
-            completedAt: null,
-            logId: null,
-          },
-        })
+          })
 
-        await tx.trainingExercise.updateMany({
-          where: {
-            day: {
+          await tx.trainingExercise.updateMany({
+            where: {
+              day: {
+                week: {
+                  plan: { assignedToId: userId },
+                },
+              },
+              ...(dateFilter && { completedAt: dateFilter }),
+            },
+            data: { completedAt: null },
+          })
+
+          await tx.trainingDay.updateMany({
+            where: {
               week: {
-                plan: {
-                  assignedToId: userId,
-                },
+                plan: { assignedToId: userId },
               },
+              ...(dateFilter && { completedAt: dateFilter }),
             },
-          },
-          data: { completedAt: null },
-        })
+            data: { completedAt: null },
+          })
 
-        await tx.trainingDay.updateMany({
-          where: {
-            week: {
-              plan: {
-                assignedToId: userId,
-              },
+          await tx.trainingWeek.updateMany({
+            where: {
+              plan: { assignedToId: userId },
+              ...(dateFilter && { completedAt: dateFilter }),
             },
-          },
-          data: { completedAt: null },
-        })
+            data: { completedAt: null },
+          })
 
-        await tx.trainingWeek.updateMany({
-          where: {
-            plan: {
+          await tx.trainingPlan.updateMany({
+            where: {
               assignedToId: userId,
+              ...(dateFilter && { completedAt: dateFilter }),
             },
-          },
-          data: { completedAt: null },
-        })
+            data: { completedAt: null },
+          })
+        }
 
-        await tx.trainingPlan.updateMany({
-          where: { assignedToId: userId },
-          data: { completedAt: null },
-        })
+        // BODY_MEASUREMENTS: UserBodyMeasure, CheckinCompletion
+        if (logTypes.includes(GQLLogType.BodyMeasurements) && profileId) {
+          const measurementsToDelete = await tx.userBodyMeasure.findMany({
+            where: {
+              userProfileId: profileId,
+              ...(dateFilter && { measuredAt: dateFilter }),
+            },
+            select: { id: true },
+          })
+
+          const measurementIds = measurementsToDelete.map((m) => m.id)
+          if (measurementIds.length > 0) {
+            await tx.checkinCompletion.deleteMany({
+              where: { measurementId: { in: measurementIds } },
+            })
+          }
+
+          await tx.userBodyMeasure.deleteMany({
+            where: {
+              userProfileId: profileId,
+              ...(dateFilter && { measuredAt: dateFilter }),
+            },
+          })
+        }
+
+        // PROGRESS_PHOTOS: BodyProgressLog + S3 cleanup
+        if (logTypes.includes(GQLLogType.ProgressPhotos) && profileId) {
+          const logsToDelete = await tx.bodyProgressLog.findMany({
+            where: {
+              userProfileId: profileId,
+              ...(dateFilter && { loggedAt: dateFilter }),
+            },
+            select: {
+              id: true,
+              image1Url: true,
+              image2Url: true,
+              image3Url: true,
+            },
+          })
+
+          for (const log of logsToDelete) {
+            if (log.image1Url) progressPhotoUrls.push(log.image1Url)
+            if (log.image2Url) progressPhotoUrls.push(log.image2Url)
+            if (log.image3Url) progressPhotoUrls.push(log.image3Url)
+          }
+
+          const logIds = logsToDelete.map((l) => l.id)
+          if (logIds.length > 0) {
+            await tx.checkinCompletion.deleteMany({
+              where: { progressLogId: { in: logIds } },
+            })
+          }
+
+          await tx.bodyProgressLog.deleteMany({
+            where: {
+              userProfileId: profileId,
+              ...(dateFilter && { loggedAt: dateFilter }),
+            },
+          })
+        }
+
+        // PERSONAL_RECORDS: PersonalRecord
+        if (logTypes.includes(GQLLogType.PersonalRecords)) {
+          await tx.personalRecord.deleteMany({
+            where: {
+              userId,
+              ...(dateFilter && { achievedAt: dateFilter }),
+            },
+          })
+        }
       })
+
+      if (progressPhotoUrls.length > 0) {
+        await deleteUserImages(progressPhotoUrls)
+      }
 
       return true
     } catch (error) {
@@ -834,9 +902,19 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new Error('User not authenticated')
     }
 
+    if (user.user.role === 'TRAINER') {
+      throw new Error('Trainers cannot delete their accounts')
+    }
+
     const userId = user.user.id
 
     try {
+      // Cancel Stripe subscriptions immediately before database cleanup
+      await cancelUserStripeSubscriptionsImmediately(userId)
+
+      // Collect all image URLs for S3 cleanup before deleting records
+      const imageUrls = await collectUserImageUrls(userId, prisma)
+
       // Use a transaction to ensure all deletions succeed or fail together
       await prisma.$transaction(async (tx) => {
         // Remove user from any trainer relationships
@@ -845,13 +923,114 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           data: { trainerId: null },
         })
 
+        // Delete checkin completions first (depends on body measures and progress logs)
+        const userProfile = await tx.userProfile.findUnique({
+          where: { userId },
+          select: { id: true },
+        })
+
+        if (userProfile) {
+          const checkinSchedule = await tx.checkinSchedule.findUnique({
+            where: { userProfileId: userProfile.id },
+            select: { id: true },
+          })
+
+          if (checkinSchedule) {
+            await tx.checkinCompletion.deleteMany({
+              where: { scheduleId: checkinSchedule.id },
+            })
+          }
+        }
+
+        // Delete chat messages before chats
+        const userChats = await tx.chat.findMany({
+          where: { OR: [{ trainerId: userId }, { clientId: userId }] },
+          select: { id: true },
+        })
+        const chatIds = userChats.map((c) => c.id)
+
+        if (chatIds.length > 0) {
+          await tx.message.deleteMany({
+            where: { chatId: { in: chatIds } },
+          })
+        }
+
+        // Delete ExerciseSetLog records (no userId, so find via training plans)
+        const userPlans = await tx.trainingPlan.findMany({
+          where: { OR: [{ assignedToId: userId }, { createdById: userId }] },
+          select: { id: true },
+        })
+        const planIds = userPlans.map((p) => p.id)
+
+        if (planIds.length > 0) {
+          const setsWithLogs = await tx.exerciseSet.findMany({
+            where: {
+              exercise: {
+                day: { week: { planId: { in: planIds } } },
+              },
+              logId: { not: null },
+            },
+            select: { id: true, logId: true },
+          })
+
+          const setIds = setsWithLogs.map((s) => s.id)
+          const logIds = setsWithLogs
+            .map((s) => s.logId)
+            .filter((id): id is string => id !== null)
+
+          // Clear logId references first to prevent cascade issues
+          if (setIds.length > 0) {
+            await tx.exerciseSet.updateMany({
+              where: { id: { in: setIds } },
+              data: { logId: null },
+            })
+          }
+
+          // Now delete the orphaned logs
+          if (logIds.length > 0) {
+            await tx.exerciseSetLog.deleteMany({
+              where: { id: { in: logIds } },
+            })
+          }
+        }
+
+        // Delete meetings where user is trainee (client deleting account)
+        await tx.meeting.deleteMany({
+          where: { traineeId: userId },
+        })
+
+        // Delete service deliveries and their tasks where user is client
+        const clientDeliveries = await tx.serviceDelivery.findMany({
+          where: { clientId: userId },
+          select: { id: true },
+        })
+        const deliveryIds = clientDeliveries.map((d) => d.id)
+
+        if (deliveryIds.length > 0) {
+          await tx.serviceTask.deleteMany({
+            where: { serviceDeliveryId: { in: deliveryIds } },
+          })
+          await tx.serviceDelivery.deleteMany({
+            where: { id: { in: deliveryIds } },
+          })
+        }
+
         // Delete all related data in efficient bulk operations
         const deleteOperations = [
+          // Chats
+          tx.chat.deleteMany({
+            where: { OR: [{ trainerId: userId }, { clientId: userId }] },
+          }),
+
           // User sessions and notifications
           tx.userSession.deleteMany({ where: { userId } }),
           tx.notification.deleteMany({
             where: { OR: [{ userId }, { createdBy: userId }] },
           }),
+
+          // Push subscriptions
+          tx.pushSubscription.deleteMany({ where: { userId } }),
+          tx.mobilePushToken.deleteMany({ where: { userId } }),
 
           // Coaching requests
           tx.coachingRequest.deleteMany({
@@ -862,25 +1041,52 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           tx.exerciseLog.deleteMany({ where: { userId } }),
           tx.review.deleteMany({ where: { createdById: userId } }),
           tx.note.deleteMany({ where: { createdById: userId } }),
+          tx.personalRecord.deleteMany({ where: { userId } }),
+
+          // Subscriptions (database records, Stripe already cancelled)
+          tx.userSubscription.deleteMany({ where: { userId } }),
+
+          // Macro targets
+          tx.macroTarget.deleteMany({ where: { clientId: userId } }),
+
+          // Reminders and locations
+          tx.reminderSent.deleteMany({ where: { userId } }),
+          tx.userLocation.deleteMany({ where: { userId } }),
+
+          // Terms agreements
+          tx.userTermsAgreement.deleteMany({ where: { userId } }),
+
+          // Team memberships
+          tx.teamMember.deleteMany({ where: { userId } }),
 
           // Plans (cascade will handle related data)
           tx.trainingPlan.deleteMany({
             where: { OR: [{ assignedToId: userId }, { createdById: userId }] },
           }),
 
-          // Other user-created content
+          // Favourite workouts and folders
+          tx.favouriteWorkoutFolder.deleteMany({
+            where: { createdById: userId },
+          }),
           tx.favouriteWorkout.deleteMany({ where: { createdById: userId } }),
+
+          // User-created exercises
           tx.baseExercise.deleteMany({ where: { createdById: userId } }),
         ]
 
         // Execute all deletions in parallel for better performance
         await Promise.all(deleteOperations)
 
-        // Finally, delete the user (profile and body measures will cascade due to onDelete: Cascade)
+        // Finally, delete the user (profile, body measures, progress logs, client survey cascade)
         await tx.user.delete({
           where: { id: userId },
         })
       })
+
+      // Delete all user images from S3 after successful database cleanup
+      if (imageUrls.length > 0) {
+        await deleteUserImages(imageUrls)
+      }
 
       return true
     } catch (error) {

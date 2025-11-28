@@ -967,6 +967,13 @@ export type GQLLogSetInput = {
   setId: Scalars['ID']['input'];
 };
 
+export enum GQLLogType {
+  BodyMeasurements = 'BODY_MEASUREMENTS',
+  PersonalRecords = 'PERSONAL_RECORDS',
+  ProgressPhotos = 'PROGRESS_PHOTOS',
+  WorkoutLogs = 'WORKOUT_LOGS'
+}
+
 export type GQLMacroDistribution = {
   __typename?: 'MacroDistribution';
   carbsPercentage: EntireFieldWrapper<Scalars['Int']['output']>;
@@ -1906,6 +1913,11 @@ export type GQLMutationReorderMealIngredientsArgs = {
 
 export type GQLMutationReorderNutritionPlanDayMealsArgs = {
   input: GQLReorderDayMealsInput;
+};
+
+
+export type GQLMutationResetUserLogsArgs = {
+  input: GQLResetUserLogsInput;
 };
 
 
@@ -2985,6 +2997,14 @@ export enum GQLRepFocus {
   Strength = 'STRENGTH'
 }
 
+export type GQLResetUserLogsInput = {
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  logTypes: Array<GQLLogType>;
+  relativePeriod?: InputMaybe<Scalars['String']['input']>;
+  timeframeType: GQLTimeframeType;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type GQLRespondToTeamInvitationInput = {
   accept: Scalars['Boolean']['input'];
   invitationId: Scalars['ID']['input'];
@@ -3265,6 +3285,11 @@ export enum GQLTheme {
 export enum GQLTimeFormat {
   H12 = 'h12',
   H24 = 'h24'
+}
+
+export enum GQLTimeframeType {
+  DateRange = 'DATE_RANGE',
+  Relative = 'RELATIVE'
 }
 
 export type GQLTrainerOffer = {
@@ -4153,6 +4178,7 @@ export type GQLResolversTypes = {
   Location: ResolverTypeWrapper<GQLLocation>;
   LocationType: GQLLocationType;
   LogSetInput: GQLLogSetInput;
+  LogType: GQLLogType;
   MacroDistribution: ResolverTypeWrapper<GQLMacroDistribution>;
   MacroTarget: ResolverTypeWrapper<GQLMacroTarget>;
   MacroTotals: ResolverTypeWrapper<GQLMacroTotals>;
@@ -4209,6 +4235,7 @@ export type GQLResolversTypes = {
   ReorderDayMealsInput: GQLReorderDayMealsInput;
   ReorderMealIngredientsInput: GQLReorderMealIngredientsInput;
   RepFocus: GQLRepFocus;
+  ResetUserLogsInput: GQLResetUserLogsInput;
   RespondToTeamInvitationInput: GQLRespondToTeamInvitationInput;
   ResumeCoachingResult: ResolverTypeWrapper<GQLResumeCoachingResult>;
   Review: ResolverTypeWrapper<GQLReview>;
@@ -4240,6 +4267,7 @@ export type GQLResolversTypes = {
   TeamRole: GQLTeamRole;
   Theme: GQLTheme;
   TimeFormat: GQLTimeFormat;
+  TimeframeType: GQLTimeframeType;
   TrainerOffer: ResolverTypeWrapper<GQLTrainerOffer>;
   TrainerOfferStatus: GQLTrainerOfferStatus;
   TrainingDay: ResolverTypeWrapper<GQLTrainingDay>;
@@ -4452,6 +4480,7 @@ export type GQLResolversParentTypes = {
   RemoveTeamMemberInput: GQLRemoveTeamMemberInput;
   ReorderDayMealsInput: GQLReorderDayMealsInput;
   ReorderMealIngredientsInput: GQLReorderMealIngredientsInput;
+  ResetUserLogsInput: GQLResetUserLogsInput;
   RespondToTeamInvitationInput: GQLRespondToTeamInvitationInput;
   ResumeCoachingResult: GQLResumeCoachingResult;
   Review: GQLReview;
@@ -5209,7 +5238,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   removeWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveWeekArgs, 'planId' | 'weekId'>>;
   reorderMealIngredients?: Resolver<Array<GQLResolversTypes['MealIngredient']>, ParentType, ContextType, RequireFields<GQLMutationReorderMealIngredientsArgs, 'input'>>;
   reorderNutritionPlanDayMeals?: Resolver<Array<GQLResolversTypes['NutritionPlanMeal']>, ParentType, ContextType, RequireFields<GQLMutationReorderNutritionPlanDayMealsArgs, 'input'>>;
-  resetUserLogs?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  resetUserLogs?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationResetUserLogsArgs, 'input'>>;
   respondToTeamInvitation?: Resolver<GQLResolversTypes['TeamInvitation'], ParentType, ContextType, RequireFields<GQLMutationRespondToTeamInvitationArgs, 'input'>>;
   resumeClientCoachingSubscription?: Resolver<GQLResolversTypes['ResumeCoachingResult'], ParentType, ContextType, RequireFields<GQLMutationResumeClientCoachingSubscriptionArgs, 'clientId'>>;
   sendMessage?: Resolver<GQLResolversTypes['Message'], ParentType, ContextType, RequireFields<GQLMutationSendMessageArgs, 'input'>>;

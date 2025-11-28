@@ -965,6 +965,13 @@ export type GQLLogSetInput = {
   setId: Scalars['ID']['input'];
 };
 
+export enum GQLLogType {
+  BodyMeasurements = 'BODY_MEASUREMENTS',
+  PersonalRecords = 'PERSONAL_RECORDS',
+  ProgressPhotos = 'PROGRESS_PHOTOS',
+  WorkoutLogs = 'WORKOUT_LOGS'
+}
+
 export type GQLMacroDistribution = {
   __typename?: 'MacroDistribution';
   carbsPercentage: Scalars['Int']['output'];
@@ -1904,6 +1911,11 @@ export type GQLMutationReorderMealIngredientsArgs = {
 
 export type GQLMutationReorderNutritionPlanDayMealsArgs = {
   input: GQLReorderDayMealsInput;
+};
+
+
+export type GQLMutationResetUserLogsArgs = {
+  input: GQLResetUserLogsInput;
 };
 
 
@@ -2983,6 +2995,14 @@ export enum GQLRepFocus {
   Strength = 'STRENGTH'
 }
 
+export type GQLResetUserLogsInput = {
+  fromDate?: InputMaybe<Scalars['String']['input']>;
+  logTypes: Array<GQLLogType>;
+  relativePeriod?: InputMaybe<Scalars['String']['input']>;
+  timeframeType: GQLTimeframeType;
+  toDate?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type GQLRespondToTeamInvitationInput = {
   accept: Scalars['Boolean']['input'];
   invitationId: Scalars['ID']['input'];
@@ -3263,6 +3283,11 @@ export enum GQLTheme {
 export enum GQLTimeFormat {
   H12 = 'h12',
   H24 = 'h24'
+}
+
+export enum GQLTimeframeType {
+  DateRange = 'DATE_RANGE',
+  Relative = 'RELATIVE'
 }
 
 export type GQLTrainerOffer = {
@@ -4448,7 +4473,9 @@ export type GQLSkipCheckinMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type GQLSkipCheckinMutation = { __typename?: 'Mutation', skipCheckin: { __typename?: 'CheckinCompletion', id: string, completedAt: string, measurement?: { __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, measuredAt: string } | undefined | null, progressLog?: { __typename?: 'BodyProgressLog', id: string, loggedAt: string } | undefined | null } };
 
-export type GQLResetUserLogsMutationVariables = Exact<{ [key: string]: never; }>;
+export type GQLResetUserLogsMutationVariables = Exact<{
+  input: GQLResetUserLogsInput;
+}>;
 
 
 export type GQLResetUserLogsMutation = { __typename?: 'Mutation', resetUserLogs: boolean };
@@ -9453,8 +9480,8 @@ useSkipCheckinMutation.getKey = () => ['SkipCheckin'];
 useSkipCheckinMutation.fetcher = (variables?: GQLSkipCheckinMutationVariables, options?: RequestInit['headers']) => fetchData<GQLSkipCheckinMutation, GQLSkipCheckinMutationVariables>(SkipCheckinDocument, variables, options);
 
 export const ResetUserLogsDocument = `
-    mutation ResetUserLogs {
-  resetUserLogs
+    mutation ResetUserLogs($input: ResetUserLogsInput!) {
+  resetUserLogs(input: $input)
 }
     `;
 
@@ -9474,7 +9501,7 @@ export const useResetUserLogsMutation = <
 useResetUserLogsMutation.getKey = () => ['ResetUserLogs'];
 
 
-useResetUserLogsMutation.fetcher = (variables?: GQLResetUserLogsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLResetUserLogsMutation, GQLResetUserLogsMutationVariables>(ResetUserLogsDocument, variables, options);
+useResetUserLogsMutation.fetcher = (variables: GQLResetUserLogsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLResetUserLogsMutation, GQLResetUserLogsMutationVariables>(ResetUserLogsDocument, variables, options);
 
 export const DeleteUserAccountDocument = `
     mutation DeleteUserAccount {

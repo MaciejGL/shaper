@@ -9,30 +9,34 @@ import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { useUser } from '@/context/user-context'
 import {
+  GQLLogType,
+  GQLTimeframeType,
   useDeleteUserAccountMutation,
   useResetUserLogsMutation,
 } from '@/generated/graphql-client'
 
-// Custom validation component for destructive actions
+import { ResetLogsModal } from './reset-logs-modal'
+
 function DestructiveActionValidator({
   expectedText,
   onValidationChange,
   actionType,
+  additionalWarning,
 }: {
   expectedText: string
   onValidationChange: (isValid: boolean) => void
   actionType: string
+  additionalWarning?: string
 }) {
   const [inputValue, setInputValue] = useState('')
   const isValid = inputValue.toLowerCase() === expectedText.toLowerCase()
 
-  // Notify parent of validation state changes
   useEffect(() => {
     onValidationChange(isValid)
   }, [isValid, onValidationChange])
 
-  // Initialize confirm button as disabled when modal opens
   useEffect(() => {
     const initializeConfirmButton = () => {
       const confirmButton = document.querySelector(
@@ -45,13 +49,10 @@ function DestructiveActionValidator({
       }
     }
 
-    // Use a small delay to ensure the modal is fully rendered
     const timeoutId = setTimeout(initializeConfirmButton, 100)
-
     return () => clearTimeout(timeoutId)
   }, [])
 
-  // Update confirm button state when validation changes
   useEffect(() => {
     const updateConfirmButton = () => {
       const confirmButton = document.querySelector(
@@ -64,14 +65,19 @@ function DestructiveActionValidator({
       }
     }
 
-    // Use a small delay to ensure the modal is fully rendered
     const timeoutId = setTimeout(updateConfirmButton, 100)
-
     return () => clearTimeout(timeoutId)
   }, [isValid])
 
   return (
     <div className="space-y-3">
+      {additionalWarning && (
+        <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-md">
+          <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+            {additionalWarning}
+          </p>
+        </div>
+      )}
       <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
         <p className="text-sm text-destructive font-medium">
           This action cannot be undone. To confirm, type "{expectedText}" below:
@@ -90,16 +96,21 @@ function DestructiveActionValidator({
 }
 
 export function AccountSection() {
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const { openModal } = useConfirmationModalContext()
   const queryClient = useQueryClient()
+  const { user, subscription } = useUser()
+
+  const isTrainer = user?.role === 'TRAINER'
+  const hasActiveSubscription = subscription?.hasPremium ?? false
 
   const { mutateAsync: resetLogs } = useResetUserLogsMutation({
     onSuccess: () => {
       toast.success('Account logs reset successfully')
-      queryClient.clear() // Clear all cached queries
+      queryClient.clear()
     },
     onError: (error: Error) => {
       console.error('Failed to reset logs:', error)
@@ -110,8 +121,7 @@ export function AccountSection() {
   const { mutateAsync: deleteAccount } = useDeleteUserAccountMutation({
     onSuccess: () => {
       toast.success('Account deleted successfully')
-      queryClient.clear() // Clear all cached queries
-      // Redirect to login page
+      queryClient.clear()
       window.location.href = '/login'
     },
     onError: (error: Error) => {
@@ -120,53 +130,60 @@ export function AccountSection() {
     },
   })
 
-  const handleResetLogs = () => {
-    let isValidationPassed = false
+  const handleResetLogs = async (params: {
+    logTypes: ('WORKOUT_LOGS' | 'BODY_MEASUREMENTS' | 'PROGRESS_PHOTOS' | 'PERSONAL_RECORDS')[]
+    timeframeType: 'RELATIVE' | 'DATE_RANGE'
+    relativePeriod?: string
+    fromDate?: string
+    toDate?: string
+  }) => {
+    setIsResetting(true)
+    try {
+      const logTypeMap: Record<string, GQLLogType> = {
+        WORKOUT_LOGS: GQLLogType.WorkoutLogs,
+        BODY_MEASUREMENTS: GQLLogType.BodyMeasurements,
+        PROGRESS_PHOTOS: GQLLogType.ProgressPhotos,
+        PERSONAL_RECORDS: GQLLogType.PersonalRecords,
+      }
 
-    openModal({
-      title: 'Reset Account Logs',
-      description:
-        'This will permanently delete all your workout logs, exercise data, progress tracking, and meal logs. Your profile and preferences will remain intact.',
-      confirmText: 'Reset Logs',
-      variant: 'destructive',
-      children: (
-        <DestructiveActionValidator
-          expectedText="reset"
-          actionType="reset"
-          onValidationChange={(isValid) => {
-            isValidationPassed = isValid
-          }}
-        />
-      ),
-      onConfirm: async () => {
-        if (!isValidationPassed) {
-          toast.error('Please type "reset" to confirm this action')
-          return
-        }
+      const timeframeMap: Record<string, GQLTimeframeType> = {
+        RELATIVE: GQLTimeframeType.Relative,
+        DATE_RANGE: GQLTimeframeType.DateRange,
+      }
 
-        setIsResetting(true)
-        try {
-          await resetLogs({})
-        } finally {
-          setIsResetting(false)
-        }
-      },
-    })
+      await resetLogs({
+        input: {
+          logTypes: params.logTypes.map((t) => logTypeMap[t]),
+          timeframeType: timeframeMap[params.timeframeType],
+          relativePeriod: params.relativePeriod,
+          fromDate: params.fromDate,
+          toDate: params.toDate,
+        },
+      })
+      setIsResetModalOpen(false)
+    } finally {
+      setIsResetting(false)
+    }
   }
 
   const handleDeleteAccount = () => {
     let isValidationPassed = false
 
+    const subscriptionWarning = hasActiveSubscription
+      ? 'Your subscription will be cancelled immediately. No additional charges will occur.'
+      : undefined
+
     openModal({
       title: 'Delete Account',
       description:
-        'This will permanently delete your account and all associated data including workouts, meals, progress, and preferences.',
+        'This will permanently delete your account and all associated data including workouts, progress photos, personal records, and preferences. All your data will be removed from our servers.',
       confirmText: 'Delete Account',
       variant: 'destructive',
       children: (
         <DestructiveActionValidator
           expectedText="delete"
           actionType="delete"
+          additionalWarning={subscriptionWarning}
           onValidationChange={(isValid) => {
             isValidationPassed = isValid
           }}
@@ -189,78 +206,95 @@ export function AccountSection() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <Card className="bg-card">
-        {/* Reset Account Data */}
-        <CardHeader>
-          <div className="flex items-center space-x-3">
-            <div className="size-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center shrink-0 self-start">
-              <RotateCcw className="size-5 text-white" />
+    <>
+      <div className={`grid grid-cols-1 ${isTrainer ? '' : 'md:grid-cols-2'} gap-8`}>
+        <Card className="bg-card">
+          <CardHeader>
+            <div className="flex items-center space-x-3">
+              <div className="size-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center shrink-0 self-start">
+                <RotateCcw className="size-5 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Reset Account Data</CardTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Selectively delete your logs and data
+                </p>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-xl">Reset Account Data</CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                This will permanently delete all your logs
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-start space-x-4">
-            <div className="flex-1">
-              <ul className="list-disc list-inside mb-4 space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                <li className="font-medium">Workout logs</li>
-                <li className="font-medium">Exercise data</li>
-                <li className="font-medium">Progress tracking</li>
-                <li className="font-medium">Meal logs</li>
-              </ul>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-start space-x-4">
+              <div className="flex-1">
+                <ul className="list-disc list-inside mb-4 space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                  <li className="font-medium">Workout logs</li>
+                  <li className="font-medium">Body measurements</li>
+                  <li className="font-medium">Progress photos</li>
+                  <li className="font-medium">Personal records</li>
+                </ul>
 
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Your assigned plans, favorite workouts, profile and preferences
-                will remain intact.
-              </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Choose what to delete and the timeframe. Your profile and
+                  preferences will remain intact.
+                </p>
+                <Button
+                  onClick={() => setIsResetModalOpen(true)}
+                  disabled={isResetting}
+                  loading={isResetting}
+                  className="ml-auto"
+                >
+                  Reset Logs
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {!isTrainer && (
+          <Card className="bg-card">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="size-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shrink-0 self-start">
+                  <Trash2 className="size-5 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Delete Account</CardTitle>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-0 flex flex-col justify-between h-full">
+              <div className="space-y-2 mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  This will permanently delete your account and all associated
+                  data. This action cannot be undone.
+                </p>
+                {hasActiveSubscription && (
+                  <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+                    Your active subscription will be cancelled.
+                  </p>
+                )}
+              </div>
+
               <Button
-                onClick={handleResetLogs}
-                disabled={isResetting}
-                loading={isResetting}
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                loading={isDeleting}
                 className="ml-auto"
               >
-                Reset Logs
+                Delete Account
               </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="bg-card">
-        <CardHeader>
-          <div className="flex items-center space-x-3">
-            <div className="size-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shrink-0 self-start">
-              <Trash2 className="size-5 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">Delete Account</CardTitle>
-            </div>
-          </div>
-        </CardHeader>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
-        {/* Delete Account */}
-        <CardContent className="pt-0 flex flex-col justify-between h-full">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            This will permanently delete your account and all associated data.
-            This action cannot be undone.
-          </p>
-
-          <Button
-            variant="destructive"
-            onClick={handleDeleteAccount}
-            disabled={isDeleting}
-            loading={isDeleting}
-            className="ml-auto"
-          >
-            Delete Account
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+      <ResetLogsModal
+        open={isResetModalOpen}
+        onOpenChange={setIsResetModalOpen}
+        onConfirm={handleResetLogs}
+        isLoading={isResetting}
+      />
+    </>
   )
 }

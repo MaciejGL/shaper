@@ -4,6 +4,26 @@ enum UserRole {
   ADMIN
 }
 
+enum LogType {
+  WORKOUT_LOGS
+  BODY_MEASUREMENTS
+  PROGRESS_PHOTOS
+  PERSONAL_RECORDS
+}
+
+enum TimeframeType {
+  RELATIVE
+  DATE_RANGE
+}
+
+input ResetUserLogsInput {
+  logTypes: [LogType!]!
+  timeframeType: TimeframeType!
+  relativePeriod: String
+  fromDate: String
+  toDate: String
+}
+
 type User {
   id: ID!
   email: String!
@@ -148,7 +168,7 @@ type Mutation {
   clearUserSessions(userId: ID!): Boolean!
 
   # User account management
-  resetUserLogs: Boolean!
+  resetUserLogs(input: ResetUserLogsInput!): Boolean!
   deleteUserAccount: Boolean!
 
   # Coaching management
