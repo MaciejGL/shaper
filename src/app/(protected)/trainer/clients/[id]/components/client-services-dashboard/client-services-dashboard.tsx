@@ -92,7 +92,7 @@ export function ClientServicesDashboard({
 
       {/* Sheet for Send Offer / History */}
       <Sheet open={sheetView !== null} onOpenChange={() => setSheetView(null)}>
-        <SheetContent className="sm:max-w-lg overflow-y-auto">
+        <SheetContent className="sm:max-w-2xl pb-12 overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
               {sheetView === 'send-offer' ? 'Send Offer' : 'Offer History'}

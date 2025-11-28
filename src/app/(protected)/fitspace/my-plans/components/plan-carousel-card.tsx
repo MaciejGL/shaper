@@ -1,9 +1,8 @@
 import { isAfter } from 'date-fns'
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { CardContent } from '@/components/ui/card'
 import { ProgressCircle } from '@/components/ui/progress-circle'
 import { cn } from '@/lib/utils'
 
@@ -53,79 +52,67 @@ export function PlanCarouselCard({
     isAfter(new Date(plan.createdAt), threeDaysAgo)
 
   const cardContent = (
-    <Card
+    <CardContent
       onClick={() => onClick(plan)}
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-[5/6] w-full border-none bg-sidebar"
-      variant="tertiary"
-    >
-      {imageUrl && (
-        <div className="absolute inset-0 transition-opacity">
-          <Image
-            src={imageUrl}
-            alt={plan.title}
-            fill
-            className="object-cover"
-            quality={100}
-            sizes="(max-width: 768px) 70vw, 300px"
-            priority={false}
-            key={imageUrl}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black to-black/5 dark:to-black/10" />
-        </div>
+      className={cn(
+        'h-full flex flex-col justify-between bg-cover rounded-2xl relative',
+        'shadow-lg shadow-neutral-400 dark:shadow-neutral-950 cursor-pointer hover:border-primary/50 transition-all group relative aspect-[4/5] w-full dark:border dark:border-border bg-sidebar py-4',
       )}
-      <CardContent className="h-full flex flex-col justify-between">
-        <div className="flex justify-end">
-          {hasProgress && (
-            <div className="dark top-2 right-2 absolute flex items-center shrink-0 bg-background/80 backdrop-blur-sm rounded-full p-1 transition-all">
-              <ProgressCircle
-                progress={progressPercentage}
-                size={34}
-                strokeWidth={plan.createdAt ? 2 : 3}
-                showValue={true}
-              />
-            </div>
-          )}
-        </div>
-        <div className="space-y-2 space-x-2 relative dark">
-          {isPremiumPlan && (
-            <Badge
-              variant="premium"
-              className="w-fit"
-              size={isExpanded ? 'xs' : 'md'}
-            >
-              Premium
-            </Badge>
-          )}
-          {!isPublicPlan && (
-            <Badge
-              variant="primary"
-              className="w-fit"
-              size={isExpanded ? 'xs' : 'md'}
-            >
-              Personal
-            </Badge>
-          )}
-          {isNewPlan && (
-            <Badge
-              variant="success"
-              className="w-fit"
-              size={isExpanded ? 'xs' : 'md'}
-            >
-              New
-            </Badge>
-          )}
-          <h3
-            className={cn(
-              'font-medium',
-              imageUrl ? 'text-white' : 'text-foreground',
-              isExpanded ? 'text-sm' : 'text-base',
-            )}
+      style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : 'none' }}
+    >
+      <div className="absolute rounded-2xl inset-[-0.5px] bg-gradient-to-t from-black to-black/5 dark:to-black/10" />
+
+      <div className="flex justify-end">
+        {hasProgress && (
+          <div className="dark top-2 right-2 absolute flex items-center shrink-0 bg-background/80 backdrop-blur-sm rounded-full p-1 transition-all">
+            <ProgressCircle
+              progress={progressPercentage}
+              size={34}
+              strokeWidth={plan.createdAt ? 2 : 3}
+              showValue={true}
+            />
+          </div>
+        )}
+      </div>
+      <div className="space-y-2 space-x-2 relative dark">
+        {isPremiumPlan && (
+          <Badge
+            variant="premium"
+            className="w-fit"
+            size={isExpanded ? 'xs' : 'md'}
           >
-            {plan.title}
-          </h3>
-        </div>
-      </CardContent>
-    </Card>
+            Premium
+          </Badge>
+        )}
+        {!isPublicPlan && (
+          <Badge
+            variant="primary"
+            className="w-fit"
+            size={isExpanded ? 'xs' : 'md'}
+          >
+            Personal
+          </Badge>
+        )}
+        {isNewPlan && (
+          <Badge
+            variant="success"
+            className="w-fit"
+            size={isExpanded ? 'xs' : 'md'}
+          >
+            New
+          </Badge>
+        )}
+        <h3
+          className={cn(
+            'font-medium',
+            imageUrl ? 'text-white' : 'text-foreground',
+            isExpanded ? 'text-sm' : 'text-base',
+          )}
+        >
+          {plan.title}
+        </h3>
+      </div>
+    </CardContent>
   )
 
   if (layoutId) {

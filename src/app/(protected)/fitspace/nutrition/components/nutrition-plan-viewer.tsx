@@ -50,7 +50,7 @@ export function NutritionPlanViewer({
   return (
     <div className="space-y-4">
       <Tabs value={activeDay} onValueChange={setActiveDay}>
-        <div className="flex items-center gap-2 max-w-screen overflow-x-auto hide-scrollbar mb-4">
+        <div className="flex items-center gap-2 max-w-screen overflow-x-auto hide-scrollbar mb-4 shadow-lg dark:shadow-neutral-950">
           <PrimaryTabList
             size="lg"
             options={days.map((day) => ({

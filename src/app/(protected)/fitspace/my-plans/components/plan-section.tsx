@@ -144,15 +144,18 @@ export function PlanSection({
                   align: 'start',
                   dragFree: true,
                 }}
-                className="w-screen md:w-[calc(100%+2rem)] space-y-3 -mx-4"
+                className="w-screen md:w-[calc(100%+2rem)] space-y-3 -mx-4 overflow-visible"
               >
-                <CarouselContent className="ml-0">
+                <CarouselContent
+                  className="ml-0"
+                  containerClassName="overflow-visible"
+                >
                   {plans.slice(0, maxPlans).map((plan) => (
                     <CarouselItem
                       key={
                         plan?.id ? `${plan.id}-carousel-item` : `carousel-item`
                       }
-                      className={cn('basis-[40%]  pl-4')}
+                      className={cn('basis-[55%] pl-4')}
                     >
                       <PlanCarouselCard
                         key={plan?.id}

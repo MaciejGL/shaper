@@ -2,6 +2,7 @@ import { ChevronRight, Crown, User } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { ProgressCircle } from '@/components/ui/progress-circle'
 import { cn } from '@/lib/utils'
@@ -35,8 +36,8 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
   return (
     <Card
       onClick={() => onClick(plan)}
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative bg-card gap-2"
-      variant={status === PlanStatus.Active ? 'premium' : 'tertiary'}
+      className="dark cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative bg-card gap-2 -mb-6 pb-14"
+      // variant={status === PlanStatus.Active ? 'premium' : 'tertiary'}
     >
       {imageUrl && (
         <div className="absolute inset-0 transition-opacity">
@@ -53,7 +54,7 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
       )}
       <CardContent
         className={cn(
-          'relative flex gap-2 justify-between aspect-[12/4]',
+          'relative flex gap-2 justify-between aspect-[12/6]',
           status !== PlanStatus.Active && 'items-center',
         )}
       >
@@ -77,8 +78,14 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
               </Badge>
             )}
           </div>
-          <CardTitle className="text-foreground text-lg grid grid-cols-[1fr_auto] items-center gap-4">
-            <p>{plan.title}</p> <ChevronRight className="size-4" />
+          <CardTitle className="text-foreground text-lg grid grid-cols-[1fr_auto] items-end gap-4">
+            <p>{plan.title}</p>
+            <Button
+              variant="default"
+              size="icon-md"
+              className="rounded-full"
+              iconOnly={<ChevronRight className="size-4" />}
+            />
           </CardTitle>
         </div>
         {hasProgress && (

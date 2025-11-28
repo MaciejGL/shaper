@@ -3,7 +3,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Dumbbell, Star, Users } from 'lucide-react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -25,6 +24,7 @@ import {
   useGetPublicTrainingPlansQuery,
 } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
+import { cn } from '@/lib/utils'
 import { formatUserCount } from '@/utils/format-user-count'
 
 import { PublicTrainingPlan } from './explore.client'
@@ -185,7 +185,7 @@ export function TrainingPlansTab({
       />
 
       {/* Results */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {isLoading ? (
           <LoadingSkeleton count={3} variant="lg" />
         ) : filteredPlans.length === 0 ? (
@@ -269,22 +269,21 @@ const difficultyVariantMap = {
 function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
   return (
     <Card
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark border-none"
+      className={cn(
+        'cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark',
+        'shadow-lg shadow-neutral-400 dark:shadow-neutral-950 dark:border dark:border-border',
+        'bg-cover bg-center',
+      )}
       onClick={onClick}
+      style={{
+        backgroundImage: plan.heroImageUrl
+          ? `url(${plan.heroImageUrl})`
+          : 'none',
+      }}
     >
       {/* Hero image background */}
       {plan.heroImageUrl && (
-        <div className="absolute inset-0 opacity-100 group-hover:opacity-30 transition-opacity">
-          <Image
-            src={plan.heroImageUrl}
-            alt={plan.title}
-            fill
-            className="object-cover"
-            quality={100}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
-        </div>
+        <div className="absolute -inset-[0.5px] bg-gradient-to-r from-black via-black/60 to-transparent" />
       )}
 
       <CardHeader className="relative">

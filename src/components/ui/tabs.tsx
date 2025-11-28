@@ -157,7 +157,7 @@ function PrimaryTabList<T extends string>({
   return (
     <div
       className={cn(
-        'rounded-[18px] bg-card dark:bg-background border border-black/15  dark:border-white/10 p-[2px] min-w-max w-full shadow-lg dark:shadow-neutral-950',
+        'rounded-[18px] bg-card/95 dark:bg-background/95 border border-zinc-400 dark:border-zinc-800 p-[2px] min-w-max w-full shadow-lg dark:shadow-neutral-950',
       )}
     >
       <div className={cn('relative flex', className)}>
@@ -168,14 +168,25 @@ function PrimaryTabList<T extends string>({
             size={size}
             onClick={() => onClick(option.value)}
             disabled={option.disabled}
-            iconStart={option.icon}
+            iconStart={
+              <span
+                className={cn(
+                  'relative z-[1] transition-colors duration-500',
+                  active === option.value
+                    ? 'text-primary-foreground dark:text-primary'
+                    : 'text-primary/80',
+                )}
+              >
+                {option.icon}
+              </span>
+            }
             iconEnd={option.disabled ? option.disabledIcon : undefined}
             className={cn('relative', classNameButton)}
           >
             {active === option.value && (
               <motion.div
                 layoutId={`activeTabBackground-${uniqueId}`}
-                className="absolute inset-0 bg-primary dark:bg-primary/20 rounded-2xl z-0"
+                className="absolute inset-0 bg-primary dark:bg-primary/25 rounded-2xl z-0"
                 transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
               />
             )}

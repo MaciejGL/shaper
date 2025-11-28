@@ -6,69 +6,6 @@ interface QueryStep {
   duration: number
 }
 
-export function createQueryLogger() {
-  // Only enable in development
-  if (process.env.NODE_ENV !== 'development') {
-    return Prisma.defineExtension({
-      name: 'query-logger-disabled',
-    })
-  }
-
-  return Prisma.defineExtension({
-    name: 'query-logger',
-    query: {
-      $allModels: {
-        async $allOperations({ model, operation, args, query }) {
-          const startTime = Date.now()
-          const steps: QueryStep[] = []
-
-          try {
-            // Execute the actual query
-            const queryStart = Date.now()
-            const result = await query(args)
-            const queryDuration = Date.now() - queryStart
-
-            // Add query execution step
-            steps.push({
-              name: 'engine:query',
-              icon: '⚙️',
-              duration: queryDuration,
-            })
-
-            const totalDuration = Date.now() - startTime
-
-            // Log the query with breakdown
-            logQueryExecution({
-              model: model || 'unknown',
-              operation,
-              args,
-              totalDuration,
-              steps,
-              success: true,
-            })
-
-            return result
-          } catch (error) {
-            const totalDuration = Date.now() - startTime
-
-            logQueryExecution({
-              model: model || 'unknown',
-              operation,
-              args,
-              totalDuration,
-              steps,
-              success: false,
-              error: error instanceof Error ? error.message : 'Unknown error',
-            })
-
-            throw error
-          }
-        },
-      },
-    },
-  })
-}
-
 interface LogQueryParams {
   model: string
   operation: string
@@ -77,46 +14,6 @@ interface LogQueryParams {
   steps: QueryStep[]
   success: boolean
   error?: string
-}
-
-function logQueryExecution({
-  model,
-  operation,
-  totalDuration,
-  steps,
-  success,
-  error,
-}: LogQueryParams) {
-  // Get timing emoji
-  const getTimingEmoji = (duration: number) => {
-    if (duration < 150) return '🟢'
-    if (duration < 400) return '🟡'
-    return '🔴'
-  }
-
-  const mainEmoji = success ? '🗄️' : '❌'
-  const queryName = `${model}.${operation}`
-  const timingEmoji = getTimingEmoji(totalDuration)
-
-  // Main query log
-  console.info(
-    `\x1b[36m[PRISMA]\x1b[0m ${queryName} ${timingEmoji} ${totalDuration}ms ${mainEmoji}`,
-  )
-
-  if (error) {
-    console.error(`   ❌ Error: ${error}`)
-  }
-
-  // Log each step with indentation
-  steps.forEach((step) => {
-    const stepEmoji = getTimingEmoji(step.duration)
-    console.info(
-      `   ├─ ${step.icon} ${step.name} ${stepEmoji} ${step.duration}ms`,
-    )
-  })
-
-  // Add empty line for separation
-  console.info('')
 }
 
 // Enhanced version that logs Prisma's built-in events if available
@@ -325,15 +222,22 @@ function logDetailedQueryExecution({
   error,
 }: Omit<LogQueryParams, 'args'>) {
   const getTimingEmoji = (duration: number) => {
-    if (duration < 30) return '🟢'
-    if (duration < 150) return '🟡'
-    if (duration < 600) return '🟠'
+    if (duration < 80) return '🟢'
+    if (duration < 250) return '🟡'
+    if (duration < 400) return '🟠'
+    return '🔴'
+  }
+
+  const getTotalTimingEmoji = (duration: number) => {
+    if (duration < 500) return '🟢'
+    if (duration < 750) return '🟡'
+    if (duration < 1000) return '🟠'
     return '🔴'
   }
 
   const mainEmoji = success ? '✅' : '❌'
   const queryName = `${model}.${operation}`
-  const timingEmoji = getTimingEmoji(totalDuration)
+  const timingEmoji = getTotalTimingEmoji(totalDuration)
 
   console.info(
     `\x1b[36m[PRISMA]\x1b[0m ${queryName} ${timingEmoji} ${totalDuration}ms ${mainEmoji}`,

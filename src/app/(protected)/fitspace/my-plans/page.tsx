@@ -1,5 +1,6 @@
 'use client'
 
+import { Plus } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
@@ -66,8 +67,12 @@ export default function MyPlansPage() {
     >
       <PrimaryTabList
         options={[
-          { label: 'Assigned Plans', value: PlanTab.Plans },
-          { label: 'My Plans', value: PlanTab.QuickWorkout },
+          { label: 'Premade Plans', value: PlanTab.Plans },
+          {
+            label: 'Create Plans',
+            value: PlanTab.QuickWorkout,
+            icon: <Plus className="relative" />,
+          },
         ]}
         onClick={setTab}
         active={tab ?? PlanTab.Plans}
@@ -94,19 +99,18 @@ export default function MyPlansPage() {
   return (
     <>
       <ExtendHeader
-        classNameContent="px-0 pt-0"
+        classNameContent="px-0 pt-0 relative"
+        classNameHeader="p-0"
         headerChildren={
           activePlan ? (
-            <div className="dark space-y-6 pb-6 pt-4">
-              <PlanCard
-                plan={activePlan}
-                onClick={handleActivePlanClick}
-                status={getPlanStatus(activePlan, activePlan.active)}
-                imageUrl={getPlanImage(activePlan)}
-              />
-            </div>
+            <PlanCard
+              plan={activePlan}
+              onClick={handleActivePlanClick}
+              status={getPlanStatus(activePlan, activePlan.active)}
+              imageUrl={getPlanImage(activePlan)}
+            />
           ) : isLoadingPlans ? (
-            <div className="dark space-y-6 pb-6 pt-4">
+            <div className="dark space-y-6 pb-6 pt-4 px-4">
               <LoadingSkeleton count={1} variant="md" className="h-[120px]" />
             </div>
           ) : null

@@ -70,6 +70,7 @@ export interface PackageCardProps {
   onUpdateQuantity: (packageId: string, quantity: number) => void
   bundleDiscount?: number
   hasCoachingSubscription?: boolean
+  disabled?: boolean
 }
 
 export interface PackageSelectionProps {

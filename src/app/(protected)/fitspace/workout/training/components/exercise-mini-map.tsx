@@ -146,7 +146,7 @@ function SmartPillContent({
             </span>
             <ChevronDown
               className={cn(
-                'size-4 transition-transform duration-200',
+                'size-6 transition-transform duration-200',
                 isExpanded && 'rotate-180',
               )}
             />
@@ -159,7 +159,7 @@ function SmartPillContent({
             </span>
             <ChevronDown
               className={cn(
-                'size-4 transition-transform duration-200',
+                'size-6 transition-transform duration-200',
                 isExpanded && 'rotate-180',
               )}
             />

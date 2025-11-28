@@ -33,6 +33,7 @@ export function PackageCard({
   onUpdateQuantity,
   bundleDiscount = 0,
   hasCoachingSubscription = false,
+  disabled = false,
 }: PackageCardProps) {
   return (
     <Card variant={isSelected ? 'premium' : 'tertiary'}>
@@ -42,6 +43,7 @@ export function PackageCard({
           checked={isSelected}
           onCheckedChange={(checked) => onToggle(pkg.id, checked === true)}
           className="mt-1"
+          disabled={disabled}
         />{' '}
         <CardTitle>{pkg.name}</CardTitle>
       </CardHeader>
@@ -70,7 +72,7 @@ export function PackageCard({
                 onClick={() =>
                   onUpdateQuantity(pkg.id, selectedItem.quantity - 1)
                 }
-                disabled={selectedItem.quantity <= 1}
+                disabled={selectedItem.quantity <= 1 || disabled}
                 iconOnly={<Minus />}
               />
               <Input
@@ -84,6 +86,7 @@ export function PackageCard({
                 type="number"
                 min="1"
                 max="20"
+                disabled={disabled}
               />
               <Button
                 variant="outline"
@@ -91,7 +94,7 @@ export function PackageCard({
                 onClick={() =>
                   onUpdateQuantity(pkg.id, selectedItem.quantity + 1)
                 }
-                disabled={selectedItem.quantity >= 20}
+                disabled={selectedItem.quantity >= 20 || disabled}
                 iconOnly={<Plus />}
               />
             </div>

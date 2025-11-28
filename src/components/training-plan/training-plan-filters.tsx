@@ -78,12 +78,7 @@ export function TrainingPlanFilters({
         {/* Advanced Filters Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="md"
-              iconStart={<Filter />}
-              className="ml-auto "
-            >
+            <Button size="md" iconStart={<Filter />} className="ml-auto ">
               Filters
             </Button>
           </DropdownMenuTrigger>

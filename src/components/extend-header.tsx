@@ -14,9 +14,7 @@ export const ExtendHeader = ({
   return (
     <div className={cn('bg-sidebar')}>
       {headerChildren && (
-        <div
-          className={cn('dark px-4 max-w-md h-max mx-auto', classNameHeader)}
-        >
+        <div className={cn('px-4 max-w-md h-max mx-auto', classNameHeader)}>
           {headerChildren}
         </div>
       )}

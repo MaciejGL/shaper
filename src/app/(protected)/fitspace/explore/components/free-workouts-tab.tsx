@@ -3,7 +3,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Dumbbell, Users } from 'lucide-react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -114,7 +113,7 @@ export function FreeWorkoutsTab({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-3">
+      <div className="space-y-4">
         <AnimatePresence mode="popLayout" initial={false}>
           {freeWorkoutDays.map((day) => (
             <motion.div
@@ -175,26 +174,20 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
   return (
     <Card
       className={cn(
-        'cursor-pointer hover:border-primary/50 transition-all overflow-hidden',
-        'group relative dark border-none',
+        'cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark',
+        'shadow-lg shadow-neutral-400 dark:shadow-neutral-950 dark:border dark:border-border',
+        'bg-cover bg-center',
       )}
       onClick={onClick}
+      style={{
+        backgroundImage: day.heroImageUrl ? `url(${day.heroImageUrl})` : 'none',
+      }}
     >
       {day.heroImageUrl && (
-        <div className="absolute inset-0 opacity-100 group-hover:opacity-30 transition-opacity overflow-hidden">
-          <Image
-            src={day.heroImageUrl}
-            alt={`${formatWorkoutType(workoutType)} workout`}
-            fill
-            className="object-cover"
-            quality={100}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent" />
-        </div>
+        <div className="absolute -inset-[0.5px] bg-gradient-to-r from-black via-black/60 to-transparent" />
       )}
 
-      <CardHeader className="relative">
+      <CardHeader className="relative dark">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
             <CardTitle className="text-2xl text-foreground">
@@ -206,7 +199,7 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="relative">
+      <CardContent className="relative dark">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-foreground">
             <span>{exerciseCount} exercises</span>

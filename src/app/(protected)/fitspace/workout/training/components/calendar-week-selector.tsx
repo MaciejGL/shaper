@@ -1,6 +1,6 @@
 'use client'
 
-import { BadgeCheckIcon, CalendarIcon } from 'lucide-react'
+import { CalendarIcon, CheckCircle } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -162,9 +162,6 @@ export function CalendarWeekSelector({
           {weekLabel}
           <span className="text-muted-foreground text-xs">
             {formatDate(weekStart)} - {formatDate(weekEnd)}{' '}
-            {activeWeek.completedAt ? (
-              <BadgeCheckIcon className="text-green-500 size-3.5" />
-            ) : null}
           </span>
         </span>
       )
@@ -181,6 +178,11 @@ export function CalendarWeekSelector({
         onClick={() => setOpen(true)}
         className=""
         iconStart={<CalendarIcon />}
+        iconEnd={
+          activeWeek?.completedAt ? (
+            <CheckCircle className="text-green-500 size-3.5" />
+          ) : null
+        }
       >
         {formatWeekDisplay()}
       </Button>

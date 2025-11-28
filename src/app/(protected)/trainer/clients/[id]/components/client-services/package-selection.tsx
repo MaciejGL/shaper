@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 import { PackageCard } from './package-card'
 import { PackageSelectionProps } from './types'
@@ -84,6 +85,10 @@ export function PackageSelection({
                   onUpdateQuantity={onUpdateQuantity}
                   bundleDiscount={bundleDiscount}
                   hasCoachingSubscription={hasCoachingSubscription}
+                  disabled={
+                    hasCoachingSubscription &&
+                    pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING
+                  }
                 />
               )
             })}
