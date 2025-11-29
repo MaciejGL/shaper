@@ -313,16 +313,7 @@ export class SubscriptionValidator {
         endDate: { gte: now },
       },
       include: {
-        package: {
-          include: {
-            trainer: {
-              select: { id: true, name: true, email: true },
-            },
-          },
-        },
-        trainer: {
-          select: { id: true, name: true, email: true },
-        },
+        package: true,
       },
     })
 
