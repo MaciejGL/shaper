@@ -222,16 +222,16 @@ function logDetailedQueryExecution({
   error,
 }: Omit<LogQueryParams, 'args'>) {
   const getTimingEmoji = (duration: number) => {
-    if (duration < 80) return '🟢'
-    if (duration < 250) return '🟡'
-    if (duration < 400) return '🟠'
+    if (duration < 100) return '🟢'
+    if (duration < 150) return '🟡'
+    if (duration < 200) return '🟠'
     return '🔴'
   }
 
   const getTotalTimingEmoji = (duration: number) => {
-    if (duration < 500) return '🟢'
-    if (duration < 750) return '🟡'
-    if (duration < 1000) return '🟠'
+    if (duration < 300) return '🟢'
+    if (duration < 500) return '🟡'
+    if (duration < 600) return '🟠'
     return '🔴'
   }
 
