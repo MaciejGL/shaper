@@ -38,7 +38,7 @@ export function Navigation({ plan }: NavigationProps) {
 
   return (
     <div id="workout-navigation" className="pb-2">
-      <div className="max-w-sm dark">
+      <div className="max-w-sm mx-auto dark">
         <WeekSelector plan={plan} />
         <DaySelector plan={plan} />
         {isPlanCompleted && (

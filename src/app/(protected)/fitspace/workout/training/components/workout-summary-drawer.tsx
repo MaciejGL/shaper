@@ -4,6 +4,7 @@ import { differenceInYears, secondsToMinutes } from 'date-fns'
 import { motion } from 'framer-motion'
 import { uniq } from 'lodash'
 import {
+  ArrowRight,
   CheckCheck,
   CheckIcon,
   ClockIcon,
@@ -225,9 +226,9 @@ export function WorkoutSummaryDrawer({
             size="lg"
             onClick={handleCompleteWorkout}
             loading={isMarkingWorkoutAsCompleted}
-            iconStart={<CheckIcon />}
+            iconEnd={<ArrowRight />}
           >
-            Complete Workout
+            Go to My Plans
           </Button>
         </div>
       </DrawerContent>
