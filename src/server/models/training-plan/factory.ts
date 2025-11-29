@@ -2043,6 +2043,7 @@ export async function getWorkoutDay(
       // Query TrainingDay directly using planId (uses @@index([planId, scheduledAt, isRestDay]))
       // First: Try to find today's scheduled day
       day = await prisma.trainingDay.findFirst({
+        relationLoadStrategy: 'join',
         where: {
           planId: activePlanId,
           scheduledAt: {
@@ -2057,6 +2058,7 @@ export async function getWorkoutDay(
       // Second: Find next upcoming incomplete day (closest to today)
       if (!day) {
         day = await prisma.trainingDay.findFirst({
+          relationLoadStrategy: 'join',
           where: {
             planId: activePlanId,
             scheduledAt: { gte: todayUTC },
@@ -2082,6 +2084,7 @@ export async function getWorkoutDay(
 
       if (selfPlanId) {
         day = await prisma.trainingDay.findFirst({
+          relationLoadStrategy: 'join',
           where: {
             planId: selfPlanId,
             scheduledAt: {
