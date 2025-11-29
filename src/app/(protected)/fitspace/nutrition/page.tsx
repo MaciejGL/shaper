@@ -69,7 +69,7 @@ export default function NutritionPage() {
 
   return (
     <ExtendHeader
-      classNameHeader="w-full max-w-screen"
+      classNameHeader="w-full"
       headerChildren={
         <div className="dark space-y-6 pt-4 pb-4 w-full">
           <div className="grid grid-cols-4">

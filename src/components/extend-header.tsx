@@ -24,7 +24,7 @@ export const ExtendHeader = ({
           classNameContent,
         )}
       >
-        <div className="max-w-md mx-auto">{children}</div>
+        <div className="max-w-md mx-auto overflow-x-hidden">{children}</div>
       </div>
     </div>
   )

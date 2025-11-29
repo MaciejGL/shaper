@@ -36,7 +36,7 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
   return (
     <Card
       onClick={() => onClick(plan)}
-      className="dark cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative bg-card gap-2 -mb-6 pb-14"
+      className="dark cursor-pointer border-none transition-all overflow-hidden group relative bg-card gap-2 -mb-6 pb-14"
       // variant={status === PlanStatus.Active ? 'premium' : 'tertiary'}
     >
       {imageUrl && (

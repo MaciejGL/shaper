@@ -156,7 +156,7 @@ export function ExerciseMetadata({
             dragFree: true,
             active: exercise.images.length > 2,
           }}
-          className="max-w-dvw md:w-[calc(100%+2rem)] bg-black py-2 space-y-3"
+          className="max-w-md md:w-[calc(100%+2rem)] bg-black py-2 space-y-3"
         >
           <CarouselContent className="ml-0 pr-2">
             {exercise.images.map((image) => (
