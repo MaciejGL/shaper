@@ -97,15 +97,11 @@ export default async function PrivacyPolicyPage() {
                     </h3>
                     <ul className="space-y-2 text-muted-foreground text-sm">
                       <li>
-                        <strong className="text-foreground">
-                          Required:
-                        </strong>{' '}
+                        <strong className="text-foreground">Required:</strong>{' '}
                         Email address (for login and account verification)
                       </li>
                       <li>
-                        <strong className="text-foreground">
-                          Optional:
-                        </strong>{' '}
+                        <strong className="text-foreground">Optional:</strong>{' '}
                         Name, profile picture, phone number, date of birth,
                         biological sex. Providing these helps trainers know you
                         better and personalize your experience.
@@ -283,6 +279,35 @@ export default async function PrivacyPolicyPage() {
                 </div>
               </div>
 
+              {/* Analytics */}
+              <div className="bg-muted/30 p-6 rounded-lg border">
+                <h2 className="text-2xl font-semibold mb-4 text-foreground">
+                  Analytics
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  We use cookieless analytics to understand how our app is used
+                  and to improve your experience:
+                </p>
+                <ul className="space-y-2 text-muted-foreground text-sm">
+                  <li>
+                    <strong>No cookies:</strong> We do not set tracking cookies
+                    on your device
+                  </li>
+                  <li>
+                    <strong>Session-only:</strong> Analytics data is collected
+                    only during your current session
+                  </li>
+                  <li>
+                    <strong>No cross-site tracking:</strong> We do not track you
+                    across other websites
+                  </li>
+                  <li>
+                    <strong>Do Not Track:</strong> We respect your browser's Do
+                    Not Track setting
+                  </li>
+                </ul>
+              </div>
+
               {/* Data Security */}
               <div className="bg-muted/30 p-6 rounded-lg border">
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">
@@ -296,7 +321,9 @@ export default async function PrivacyPolicyPage() {
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li>Secure authentication methods</li>
                     <li>HTTPS encryption for all data transmission</li>
-                    <li>Private storage for sensitive images</li>
+                    <li>
+                      Progress photos secured with time-limited access URLs
+                    </li>
                   </ul>
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li>Role-based access controls</li>

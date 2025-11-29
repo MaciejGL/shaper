@@ -390,6 +390,21 @@ export class ImageHandler {
   }
 
   /**
+   * Generate a presigned URL for reading a private image
+   * Use this for progress photos and other private content
+   * @param s3Url - The S3 URL or key (e.g., https://bucket.s3.region.amazonaws.com/key or just the key)
+   * @param expiresIn - URL validity in seconds (default: 1 hour)
+   */
+  static async getPresignedReadUrl(
+    s3Url: string,
+    expiresIn: number = 3600,
+  ): Promise<string> {
+    // Extract the S3 key from the URL if it's a full URL
+    const s3Key = this.extractFileKey(s3Url)
+    return await this.generateSignedUrl(s3Key, expiresIn)
+  }
+
+  /**
    * Generate optimized image URL with on-demand processing
    */
   static getOptimizedImageUrl(

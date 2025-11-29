@@ -26,9 +26,9 @@ export const IMAGE_CONFIGS = {
     maxWidth: 1200, // Keep original high quality for detailed analysis
     maxHeight: 1600, // Portrait aspect ratio (3:4)
     quality: 0.9, // High quality originals for professional analysis
-    folder: 'progress-private', // Public folder for progress images
+    folder: 'progress-private', // Private folder for progress images
     maxSize: 8 * 1024 * 1024, // 8MB for high quality originals
-    isPublic: true, // Progress photos are now public with API access control
+    isPublic: false, // Progress photos are private - served via /api/images/private/
   },
 } as const
 

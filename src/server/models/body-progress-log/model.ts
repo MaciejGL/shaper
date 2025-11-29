@@ -1,5 +1,6 @@
 import { GQLBodyProgressLog } from '@/generated/graphql-server'
 import { BodyProgressLog as PrismaBodyProgressLog } from '@/generated/prisma/client'
+import { ImageHandler } from '@/lib/aws/image-handler'
 
 export default class BodyProgressLog implements GQLBodyProgressLog {
   constructor(protected data: PrismaBodyProgressLog) {}
@@ -16,7 +17,6 @@ export default class BodyProgressLog implements GQLBodyProgressLog {
     return this.data.notes
   }
 
-  // Simple image variants - just return the direct S3 URLs
   async image1() {
     return this.data.image1Url
       ? this.createImageVariants(this.data.image1Url)
@@ -35,8 +35,24 @@ export default class BodyProgressLog implements GQLBodyProgressLog {
       : null
   }
 
-  // Create simple image variants that all point to the same public S3 URL
-  private createImageVariants(imageUrl: string) {
+  // Generate presigned URLs for private progress images
+  // URLs are valid for 1 hour
+  private async createImageVariants(imageUrl: string) {
+    // Check if this is a progress-private image that needs presigning
+    if (imageUrl.includes('progress-private')) {
+      const presignedUrl = await ImageHandler.getPresignedReadUrl(
+        imageUrl,
+        3600, // 1 hour
+      )
+      return {
+        thumbnail: presignedUrl,
+        medium: presignedUrl,
+        large: presignedUrl,
+        url: presignedUrl,
+      }
+    }
+
+    // For other images (legacy public URLs), return as-is
     return {
       thumbnail: imageUrl,
       medium: imageUrl,
