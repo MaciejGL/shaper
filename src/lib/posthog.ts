@@ -26,25 +26,31 @@ export async function initPostHog(): Promise<PostHog | null> {
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
       api_host:
         process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
-      // Enable session recordings
+
+      // GDPR-compliant cookieless mode
+      // No cookies are set, data stored only in memory for current session
+      persistence: 'memory',
+
+      // Session recordings - still work within a session
       session_recording: {
         maskAllInputs: false,
         maskInputOptions: {
           password: true,
         },
       },
-      // Enable feature flags
-      // Capture page views automatically
-      capture_pageview: false, // We'll handle this manually for better control
-      // Other useful options
-      persistence: 'localStorage+cookie',
+
+      // Capture settings
+      capture_pageview: false, // We handle this manually
       autocapture: true,
       disable_session_recording: false,
-      verbose: false,
       enable_recording_console_log: true,
-      loaded: (posthog: PostHog) => {
-        // Only enable debug mode in development
 
+      // Privacy settings
+      respect_dnt: true, // Respect Do Not Track browser setting
+      opt_out_capturing_by_default: false,
+
+      verbose: false,
+      loaded: (posthog: PostHog) => {
         posthog.debug(false)
       },
     })
