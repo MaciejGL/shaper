@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import { createContext, useContext, useEffect, useMemo } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef } from 'react'
 
 import {
   GQLGetMySubscriptionStatusQuery,
@@ -45,9 +45,9 @@ export function UserProvider({
     {
       initialData,
       enabled: !!initialData || session.status === 'authenticated',
-      staleTime: 30000, // Keep data fresh for 30 seconds
+      staleTime: 60000, // Keep data fresh for 60 seconds
       refetchOnWindowFocus: false,
-      // Keep previous data while refetching to prevent flash
+      refetchOnMount: !initialData, // Only refetch if no server data provided
       placeholderData: (previousData) => previousData,
     },
   )
@@ -61,19 +61,25 @@ export function UserProvider({
         initialData: initialSubscriptionData,
         enabled:
           !!initialSubscriptionData || session.status === 'authenticated',
-        staleTime: 10000, // Data is fresh for 10 seconds - prevents rapid refetches
-        refetchOnWindowFocus: true, // ✅ CRITICAL: Refetch when user returns from payment
-        refetchOnMount: true, // ✅ Refetch when component mounts
-        // Keep previous data while refetching to prevent flash
+        staleTime: 60000, // Data is fresh for 60 seconds - subscription rarely changes
+        refetchOnWindowFocus: true, // CRITICAL: Refetch when user returns from payment
+        refetchOnMount: !initialSubscriptionData, // Only refetch if no server data provided
         placeholderData: (previousData) => previousData,
       },
     )
 
-  // Refetch user data when session becomes authenticated (after login)
-  // Clear user query cache when user logs out
+  // Track previous session status to detect actual login/logout transitions
+  const prevSessionStatus = useRef(session.status)
+
+  // Only invalidate queries on actual session transitions, not on every page load
   useEffect(() => {
-    if (session.status === 'authenticated') {
-      // Immediately refetch user data when authenticated
+    const wasAuthenticated = prevSessionStatus.current === 'authenticated'
+    const isNowAuthenticated = session.status === 'authenticated'
+    const wasUnauthenticated = prevSessionStatus.current === 'unauthenticated'
+    const isNowUnauthenticated = session.status === 'unauthenticated'
+
+    // Detect actual login (transition from unauthenticated/loading to authenticated)
+    if (!wasAuthenticated && isNowAuthenticated && wasUnauthenticated) {
       queryClient.invalidateQueries({
         queryKey: useUserBasicQuery.getKey({}),
       })
@@ -82,8 +88,8 @@ export function UserProvider({
       })
     }
 
-    if (session.status === 'unauthenticated') {
-      // Clear all user-related queries to prevent stale data
+    // Detect logout (transition from authenticated to unauthenticated)
+    if (wasAuthenticated && isNowUnauthenticated) {
       queryClient.invalidateQueries({
         predicate: (query) => {
           const queryKey = query.queryKey
@@ -99,7 +105,6 @@ export function UserProvider({
         },
       })
 
-      // Remove cached queries entirely for a clean logout
       queryClient.removeQueries({
         predicate: (query) => {
           const queryKey = query.queryKey
@@ -112,6 +117,8 @@ export function UserProvider({
         },
       })
     }
+
+    prevSessionStatus.current = session.status
   }, [session.status, queryClient])
 
   const subscription = subscriptionData?.getMySubscriptionStatus

@@ -11,7 +11,15 @@ import { SubscriptionStatus } from '@/types/subscription'
 
 export type UserSubscriptionWithIncludes = PrismaUserSubscription & {
   user?: PrismaUser | null
-  package?: PrismaPackageTemplate | null
+  package?:
+    | (PrismaPackageTemplate & {
+        trainer?: {
+          id: string
+          name: string | null
+          email: string | null
+        } | null
+      })
+    | null
 }
 
 export default class UserSubscription implements GQLUserSubscription {
@@ -95,5 +103,9 @@ export default class UserSubscription implements GQLUserSubscription {
 
   get updatedAt() {
     return this.data.updatedAt.toISOString()
+  }
+
+  get package() {
+    return this.data.package
   }
 }

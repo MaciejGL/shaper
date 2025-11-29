@@ -34,7 +34,7 @@ export class SubscriptionValidator {
   async hasPremiumAccess(userId: string): Promise<boolean> {
     const validSubscriptions = await this.getValidSubscriptions(userId)
 
-    return await this.evaluatePremiumLogic(validSubscriptions)
+    return this.evaluatePremiumLogic(validSubscriptions)
   }
 
   /**
@@ -65,24 +65,16 @@ export class SubscriptionValidator {
 
   /**
    * Extract premium logic for reuse
+   * Uses pre-loaded package data from subscriptions to avoid N+1 queries
    */
-  private async evaluatePremiumLogic(
-    subscriptions: UserSubscription[],
-  ): Promise<boolean> {
+  private evaluatePremiumLogic(subscriptions: UserSubscription[]): boolean {
     const premiumLookupKeys = getPremiumLookupKeys()
 
-    // Check each subscription by fetching package data from database
     for (const sub of subscriptions) {
       const isNotExpired = new Date(sub.endDate) > new Date()
-
       if (!isNotExpired) continue
 
-      // Get package data from database
-      const packageTemplate = await prisma.packageTemplate.findUnique({
-        where: { id: sub.packageId },
-        select: { stripeLookupKey: true, metadata: true, name: true },
-      })
-
+      const packageTemplate = sub.package
       if (!packageTemplate) continue
 
       // Check for lifetime premium (admin-granted, no Stripe lookup key)
@@ -244,7 +236,7 @@ export class SubscriptionValidator {
   ): Promise<UserSubscriptionStatusData> {
     const validSubscriptions = await this.getValidSubscriptions(userId)
 
-    const hasPremium = await this.evaluatePremiumLogic(validSubscriptions)
+    const hasPremium = this.evaluatePremiumLogic(validSubscriptions)
 
     // Find trainer subscription
     const trainerSubscription = validSubscriptions.find(
