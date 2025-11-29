@@ -355,6 +355,8 @@ model TrainingDay {
   @@index([weekId, scheduledAt])
   @@index([sourceTrainingDayId])
   @@index([sourcePlanId])
+  @@index([scheduledAt, isRestDay, weekId]) // for today's day
+  @@index([scheduledAt, completedAt, isRestDay, weekId]) // for next upcoming incomplete day
 }
 
 model TrainingExercise {
