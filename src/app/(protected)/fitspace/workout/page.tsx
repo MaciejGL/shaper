@@ -17,7 +17,12 @@ import { WorkoutPageServer } from './training/components/workout-page.server'
 // Critical for accurate workout routing after plan status changes
 export const dynamic = 'force-dynamic'
 
-export default async function SessionPage() {
+export default async function SessionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ day?: string; week?: string }>
+}) {
+  const { day: dayIdParam } = await searchParams
   // Query active training plans directly
   const user = await getCurrentUser()
   if (!user) {
@@ -93,7 +98,7 @@ export default async function SessionPage() {
     )
   const dayPromise = gqlServerFetch<GQLFitspaceGetWorkoutDayQuery>(
     FitspaceGetWorkoutDayDocument,
-    { dayId: undefined },
+    { dayId: dayIdParam },
   )
 
   return (
