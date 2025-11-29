@@ -1,3 +1,5 @@
+import { after } from 'next/server'
+
 import {
   GQLMutationMarkExerciseAsCompletedArgs,
   GQLMutationMarkSetAsCompletedArgs,
@@ -12,6 +14,7 @@ import {
   notifyWorkoutCompleted,
 } from '@/lib/notifications/push-notification-service'
 import { getHistoricalBest1RM } from '@/lib/queries/historical-best-1rm'
+import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
 import {
   calculateEstimated1RM,
@@ -105,11 +108,7 @@ const markSetAsCompletedRelatedData = async (
     })
 
     if (userId) {
-      try {
-        await saveExercisePR(exerciseId, exercise.dayId, userId)
-      } catch (error) {
-        console.error('Error saving exercise PR:', error)
-      }
+      after(saveExercisePR(exerciseId, exercise.dayId, userId))
     }
   } else {
     return null
@@ -230,11 +229,7 @@ const unmarkSetCompletedRelatedData = async (setId: string, userId: string) => {
   updateWorkoutSessionEvent(set.exercise.dayId, GQLWorkoutSessionEvent.Progress)
 
   if (userId) {
-    try {
-      await saveExercisePR(set.exerciseId, set.exercise.dayId, userId)
-    } catch (error) {
-      console.error('Error recalculating exercise PR:', error)
-    }
+    after(saveExercisePR(set.exerciseId, set.exercise.dayId, userId))
   }
 
   return true
@@ -437,6 +432,11 @@ const saveExercisePR = async (
   dayId: string,
   userId: string,
 ) => {
+  const hasPremiumAccess = await subscriptionValidator.hasPremiumAccess(userId)
+  if (!hasPremiumAccess) {
+    return
+  }
+
   const completedSets = await prisma.exerciseSet.findMany({
     where: {
       exerciseId,
