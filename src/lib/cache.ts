@@ -51,6 +51,9 @@ const keys = {
     trainerAllAccess: (trainerId: string) => `access:trainer:${trainerId}:*`,
     clientAllAccess: (clientId: string) => `access:*:client:${clientId}`,
   },
+  images: {
+    presignedUrl: (s3Key: string) => `presigned-url:${s3Key}`,
+  },
 }
 
 // Cache operations

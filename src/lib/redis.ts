@@ -60,7 +60,14 @@ async function getFromCache<T>(key: string): Promise<T | null> {
       // Upstash returns parsed JSON if it's valid JSON, otherwise string
       // We need to handle both cases
       if (typeof value === 'string') {
-        return JSON.parse(value)
+        // Try to parse as JSON, but if it fails, return the string as-is
+        // This handles plain strings like URLs that don't need parsing
+        try {
+          return JSON.parse(value)
+        } catch {
+          // Not valid JSON, return as plain string
+          return value as T
+        }
       }
       return value as T
     }

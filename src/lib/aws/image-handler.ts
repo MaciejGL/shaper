@@ -7,6 +7,8 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
+import { cache } from '../cache'
+
 import { IMAGE_CONFIGS, type ImageType } from './s3'
 
 // Re-export ImageType for easier imports
@@ -392,16 +394,27 @@ export class ImageHandler {
   /**
    * Generate a presigned URL for reading a private image
    * Use this for progress photos and other private content
+   * Cached in Redis to avoid regenerating on every request
    * @param s3Url - The S3 URL or key (e.g., https://bucket.s3.region.amazonaws.com/key or just the key)
-   * @param expiresIn - URL validity in seconds (default: 1 hour)
+   * @param expiresIn - URL validity in seconds (default: 24 hours)
    */
   static async getPresignedReadUrl(
     s3Url: string,
-    expiresIn: number = 3600,
+    expiresIn: number = 86400, // Default 24 hours
   ): Promise<string> {
     // Extract the S3 key from the URL if it's a full URL
     const s3Key = this.extractFileKey(s3Url)
-    return await this.generateSignedUrl(s3Key, expiresIn)
+
+    // Try to get from cache first
+
+    const cacheKey = cache.keys.images.presignedUrl(s3Key)
+
+    // Use cache.getOrSet to handle cache miss/hit automatically
+    return await cache.getOrSet(
+      cacheKey,
+      () => this.generateSignedUrl(s3Key, expiresIn),
+      expiresIn - 3600, // Cache for 1 hour less than URL expiry for safety
+    )
   }
 
   /**

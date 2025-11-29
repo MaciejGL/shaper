@@ -36,13 +36,13 @@ export default class BodyProgressLog implements GQLBodyProgressLog {
   }
 
   // Generate presigned URLs for private progress images
-  // URLs are valid for 1 hour
+  // URLs are valid for 24 hours and cached in Redis
   private async createImageVariants(imageUrl: string) {
     // Check if this is a progress-private image that needs presigning
     if (imageUrl.includes('progress-private')) {
       const presignedUrl = await ImageHandler.getPresignedReadUrl(
         imageUrl,
-        3600, // 1 hour
+        86400, // 24 hours
       )
       return {
         thumbnail: presignedUrl,
