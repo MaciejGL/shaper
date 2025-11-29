@@ -2,6 +2,7 @@
 
 import {
   Bell,
+  Database,
   FileTextIcon,
   LockIcon,
   MessageCircleIcon,
@@ -12,6 +13,7 @@ import Link from 'next/link'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+import { DataExportSection } from './data-export-section'
 import { ExternalAccountManagement } from './external-account-management'
 import { NotificationSection } from './notification-section'
 import { PreferencesSection } from './preferences-section'
@@ -61,6 +63,26 @@ export function SettingsContent() {
 
       {/* External Account Management */}
       <ExternalAccountManagement />
+
+      {/* Your Data Section */}
+      <Card className="col-span-2 lg:col-span-1">
+        <CardHeader className="pb-6">
+          <div className="flex items-center space-x-3">
+            <div className="size-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shrink-0 self-start">
+              <Database className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Your Data</CardTitle>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Export and manage your personal data
+              </p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <DataExportSection />
+        </CardContent>
+      </Card>
 
       {/* Legal & Privacy Section */}
       <Card className="col-span-2">

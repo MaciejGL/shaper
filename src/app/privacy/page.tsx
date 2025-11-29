@@ -350,10 +350,10 @@ export default async function PrivacyPolicyPage() {
                       </div>
                       <div>
                         <div className="font-semibold text-foreground">
-                          Access
+                          Access & Export
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          View and download your personal data from Settings
+                          Export all your personal data from Settings
                         </div>
                       </div>
                     </div>
