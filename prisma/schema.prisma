@@ -298,6 +298,7 @@ model TrainingPlan {
   template             TrainingPlan?     @relation("Template", fields: [templateId], references: [id])
   templates            TrainingPlan[]    @relation("Template")
   weeks                TrainingWeek[]
+  days                 TrainingDay[]     @relation("PlanDays")
   freeWorkoutDays      FreeWorkoutDay[]
 
   @@index([completedAt])
@@ -332,6 +333,7 @@ model TrainingWeek {
 model TrainingDay {
   id                  String                @id @default(uuid())
   weekId              String
+  planId              String?
   dayOfWeek           Int
   completedAt         DateTime?
   createdAt           DateTime              @default(now())
@@ -344,6 +346,7 @@ model TrainingDay {
   sourcePlanId        String?
   personalRecords     PersonalRecord[]
   week                TrainingWeek          @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  plan                TrainingPlan?         @relation("PlanDays", fields: [planId], references: [id])
   exercises           TrainingExercise[]
   events              WorkoutSessionEvent[]
   freeWorkoutDay      FreeWorkoutDay?
@@ -355,8 +358,7 @@ model TrainingDay {
   @@index([weekId, scheduledAt])
   @@index([sourceTrainingDayId])
   @@index([sourcePlanId])
-  @@index([scheduledAt, isRestDay, weekId]) // for today's day
-  @@index([scheduledAt, completedAt, isRestDay, weekId]) // for next upcoming incomplete day
+  @@index([planId, scheduledAt, isRestDay])
 }
 
 model TrainingExercise {

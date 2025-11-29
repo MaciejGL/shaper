@@ -2783,6 +2783,7 @@ export type GQLQueryGetUserPrHistoryArgs = {
 
 export type GQLQueryGetWorkoutDayArgs = {
   dayId?: InputMaybe<Scalars['ID']['input']>;
+  planId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -4525,6 +4526,7 @@ export type GQLFitspaceGetWorkoutInfoQuery = { __typename?: 'Query', getWorkoutI
 
 export type GQLFitspaceGetWorkoutDayQueryVariables = Exact<{
   dayId?: InputMaybe<Scalars['ID']['input']>;
+  planId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -9910,8 +9912,8 @@ useInfiniteFitspaceGetWorkoutInfoQuery.getKey = (variables: GQLFitspaceGetWorkou
 useFitspaceGetWorkoutInfoQuery.fetcher = (variables: GQLFitspaceGetWorkoutInfoQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetWorkoutInfoQuery, GQLFitspaceGetWorkoutInfoQueryVariables>(FitspaceGetWorkoutInfoDocument, variables, options);
 
 export const FitspaceGetWorkoutDayDocument = `
-    query FitspaceGetWorkoutDay($dayId: ID) {
-  getWorkoutDay(dayId: $dayId) {
+    query FitspaceGetWorkoutDay($dayId: ID, $planId: ID) {
+  getWorkoutDay(dayId: $dayId, planId: $planId) {
     day {
       ...WorkoutDayData
     }

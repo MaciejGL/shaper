@@ -207,6 +207,7 @@ export async function duplicateTrainingWeek(
         daysData.push({
           id: newDayId,
           weekId: newWeek.id,
+          planId: input.trainingPlanId,
           dayOfWeek: day.dayOfWeek,
           isRestDay: day.isRestDay,
           workoutType: day.workoutType,

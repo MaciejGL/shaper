@@ -18,7 +18,7 @@ type GetWorkoutDayPayload {
 type Query {
   getWorkoutNavigation(trainingId: ID): GetWorkoutNavigationPayload
   getQuickWorkoutNavigation: GetWorkoutNavigationPayload
-  getWorkoutDay(dayId: ID): GetWorkoutDayPayload
+  getWorkoutDay(dayId: ID, planId: ID): GetWorkoutDayPayload
   getQuickWorkoutDay(dayId: ID): GetWorkoutDayPayload
   getWorkoutDaysBatch(dayIds: [ID!]!): [GetWorkoutDayPayload!]!
 }

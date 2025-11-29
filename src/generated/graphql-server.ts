@@ -2785,6 +2785,7 @@ export type GQLQueryGetUserPrHistoryArgs = {
 
 export type GQLQueryGetWorkoutDayArgs = {
   dayId?: InputMaybe<Scalars['ID']['input']>;
+  planId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

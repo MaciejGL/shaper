@@ -211,6 +211,7 @@ export async function duplicatePlan({
             isRestDay: day.isRestDay,
             workoutType: day.workoutType,
             weekId: newWeekId,
+            planId: newPlanId,
           })
 
           for (const exercise of day.exercises) {

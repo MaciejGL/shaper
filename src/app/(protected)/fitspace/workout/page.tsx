@@ -98,7 +98,7 @@ export default async function SessionPage({
     )
   const dayPromise = gqlServerFetch<GQLFitspaceGetWorkoutDayQuery>(
     FitspaceGetWorkoutDayDocument,
-    { dayId: dayIdParam },
+    { dayId: dayIdParam, planId: trainingId },
   )
 
   return (

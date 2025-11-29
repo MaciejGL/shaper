@@ -176,8 +176,8 @@ query FitspaceGetWorkoutInfo($dayId: ID!) {
   }
 }
 
-query FitspaceGetWorkoutDay($dayId: ID) {
-  getWorkoutDay(dayId: $dayId) {
+query FitspaceGetWorkoutDay($dayId: ID, $planId: ID) {
+  getWorkoutDay(dayId: $dayId, planId: $planId) {
     day {
       ...WorkoutDayData
     }

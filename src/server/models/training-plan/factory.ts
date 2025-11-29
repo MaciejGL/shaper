@@ -955,6 +955,7 @@ export async function updateTrainingPlan(
                   const newDay = await tx.trainingDay.create({
                     data: {
                       weekId: weekInput.id,
+                      planId: input.id,
                       dayOfWeek: dayInput.dayOfWeek,
                       isRestDay: dayInput.isRestDay ?? false,
                       workoutType: dayInput.workoutType,
@@ -1033,6 +1034,7 @@ export async function updateTrainingPlan(
                 const newDay = await tx.trainingDay.create({
                   data: {
                     weekId: newWeek.id,
+                    planId: input.id,
                     dayOfWeek: dayInput.dayOfWeek,
                     isRestDay: dayInput.isRestDay ?? false,
                     workoutType: dayInput.workoutType,
@@ -2008,7 +2010,7 @@ export async function getWorkoutDay(
   args: GQLQueryGetWorkoutDayArgs,
   context: GQLContext,
 ) {
-  const { dayId } = args
+  const { dayId, planId: providedPlanId } = args
   const user = context.user
   if (!user) {
     throw new GraphQLError('User not found')
@@ -2027,57 +2029,69 @@ export async function getWorkoutDay(
     const todayUTC = getTodayUTC('UTC')
     const tomorrowUTC = new Date(todayUTC.getTime() + 24 * 60 * 60 * 1000)
 
-    // First: Try to find today's scheduled day
-    day = await prisma.trainingDay.findFirst({
-      where: {
-        week: {
-          plan: {
-            assignedToId: user.user.id,
-            active: true,
-          },
-        },
-        scheduledAt: {
-          gte: todayUTC,
-          lt: tomorrowUTC,
-        },
-        isRestDay: false,
-      },
-      include: WORKOUT_DAY_INCLUDE,
-    })
+    // Use provided planId or fetch active plan (fast indexed lookup)
+    const activePlanId =
+      providedPlanId ??
+      (
+        await prisma.trainingPlan.findFirst({
+          where: { assignedToId: user.user.id, active: true },
+          select: { id: true },
+        })
+      )?.id
 
-    // Second: Find next upcoming incomplete day (closest to today)
-    if (!day) {
+    if (activePlanId) {
+      // Query TrainingDay directly using planId (uses @@index([planId, scheduledAt, isRestDay]))
+      // First: Try to find today's scheduled day
       day = await prisma.trainingDay.findFirst({
         where: {
-          week: {
-            plan: {
-              assignedToId: user.user.id,
-              active: true,
-            },
-          },
-          scheduledAt: { gte: todayUTC },
-          completedAt: null,
-          isRestDay: false,
-        },
-        orderBy: [{ scheduledAt: 'asc' }],
-        include: WORKOUT_DAY_INCLUDE,
-      })
-    }
-
-    // Third: Fallback to self-created plan's today day
-    if (!day) {
-      day = await prisma.trainingDay.findFirst({
-        where: {
-          week: {
-            plan: { assignedToId: user.user.id, createdById: user.user.id },
-          },
+          planId: activePlanId,
           scheduledAt: {
             gte: todayUTC,
             lt: tomorrowUTC,
           },
+          isRestDay: false,
         },
         include: WORKOUT_DAY_INCLUDE,
       })
+
+      // Second: Find next upcoming incomplete day (closest to today)
+      if (!day) {
+        day = await prisma.trainingDay.findFirst({
+          where: {
+            planId: activePlanId,
+            scheduledAt: { gte: todayUTC },
+            completedAt: null,
+            isRestDay: false,
+          },
+          orderBy: [{ scheduledAt: 'asc' }],
+          include: WORKOUT_DAY_INCLUDE,
+        })
+      }
+    }
+
+    // Fallback to self-created plan's today day
+    if (!day) {
+      const selfPlanId =
+        providedPlanId ??
+        (
+          await prisma.trainingPlan.findFirst({
+            where: { assignedToId: user.user.id, createdById: user.user.id },
+            select: { id: true },
+          })
+        )?.id
+
+      if (selfPlanId) {
+        day = await prisma.trainingDay.findFirst({
+          where: {
+            planId: selfPlanId,
+            scheduledAt: {
+              gte: todayUTC,
+              lt: tomorrowUTC,
+            },
+          },
+          include: WORKOUT_DAY_INCLUDE,
+        })
+      }
     }
   }
 
