@@ -28,20 +28,26 @@ const createMockPackage = (overrides: any = {}) => ({
   ...overrides,
 })
 
-const createMockSubscription = (overrides: any = {}) => ({
-  id: 'sub_123',
-  userId: 'user_123',
-  packageId: 'pkg_premium',
-  status: SubscriptionStatus.ACTIVE,
-  startDate: new Date(),
-  endDate: addMonths(new Date(), 1), // 1 month from now
-  isTrialActive: false,
-  trialEnd: null,
-  isInGracePeriod: false,
-  gracePeriodEnd: null,
-  failedPaymentRetries: 0,
-  ...overrides,
-})
+const createMockSubscription = (overrides: any = {}) => {
+  // Extract package from overrides or use default
+  const packageData = overrides.package ?? createMockPackage()
+
+  return {
+    id: 'sub_123',
+    userId: 'user_123',
+    packageId: 'pkg_premium',
+    status: SubscriptionStatus.ACTIVE,
+    startDate: new Date(),
+    endDate: addMonths(new Date(), 1), // 1 month from now
+    isTrialActive: false,
+    trialEnd: null,
+    isInGracePeriod: false,
+    gracePeriodEnd: null,
+    failedPaymentRetries: 0,
+    package: packageData, // Include package directly (matches include: { package: true })
+    ...overrides,
+  }
+}
 
 describe('Premium Access Logic', () => {
   beforeEach(() => {
@@ -51,15 +57,13 @@ describe('Premium Access Logic', () => {
   describe('hasPremiumAccess', () => {
     it('should grant access with active premium subscription', async () => {
       // Arrange
-      const subscription = createMockSubscription()
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
+      const subscription = createMockSubscription({
+        package: createMockPackage({ name: 'Premium Membership' }),
+      })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -72,19 +76,16 @@ describe('Premium Access Logic', () => {
       // Arrange
       const subscription = createMockSubscription({
         packageId: 'pkg_coaching_combo',
-      })
-      const packageTemplate = createMockPackage({
-        id: 'pkg_coaching_combo',
-        name: 'Complete Coaching Combo',
-        stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_COACHING,
+        package: createMockPackage({
+          id: 'pkg_coaching_combo',
+          name: 'Complete Coaching Combo',
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_COACHING,
+        }),
       })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -97,15 +98,12 @@ describe('Premium Access Logic', () => {
       // Arrange
       const subscription = createMockSubscription({
         endDate: addDays(new Date(), -1), // Yesterday
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -131,19 +129,16 @@ describe('Premium Access Logic', () => {
       // Arrange
       const subscription = createMockSubscription({
         packageId: 'pkg_basic',
-      })
-      const packageTemplate = createMockPackage({
-        id: 'pkg_basic',
-        name: 'Basic Workout Plan',
-        stripeLookupKey: MOCK_LOOKUP_KEYS.WORKOUT_PLAN, // Non-premium lookup key
+        package: createMockPackage({
+          id: 'pkg_basic',
+          name: 'Basic Workout Plan',
+          stripeLookupKey: MOCK_LOOKUP_KEYS.WORKOUT_PLAN, // Non-premium lookup key
+        }),
       })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -157,15 +152,12 @@ describe('Premium Access Logic', () => {
       const subscription = createMockSubscription({
         status: SubscriptionStatus.CANCELLED,
         endDate: addDays(new Date(), 15), // Still 15 days left
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -179,27 +171,26 @@ describe('Premium Access Logic', () => {
       const basicSub = createMockSubscription({
         id: 'sub_basic',
         packageId: 'pkg_basic',
+        package: createMockPackage({
+          id: 'pkg_basic',
+          name: 'Basic Workout',
+          stripeLookupKey: MOCK_LOOKUP_KEYS.WORKOUT_PLAN,
+        }),
       })
       const premiumSub = createMockSubscription({
         id: 'sub_premium',
         packageId: 'pkg_premium',
+        package: createMockPackage({
+          id: 'pkg_premium',
+          name: 'Premium Membership',
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
+        }),
       })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         basicSub as any,
         premiumSub as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique)
-        .mockResolvedValueOnce({
-          id: 'pkg_basic',
-          name: 'Basic Workout',
-          stripeLookupKey: MOCK_LOOKUP_KEYS.WORKOUT_PLAN,
-        } as any)
-        .mockResolvedValueOnce({
-          id: 'pkg_premium',
-          name: 'Premium Membership',
-          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
-        } as any)
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -210,15 +201,13 @@ describe('Premium Access Logic', () => {
 
     it('should handle package name case-insensitively', async () => {
       // Arrange
-      const subscription = createMockSubscription()
-      const packageTemplate = createMockPackage({ name: 'PREMIUM Membership' })
+      const subscription = createMockSubscription({
+        package: createMockPackage({ name: 'PREMIUM Membership' }),
+      })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -229,14 +218,13 @@ describe('Premium Access Logic', () => {
 
     it('should handle missing package template gracefully', async () => {
       // Arrange
-      const subscription = createMockSubscription()
+      const subscription = createMockSubscription({
+        package: null, // No package attached
+      })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        null,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -253,15 +241,12 @@ describe('Premium Access Logic', () => {
         status: SubscriptionStatus.PENDING,
         isInGracePeriod: true,
         gracePeriodEnd: addDays(new Date(), 2), // 2 days left
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany)
         .mockResolvedValueOnce([subscription as any]) // For hasPremiumAccess
         .mockResolvedValueOnce([subscription as any]) // For checkGracePeriodStatus
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -277,15 +262,12 @@ describe('Premium Access Logic', () => {
         endDate: addDays(new Date(), 10), // Still has time on subscription
         isInGracePeriod: true,
         gracePeriodEnd: addDays(new Date(), -1), // Grace period ended yesterday
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -303,15 +285,12 @@ describe('Premium Access Logic', () => {
         status: SubscriptionStatus.PENDING,
         isInGracePeriod: true,
         gracePeriodEnd,
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany)
         .mockResolvedValueOnce([subscription as any])
         .mockResolvedValueOnce([subscription as any])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -326,15 +305,12 @@ describe('Premium Access Logic', () => {
         status: SubscriptionStatus.ACTIVE,
         isInGracePeriod: true,
         gracePeriodEnd: null,
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -351,18 +327,16 @@ describe('Premium Access Logic', () => {
         endDate: addDays(new Date(), 10), // Still valid
         isInGracePeriod: true,
         gracePeriodEnd: addDays(new Date(), 2),
+        package: createMockPackage({
+          id: 'pkg_premium',
+          name: 'Premium Membership',
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
+        }),
       })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         graceSub as any, // Query filters out expired subscriptions
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        {
-          id: 'pkg_premium',
-          name: 'Premium Membership',
-          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
-        } as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -378,15 +352,12 @@ describe('Premium Access Logic', () => {
       const subscription = createMockSubscription({
         isTrialActive: true,
         trialEnd: addDays(new Date(), 10), // 10 days left
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -422,15 +393,12 @@ describe('Premium Access Logic', () => {
       const subscription = createMockSubscription({
         isTrialActive: true,
         trialEnd,
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -444,15 +412,12 @@ describe('Premium Access Logic', () => {
       const subscription = createMockSubscription({
         isTrialActive: true,
         trialEnd: null,
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -468,28 +433,27 @@ describe('Premium Access Logic', () => {
       const activeSub = createMockSubscription({
         id: 'sub_active',
         status: SubscriptionStatus.ACTIVE,
+        package: createMockPackage({
+          id: 'pkg_premium',
+          name: 'Premium Membership',
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
+        }),
       })
       const graceSub = createMockSubscription({
         id: 'sub_grace',
         status: SubscriptionStatus.PENDING,
         isInGracePeriod: true,
         gracePeriodEnd: addDays(new Date(), 2),
+        package: createMockPackage({
+          id: 'pkg_premium',
+          name: 'Premium Membership',
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
+        }),
       })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany)
         .mockResolvedValueOnce([activeSub as any, graceSub as any])
         .mockResolvedValueOnce([graceSub as any])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique)
-        .mockResolvedValueOnce({
-          id: 'pkg_premium',
-          name: 'Premium Membership',
-          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
-        } as any)
-        .mockResolvedValueOnce({
-          id: 'pkg_premium',
-          name: 'Premium Membership',
-          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
-        } as any)
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -503,15 +467,12 @@ describe('Premium Access Logic', () => {
       const subscription = createMockSubscription({
         startDate: addDays(new Date(), 5), // Starts in 5 days
         endDate: addMonths(new Date(), 1),
+        package: createMockPackage({ name: 'Premium Membership' }),
       })
-      const packageTemplate = createMockPackage({ name: 'Premium Membership' })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         subscription as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique).mockResolvedValue(
-        packageTemplate as any,
-      )
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
@@ -525,27 +486,26 @@ describe('Premium Access Logic', () => {
       const premiumSub = createMockSubscription({
         id: 'sub_premium',
         packageId: 'pkg_premium',
+        package: createMockPackage({
+          id: 'pkg_premium',
+          name: 'Premium Membership',
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
+        }),
       })
       const comboSub = createMockSubscription({
         id: 'sub_combo',
         packageId: 'pkg_coaching_combo',
+        package: createMockPackage({
+          id: 'pkg_coaching_combo',
+          name: 'Complete Coaching Combo',
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_COACHING,
+        }),
       })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
         premiumSub as any,
         comboSub as any,
       ])
-      vi.mocked(mockPrisma.prisma.packageTemplate.findUnique)
-        .mockResolvedValueOnce({
-          id: 'pkg_premium',
-          name: 'Premium Membership',
-          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
-        } as any)
-        .mockResolvedValueOnce({
-          id: 'pkg_coaching_combo',
-          name: 'Complete Coaching Combo',
-          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_COACHING,
-        } as any)
 
       // Act
       const result = await subscriptionValidator.hasPremiumAccess('user_123')
