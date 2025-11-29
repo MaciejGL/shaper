@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertTriangle, Check, CheckCircle, Trash2, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -110,6 +111,16 @@ export function ExerciseCard({
             }}
           >
             Delete
+          </Button>
+          <Button
+            variant="tertiary"
+            size="sm"
+            onClick={() => {
+              navigator.clipboard.writeText(exercise.id)
+              toast.success('Exercise ID copied to clipboard')
+            }}
+          >
+            {exercise.id}
           </Button>
         </div>
 
