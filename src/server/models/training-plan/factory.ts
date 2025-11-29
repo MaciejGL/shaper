@@ -2309,6 +2309,102 @@ export async function getWorkoutDay(
   }
 }
 
+const PREVIOUS_EXERCISE_SELECT = {
+  id: true,
+  name: true,
+  baseId: true,
+  completedAt: true,
+  sets: {
+    where: { log: { isNot: null } },
+    include: { log: true },
+    orderBy: { order: 'asc' as const },
+  },
+} as const
+
+type PreviousExercise = Prisma.TrainingExerciseGetPayload<{
+  select: typeof PREVIOUS_EXERCISE_SELECT
+}>
+
+function hasValidLogs(exercise: PreviousExercise): boolean {
+  return (
+    exercise.sets.length > 0 &&
+    !exercise.sets.every((s) => s.log?.reps === null && s.log?.weight === null)
+  )
+}
+
+function formatPreviousLogs(exercises: PreviousExercise[]) {
+  return exercises.map((exercise) => ({
+    id: exercise.id,
+    exerciseName: exercise.name,
+    baseId: exercise.baseId,
+    completedAt: exercise.completedAt
+      ? new Date(exercise.completedAt).toISOString()
+      : null,
+    sets: exercise.sets.map((set) => new ExerciseSet(set)),
+  }))
+}
+
+async function fetchPreviousExercisesByBaseIds({
+  baseIds,
+  planIds,
+  userId,
+}: {
+  baseIds: string[]
+  planIds: string[]
+  userId: string
+}): Promise<Map<string, PreviousExercise>> {
+  if (baseIds.length === 0) {
+    return new Map()
+  }
+
+  // Step 1: Fetch from current plan(s)
+  const currentPlanExercises = await prisma.trainingExercise.findMany({
+    where: {
+      baseId: { in: baseIds },
+      completedAt: { not: null },
+      day: { week: { planId: { in: planIds } } },
+    },
+    select: PREVIOUS_EXERCISE_SELECT,
+    orderBy: [{ completedAt: 'desc' }],
+    take: 200,
+  })
+
+  const exercisesByBaseId = new Map<string, PreviousExercise>()
+  for (const exercise of currentPlanExercises) {
+    if (exercise.baseId && !exercisesByBaseId.has(exercise.baseId)) {
+      if (hasValidLogs(exercise)) {
+        exercisesByBaseId.set(exercise.baseId, exercise)
+      }
+    }
+  }
+
+  // Step 2: Fallback to ANY user plan for missing baseIds
+  const missingBaseIds = baseIds.filter((id) => !exercisesByBaseId.has(id))
+
+  if (missingBaseIds.length > 0) {
+    const fallbackExercises = await prisma.trainingExercise.findMany({
+      where: {
+        baseId: { in: missingBaseIds },
+        completedAt: { not: null },
+        day: { week: { plan: { assignedToId: userId } } },
+      },
+      select: PREVIOUS_EXERCISE_SELECT,
+      orderBy: [{ completedAt: 'desc' }],
+      take: 100,
+    })
+
+    for (const exercise of fallbackExercises) {
+      if (exercise.baseId && !exercisesByBaseId.has(exercise.baseId)) {
+        if (hasValidLogs(exercise)) {
+          exercisesByBaseId.set(exercise.baseId, exercise)
+        }
+      }
+    }
+  }
+
+  return exercisesByBaseId
+}
+
 export async function getWorkoutDaysBatch(
   args: { dayIds: string[] },
   context: GQLContext,
@@ -2331,10 +2427,37 @@ export async function getWorkoutDaysBatch(
     include: WORKOUT_DAY_INCLUDE,
   })
 
-  return days.map((day) => ({
-    day: new TrainingDay(day, context),
-    previousDayLogs: [],
-  }))
+  // Collect baseIds per day
+  const dayExerciseMap = new Map<string, string[]>()
+  const allBaseIds = new Set<string>()
+
+  for (const day of days) {
+    const baseIds = day.exercises
+      .map((ex) => ex.baseId)
+      .filter((id): id is string => id !== null)
+    dayExerciseMap.set(day.id, baseIds)
+    baseIds.forEach((id) => allBaseIds.add(id))
+  }
+
+  // Fetch previous exercises for all baseIds
+  const exercisesByBaseId = await fetchPreviousExercisesByBaseIds({
+    baseIds: Array.from(allBaseIds),
+    planIds: [...new Set(days.map((d) => d.week.planId))],
+    userId: user.user.id,
+  })
+
+  // Map to each day
+  return days.map((day) => {
+    const dayBaseIds = dayExerciseMap.get(day.id) || []
+    const previousExercises = dayBaseIds
+      .map((baseId) => exercisesByBaseId.get(baseId))
+      .filter((ex): ex is PreviousExercise => ex !== undefined)
+
+    return {
+      day: new TrainingDay(day, context),
+      previousDayLogs: formatPreviousLogs(previousExercises),
+    }
+  })
 }
 
 export async function getQuickWorkoutNavigation(context: GQLContext) {
