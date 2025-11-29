@@ -1,7 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
-import { useFitspaceGetWorkoutDayQuery } from '@/generated/graphql-client'
+import {
+  GQLFitspaceGetWorkoutDayQuery,
+  useFitspaceGetWorkoutDayQuery,
+  useFitspaceGetWorkoutDaysBatchQuery,
+} from '@/generated/graphql-client'
 
 interface NavigationWeek {
   id: string
@@ -15,7 +19,7 @@ interface NavigationPlan {
 interface UseWorkoutPrefetchOptions {
   /**
    * Delay in milliseconds before starting prefetch
-   * @default 10000 (10 seconds)
+   * @default 2500 (2.5 seconds)
    */
   delay?: number
   /**
@@ -27,7 +31,7 @@ interface UseWorkoutPrefetchOptions {
 
 /**
  * Hook to prefetch workout day data with configurable delay
- * Prefetches only the current selected week
+ * Uses batch query to fetch all days in one request instead of parallel individual requests
  */
 export function useWorkoutPrefetch(
   plan: NavigationPlan | null,
@@ -36,36 +40,65 @@ export function useWorkoutPrefetch(
 ) {
   const { delay = 2500, staleTime = 5 * 60 * 1000 } = options
   const queryClient = useQueryClient()
+  const isFetchingRef = useRef(false)
 
   const prefetchDays = useCallback(
-    (dayIds: string[]) => {
-      dayIds.forEach((dayId) => {
-        const queryKey = useFitspaceGetWorkoutDayQuery.getKey({ dayId })
+    async (dayIds: string[]) => {
+      if (isFetchingRef.current || dayIds.length === 0) return
 
-        // Check if we already have fresh data for this day
+      // Filter out days that already have fresh data
+      const dayIdsToFetch = dayIds.filter((dayId) => {
+        const queryKey = useFitspaceGetWorkoutDayQuery.getKey({ dayId })
         const existingData = queryClient.getQueryData(queryKey)
         const queryState = queryClient.getQueryState(queryKey)
 
-        // Skip prefetch if:
-        // 1. Data exists and is fresh (within staleTime)
-        // 2. Query is currently fetching
         if (existingData && queryState?.dataUpdatedAt) {
           const isDataFresh = Date.now() - queryState.dataUpdatedAt < staleTime
-          if (isDataFresh) {
-            return
-          }
+          if (isDataFresh) return false
         }
 
-        if (queryState?.fetchStatus === 'fetching') {
-          return
-        }
+        if (queryState?.fetchStatus === 'fetching') return false
 
-        queryClient.prefetchQuery({
-          queryKey,
-          queryFn: useFitspaceGetWorkoutDayQuery.fetcher({ dayId }),
+        return true
+      })
+
+      if (dayIdsToFetch.length === 0) return
+
+      isFetchingRef.current = true
+
+      try {
+        // Fetch all days in one batch request
+        const batchData = await queryClient.fetchQuery({
+          queryKey: useFitspaceGetWorkoutDaysBatchQuery.getKey({
+            dayIds: dayIdsToFetch,
+          }),
+          queryFn: useFitspaceGetWorkoutDaysBatchQuery.fetcher({
+            dayIds: dayIdsToFetch,
+          }),
           staleTime,
         })
-      })
+
+        // Populate individual query caches from batch response
+        if (batchData?.getWorkoutDaysBatch) {
+          batchData.getWorkoutDaysBatch.forEach((dayPayload) => {
+            if (!dayPayload.day?.id) return
+
+            const dayId = dayPayload.day.id
+            const queryKey = useFitspaceGetWorkoutDayQuery.getKey({ dayId })
+
+            // Transform batch payload to match single query structure
+            const singleDayData: GQLFitspaceGetWorkoutDayQuery = {
+              getWorkoutDay: dayPayload,
+            }
+
+            queryClient.setQueryData(queryKey, singleDayData)
+          })
+        }
+      } catch (error) {
+        console.error('[Prefetch] Failed to batch fetch workout days:', error)
+      } finally {
+        isFetchingRef.current = false
+      }
     },
     [queryClient, staleTime],
   )
@@ -74,7 +107,6 @@ export function useWorkoutPrefetch(
     if (!plan?.weeks || !activeWeekId) return
 
     const timer = setTimeout(() => {
-      // Find and prefetch only the current selected week
       const currentWeek = plan.weeks.find((w) => w.id === activeWeekId)
 
       if (currentWeek) {
@@ -88,13 +120,14 @@ export function useWorkoutPrefetch(
     return () => clearTimeout(timer)
   }, [plan, activeWeekId, delay, prefetchDays])
 
-  // Expose manual prefetch for immediate prefetching when needed
   const prefetchWeek = useCallback(
     (weekId: string) => {
       const week = plan?.weeks.find((w) => w.id === weekId)
       if (!week) return
 
-      const dayIds = week.days.map((day) => day.id)
+      const dayIds = week.days
+        .filter((day) => !day.isRestDay)
+        .map((day) => day.id)
       prefetchDays(dayIds)
     },
     [plan, prefetchDays],

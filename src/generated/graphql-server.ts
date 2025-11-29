@@ -2534,6 +2534,7 @@ export type GQLQuery = {
   getTrainingPlanById: EntireFieldWrapper<GQLTrainingPlan>;
   getUserPRHistory: EntireFieldWrapper<Array<GQLPersonalRecordHistory>>;
   getWorkoutDay?: EntireFieldWrapper<Maybe<GQLGetWorkoutDayPayload>>;
+  getWorkoutDaysBatch: EntireFieldWrapper<Array<GQLGetWorkoutDayPayload>>;
   getWorkoutInfo: EntireFieldWrapper<GQLTrainingDay>;
   getWorkoutNavigation?: EntireFieldWrapper<Maybe<GQLGetWorkoutNavigationPayload>>;
   ingredient?: EntireFieldWrapper<Maybe<GQLIngredient>>;
@@ -2784,6 +2785,11 @@ export type GQLQueryGetUserPrHistoryArgs = {
 
 export type GQLQueryGetWorkoutDayArgs = {
   dayId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type GQLQueryGetWorkoutDaysBatchArgs = {
+  dayIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -5608,6 +5614,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getTrainingPlanById?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLQueryGetTrainingPlanByIdArgs, 'id'>>;
   getUserPRHistory?: Resolver<Array<GQLResolversTypes['PersonalRecordHistory']>, ParentType, ContextType, RequireFields<GQLQueryGetUserPrHistoryArgs, 'userId'>>;
   getWorkoutDay?: Resolver<Maybe<GQLResolversTypes['GetWorkoutDayPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutDayArgs>>;
+  getWorkoutDaysBatch?: Resolver<Array<GQLResolversTypes['GetWorkoutDayPayload']>, ParentType, ContextType, RequireFields<GQLQueryGetWorkoutDaysBatchArgs, 'dayIds'>>;
   getWorkoutInfo?: Resolver<GQLResolversTypes['TrainingDay'], ParentType, ContextType, RequireFields<GQLQueryGetWorkoutInfoArgs, 'dayId'>>;
   getWorkoutNavigation?: Resolver<Maybe<GQLResolversTypes['GetWorkoutNavigationPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutNavigationArgs>>;
   ingredient?: Resolver<Maybe<GQLResolversTypes['Ingredient']>, ParentType, ContextType, RequireFields<GQLQueryIngredientArgs, 'id'>>;

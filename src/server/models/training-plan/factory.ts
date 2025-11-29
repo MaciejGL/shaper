@@ -1951,6 +1951,59 @@ export async function getWorkoutNavigation(
   return null
 }
 
+const WORKOUT_DAY_INCLUDE = {
+  week: {
+    select: {
+      planId: true,
+      weekNumber: true,
+    },
+  },
+  exercises: {
+    orderBy: {
+      order: 'asc' as const,
+    },
+    include: {
+      substitutedBy: {
+        include: {
+          base: {
+            include: {
+              muscleGroups: true,
+            },
+          },
+          sets: {
+            include: {
+              log: true,
+            },
+            orderBy: {
+              order: 'asc' as const,
+            },
+          },
+        },
+      },
+      substitutes: true,
+      base: {
+        include: {
+          images: true,
+          muscleGroups: true,
+          substitutes: {
+            include: {
+              substitute: true,
+            },
+          },
+        },
+      },
+      sets: {
+        include: {
+          log: true,
+        },
+        orderBy: {
+          order: 'asc' as const,
+        },
+      },
+    },
+  },
+} satisfies Prisma.TrainingDayInclude
+
 export async function getWorkoutDay(
   args: GQLQueryGetWorkoutDayArgs,
   context: GQLContext,
@@ -1960,59 +2013,6 @@ export async function getWorkoutDay(
   if (!user) {
     throw new GraphQLError('User not found')
   }
-
-  const WORKOUT_DAY_INCLUDE = {
-    week: {
-      select: {
-        planId: true,
-        weekNumber: true,
-      },
-    },
-    exercises: {
-      orderBy: {
-        order: 'asc',
-      },
-      include: {
-        substitutedBy: {
-          include: {
-            base: {
-              include: {
-                muscleGroups: true,
-              },
-            },
-            sets: {
-              include: {
-                log: true,
-              },
-              orderBy: {
-                order: 'asc',
-              },
-            },
-          },
-        },
-        substitutes: true,
-        base: {
-          include: {
-            images: true,
-            muscleGroups: true,
-            substitutes: {
-              include: {
-                substitute: true,
-              },
-            },
-          },
-        },
-        sets: {
-          include: {
-            log: true,
-          },
-          orderBy: {
-            order: 'asc',
-          },
-        },
-      },
-    },
-  } satisfies Prisma.TrainingDayInclude
 
   // Get the target day with all data in one efficient query
   let day
@@ -2270,6 +2270,34 @@ export async function getWorkoutDay(
     day: new TrainingDay(day, context),
     previousDayLogs,
   }
+}
+
+export async function getWorkoutDaysBatch(
+  args: { dayIds: string[] },
+  context: GQLContext,
+) {
+  const { dayIds } = args
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  if (!dayIds.length) {
+    return []
+  }
+
+  const days = await prisma.trainingDay.findMany({
+    where: {
+      id: { in: dayIds },
+      week: { plan: { assignedToId: user.user.id } },
+    },
+    include: WORKOUT_DAY_INCLUDE,
+  })
+
+  return days.map((day) => ({
+    day: new TrainingDay(day, context),
+    previousDayLogs: [],
+  }))
 }
 
 export async function getQuickWorkoutNavigation(context: GQLContext) {

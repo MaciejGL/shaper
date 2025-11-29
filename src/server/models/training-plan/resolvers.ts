@@ -42,6 +42,7 @@ import {
   getTemplates,
   getTrainingPlanById,
   getWorkoutDay,
+  getWorkoutDaysBatch,
   getWorkoutNavigation,
   pausePlan,
   removeTrainingPlanFromClient,
@@ -108,6 +109,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   },
   getWorkoutDay: async (_, args, context) => {
     return getWorkoutDay(args, context)
+  },
+  getWorkoutDaysBatch: async (_, args, context) => {
+    return getWorkoutDaysBatch(args, context)
   },
   getPlanSummary: async (_, args, context) => {
     return getPlanSummary(args, context)

@@ -2532,6 +2532,7 @@ export type GQLQuery = {
   getTrainingPlanById: GQLTrainingPlan;
   getUserPRHistory: Array<GQLPersonalRecordHistory>;
   getWorkoutDay?: Maybe<GQLGetWorkoutDayPayload>;
+  getWorkoutDaysBatch: Array<GQLGetWorkoutDayPayload>;
   getWorkoutInfo: GQLTrainingDay;
   getWorkoutNavigation?: Maybe<GQLGetWorkoutNavigationPayload>;
   ingredient?: Maybe<GQLIngredient>;
@@ -2782,6 +2783,11 @@ export type GQLQueryGetUserPrHistoryArgs = {
 
 export type GQLQueryGetWorkoutDayArgs = {
   dayId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type GQLQueryGetWorkoutDaysBatchArgs = {
+  dayIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -4485,6 +4491,16 @@ export type GQLDeleteUserAccountMutationVariables = Exact<{ [key: string]: never
 
 export type GQLDeleteUserAccountMutation = { __typename?: 'Mutation', deleteUserAccount: boolean };
 
+export type GQLBaseExerciseDataFragment = { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> };
+
+export type GQLWorkoutSetDataFragment = { __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null };
+
+export type GQLWorkoutExerciseDataFragment = { __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, description?: string | undefined | null, tips?: Array<string> | undefined | null, difficulty?: string | undefined | null, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, substitutedBy?: { __typename?: 'Substitute', id: string, name: string, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> } | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, substitute: { __typename?: 'BaseExercise', id: string, name: string } }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> };
+
+export type GQLWorkoutDayDataFragment = { __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, description?: string | undefined | null, tips?: Array<string> | undefined | null, difficulty?: string | undefined | null, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, substitutedBy?: { __typename?: 'Substitute', id: string, name: string, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> } | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, substitute: { __typename?: 'BaseExercise', id: string, name: string } }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> };
+
+export type GQLPreviousWorkoutLogsFragment = { __typename?: 'PreviousExerciseLog', id: string, exerciseName: string, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> };
+
 export type GQLFitspaceGetCurrentWorkoutIdQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -4513,6 +4529,13 @@ export type GQLFitspaceGetWorkoutDayQueryVariables = Exact<{
 
 
 export type GQLFitspaceGetWorkoutDayQuery = { __typename?: 'Query', getWorkoutDay?: { __typename?: 'GetWorkoutDayPayload', day: { __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, description?: string | undefined | null, tips?: Array<string> | undefined | null, difficulty?: string | undefined | null, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, substitutedBy?: { __typename?: 'Substitute', id: string, name: string, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> } | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, substitute: { __typename?: 'BaseExercise', id: string, name: string } }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> }, previousDayLogs: Array<{ __typename?: 'PreviousExerciseLog', id: string, exerciseName: string, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> } | undefined | null };
+
+export type GQLFitspaceGetWorkoutDaysBatchQueryVariables = Exact<{
+  dayIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceGetWorkoutDaysBatchQuery = { __typename?: 'Query', getWorkoutDaysBatch: Array<{ __typename?: 'GetWorkoutDayPayload', day: { __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, description?: string | undefined | null, tips?: Array<string> | undefined | null, difficulty?: string | undefined | null, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, substitutedBy?: { __typename?: 'Substitute', id: string, name: string, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> } | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, substitute: { __typename?: 'BaseExercise', id: string, name: string } }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> }, previousDayLogs: Array<{ __typename?: 'PreviousExerciseLog', id: string, exerciseName: string, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> }> };
 
 export type GQLFitspaceGetWorkoutNavigationQueryVariables = Exact<{
   trainingId: Scalars['ID']['input'];
@@ -5754,6 +5777,142 @@ export const ProfileFragmentFragmentDoc = `
     pushNotifications
   }
   blurProgressSnapshots
+}
+    `;
+export const BaseExerciseDataFragmentDoc = `
+    fragment BaseExerciseData on BaseExercise {
+  id
+  name
+  description
+  videoUrl
+  equipment
+  isPublic
+  instructions
+  tips
+  difficulty
+  images {
+    id
+    thumbnail
+    medium
+    url
+    order
+  }
+  muscleGroups {
+    id
+    alias
+    groupSlug
+  }
+  secondaryMuscleGroups {
+    id
+    alias
+    groupSlug
+  }
+}
+    `;
+export const WorkoutSetDataFragmentDoc = `
+    fragment WorkoutSetData on ExerciseSet {
+  id
+  order
+  reps
+  minReps
+  maxReps
+  weight
+  rpe
+  isExtra
+  completedAt
+  log {
+    id
+    weight
+    rpe
+    reps
+    createdAt
+  }
+}
+    `;
+export const WorkoutExerciseDataFragmentDoc = `
+    fragment WorkoutExerciseData on TrainingExercise {
+  id
+  name
+  baseId
+  restSeconds
+  tempo
+  warmupSets
+  description
+  tips
+  difficulty
+  instructions
+  additionalInstructions
+  type
+  order
+  videoUrl
+  images {
+    id
+    thumbnail
+    medium
+    url
+    order
+  }
+  completedAt
+  isExtra
+  substitutedBy {
+    id
+    name
+    instructions
+    additionalInstructions
+    type
+    videoUrl
+    completedAt
+    baseId
+    sets {
+      ...WorkoutSetData
+    }
+  }
+  substitutes {
+    id
+    substitute {
+      id
+      name
+    }
+  }
+  muscleGroups {
+    id
+    alias
+    groupSlug
+  }
+  sets {
+    ...WorkoutSetData
+  }
+}
+    ${WorkoutSetDataFragmentDoc}`;
+export const WorkoutDayDataFragmentDoc = `
+    fragment WorkoutDayData on TrainingDay {
+  id
+  dayOfWeek
+  isRestDay
+  workoutType
+  startedAt
+  completedAt
+  scheduledAt
+  exercises {
+    ...WorkoutExerciseData
+  }
+}
+    ${WorkoutExerciseDataFragmentDoc}`;
+export const PreviousWorkoutLogsFragmentDoc = `
+    fragment PreviousWorkoutLogs on PreviousExerciseLog {
+  id
+  exerciseName
+  baseId
+  sets {
+    id
+    order
+    log {
+      id
+      weight
+      reps
+      createdAt
+    }
+  }
 }
     `;
 export const TrainingTemplateFragmentDoc = `
@@ -9631,60 +9790,10 @@ export const FitspaceGetExercisesDocument = `
     query FitspaceGetExercises {
   getExercises {
     publicExercises {
-      id
-      name
-      description
-      videoUrl
-      equipment
-      isPublic
-      instructions
-      tips
-      difficulty
-      images {
-        id
-        thumbnail
-        medium
-        url
-        order
-      }
-      muscleGroups {
-        id
-        alias
-        groupSlug
-      }
-      secondaryMuscleGroups {
-        id
-        alias
-        groupSlug
-      }
+      ...BaseExerciseData
     }
     trainerExercises {
-      id
-      name
-      description
-      videoUrl
-      equipment
-      isPublic
-      instructions
-      tips
-      difficulty
-      images {
-        id
-        thumbnail
-        medium
-        url
-        order
-      }
-      muscleGroups {
-        id
-        alias
-        groupSlug
-      }
-      secondaryMuscleGroups {
-        id
-        alias
-        groupSlug
-      }
+      ...BaseExerciseData
     }
   }
   muscleGroupCategories {
@@ -9698,7 +9807,7 @@ export const FitspaceGetExercisesDocument = `
     }
   }
 }
-    `;
+    ${BaseExerciseDataFragmentDoc}`;
 
 export const useFitspaceGetExercisesQuery = <
       TData = GQLFitspaceGetExercisesQuery,
@@ -9804,115 +9913,15 @@ export const FitspaceGetWorkoutDayDocument = `
     query FitspaceGetWorkoutDay($dayId: ID) {
   getWorkoutDay(dayId: $dayId) {
     day {
-      id
-      dayOfWeek
-      isRestDay
-      workoutType
-      startedAt
-      completedAt
-      scheduledAt
-      exercises {
-        id
-        name
-        baseId
-        restSeconds
-        tempo
-        warmupSets
-        description
-        tips
-        difficulty
-        instructions
-        additionalInstructions
-        type
-        order
-        videoUrl
-        images {
-          id
-          thumbnail
-          medium
-          url
-          order
-        }
-        completedAt
-        isExtra
-        substitutedBy {
-          id
-          name
-          instructions
-          additionalInstructions
-          type
-          videoUrl
-          completedAt
-          baseId
-          sets {
-            id
-            order
-            reps
-            minReps
-            maxReps
-            weight
-            rpe
-            isExtra
-            completedAt
-            log {
-              id
-              weight
-              rpe
-              reps
-              createdAt
-            }
-          }
-        }
-        substitutes {
-          id
-          substitute {
-            id
-            name
-          }
-        }
-        muscleGroups {
-          id
-          alias
-          groupSlug
-        }
-        sets {
-          id
-          order
-          reps
-          minReps
-          maxReps
-          weight
-          rpe
-          isExtra
-          completedAt
-          log {
-            id
-            weight
-            rpe
-            reps
-            createdAt
-          }
-        }
-      }
+      ...WorkoutDayData
     }
     previousDayLogs {
-      id
-      exerciseName
-      baseId
-      sets {
-        id
-        order
-        log {
-          id
-          weight
-          reps
-          createdAt
-        }
-      }
+      ...PreviousWorkoutLogs
     }
   }
 }
-    `;
+    ${WorkoutDayDataFragmentDoc}
+${PreviousWorkoutLogsFragmentDoc}`;
 
 export const useFitspaceGetWorkoutDayQuery = <
       TData = GQLFitspaceGetWorkoutDayQuery,
@@ -9955,6 +9964,62 @@ useInfiniteFitspaceGetWorkoutDayQuery.getKey = (variables?: GQLFitspaceGetWorkou
 
 
 useFitspaceGetWorkoutDayQuery.fetcher = (variables?: GQLFitspaceGetWorkoutDayQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetWorkoutDayQuery, GQLFitspaceGetWorkoutDayQueryVariables>(FitspaceGetWorkoutDayDocument, variables, options);
+
+export const FitspaceGetWorkoutDaysBatchDocument = `
+    query FitspaceGetWorkoutDaysBatch($dayIds: [ID!]!) {
+  getWorkoutDaysBatch(dayIds: $dayIds) {
+    day {
+      ...WorkoutDayData
+    }
+    previousDayLogs {
+      ...PreviousWorkoutLogs
+    }
+  }
+}
+    ${WorkoutDayDataFragmentDoc}
+${PreviousWorkoutLogsFragmentDoc}`;
+
+export const useFitspaceGetWorkoutDaysBatchQuery = <
+      TData = GQLFitspaceGetWorkoutDaysBatchQuery,
+      TError = unknown
+    >(
+      variables: GQLFitspaceGetWorkoutDaysBatchQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitspaceGetWorkoutDaysBatchQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceGetWorkoutDaysBatchQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLFitspaceGetWorkoutDaysBatchQuery, TError, TData>(
+      {
+    queryKey: ['FitspaceGetWorkoutDaysBatch', variables],
+    queryFn: fetchData<GQLFitspaceGetWorkoutDaysBatchQuery, GQLFitspaceGetWorkoutDaysBatchQueryVariables>(FitspaceGetWorkoutDaysBatchDocument, variables),
+    ...options
+  }
+    )};
+
+useFitspaceGetWorkoutDaysBatchQuery.getKey = (variables: GQLFitspaceGetWorkoutDaysBatchQueryVariables) => ['FitspaceGetWorkoutDaysBatch', variables];
+
+export const useInfiniteFitspaceGetWorkoutDaysBatchQuery = <
+      TData = InfiniteData<GQLFitspaceGetWorkoutDaysBatchQuery>,
+      TError = unknown
+    >(
+      variables: GQLFitspaceGetWorkoutDaysBatchQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitspaceGetWorkoutDaysBatchQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceGetWorkoutDaysBatchQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLFitspaceGetWorkoutDaysBatchQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['FitspaceGetWorkoutDaysBatch.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitspaceGetWorkoutDaysBatchQuery, GQLFitspaceGetWorkoutDaysBatchQueryVariables>(FitspaceGetWorkoutDaysBatchDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteFitspaceGetWorkoutDaysBatchQuery.getKey = (variables: GQLFitspaceGetWorkoutDaysBatchQueryVariables) => ['FitspaceGetWorkoutDaysBatch.infinite', variables];
+
+
+useFitspaceGetWorkoutDaysBatchQuery.fetcher = (variables: GQLFitspaceGetWorkoutDaysBatchQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetWorkoutDaysBatchQuery, GQLFitspaceGetWorkoutDaysBatchQueryVariables>(FitspaceGetWorkoutDaysBatchDocument, variables, options);
 
 export const FitspaceGetWorkoutNavigationDocument = `
     query FitspaceGetWorkoutNavigation($trainingId: ID!) {

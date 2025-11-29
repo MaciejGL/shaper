@@ -1,3 +1,134 @@
+fragment BaseExerciseData on BaseExercise {
+  id
+  name
+  description
+  videoUrl
+  equipment
+  isPublic
+  instructions
+  tips
+  difficulty
+  images {
+    id
+    thumbnail
+    medium
+    url
+    order
+  }
+  muscleGroups {
+    id
+    alias
+    groupSlug
+  }
+  secondaryMuscleGroups {
+    id
+    alias
+    groupSlug
+  }
+}
+
+fragment WorkoutSetData on ExerciseSet {
+  id
+  order
+  reps
+  minReps
+  maxReps
+  weight
+  rpe
+  isExtra
+  completedAt
+  log {
+    id
+    weight
+    rpe
+    reps
+    createdAt
+  }
+}
+
+fragment WorkoutExerciseData on TrainingExercise {
+  id
+  name
+  baseId
+  restSeconds
+  tempo
+  warmupSets
+  description
+  tips
+  difficulty
+  instructions
+  additionalInstructions
+  type
+  order
+  videoUrl
+  images {
+    id
+    thumbnail
+    medium
+    url
+    order
+  }
+  completedAt
+  isExtra
+  substitutedBy {
+    id
+    name
+    instructions
+    additionalInstructions
+    type
+    videoUrl
+    completedAt
+    baseId
+    sets {
+      ...WorkoutSetData
+    }
+  }
+  substitutes {
+    id
+    substitute {
+      id
+      name
+    }
+  }
+  muscleGroups {
+    id
+    alias
+    groupSlug
+  }
+  sets {
+    ...WorkoutSetData
+  }
+}
+
+fragment WorkoutDayData on TrainingDay {
+  id
+  dayOfWeek
+  isRestDay
+  workoutType
+  startedAt
+  completedAt
+  scheduledAt
+  exercises {
+    ...WorkoutExerciseData
+  }
+}
+
+fragment PreviousWorkoutLogs on PreviousExerciseLog {
+  id
+  exerciseName
+  baseId
+  sets {
+    id
+    order
+    log {
+      id
+      weight
+      reps
+      createdAt
+    }
+  }
+}
+
 query FitspaceGetCurrentWorkoutId {
   getMyPlansOverview {
     activePlan {
@@ -13,60 +144,10 @@ query FitspaceGetActivePlanId {
 query FitspaceGetExercises {
   getExercises {
     publicExercises {
-      id
-      name
-      description
-      videoUrl
-      equipment
-      isPublic
-      instructions
-      tips
-      difficulty
-      images {
-        id
-        thumbnail
-        medium
-        url
-        order
-      }
-      muscleGroups {
-        id
-        alias
-        groupSlug
-      }
-      secondaryMuscleGroups {
-        id
-        alias
-        groupSlug
-      }
+      ...BaseExerciseData
     }
     trainerExercises {
-      id
-      name
-      description
-      videoUrl
-      equipment
-      isPublic
-      instructions
-      tips
-      difficulty
-      images {
-        id
-        thumbnail
-        medium
-        url
-        order
-      }
-      muscleGroups {
-        id
-        alias
-        groupSlug
-      }
-      secondaryMuscleGroups {
-        id
-        alias
-        groupSlug
-      }
+      ...BaseExerciseData
     }
   }
   muscleGroupCategories {
@@ -98,112 +179,21 @@ query FitspaceGetWorkoutInfo($dayId: ID!) {
 query FitspaceGetWorkoutDay($dayId: ID) {
   getWorkoutDay(dayId: $dayId) {
     day {
-      id
-      dayOfWeek
-      isRestDay
-      workoutType
-      startedAt
-      completedAt
-      scheduledAt
-
-      exercises {
-        id
-        name
-        baseId
-        restSeconds
-        tempo
-        warmupSets
-        description
-        tips
-        difficulty
-        instructions
-        additionalInstructions
-        type
-        order
-        videoUrl
-        images {
-          id
-          thumbnail
-          medium
-          url
-          order
-        }
-        completedAt
-        isExtra
-        substitutedBy {
-          id
-          name
-          instructions
-          additionalInstructions
-          type
-          videoUrl
-          completedAt
-          baseId
-          sets {
-            id
-            order
-            reps
-            minReps
-            maxReps
-            weight
-            rpe
-            isExtra
-            completedAt
-            log {
-              id
-              weight
-              rpe
-              reps
-              createdAt
-            }
-          }
-        }
-        substitutes {
-          id
-          substitute {
-            id
-            name
-          }
-        }
-        muscleGroups {
-          id
-          alias
-          groupSlug
-        }
-        sets {
-          id
-          order
-          reps
-          minReps
-          maxReps
-          weight
-          rpe
-          isExtra
-          completedAt
-          log {
-            id
-            weight
-            rpe
-            reps
-            createdAt
-          }
-        }
-      }
+      ...WorkoutDayData
     }
     previousDayLogs {
-      id
-      exerciseName
-      baseId
-      sets {
-        id
-        order
-        log {
-          id
-          weight
-          reps
-          createdAt
-        }
-      }
+      ...PreviousWorkoutLogs
+    }
+  }
+}
+
+query FitspaceGetWorkoutDaysBatch($dayIds: [ID!]!) {
+  getWorkoutDaysBatch(dayIds: $dayIds) {
+    day {
+      ...WorkoutDayData
+    }
+    previousDayLogs {
+      ...PreviousWorkoutLogs
     }
   }
 }
