@@ -140,21 +140,3 @@ export const WORKOUT_TYPE_OPTIONS: WorkoutTypeOption[] = [
     ],
   },
 ]
-
-// Helper to get muscle groups by workout sub-type
-export function getMuscleGroupsForSubType(
-  subType: WorkoutSubType | null,
-): string[] {
-  if (!subType) return []
-
-  for (const workoutType of WORKOUT_TYPE_OPTIONS) {
-    if (workoutType.subTypes) {
-      const subTypeOption = workoutType.subTypes.find((st) => st.id === subType)
-      if (subTypeOption) {
-        return subTypeOption.muscleGroups
-      }
-    }
-  }
-
-  return []
-}

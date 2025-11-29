@@ -1,0 +1,13 @@
+{
+  "entry": ["src/**/*.tsx"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "src/**/*.test.ts",
+    "src/**/*.stories.tsx",
+    "src/generated/**/*.ts"
+  ],
+  "ignoreDependencies": ["@types/*"],
+  "next": {
+    "entry": ["next.config.ts"]
+  }
+}

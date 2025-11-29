@@ -52,12 +52,3 @@ export const getIntensityColor = (intensity: number) => {
   const colorLevel = HEATMAP_COLORS.getColorForIntensity(intensity)
   return cn(colorLevel.fillColor)
 }
-
-// Volume thresholds for Quick Stats categorization
-export const VOLUME_THRESHOLDS = {
-  HIGH: 0.45,
-  MEDIUM_MIN: 0.19,
-  MEDIUM_MAX: 0.45,
-  LOW_MIN: 0.0,
-  LOW_MAX: 0.19,
-} as const
