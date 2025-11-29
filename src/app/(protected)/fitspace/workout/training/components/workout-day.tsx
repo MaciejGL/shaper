@@ -3,7 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
-import { use, useEffect, useMemo } from 'react'
+import { use, useEffect, useMemo, useRef } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { WorkoutProvider } from '@/context/workout-context/workout-context'
@@ -56,63 +56,57 @@ export const WorkoutDay = ({
   const { data: dayData } = use(dayDataPromise)
   const queryClient = useQueryClient()
   const router = useRouter()
-  // Handle both getWorkoutDay (trainer plans) and getQuickWorkoutDay (quick workouts)
-  const initialDay =
-    'getWorkoutDay' in (dayData ?? {})
-      ? (dayData as GQLFitspaceGetWorkoutDayQuery)?.getWorkoutDay
-      : (dayData as GQLFitspaceGetQuickWorkoutDayQuery)?.getQuickWorkoutDay
+  const hasSeedCache = useRef(false)
 
-  // Normalize Quick Workout data to match getWorkoutDay structure for consistent cache handling
-  const normalizedInitialData = useMemo(():
-    | GQLFitspaceGetWorkoutDayQuery
-    | undefined => {
+  // Normalize data to consistent format
+  const serverData = useMemo((): GQLFitspaceGetWorkoutDayQuery | undefined => {
     if (!dayData) return undefined
-
     if ('getWorkoutDay' in dayData) {
       return dayData as GQLFitspaceGetWorkoutDayQuery
     }
-
-    // Transform Quick Workout data to getWorkoutDay format
-    const quickWorkoutData = dayData as GQLFitspaceGetQuickWorkoutDayQuery
-    if (!quickWorkoutData?.getQuickWorkoutDay) return undefined
-
-    return {
-      getWorkoutDay: quickWorkoutData.getQuickWorkoutDay,
-    }
+    const quickData = dayData as GQLFitspaceGetQuickWorkoutDayQuery
+    if (!quickData?.getQuickWorkoutDay) return undefined
+    return { getWorkoutDay: quickData.getQuickWorkoutDay }
   }, [dayData])
 
+  const serverDayId = serverData?.getWorkoutDay?.day?.id
+
+  // Seed cache ONCE with server data (synchronously via ref check)
+  if (serverDayId && serverData && !hasSeedCache.current) {
+    const queryKey = useFitspaceGetWorkoutDayQuery.getKey({
+      dayId: serverDayId,
+    })
+    if (!queryClient.getQueryData(queryKey)) {
+      queryClient.setQueryData(queryKey, serverData)
+    }
+    hasSeedCache.current = true
+  }
+
+  // The effective dayId: use URL param, or fall back to server data
+  const effectiveDayId = dayId ?? serverDayId
+
+  // Check for rest day
   const navigationData =
     queryClient.getQueryData<GQLFitspaceGetWorkoutNavigationQuery>([
       'navigation',
     ])
-
-  // Check if current day is rest day
   const isRestDay = useMemo(() => {
-    if (!dayId || !navigationData?.getWorkoutNavigation?.plan) return false
+    if (!effectiveDayId || !navigationData?.getWorkoutNavigation?.plan)
+      return false
     for (const week of navigationData.getWorkoutNavigation.plan.weeks) {
-      const day = week.days.find((d) => d.id === dayId)
+      const day = week.days.find((d) => d.id === effectiveDayId)
       if (day) return day.isRestDay
     }
     return false
-  }, [dayId, navigationData])
+  }, [effectiveDayId, navigationData])
 
-  // Check if we have any data (initial or cached) for the current dayId
-  const hasDataForCurrentDay = useMemo(() => {
-    if (isRestDay) return true // Rest days are always available (hardcoded)
-    const hasInitialData = initialDay?.day?.id === dayId && initialDay
-    const hasCachedData =
-      dayId &&
-      queryClient.getQueryData(useFitspaceGetWorkoutDayQuery.getKey({ dayId }))
-    return hasInitialData || !!hasCachedData
-  }, [initialDay, dayId, queryClient, isRestDay])
-
-  // Rest day data
-  const restDayData = useMemo(() => {
-    if (!isRestDay || !dayId) return undefined
+  // Rest day placeholder data
+  const restDayData = useMemo((): GQLFitspaceGetWorkoutDayQuery | undefined => {
+    if (!isRestDay || !effectiveDayId) return undefined
     let dayOfWeek = 0
     if (navigationData?.getWorkoutNavigation?.plan) {
       for (const week of navigationData.getWorkoutNavigation.plan.weeks) {
-        const day = week.days.find((d) => d.id === dayId)
+        const day = week.days.find((d) => d.id === effectiveDayId)
         if (day) {
           dayOfWeek = day.dayOfWeek
           break
@@ -122,7 +116,7 @@ export const WorkoutDay = ({
     return {
       getWorkoutDay: {
         day: {
-          id: dayId,
+          id: effectiveDayId,
           dayOfWeek,
           isRestDay: true,
           exercises: [],
@@ -130,60 +124,51 @@ export const WorkoutDay = ({
           scheduledAt: null,
           completedAt: null,
           startedAt: null,
-          duration: null,
         },
         previousDayLogs: [],
       },
     } as GQLFitspaceGetWorkoutDayQuery
-  }, [isRestDay, dayId, navigationData])
+  }, [isRestDay, effectiveDayId, navigationData])
 
-  const { data: dayDataQuery, isFetching } = useFitspaceGetWorkoutDayQuery(
+  // Simple query - cache is already seeded
+  const { data: queryData, isFetching } = useFitspaceGetWorkoutDayQuery(
+    { dayId: effectiveDayId ?? '' },
     {
-      dayId: dayId ?? '',
-    },
-    {
-      initialData: isRestDay ? restDayData : normalizedInitialData,
-      initialDataUpdatedAt: hasDataForCurrentDay || isRestDay ? Date.now() : 0,
-      // Keep query enabled to subscribe to cache updates from optimistic mutations
-      enabled: !!dayId,
-      // But prevent unnecessary network requests when we have data
-      refetchOnMount: !hasDataForCurrentDay && !isRestDay,
+      enabled: !!effectiveDayId && !isRestDay,
+      staleTime: 5 * 60 * 1000,
+      refetchOnMount: false,
       refetchOnWindowFocus: false,
-      staleTime: isRestDay ? Infinity : 0,
       retry: false,
     },
   )
 
-  const isLoadingNewDay = isFetching && !hasDataForCurrentDay && !isRestDay
+  // Use query data, rest day data, or server data (in that order)
+  const currentData = isRestDay ? restDayData : (queryData ?? serverData)
+  const currentDay = currentData?.getWorkoutDay?.day
+  const previousDayLogs = currentData?.getWorkoutDay?.previousDayLogs
 
-  // Redirect to workout home if no valid data (client-side only)
+  // Loading state: fetching AND no data available
+  const isLoading = isFetching && !currentDay && !isRestDay
+
+  // Redirect if no data after fetch
   useEffect(() => {
-    if (!isFetching && !hasDataForCurrentDay && !isRestDay && !dayDataQuery) {
+    if (!isFetching && !currentDay && !isRestDay && effectiveDayId) {
       router.replace('/fitspace/workout')
     }
-  }, [isFetching, hasDataForCurrentDay, isRestDay, dayDataQuery, router])
+  }, [isFetching, currentDay, isRestDay, effectiveDayId, router])
 
   return (
-    <WorkoutProvider
-      exercises={
-        dayDataQuery?.getWorkoutDay?.day?.exercises ??
-        initialDay?.day?.exercises ??
-        []
-      }
-    >
+    <WorkoutProvider exercises={currentDay?.exercises ?? []}>
       <div className={cn('pb-4')}>
-        {isLoadingNewDay ? (
+        {isLoading ? (
           <div className="px-4 pt-4 space-y-6">
             <LoadingSkeleton variant="light" count={3} />
           </div>
         ) : (
-          (dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day) && (
+          currentDay && (
             <Exercises
-              day={dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day}
-              previousDayLogs={
-                dayDataQuery?.getWorkoutDay?.previousDayLogs ??
-                initialDay?.previousDayLogs
-              }
+              day={currentDay}
+              previousDayLogs={previousDayLogs}
               isQuickWorkout={isQuickWorkout}
             />
           )

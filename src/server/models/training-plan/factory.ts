@@ -2025,7 +2025,9 @@ export async function getWorkoutDay(
   } else {
     // Find today's scheduled day with all data
     const todayUTC = getTodayUTC('UTC')
+    const tomorrowUTC = new Date(todayUTC.getTime() + 24 * 60 * 60 * 1000)
 
+    // First: Try to find today's scheduled day
     day = await prisma.trainingDay.findFirst({
       where: {
         week: {
@@ -2034,17 +2036,35 @@ export async function getWorkoutDay(
             active: true,
           },
         },
-        // OR: [{ scheduledAt: todayUTC }, { completedAt: null }],
-        completedAt: null,
+        scheduledAt: {
+          gte: todayUTC,
+          lt: tomorrowUTC,
+        },
         isRestDay: false,
       },
-      orderBy: [
-        // Prioritize today's training, then most recent past trainings
-        { scheduledAt: 'desc' },
-      ],
       include: WORKOUT_DAY_INCLUDE,
     })
 
+    // Second: Find next upcoming incomplete day (closest to today)
+    if (!day) {
+      day = await prisma.trainingDay.findFirst({
+        where: {
+          week: {
+            plan: {
+              assignedToId: user.user.id,
+              active: true,
+            },
+          },
+          scheduledAt: { gte: todayUTC },
+          completedAt: null,
+          isRestDay: false,
+        },
+        orderBy: [{ scheduledAt: 'asc' }],
+        include: WORKOUT_DAY_INCLUDE,
+      })
+    }
+
+    // Third: Fallback to self-created plan's today day
     if (!day) {
       day = await prisma.trainingDay.findFirst({
         where: {
@@ -2053,7 +2073,7 @@ export async function getWorkoutDay(
           },
           scheduledAt: {
             gte: todayUTC,
-            lt: new Date(todayUTC.getTime() + 24 * 60 * 60 * 1000),
+            lt: tomorrowUTC,
           },
         },
         include: WORKOUT_DAY_INCLUDE,
