@@ -75,7 +75,7 @@ export function PlanDetailsDrawer({
       <DrawerContent dialogTitle={plan.title}>
         <div className="flex flex-col h-full overflow-hidden">
           {/* Header */}
-          <DrawerHeader className="border-b flex-shrink-0">
+          <DrawerHeader className="flex-shrink-0">
             <div className="flex items-center justify-between gap-3">
               <div className="w-full space-y-2">
                 <h3 className="text-lg font-medium">{plan.title}</h3>
@@ -105,41 +105,42 @@ export function PlanDetailsDrawer({
           </DrawerHeader>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-2" ref={scrollContainerRef}>
+          <div className="flex-1 overflow-y-auto" ref={scrollContainerRef}>
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
               className="w-full"
             >
-              {isTemplate ? (
-                <PrimaryTabList
-                  options={[
-                    { label: 'Info', value: 'info' },
-                    { label: 'Preview', value: 'preview' },
-                  ]}
-                  onClick={setActiveTab}
-                  active={activeTab}
-                  size="lg"
-                  className="grid grid-cols-2"
-                  classNameButton="text-sm px-3"
-                />
-              ) : (
-                <PrimaryTabList
-                  options={[
-                    { label: 'Summary', value: 'summary' },
-                    { label: 'Info', value: 'info' },
-                    { label: 'Preview', value: 'preview' },
-                  ]}
-                  onClick={setActiveTab}
-                  active={activeTab}
-                  size="lg"
-                  className="grid grid-cols-3"
-                  classNameButton="text-sm px-3"
-                />
-              )}
-
+              <div className="px-2 mt-2">
+                {isTemplate ? (
+                  <PrimaryTabList
+                    options={[
+                      { label: 'Info', value: 'info' },
+                      { label: 'Preview', value: 'preview' },
+                    ]}
+                    onClick={setActiveTab}
+                    active={activeTab}
+                    size="lg"
+                    className="grid grid-cols-2"
+                    classNameButton="text-sm px-3"
+                  />
+                ) : (
+                  <PrimaryTabList
+                    options={[
+                      { label: 'Summary', value: 'summary' },
+                      { label: 'Info', value: 'info' },
+                      { label: 'Preview', value: 'preview' },
+                    ]}
+                    onClick={setActiveTab}
+                    active={activeTab}
+                    size="lg"
+                    className="grid grid-cols-3"
+                    classNameButton="text-sm px-3"
+                  />
+                )}
+              </div>
               {!isTemplate && (
-                <TabsContent value="summary" className="px-2 py-4">
+                <TabsContent value="summary" className="p-4">
                   <PlanSummaryTab planId={plan.id} />
                 </TabsContent>
               )}

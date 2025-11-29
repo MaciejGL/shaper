@@ -138,6 +138,7 @@ function PrimaryTabList<T extends string>({
   className,
   size = 'xl',
   classNameButton,
+  classNameWrapper,
 }: {
   options: {
     label: string
@@ -151,13 +152,15 @@ function PrimaryTabList<T extends string>({
   className?: string
   size?: 'md' | 'sm' | 'lg' | 'xl'
   classNameButton?: string
+  classNameWrapper?: string
 }) {
   const uniqueId = React.useId()
 
   return (
     <div
       className={cn(
-        'rounded-[18px] bg-card/95 dark:bg-background/95 border border-zinc-400 dark:border-zinc-800 p-[2px] min-w-max w-full shadow-lg dark:shadow-neutral-950',
+        'rounded-[18px] bg-card/95 dark:bg-background/95 border border-zinc-400/60 dark:border-zinc-800 p-[2px] min-w-max w-full shadow-lg dark:shadow-neutral-950',
+        classNameWrapper,
       )}
     >
       <div className={cn('relative flex', className)}>
