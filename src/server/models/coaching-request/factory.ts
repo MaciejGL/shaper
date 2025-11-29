@@ -9,6 +9,7 @@ import {
   invalidateClientAccessCache,
   invalidateTrainerAccessCache,
 } from '@/lib/access-control'
+import { invalidateUserBasicCache } from '@/lib/cache/user-cache'
 import { prisma } from '@/lib/db'
 import { invalidateUserCache } from '@/lib/getUser'
 import {
@@ -329,6 +330,7 @@ export async function acceptCoachingRequest({
       if (client.email) {
         invalidateUserCache(client.email)
       }
+      await invalidateUserBasicCache(coachingRequest.senderId)
     }
 
     if (recipientRole === GQLUserRole.Client) {
@@ -348,6 +350,7 @@ export async function acceptCoachingRequest({
       if (client.email) {
         invalidateUserCache(client.email)
       }
+      await invalidateUserBasicCache(recipientId)
     }
 
     await createNotification(

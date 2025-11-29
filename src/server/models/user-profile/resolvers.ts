@@ -5,6 +5,7 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
+import { invalidateUserBasicCache } from '@/lib/cache/user-cache'
 import { prisma } from '@/lib/db'
 import { invalidateUserCache } from '@/lib/getUser'
 import { GQLContext } from '@/types/gql-context'
@@ -555,11 +556,12 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       },
     })
 
-    // Invalidate cache so navbar/UI gets fresh data immediately
-    // Only invalidate if User record exists and has email
+    // Invalidate caches so navbar/UI gets fresh data immediately
     if (user?.email) {
       invalidateUserCache(user.email)
     }
+    // Invalidate Redis cache for userBasic GraphQL query
+    await invalidateUserBasicCache(user.id)
 
     return new UserProfile(userProfile)
   },

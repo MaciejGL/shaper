@@ -21,6 +21,12 @@ import {
 import Location from '../location/model'
 import UserBodyMeasure from '../user-body-measure/model'
 
+function toISOString(date: Date | string | null | undefined): string | null {
+  if (!date) return null
+  if (typeof date === 'string') return date
+  return date.toISOString()
+}
+
 export default class UserProfile implements GQLUserProfile {
   constructor(
     protected data: PrismaUserProfile & {
@@ -52,7 +58,7 @@ export default class UserProfile implements GQLUserProfile {
   }
 
   get birthday() {
-    return this.data.birthday?.toISOString()
+    return toISOString(this.data.birthday)
   }
 
   get sex() {
@@ -169,11 +175,11 @@ export default class UserProfile implements GQLUserProfile {
   }
 
   get createdAt() {
-    return this.data.createdAt.toISOString()
+    return toISOString(this.data.createdAt) ?? ''
   }
 
   get updatedAt() {
-    return this.data.updatedAt.toISOString()
+    return toISOString(this.data.updatedAt) ?? ''
   }
 
   get weightUnit(): GQLWeightUnit {

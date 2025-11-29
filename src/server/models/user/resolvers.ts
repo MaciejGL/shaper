@@ -18,6 +18,11 @@ import {
   invalidateTrainerAccessCache,
 } from '@/lib/access-control'
 import { requireAdminUser } from '@/lib/admin-auth'
+import {
+  getCachedUserBasic,
+  invalidateUserBasicCache,
+  setCachedUserBasic,
+} from '@/lib/cache/user-cache'
 import { prisma } from '@/lib/db'
 import { notifyCoachingCancelled } from '@/lib/notifications/push-notification-service'
 import { getFromCache, setInCache } from '@/lib/redis'
@@ -112,12 +117,23 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
+    const userId = userSession.user.id
+
+    // Check Redis cache first
+    const cachedUser = await getCachedUserBasic<UserWithIncludes>(userId)
+    if (cachedUser) {
+      return new User(cachedUser, context)
+    }
+
     // Use DataLoader to batch basic user queries and prevent N+1 queries
-    const user = await context.loaders.user.userBasic.load(userSession.user.id)
+    const user = await context.loaders.user.userBasic.load(userId)
 
     if (!user) {
       throw new Error('User not found')
     }
+
+    // Cache the user data in Redis
+    await setCachedUserBasic(userId, user)
 
     return new User(user, context)
   },
@@ -1312,6 +1328,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       await Promise.all([
         invalidateTrainerAccessCache(trainerId),
         invalidateClientAccessCache(clientId),
+        invalidateUserBasicCache(clientId),
       ])
 
       return true

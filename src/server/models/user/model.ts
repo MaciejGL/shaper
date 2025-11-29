@@ -11,6 +11,11 @@ import Notification from '../notification/model'
 import UserProfile from '../user-profile/model'
 import UserPublic from '../user-public/model'
 
+function toISOString(date: Date | string): string {
+  if (typeof date === 'string') return date
+  return date.toISOString()
+}
+
 export default class User implements GQLUser {
   constructor(
     protected data: PrismaUser & {
@@ -48,11 +53,11 @@ export default class User implements GQLUser {
   }
 
   get createdAt() {
-    return this.data.createdAt.toISOString()
+    return toISOString(this.data.createdAt)
   }
 
   get updatedAt() {
-    return this.data.updatedAt.toISOString()
+    return toISOString(this.data.updatedAt)
   }
 
   get capacity() {
@@ -101,8 +106,8 @@ export default class User implements GQLUser {
         id: s.id,
         user: this,
         otp: s.otp,
-        expiresAt: s.expiresAt.toISOString(),
-        createdAt: s.createdAt.toISOString(),
+        expiresAt: toISOString(s.expiresAt),
+        createdAt: toISOString(s.createdAt),
       }))
     } else {
       console.error(`[User] No sessions found for user ${this.id}. Skipping.`)
