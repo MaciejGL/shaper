@@ -12,10 +12,9 @@ export const metadata: Metadata = {
 export default async function SupportPage() {
   const userSession = await getCurrentUser()
 
-  // Determine back URL based on user authentication and role
   const getBackUrl = () => {
     if (!userSession) {
-      return '/' // Landing page for non-authenticated users
+      return '/'
     }
 
     if (userSession.user.role === 'TRAINER') {
@@ -27,9 +26,9 @@ export default async function SupportPage() {
 
   const backUrl = getBackUrl()
   const backText = userSession ? 'Back to Settings' : 'Back to Home'
+
   return (
     <div className="mx-auto bg-background h-screen overflow-y-auto hide-scrollbar">
-      {/* Navigation Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-5xl">
           <Link
@@ -52,7 +51,7 @@ export default async function SupportPage() {
               {/* Header */}
               <div className="border-b pb-6 text-center">
                 <h1 className="text-4xl font-bold mb-4 text-foreground">
-                  Hypro Support
+                  Support
                 </h1>
                 <p className="text-xl text-muted-foreground">
                   We're here to help you get the most out of your fitness
@@ -60,57 +59,25 @@ export default async function SupportPage() {
                 </p>
               </div>
 
-              {/* Contact Cards */}
+              {/* Contact */}
               <div>
                 <h2 className="text-2xl font-semibold mb-6 text-foreground text-center">
                   Contact Us
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center mb-4">
-                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-white font-bold">📧</span>
-                      </div>
-                      <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">
-                        General Support
-                      </h3>
-                    </div>
-                    <p className="text-blue-800 dark:text-blue-200 mb-3 text-sm">
-                      For app questions, technical issues, and general help
-                    </p>
-                    <Link
-                      className="text-blue-900 dark:text-blue-100 font-semibold"
-                      href="mailto:support@hypro.app"
-                    >
-                      support@hypro.app
-                    </Link>
-                    <p className="text-blue-700 dark:text-blue-300 text-sm mt-2">
-                      ⏱️ We typically respond within 1-3 business days
-                    </p>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/50 p-6 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <div className="flex items-center mb-4">
-                      <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-white font-bold">🔒</span>
-                      </div>
-                      <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">
-                        Privacy & Legal
-                      </h3>
-                    </div>
-                    <p className="text-purple-800 dark:text-purple-200 mb-3 text-sm">
-                      For privacy questions and legal matters
-                    </p>
-                    <Link
-                      className="text-purple-900 dark:text-purple-100 font-semibold"
-                      href="mailto:support@hypro.app"
-                    >
-                      support@hypro.app
-                    </Link>
-                    <p className="text-purple-700 dark:text-purple-300 text-sm mt-2">
-                      🛡️ For data protection and privacy concerns
-                    </p>
-                  </div>
+                <div className="bg-muted/30 p-6 rounded-lg border text-center">
+                  <p className="text-muted-foreground mb-4">
+                    For all support inquiries, technical issues, privacy
+                    questions, or feedback:
+                  </p>
+                  <Link
+                    className="text-xl text-primary font-semibold hover:underline"
+                    href="mailto:support@hypro.app"
+                  >
+                    support@hypro.app
+                  </Link>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    We typically respond within 1-3 business days
+                  </p>
                 </div>
               </div>
 
@@ -122,109 +89,32 @@ export default async function SupportPage() {
 
                 {/* Getting Started */}
                 <div className="mb-8">
-                  <h3 className="text-xl font-semibold mb-4 text-foreground flex items-center">
-                    <span className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3 text-white text-sm font-bold">
-                      🚀
-                    </span>
+                  <h3 className="text-lg font-semibold mb-4 text-foreground">
                     Getting Started
                   </h3>
                   <div className="space-y-4">
                     {[
                       {
                         q: 'How do I create an account?',
-                        a: "Visit hypro.app in your web browser or download our mobile app. Enter your email address and we'll send you a one-time password (OTP) to log in. No traditional password needed!",
-                      },
-                      {
-                        q: 'Is Hypro free to use?',
-                        a: 'Yes! Hypro is completely free with all core features included: workout tracking, meal planning, progress photos, trainer teams, and more. Premium features may be added in the future.',
+                        a: "Visit hypro.app or download our mobile app. Enter your email address and we'll send you a one-time password to log in.",
                       },
                       {
                         q: 'How does the trainer-client system work?',
-                        a: "If you're a client, you can send coaching requests to trainers. Once connected, trainers can create custom workout and meal plans for you, track your progress, and leave notes.",
+                        a: 'Clients can send coaching requests to trainers. Once connected, trainers can create custom workout and meal plans, track progress, and provide guidance.',
                       },
                       {
                         q: 'Can I use Hypro without a trainer?',
-                        a: 'Absolutely! You can create your own workout plans, track exercises, log meals, take progress photos, and monitor your fitness journey independently.',
-                      },
-                      {
-                        q: 'Is Hypro still in development?',
-                        a: 'Yes! Hypro is actively being developed. You may notice new features, improvements, or occasional changes as we enhance the platform based on user feedback.',
+                        a: 'Yes! You can create your own workout plans, track exercises, log meals, take progress photos, and monitor your fitness journey independently.',
                       },
                     ].map((faq, index) => (
                       <div
                         key={index}
-                        className="bg-green-50 dark:bg-green-950/30 border-l-4 border-green-500 pl-6 py-4 rounded-r-lg"
+                        className="bg-muted/30 border-l-4 border-primary pl-6 py-4 rounded-r-lg"
                       >
-                        <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                        <h4 className="font-semibold text-foreground mb-2">
                           {faq.q}
                         </h4>
-                        <p className="text-green-800 dark:text-green-200 text-sm leading-relaxed">
-                          {faq.a}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Technical Support */}
-                <div className="mb-8">
-                  <h3 className="text-xl font-semibold mb-4 text-foreground flex items-center">
-                    <span className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mr-3 text-white text-sm font-bold">
-                      🔧
-                    </span>
-                    Technical Support
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="bg-orange-50 dark:bg-orange-950/30 border-l-4 border-orange-500 pl-6 py-4 rounded-r-lg">
-                      <h4 className="font-semibold text-orange-900 dark:text-orange-100 mb-2">
-                        The app isn't working properly
-                      </h4>
-                      <p className="text-orange-800 dark:text-orange-200 text-sm mb-3">
-                        Try these steps first:
-                      </p>
-                      <ol className="text-orange-800 dark:text-orange-200 text-sm ml-4 space-y-1 list-decimal">
-                        <li>Close and restart the app</li>
-                        <li>Check for app updates in your app store</li>
-                        <li>Restart your device</li>
-                        <li>Ensure you have a stable internet connection</li>
-                      </ol>
-                      <p className="text-orange-800 dark:text-orange-200 text-sm mt-3">
-                        If issues persist, please email us at support@hypro.app
-                        with details about the problem, your device type, and
-                        operating system version.
-                      </p>
-                    </div>
-
-                    {[
-                      {
-                        q: 'How do I sync my data across devices?',
-                        a: "Your data automatically syncs when you're logged into the same account on multiple devices with an internet connection. Works seamlessly between web browser and mobile app.",
-                      },
-                      {
-                        q: "Push notifications aren't working on mobile",
-                        a: 'First, ensure notifications are enabled in your device settings for Hypro. Then check the notification preferences in the mobile app settings. Note: Push notifications only work on mobile apps, not in web browsers.',
-                      },
-                      // {
-                      //   q: 'Can I export my workout data?',
-                      //   a: 'Yes! Go to Settings → Data & Privacy → Export Data to download your workout history, progress measurements, and other fitness data in JSON format.',
-                      // },
-                      {
-                        q: 'How does OTP login work?',
-                        a: 'Instead of passwords, Hypro uses one-time passwords (OTP). Enter your email, check your inbox for a 6-digit code, and enter it to log in. Codes expire after a few minutes for security.',
-                      },
-                      {
-                        q: 'I found a bug or want to suggest a feature',
-                        a: "Great! Since we're actively developing Hypro, your feedback is invaluable. Please email us at support@hypro.app with details about bugs or feature suggestions.",
-                      },
-                    ].map((faq, index) => (
-                      <div
-                        key={index}
-                        className="bg-orange-50 dark:bg-orange-950/30 border-l-4 border-orange-500 pl-6 py-4 rounded-r-lg"
-                      >
-                        <h4 className="font-semibold text-orange-900 dark:text-orange-100 mb-2">
-                          {faq.q}
-                        </h4>
-                        <p className="text-orange-800 dark:text-orange-200 text-sm leading-relaxed">
+                        <p className="text-muted-foreground text-sm leading-relaxed">
                           {faq.a}
                         </p>
                       </div>
@@ -234,165 +124,105 @@ export default async function SupportPage() {
 
                 {/* Account & Data */}
                 <div className="mb-8">
-                  <h3 className="text-xl font-semibold mb-4 text-foreground flex items-center">
-                    <span className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3 text-white text-sm font-bold">
-                      👤
-                    </span>
+                  <h3 className="text-lg font-semibold mb-4 text-foreground">
                     Account & Data
                   </h3>
                   <div className="space-y-4">
                     {[
-                      // {
-                      //   q: 'What data can I export?',
-                      //   a: 'You can export your complete fitness data including workout plans, exercise logs, body measurements, meal plans, and progress tracking data in JSON format from Settings → Data & Privacy.',
-                      // },
                       {
                         q: 'How do I delete my account?',
-                        a: 'To delete your account, go to Settings → Account → Delete Account or email support@hypro.app. This will permanently remove all your data including progress photos and workout history.',
-                      },
-                      {
-                        q: 'Where are my progress photos stored?',
-                        a: 'Progress photos are securely stored in private AWS S3 buckets and are only accessible to you and any trainers you collaborate with. Avatar photos are publicly visible to other users.',
+                        a: 'Go to Settings and look for the Delete Account option, or email support@hypro.app. This will permanently remove all your data.',
                       },
                       {
                         q: 'Is my data secure?',
-                        a: 'Yes! We use OTP authentication (no password storage), HTTPS encryption, and secure cloud storage. Learn more in our Privacy Policy.',
+                        a: 'Yes. We use secure authentication, HTTPS encryption, and private storage for sensitive data. See our Privacy Policy for details.',
+                      },
+                      {
+                        q: 'Where are my progress photos stored?',
+                        a: 'Progress photos are stored securely in private cloud storage and are only accessible to you and trainers you work with.',
                       },
                     ].map((faq, index) => (
                       <div
                         key={index}
-                        className="bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-500 pl-6 py-4 rounded-r-lg"
+                        className="bg-muted/30 border-l-4 border-primary pl-6 py-4 rounded-r-lg"
                       >
-                        <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                        <h4 className="font-semibold text-foreground mb-2">
                           {faq.q}
                         </h4>
-                        <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed">
+                        <p className="text-muted-foreground text-sm leading-relaxed">
                           {faq.a}
-                          {faq.q.includes('data secure') && (
-                            <>
-                              {' '}
-                              <a
-                                href="/privacy"
-                                className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
-                              >
-                                Privacy Policy
-                              </a>
-                              .
-                            </>
-                          )}
                         </p>
                       </div>
                     ))}
                   </div>
                 </div>
-              </div>
 
-              {/* Mobile App Specific */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-foreground flex items-center">
-                  <span className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3 text-white text-sm font-bold">
-                    📱
-                  </span>
-                  Mobile App
-                </h3>
-                <div className="space-y-4">
-                  {[
-                    {
-                      q: 'Where can I download the mobile app?',
-                      a: 'The Hypro mobile app is available on the iOS App Store and Google Play Store. Search for "Hypro" or visit the download links on our website.',
-                    },
-                    {
-                      q: 'Why do I need camera permissions?',
-                      a: 'Camera access is only used for taking progress photos and exercise demonstration images. You can grant or deny this permission in your device settings.',
-                    },
-                    {
-                      q: 'How do mobile push notifications work?',
-                      a: 'Our mobile app uses native push notifications to remind you about workouts, meals, and team updates. You can customize notification types in the app settings.',
-                    },
-                    {
-                      q: 'Is the mobile app the same as the website?',
-                      a: 'The mobile app provides the same features as the web version with additional native integrations like push notifications and camera access. Your data syncs across all platforms.',
-                    },
-                  ].map((faq, index) => (
-                    <div
-                      key={index}
-                      className="bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-500 pl-6 py-4 rounded-r-lg"
-                    >
-                      <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                        {faq.q}
-                      </h4>
-                      <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed">
-                        {faq.a}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bug Reports */}
-              <div className="bg-red-50 dark:bg-red-950/30 p-6 rounded-lg border border-red-200 dark:border-red-800">
-                <h2 className="text-2xl font-semibold mb-4 text-red-900 dark:text-red-100 flex items-center">
-                  <span className="mr-3">🐛</span>Report a Bug
-                </h2>
-                <p className="text-red-800 dark:text-red-200 mb-4">
-                  Found a bug? Help us improve Hypro by reporting it. Please
-                  include:
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <ul className="space-y-2 text-red-800 dark:text-red-200 text-sm">
-                    <li>• Detailed description of the problem</li>
-                    <li>• Steps to reproduce the issue</li>
-                    <li>• Your device type and operating system version</li>
-                  </ul>
-                  <ul className="space-y-2 text-red-800 dark:text-red-200 text-sm">
-                    <li>• App version (found in Settings → About)</li>
-                    <li>• Screenshots or screen recordings if applicable</li>
-                    <li>• When the issue first occurred</li>
-                  </ul>
-                </div>
-                <div className="bg-red-100 dark:bg-red-900/50 p-4 rounded-lg">
-                  <p className="font-semibold text-red-900 dark:text-red-100">
-                    Send bug reports to:{' '}
-                    <span className="text-red-600 dark:text-red-400">
-                      support@hypro.app
-                    </span>
-                  </p>
+                {/* Technical Support */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold mb-4 text-foreground">
+                    Technical Support
+                  </h3>
+                  <div className="bg-muted/30 border-l-4 border-primary pl-6 py-4 rounded-r-lg">
+                    <h4 className="font-semibold text-foreground mb-2">
+                      The app isn't working properly
+                    </h4>
+                    <p className="text-muted-foreground text-sm mb-3">
+                      Try these steps first:
+                    </p>
+                    <ol className="text-muted-foreground text-sm ml-4 space-y-1 list-decimal">
+                      <li>Close and restart the app</li>
+                      <li>Check for app updates in your app store</li>
+                      <li>Restart your device</li>
+                      <li>Ensure you have a stable internet connection</li>
+                    </ol>
+                    <p className="text-muted-foreground text-sm mt-3">
+                      If issues persist, please email us at support@hypro.app
+                      with details about the problem, your device type, and
+                      operating system version.
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* Safety Notice */}
               <div className="bg-amber-50 dark:bg-amber-950/30 p-6 rounded-lg border-2 border-amber-300 dark:border-amber-700">
-                <h2 className="text-2xl font-semibold mb-4 text-amber-900 dark:text-amber-100 flex items-center">
-                  <span className="mr-3">⚠️</span>Training & Safety
+                <h2 className="text-2xl font-semibold mb-4 text-amber-900 dark:text-amber-100">
+                  Training & Safety
                 </h2>
-                <div className="bg-amber-100 dark:bg-amber-900/50 p-4 rounded-lg mb-4">
-                  <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">
-                    Important Safety Notice
-                  </h3>
-                  <p className="text-amber-800 dark:text-amber-200 text-sm mb-3">
-                    Hypro provides fitness guidance, but we are not medical
-                    professionals. Always consult with your healthcare provider
-                    before starting any new exercise program.
+                <div className="space-y-4 text-amber-800 dark:text-amber-200">
+                  <p className="text-sm">
+                    Hypro provides fitness guidance and training plan
+                    suggestions. All workout programs are for informational
+                    purposes only and should be adjusted to your individual
+                    fitness level.
                   </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <ul className="space-y-2 text-amber-800 dark:text-amber-200 text-sm">
+                  <ul className="text-sm space-y-2">
                     <li>
-                      • Stop exercising immediately if you feel pain, dizziness,
+                      Consult with a healthcare provider before starting any new
+                      exercise program
+                    </li>
+                    <li>
+                      Stop exercising immediately if you feel pain, dizziness,
                       or discomfort
                     </li>
                     <li>
-                      • Listen to your body and exercise within your
-                      capabilities
+                      Adjust intensity and exercises to match your abilities
                     </li>
-                  </ul>
-                  <ul className="space-y-2 text-amber-800 dark:text-amber-200 text-sm">
-                    <li>• Stay hydrated and take breaks as needed</li>
                     <li>
-                      • If you have any medical conditions, get clearance from
-                      your doctor first
+                      You exercise at your own risk and assume responsibility
+                      for your safety
                     </li>
                   </ul>
+                  <p className="text-sm mt-4">
+                    For complete details, see our{' '}
+                    <Link
+                      href="/terms"
+                      className="font-semibold underline hover:no-underline"
+                    >
+                      Terms of Service
+                    </Link>
+                    .
+                  </p>
                 </div>
               </div>
 
@@ -402,77 +232,45 @@ export default async function SupportPage() {
                   Quick Links
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <a
-                      href="/privacy"
-                      className="flex items-center p-3 bg-card rounded-lg border hover:border-primary transition-colors"
-                    >
-                      <span className="mr-3">🔒</span>
-                      <div>
-                        <div className="font-semibold text-foreground">
-                          Privacy Policy
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          How we handle your data
-                        </div>
+                  <Link
+                    href="/privacy"
+                    className="flex items-center p-4 bg-card rounded-lg border hover:border-primary transition-colors"
+                  >
+                    <div>
+                      <div className="font-semibold text-foreground">
+                        Privacy Policy
                       </div>
-                    </a>
-                    <a
-                      href="/terms"
-                      className="flex items-center p-3 bg-card rounded-lg border hover:border-primary transition-colors"
-                    >
-                      <span className="mr-3">📋</span>
-                      <div>
-                        <div className="font-semibold text-foreground">
-                          Terms of Service
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Legal terms and conditions
-                        </div>
-                      </div>
-                    </a>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center p-3 bg-card rounded-lg border">
-                      <span className="mr-3">💡</span>
-                      <div>
-                        <div className="font-semibold text-foreground">
-                          Feature Requests
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          support@hypro.app
-                        </div>
+                      <div className="text-sm text-muted-foreground">
+                        How we handle your data
                       </div>
                     </div>
-                    <div className="flex items-center p-3 bg-card rounded-lg border">
-                      <span className="mr-3">🤝</span>
-                      <div>
-                        <div className="font-semibold text-foreground">
-                          Partnership Inquiries
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          support@hypro.app
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Mark subject as "Partnership"
-                        </div>
+                  </Link>
+                  <Link
+                    href="/terms"
+                    className="flex items-center p-4 bg-card rounded-lg border hover:border-primary transition-colors"
+                  >
+                    <div>
+                      <div className="font-semibold text-foreground">
+                        Terms of Service
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Legal terms and conditions
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               </div>
 
               {/* Footer */}
               <div className="border-t pt-6 text-center bg-muted/20 p-6 rounded-lg">
                 <p className="text-muted-foreground font-medium">
-                  Need immediate help? Check our FAQ section above or email{' '}
-                  <span className="text-primary font-semibold">
+                  Need help? Email us at{' '}
+                  <Link
+                    href="mailto:support@hypro.app"
+                    className="text-primary font-semibold hover:underline"
+                  >
                     support@hypro.app
-                  </span>
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  We're committed to providing excellent support for your
-                  fitness journey! 💪
+                  </Link>
                 </p>
               </div>
             </div>

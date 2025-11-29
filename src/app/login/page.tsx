@@ -61,6 +61,16 @@ export default async function RequestOtpPage({
           <EmailChangeSuccess />
         </Suspense>
         <LoginCard />
+        <p className="text-center text-xs text-zinc-500 px-4">
+          By continuing, you agree to our{' '}
+          <Link href="/terms" className="text-zinc-400 underline hover:text-white">
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link href="/privacy" className="text-zinc-400 underline hover:text-white">
+            Privacy Policy
+          </Link>
+        </p>
       </div>
     </div>
   )

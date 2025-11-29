@@ -12,10 +12,9 @@ export const metadata: Metadata = {
 export default async function TermsOfServicePage() {
   const userSession = await getCurrentUser()
 
-  // Determine back URL based on user authentication and role
   const getBackUrl = () => {
     if (!userSession) {
-      return '/' // Landing page for non-authenticated users
+      return '/'
     }
 
     if (userSession.user.role === 'TRAINER') {
@@ -27,9 +26,9 @@ export default async function TermsOfServicePage() {
 
   const backUrl = getBackUrl()
   const backText = userSession ? 'Back to Settings' : 'Back to Home'
+
   return (
     <div className="mx-auto bg-background h-screen overflow-y-auto hide-scrollbar">
-      {/* Navigation Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-5xl">
           <Link
@@ -52,9 +51,8 @@ export default async function TermsOfServicePage() {
               {/* Header */}
               <div className="border-b pb-6">
                 <h1 className="text-4xl font-bold mb-4 text-foreground">
-                  Terms of Service for Hypro
+                  Terms of Service
                 </h1>
-
                 <div className="text-sm text-muted-foreground border-l-4 border-primary pl-4 bg-muted/30 p-4 rounded-r-lg">
                   <p className="mb-1">
                     <strong>Effective Date:</strong> January 2025
@@ -65,12 +63,12 @@ export default async function TermsOfServicePage() {
                 </div>
               </div>
 
-              {/* Acceptance */}
+              {/* 1. Acceptance */}
               <div>
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">
                   1. Acceptance of Terms
                 </h2>
-                <p className="text-base leading-relaxed text-muted-foreground mb-6">
+                <p className="text-base leading-relaxed text-muted-foreground">
                   By downloading, installing, or using the Hypro mobile
                   application and web services ("Service"), you agree to be
                   bound by these Terms of Service ("Terms"). If you do not agree
@@ -78,353 +76,314 @@ export default async function TermsOfServicePage() {
                 </p>
               </div>
 
-              {/* Service Description */}
+              {/* 2. Service Description */}
               <div>
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">
                   2. Description of Service
                 </h2>
                 <p className="text-base leading-relaxed text-muted-foreground mb-4">
-                  Hypro is a comprehensive fitness platform available as both a
-                  web application and mobile apps that provides:
+                  Hypro is a fitness platform available as both a web
+                  application and mobile app that provides:
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  <div className="bg-muted/30 p-4 rounded-lg border">
+                    <h4 className="font-semibold text-foreground mb-2">
                       Core Features
                     </h4>
-                    <ul className="space-y-2 text-blue-800 dark:text-blue-200 text-sm">
-                      <li>• Customizable workout plan creation and tracking</li>
-                      <li>• Exercise database with detailed instructions</li>
-                      <li>• Body measurement and progress photo tracking</li>
-                      <li>• Real-time workout session recording</li>
+                    <ul className="space-y-2 text-muted-foreground text-sm">
+                      <li>Customizable workout plan creation and tracking</li>
+                      <li>Exercise database with instructions</li>
+                      <li>Body measurement and progress photo tracking</li>
+                      <li>Real-time workout session recording</li>
                     </ul>
                   </div>
-                  <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg border border-green-200 dark:border-green-800">
-                    <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
-                      Advanced Features
+                  <div className="bg-muted/30 p-4 rounded-lg border">
+                    <h4 className="font-semibold text-foreground mb-2">
+                      Trainer Services
                     </h4>
-                    <ul className="space-y-2 text-green-800 dark:text-green-200 text-sm">
-                      <li>• Meal planning and nutrition tracking</li>
-                      <li>• Trainer team management tools</li>
-                      <li>• Mobile app with native push notifications</li>
-                      <li>• Data export and privacy controls</li>
+                    <ul className="space-y-2 text-muted-foreground text-sm">
+                      <li>Connect with personal trainers</li>
+                      <li>Receive customized training plans</li>
+                      <li>Meal plans and nutrition guidelines</li>
+                      <li>Progress monitoring and feedback</li>
                     </ul>
                   </div>
                 </div>
-                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
-                  <p className="text-amber-800 dark:text-amber-200 text-sm">
-                    <strong>Current Status:</strong> Hypro is currently free to
-                    use. Premium features may be introduced in the future, but
-                    core functionality will always remain available at no cost.
+              </div>
+
+              {/* 3. Training Plan Disclaimer - PROMINENT SECTION */}
+              <div className="bg-red-50 dark:bg-red-950/30 p-8 rounded-lg border-2 border-red-300 dark:border-red-700">
+                <h2 className="text-2xl font-semibold mb-4 text-red-900 dark:text-red-100">
+                  3. Training Plan Disclaimer
+                </h2>
+                <div className="space-y-4 text-red-800 dark:text-red-200">
+                  <p className="font-semibold text-lg">
+                    IMPORTANT: Please read this section carefully before using
+                    any training plans or workout suggestions.
+                  </p>
+
+                  <div className="bg-red-100 dark:bg-red-900/50 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-red-900 dark:text-red-100">
+                      Training Plans Are Suggestions Only
+                    </h3>
+                    <p className="text-sm">
+                      All training plans, workout programs, exercise
+                      recommendations, and fitness content provided through
+                      Hypro (whether created by our platform, trainers, or
+                      AI-generated) are for{' '}
+                      <strong>
+                        informational and educational purposes only
+                      </strong>
+                      . They are not personalized medical or therapeutic
+                      prescriptions.
+                    </p>
+                  </div>
+
+                  <div className="bg-red-100 dark:bg-red-900/50 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-red-900 dark:text-red-100">
+                      Your Responsibility to Adjust
+                    </h3>
+                    <p className="text-sm mb-2">
+                      You are solely responsible for:
+                    </p>
+                    <ul className="text-sm space-y-1 ml-4 list-disc">
+                      <li>
+                        Evaluating whether any exercise or training plan is
+                        appropriate for your current fitness level, health
+                        status, and physical capabilities
+                      </li>
+                      <li>
+                        Adjusting intensity, volume, weight, and exercise
+                        selection to match your individual needs
+                      </li>
+                      <li>
+                        Modifying or skipping exercises that cause pain,
+                        discomfort, or are beyond your abilities
+                      </li>
+                      <li>
+                        Seeking proper instruction for unfamiliar exercises
+                      </li>
+                      <li>
+                        Listening to your body and stopping immediately if
+                        something feels wrong
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-red-100 dark:bg-red-900/50 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-red-900 dark:text-red-100">
+                      Consult Healthcare Professionals
+                    </h3>
+                    <p className="text-sm">
+                      Before starting any new exercise program, you should
+                      consult with a qualified healthcare provider, especially
+                      if you have any pre-existing medical conditions, injuries,
+                      physical limitations, or are pregnant. This is
+                      particularly important if you have cardiovascular
+                      conditions, joint problems, or have been sedentary.
+                    </p>
+                  </div>
+
+                  <div className="bg-red-100 dark:bg-red-900/50 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-red-900 dark:text-red-100">
+                      Assumption of Risk
+                    </h3>
+                    <p className="text-sm">
+                      Physical exercise carries inherent risks including, but
+                      not limited to, muscle strains, sprains, fractures,
+                      cardiovascular events, and other injuries. By using Hypro
+                      and following any training plans or exercise
+                      recommendations, you{' '}
+                      <strong>
+                        voluntarily assume all risks associated with physical
+                        activity
+                      </strong>{' '}
+                      and agree that you exercise entirely at your own risk.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Limitation of Liability */}
+              <div className="bg-amber-50 dark:bg-amber-950/30 p-8 rounded-lg border-2 border-amber-300 dark:border-amber-700">
+                <h2 className="text-2xl font-semibold mb-4 text-amber-900 dark:text-amber-100">
+                  4. Limitation of Liability
+                </h2>
+                <div className="space-y-4">
+                  <p className="text-amber-800 dark:text-amber-200 font-semibold uppercase text-sm">
+                    To the maximum extent permitted by applicable law:
+                  </p>
+
+                  <ul className="space-y-3 text-amber-800 dark:text-amber-200 text-sm">
+                    <li className="flex items-start">
+                      <span className="mr-2 font-bold">a)</span>
+                      <span>
+                        Hypro, its owners, employees, trainers, and affiliates
+                        shall not be liable for any injuries, health issues,
+                        physical harm, or death resulting from the use of our
+                        Service, including following any training plans, workout
+                        programs, or exercise recommendations.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2 font-bold">b)</span>
+                      <span>
+                        We are not liable for any indirect, incidental, special,
+                        consequential, or punitive damages, including loss of
+                        profits, data, or other intangible losses.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2 font-bold">c)</span>
+                      <span>
+                        We are not responsible for the actions, advice, or
+                        conduct of any trainers using our platform. Trainers are
+                        independent contractors, not employees of Hypro.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2 font-bold">d)</span>
+                      <span>
+                        You agree to release and hold harmless Hypro from any
+                        claims arising from your use of the Service or
+                        participation in any exercise activities.
+                      </span>
+                    </li>
+                  </ul>
+
+                  <div className="bg-amber-100 dark:bg-amber-900/50 p-4 rounded-lg mt-4">
+                    <p className="text-amber-900 dark:text-amber-100 text-sm font-semibold">
+                      The Service is provided "as is" and "as available" without
+                      warranties of any kind, either express or implied,
+                      including but not limited to implied warranties of
+                      merchantability, fitness for a particular purpose, or
+                      non-infringement.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. User Accounts */}
+              <div>
+                <h2 className="text-2xl font-semibold mb-4 text-foreground">
+                  5. User Accounts and Registration
+                </h2>
+                <div className="bg-muted/30 p-6 rounded-lg">
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li>
+                      You must be at least 13 years old to create an account
+                    </li>
+                    <li>You must provide a valid email address</li>
+                    <li>Account information must be accurate and complete</li>
+                    <li>You may not share your account access with others</li>
+                    <li>
+                      You are responsible for all activities under your account
+                    </li>
+                    <li>
+                      Notify us immediately of any unauthorized account access
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 6. User Conduct */}
+              <div>
+                <h2 className="text-2xl font-semibold mb-4 text-foreground">
+                  6. User Conduct
+                </h2>
+                <div className="bg-muted/30 p-6 rounded-lg">
+                  <p className="text-muted-foreground text-sm">
+                    You agree to use the Service lawfully and respectfully. You
+                    may not impersonate others, provide false information,
+                    harass other users or trainers, or violate any applicable
+                    laws.
                   </p>
                 </div>
               </div>
 
-              {/* User Accounts */}
+              {/* 7. Trainer Relationships */}
               <div>
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">
-                  3. User Accounts and Registration
+                  7. Trainer Relationships
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-muted/30 p-6 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-3 text-foreground">
-                      Account Creation
-                    </h3>
-                    <ul className="space-y-2 text-muted-foreground text-sm">
-                      <li>
-                        • You must be at least 13 years old to create an account
-                      </li>
-                      <li>• You must provide a valid email address</li>
-                      <li>
-                        • Account information must be accurate and complete
-                      </li>
-                      <li>
-                        • You may not share your account access with others
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="bg-muted/30 p-6 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-3 text-foreground">
-                      Authentication & Security
-                    </h3>
-                    <ul className="space-y-2 text-muted-foreground text-sm">
-                      <li>
-                        • Hypro uses one-time password (OTP) authentication
-                      </li>
-                      <li>• No traditional passwords are stored or required</li>
-                      <li>
-                        • Notify us immediately of any unauthorized account
-                        access
-                      </li>
-                      <li>
-                        • You are responsible for all activities under your
-                        account
-                      </li>
-                      <li>• Provide truthful health and fitness information</li>
-                    </ul>
-                  </div>
+                <div className="bg-muted/30 p-6 rounded-lg space-y-4">
+                  <p className="text-muted-foreground text-sm">
+                    Hypro connects users with fitness trainers who provide
+                    training plans, guidance, and coaching services through our
+                    platform. Trainers are contractors of Hypro and are
+                    initially evaluated before being allowed to offer services.
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    We oversee trainer activity on the platform and are
+                    committed to supporting the best possible user experience
+                    and safety for our clients. However, Hypro does not take
+                    responsibility for individual trainer actions, advice, or
+                    the outcomes of following their training programs.
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    There are no additional contracts required between you and
+                    trainers beyond these Terms of Service. All trainer services
+                    are provided through and governed by the Hypro platform.
+                  </p>
                 </div>
               </div>
 
-              {/* User Conduct */}
+              {/* 8. Mobile Application */}
               <div>
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">
-                  4. User Conduct and Prohibited Activities
+                  8. Mobile Application Terms
                 </h2>
-                <div className="space-y-6">
-                  <div className="bg-green-50 dark:bg-green-950/30 p-6 rounded-lg border border-green-200 dark:border-green-800">
-                    <h3 className="text-lg font-semibold mb-3 text-green-900 dark:text-green-100">
-                      ✅ Acceptable Use
-                    </h3>
-                    <p className="text-green-800 dark:text-green-200 text-sm">
-                      You agree to use the Service only for lawful purposes and
-                      in accordance with these Terms.
-                    </p>
-                  </div>
-
-                  <div className="bg-red-50 dark:bg-red-950/30 p-6 rounded-lg border border-red-200 dark:border-red-800">
-                    <h3 className="text-lg font-semibold mb-3 text-red-900 dark:text-red-100">
-                      ❌ Prohibited Activities
-                    </h3>
-                    <p className="text-red-800 dark:text-red-200 text-sm mb-3">
-                      You may not:
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <ul className="space-y-1 text-red-800 dark:text-red-200 text-sm">
-                        <li>
-                          • Use the Service for any illegal or unauthorized
-                          purpose
-                        </li>
-                        <li>
-                          • Impersonate others or provide false information
-                        </li>
-                        <li>
-                          • Harass, abuse, or harm other users or trainers
-                        </li>
-                        <li>
-                          • Distribute malware, viruses, or harmful content
-                        </li>
-                      </ul>
-                      <ul className="space-y-1 text-red-800 dark:text-red-200 text-sm">
-                        <li>
-                          • Attempt to gain unauthorized access to our systems
-                        </li>
-                        <li>• Use automated tools to access the Service</li>
-                        <li>• Share inappropriate or offensive content</li>
-                        <li>• Violate any applicable laws or regulations</li>
-                      </ul>
-                    </div>
-                  </div>
+                <div className="bg-muted/30 p-6 rounded-lg">
+                  <ul className="space-y-2 text-muted-foreground text-sm">
+                    <li>
+                      Available on iOS App Store and Google Play Store, subject
+                      to respective platform terms
+                    </li>
+                    <li>
+                      App permissions (camera, notifications) are clearly
+                      disclosed during installation
+                    </li>
+                    <li>Updates may be automatically applied</li>
+                    <li>Your data syncs across web and mobile platforms</li>
+                  </ul>
                 </div>
               </div>
 
-              {/* Health & Safety Disclaimer */}
-              <div className="bg-amber-50 dark:bg-amber-950/30 p-8 rounded-lg border-2 border-amber-300 dark:border-amber-700">
-                <h2 className="text-2xl font-semibold mb-4 text-amber-900 dark:text-amber-100 flex items-center">
-                  ⚠️ Health and Safety Disclaimer
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-amber-800 dark:text-amber-200">
-                      Important Reminders
-                    </h3>
-                    <ul className="space-y-2 text-amber-700 dark:text-amber-300 text-sm">
-                      <li>
-                        • Consult healthcare providers before starting any
-                        fitness program
-                      </li>
-                      <li>
-                        • Exercise at your own risk and within your capabilities
-                      </li>
-                      <li>
-                        • Stop exercising if you experience pain or discomfort
-                      </li>
-                      <li>
-                        • We are not responsible for injuries resulting from app
-                        use
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-amber-800 dark:text-amber-200">
-                      Trainer Relationships
-                    </h3>
-                    <ul className="space-y-2 text-amber-700 dark:text-amber-300 text-sm">
-                      <li>
-                        • Trainers are independent contractors, not Hypro
-                        employees
-                      </li>
-                      <li>
-                        • We facilitate connections but do not employ trainers
-                      </li>
-                      <li>
-                        • You are responsible for evaluating trainer
-                        qualifications
-                      </li>
-                      <li>
-                        • Direct relationships are governed by separate
-                        agreements
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Medical Disclaimer */}
-              <div className="bg-red-50 dark:bg-red-950/30 p-8 rounded-lg border-2 border-red-300 dark:border-red-700">
-                <h2 className="text-2xl font-semibold mb-4 text-red-900 dark:text-red-100 flex items-center">
-                  🏥 Medical Disclaimer
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-red-800 dark:text-red-200">
-                      Not Medical Advice
-                    </h3>
-                    <ul className="space-y-2 text-red-700 dark:text-red-300 text-sm">
-                      <li>
-                        • The Service provides general fitness information only
-                      </li>
-                      <li>• Content is not intended as medical advice</li>
-                      <li>
-                        • Always consult healthcare professionals before
-                        starting exercise programs
-                      </li>
-                      <li>
-                        • We do not diagnose, treat, or prevent any medical
-                        conditions
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-red-800 dark:text-red-200">
-                      Health Considerations
-                    </h3>
-                    <ul className="space-y-2 text-red-700 dark:text-red-300 text-sm">
-                      <li>
-                        • Exercise programs may not be suitable for everyone
-                      </li>
-                      <li>• Consider your health status and limitations</li>
-                      <li>
-                        • Stop exercising if you experience adverse symptoms
-                      </li>
-                      <li>• Seek medical attention for any health concerns</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mobile App Terms */}
-              <div className="bg-blue-50 dark:bg-blue-950/30 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
-                <h2 className="text-2xl font-semibold mb-4 text-blue-900 dark:text-blue-100">
-                  📱 Mobile Application Terms
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-200">
-                      App Store Compliance
-                    </h3>
-                    <ul className="space-y-2 text-blue-700 dark:text-blue-300 text-sm">
-                      <li>
-                        • Available on iOS App Store and Google Play Store
-                      </li>
-                      <li>
-                        • Subject to respective platform terms and policies
-                      </li>
-                      <li>
-                        • Over-the-air updates may be automatically applied
-                      </li>
-                      <li>
-                        • App permissions are clearly disclosed during
-                        installation
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-200">
-                      Mobile-Specific Features
-                    </h3>
-                    <ul className="space-y-2 text-blue-700 dark:text-blue-300 text-sm">
-                      <li>
-                        • Camera access for progress photos only when granted
-                      </li>
-                      <li>• Push notifications require user permission</li>
-                      <li>• Data syncs across web and mobile platforms</li>
-                      <li>• Native integrations with device capabilities</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Legal Disclaimers */}
-              <div>
-                <h2 className="text-2xl font-semibold mb-4 text-foreground">
-                  Legal Disclaimers
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-muted p-6 rounded-lg border">
-                    <h3 className="text-lg font-semibold mb-3 text-foreground">
-                      9. Disclaimer of Warranties
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3 font-semibold">
-                      THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT
-                      WARRANTIES OF ANY KIND:
-                    </p>
-                    <ul className="space-y-1 text-muted-foreground text-sm">
-                      <li>
-                        • MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-                      </li>
-                      <li>• ACCURACY OR COMPLETENESS OF CONTENT</li>
-                      <li>• UNINTERRUPTED OR ERROR-FREE OPERATION</li>
-                      <li>• SECURITY OR ABSENCE OF VIRUSES</li>
-                      <li>• FITNESS ADVICE OR NUTRITIONAL RECOMMENDATIONS</li>
-                    </ul>
-                  </div>
-
-                  <div className="bg-muted p-6 rounded-lg border">
-                    <h3 className="text-lg font-semibold mb-3 text-foreground">
-                      10. Limitation of Liability
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3 font-semibold">
-                      TO THE MAXIMUM EXTENT PERMITTED BY LAW:
-                    </p>
-                    <ul className="space-y-1 text-muted-foreground text-sm">
-                      <li>• WE SHALL NOT BE LIABLE FOR INDIRECT DAMAGES</li>
-                      <li>• WE ARE NOT LIABLE FOR EXERCISE-RELATED INJURIES</li>
-                      <li>
-                        • WE ARE NOT LIABLE FOR TRAINER-CLIENT RELATIONSHIPS
-                      </li>
-                      <li>
-                        • WE ARE NOT LIABLE FOR DATA LOSS OR DEVICE ISSUES
-                      </li>
-                      <li>• LIABILITY LIMITED TO THE FULLEST EXTENT OF LAW</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Privacy Reference */}
+              {/* 9. Privacy */}
               <div className="bg-primary/5 p-6 rounded-lg border border-primary/20">
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">
-                  7. Privacy and Data Protection
+                  9. Privacy and Data Protection
                 </h2>
                 <p className="text-muted-foreground">
                   Your privacy is important to us. Our collection and use of
                   personal information is governed by our{' '}
-                  <a
+                  <Link
                     href="/privacy"
                     className="text-primary hover:underline font-semibold"
                   >
                     Privacy Policy
-                  </a>
+                  </Link>
                   , which is incorporated into these Terms by reference.
                 </p>
               </div>
 
-              {/* Contact Information */}
+              {/* 10. Modifications */}
+              <div>
+                <h2 className="text-2xl font-semibold mb-4 text-foreground">
+                  10. Modifications to Terms
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  We reserve the right to modify these Terms at any time. We
+                  will notify users of material changes through the app or via
+                  email. Your continued use of the Service after changes
+                  constitutes acceptance of the modified Terms.
+                </p>
+              </div>
+
+              {/* 11. Contact Information */}
               <div className="bg-muted/30 p-6 rounded-lg">
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">
-                  17. Contact Information
+                  11. Contact Information
                 </h2>
                 <p className="text-muted-foreground mb-4">
                   If you have questions about these Terms, contact us:
@@ -432,32 +391,25 @@ export default async function TermsOfServicePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-card rounded-lg border">
                     <div className="font-semibold text-foreground">
-                      Terms Questions
+                      Terms & Legal
                     </div>
                     <Link
-                      className="text-sm text-blue-500 hover:underline"
+                      className="text-sm text-primary hover:underline"
                       href="mailto:support@hypro.app"
                     >
                       support@hypro.app
                     </Link>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Mark subject as "Terms & Legal"
-                    </div>
                   </div>
                   <div className="text-center p-4 bg-card rounded-lg border">
                     <div className="font-semibold text-foreground">
                       Support Center
                     </div>
                     <Link
-                      className="text-sm text-blue-500 hover:underline"
+                      className="text-sm text-primary hover:underline"
                       href="/support"
-                      target="_blank"
                     >
                       hypro.app/support
                     </Link>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      FAQ and help resources
-                    </div>
                   </div>
                 </div>
               </div>
@@ -470,13 +422,12 @@ export default async function TermsOfServicePage() {
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
                   These Terms work together with our{' '}
-                  <a href="/privacy" className="text-primary hover:underline">
+                  <Link
+                    href="/privacy"
+                    className="text-primary hover:underline"
+                  >
                     Privacy Policy
-                  </a>{' '}
-                  and{' '}
-                  <a href="/support" className="text-primary hover:underline">
-                    Support Documentation
-                  </a>
+                  </Link>
                   .
                 </p>
               </div>
