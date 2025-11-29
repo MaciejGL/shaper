@@ -445,22 +445,18 @@ function PROverlay({ isAdvancedView, prData, onClose }: PROverlayProps) {
                 }}
                 className="flex justify-center items-center gap-4 overflow-hidden"
               >
-                <div
-                  className={cn(
-                    'text-lg font-semibold whitespace-nowrap',
-                    'text-lg',
-                  )}
-                >
+                <div className={cn('font-semibold whitespace-nowrap')}>
                   <p
                     className={cn(
-                      'text-[10px] font-medium whitespace-nowrap',
-                      'text-[10px]',
+                      'text-[10px] leading-none font-medium whitespace-nowrap',
                     )}
                   >
                     New PR!
                   </p>
-                  {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(1)}{' '}
-                  {preferences.weightUnit}
+                  <p className="leading-tight">
+                    {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(1)}{' '}
+                    {preferences.weightUnit}
+                  </p>
                 </div>
                 <div
                   className={cn(
