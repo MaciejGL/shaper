@@ -9,7 +9,28 @@ export type UserWithSession = {
   session: Session
 }
 
-type User = PrismaUser & {
+// Minimal user fields needed for context (optimized to skip large OAuth tokens)
+export type UserBasicFields = {
+  id: string
+  email: string
+  name: string | null
+  role: string
+  trainerId: string | null
+  profile: {
+    id: string
+    firstName: string | null
+    lastName: string | null
+    weekStartsOn: number | null
+  } | null
+}
+
+type User = UserBasicFields & {
+  clients?: PrismaUser[] | null
+  sessions?: PrismaUserSession[] | null
+}
+
+// Full user type when all fields are needed
+export type UserFull = PrismaUser & {
   profile?: PrismaUserProfile | null
   trainerId?: string | null
   clients?: PrismaUser[] | null

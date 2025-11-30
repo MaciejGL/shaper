@@ -107,7 +107,7 @@ function SmartPillContent({
       layoutId={layoutId}
       className={cn(
         'pointer-events-auto flex items-center gap-0 bg-white/95 dark:bg-zinc-900/80 backdrop-blur-xl border border-white dark:border-border shadow-lg rounded-full pl-1 pr-3 py-1 max-w-full overflow-hidden w-full',
-        !isStaticOverview && 'pr-0 rounded-l-none',
+        !isStaticOverview && 'rounded-l-none',
         className,
       )}
     >

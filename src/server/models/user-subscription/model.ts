@@ -4,13 +4,11 @@ import {
 } from '@/generated/graphql-server'
 import type {
   PackageTemplate as PrismaPackageTemplate,
-  User as PrismaUser,
   UserSubscription as PrismaUserSubscription,
 } from '@/generated/prisma/client'
 import { SubscriptionStatus } from '@/types/subscription'
 
 export type UserSubscriptionWithIncludes = PrismaUserSubscription & {
-  user?: PrismaUser | null
   package?:
     | (PrismaPackageTemplate & {
         trainer?: {

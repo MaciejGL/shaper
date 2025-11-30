@@ -304,6 +304,7 @@ export class SubscriptionValidator {
     const now = new Date()
 
     const subscriptions = await prisma.userSubscription.findMany({
+      relationLoadStrategy: 'join',
       where: {
         userId,
         status: {

@@ -17,9 +17,9 @@ export async function getMySubscriptions(
   }
 
   const subscriptions = await prisma.userSubscription.findMany({
+    relationLoadStrategy: 'join',
     where: { userId: context.user.user.id },
     include: {
-      user: true,
       package: {
         include: {
           trainer: true,

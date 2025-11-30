@@ -161,6 +161,10 @@ async function fetchAndCacheUser(
   cacheKey: string,
 ): Promise<UserWithSession | null> {
   try {
+    const cachedUser = getCachedUser(cacheKey)
+    if (cachedUser) {
+      return cachedUser
+    }
     const user = await fetchUserFromDatabase(email)
 
     if (!user) {
