@@ -2063,7 +2063,7 @@ export async function getWorkoutDay(
             planId: activePlanId,
             scheduledAt: { gte: todayUTC },
             completedAt: null,
-            isRestDay: false,
+            // isRestDay: false,
           },
           orderBy: [{ scheduledAt: 'asc' }],
           include: WORKOUT_DAY_INCLUDE,

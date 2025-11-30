@@ -165,10 +165,11 @@ export function SkeletonNavigation() {
 
 function SkeletonWeekSelector() {
   return (
-    <div className="flex justify-between gap-2">
-      <Button variant="tertiary" size="sm" className="masked-placeholder-text">
+    <div className="dark flex justify-between gap-2">
+      <Button variant="tertiary" size="md" className="masked-placeholder-text">
         Week 1 Loading...
       </Button>
+      <Skeleton className="size-[36px]" />
     </div>
   )
 }
