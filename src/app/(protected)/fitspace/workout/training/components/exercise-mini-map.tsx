@@ -1,9 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { BarChart, Check, ChevronDown } from 'lucide-react'
+import { BarChart, Check, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
+import { AnimateNumber } from '@/components/animate-number'
 import { ProgressCircle } from '@/components/ui/progress-circle'
 import { cn } from '@/lib/utils'
 
@@ -80,7 +81,7 @@ function SmartPillContent({
   progressPercentage,
   completedCount,
   totalCount,
-  currentExerciseName,
+  currentExerciseOrder,
   allExercisesCompleted,
   isExpanded,
   onToggleExpand,
@@ -92,7 +93,7 @@ function SmartPillContent({
   progressPercentage: number
   completedCount: number
   totalCount: number
-  currentExerciseName: string
+  currentExerciseOrder: number
   allExercisesCompleted: boolean
   isExpanded: boolean
   onToggleExpand: () => void
@@ -106,13 +107,14 @@ function SmartPillContent({
       layoutId={layoutId}
       className={cn(
         'pointer-events-auto flex items-center gap-0 bg-white/95 dark:bg-zinc-900/80 backdrop-blur-xl border border-white dark:border-border shadow-lg rounded-full pl-1 pr-3 py-1 max-w-full overflow-hidden w-full',
+        !isStaticOverview && 'pr-0 rounded-l-none',
         className,
       )}
     >
       <button
         onClick={onToggleExpand}
         className={cn(
-          'flex items-center justify-center size-8 rounded-full transition-all mr-2 shrink-0 relative',
+          'flex items-center justify-center rounded-full transition-all mr-2 shrink-0 relative',
           'hover:bg-white/5 active:scale-95 size-10',
         )}
       >
@@ -153,14 +155,18 @@ function SmartPillContent({
           </div>
         )}
         {!isStaticOverview && (
-          <div className="flex items-center gap-1 justify-between">
-            <span className="text-sm font-medium truncate leading-tight text-foreground">
-              {currentExerciseName}
-            </span>
-            <ChevronDown
+          <div className="flex items-center gap-3 pl-1 justify-between">
+            <AnimateNumber
+              value={currentExerciseOrder}
+              duration={200}
+              className="text-sm font-medium truncate leading-tight text-foreground"
+            />
+            <ChevronsUpDown
               className={cn(
-                'size-6 transition-transform duration-200',
-                isExpanded && 'rotate-180',
+                'size-4 relative overflow-visible',
+                '[&_path]:transition-transform [&_path]:duration-200',
+                isExpanded &&
+                  '[&_path:first-child]:translate-y-[-12px] [&_path:last-child]:translate-y-[12px]',
               )}
             />
           </div>
@@ -171,6 +177,7 @@ function SmartPillContent({
         <div
           className={cn(
             'flex items-center gap-2 p-2 border-l border-border dark:border-border shrink-0',
+            !isStaticOverview && 'py-1 h-full',
           )}
         >
           <button
@@ -267,11 +274,11 @@ export function WorkoutSmartPill({
   const currentExercise =
     exercises.find((e) => e.id === currentExerciseId) ?? exercises[0]
 
-  const currentExerciseName = isOverviewVisible
-    ? 'Overview'
+  const currentExerciseOrder = isOverviewVisible
+    ? 1
     : currentExercise
-      ? currentExercise.name
-      : 'Overview'
+      ? currentExercise.order
+      : 1
 
   const completedCount = exercises.filter((e) => e.completedAt).length
   const totalCount = exercises.length
@@ -290,7 +297,7 @@ export function WorkoutSmartPill({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[38] bg-gradient-to-b from-black/60 via-black/70 to-transparent pointer-events-none backdrop-blur-xs"
+              className="fixed inset-0 z-[38] bg-gradient-to-t from-black/60 via-black/70 to-transparent pointer-events-none backdrop-blur-xs"
             />
             {/* Clickable area to close */}
             <div
@@ -308,13 +315,13 @@ export function WorkoutSmartPill({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-1 left-0 right-0 z-[40] px-1 flex justify-center pointer-events-none"
+            className="fixed bottom-18 left-0 z-[40] flex justify-center pointer-events-none"
           >
             <SmartPillContent
               progressPercentage={progressPercentage}
               completedCount={completedCount}
               totalCount={totalCount}
-              currentExerciseName={currentExerciseName}
+              currentExerciseOrder={currentExerciseOrder}
               allExercisesCompleted={allExercisesCompleted}
               isExpanded={isExpanded}
               onToggleExpand={() => setIsExpanded(!isExpanded)}
@@ -330,19 +337,19 @@ export function WorkoutSmartPill({
       <AnimatePresence>
         {isExpanded && !isOverviewVisible && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-18 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed bottom-32 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
           >
             {exercises.map((exercise, i) => (
               <motion.div
                 key={exercise.id}
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{
                   opacity: 1,
                   y: 0,
-                  transition: { delay: i * 0.05 },
+                  transition: { delay: (exercises.length - 1 - i) * 0.05 },
                 }}
               >
                 <ExpandedExerciseListItem
@@ -428,7 +435,7 @@ export function WorkoutOverviewPill({
               progressPercentage={progressPercentage}
               completedCount={completedCount}
               totalCount={totalCount}
-              currentExerciseName="Overview"
+              currentExerciseOrder={1}
               allExercisesCompleted={allExercisesCompleted}
               isExpanded={false}
               onToggleExpand={() => setIsExpanded(true)}
@@ -466,7 +473,7 @@ export function WorkoutOverviewPill({
                 progressPercentage={progressPercentage}
                 completedCount={completedCount}
                 totalCount={totalCount}
-                currentExerciseName="Overview"
+                currentExerciseOrder={1}
                 allExercisesCompleted={allExercisesCompleted}
                 isExpanded={true}
                 onToggleExpand={() => setIsExpanded(false)}
