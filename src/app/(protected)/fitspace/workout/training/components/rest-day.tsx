@@ -1,6 +1,12 @@
-import { CoffeeIcon } from 'lucide-react'
+'use client'
+
+import { CoffeeIcon, ScaleIcon, TrendingUp } from 'lucide-react'
+import { useMemo } from 'react'
 
 import { BiggyIcon } from '@/components/biggy-icon'
+import { ButtonLink } from '@/components/ui/button-link'
+import { useUser } from '@/context/user-context'
+import { useBodyMeasuresQuery } from '@/generated/graphql-client'
 
 interface RecoveryTip {
   title: string
@@ -64,19 +70,140 @@ function getTodaysTip(): RecoveryTip {
   return RECOVERY_TIPS[index]
 }
 
+function getDaysSinceLastLog(measuredAt: string): number {
+  const lastDate = new Date(measuredAt)
+  const today = new Date()
+  const diffTime = today.getTime() - lastDate.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return diffDays
+}
+
+interface TrackingReminderMessage {
+  title: string
+  description: string
+}
+
+function getTrackingMessage(
+  daysSinceLastLog: number | null,
+): TrackingReminderMessage {
+  if (daysSinceLastLog === null) {
+    return {
+      title: 'Start tracking your progress',
+      description:
+        'Log your first weigh-in to track changes over time and see how your training is paying off.',
+    }
+  }
+
+  if (daysSinceLastLog <= 3) {
+    return {
+      title: 'Keep up the consistency',
+      description: `You logged ${daysSinceLastLog === 0 ? 'today' : daysSinceLastLog === 1 ? 'yesterday' : `${daysSinceLastLog} days ago`}. Regular tracking helps you spot trends.`,
+    }
+  }
+
+  if (daysSinceLastLog <= 7) {
+    return {
+      title: 'Time for a check-in?',
+      description: `It's been ${daysSinceLastLog} days since your last log. A quick weigh-in keeps your progress visible.`,
+    }
+  }
+
+  if (daysSinceLastLog <= 14) {
+    return {
+      title: 'Your progress is waiting',
+      description: `${daysSinceLastLog} days since your last log. Take a moment to check in and see how far you've come.`,
+    }
+  }
+
+  return {
+    title: 'Pick up where you left off',
+    description: `It's been a while since you tracked. A fresh measurement can kickstart your momentum.`,
+  }
+}
+
 export function RestDay() {
   const tip = getTodaysTip()
+  const { hasPremium } = useUser()
+
+  const { data: bodyMeasuresData } = useBodyMeasuresQuery(
+    {},
+    {
+      staleTime: 5 * 60 * 1000,
+      enabled: hasPremium,
+    },
+  )
+
+  const trackingInfo = useMemo(() => {
+    if (!hasPremium) {
+      return {
+        daysSinceLastLog: null,
+        message: {
+          title: 'Track your transformation',
+          description:
+            'Premium members can log weight, measurements, and progress photos to visualize their journey.',
+        },
+      }
+    }
+
+    const measures = bodyMeasuresData?.bodyMeasures
+    if (!measures || measures.length === 0) {
+      return {
+        daysSinceLastLog: null,
+        message: getTrackingMessage(null),
+      }
+    }
+
+    const sortedMeasures = [...measures].sort(
+      (a, b) =>
+        new Date(b.measuredAt).getTime() - new Date(a.measuredAt).getTime(),
+    )
+    const lastMeasure = sortedMeasures[0]
+    const daysSince = getDaysSinceLastLog(lastMeasure.measuredAt)
+
+    return {
+      daysSinceLastLog: daysSince,
+      message: getTrackingMessage(daysSince),
+    }
+  }, [bodyMeasuresData, hasPremium])
 
   return (
-    <div className="text-center p-6 text-muted-foreground flex-center flex-col pt-16">
-      <BiggyIcon icon={CoffeeIcon} />
-      <p className="text-lg font-medium mb-2 mt-6 text-foreground">
-        Rest up today
-      </p>
+    <div className="text-center p-6 text-muted-foreground flex-center flex-col pt-12 space-y-6">
+      <div className="flex-center flex-col">
+        <BiggyIcon icon={CoffeeIcon} />
+        <p className="text-lg font-medium mb-2 mt-6 text-foreground">
+          Rest up today
+        </p>
+      </div>
 
-      <div className="mt-4 p-4 rounded-xl bg-muted/50 max-w-sm">
+      <div className="p-4 rounded-xl bg-muted/50 max-w-sm">
         <p className="text-sm font-medium text-foreground mb-1">{tip.title}</p>
         <p className="text-sm leading-relaxed">{tip.description}</p>
+      </div>
+
+      <div className="p-4 rounded-xl bg-card border border-border max-w-sm w-full">
+        <div className="flex items-start gap-3 text-left mb-4">
+          <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+            <ScaleIcon className="size-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {trackingInfo.message.title}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {trackingInfo.message.description}
+            </p>
+          </div>
+        </div>
+
+        <ButtonLink
+          href="/fitspace/progress"
+          variant="default"
+          size="sm"
+          className="w-full"
+          iconStart={<TrendingUp />}
+        >
+          {hasPremium ? 'Log Progress' : 'View Progress'}
+        </ButtonLink>
       </div>
     </div>
   )
