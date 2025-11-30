@@ -81,7 +81,8 @@ describe('Meal Integration Tests', () => {
       user: {
         user: mockUser,
       },
-    } as GQLContext
+      loaders: {},
+    } as unknown as GQLContext
   })
 
   describe('Meal Model Integration', () => {
