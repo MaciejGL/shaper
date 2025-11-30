@@ -4,7 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider, { GoogleProfile } from 'next-auth/providers/google'
 
 import { prisma } from '@/lib/db'
-import { UserWithSession } from '@/types/UserWithSession'
+import { UserFull } from '@/types/UserWithSession'
 
 import { createUserLoaders } from '../loaders/user.loader'
 
@@ -64,7 +64,7 @@ export const authOptions = {
 
         await prisma.userSession.delete({ where: { id: session.id } })
 
-        return user as UserWithSession['user']
+        return user as UserFull
       },
     }),
     CredentialsProvider({
@@ -122,7 +122,7 @@ export const authOptions = {
             email: user.email,
           })
 
-          return user as UserWithSession['user']
+          return user as UserFull
         } catch (error) {
           console.error('🔐 [SERVER-NONCE] Authorization error:', error)
           return null
@@ -232,9 +232,9 @@ export const authOptions = {
           email: user.email,
           name: user.name,
           image: user.image,
-          role: (user as UserWithSession['user']).role,
-          profile: (user as UserWithSession['user']).profile,
-          trainerId: (user as UserWithSession['user']).trainerId,
+          role: (user as UserFull).role,
+          profile: (user as UserFull).profile,
+          trainerId: (user as UserFull).trainerId,
         }
       }
       return token
