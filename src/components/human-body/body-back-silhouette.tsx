@@ -1,8 +1,9 @@
 'use client'
 
+import { useUser } from '@/context/user-context'
+
 import { BackBodyView } from './body-back/body-back'
 import { FemaleBodyBackView } from './female-body-back/female-body-back'
-import { useUserSex } from './use-user-sex'
 
 interface BodyBackSilhouetteProps {
   className?: string
@@ -17,9 +18,8 @@ const noopGetPathProps = () => ({
 const noopHandler = () => false
 
 export function BodyBackSilhouette({ className }: BodyBackSilhouetteProps) {
-  const sex = useUserSex()
-
-  if (sex === 'female') {
+  const { user } = useUser()
+  if (user?.profile?.sex === 'Female') {
     return (
       <div className={className}>
         <FemaleBodyBackView
@@ -41,4 +41,3 @@ export function BodyBackSilhouette({ className }: BodyBackSilhouetteProps) {
     />
   )
 }
-
