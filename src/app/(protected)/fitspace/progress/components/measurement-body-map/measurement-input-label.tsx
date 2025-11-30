@@ -4,6 +4,11 @@ import { Input } from '@/components/ui/input'
 import { useCircumferenceConversion } from '@/hooks/use-circumference-conversion'
 import { cn } from '@/lib/utils'
 
+// Format number - remove .0 for whole numbers
+function formatValue(value: number): string {
+  return value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)
+}
+
 interface MeasurementInputLabelProps {
   label: string
   value: string
@@ -34,7 +39,7 @@ export function MeasurementInputLabel({
   const displayLastValue = lastValue
     ? toDisplayCircumference(lastValue)
     : undefined
-  const placeholder = displayLastValue?.toFixed(1) ?? ''
+  const placeholder = displayLastValue ? formatValue(displayLastValue) : ''
 
   return (
     <div

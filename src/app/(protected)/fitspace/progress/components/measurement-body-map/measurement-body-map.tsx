@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { FrontBodyView } from '@/components/human-body/body-front/body-front'
+import { BodyFrontSilhouette } from '@/components/human-body/body-front-silhouette'
 
 import { MeasurementFieldEnum } from '../measurement-constants'
 
@@ -115,14 +115,6 @@ interface MeasurementBodyMapProps {
   onChange: (field: MeasurementFieldEnum, value: string) => void
 }
 
-const noopGetPathProps = () => ({
-  className:
-    'fill-muted-foreground/15 dark:fill-muted-foreground/10 pointer-events-none',
-  onClick: () => {},
-})
-
-const noopHandler = () => false
-
 export function MeasurementBodyMap({
   values,
   lastValues,
@@ -137,14 +129,9 @@ export function MeasurementBodyMap({
       className="relative w-full"
       style={{ height: `${CONTAINER_HEIGHT}px` }}
     >
-      {/* Body silhouette using existing FrontBodyView */}
+      {/* Body silhouette - gender-aware */}
       <div className="absolute [&_svg]:w-[170px] [&_svg]:h-[340px] left-1/2 -translate-x-1/2 pointer-events-none opacity-60">
-        <FrontBodyView
-          getPathProps={noopGetPathProps}
-          isRegionSelected={noopHandler}
-          handleRegionClick={() => {}}
-          hideLabels={true}
-        />
+        <BodyFrontSilhouette />
       </div>
 
       {/* SVG overlay for connection lines */}

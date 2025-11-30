@@ -1,8 +1,9 @@
 'use client'
 
+import { ArrowDown, ArrowUp } from 'lucide-react'
 import { useState } from 'react'
 
-import { FrontBodyView } from '@/components/human-body/body-front/body-front'
+import { BodyFrontSilhouette } from '@/components/human-body/body-front-silhouette'
 import { useCircumferenceConversion } from '@/hooks/use-circumference-conversion'
 import { cn } from '@/lib/utils'
 
@@ -137,16 +138,45 @@ const measurementPositions: MeasurementPosition[] = [
   },
 ]
 
-const noopGetPathProps = () => ({
-  className:
-    'fill-muted-foreground/15 dark:fill-muted-foreground/10 pointer-events-none',
-  onClick: () => {},
-})
+// Format number - remove .0 for whole numbers
+function formatValue(value: number): string {
+  return value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)
+}
 
-const noopHandler = () => false
+// Trend indicator component
+function TrendIndicator({
+  trend,
+  unit,
+}: {
+  trend: number | null
+  unit: string
+}) {
+  // Don't show anything for null or no change
+  if (trend === null || trend === 0) return null
+
+  const isIncrease = trend > 0
+
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-0.5',
+        isIncrease ? 'text-emerald-500' : 'text-amber-500',
+      )}
+    >
+      {isIncrease ? (
+        <ArrowUp className="size-2.5" />
+      ) : (
+        <ArrowDown className="size-2.5" />
+      )}
+      <span className="text-[9px]">
+        {formatValue(Math.abs(trend))} {unit}
+      </span>
+    </div>
+  )
+}
 
 export function MeasurementBodyMapDisplay() {
-  const { bodyMeasures, getLatestMeasurement, onMeasurementAdded } =
+  const { bodyMeasures, getLatestMeasurement, getTrend, onMeasurementAdded } =
     useBodyMeasurementsContext()
   const { toDisplayCircumference, circumferenceUnit } =
     useCircumferenceConversion()
@@ -159,14 +189,9 @@ export function MeasurementBodyMapDisplay() {
       className="relative w-full"
       style={{ height: `${CONTAINER_HEIGHT}px` }}
     >
-      {/* Body silhouette using existing FrontBodyView */}
+      {/* Body silhouette - gender aware */}
       <div className="absolute [&_svg]:w-[170px] [&_svg]:h-[340px] left-1/2 -translate-x-1/2 pointer-events-none opacity-60">
-        <FrontBodyView
-          getPathProps={noopGetPathProps}
-          isRegionSelected={noopHandler}
-          handleRegionClick={() => {}}
-          hideLabels={true}
-        />
+        <BodyFrontSilhouette />
       </div>
 
       {/* SVG overlay for connection lines */}
@@ -209,6 +234,12 @@ export function MeasurementBodyMapDisplay() {
             : null
           const hasValue = displayValue !== null
 
+          // Get trend (difference from previous measurement)
+          const rawTrend = getTrend(field)
+          // Use toDisplayCircumference for delta conversion (same unit conversion applies)
+          const displayTrend =
+            rawTrend !== null ? toDisplayCircumference(rawTrend) : null
+
           const category = getCategoryForField(field)
           const fieldMeasurements = bodyMeasures.filter(
             (m) => m[field] !== null && m[field] !== undefined,
@@ -232,14 +263,27 @@ export function MeasurementBodyMapDisplay() {
               onMouseEnter={() => hasFieldData && setHoveredField(pos.field)}
               onMouseLeave={() => hasFieldData && setHoveredField(null)}
             >
-              <span
+              <div
                 className={cn(
-                  'text-[10px] font-medium whitespace-nowrap uppercase tracking-wide',
-                  hasValue ? 'text-foreground' : 'text-muted-foreground/70',
+                  'flex items-center gap-1',
+                  pos.side === 'left' ? 'flex-row-reverse' : 'flex-row',
                 )}
               >
-                {pos.label}
-              </span>
+                <p
+                  className={cn(
+                    'text-[10px] font-medium whitespace-nowrap uppercase tracking-wide',
+                    hasValue ? 'text-foreground' : 'text-muted-foreground/70',
+                  )}
+                >
+                  {pos.label}
+                </p>
+                {displayTrend !== null && (
+                  <TrendIndicator
+                    trend={displayTrend}
+                    unit={circumferenceUnit}
+                  />
+                )}
+              </div>
               <div
                 className={cn(
                   'w-24 h-7 px-1.5 text-xs rounded-md flex items-center',
@@ -252,7 +296,7 @@ export function MeasurementBodyMapDisplay() {
               >
                 {hasValue ? (
                   <span className="text-foreground">
-                    {displayValue?.toFixed(1)}{' '}
+                    {formatValue(displayValue!)}{' '}
                     <span className="text-muted-foreground text-[10px]">
                       {circumferenceUnit}
                     </span>

@@ -7,6 +7,7 @@ export interface BodyViewProps {
   handleRegionClick: (aliases: string[]) => void
   hasMuscleData?: (aliases: string[]) => boolean
   hideLabels?: boolean
+  className?: string
 }
 
 export type MuscleGroupProps = {
