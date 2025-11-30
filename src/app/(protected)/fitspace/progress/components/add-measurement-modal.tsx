@@ -22,7 +22,9 @@ import {
   useUpdateBodyMeasurementMutation,
 } from '@/generated/graphql-client'
 
-import { MeasurementField, MeasurementFieldEnum } from './measurement-constants'
+import { useBodyMeasurementsContext } from './body-measurements-context'
+import { MeasurementBodyMap } from './measurement-body-map/measurement-body-map'
+import { MeasurementFieldEnum } from './measurement-constants'
 
 const measurementSchema = z.object({
   weight: z.string({ message: 'Invalid weight' }).optional(),
@@ -60,6 +62,7 @@ export function AddMeasurementModal({
 }: AddMeasurementModalProps) {
   const isEdit = !!measurement
   const [open, setOpen] = useState(false)
+  const { getLatestMeasurement } = useBodyMeasurementsContext()
 
   const [form, setForm] = useState<MeasurementFormData>({
     weight: measurement?.weight?.toString() || '',
@@ -76,6 +79,43 @@ export function AddMeasurementModal({
     calfRight: measurement?.calfRight?.toString() || '',
     notes: measurement?.notes || '',
   })
+
+  const lastValues: Record<MeasurementFieldEnum, number | undefined> = {
+    [MeasurementFieldEnum.Weight]: getLatestMeasurement('weight'),
+    [MeasurementFieldEnum.BodyFat]: getLatestMeasurement('bodyFat'),
+    [MeasurementFieldEnum.Chest]: getLatestMeasurement('chest'),
+    [MeasurementFieldEnum.Waist]: getLatestMeasurement('waist'),
+    [MeasurementFieldEnum.Hips]: getLatestMeasurement('hips'),
+    [MeasurementFieldEnum.Neck]: getLatestMeasurement('neck'),
+    [MeasurementFieldEnum.BicepsLeft]: getLatestMeasurement('bicepsLeft'),
+    [MeasurementFieldEnum.BicepsRight]: getLatestMeasurement('bicepsRight'),
+    [MeasurementFieldEnum.ThighLeft]: getLatestMeasurement('thighLeft'),
+    [MeasurementFieldEnum.ThighRight]: getLatestMeasurement('thighRight'),
+    [MeasurementFieldEnum.CalfLeft]: getLatestMeasurement('calfLeft'),
+    [MeasurementFieldEnum.CalfRight]: getLatestMeasurement('calfRight'),
+    [MeasurementFieldEnum.Notes]: undefined,
+  }
+
+  const bodyMapValues: Record<MeasurementFieldEnum, string> = {
+    [MeasurementFieldEnum.Weight]: form.weight || '',
+    [MeasurementFieldEnum.BodyFat]: form.bodyFat || '',
+    [MeasurementFieldEnum.Chest]: form.chest || '',
+    [MeasurementFieldEnum.Waist]: form.waist || '',
+    [MeasurementFieldEnum.Hips]: form.hips || '',
+    [MeasurementFieldEnum.Neck]: form.neck || '',
+    [MeasurementFieldEnum.BicepsLeft]: form.bicepsLeft || '',
+    [MeasurementFieldEnum.BicepsRight]: form.bicepsRight || '',
+    [MeasurementFieldEnum.ThighLeft]: form.thighLeft || '',
+    [MeasurementFieldEnum.ThighRight]: form.thighRight || '',
+    [MeasurementFieldEnum.CalfLeft]: form.calfLeft || '',
+    [MeasurementFieldEnum.CalfRight]: form.calfRight || '',
+    [MeasurementFieldEnum.Notes]: form.notes || '',
+  }
+
+  const handleBodyMapChange = (field: MeasurementFieldEnum, value: string) => {
+    const fieldKey = field as keyof MeasurementFormData
+    setForm((prev) => ({ ...prev, [fieldKey]: value }))
+  }
 
   // Date state - initialize with measurement date or today
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
@@ -156,81 +196,6 @@ export function AddMeasurementModal({
     }
   }
 
-  const measurementGroups = [
-    {
-      title: 'Weight & Body Fat',
-      fields: [
-        {
-          name: 'weight' as const,
-          label: 'Weight',
-          unit: 'dynamic',
-          step: '0.01',
-        },
-        {
-          name: 'bodyFat' as const,
-          label: 'Body Fat',
-          unit: '%',
-          step: '0.01',
-        },
-      ],
-    },
-    {
-      title: 'Circumferences',
-      fields: [
-        { name: 'chest' as const, label: 'Chest', unit: 'cm', step: '0.1' },
-        { name: 'waist' as const, label: 'Waist', unit: 'cm', step: '0.1' },
-        { name: 'hips' as const, label: 'Hips', unit: 'cm', step: '0.1' },
-        { name: 'neck' as const, label: 'Neck', unit: 'cm', step: '0.1' },
-      ],
-    },
-    {
-      title: 'Arms & Legs',
-      fields: [
-        {
-          name: 'bicepsLeft' as const,
-          label: 'Left Bicep',
-          unit: 'cm',
-          step: '0.1',
-        },
-        {
-          name: 'bicepsRight' as const,
-          label: 'Right Bicep',
-          unit: 'cm',
-          step: '0.1',
-        },
-        {
-          name: 'thighLeft' as const,
-          label: 'Left Thigh',
-          unit: 'cm',
-          step: '0.1',
-        },
-        {
-          name: 'thighRight' as const,
-          label: 'Right Thigh',
-          unit: 'cm',
-          step: '0.1',
-        },
-        {
-          name: 'calfLeft' as const,
-          label: 'Left Calf',
-          unit: 'cm',
-          step: '0.1',
-        },
-        {
-          name: 'calfRight' as const,
-          label: 'Right Calf',
-          unit: 'cm',
-          step: '0.1',
-        },
-      ],
-    },
-  ].filter((group) => {
-    if (!showFields) return true
-    return group.fields.some((field) =>
-      showFields.includes(field.name as MeasurementField & 'notes'),
-    )
-  })
-
   const hasValues = Object.values(form).some((value) => value !== '')
 
   const handleDelete = () => {
@@ -295,55 +260,68 @@ export function AddMeasurementModal({
             setDate={(date) => date && setSelectedDate(date)}
           />
 
-          {measurementGroups.map((group) => (
-            <div key={group.title} className="space-y-3">
-              <h3 className="font-medium text-lg">{group.title}</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {group.fields.map((field) => {
-                  // Special handling for weight field to use WeightInput with unit conversion
-                  if (field.name === 'weight') {
-                    return (
-                      <WeightInput
-                        key={field.name}
-                        id={field.name}
-                        label={field.label}
-                        weightInKg={
-                          form[field.name]
-                            ? parseFloat(form[field.name] || '0')
-                            : null
-                        }
-                        onWeightChange={(weightInKg) =>
-                          setForm({
-                            ...form,
-                            [field.name]: weightInKg?.toString() || '',
-                          })
-                        }
-                        showLabel={true}
-                        decimals={2}
-                      />
-                    )
-                  }
-
-                  return (
-                    <Input
-                      key={field.name}
-                      id={field.name}
-                      type="number"
-                      inputMode="decimal"
-                      step={field.step}
-                      iconEnd={field.unit}
-                      label={field.label}
-                      variant="secondary"
-                      value={form[field.name]}
-                      onChange={(e) =>
-                        setForm({ ...form, [field.name]: e.target.value || '' })
-                      }
-                    />
-                  )
-                })}
-              </div>
+          {/* Weight & Body Fat - Prominent inputs at top */}
+          {(!showFields ||
+            showFields.includes(MeasurementFieldEnum.Weight) ||
+            showFields.includes(MeasurementFieldEnum.BodyFat)) && (
+            <div className="grid grid-cols-2 gap-4">
+              <WeightInput
+                id="weight"
+                label="Weight"
+                weightInKg={form.weight ? parseFloat(form.weight || '0') : null}
+                onWeightChange={(weightInKg) =>
+                  setForm({
+                    ...form,
+                    weight: weightInKg?.toString() || '',
+                  })
+                }
+                showLabel={true}
+                decimals={2}
+                placeholder={lastValues[MeasurementFieldEnum.Weight]?.toFixed(
+                  1,
+                )}
+              />
+              <Input
+                id="bodyFat"
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                iconEnd="%"
+                label="Body Fat"
+                variant="secondary"
+                value={form.bodyFat}
+                placeholder={lastValues[MeasurementFieldEnum.BodyFat]?.toFixed(
+                  1,
+                )}
+                onChange={(e) =>
+                  setForm({ ...form, bodyFat: e.target.value || '' })
+                }
+              />
             </div>
-          ))}
+          )}
+
+          {/* Body Map for circumference measurements */}
+          {(!showFields ||
+            showFields.some((f) =>
+              [
+                MeasurementFieldEnum.Chest,
+                MeasurementFieldEnum.Waist,
+                MeasurementFieldEnum.Hips,
+                MeasurementFieldEnum.Neck,
+                MeasurementFieldEnum.BicepsLeft,
+                MeasurementFieldEnum.BicepsRight,
+                MeasurementFieldEnum.ThighLeft,
+                MeasurementFieldEnum.ThighRight,
+                MeasurementFieldEnum.CalfLeft,
+                MeasurementFieldEnum.CalfRight,
+              ].includes(f),
+            )) && (
+            <MeasurementBodyMap
+              values={bodyMapValues}
+              lastValues={lastValues}
+              onChange={handleBodyMapChange}
+            />
+          )}
 
           <Textarea
             id="notes"
