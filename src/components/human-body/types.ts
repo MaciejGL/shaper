@@ -1,5 +1,6 @@
 export interface BodyViewProps {
-  getPathProps: (aliases: string[]) => {
+  className?: string
+  getPathProps?: (aliases: string[]) => {
     className: string
     onClick: () => void
   }

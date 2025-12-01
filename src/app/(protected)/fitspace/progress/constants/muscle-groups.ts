@@ -56,27 +56,46 @@ export const MUSCLE_GROUP_MAPPING_BY_MUSCLE_ID: Record<
 }
 
 // Map body view labels to muscle group names for heatmap visualization
+// These aliases match the SVG path muscle group aliases in background.tsx files
 export const LABEL_TO_GROUP_MAPPING: Record<string, string> = {
+  // Neck
   neck: 'Neck',
   anterior: 'Neck',
+
+  // Shoulders
+  shoulders: 'Shoulders',
   'front delts': 'Shoulders',
   'side delts': 'Shoulders',
   'rear delts': 'Shoulders',
+
+  // Chest
   chest: 'Chest',
   'inner chest': 'Chest',
-  forearms: 'Forearms',
-  quads: 'Quads',
-  traps: 'Traps',
+
+  // Arms
   biceps: 'Biceps',
-  obliques: 'Obliques',
+  triceps: 'Triceps',
+  forearms: 'Forearms',
+
+  // Core
   abs: 'Abs',
-  'inner thigh': 'Inner Thighs',
+  obliques: 'Obliques',
+
+  // Back
+  traps: 'Traps',
+  upper_back: 'Upper Back',
   rhomboids: 'Upper Back',
   lats: 'Lats',
-  hams: 'Hamstrings',
-  triceps: 'Triceps',
+  lower_back: 'LowerBack',
   'lower back': 'LowerBack',
+
+  // Legs
+  quads: 'Quads',
+  hamstrings: 'Hamstrings',
+  hams: 'Hamstrings',
   glutes: 'Glutes',
+  adductors: 'Inner Thighs',
+  'inner thigh': 'Inner Thighs',
   calves: 'Calves',
-  shin: 'Calves', // Map shin to calves since they're related lower leg muscles
+  shin: 'Calves',
 }

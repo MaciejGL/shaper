@@ -5,7 +5,12 @@ import { BodyViewProps } from '../types'
 import { FemaleBodyBackBackground } from './background'
 import { Unselectable } from './unselectable'
 
-export function FemaleBodyBackView({ className }: BodyViewProps) {
+export function FemaleBodyBackView({ className, getPathProps }: BodyViewProps) {
+  const defaultGetPathProps = (_aliases: string[]) => ({
+    className: 'fill-neutral-400',
+    onClick: () => {},
+  })
+
   return (
     <div className="relative">
       <svg
@@ -30,7 +35,9 @@ export function FemaleBodyBackView({ className }: BodyViewProps) {
           </mask>
           <g mask="url(#female-back-mask)">
             <Unselectable />
-            <FemaleBodyBackBackground />
+            <FemaleBodyBackBackground
+              getPathProps={getPathProps ?? defaultGetPathProps}
+            />
           </g>
         </g>
         <defs>

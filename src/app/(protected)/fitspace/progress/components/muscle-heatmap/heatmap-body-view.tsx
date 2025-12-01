@@ -2,8 +2,8 @@
 
 import { ArrowLeftRight } from 'lucide-react'
 
-// import { BackBodyView } from '@/components/human-body/body-back/body-back'
-// import { FrontBodyView } from '@/components/human-body/body-front/body-front'
+import { MaleBodyBackView } from '@/components/human-body/male-body-back/male-body-back'
+import { MaleBodyFrontView } from '@/components/human-body/male-body-front/male-body-front'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GQLMuscleFrequency } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
@@ -35,8 +35,8 @@ export function HeatmapBodyView({
   muscleIntensity,
   selectedMuscle,
   onMuscleClick,
-  groupedMuscleData,
-  disableEmptyLabels = false,
+  groupedMuscleData: _groupedMuscleData,
+  disableEmptyLabels: _disableEmptyLabels = false,
 }: HeatmapBodyViewProps) {
   const getPathProps = (aliases: string[]) => {
     // Find the muscle group for these aliases
@@ -69,43 +69,6 @@ export function HeatmapBodyView({
     }
   }
 
-  const isRegionSelected = (aliases: string[]) => {
-    if (!selectedMuscle) return false
-
-    // Find the muscle group for these aliases
-    for (const alias of aliases) {
-      if (LABEL_TO_GROUP_MAPPING[alias] === selectedMuscle) {
-        return true
-      }
-    }
-
-    return false
-  }
-
-  const handleRegionClick = (aliases: string[]) => {
-    // Find the muscle group for these aliases
-    for (const alias of aliases) {
-      if (LABEL_TO_GROUP_MAPPING[alias]) {
-        onMuscleClick(LABEL_TO_GROUP_MAPPING[alias])
-        break
-      }
-    }
-  }
-
-  const hasMuscleData = (aliases: string[]): boolean => {
-    if (!disableEmptyLabels) return true
-
-    // Find the muscle group for these aliases
-    for (const alias of aliases) {
-      if (LABEL_TO_GROUP_MAPPING[alias]) {
-        const groupData = groupedMuscleData?.[LABEL_TO_GROUP_MAPPING[alias]]
-        return Boolean(groupData && groupData.totalSets > 0)
-      }
-    }
-
-    return false
-  }
-
   return (
     <div className="relative">
       <Tabs defaultValue="front">
@@ -117,23 +80,13 @@ export function HeatmapBodyView({
           <TabsTrigger value="back">Back</TabsTrigger>
         </TabsList>
 
-        {/* <TabsContent value="front" className="flex flex-col items-center">
-          <FrontBodyView
-            getPathProps={getPathProps}
-            isRegionSelected={isRegionSelected}
-            handleRegionClick={handleRegionClick}
-            hasMuscleData={hasMuscleData}
-          />
+        <TabsContent value="front" className="flex flex-col items-center pt-4">
+          <MaleBodyFrontView getPathProps={getPathProps} />
         </TabsContent>
 
-        <TabsContent value="back" className="flex flex-col items-center">
-          <BackBodyView
-            getPathProps={getPathProps}
-            isRegionSelected={isRegionSelected}
-            handleRegionClick={handleRegionClick}
-            hasMuscleData={hasMuscleData}
-          />
-        </TabsContent> */}
+        <TabsContent value="back" className="flex flex-col items-center pt-4">
+          <MaleBodyBackView getPathProps={getPathProps} />
+        </TabsContent>
       </Tabs>
       {/* Intensity Legend */}
       <div className="space-y-1">

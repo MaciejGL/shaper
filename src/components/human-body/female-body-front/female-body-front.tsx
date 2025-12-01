@@ -6,7 +6,15 @@ import { FemaleBodyFrontBackground } from './background'
 import { FemaleBodyFrontBackgroundLayer } from './background-layer'
 import { Unselectable } from './unselectable'
 
-export function FemaleBodyFrontView({ getPathProps }: BodyViewProps) {
+export function FemaleBodyFrontView({
+  className,
+  getPathProps,
+}: BodyViewProps) {
+  const defaultGetPathProps = (_aliases: string[]) => ({
+    className: 'fill-[#424747]',
+    onClick: () => {},
+  })
+
   return (
     <div className="relative">
       <svg
@@ -15,6 +23,7 @@ export function FemaleBodyFrontView({ getPathProps }: BodyViewProps) {
         viewBox="0 0 174 392"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        className={className}
       >
         <g clipPath="url(#female-front-clip)">
           <mask
@@ -30,7 +39,9 @@ export function FemaleBodyFrontView({ getPathProps }: BodyViewProps) {
           </mask>
           <g mask="url(#female-front-mask)">
             <Unselectable />
-            <FemaleBodyFrontBackground getPathProps={getPathProps} />
+            <FemaleBodyFrontBackground
+              getPathProps={getPathProps ?? defaultGetPathProps}
+            />
             <FemaleBodyFrontBackgroundLayer />
           </g>
         </g>
