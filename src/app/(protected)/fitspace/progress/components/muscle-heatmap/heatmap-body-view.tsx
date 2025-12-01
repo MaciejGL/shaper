@@ -2,8 +2,8 @@
 
 import { ArrowLeftRight } from 'lucide-react'
 
-import { BackBodyView } from '@/components/human-body/body-back/body-back'
-import { FrontBodyView } from '@/components/human-body/body-front/body-front'
+// import { BackBodyView } from '@/components/human-body/body-back/body-back'
+// import { FrontBodyView } from '@/components/human-body/body-front/body-front'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GQLMuscleFrequency } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
@@ -117,7 +117,7 @@ export function HeatmapBodyView({
           <TabsTrigger value="back">Back</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="front" className="flex flex-col items-center">
+        {/* <TabsContent value="front" className="flex flex-col items-center">
           <FrontBodyView
             getPathProps={getPathProps}
             isRegionSelected={isRegionSelected}
@@ -133,7 +133,7 @@ export function HeatmapBodyView({
             handleRegionClick={handleRegionClick}
             hasMuscleData={hasMuscleData}
           />
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
       {/* Intensity Legend */}
       <div className="space-y-1">
