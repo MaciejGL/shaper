@@ -18,6 +18,7 @@ import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import { AddMeasurementModal } from '../add-measurement-modal'
 import { useBodyMeasurementsContext } from '../body-measurements-context'
+import { MeasurementBodyMapDisplay } from '../measurement-body-map/measurement-body-map-display'
 import { MeasurementCategoryDrawer } from '../measurement-category-drawer'
 import { MeasurementChart } from '../measurement-chart'
 import { measurementCategories } from '../measurement-constants'
@@ -80,7 +81,6 @@ export function LogsSection() {
       />
       <CardContent>
         <div className="space-y-4">
-          {/* Weight Progress Chart Placeholder */}
           {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-4">
             <MeasurementCategoryDrawer
@@ -126,6 +126,11 @@ export function LogsSection() {
                 />
               </button>
             </MeasurementCategoryDrawer>
+          </div>
+
+          {/* Body Circumferences Map */}
+          <div className="py-4">
+            <MeasurementBodyMapDisplay size="sm" />
           </div>
         </div>
       </CardContent>

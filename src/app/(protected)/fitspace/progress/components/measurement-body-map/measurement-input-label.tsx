@@ -13,8 +13,6 @@ interface MeasurementInputLabelProps {
   label: string
   value: string
   lastValue?: number
-  inputX: number
-  inputY: number
   side: 'left' | 'right'
   onChange: (value: string) => void
   onFocus?: () => void
@@ -25,8 +23,6 @@ export function MeasurementInputLabel({
   label,
   value,
   lastValue,
-  inputX,
-  inputY,
   side,
   onChange,
   onFocus,
@@ -44,13 +40,9 @@ export function MeasurementInputLabel({
   return (
     <div
       className={cn(
-        'absolute flex flex-col gap-0.5 -translate-y-1/2',
+        'flex flex-col gap-0.5 w-full',
         side === 'left' ? 'items-end' : 'items-start',
       )}
-      style={{
-        top: `${inputY}px`,
-        left: side === 'left' ? `${inputX - 80}px` : `${inputX}px`,
-      }}
     >
       <span
         className={cn(
@@ -73,7 +65,7 @@ export function MeasurementInputLabel({
         placeholder={placeholder}
         iconEnd={circumferenceUnit}
         className={cn(
-          'w-24 px-1.5 text-xs rounded-md',
+          'w-20 px-1.5 text-xs rounded-md',
           'bg-primary/5 dark:bg-primary/8',
           'placeholder:text-muted-foreground/40',
           'transition-all duration-200',

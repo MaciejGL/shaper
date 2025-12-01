@@ -8,8 +8,9 @@ interface MeasurementConnectionLineProps {
   inputX: number
   inputY: number
   side: 'left' | 'right'
-  hasValue?: boolean
   isFocused?: boolean
+  /** When true, uses coordinates directly (for full-width overlay SVG) */
+  useAbsoluteCoords?: boolean
 }
 
 export function MeasurementConnectionLine({
@@ -18,42 +19,38 @@ export function MeasurementConnectionLine({
   inputX,
   inputY,
   side,
-  hasValue = false,
   isFocused = false,
+  useAbsoluteCoords = false,
 }: MeasurementConnectionLineProps) {
-  const stepX =
-    side === 'left'
+  // Calculate the elbow point for the L-shaped line
+  const elbowX = useAbsoluteCoords
+    ? side === 'left'
+      ? inputX + (bodyX - inputX) * 0.2
+      : inputX - (inputX - bodyX) * 0.2
+    : side === 'left'
       ? inputX + (bodyX - inputX) * 0.3
       : inputX - (inputX - bodyX) * 0.3
 
-  const pathData = `M ${inputX} ${inputY} L ${stepX} ${inputY} L ${bodyX} ${bodyY}`
+  const pathData = `M ${inputX} ${inputY} L ${elbowX} ${inputY} L ${bodyX} ${bodyY}`
 
   return (
     <g className="measurement-connection">
       <path
         d={pathData}
-        strokeWidth={1.5}
+        strokeWidth={useAbsoluteCoords ? 1 : 1.5}
         fill="none"
         className={cn(
           'transition-all duration-200',
-          isFocused
-            ? 'stroke-primary'
-            : hasValue
-              ? 'stroke-primary/60'
-              : 'stroke-muted-foreground/40',
+          isFocused ? 'stroke-primary' : 'stroke-primary/60',
         )}
       />
       <circle
         cx={bodyX}
         cy={bodyY}
-        r={isFocused ? 5 : 4}
+        r={isFocused ? 4 : 3}
         className={cn(
           'transition-all duration-200',
-          isFocused
-            ? 'fill-primary'
-            : hasValue
-              ? 'fill-primary/60'
-              : 'fill-muted-foreground/40',
+          isFocused ? 'fill-primary' : 'fill-primary/60',
         )}
       />
     </g>
