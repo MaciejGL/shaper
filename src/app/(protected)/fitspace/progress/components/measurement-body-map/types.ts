@@ -1,8 +1,10 @@
 import { MeasurementFieldEnum } from '../measurement-constants'
 
 export interface MeasurementPosition {
-  bodyX: number
-  bodyY: number
+  femaleBodyX: number
+  femaleBodyY: number
+  maleBodyX?: number
+  maleBodyY?: number
   inputX: number
   inputY: number
   side: 'left' | 'right'

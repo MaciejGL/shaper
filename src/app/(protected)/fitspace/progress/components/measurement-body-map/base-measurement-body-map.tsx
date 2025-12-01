@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useRef, useState } from 'react'
 
 import { BodyFrontSilhouette } from '@/components/human-body/body-front-silhouette'
+import { useUser } from '@/context/user-context'
 
 import { MeasurementFieldEnum } from '../measurement-constants'
 
@@ -56,13 +57,16 @@ const COLUMN_GAP = 8
 
 // Body points for connection lines (relative to base 170x340 SVG)
 // inputY is the label index (0-4) for ordering
+// Male coordinates adjusted for wider body (194 vs 174 for female)
 export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   // Left side (order matters - top to bottom)
   {
     field: MeasurementFieldEnum.Neck,
     label: 'Neck',
-    bodyX: 86,
-    bodyY: 74,
+    femaleBodyX: 86,
+    femaleBodyY: 74,
+    maleBodyX: 84,
+    maleBodyY: 50,
     inputX: 0,
     inputY: 0,
     side: 'left',
@@ -70,8 +74,10 @@ export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   {
     field: MeasurementFieldEnum.BicepsLeft,
     label: 'L. Bicep',
-    bodyX: 47,
-    bodyY: 110,
+    femaleBodyX: 47,
+    femaleBodyY: 110,
+    maleBodyX: 42,
+    maleBodyY: 101,
     inputX: 0,
     inputY: 1,
     side: 'left',
@@ -79,8 +85,10 @@ export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   {
     field: MeasurementFieldEnum.Waist,
     label: 'Waist',
-    bodyX: 85,
-    bodyY: 145,
+    femaleBodyX: 85,
+    femaleBodyY: 145,
+    maleBodyX: 85,
+    maleBodyY: 136,
     inputX: 0,
     inputY: 2,
     side: 'left',
@@ -88,8 +96,10 @@ export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   {
     field: MeasurementFieldEnum.ThighLeft,
     label: 'L. Thigh',
-    bodyX: 61,
-    bodyY: 220,
+    femaleBodyX: 61,
+    femaleBodyY: 220,
+    maleBodyX: 61,
+    maleBodyY: 208,
     inputX: 0,
     inputY: 3,
     side: 'left',
@@ -97,8 +107,10 @@ export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   {
     field: MeasurementFieldEnum.CalfLeft,
     label: 'L. Calf',
-    bodyX: 64,
-    bodyY: 310,
+    femaleBodyX: 64,
+    femaleBodyY: 310,
+    maleBodyX: 64,
+    maleBodyY: 290,
     inputX: 0,
     inputY: 4,
     side: 'left',
@@ -107,8 +119,10 @@ export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   {
     field: MeasurementFieldEnum.Chest,
     label: 'Chest',
-    bodyX: 85,
-    bodyY: 102,
+    femaleBodyX: 95,
+    femaleBodyY: 102,
+    maleBodyX: 98,
+    maleBodyY: 82,
     inputX: 0,
     inputY: 0,
     side: 'right',
@@ -116,8 +130,10 @@ export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   {
     field: MeasurementFieldEnum.BicepsRight,
     label: 'R. Bicep',
-    bodyX: 123,
-    bodyY: 110,
+    femaleBodyX: 123,
+    femaleBodyY: 110,
+    maleBodyX: 129,
+    maleBodyY: 101,
     inputX: 0,
     inputY: 1,
     side: 'right',
@@ -125,8 +141,10 @@ export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   {
     field: MeasurementFieldEnum.Hips,
     label: 'Hips',
-    bodyX: 85,
-    bodyY: 175,
+    femaleBodyX: 100,
+    femaleBodyY: 175,
+    maleBodyX: 99,
+    maleBodyY: 166,
     inputX: 0,
     inputY: 2,
     side: 'right',
@@ -134,8 +152,10 @@ export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   {
     field: MeasurementFieldEnum.ThighRight,
     label: 'R. Thigh',
-    bodyX: 110,
-    bodyY: 220,
+    femaleBodyX: 110,
+    femaleBodyY: 220,
+    maleBodyX: 110,
+    maleBodyY: 208,
     inputX: 0,
     inputY: 3,
     side: 'right',
@@ -143,8 +163,10 @@ export const MEASUREMENT_POSITIONS: MeasurementPosition[] = [
   {
     field: MeasurementFieldEnum.CalfRight,
     label: 'R. Calf',
-    bodyX: 107,
-    bodyY: 310,
+    femaleBodyX: 107,
+    femaleBodyY: 310,
+    maleBodyX: 107,
+    maleBodyY: 290,
     inputX: 0,
     inputY: 4,
     side: 'right',
@@ -188,6 +210,7 @@ interface ConnectionLinesOverlayProps {
   svgWidth: number
   svgOffsetY: number
   labelHeight: number
+  isMale: boolean
 }
 
 function ConnectionLinesOverlay({
@@ -199,6 +222,7 @@ function ConnectionLinesOverlay({
   svgWidth,
   svgOffsetY,
   labelHeight,
+  isMale,
 }: ConnectionLinesOverlayProps) {
   const scale = svgWidth / BASE_SVG_WIDTH
   const svgOffsetX = labelColumnWidth + COLUMN_GAP
@@ -211,8 +235,18 @@ function ConnectionLinesOverlay({
       viewBox={`0 0 ${containerWidth} ${containerHeight}`}
     >
       {positions.map((pos) => {
-        const bodyX = svgOffsetX + pos.bodyX * scale
-        const bodyY = svgOffsetY + pos.bodyY * scale
+        // Use male-specific coordinates if available and user is male
+        const rawBodyX =
+          isMale && pos.maleBodyX !== undefined
+            ? pos.maleBodyX
+            : pos.femaleBodyX
+        const rawBodyY =
+          isMale && pos.maleBodyY !== undefined
+            ? pos.maleBodyY
+            : pos.femaleBodyY
+
+        const bodyX = svgOffsetX + rawBodyX * scale
+        const bodyY = svgOffsetY + rawBodyY * scale
 
         const labelIndex = pos.inputY
         const labelY = getLabelCenterY(
@@ -264,6 +298,9 @@ export function BaseMeasurementBodyMap({
   renderLabel,
   hoveredField = null,
 }: BaseMeasurementBodyMapProps) {
+  const { user } = useUser()
+  const isMale = user?.profile?.sex !== 'Female'
+
   // Measure container width
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
@@ -368,6 +405,7 @@ export function BaseMeasurementBodyMap({
         svgWidth={svgWidth}
         svgOffsetY={svgOffsetY}
         labelHeight={config.height}
+        isMale={isMale}
       />
     </div>
   )
