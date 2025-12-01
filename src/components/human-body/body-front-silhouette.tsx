@@ -2,8 +2,8 @@
 
 import { useUser } from '@/context/user-context'
 
-import { FrontBodyView } from './body-front/body-front'
 import { FemaleBodyFrontView } from './female-body-front/female-body-front'
+import { MaleBodyFrontView } from './male-body-front/male-body-front'
 
 interface BodyFrontSilhouetteProps {
   className?: string
@@ -32,11 +32,13 @@ export function BodyFrontSilhouette({ className }: BodyFrontSilhouetteProps) {
   }
 
   return (
-    <FrontBodyView
-      getPathProps={noopGetPathProps}
-      isRegionSelected={noopHandler}
-      handleRegionClick={() => {}}
-      hideLabels
-    />
+    <div className={className}>
+      <MaleBodyFrontView
+        getPathProps={noopGetPathProps}
+        isRegionSelected={noopHandler}
+        handleRegionClick={() => {}}
+        hideLabels
+      />
+    </div>
   )
 }

@@ -2,8 +2,8 @@
 
 import { useUser } from '@/context/user-context'
 
-import { BackBodyView } from './body-back/body-back'
 import { FemaleBodyBackView } from './female-body-back/female-body-back'
+import { MaleBodyBackView } from './male-body-back/male-body-back'
 
 interface BodyBackSilhouetteProps {
   className?: string
@@ -33,11 +33,13 @@ export function BodyBackSilhouette({ className }: BodyBackSilhouetteProps) {
   }
 
   return (
-    <BackBodyView
-      getPathProps={noopGetPathProps}
-      isRegionSelected={noopHandler}
-      handleRegionClick={() => {}}
-      hideLabels
-    />
+    <div className={className}>
+      <MaleBodyBackView
+        getPathProps={noopGetPathProps}
+        isRegionSelected={noopHandler}
+        handleRegionClick={() => {}}
+        hideLabels
+      />
+    </div>
   )
 }

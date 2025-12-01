@@ -3,11 +3,6 @@ export interface BodyViewProps {
     className: string
     onClick: () => void
   }
-  isRegionSelected: (aliases: string[]) => boolean
-  handleRegionClick: (aliases: string[]) => void
-  hasMuscleData?: (aliases: string[]) => boolean
-  hideLabels?: boolean
-  className?: string
 }
 
 export type MuscleGroupProps = {

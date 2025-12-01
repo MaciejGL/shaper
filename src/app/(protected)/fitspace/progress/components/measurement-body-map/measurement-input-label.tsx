@@ -65,7 +65,7 @@ export function MeasurementInputLabel({
         placeholder={placeholder}
         iconEnd={circumferenceUnit}
         className={cn(
-          'w-20 px-1.5 text-xs rounded-md',
+          'w-full px-1.5 text-sm rounded-md',
           'bg-primary/5 dark:bg-primary/8',
           'placeholder:text-muted-foreground/40',
           'transition-all duration-200',

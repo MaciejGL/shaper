@@ -316,11 +316,13 @@ export function AddMeasurementModal({
                 MeasurementFieldEnum.CalfRight,
               ].includes(f),
             )) && (
-            <MeasurementBodyMap
-              values={bodyMapValues}
-              lastValues={lastValues}
-              onChange={handleBodyMapChange}
-            />
+            <div className="w-full mt-12 mb-18">
+              <MeasurementBodyMap
+                values={bodyMapValues}
+                lastValues={lastValues}
+                onChange={handleBodyMapChange}
+              />
+            </div>
           )}
 
           <Textarea

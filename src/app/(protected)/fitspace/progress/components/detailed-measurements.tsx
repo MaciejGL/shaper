@@ -3,8 +3,9 @@ import { MeasurementBodyMapDisplay } from './measurement-body-map/measurement-bo
 export function DetailedMeasurements({ className }: { className?: string }) {
   return (
     <div className={className}>
-      <div className="font-semibold mb-2">Body Circumferences</div>
-      <MeasurementBodyMapDisplay />
+      <div className="mt-12 mb-18">
+        <MeasurementBodyMapDisplay />
+      </div>
     </div>
   )
 }

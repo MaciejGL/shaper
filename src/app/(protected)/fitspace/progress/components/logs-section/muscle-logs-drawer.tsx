@@ -32,7 +32,7 @@ export function MuscleLogsDrawer({
 
           <DetailedMeasurements className="!max-h-[87vh]" />
           <div>
-            <h3 className="font-semibold mb-3">Measurement History</h3>
+            <h3 className="font-semibold text-lg mb-3">History</h3>
             <MeasurementHistoryList
               measurements={bodyMeasures}
               onUpdate={onMeasurementAdded}

@@ -58,7 +58,7 @@ export function MeasurementHistoryList({
     <div className="space-y-4">
       {monthsToShow.map(({ month, measurements: monthMeasurements }) => (
         <div key={month}>
-          <h4 className="font-semibold text-base mb-2">{month}</h4>
+          <h4 className="font-medium text-base mb-2">{month}</h4>
           <div className="space-y-0">
             {monthMeasurements.map((measurement) => {
               // If focusing on specific field, filter measurements

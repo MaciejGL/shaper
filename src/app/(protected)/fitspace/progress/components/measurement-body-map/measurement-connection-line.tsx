@@ -31,7 +31,8 @@ export function MeasurementConnectionLine({
       ? inputX + (bodyX - inputX) * 0.3
       : inputX - (inputX - bodyX) * 0.3
 
-  const pathData = `M ${inputX} ${inputY} L ${elbowX} ${inputY} L ${bodyX} ${bodyY}`
+  const offset = 8
+  const pathData = `M ${inputX} ${inputY + offset} L ${elbowX} ${inputY + offset} L ${bodyX} ${bodyY}`
 
   return (
     <g className="measurement-connection">

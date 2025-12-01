@@ -129,7 +129,7 @@ export function LogsSection() {
           </div>
 
           {/* Body Circumferences Map */}
-          <div className="py-4">
+          <div className="-mx-2 mt-12 mb-12">
             <MeasurementBodyMapDisplay size="sm" />
           </div>
         </div>
