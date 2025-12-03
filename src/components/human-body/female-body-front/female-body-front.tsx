@@ -11,7 +11,7 @@ export function FemaleBodyFrontView({
   getPathProps,
 }: BodyViewProps) {
   const defaultGetPathProps = (_aliases: string[]) => ({
-    className: 'fill-[#424747]',
+    className: 'fill-neutral-500 dark:fill-neutral-700',
     onClick: () => {},
   })
 
@@ -39,10 +39,10 @@ export function FemaleBodyFrontView({
           </mask>
           <g mask="url(#female-front-mask)">
             <Unselectable />
+            <FemaleBodyFrontBackgroundLayer />
             <FemaleBodyFrontBackground
               getPathProps={getPathProps ?? defaultGetPathProps}
             />
-            <FemaleBodyFrontBackgroundLayer />
           </g>
         </g>
         <defs>

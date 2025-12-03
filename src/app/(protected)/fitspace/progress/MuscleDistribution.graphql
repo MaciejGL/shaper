@@ -47,3 +47,14 @@ query WeeklyMuscleProgress($userId: ID!, $weekOffset: Int = 0) {
     }
   }
 }
+
+query ActivityHeatmap($userId: ID!, $weekCount: Int = 8) {
+  activityHeatmap(userId: $userId, weekCount: $weekCount) {
+    activities {
+      date
+      totalSets
+      dayOfWeek
+    }
+    weekCount
+  }
+}

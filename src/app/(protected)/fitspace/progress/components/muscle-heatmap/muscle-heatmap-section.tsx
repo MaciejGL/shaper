@@ -7,9 +7,8 @@ import { PremiumGate } from '@/components/premium-gate'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 
+import { ActivityHeatmap } from './activity-heatmap'
 import { HeatmapBodyView } from './heatmap-body-view'
-import { MuscleProgressList } from './muscle-progress-list'
-import { OverallProgress } from './overall-progress'
 import { SelectedMuscleDetails } from './selected-muscle-details'
 import { useMuscleHeatmap } from './use-muscle-heatmap'
 import { WeekNavigator } from './week-navigator'
@@ -21,15 +20,14 @@ export function MuscleHeatmapSection() {
   const {
     muscleIntensity,
     muscleProgress,
-    overallPercentage,
     streakWeeks,
     weekStartDate,
     weekEndDate,
     weekOffset,
+    setWeekOffset,
     isCurrentWeek,
     goToPreviousWeek,
     goToNextWeek,
-    isLoading,
   } = useMuscleHeatmap()
 
   const handleMuscleClick = (muscle: string) => {
@@ -43,7 +41,7 @@ export function MuscleHeatmapSection() {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 items-center justify-center">
           <WeekNavigator
             weekStartDate={weekStartDate}
             weekEndDate={weekEndDate}
@@ -52,7 +50,7 @@ export function MuscleHeatmapSection() {
             onNext={goToNextWeek}
           />
           {streakWeeks > 0 && isCurrentWeek && (
-            <div className="flex items-center gap-1.5 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-700 dark:bg-orange-950 dark:text-orange-300">
+            <div className="flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-300">
               <span className="font-semibold">{streakWeeks}</span>
               <span>week streak</span>
             </div>
@@ -66,19 +64,15 @@ export function MuscleHeatmapSection() {
           showPartialContent
         >
           <div className="space-y-6">
-            {/* Overall Progress */}
-            <OverallProgress
-              percentage={overallPercentage}
-              isLoading={isLoading}
-            />
-
             {/* Body Heatmap View */}
-            <HeatmapBodyView
-              muscleIntensity={muscleIntensity}
-              muscleProgress={muscleProgress}
-              selectedMuscle={selectedMuscle}
-              onMuscleClick={handleMuscleClick}
-            />
+            <div className="mb-16">
+              <HeatmapBodyView
+                muscleIntensity={muscleIntensity}
+                muscleProgress={muscleProgress}
+                selectedMuscle={selectedMuscle}
+                onMuscleClick={handleMuscleClick}
+              />
+            </div>
 
             {/* Selected Muscle Details */}
             <AnimatePresence>
@@ -101,11 +95,10 @@ export function MuscleHeatmapSection() {
               )}
             </AnimatePresence>
 
-            {/* Muscle Progress List */}
-            <MuscleProgressList
-              muscleProgress={muscleProgress}
-              onMuscleClick={handleMuscleClick}
-              selectedMuscle={selectedMuscle}
+            {/* Activity Heatmap */}
+            <ActivityHeatmap
+              weekOffset={weekOffset}
+              onWeekOffsetChange={setWeekOffset}
             />
           </div>
         </PremiumGate>

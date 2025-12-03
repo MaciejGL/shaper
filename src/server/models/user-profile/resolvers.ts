@@ -1,4 +1,11 @@
-import { endOfWeek, startOfWeek, subDays, subWeeks } from 'date-fns'
+import {
+  endOfWeek,
+  format,
+  getDay,
+  startOfWeek,
+  subDays,
+  subWeeks,
+} from 'date-fns'
 
 import {
   GQLMutationResolvers,
@@ -670,6 +677,66 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       overallPercentage,
       muscleProgress: weeklyMuscleProgress,
       streakWeeks,
+    }
+  },
+
+  activityHeatmap: async (_parent, { userId, weekCount = 8 }, context) => {
+    const userProfile =
+      await context.loaders.user.userProfileByUserId.load(userId)
+    const weekStartsOn = (userProfile?.weekStartsOn ?? 1) as
+      | 0
+      | 1
+      | 2
+      | 3
+      | 4
+      | 5
+      | 6
+
+    const now = new Date()
+    const startDate = startOfWeek(subWeeks(now, weekCount - 1), { weekStartsOn })
+    const endDate = endOfWeek(now, { weekStartsOn })
+
+    const completedSets = await prisma.exerciseSet.findMany({
+      where: {
+        completedAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+        exercise: {
+          day: {
+            week: {
+              plan: {
+                assignedToId: userId,
+              },
+            },
+          },
+        },
+      },
+      select: {
+        completedAt: true,
+      },
+    })
+
+    const dailyTotals = new Map<string, number>()
+
+    completedSets.forEach((set) => {
+      if (set.completedAt) {
+        const dateKey = format(set.completedAt, 'yyyy-MM-dd')
+        dailyTotals.set(dateKey, (dailyTotals.get(dateKey) || 0) + 1)
+      }
+    })
+
+    const activities = Array.from(dailyTotals.entries()).map(
+      ([date, totalSets]) => ({
+        date,
+        totalSets,
+        dayOfWeek: getDay(new Date(date)),
+      }),
+    )
+
+    return {
+      activities,
+      weekCount,
     }
   },
 }

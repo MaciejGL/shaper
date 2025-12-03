@@ -9,7 +9,7 @@ export const HEATMAP_COLORS = {
       fillColor: cn('fill-orange-500'),
       bgColor: cn('bg-orange-500'),
       textColor: cn('text-white'),
-      progressColor: cn('bg-orange-500'),
+      progressColor: cn('bg-orange-500 dark:bg-orange-500'),
       label: 'Complete',
     },
     {
@@ -17,7 +17,7 @@ export const HEATMAP_COLORS = {
       fillColor: cn('fill-orange-400'),
       bgColor: cn('bg-orange-400'),
       textColor: cn('text-white'),
-      progressColor: cn('bg-orange-400'),
+      progressColor: cn('bg-orange-400 dark:bg-orange-400'),
       label: 'Almost',
     },
     {
@@ -25,7 +25,7 @@ export const HEATMAP_COLORS = {
       fillColor: cn('fill-orange-300'),
       bgColor: cn('bg-orange-300'),
       textColor: cn('text-orange-900'),
-      progressColor: cn('bg-orange-300'),
+      progressColor: cn('bg-orange-300 dark:bg-orange-300'),
       label: 'Good',
     },
     {
@@ -33,7 +33,7 @@ export const HEATMAP_COLORS = {
       fillColor: cn('fill-orange-200'),
       bgColor: cn('bg-orange-200'),
       textColor: cn('text-orange-900'),
-      progressColor: cn('bg-orange-200'),
+      progressColor: cn('bg-orange-200 dark:bg-orange-200'),
       label: 'Started',
     },
     {
@@ -41,15 +41,15 @@ export const HEATMAP_COLORS = {
       fillColor: cn('fill-orange-100'),
       bgColor: cn('bg-orange-100'),
       textColor: cn('text-orange-800'),
-      progressColor: cn('bg-orange-100'),
+      progressColor: cn('bg-orange-100 dark:bg-orange-100'),
       label: 'Light',
     },
     {
       threshold: 0, // 0% - Not trained
-      fillColor: cn('fill-muted'),
-      bgColor: cn('bg-muted'),
+      fillColor: cn('fill-neutral-500 dark:fill-neutral-700'),
+      bgColor: cn('bg-neutral-500 dark:bg-neutral-700'),
       textColor: cn('text-muted-foreground'),
-      progressColor: cn('bg-muted'),
+      progressColor: cn('bg-neutral-500 dark:bg-neutral-500'),
       label: 'None',
     },
   ],

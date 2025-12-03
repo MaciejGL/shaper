@@ -10,331 +10,338 @@ export const FemaleBodyBackBackground = ({
     onClick: () => void
   }
 }) => {
+  const defaultFillClass = 'fill-neutral-400'
   return (
     <>
       {/* Upper back - left */}
       <path
         d="M57.2185 77.7073C55.6275 77.3453 56.2805 76.9713 59.1455 76.6013C66.3145 75.6773 79.0646 78.6673 82.9486 82.1843L83.9146 83.0583L84.0916 96.1643C84.3166 112.751 84.4466 111.851 82.0136 110.522C76.0816 107.281 73.2005 103.053 68.7175 91.0113C65.5955 82.6243 62.3565 78.8763 57.2185 77.7073Z"
-        className={getPathProps(['upper-back']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['upper-back']).className ?? defaultFillClass}
         name="upper-back"
       />
 
       {/* Upper back - right */}
       <path
         d="M88.8845 81.4222C92.1565 79.1962 98.5675 77.2882 104.771 76.6942C110.125 76.1822 116.815 76.9302 113.808 77.7052C107.83 79.2452 105.389 82.2682 101.315 93.1752C98.6125 100.409 96.5655 104.001 93.3265 107.187C91.3275 109.154 88.3515 111.13 87.3745 111.14L86.8535 111.146L86.8655 97.2652C86.8785 81.4252 86.6875 82.9162 88.8845 81.4222Z"
-        className={getPathProps(['upper-back']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['upper-back']).className ?? defaultFillClass}
         name="upper-back"
       />
 
       {/* Shoulder - left */}
       <path
         d="M44.1886 100.313C42.9156 89.4253 46.1926 80.6383 52.1206 79.0433C54.5916 78.3783 58.0806 79.3773 61.0406 81.5993C62.4316 82.6433 62.5406 82.4333 59.0586 85.4073C53.3916 90.2453 48.6466 95.3693 45.5516 99.9893L44.3586 101.771L44.1886 100.313Z"
-        className={getPathProps(['shoulders']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['shoulders']).className ?? defaultFillClass}
         name="shoulders"
       />
 
       {/* Shoulder - right */}
       <path
         d="M110.303 81.967C111.418 80.817 113.091 79.759 114.619 79.238C119.443 77.594 124.474 81.182 126.064 87.402C126.471 88.99 126.555 97.307 126.195 100.307L126.021 101.76L124.472 99.578C121.437 95.302 117.9 91.175 112.915 86.09L109.592 82.701L110.303 81.967Z"
-        className={getPathProps(['shoulders']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['shoulders']).className ?? defaultFillClass}
         name="shoulders"
       />
 
       {/* Upper Back - left */}
       <path
         d="M54.2747 97.7712C55.3647 93.5662 58.4677 89.1602 62.0287 86.7622C63.4347 85.8152 63.4027 85.8052 64.5077 87.5522C67.2427 91.8752 68.6327 95.4912 69.3617 100.185L69.5047 101.099L67.5537 100.955C64.5927 100.736 55.7007 99.2312 54.5237 98.7492C54.1117 98.5812 54.0887 98.4882 54.2747 97.7712Z"
-        className={getPathProps(['upper-back']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['upper-back']).className ?? defaultFillClass}
         name="upper-back"
       />
 
       {/* Upper Back - right */}
       <path
         d="M101.542 100.578C101.542 97.6233 103.478 92.2443 106.05 88.0523C107.456 85.7613 107.344 85.8113 108.838 86.7863C112.612 89.2493 117.891 97.3813 116.522 98.6243C116.033 99.0683 106.964 100.664 103.365 100.939L101.542 101.079V100.578Z"
-        className={getPathProps(['upper-back']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['upper-back']).className ?? defaultFillClass}
         name="upper-back"
       />
 
       {/* Triceps left */}
       <path
         d="M47.051 123.646C45.61 108.361 46.441 102.325 50.545 98.2812C52.109 96.7402 52.085 96.7282 52.226 99.1152C52.292 100.232 52.675 103.068 53.076 105.417C55.305 118.457 53.827 126.84 48.069 133.818L47.583 134.407L47.582 131.839C47.582 130.426 47.343 126.74 47.051 123.646Z"
-        className={getPathProps(['triceps']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['triceps']).className ?? defaultFillClass}
         name="triceps"
       />
 
       {/* Triceps right */}
       <path
         d="M117.899 104.71C118.302 102.316 118.653 99.6201 118.68 98.7201C118.739 96.7461 118.742 96.7451 120.416 98.4191C124.454 102.457 125.28 108.538 123.814 123.427C123.565 125.954 123.351 129.442 123.337 131.179C123.309 134.834 123.381 134.799 121.538 132.044C116.652 124.74 115.714 117.694 117.899 104.71Z"
-        className={getPathProps(['triceps']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['triceps']).className ?? defaultFillClass}
         name="triceps"
       />
 
       {/* Lats left */}
       <path
         d="M60.7352 104.516C64.0882 104.89 66.9483 104.743 68.2083 104.132C68.8393 103.826 69.4102 103.569 69.4782 103.559C69.5472 103.549 70.5312 104.548 71.6662 105.779C75.1022 109.506 81.1552 115.511 82.4172 116.446C84.0112 117.627 84.3552 118.945 84.3522 123.854C84.3492 131.672 80.3992 138.103 70.8132 145.903L68.3132 147.938L68.1743 147.354C68.0983 147.033 67.8323 144.943 67.5833 142.708C66.4483 132.529 64.3232 122.393 60.7792 110.255C60.0192 107.651 59.3532 105.256 59.2982 104.933L59.1982 104.345L60.7352 104.516Z"
-        className={getPathProps(['lats']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['lats']).className ?? defaultFillClass}
         name="lats"
       />
 
       {/* Lats right */}
       <path
         d="M88.05 116.719C89.545 115.689 91.636 113.672 97.146 107.945C99.483 105.516 101.452 103.558 101.521 103.596C103.596 104.726 105.658 104.996 109.236 104.606C110.432 104.475 111.476 104.44 111.556 104.528C111.637 104.616 111.099 106.75 110.362 109.271C106.397 122.824 102.792 140.882 102.792 147.184C102.792 148.145 102.826 148.157 100.628 146.388C89.545 137.467 85.076 129.216 86.619 120.521C87.118 117.707 87.294 117.241 88.05 116.719Z"
-        className={getPathProps(['lats']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['lats']).className ?? defaultFillClass}
         name="lats"
       />
 
       {/* Triceps left */}
       <path
         d="M39.9861 124.427C40.0321 114.891 40.9531 110.734 44.2511 105.182C45.0861 103.776 45.4351 103.387 45.2021 104.12C44.7911 105.416 42.5362 117.56 41.1312 126.042C40.0022 132.861 39.9461 132.783 39.9861 124.427Z"
-        className={getPathProps(['triceps']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['triceps']).className ?? defaultFillClass}
         name="triceps"
       />
 
       {/* Triceps right */}
       <path
         d="M126.442 107.725C126.039 105.729 125.708 104.065 125.708 104.027C125.708 103.336 127.782 107.059 128.688 109.375C130.526 114.077 130.762 115.66 130.866 124.01C130.964 131.818 130.818 132.604 130.095 128.177C129.181 122.585 127.165 111.301 126.442 107.725Z"
-        className={getPathProps(['triceps']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['triceps']).className ?? defaultFillClass}
         name="triceps"
       />
 
       {/* Triceps left */}
       <path
         d="M44.0975 131.63C42.6285 131.355 42.6116 123.212 44.0656 116.29C44.6216 113.646 44.7356 113.749 45.1806 117.292C46.1266 124.831 45.5925 131.909 44.0975 131.63Z"
-        className={getPathProps(['triceps']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['triceps']).className ?? defaultFillClass}
         name="triceps"
       />
 
       {/* Triceps right */}
       <path
         d="M126.726 131.624C125.133 131.918 124.699 122.85 125.953 115.438C126.226 113.825 126.343 113.999 126.925 116.875C128.367 124.013 128.268 131.341 126.726 131.624Z"
-        className={getPathProps(['triceps']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['triceps']).className ?? defaultFillClass}
         name="triceps"
       />
 
       {/* Unselected area left */}
       <path
         d="M38.4595 142.269C38.2935 138.53 40.3795 133.812 42.4095 133.332C47.6515 132.092 47.2735 134.837 41.3335 141.146C38.5795 144.071 38.5395 144.087 38.4595 142.269Z"
-        className={
-          getPathProps(['unselectable']).className ?? 'fill-neutral-400'
-        }
+        className={getPathProps(['unselectable']).className ?? defaultFillClass}
         name="unselectable"
       />
 
       {/* Unselected area right */}
       <path
         d="M125.218 135.815C124.554 134.663 124.538 134.386 125.098 133.674C125.828 132.747 128.631 132.955 129.69 134.014C131.446 135.769 133.314 142.692 132.3 143.682C131.941 144.032 126.416 137.894 125.218 135.815Z"
-        className={
-          getPathProps(['unselectable']).className ?? 'fill-neutral-400'
-        }
+        className={getPathProps(['unselectable']).className ?? defaultFillClass}
         name="unselectable"
       />
 
       {/* Lower back left */}
       <path
         d="M78.6212 143.229C79.3552 142.427 80.6171 141.078 81.4261 140.232L82.8961 138.693L82.9632 149.19C83.0242 158.815 82.8322 165.252 82.4062 167.793L82.2701 168.607L81.4391 167.585C80.9821 167.022 79.5251 165.391 78.2011 163.958C73.6321 159.015 71.7472 156.68 69.5862 153.286L68.8271 152.093L69.7151 151.536C71.7441 150.266 74.7342 147.477 78.6212 143.229Z"
-        className={getPathProps(['lower-back']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['lower-back']).className ?? defaultFillClass}
         name="lower-back"
       />
 
       {/* Lower back right */}
       <path
         d="M88.5269 168.294C88.0059 166.792 87.7019 156.539 87.8919 146.823C87.9779 142.383 88.0689 138.75 88.0939 138.75C88.1179 138.75 89.4989 140.227 91.1629 142.031C96.4679 147.787 100.287 151.373 101.535 151.769C102.145 151.962 102.095 152.104 100.672 154.227C98.8379 156.962 96.8279 159.437 93.5299 163.021C91.9489 164.74 90.1969 166.691 89.6379 167.357C89.0199 168.093 88.5849 168.46 88.5269 168.294Z"
-        className={getPathProps(['lower-back']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['lower-back']).className ?? defaultFillClass}
         name="lower-back"
       />
 
       {/* Forearms left */}
       <path
         d="M24.7355 168.314C25.1455 163.051 28.8505 152.519 34.0735 141.771L35.1875 139.479L35.2545 140.729C35.4045 143.493 34.3005 150.665 33.2205 153.942C31.0495 160.533 29.3335 164.087 26.5035 167.858C24.5805 170.423 24.5715 170.425 24.7355 168.314Z"
-        className={getPathProps(['forearms']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['forearms']).className ?? defaultFillClass}
+        name="forearms"
+      />
+      <path
+        d="M21.0319 167.704C27.2499 151.516 30.8789 142.978 32.7349 140.174C33.5919 138.879 33.4929 139.321 32.1849 142.621C28.0119 153.156 23.1149 169.018 22.3519 174.476C22.0809 176.413 21.8429 176.623 20.3789 176.219C18.2829 175.64 18.3579 174.667 21.0319 167.704Z"
+        className={getPathProps(['forearms']).className ?? defaultFillClass}
+        name="forearms"
+      />
+      <path
+        d="M148.485 174.226C147.508 168.112 142.417 151.774 138.356 141.719C137.281 139.058 137.275 138.913 138.305 140.523C140.287 143.621 149.292 165.19 151.786 172.813C152.477 174.925 151.774 176.23 149.905 176.304C148.813 176.348 148.828 176.37 148.485 174.226Z"
+        className={getPathProps(['forearms']).className ?? defaultFillClass}
         name="forearms"
       />
 
       {/* Forearms right */}
       <path
         d="M138.982 157.604C136.713 151.525 134.851 141.709 135.609 139.822C135.974 138.913 142.325 153.785 144.327 160.238C145.67 164.565 146.681 170 146.144 170C145.098 170 140.891 162.719 138.982 157.604Z"
-        className={getPathProps(['forearms']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['forearms']).className ?? defaultFillClass}
         name="forearms"
       />
 
       {/* Forearms left */}
       <path
         d="M41.8955 143.893C43.6745 143.856 43.7855 143.824 45.0875 142.986C47.0725 141.71 47.1055 141.783 45.7585 144.479C41.1485 153.707 33.4426 164.863 28.5716 169.361C27.3846 170.457 27.4435 170.153 29.2665 165.81C30.1995 163.589 31.1725 161.255 31.4295 160.625C33.9115 154.538 38.7195 145.039 39.7525 144.182C39.9255 144.038 40.8295 143.916 41.8955 143.893Z"
-        className={getPathProps(['forearms']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['forearms']).className ?? defaultFillClass}
         name="forearms"
       />
 
       {/* Forearms right */}
       <path
         d="M132.697 157.335C129.419 152.373 124.042 142.973 124.042 142.202C124.042 141.974 124.324 142.088 125.276 142.698C126.895 143.737 127.716 143.998 128.908 143.85C131.054 143.585 131.592 144.183 134.624 150.208C137.455 155.833 143.415 169.655 143.132 169.938C142.606 170.463 136.495 163.082 132.697 157.335Z"
-        className={getPathProps(['forearms']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['forearms']).className ?? defaultFillClass}
         name="forearms"
       />
 
       {/* Lower back left */}
       <path
         d="M63.6293 153.958C63.8703 151.925 64.3423 149.773 64.6923 149.119C65.0323 148.485 65.2543 148.697 66.1173 150.48C67.4773 153.289 68.6303 159.078 67.9533 159.697C67.5473 160.068 63.0383 162.677 62.9513 162.59C62.8553 162.494 63.3203 156.571 63.6293 153.958Z"
-        className={getPathProps(['lower-back']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['lower-back']).className ?? defaultFillClass}
         name="lower-back"
       />
 
       {/* Lower back right */}
       <path
         d="M102.876 157.774C103.09 154.631 104.097 151.284 105.452 149.215C106.344 147.852 107.029 150.757 107.694 158.726C107.87 160.832 107.987 162.581 107.955 162.611C107.922 162.642 106.737 161.997 105.321 161.177L102.746 159.688L102.876 157.774Z"
-        className={getPathProps(['lower-back']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['lower-back']).className ?? defaultFillClass}
         name="lower-back"
       />
 
       {/* Glutes Upper Part Left */}
       <path
         d="M52.0618 183.854C52.5808 176.435 56.0318 168.593 60.3738 164.965L61.6088 163.932L62.9818 164.069C67.4038 164.508 69.4158 165.695 73.2148 170.112C75.1888 172.406 75.1438 172.21 73.7288 172.387C66.4988 173.29 58.0278 178.033 53.6238 183.643C51.7688 186.006 51.9128 185.987 52.0618 183.854Z"
-        className={getPathProps(['glutes']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['glutes']).className ?? defaultFillClass}
         name="glutes"
       />
 
       {/* Glutes Upper Part Right */}
       <path
         d="M101.716 166.105C103.084 165.169 105.195 164.415 107.151 164.163C109.046 163.919 109.153 163.933 110 164.548C112.588 166.426 115.372 170.64 116.916 175.016C118.257 178.817 119.611 187.172 118.591 185.349C115.569 179.948 106.862 174.431 98.6245 172.698C97.4215 172.445 96.3145 172.204 96.1645 172.162C95.7265 172.041 100.243 167.113 101.716 166.105Z"
-        className={getPathProps(['glutes']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['glutes']).className ?? defaultFillClass}
         name="glutes"
       />
 
       {/* Glutes Main Part Left */}
       <path
         d="M57.3615 182.859C62.6575 177.888 71.4195 174.224 80.2915 173.27C80.6925 173.227 81.4505 173.177 81.9775 173.158L82.9345 173.125L83.0705 176.596C83.1465 178.505 83.2075 183.964 83.2075 188.727V197.388L82.4445 198.642C79.6025 203.31 76.3225 205.684 69.3535 208.117C63.4655 210.173 60.9455 211.965 59.4215 215.179L58.6955 216.712L56.7835 213.872C48.4595 201.5 48.6545 191.03 57.3615 182.859Z"
-        className={getPathProps(['glutes']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['glutes']).className ?? defaultFillClass}
         name="glutes"
       />
 
       {/* Glutes Main Part Right */}
       <path
         d="M87.6536 185.861C87.7286 179.716 87.8516 174.325 87.9266 173.882L88.0616 173.077L89.7496 173.221C96.7816 173.824 104.505 176.396 109.663 179.852C122.227 188.271 123.586 200.863 113.438 214.837C112.055 216.742 112.123 216.719 111.599 215.469C110.172 212.069 107.858 210.388 101.438 208.086C94.1866 205.487 90.8856 203.035 88.2016 198.257L87.5156 197.034L87.6536 185.861Z"
-        className={getPathProps(['glutes']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['glutes']).className ?? defaultFillClass}
         name="glutes"
       />
 
       {/* Hip Adductors left */}
       <path
         d="M72.5662 210.341C73.3092 209.138 75.3042 207.48 77.8132 205.98C80.5722 204.331 80.4232 204.359 80.7152 205.44C82.5402 212.219 83.0542 224.555 81.7682 230.731C79.5002 241.623 78.7912 245.659 78.3312 250.284C78.1612 251.987 77.9852 253.417 77.9402 253.463C77.8942 253.509 77.7982 252.35 77.7272 250.888C77.4942 246.086 76.4382 239.181 74.3582 228.854C72.1672 217.974 71.5822 211.933 72.5662 210.341Z"
-        className={getPathProps(['adductors']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['adductors']).className ?? defaultFillClass}
         name="adductors"
       />
 
       {/* Hip Adductors right */}
       <path
         d="M89.0892 230.833C87.9572 225.464 88.3172 213.284 89.7932 207.018C90.1082 205.679 90.4472 204.583 90.5472 204.583C91.4642 204.583 97.1932 208.685 98.0962 209.989L98.6802 210.832L98.5682 214.635C98.4422 218.884 98.0292 221.691 96.3402 229.792C94.6312 237.988 93.4172 246.003 93.0742 251.354L92.9142 253.854L92.7622 252.292C92.1302 245.809 91.6352 242.917 89.0892 230.833Z"
-        className={getPathProps(['adductors']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['adductors']).className ?? defaultFillClass}
         name="adductors"
       />
 
       {/* Hip Abductors left */}
       <path
         d="M52.1683 220.938C51.6383 217.84 50.9943 212.661 50.7943 209.896C50.6123 207.375 50.6812 207.392 52.5972 210.351C53.8692 212.314 55.3483 215.263 56.4103 217.952C57.3913 220.438 57.0693 224.02 55.3833 229.375C54.9683 230.693 54.5583 231.845 54.4713 231.937C54.3173 232.099 53.0113 225.861 52.1683 220.938Z"
-        className={getPathProps(['abductors']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['abductors']).className ?? defaultFillClass}
         name="abductors"
       />
 
       {/* Hip Abductors right */}
       <path
         d="M113.921 221.875C113.731 219.05 115.464 214.574 118.533 209.965C119.874 207.95 120.392 207.46 120.203 208.385C120.15 208.643 120.052 209.698 119.984 210.729C119.672 215.511 117.321 229.961 116.561 231.771C116.152 232.743 114.146 225.221 113.921 221.875Z"
-        className={getPathProps(['abductors']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['abductors']).className ?? defaultFillClass}
         name="abductors"
       />
 
       {/* Hamstrings left */}
       <path
         d="M97.7559 232.5C98.4009 224.315 99.4678 218.049 101.067 213.065C101.243 212.516 101.413 212.094 101.446 212.127C101.844 212.529 104.762 223.218 105.591 227.311C109.251 245.387 107.455 259.169 99.9398 270.667C98.2148 273.306 98.1608 273.325 98.3578 271.214C98.6018 268.615 98.5338 263.592 98.2378 262.292C97.5478 259.262 97.2249 239.249 97.7559 232.5Z"
-        className={getPathProps(['hamstrings']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['hamstrings']).className ?? defaultFillClass}
         name="hamstrings"
       />
 
       {/* Hamstrings right */}
       <path
         d="M70.8135 270.521C61.6655 256.868 61.0925 237.993 69.0695 213.073C69.4395 211.915 69.5565 212.068 70.2665 214.635C72.3405 222.138 73.1685 229.261 73.3565 241.202C73.4855 249.463 73.1665 259.523 72.6925 262.083C72.1245 265.155 72.1315 269.715 72.7085 272.604C72.8825 273.479 72.5525 273.115 70.8135 270.521Z"
-        className={getPathProps(['hamstrings']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['hamstrings']).className ?? defaultFillClass}
         name="hamstrings"
       />
 
       {/* Hamstrings left */}
       <path
         d="M56.2642 227.824C57.4412 222.653 61.7272 216.439 64.9232 215.272C65.7472 214.971 65.7022 214.976 66.2812 215.131C66.9092 215.3 66.8822 215.489 65.9432 217.523C63.1742 223.524 61.8832 230.477 61.8692 239.479L61.8602 245.104L62.7532 250.625C64.0882 258.875 64.2472 260.189 64.3892 264.183C64.5212 267.902 64.2932 270.947 63.7472 272.772L63.4852 273.646L63.3282 272.083C62.8502 267.347 61.7612 262.397 58.8432 251.702C55.5472 239.625 54.9142 233.761 56.2642 227.824Z"
-        className={getPathProps(['hamstrings']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['hamstrings']).className ?? defaultFillClass}
         name="hamstrings"
       />
 
       {/* Hamstrings right */}
       <path
         d="M105.067 217.819C103.901 215.205 103.918 215.273 104.406 215.137C107.077 214.393 112.121 220.014 114.005 225.833C116.256 232.788 115.745 238.143 111.26 254.583C109.389 261.443 108.35 266.063 107.887 269.583C107.303 274.033 107.362 273.903 106.9 271.771C106.576 270.279 106.491 269.045 106.48 265.729C106.466 261.267 106.468 261.249 108.113 250.487C110.034 237.923 108.976 226.578 105.067 217.819Z"
-        className={getPathProps(['hamstrings']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['hamstrings']).className ?? defaultFillClass}
         name="hamstrings"
       />
 
       {/* Hamstrings left */}
       <path
         d="M74.765 277.777C73.738 270.303 73.67 256.042 74.595 241.818C74.667 240.699 74.766 239.822 74.814 239.87C74.967 240.023 75.905 245.802 76.441 249.896C78.226 263.539 77.956 273.933 75.681 279.075C75.142 280.295 75.104 280.242 74.765 277.777Z"
-        className={getPathProps(['hamstrings']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['hamstrings']).className ?? defaultFillClass}
         name="hamstrings"
       />
 
       {/* Hamstrings right */}
       <path
         d="M95.1143 278.889C92.5363 271.998 92.6093 260.394 95.3363 243.75C96.1163 238.986 96.1573 239.053 96.5383 245.729C97.1683 256.756 97.0263 269.877 96.1993 277.031C95.8193 280.323 95.7173 280.499 95.1143 278.889Z"
-        className={getPathProps(['hamstrings']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['hamstrings']).className ?? defaultFillClass}
         name="hamstrings"
       />
 
       {/* Calves Left */}
       <path
         d="M63.0224 292.821C64.2714 285.241 65.2124 278.452 65.6314 274.004C65.8394 271.802 66.0384 270 66.0754 270C66.3114 270 67.9804 270.958 68.3834 271.326C69.4124 272.263 69.4754 272.618 69.2424 276.187C68.8204 282.674 68.7394 302.584 69.1184 306.771C70.0854 317.451 69.9164 327.919 68.7314 330.755C68.2184 331.981 68.2384 332.001 64.5974 326.673C59.2714 318.878 59.1524 316.311 63.0224 292.821Z"
-        className={getPathProps(['calves']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['calves']).className ?? defaultFillClass}
         name="calves"
       />
 
       {/* Calves right */}
       <path
         d="M101.576 275.034C101.374 272.387 101.802 271.535 103.915 270.373C104.634 269.978 104.875 269.924 104.875 270.156C104.879 271.222 106.016 281.222 106.433 283.854C106.597 284.885 107.061 287.792 107.464 290.313L108.713 298.125C109.297 301.781 110.143 308.119 110.515 311.626C110.982 316.026 110.464 319.045 108.609 322.737C107.084 325.774 103.111 331.509 102.599 331.413C101.221 331.154 100.69 318.508 101.622 308.125C101.792 306.234 101.992 303.422 102.068 301.875C102.21 298.949 101.834 278.434 101.576 275.034Z"
-        className={getPathProps(['calves']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['calves']).className ?? defaultFillClass}
         name="calves"
       />
 
       {/* Calves left */}
       <path
         d="M72.2806 319.162C70.6746 304.859 69.7655 281.567 70.4935 273.368C70.5905 272.27 72.2615 275.734 73.6925 280C80.1875 299.368 82.9016 320.741 79.6696 327.077C79.0546 328.283 78.8266 328.294 77.0776 327.204C74.0026 325.287 72.7286 323.152 72.2806 319.162Z"
-        className={getPathProps(['calves']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['calves']).className ?? defaultFillClass}
         name="calves"
       />
 
       {/* Calves right */}
       <path
         d="M90.837 306.25C92.397 295.992 96.38 280.841 99.017 275.131C99.474 274.142 99.942 273.333 100.057 273.333C101.344 273.333 100.515 299.463 98.597 319.375C98.252 322.963 96.499 325.738 93.529 327.399C91.892 328.315 91.921 328.318 91.281 327.135C89.379 323.622 89.234 316.79 90.837 306.25Z"
-        className={getPathProps(['calves']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['calves']).className ?? defaultFillClass}
         name="calves"
       />
 
       {/* Calves lower left */}
       <path
         d="M75.2881 346.563C75.5041 335.162 75.9071 331.518 77.1811 329.456C77.6261 328.736 77.9891 328.542 78.0131 329.01C78.0201 329.154 78.1021 330.302 78.1951 331.563C78.4021 334.364 78.1441 340.048 77.5771 345.208C77.3431 347.328 77.0191 351.922 76.8551 355.417C76.4291 364.526 75.8821 370.313 75.4021 370.793C75.3331 370.861 75.0221 370.642 74.7111 370.306C73.9831 369.518 73.9661 366.031 74.6621 359.792C75.0131 356.642 75.1541 353.669 75.2881 346.563Z"
-        className={getPathProps(['calves']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['calves']).className ?? defaultFillClass}
         name="calves"
       />
 
       {/* Calves lower right */}
       <path
         d="M93.1712 344.271C92.6892 339.936 92.4852 329.971 92.8592 329.063C93.0272 328.654 93.0392 328.656 93.4202 329.123C94.8902 330.925 95.2932 334.102 95.5002 345.521C95.6322 352.841 95.7672 355.763 96.1152 358.854C96.3602 361.031 96.6162 364.313 96.6852 366.147L96.8082 369.482L96.2402 370.158C95.9272 370.529 95.5962 370.833 95.5052 370.833C95.1052 370.833 94.5332 365.624 94.2502 359.413C93.9232 352.206 93.6902 348.938 93.1712 344.271Z"
-        className={getPathProps(['calves']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['calves']).className ?? defaultFillClass}
         name="calves"
       />
 
       {/* Calves Lower Left */}
       <path
         d="M65.0869 337.5C63.7589 333.281 63.5669 331.112 64.3999 329.723C64.7109 329.203 66.8489 332.755 67.8889 335.521C70.4249 342.261 72.6359 357.506 72.8219 369.537C72.8679 372.523 72.7759 372.817 71.8689 372.589C71.0769 372.39 70.9939 372.021 70.8469 368.021C70.4839 358.155 68.8299 349.39 65.0869 337.5Z"
-        className={getPathProps(['calves']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['calves']).className ?? defaultFillClass}
         name="calves"
       />
 
       {/* Lower calves right */}
       <path
         d="M98.0731 368.692C98.7461 350.131 101.832 334.759 105.79 330.251L106.413 329.542L106.598 330.031C106.904 330.84 107.013 333.38 106.78 334.271C106.66 334.729 106.131 336.457 105.605 338.11C102.108 349.081 100.407 358.308 99.9191 368.956L99.7711 372.183L99.1851 372.463C97.9661 373.046 97.9201 372.89 98.0731 368.692Z"
-        className={getPathProps(['calves']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['calves']).className ?? defaultFillClass}
         name="calves"
       />
 
@@ -375,12 +382,12 @@ export const FemaleBodyBackBackground = ({
       <path
         d="M80.87 66.9774C83.154 70.0915 84.4492 74.6965 84.1058 78.4841C83.9703 79.9796 83.9952 79.9634 82.1739 79.7357C77.6668 79.1728 74.3995 78.0876 70.7605 75.943L70.0513 75.5261L71.2429 74.272C73.0517 72.3689 79.0666 67.131 80.0574 66.597C80.4037 66.4096 80.4806 66.4463 80.87 66.9774Z"
         //traps
-        className={getPathProps(['traps']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['traps']).className ?? defaultFillClass}
         name="traps"
       />
       <path
         d="M90.1298 66.9774C87.8457 70.0915 86.5505 74.6965 86.8939 78.4841C87.0294 79.9796 87.0046 79.9634 88.8258 79.7357C93.3329 79.1728 96.6002 78.0876 100.239 75.943L100.948 75.5261L99.7569 74.272C97.9481 72.3689 91.9332 67.131 90.9424 66.597C90.596 66.4096 90.5191 66.4463 90.1298 66.9774Z"
-        className={getPathProps(['traps']).className ?? 'fill-neutral-400'}
+        className={getPathProps(['traps']).className ?? defaultFillClass}
         name="traps"
       />
     </>

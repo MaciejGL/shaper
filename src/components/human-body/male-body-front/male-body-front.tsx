@@ -8,7 +8,7 @@ import { Unselectable } from './unselectable'
 
 export function MaleBodyFrontView({ className, getPathProps }: BodyViewProps) {
   const defaultGetPathProps = (_aliases: string[]) => ({
-    className: 'fill-[#424747]',
+    className: 'fill-neutral-500 dark:fill-neutral-700',
     onClick: () => {},
   })
 

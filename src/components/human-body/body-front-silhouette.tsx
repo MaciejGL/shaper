@@ -10,7 +10,7 @@ interface BodyFrontSilhouetteProps {
 }
 
 const noopGetPathProps = () => ({
-  className: 'fill-[#424747] dark:fill-muted-foreground/10 pointer-events-none',
+  className: 'fill-neutral-500 dark:fill-neutral-700 pointer-events-none',
   onClick: () => {},
 })
 

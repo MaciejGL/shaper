@@ -19,6 +19,12 @@ export type Scalars = {
   JSON: { input: any; output: any; }
 };
 
+export type GQLActivityHeatmapData = {
+  __typename?: 'ActivityHeatmapData';
+  activities: EntireFieldWrapper<Array<GQLDailyActivity>>;
+  weekCount: EntireFieldWrapper<Scalars['Int']['output']>;
+};
+
 export enum GQLActivityLevel {
   Active = 'ACTIVE',
   Athlete = 'ATHLETE',
@@ -672,6 +678,13 @@ export type GQLCreateTrainingWeekInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   weekNumber: Scalars['Int']['input'];
+};
+
+export type GQLDailyActivity = {
+  __typename?: 'DailyActivity';
+  date: EntireFieldWrapper<Scalars['String']['output']>;
+  dayOfWeek: EntireFieldWrapper<Scalars['Int']['output']>;
+  totalSets: EntireFieldWrapper<Scalars['Int']['output']>;
 };
 
 export type GQLDeleteReviewInput = {
@@ -2469,6 +2482,7 @@ export type GQLPushSubscription = {
 
 export type GQLQuery = {
   __typename?: 'Query';
+  activityHeatmap: EntireFieldWrapper<GQLActivityHeatmapData>;
   adminUserById?: EntireFieldWrapper<Maybe<GQLAdminUserListItem>>;
   adminUserList: EntireFieldWrapper<GQLAdminUserListResponse>;
   adminUserStats: EntireFieldWrapper<GQLAdminUserStats>;
@@ -2577,6 +2591,12 @@ export type GQLQuery = {
   userPublic?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
   weeklyMuscleProgress: EntireFieldWrapper<GQLWeeklyProgressSummary>;
   workoutExerciseNotes: EntireFieldWrapper<Array<GQLWorkoutExerciseNotes>>;
+};
+
+
+export type GQLQueryActivityHeatmapArgs = {
+  userId: Scalars['ID']['input'];
+  weekCount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -4100,6 +4120,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type GQLResolversTypes = {
+  ActivityHeatmapData: ResolverTypeWrapper<GQLActivityHeatmapData>;
   ActivityLevel: GQLActivityLevel;
   AddAiExerciseToWorkoutInput: GQLAddAiExerciseToWorkoutInput;
   AddBodyMeasurementInput: GQLAddBodyMeasurementInput;
@@ -4173,6 +4194,7 @@ export type GQLResolversTypes = {
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
   CreateTrainingPlanPayload: ResolverTypeWrapper<GQLCreateTrainingPlanPayload>;
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
+  DailyActivity: ResolverTypeWrapper<GQLDailyActivity>;
   DeleteReviewInput: GQLDeleteReviewInput;
   DeliveryStatus: GQLDeliveryStatus;
   Difficulty: GQLDifficulty;
@@ -4366,6 +4388,7 @@ export type GQLResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type GQLResolversParentTypes = {
+  ActivityHeatmapData: GQLActivityHeatmapData;
   AddAiExerciseToWorkoutInput: GQLAddAiExerciseToWorkoutInput;
   AddBodyMeasurementInput: GQLAddBodyMeasurementInput;
   AddExerciseToDayInput: GQLAddExerciseToDayInput;
@@ -4436,6 +4459,7 @@ export type GQLResolversParentTypes = {
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
   CreateTrainingPlanPayload: GQLCreateTrainingPlanPayload;
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
+  DailyActivity: GQLDailyActivity;
   DeleteReviewInput: GQLDeleteReviewInput;
   DuplicateTrainingWeekInput: GQLDuplicateTrainingWeekInput;
   EditMessageInput: GQLEditMessageInput;
@@ -4593,6 +4617,12 @@ export type GQLResolversParentTypes = {
   WeightProgressLog: GQLWeightProgressLog;
   WorkoutCompletionResult: GQLWorkoutCompletionResult;
   WorkoutExerciseNotes: GQLWorkoutExerciseNotes;
+};
+
+export type GQLActivityHeatmapDataResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ActivityHeatmapData'] = GQLResolversParentTypes['ActivityHeatmapData']> = {
+  activities?: Resolver<Array<GQLResolversTypes['DailyActivity']>, ParentType, ContextType>;
+  weekCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAdminUserListItemResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AdminUserListItem'] = GQLResolversParentTypes['AdminUserListItem']> = {
@@ -4831,6 +4861,13 @@ export type GQLCreateNutritionPlanPayloadResolvers<ContextType = GQLContext, Par
 export type GQLCreateTrainingPlanPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CreateTrainingPlanPayload'] = GQLResolversParentTypes['CreateTrainingPlanPayload']> = {
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLDailyActivityResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['DailyActivity'] = GQLResolversParentTypes['DailyActivity']> = {
+  date?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  dayOfWeek?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  totalSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5579,6 +5616,7 @@ export type GQLPushSubscriptionResolvers<ContextType = GQLContext, ParentType ex
 };
 
 export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Query'] = GQLResolversParentTypes['Query']> = {
+  activityHeatmap?: Resolver<GQLResolversTypes['ActivityHeatmapData'], ParentType, ContextType, RequireFields<GQLQueryActivityHeatmapArgs, 'userId' | 'weekCount'>>;
   adminUserById?: Resolver<Maybe<GQLResolversTypes['AdminUserListItem']>, ParentType, ContextType, RequireFields<GQLQueryAdminUserByIdArgs, 'id'>>;
   adminUserList?: Resolver<GQLResolversTypes['AdminUserListResponse'], ParentType, ContextType, Partial<GQLQueryAdminUserListArgs>>;
   adminUserStats?: Resolver<GQLResolversTypes['AdminUserStats'], ParentType, ContextType>;
@@ -6191,6 +6229,7 @@ export type GQLWorkoutExerciseNotesResolvers<ContextType = GQLContext, ParentTyp
 };
 
 export type GQLResolvers<ContextType = GQLContext> = {
+  ActivityHeatmapData?: GQLActivityHeatmapDataResolvers<ContextType>;
   AdminUserListItem?: GQLAdminUserListItemResolvers<ContextType>;
   AdminUserListResponse?: GQLAdminUserListResponseResolvers<ContextType>;
   AdminUserStats?: GQLAdminUserStatsResolvers<ContextType>;
@@ -6214,6 +6253,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   CopyNutritionPlanPayload?: GQLCopyNutritionPlanPayloadResolvers<ContextType>;
   CreateNutritionPlanPayload?: GQLCreateNutritionPlanPayloadResolvers<ContextType>;
   CreateTrainingPlanPayload?: GQLCreateTrainingPlanPayloadResolvers<ContextType>;
+  DailyActivity?: GQLDailyActivityResolvers<ContextType>;
   ExerciseLog?: GQLExerciseLogResolvers<ContextType>;
   ExerciseProgress?: GQLExerciseProgressResolvers<ContextType>;
   ExerciseSet?: GQLExerciseSetResolvers<ContextType>;

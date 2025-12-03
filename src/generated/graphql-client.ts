@@ -17,6 +17,12 @@ export type Scalars = {
   JSON: { input: any; output: any; }
 };
 
+export type GQLActivityHeatmapData = {
+  __typename?: 'ActivityHeatmapData';
+  activities: Array<GQLDailyActivity>;
+  weekCount: Scalars['Int']['output'];
+};
+
 export enum GQLActivityLevel {
   Active = 'ACTIVE',
   Athlete = 'ATHLETE',
@@ -670,6 +676,13 @@ export type GQLCreateTrainingWeekInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   weekNumber: Scalars['Int']['input'];
+};
+
+export type GQLDailyActivity = {
+  __typename?: 'DailyActivity';
+  date: Scalars['String']['output'];
+  dayOfWeek: Scalars['Int']['output'];
+  totalSets: Scalars['Int']['output'];
 };
 
 export type GQLDeleteReviewInput = {
@@ -2467,6 +2480,7 @@ export type GQLPushSubscription = {
 
 export type GQLQuery = {
   __typename?: 'Query';
+  activityHeatmap: GQLActivityHeatmapData;
   adminUserById?: Maybe<GQLAdminUserListItem>;
   adminUserList: GQLAdminUserListResponse;
   adminUserStats: GQLAdminUserStats;
@@ -2575,6 +2589,12 @@ export type GQLQuery = {
   userPublic?: Maybe<GQLUserPublic>;
   weeklyMuscleProgress: GQLWeeklyProgressSummary;
   workoutExerciseNotes: Array<GQLWorkoutExerciseNotes>;
+};
+
+
+export type GQLQueryActivityHeatmapArgs = {
+  userId: Scalars['ID']['input'];
+  weekCount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -4416,6 +4436,14 @@ export type GQLWeeklyMuscleProgressQueryVariables = Exact<{
 
 
 export type GQLWeeklyMuscleProgressQuery = { __typename?: 'Query', weeklyMuscleProgress: { __typename?: 'WeeklyProgressSummary', weekStartDate: string, weekEndDate: string, overallPercentage: number, streakWeeks: number, muscleProgress: Array<{ __typename?: 'WeeklyMuscleProgress', muscleGroup: string, completedSets: number, targetSets: number, percentage: number, lastTrained?: string | undefined | null }> } };
+
+export type GQLActivityHeatmapQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  weekCount?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLActivityHeatmapQuery = { __typename?: 'Query', activityHeatmap: { __typename?: 'ActivityHeatmapData', weekCount: number, activities: Array<{ __typename?: 'DailyActivity', date: string, totalSets: number, dayOfWeek: number }> } };
 
 export type GQLProgressPageExercisesQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -9072,6 +9100,61 @@ useInfiniteWeeklyMuscleProgressQuery.getKey = (variables: GQLWeeklyMuscleProgres
 
 
 useWeeklyMuscleProgressQuery.fetcher = (variables: GQLWeeklyMuscleProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLWeeklyMuscleProgressQuery, GQLWeeklyMuscleProgressQueryVariables>(WeeklyMuscleProgressDocument, variables, options);
+
+export const ActivityHeatmapDocument = `
+    query ActivityHeatmap($userId: ID!, $weekCount: Int = 8) {
+  activityHeatmap(userId: $userId, weekCount: $weekCount) {
+    activities {
+      date
+      totalSets
+      dayOfWeek
+    }
+    weekCount
+  }
+}
+    `;
+
+export const useActivityHeatmapQuery = <
+      TData = GQLActivityHeatmapQuery,
+      TError = unknown
+    >(
+      variables: GQLActivityHeatmapQueryVariables,
+      options?: Omit<UseQueryOptions<GQLActivityHeatmapQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLActivityHeatmapQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLActivityHeatmapQuery, TError, TData>(
+      {
+    queryKey: ['ActivityHeatmap', variables],
+    queryFn: fetchData<GQLActivityHeatmapQuery, GQLActivityHeatmapQueryVariables>(ActivityHeatmapDocument, variables),
+    ...options
+  }
+    )};
+
+useActivityHeatmapQuery.getKey = (variables: GQLActivityHeatmapQueryVariables) => ['ActivityHeatmap', variables];
+
+export const useInfiniteActivityHeatmapQuery = <
+      TData = InfiniteData<GQLActivityHeatmapQuery>,
+      TError = unknown
+    >(
+      variables: GQLActivityHeatmapQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLActivityHeatmapQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLActivityHeatmapQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLActivityHeatmapQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['ActivityHeatmap.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLActivityHeatmapQuery, GQLActivityHeatmapQueryVariables>(ActivityHeatmapDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteActivityHeatmapQuery.getKey = (variables: GQLActivityHeatmapQueryVariables) => ['ActivityHeatmap.infinite', variables];
+
+
+useActivityHeatmapQuery.fetcher = (variables: GQLActivityHeatmapQueryVariables, options?: RequestInit['headers']) => fetchData<GQLActivityHeatmapQuery, GQLActivityHeatmapQueryVariables>(ActivityHeatmapDocument, variables, options);
 
 export const ProgressPageExercisesDocument = `
     query ProgressPageExercises($userId: ID!) {

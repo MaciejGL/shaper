@@ -3,6 +3,7 @@
 import { ArrowLeftRight } from 'lucide-react'
 import { useState } from 'react'
 
+import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 
@@ -43,7 +44,7 @@ function MuscleProgressLabel({
       className={cn(
         'flex w-full flex-col justify-center gap-0.5 rounded-md px-2 transition-colors',
         'hover:bg-muted/50',
-        isSelected && 'bg-muted',
+        isSelected && 'bg-muted/50',
         isLeft ? 'items-end' : 'items-start',
       )}
     >
@@ -58,16 +59,11 @@ function MuscleProgressLabel({
           {completedSets}/{targetSets}
         </span>
       </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={cn(
-            'h-full rounded-full transition-all duration-500',
-            colorLevel.progressColor,
-            // percentage >= 100 && 'animate-pulse',
-          )}
-          style={{ width: `${Math.min(percentage, 100)}%` }}
-        />
-      </div>
+
+      <Progress
+        value={percentage}
+        classNameIndicator={colorLevel.progressColor}
+      />
     </button>
   )
 }

@@ -1,11 +1,17 @@
+import { endOfWeek, startOfWeek, subWeeks } from 'date-fns'
 import { useState } from 'react'
 
 import { useUser } from '@/context/user-context'
 import { useWeeklyMuscleProgressQuery } from '@/generated/graphql-client'
 
-export function useMuscleHeatmap() {
+export function useMuscleHeatmap(externalWeekOffset?: number) {
   const { user } = useUser()
-  const [weekOffset, setWeekOffset] = useState(0)
+  const [internalWeekOffset, setInternalWeekOffset] = useState(0)
+  
+  const weekOffset = externalWeekOffset ?? internalWeekOffset
+  const setWeekOffset = setInternalWeekOffset
+  
+  const weekStartsOn = (user?.profile?.weekStartsOn ?? 1) as 0 | 1 | 2 | 3 | 4 | 5 | 6
 
   const { data, isLoading, error } = useWeeklyMuscleProgressQuery(
     {
@@ -16,6 +22,12 @@ export function useMuscleHeatmap() {
   )
 
   const weeklyProgress = data?.weeklyMuscleProgress
+  
+  // Calculate week dates client-side for immediate UI update
+  const now = new Date()
+  const targetWeek = subWeeks(now, weekOffset)
+  const weekStartDate = startOfWeek(targetWeek, { weekStartsOn }).toISOString()
+  const weekEndDate = endOfWeek(targetWeek, { weekStartsOn }).toISOString()
 
   // Convert muscle progress to intensity map for body view (0-1 scale based on percentage)
   const muscleIntensity: Record<string, number> = {}
@@ -58,8 +70,8 @@ export function useMuscleHeatmap() {
     // Weekly progress data
     overallPercentage: weeklyProgress?.overallPercentage ?? 0,
     streakWeeks: weeklyProgress?.streakWeeks ?? 0,
-    weekStartDate: weeklyProgress?.weekStartDate ?? null,
-    weekEndDate: weeklyProgress?.weekEndDate ?? null,
+    weekStartDate,
+    weekEndDate,
     muscleProgress,
 
     // For body view compatibility
@@ -68,6 +80,7 @@ export function useMuscleHeatmap() {
 
     // Week navigation
     weekOffset,
+    setWeekOffset,
     isCurrentWeek: weekOffset === 0,
     goToPreviousWeek,
     goToNextWeek,

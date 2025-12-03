@@ -8,7 +8,7 @@ import { Unselectable } from './unselectable'
 
 export function FemaleBodyBackView({ className, getPathProps }: BodyViewProps) {
   const defaultGetPathProps = (_aliases: string[]) => ({
-    className: 'fill-neutral-400',
+    className: 'fill-neutral-500 dark:fill-neutral-700',
     onClick: () => {},
   })
 

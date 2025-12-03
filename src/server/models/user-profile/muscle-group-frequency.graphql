@@ -45,9 +45,22 @@ type WeeklyProgressSummary {
   streakWeeks: Int!
 }
 
+# Daily Activity for Activity Heatmap (GitHub-style)
+type DailyActivity {
+  date: String!
+  totalSets: Int!
+  dayOfWeek: Int!
+}
+
+type ActivityHeatmapData {
+  activities: [DailyActivity!]!
+  weekCount: Int!
+}
+
 extend type Query {
   muscleGroupFrequency(userId: ID!, days: Int = 30): [MuscleGroupFrequency!]!
   muscleFrequency(userId: ID!, days: Int = 30): [MuscleFrequency!]!
   muscleGroupDistribution(userId: ID!, days: Int = 30): MuscleGroupDistribution!
   weeklyMuscleProgress(userId: ID!, weekOffset: Int = 0): WeeklyProgressSummary!
+  activityHeatmap(userId: ID!, weekCount: Int = 8): ActivityHeatmapData!
 }

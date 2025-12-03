@@ -97,7 +97,7 @@ export const FRONT_POSITIONS: MusclePosition[] = [
     side: 'right',
   },
   {
-    muscle: 'Abductors',
+    muscle: 'Adductors',
     maleBodyX: 105,
     maleBodyY: 220,
     femaleBodyX: 110,
@@ -272,20 +272,20 @@ function ConnectionLines({
           <g key={`${pos.muscle}-${pos.side}`}>
             <path
               d={pathData}
-              strokeWidth={1}
+              strokeWidth={isFocused ? 2 : 1}
               fill="none"
               className={cn(
                 'transition-all duration-200',
-                isFocused ? 'stroke-orange-500' : 'stroke-muted-foreground',
+                isFocused ? 'stroke-orange-800' : 'stroke-amber-800',
               )}
             />
             <circle
               cx={bodyX}
               cy={bodyY}
-              r={isFocused ? 4 : 3}
+              r={isFocused ? 5 : 3}
               className={cn(
                 'transition-all duration-200',
-                isFocused ? 'fill-orange-500' : 'fill-muted-foreground',
+                isFocused ? 'fill-orange-800' : 'fill-amber-800',
               )}
             />
           </g>

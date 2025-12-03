@@ -380,7 +380,7 @@ export function BaseMeasurementBodyMap({
         {/* SVG body column */}
         <div className="relative flex items-center justify-center">
           <div
-            className="pointer-events-none opacity-60 [&_svg]:w-full [&_svg]:h-full"
+            className="pointer-events-none [&_svg]:w-full [&_svg]:h-full"
             style={{ width: `${svgWidth}px`, height: `${svgHeight}px` }}
           >
             <BodyFrontSilhouette />

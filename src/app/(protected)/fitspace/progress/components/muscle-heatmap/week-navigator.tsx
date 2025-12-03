@@ -22,18 +22,18 @@ export function WeekNavigator({
 }: WeekNavigatorProps) {
   const formatWeekRange = () => {
     if (!weekStartDate || !weekEndDate) return 'This Week'
-    
+
     const start = parseISO(weekStartDate)
     const end = parseISO(weekEndDate)
-    
+
     if (weekOffset === 0) {
       return 'This Week'
     }
-    
+
     // Format as "Dec 1-7" or "Nov 25 - Dec 1" if spans months
     const startMonth = format(start, 'MMM')
     const endMonth = format(end, 'MMM')
-    
+
     if (startMonth === endMonth) {
       return `${format(start, 'MMM d')}-${format(end, 'd')}`
     }
@@ -43,7 +43,7 @@ export function WeekNavigator({
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon-sm"
         iconOnly={<ChevronLeft className="size-4" />}
         onClick={onPrevious}
@@ -53,7 +53,7 @@ export function WeekNavigator({
         {formatWeekRange()}
       </span>
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon-sm"
         iconOnly={<ChevronRight className="size-4" />}
         onClick={onNext}
@@ -63,4 +63,3 @@ export function WeekNavigator({
     </div>
   )
 }
-
