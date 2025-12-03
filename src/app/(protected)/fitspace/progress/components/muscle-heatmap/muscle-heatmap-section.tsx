@@ -63,7 +63,7 @@ export function MuscleHeatmapSection() {
           compact
           showPartialContent
         >
-          <div className="space-y-6">
+          <div>
             {/* Body Heatmap View */}
             <div className="mb-16">
               <HeatmapBodyView
@@ -87,10 +87,12 @@ export function MuscleHeatmapSection() {
                   }}
                   className="overflow-hidden"
                 >
-                  <SelectedMuscleDetails
-                    selectedMuscle={selectedMuscle}
-                    muscleProgress={muscleProgress}
-                  />
+                  <div className="pt-6">
+                    <SelectedMuscleDetails
+                      selectedMuscle={selectedMuscle}
+                      muscleProgress={muscleProgress}
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

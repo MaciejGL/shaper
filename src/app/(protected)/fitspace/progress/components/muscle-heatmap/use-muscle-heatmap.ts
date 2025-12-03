@@ -42,15 +42,6 @@ export function useMuscleHeatmap(externalWeekOffset?: number) {
   > = {}
 
   if (weeklyProgress?.muscleProgress) {
-    // DEBUG: Log raw API response
-    console.info(
-      '[MUSCLE-HEATMAP-UI] Raw API muscleProgress:',
-      weeklyProgress.muscleProgress.map((p) => ({
-        muscleGroup: p.muscleGroup,
-        completedSets: p.completedSets,
-      })),
-    )
-
     weeklyProgress.muscleProgress.forEach((progress) => {
       // Normalize percentage to 0-1 scale for body coloring
       muscleIntensity[progress.muscleGroup] = progress.percentage / 100
@@ -61,9 +52,6 @@ export function useMuscleHeatmap(externalWeekOffset?: number) {
         lastTrained: progress.lastTrained || null,
       }
     })
-
-    // DEBUG: Log processed data
-    console.info('[MUSCLE-HEATMAP-UI] Processed muscleIntensity keys:', Object.keys(muscleIntensity))
   }
 
   // Calculate total sets this week

@@ -100,7 +100,7 @@ export function HeatmapBodyView({
           <TabsTrigger value="back">Back</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="front" className="pt-4">
+        <TabsContent value="front" className="pt-4 -mx-2">
           <BaseMuscleBodyMap
             view="front"
             muscleIntensity={muscleIntensity}

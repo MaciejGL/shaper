@@ -112,7 +112,7 @@ export function ActivityHeatmap({
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-3 pt-6">
         <div className="flex items-center justify-between">
           <div className="h-4 w-24 animate-pulse rounded bg-muted" />
           <div className="h-3 w-32 animate-pulse rounded bg-muted" />
@@ -123,7 +123,7 @@ export function ActivityHeatmap({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 pt-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-medium text-muted-foreground">Activity</h3>
         {selectedWeekStats && (

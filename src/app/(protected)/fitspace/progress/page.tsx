@@ -45,9 +45,9 @@ export default function ProgressPage() {
           <SnapshotsSection />
         </BodyMeasurementsProvider>
 
-        <LatestPRs />
-
         <MuscleHeatmapSection />
+
+        <LatestPRs />
 
         {showAtBottom && <CheckinScheduleSection variant="minimal" />}
       </div>

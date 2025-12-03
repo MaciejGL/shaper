@@ -477,17 +477,22 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       weekStartsOn,
     })
 
-    // Get completed exercises for the target week
-    const completedExercises = await prisma.trainingExercise.findMany({
+    // Get exercises that have sets completed in the target week
+    // (counts individual sets, not just fully completed exercises)
+    const exercisesWithCompletedSets = await prisma.trainingExercise.findMany({
       where: {
-        completedAt: {
-          gte: targetWeekStart,
-          lte: targetWeekEnd,
-        },
         day: {
           week: {
             plan: {
               assignedToId: userId,
+            },
+          },
+        },
+        sets: {
+          some: {
+            completedAt: {
+              gte: targetWeekStart,
+              lte: targetWeekEnd,
             },
           },
         },
@@ -496,12 +501,14 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         base: {
           include: {
             muscleGroups: true,
+            secondaryMuscleGroups: true,
           },
         },
         sets: {
           where: {
             completedAt: {
-              not: null,
+              gte: targetWeekStart,
+              lte: targetWeekEnd,
             },
           },
         },
@@ -556,36 +563,50 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     })
 
     // Aggregate sets by muscle group
-    const unmappedSlugs = new Set<string>()
-    completedExercises.forEach((exercise) => {
-      if (!exercise.base?.muscleGroups) return
+    // Primary muscles = 100%, Secondary muscles = 25%
+    const SECONDARY_MUSCLE_WEIGHT = 0.25
 
-      exercise.base.muscleGroups.forEach((muscleGroup) => {
+    exercisesWithCompletedSets.forEach((exercise) => {
+      if (!exercise.base) return
+      const setCount = exercise.sets.length
+
+      // Primary muscle groups (100% weight)
+      exercise.base.muscleGroups?.forEach((muscleGroup) => {
         const mappedGroup = slugToMuscleGroup[muscleGroup.groupSlug]
         if (mappedGroup && muscleProgress[mappedGroup]) {
-          muscleProgress[mappedGroup].completedSets += exercise.sets.length
+          muscleProgress[mappedGroup].completedSets += setCount
 
-          if (
-            !muscleProgress[mappedGroup].lastTrained ||
-            (exercise.completedAt &&
-              exercise.completedAt > muscleProgress[mappedGroup].lastTrained!)
-          ) {
-            muscleProgress[mappedGroup].lastTrained = exercise.completedAt
-          }
-        } else if (muscleGroup.groupSlug) {
-          unmappedSlugs.add(muscleGroup.groupSlug)
+          exercise.sets.forEach((set) => {
+            if (
+              set.completedAt &&
+              (!muscleProgress[mappedGroup].lastTrained ||
+                set.completedAt > muscleProgress[mappedGroup].lastTrained!)
+            ) {
+              muscleProgress[mappedGroup].lastTrained = set.completedAt
+            }
+          })
+        }
+      })
+
+      // Secondary muscle groups (25% weight)
+      exercise.base.secondaryMuscleGroups?.forEach((muscleGroup) => {
+        const mappedGroup = slugToMuscleGroup[muscleGroup.groupSlug]
+        if (mappedGroup && muscleProgress[mappedGroup]) {
+          muscleProgress[mappedGroup].completedSets +=
+            setCount * SECONDARY_MUSCLE_WEIGHT
+
+          exercise.sets.forEach((set) => {
+            if (
+              set.completedAt &&
+              (!muscleProgress[mappedGroup].lastTrained ||
+                set.completedAt > muscleProgress[mappedGroup].lastTrained!)
+            ) {
+              muscleProgress[mappedGroup].lastTrained = set.completedAt
+            }
+          })
         }
       })
     })
-
-    // DEBUG: Log unmapped muscle group slugs
-    if (unmappedSlugs.size > 0) {
-      console.warn(
-        '[MUSCLE-HEATMAP] Unmapped groupSlugs found:',
-        Array.from(unmappedSlugs),
-      )
-    }
-    console.info('[MUSCLE-HEATMAP] Final muscleProgress:', muscleProgress)
 
     // Calculate weekly progress array
     const weeklyMuscleProgress = trackedMuscleGroups.map((group) => {
@@ -596,7 +617,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       )
       return {
         muscleGroup: group,
-        completedSets: progress.completedSets,
+        completedSets: Math.round(progress.completedSets),
         targetSets: TARGET_SETS_PER_MUSCLE,
         percentage: Math.round(percentage * 10) / 10,
         lastTrained: progress.lastTrained?.toISOString() || null,
@@ -707,7 +728,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       | 6
 
     const now = new Date()
-    const startDate = startOfWeek(subWeeks(now, weekCount - 1), { weekStartsOn })
+    const startDate = startOfWeek(subWeeks(now, weekCount - 1), {
+      weekStartsOn,
+    })
     const endDate = endOfWeek(now, { weekStartsOn })
 
     const completedSets = await prisma.exerciseSet.findMany({
