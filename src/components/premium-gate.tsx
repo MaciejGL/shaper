@@ -29,13 +29,15 @@ export function PremiumGate({
   className,
 }: PremiumGateProps) {
   const pathname = usePathname()
-  const { hasPremium, isLoading } = useUser()
+  const { hasPremium, isLoading, user } = useUser()
   const { openUrl, isLoading: isOpeningUrl } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
   })
 
-  // If user has premium access, show the content
-  if (hasPremium || isLoading) {
+  const isAdmin = user?.email === 'm.glowacki01@gmail.com'
+
+  // If user has premium access or is admin, show the content
+  if (hasPremium || isLoading || isAdmin) {
     return children
   }
 

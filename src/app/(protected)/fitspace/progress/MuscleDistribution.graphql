@@ -44,6 +44,11 @@ query WeeklyMuscleProgress($userId: ID!, $weekOffset: Int = 0) {
       targetSets
       percentage
       lastTrained
+      subMuscles {
+        name
+        alias
+        completedSets
+      }
     }
   }
 }

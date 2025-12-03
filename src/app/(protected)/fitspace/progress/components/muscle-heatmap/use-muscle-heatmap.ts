@@ -38,6 +38,7 @@ export function useMuscleHeatmap(externalWeekOffset?: number) {
       targetSets: number
       percentage: number
       lastTrained: string | null
+      subMuscles: { name: string; alias: string; completedSets: number }[]
     }
   > = {}
 
@@ -50,6 +51,7 @@ export function useMuscleHeatmap(externalWeekOffset?: number) {
         targetSets: progress.targetSets,
         percentage: progress.percentage,
         lastTrained: progress.lastTrained || null,
+        subMuscles: progress.subMuscles || [],
       }
     })
   }

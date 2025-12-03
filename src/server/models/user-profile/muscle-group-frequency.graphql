@@ -28,6 +28,13 @@ type MuscleGroupDistribution {
   core: Int!
 }
 
+# Sub-muscle breakdown for detailed view
+type SubMuscleProgress {
+  name: String!
+  alias: String!
+  completedSets: Int!
+}
+
 # Weekly Muscle Progress for Gamification
 type WeeklyMuscleProgress {
   muscleGroup: String!
@@ -35,6 +42,7 @@ type WeeklyMuscleProgress {
   targetSets: Int!
   percentage: Float!
   lastTrained: String
+  subMuscles: [SubMuscleProgress!]!
 }
 
 type WeeklyProgressSummary {

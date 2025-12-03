@@ -3177,6 +3177,13 @@ export type GQLStrengthProgression = {
   totalSessions: Scalars['Int']['output'];
 };
 
+export type GQLSubMuscleProgress = {
+  __typename?: 'SubMuscleProgress';
+  alias: Scalars['String']['output'];
+  completedSets: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+};
+
 export enum GQLSubscriptionDuration {
   Monthly = 'MONTHLY',
   Yearly = 'YEARLY'
@@ -3980,6 +3987,7 @@ export type GQLWeeklyMuscleProgress = {
   lastTrained?: Maybe<Scalars['String']['output']>;
   muscleGroup: Scalars['String']['output'];
   percentage: Scalars['Float']['output'];
+  subMuscles: Array<GQLSubMuscleProgress>;
   targetSets: Scalars['Int']['output'];
 };
 
@@ -4435,7 +4443,7 @@ export type GQLWeeklyMuscleProgressQueryVariables = Exact<{
 }>;
 
 
-export type GQLWeeklyMuscleProgressQuery = { __typename?: 'Query', weeklyMuscleProgress: { __typename?: 'WeeklyProgressSummary', weekStartDate: string, weekEndDate: string, overallPercentage: number, streakWeeks: number, muscleProgress: Array<{ __typename?: 'WeeklyMuscleProgress', muscleGroup: string, completedSets: number, targetSets: number, percentage: number, lastTrained?: string | undefined | null }> } };
+export type GQLWeeklyMuscleProgressQuery = { __typename?: 'Query', weeklyMuscleProgress: { __typename?: 'WeeklyProgressSummary', weekStartDate: string, weekEndDate: string, overallPercentage: number, streakWeeks: number, muscleProgress: Array<{ __typename?: 'WeeklyMuscleProgress', muscleGroup: string, completedSets: number, targetSets: number, percentage: number, lastTrained?: string | undefined | null, subMuscles: Array<{ __typename?: 'SubMuscleProgress', name: string, alias: string, completedSets: number }> }> } };
 
 export type GQLActivityHeatmapQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -9054,6 +9062,11 @@ export const WeeklyMuscleProgressDocument = `
       targetSets
       percentage
       lastTrained
+      subMuscles {
+        name
+        alias
+        completedSets
+      }
     }
   }
 }

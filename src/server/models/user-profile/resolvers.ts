@@ -549,8 +549,13 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       forearms: 'Forearms',
       'hip-adductors': 'Inner Thighs',
       'lower-back': 'Lower Back',
-      lats: 'Lats',
-      traps: 'Traps',
+    }
+
+    // Map specific muscle names to separate display groups
+    // (for muscles that share a groupSlug but need separate tracking)
+    const muscleNameToGroup: Record<string, string> = {
+      'Latissimus Dorsi': 'Lats',
+      Trapezius: 'Traps',
     }
 
     // Initialize progress for all muscle groups
@@ -560,6 +565,15 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     > = {}
     trackedMuscleGroups.forEach((group) => {
       muscleProgress[group] = { completedSets: 0, lastTrained: null }
+    })
+
+    // Track individual sub-muscle sets for breakdown
+    const subMuscleProgress: Record<
+      string,
+      Record<string, { name: string; alias: string; completedSets: number }>
+    > = {}
+    trackedMuscleGroups.forEach((group) => {
+      subMuscleProgress[group] = {}
     })
 
     // Aggregate sets by muscle group
@@ -572,9 +586,23 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
       // Primary muscle groups (100% weight)
       exercise.base.muscleGroups?.forEach((muscleGroup) => {
-        const mappedGroup = slugToMuscleGroup[muscleGroup.groupSlug]
+        // Check muscle name first for separate tracking, then fall back to groupSlug
+        const mappedGroup =
+          muscleNameToGroup[muscleGroup.name] ||
+          slugToMuscleGroup[muscleGroup.groupSlug]
         if (mappedGroup && muscleProgress[mappedGroup]) {
           muscleProgress[mappedGroup].completedSets += setCount
+
+          // Track sub-muscle breakdown
+          const subMuscleKey = muscleGroup.name
+          if (!subMuscleProgress[mappedGroup][subMuscleKey]) {
+            subMuscleProgress[mappedGroup][subMuscleKey] = {
+              name: muscleGroup.name,
+              alias: muscleGroup.alias || muscleGroup.name,
+              completedSets: 0,
+            }
+          }
+          subMuscleProgress[mappedGroup][subMuscleKey].completedSets += setCount
 
           exercise.sets.forEach((set) => {
             if (
@@ -590,9 +618,24 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
       // Secondary muscle groups (25% weight)
       exercise.base.secondaryMuscleGroups?.forEach((muscleGroup) => {
-        const mappedGroup = slugToMuscleGroup[muscleGroup.groupSlug]
+        // Check muscle name first for separate tracking, then fall back to groupSlug
+        const mappedGroup =
+          muscleNameToGroup[muscleGroup.name] ||
+          slugToMuscleGroup[muscleGroup.groupSlug]
         if (mappedGroup && muscleProgress[mappedGroup]) {
           muscleProgress[mappedGroup].completedSets +=
+            setCount * SECONDARY_MUSCLE_WEIGHT
+
+          // Track sub-muscle breakdown (with weight)
+          const subMuscleKey = muscleGroup.name
+          if (!subMuscleProgress[mappedGroup][subMuscleKey]) {
+            subMuscleProgress[mappedGroup][subMuscleKey] = {
+              name: muscleGroup.name,
+              alias: muscleGroup.alias || muscleGroup.name,
+              completedSets: 0,
+            }
+          }
+          subMuscleProgress[mappedGroup][subMuscleKey].completedSets +=
             setCount * SECONDARY_MUSCLE_WEIGHT
 
           exercise.sets.forEach((set) => {
@@ -608,19 +651,28 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       })
     })
 
-    // Calculate weekly progress array
+    // Calculate weekly progress array with raw totals
     const weeklyMuscleProgress = trackedMuscleGroups.map((group) => {
       const progress = muscleProgress[group]
       const percentage = Math.min(
         100,
         (progress.completedSets / TARGET_SETS_PER_MUSCLE) * 100,
       )
+
+      // Get sub-muscle breakdown
+      const subMuscles = Object.values(subMuscleProgress[group]).map((sub) => ({
+        name: sub.name,
+        alias: sub.alias,
+        completedSets: Math.round(sub.completedSets),
+      }))
+
       return {
         muscleGroup: group,
         completedSets: Math.round(progress.completedSets),
         targetSets: TARGET_SETS_PER_MUSCLE,
         percentage: Math.round(percentage * 10) / 10,
         lastTrained: progress.lastTrained?.toISOString() || null,
+        subMuscles,
       }
     })
 

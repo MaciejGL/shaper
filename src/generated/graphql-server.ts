@@ -3179,6 +3179,13 @@ export type GQLStrengthProgression = {
   totalSessions: EntireFieldWrapper<Scalars['Int']['output']>;
 };
 
+export type GQLSubMuscleProgress = {
+  __typename?: 'SubMuscleProgress';
+  alias: EntireFieldWrapper<Scalars['String']['output']>;
+  completedSets: EntireFieldWrapper<Scalars['Int']['output']>;
+  name: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
 export enum GQLSubscriptionDuration {
   Monthly = 'MONTHLY',
   Yearly = 'YEARLY'
@@ -3982,6 +3989,7 @@ export type GQLWeeklyMuscleProgress = {
   lastTrained?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   muscleGroup: EntireFieldWrapper<Scalars['String']['output']>;
   percentage: EntireFieldWrapper<Scalars['Float']['output']>;
+  subMuscles: EntireFieldWrapper<Array<GQLSubMuscleProgress>>;
   targetSets: EntireFieldWrapper<Scalars['Int']['output']>;
 };
 
@@ -4305,6 +4313,7 @@ export type GQLResolversTypes = {
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   StrengthProgression: ResolverTypeWrapper<GQLStrengthProgression>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  SubMuscleProgress: ResolverTypeWrapper<GQLSubMuscleProgress>;
   SubscriptionDuration: GQLSubscriptionDuration;
   SubscriptionStats: ResolverTypeWrapper<GQLSubscriptionStats>;
   SubscriptionStatus: GQLSubscriptionStatus;
@@ -4553,6 +4562,7 @@ export type GQLResolversParentTypes = {
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   StrengthProgression: GQLStrengthProgression;
   String: Scalars['String']['output'];
+  SubMuscleProgress: GQLSubMuscleProgress;
   SubscriptionStats: GQLSubscriptionStats;
   Substitute: GQLSubstitute;
   SuggestedSets: GQLSuggestedSets;
@@ -5827,6 +5837,13 @@ export type GQLStrengthProgressionResolvers<ContextType = GQLContext, ParentType
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLSubMuscleProgressResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SubMuscleProgress'] = GQLResolversParentTypes['SubMuscleProgress']> = {
+  alias?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  completedSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLSubscriptionStatsResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SubscriptionStats'] = GQLResolversParentTypes['SubscriptionStats']> = {
   totalLifetimeSubscriptions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalUsers?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
@@ -6196,6 +6213,7 @@ export type GQLWeeklyMuscleProgressResolvers<ContextType = GQLContext, ParentTyp
   lastTrained?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   muscleGroup?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   percentage?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  subMuscles?: Resolver<Array<GQLResolversTypes['SubMuscleProgress']>, ParentType, ContextType>;
   targetSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -6317,6 +6335,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   SetCompletionResult?: GQLSetCompletionResultResolvers<ContextType>;
   StartFreeWorkoutResult?: GQLStartFreeWorkoutResultResolvers<ContextType>;
   StrengthProgression?: GQLStrengthProgressionResolvers<ContextType>;
+  SubMuscleProgress?: GQLSubMuscleProgressResolvers<ContextType>;
   SubscriptionStats?: GQLSubscriptionStatsResolvers<ContextType>;
   Substitute?: GQLSubstituteResolvers<ContextType>;
   SuggestedSets?: GQLSuggestedSetsResolvers<ContextType>;
