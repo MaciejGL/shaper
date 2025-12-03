@@ -15,9 +15,9 @@ export function MaleBodyFrontView({ className, getPathProps }: BodyViewProps) {
   return (
     <div className="relative">
       <svg
-        width="194"
-        height="392"
-        viewBox="0 0 194 392"
+        width="198"
+        height="393"
+        viewBox="0 0 198 393"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={className}
@@ -29,10 +29,10 @@ export function MaleBodyFrontView({ className, getPathProps }: BodyViewProps) {
             maskUnits="userSpaceOnUse"
             x="0"
             y="0"
-            width="194"
-            height="392"
+            width="198"
+            height="393"
           >
-            <path d="M194 0H0V392H194V0Z" fill="white" />
+            <path d="M198 0H0V393H198V0Z" fill="white" />
           </mask>
           <g mask="url(#male-front-mask)">
             <Unselectable />
@@ -44,7 +44,7 @@ export function MaleBodyFrontView({ className, getPathProps }: BodyViewProps) {
         </g>
         <defs>
           <clipPath id="male-front-clip">
-            <rect width="194" height="392" fill="white" />
+            <rect width="198" height="393" fill="white" />
           </clipPath>
         </defs>
       </svg>

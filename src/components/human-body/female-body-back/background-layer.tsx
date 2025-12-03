@@ -1,4 +1,4 @@
-export function FemaleBodyFrontBackgroundLayer() {
+export function FemaleBodyBackBackgroundLayer() {
   return (
     <path
       className="fill-neutral-400"

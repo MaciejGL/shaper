@@ -15,9 +15,9 @@ export function MaleBodyBackView({ className, getPathProps }: BodyViewProps) {
   return (
     <div className="relative">
       <svg
-        width="194"
+        width="197"
         height="392"
-        viewBox="0 0 194 392"
+        viewBox="0 0 197 392"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={className}
@@ -29,22 +29,22 @@ export function MaleBodyBackView({ className, getPathProps }: BodyViewProps) {
             maskUnits="userSpaceOnUse"
             x="0"
             y="0"
-            width="194"
+            width="197"
             height="392"
           >
-            <path d="M194 0H0V392H194V0Z" fill="white" />
+            <path d="M197 0H0V392H197V0Z" fill="white" />
           </mask>
           <g mask="url(#male-back-mask)">
+            <MaleBodyBackBackgroundLayer />
             <Unselectable />
             <MaleBodyBackBackground
               getPathProps={getPathProps ?? defaultGetPathProps}
             />
-            <MaleBodyBackBackgroundLayer />
           </g>
         </g>
         <defs>
           <clipPath id="male-back-clip">
-            <rect width="194" height="392" fill="white" />
+            <rect width="197" height="392" fill="white" />
           </clipPath>
         </defs>
       </svg>

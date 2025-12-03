@@ -28,9 +28,26 @@ type MuscleGroupDistribution {
   core: Int!
 }
 
+# Weekly Muscle Progress for Gamification
+type WeeklyMuscleProgress {
+  muscleGroup: String!
+  completedSets: Int!
+  targetSets: Int!
+  percentage: Float!
+  lastTrained: String
+}
+
+type WeeklyProgressSummary {
+  weekStartDate: String!
+  weekEndDate: String!
+  overallPercentage: Float!
+  muscleProgress: [WeeklyMuscleProgress!]!
+  streakWeeks: Int!
+}
+
 extend type Query {
   muscleGroupFrequency(userId: ID!, days: Int = 30): [MuscleGroupFrequency!]!
   muscleFrequency(userId: ID!, days: Int = 30): [MuscleFrequency!]!
-
   muscleGroupDistribution(userId: ID!, days: Int = 30): MuscleGroupDistribution!
+  weeklyMuscleProgress(userId: ID!, weekOffset: Int = 0): WeeklyProgressSummary!
 }

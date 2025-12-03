@@ -1,4 +1,4 @@
-import { subDays } from 'date-fns'
+import { endOfWeek, startOfWeek, subDays, subWeeks } from 'date-fns'
 
 import {
   GQLMutationResolvers,
@@ -440,6 +440,237 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     // console.info(distribution) // Debug output disabled
 
     return distribution
+  },
+
+  weeklyMuscleProgress: async (
+    _parent,
+    { userId, weekOffset = 0 },
+    context,
+  ) => {
+    const TARGET_SETS_PER_MUSCLE = 12
+
+    // Get user's week start preference (0 = Sunday, 1 = Monday, etc.)
+    const userProfile =
+      await context.loaders.user.userProfileByUserId.load(userId)
+    const weekStartsOn = (userProfile?.weekStartsOn ?? 1) as
+      | 0
+      | 1
+      | 2
+      | 3
+      | 4
+      | 5
+      | 6
+
+    // Calculate the target week's boundaries
+    const now = new Date()
+    const targetWeekStart = startOfWeek(subWeeks(now, weekOffset), {
+      weekStartsOn,
+    })
+    const targetWeekEnd = endOfWeek(subWeeks(now, weekOffset), {
+      weekStartsOn,
+    })
+
+    // Get completed exercises for the target week
+    const completedExercises = await prisma.trainingExercise.findMany({
+      where: {
+        completedAt: {
+          gte: targetWeekStart,
+          lte: targetWeekEnd,
+        },
+        day: {
+          week: {
+            plan: {
+              assignedToId: userId,
+            },
+          },
+        },
+      },
+      include: {
+        base: {
+          include: {
+            muscleGroups: true,
+          },
+        },
+        sets: {
+          where: {
+            completedAt: {
+              not: null,
+            },
+          },
+        },
+      },
+    })
+
+    // Define muscle groups ordered by popularity (most trained first)
+    const trackedMuscleGroups = [
+      'Chest',
+      'Upper Back',
+      'Lower Back',
+      'Lats',
+      'Shoulders',
+      'Biceps',
+      'Triceps',
+      'Quads',
+      'Hamstrings',
+      'Glutes',
+      'Calves',
+      'Core', // Combined Abs + Obliques
+      'Forearms',
+      'Traps',
+      'Inner Thighs',
+    ]
+
+    // Map groupSlug to our muscle group names
+    const slugToMuscleGroup: Record<string, string> = {
+      chest: 'Chest',
+      'upper-back': 'Upper Back',
+      shoulders: 'Shoulders',
+      biceps: 'Biceps',
+      triceps: 'Triceps',
+      quads: 'Quads',
+      hamstrings: 'Hamstrings',
+      glutes: 'Glutes',
+      calves: 'Calves',
+      core: 'Core', // Maps to combined Core
+      forearms: 'Forearms',
+      'hip-adductors': 'Inner Thighs',
+      'lower-back': 'Lower Back',
+    }
+
+    // Initialize progress for all muscle groups
+    const muscleProgress: Record<
+      string,
+      { completedSets: number; lastTrained: Date | null }
+    > = {}
+    trackedMuscleGroups.forEach((group) => {
+      muscleProgress[group] = { completedSets: 0, lastTrained: null }
+    })
+
+    // Aggregate sets by muscle group
+    completedExercises.forEach((exercise) => {
+      if (!exercise.base?.muscleGroups) return
+
+      exercise.base.muscleGroups.forEach((muscleGroup) => {
+        const mappedGroup = slugToMuscleGroup[muscleGroup.groupSlug]
+        if (mappedGroup && muscleProgress[mappedGroup]) {
+          muscleProgress[mappedGroup].completedSets += exercise.sets.length
+
+          if (
+            !muscleProgress[mappedGroup].lastTrained ||
+            (exercise.completedAt &&
+              exercise.completedAt > muscleProgress[mappedGroup].lastTrained!)
+          ) {
+            muscleProgress[mappedGroup].lastTrained = exercise.completedAt
+          }
+        }
+      })
+    })
+
+    // Calculate weekly progress array
+    const weeklyMuscleProgress = trackedMuscleGroups.map((group) => {
+      const progress = muscleProgress[group]
+      const percentage = Math.min(
+        100,
+        (progress.completedSets / TARGET_SETS_PER_MUSCLE) * 100,
+      )
+      return {
+        muscleGroup: group,
+        completedSets: progress.completedSets,
+        targetSets: TARGET_SETS_PER_MUSCLE,
+        percentage: Math.round(percentage * 10) / 10,
+        lastTrained: progress.lastTrained?.toISOString() || null,
+      }
+    })
+
+    // Calculate overall percentage (average of all muscle groups)
+    const totalPercentage = weeklyMuscleProgress.reduce(
+      (sum, m) => sum + m.percentage,
+      0,
+    )
+    const overallPercentage =
+      Math.round((totalPercentage / trackedMuscleGroups.length) * 10) / 10
+
+    // Calculate streak (consecutive weeks with >= 80% overall completion)
+    let streakWeeks = 0
+    const STREAK_THRESHOLD = 80
+
+    // Only calculate streak if looking at current week
+    if (weekOffset === 0) {
+      // Check previous weeks for streak
+      for (let i = 1; i <= 12; i++) {
+        const prevWeekStart = startOfWeek(subWeeks(now, i), { weekStartsOn })
+        const prevWeekEnd = endOfWeek(subWeeks(now, i), { weekStartsOn })
+
+        const prevWeekExercises = await prisma.trainingExercise.findMany({
+          where: {
+            completedAt: {
+              gte: prevWeekStart,
+              lte: prevWeekEnd,
+            },
+            day: {
+              week: {
+                plan: {
+                  assignedToId: userId,
+                },
+              },
+            },
+          },
+          include: {
+            base: {
+              include: {
+                muscleGroups: true,
+              },
+            },
+            sets: {
+              where: {
+                completedAt: {
+                  not: null,
+                },
+              },
+            },
+          },
+        })
+
+        // Calculate that week's overall percentage
+        const prevMuscleProgress: Record<string, number> = {}
+        trackedMuscleGroups.forEach((group) => {
+          prevMuscleProgress[group] = 0
+        })
+
+        prevWeekExercises.forEach((exercise) => {
+          if (!exercise.base?.muscleGroups) return
+          exercise.base.muscleGroups.forEach((muscleGroup) => {
+            const mappedGroup = slugToMuscleGroup[muscleGroup.groupSlug]
+            if (mappedGroup && prevMuscleProgress[mappedGroup] !== undefined) {
+              prevMuscleProgress[mappedGroup] += exercise.sets.length
+            }
+          })
+        })
+
+        const prevTotalPercentage = trackedMuscleGroups.reduce((sum, group) => {
+          const pct = Math.min(
+            100,
+            (prevMuscleProgress[group] / TARGET_SETS_PER_MUSCLE) * 100,
+          )
+          return sum + pct
+        }, 0)
+        const prevOverallPct = prevTotalPercentage / trackedMuscleGroups.length
+
+        if (prevOverallPct >= STREAK_THRESHOLD) {
+          streakWeeks++
+        } else {
+          break
+        }
+      }
+    }
+
+    return {
+      weekStartDate: targetWeekStart.toISOString(),
+      weekEndDate: targetWeekEnd.toISOString(),
+      overallPercentage,
+      muscleProgress: weeklyMuscleProgress,
+      streakWeeks,
+    }
   },
 }
 

@@ -1,77 +1,95 @@
 'use client'
 
 import { ArrowLeftRight } from 'lucide-react'
+import { useState } from 'react'
 
-import { MaleBodyBackView } from '@/components/human-body/male-body-back/male-body-back'
-import { MaleBodyFrontView } from '@/components/human-body/male-body-front/male-body-front'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { GQLMuscleFrequency } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
+import { HEATMAP_COLORS } from '../../constants/heatmap-colors'
+
 import {
-  HEATMAP_COLORS,
-  getIntensityColor,
-} from '../../constants/heatmap-colors'
-import { LABEL_TO_GROUP_MAPPING } from '../../constants/muscle-groups'
+  BaseMuscleBodyMap,
+  LABEL_HEIGHT,
+  MusclePosition,
+} from './muscle-body-map'
+import type { MuscleProgressData } from './types'
+
+interface MuscleProgressLabelProps {
+  position: MusclePosition
+  progress: MuscleProgressData | undefined
+  isSelected: boolean
+  onClick: () => void
+}
+
+function MuscleProgressLabel({
+  position,
+  progress,
+  isSelected,
+  onClick,
+}: MuscleProgressLabelProps) {
+  const completedSets = progress?.completedSets ?? 0
+  const targetSets = progress?.targetSets ?? 12
+  const percentage = progress?.percentage ?? 0
+  const colorLevel = HEATMAP_COLORS.getColorForProgress(percentage / 100)
+  const isLeft = position.side === 'left'
+  const displayName =
+    position.muscle === 'LowerBack' ? 'Lower Back' : position.muscle
+
+  return (
+    <button
+      onClick={onClick}
+      style={{ height: LABEL_HEIGHT }}
+      className={cn(
+        'flex w-full flex-col justify-center gap-0.5 rounded-md px-2 transition-colors',
+        'hover:bg-muted/50',
+        isSelected && 'bg-muted',
+        isLeft ? 'items-end' : 'items-start',
+      )}
+    >
+      <div
+        className={cn(
+          'flex items-center gap-1.5 text-[10px]',
+          isLeft && 'flex-row-reverse',
+        )}
+      >
+        <span className="font-medium truncate">{displayName}</span>
+        <span className="tabular-nums text-muted-foreground whitespace-nowrap">
+          {completedSets}/{targetSets}
+        </span>
+      </div>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className={cn(
+            'h-full rounded-full transition-all duration-500',
+            colorLevel.progressColor,
+            // percentage >= 100 && 'animate-pulse',
+          )}
+          style={{ width: `${Math.min(percentage, 100)}%` }}
+        />
+      </div>
+    </button>
+  )
+}
 
 interface HeatmapBodyViewProps {
   muscleIntensity: Record<string, number>
+  muscleProgress: Record<string, MuscleProgressData>
   selectedMuscle: string | null
   onMuscleClick: (muscle: string) => void
-  groupedMuscleData?: Record<
-    string,
-    {
-      groupName: string
-      totalSets: number
-      sessionsCount: number
-      lastTrained: string
-      muscles: GQLMuscleFrequency[]
-    }
-  >
-  disableEmptyLabels?: boolean
 }
 
 export function HeatmapBodyView({
   muscleIntensity,
+  muscleProgress,
   selectedMuscle,
   onMuscleClick,
-  groupedMuscleData: _groupedMuscleData,
-  disableEmptyLabels: _disableEmptyLabels = false,
 }: HeatmapBodyViewProps) {
-  const getPathProps = (aliases: string[]) => {
-    // Find the muscle group for these aliases
-    let muscleGroupName: string | null = null
-    for (const alias of aliases) {
-      if (LABEL_TO_GROUP_MAPPING[alias]) {
-        muscleGroupName = LABEL_TO_GROUP_MAPPING[alias]
-        break
-      }
-    }
-
-    const intensity = muscleGroupName
-      ? muscleIntensity[muscleGroupName] || 0
-      : 0
-
-    return {
-      className: cn(
-        'cursor-pointer transition-all duration-200',
-        getIntensityColor(intensity),
-        selectedMuscle &&
-          muscleGroupName &&
-          muscleGroupName === selectedMuscle &&
-          'ring-2 ring-blue-500',
-      ),
-      onClick: () => {
-        if (muscleGroupName) {
-          onMuscleClick(muscleGroupName)
-        }
-      },
-    }
-  }
+  const [view, setView] = useState<'front' | 'back'>('front')
 
   return (
     <div className="relative">
-      <Tabs defaultValue="front">
+      <Tabs value={view} onValueChange={(v) => setView(v as 'front' | 'back')}>
         <TabsList className="mx-auto border border-border grid grid-cols-[1fr_auto_1fr]">
           <TabsTrigger value="front">Front</TabsTrigger>
           <TabsTrigger value="swap" disabled>
@@ -80,28 +98,40 @@ export function HeatmapBodyView({
           <TabsTrigger value="back">Back</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="front" className="flex flex-col items-center pt-4">
-          <MaleBodyFrontView getPathProps={getPathProps} />
+        <TabsContent value="front" className="pt-4">
+          <BaseMuscleBodyMap
+            view="front"
+            muscleIntensity={muscleIntensity}
+            selectedMuscle={selectedMuscle}
+            onMuscleClick={onMuscleClick}
+            renderLabel={({ position }) => (
+              <MuscleProgressLabel
+                position={position}
+                progress={muscleProgress[position.muscle]}
+                isSelected={selectedMuscle === position.muscle}
+                onClick={() => onMuscleClick(position.muscle)}
+              />
+            )}
+          />
         </TabsContent>
 
-        <TabsContent value="back" className="flex flex-col items-center pt-4">
-          <MaleBodyBackView getPathProps={getPathProps} />
+        <TabsContent value="back" className="pt-4">
+          <BaseMuscleBodyMap
+            view="back"
+            muscleIntensity={muscleIntensity}
+            selectedMuscle={selectedMuscle}
+            onMuscleClick={onMuscleClick}
+            renderLabel={({ position }) => (
+              <MuscleProgressLabel
+                position={position}
+                progress={muscleProgress[position.muscle]}
+                isSelected={selectedMuscle === position.muscle}
+                onClick={() => onMuscleClick(position.muscle)}
+              />
+            )}
+          />
         </TabsContent>
       </Tabs>
-      {/* Intensity Legend */}
-      <div className="space-y-1">
-        <div className="text-xs font-medium text-muted-foreground">
-          Intensity
-        </div>
-        <div className="flex items-center gap-1">
-          {HEATMAP_COLORS.levels.map((level) => (
-            <div key={level.label} className="flex items-center gap-2">
-              <div className={cn('size-3 rounded', level.bgColor)} />
-              <div className="text-xs text-muted-foreground">{level.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   )
 }

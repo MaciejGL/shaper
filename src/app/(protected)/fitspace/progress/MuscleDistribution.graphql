@@ -31,3 +31,19 @@ query MuscleFrequency($userId: ID!, $days: Int = 30) {
     lastTrained
   }
 }
+
+query WeeklyMuscleProgress($userId: ID!, $weekOffset: Int = 0) {
+  weeklyMuscleProgress(userId: $userId, weekOffset: $weekOffset) {
+    weekStartDate
+    weekEndDate
+    overallPercentage
+    streakWeeks
+    muscleProgress {
+      muscleGroup
+      completedSets
+      targetSets
+      percentage
+      lastTrained
+    }
+  }
+}

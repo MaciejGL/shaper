@@ -1,46 +1,94 @@
-import { StatCard } from '../stat-card'
+'use client'
+
+import { formatDistanceToNow, parseISO } from 'date-fns'
+import { motion } from 'framer-motion'
+
+import { cn } from '@/lib/utils'
+
+import { HEATMAP_COLORS } from '../../constants/heatmap-colors'
 
 import type { SelectedMuscleDetailsProps } from './types'
 
 export function SelectedMuscleDetails({
   selectedMuscle,
-  muscleIntensity,
-  groupedMuscleData,
+  muscleProgress,
 }: SelectedMuscleDetailsProps) {
-  const groupData = groupedMuscleData?.[selectedMuscle]
-  const intensity = muscleIntensity[selectedMuscle] || 0
-  const sets = groupData?.totalSets || 0
+  const progress = muscleProgress[selectedMuscle]
+  
+  if (!progress) {
+    return null
+  }
+
+  const colorLevel = HEATMAP_COLORS.getColorForProgress(progress.percentage / 100)
+  const isComplete = progress.percentage >= 100
+  const setsRemaining = Math.max(0, progress.targetSets - progress.completedSets)
+
+  const getStatusMessage = () => {
+    if (isComplete) return 'Target reached!'
+    if (setsRemaining === 1) return '1 more set to go'
+    return `${setsRemaining} more sets to complete`
+  }
+
+  const formatLastTrained = () => {
+    if (!progress.lastTrained) return 'Not trained this week'
+    try {
+      return `Trained ${formatDistanceToNow(parseISO(progress.lastTrained), { addSuffix: true })}`
+    } catch {
+      return 'Recently trained'
+    }
+  }
 
   return (
-    <div className="space-y-3">
-      <div className="text-center">
-        <h3 className="font-medium">
-          {selectedMuscle || 'Unknown Muscle Group'}
-        </h3>
-        {groupData && groupData.muscles.length > 1 && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="rounded-lg border bg-card p-4"
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="font-semibold">{selectedMuscle}</h3>
           <p className="text-sm text-muted-foreground">
-            {groupData.muscles.length} muscles:{' '}
-            {groupData.muscles.map((m) => m.muscleAlias).join(', ')}
+            {formatLastTrained()}
           </p>
-        )}
+        </div>
+        <div className="text-right">
+          <span className={cn(
+            'text-2xl font-bold tabular-nums',
+            isComplete && 'text-orange-500',
+          )}>
+            {progress.completedSets}
+          </span>
+          <span className="text-muted-foreground">/{progress.targetSets}</span>
+          <p className="text-xs text-muted-foreground">sets</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <StatCard
-          label="Last 30 Days"
-          value={sets}
-          unit="sets"
-          size="sm"
-          isOnCard
-        />
-        <StatCard
-          label="Focus Level"
-          value={intensity * 100}
-          unit="%"
-          size="sm"
-          isOnCard
-        />
+      {/* Large progress bar */}
+      <div className="mt-4">
+        <div className="relative h-3 overflow-hidden rounded-full bg-muted">
+          <motion.div
+            className={cn(
+              'absolute inset-y-0 left-0 rounded-full',
+              colorLevel.progressColor,
+              isComplete && 'animate-pulse',
+            )}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(progress.percentage, 100)}%` }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-sm">
+          <span className={cn(
+            'font-medium',
+            isComplete ? 'text-orange-500' : 'text-muted-foreground',
+          )}>
+            {getStatusMessage()}
+          </span>
+          <span className="font-semibold tabular-nums">
+            {Math.round(progress.percentage)}%
+          </span>
+        </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

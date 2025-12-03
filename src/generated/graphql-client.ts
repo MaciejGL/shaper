@@ -2573,6 +2573,7 @@ export type GQLQuery = {
   userBodyProgressLogs: Array<GQLBodyProgressLog>;
   userExercises: Array<GQLBaseExercise>;
   userPublic?: Maybe<GQLUserPublic>;
+  weeklyMuscleProgress: GQLWeeklyProgressSummary;
   workoutExerciseNotes: Array<GQLWorkoutExerciseNotes>;
 };
 
@@ -2945,6 +2946,12 @@ export type GQLQueryUserExercisesArgs = {
 
 export type GQLQueryUserPublicArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryWeeklyMuscleProgressArgs = {
+  userId: Scalars['ID']['input'];
+  weekOffset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3947,6 +3954,24 @@ export type GQLVolumeEntry = {
   week: Scalars['String']['output'];
 };
 
+export type GQLWeeklyMuscleProgress = {
+  __typename?: 'WeeklyMuscleProgress';
+  completedSets: Scalars['Int']['output'];
+  lastTrained?: Maybe<Scalars['String']['output']>;
+  muscleGroup: Scalars['String']['output'];
+  percentage: Scalars['Float']['output'];
+  targetSets: Scalars['Int']['output'];
+};
+
+export type GQLWeeklyProgressSummary = {
+  __typename?: 'WeeklyProgressSummary';
+  muscleProgress: Array<GQLWeeklyMuscleProgress>;
+  overallPercentage: Scalars['Float']['output'];
+  streakWeeks: Scalars['Int']['output'];
+  weekEndDate: Scalars['String']['output'];
+  weekStartDate: Scalars['String']['output'];
+};
+
 export type GQLWeightProgressLog = {
   __typename?: 'WeightProgressLog';
   measuredAt: Scalars['String']['output'];
@@ -4383,6 +4408,14 @@ export type GQLMuscleFrequencyQueryVariables = Exact<{
 
 
 export type GQLMuscleFrequencyQuery = { __typename?: 'Query', muscleFrequency: Array<{ __typename?: 'MuscleFrequency', muscleId: string, muscleName: string, muscleAlias: string, groupSlug: string, groupName: string, sessionsCount: number, totalSets: number, lastTrained?: string | undefined | null }> };
+
+export type GQLWeeklyMuscleProgressQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  weekOffset?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLWeeklyMuscleProgressQuery = { __typename?: 'Query', weeklyMuscleProgress: { __typename?: 'WeeklyProgressSummary', weekStartDate: string, weekEndDate: string, overallPercentage: number, streakWeeks: number, muscleProgress: Array<{ __typename?: 'WeeklyMuscleProgress', muscleGroup: string, completedSets: number, targetSets: number, percentage: number, lastTrained?: string | undefined | null }> } };
 
 export type GQLProgressPageExercisesQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -8979,6 +9012,66 @@ useInfiniteMuscleFrequencyQuery.getKey = (variables: GQLMuscleFrequencyQueryVari
 
 
 useMuscleFrequencyQuery.fetcher = (variables: GQLMuscleFrequencyQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMuscleFrequencyQuery, GQLMuscleFrequencyQueryVariables>(MuscleFrequencyDocument, variables, options);
+
+export const WeeklyMuscleProgressDocument = `
+    query WeeklyMuscleProgress($userId: ID!, $weekOffset: Int = 0) {
+  weeklyMuscleProgress(userId: $userId, weekOffset: $weekOffset) {
+    weekStartDate
+    weekEndDate
+    overallPercentage
+    streakWeeks
+    muscleProgress {
+      muscleGroup
+      completedSets
+      targetSets
+      percentage
+      lastTrained
+    }
+  }
+}
+    `;
+
+export const useWeeklyMuscleProgressQuery = <
+      TData = GQLWeeklyMuscleProgressQuery,
+      TError = unknown
+    >(
+      variables: GQLWeeklyMuscleProgressQueryVariables,
+      options?: Omit<UseQueryOptions<GQLWeeklyMuscleProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLWeeklyMuscleProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLWeeklyMuscleProgressQuery, TError, TData>(
+      {
+    queryKey: ['WeeklyMuscleProgress', variables],
+    queryFn: fetchData<GQLWeeklyMuscleProgressQuery, GQLWeeklyMuscleProgressQueryVariables>(WeeklyMuscleProgressDocument, variables),
+    ...options
+  }
+    )};
+
+useWeeklyMuscleProgressQuery.getKey = (variables: GQLWeeklyMuscleProgressQueryVariables) => ['WeeklyMuscleProgress', variables];
+
+export const useInfiniteWeeklyMuscleProgressQuery = <
+      TData = InfiniteData<GQLWeeklyMuscleProgressQuery>,
+      TError = unknown
+    >(
+      variables: GQLWeeklyMuscleProgressQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLWeeklyMuscleProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLWeeklyMuscleProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLWeeklyMuscleProgressQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['WeeklyMuscleProgress.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLWeeklyMuscleProgressQuery, GQLWeeklyMuscleProgressQueryVariables>(WeeklyMuscleProgressDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteWeeklyMuscleProgressQuery.getKey = (variables: GQLWeeklyMuscleProgressQueryVariables) => ['WeeklyMuscleProgress.infinite', variables];
+
+
+useWeeklyMuscleProgressQuery.fetcher = (variables: GQLWeeklyMuscleProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLWeeklyMuscleProgressQuery, GQLWeeklyMuscleProgressQueryVariables>(WeeklyMuscleProgressDocument, variables, options);
 
 export const ProgressPageExercisesDocument = `
     query ProgressPageExercises($userId: ID!) {

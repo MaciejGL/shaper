@@ -3,6 +3,7 @@
 import { BodyViewProps } from '../types'
 
 import { FemaleBodyBackBackground } from './background'
+import { FemaleBodyBackBackgroundLayer } from './background-layer'
 import { Unselectable } from './unselectable'
 
 export function FemaleBodyBackView({ className, getPathProps }: BodyViewProps) {
@@ -38,6 +39,7 @@ export function FemaleBodyBackView({ className, getPathProps }: BodyViewProps) {
             <FemaleBodyBackBackground
               getPathProps={getPathProps ?? defaultGetPathProps}
             />
+            <FemaleBodyBackBackgroundLayer />
           </g>
         </g>
         <defs>

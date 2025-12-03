@@ -1,24 +1,18 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Activity } from 'lucide-react'
 import { useState } from 'react'
 
 import { PremiumGate } from '@/components/premium-gate'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 
 import { HeatmapBodyView } from './heatmap-body-view'
-import { MuscleHeatmapEmpty } from './muscle-heatmap-empty'
-import { QuickStats } from './quick-stats'
+import { MuscleProgressList } from './muscle-progress-list'
+import { OverallProgress } from './overall-progress'
 import { SelectedMuscleDetails } from './selected-muscle-details'
 import { useMuscleHeatmap } from './use-muscle-heatmap'
+import { WeekNavigator } from './week-navigator'
 
 export function MuscleHeatmapSection() {
   const { user } = useUser()
@@ -26,11 +20,16 @@ export function MuscleHeatmapSection() {
 
   const {
     muscleIntensity,
-    muscleCategorization,
-    totalSets,
-    groupedMuscleData,
+    muscleProgress,
+    overallPercentage,
+    streakWeeks,
+    weekStartDate,
+    weekEndDate,
+    weekOffset,
+    isCurrentWeek,
+    goToPreviousWeek,
+    goToNextWeek,
     isLoading,
-    error,
   } = useMuscleHeatmap()
 
   const handleMuscleClick = (muscle: string) => {
@@ -41,36 +40,49 @@ export function MuscleHeatmapSection() {
     return null
   }
 
-  if ((error || totalSets === 0) && !isLoading) {
-    return <MuscleHeatmapEmpty />
-  }
-
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-orange-500" />
-          Muscle Heatmap
-        </CardTitle>
-        <CardDescription>
-          Muscle stress and intensity over the last 30 days.
-        </CardDescription>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <WeekNavigator
+            weekStartDate={weekStartDate}
+            weekEndDate={weekEndDate}
+            weekOffset={weekOffset}
+            onPrevious={goToPreviousWeek}
+            onNext={goToNextWeek}
+          />
+          {streakWeeks > 0 && isCurrentWeek && (
+            <div className="flex items-center gap-1.5 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-700 dark:bg-orange-950 dark:text-orange-300">
+              <span className="font-semibold">{streakWeeks}</span>
+              <span>week streak</span>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
-        <PremiumGate feature="Muscle Focus Heatmap" compact showPartialContent>
-          <div>
+        <PremiumGate
+          feature="Weekly Muscle Progress"
+          compact
+          showPartialContent
+        >
+          <div className="space-y-6">
+            {/* Overall Progress */}
+            <OverallProgress
+              percentage={overallPercentage}
+              isLoading={isLoading}
+            />
+
             {/* Body Heatmap View */}
             <HeatmapBodyView
               muscleIntensity={muscleIntensity}
+              muscleProgress={muscleProgress}
               selectedMuscle={selectedMuscle}
               onMuscleClick={handleMuscleClick}
-              groupedMuscleData={groupedMuscleData}
-              disableEmptyLabels={true}
             />
 
             {/* Selected Muscle Details */}
             <AnimatePresence>
-              {selectedMuscle && (
+              {selectedMuscle && muscleProgress[selectedMuscle] && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -81,30 +93,20 @@ export function MuscleHeatmapSection() {
                   }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-6">
-                    <SelectedMuscleDetails
-                      selectedMuscle={selectedMuscle}
-                      muscleIntensity={muscleIntensity}
-                      groupedMuscleData={groupedMuscleData}
-                    />
-                  </div>
+                  <SelectedMuscleDetails
+                    selectedMuscle={selectedMuscle}
+                    muscleProgress={muscleProgress}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Quick Stats */}
-            <div className="pt-6">
-              <QuickStats
-                muscleIntensity={muscleIntensity}
-                muscleCategorization={
-                  muscleCategorization || {
-                    overfocused: [],
-                    balanced: [],
-                    underfocused: [],
-                  }
-                }
-              />
-            </div>
+            {/* Muscle Progress List */}
+            <MuscleProgressList
+              muscleProgress={muscleProgress}
+              onMuscleClick={handleMuscleClick}
+              selectedMuscle={selectedMuscle}
+            />
           </div>
         </PremiumGate>
       </CardContent>

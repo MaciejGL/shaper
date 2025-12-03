@@ -1,26 +1,34 @@
-import type { GQLMuscleFrequency } from '@/generated/graphql-client'
+export interface MuscleProgressData {
+  completedSets: number
+  targetSets: number
+  percentage: number
+  lastTrained: string | null
+}
 
-import type {
-  GroupedMuscleData,
-  MuscleGroupCategorization,
-} from '../../utils/muscle-aggregation'
-
-export interface MuscleHeatmapData {
+export interface WeeklyHeatmapData {
+  overallPercentage: number
+  streakWeeks: number
+  weekStartDate: string | null
+  weekEndDate: string | null
+  muscleProgress: Record<string, MuscleProgressData>
   muscleIntensity: Record<string, number>
   totalSets: number
-  individualMuscleData: Record<string, number>
-  rawMuscleData: GQLMuscleFrequency[]
+  weekOffset: number
+  isCurrentWeek: boolean
+  goToPreviousWeek: () => void
+  goToNextWeek: () => void
+  goToCurrentWeek: () => void
   isLoading: boolean
-  error: boolean
+  error: unknown
 }
 
 export interface SelectedMuscleDetailsProps {
-  selectedMuscle: string // Now contains muscle group name (e.g., "Shoulders")
-  muscleIntensity: Record<string, number> // Now contains muscle group names as keys
-  groupedMuscleData?: Record<string, GroupedMuscleData>
+  selectedMuscle: string
+  muscleProgress: Record<string, MuscleProgressData>
 }
 
-export interface QuickStatsProps {
-  muscleIntensity: Record<string, number> // Now contains muscle group names as keys
-  muscleCategorization: MuscleGroupCategorization // Categorized muscle groups
+export interface MuscleProgressListProps {
+  muscleProgress: Record<string, MuscleProgressData>
+  onMuscleClick: (muscle: string) => void
+  selectedMuscle: string | null
 }

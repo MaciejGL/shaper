@@ -4,10 +4,6 @@ export const MUSCLE_GROUP_MAPPING_BY_MUSCLE_ID: Record<
   { name: string; id: string }[]
 > = {
   // Front view muscle groups
-  Neck: [
-    { id: 'c39a156b-09eb-4b00-b306-0c2a4adfce30', name: 'Posterior' },
-    { id: 'fe477e74-1bfb-4391-807e-6da86953074b', name: 'Anterior' },
-  ],
   Shoulders: [
     { id: 'a4d9c7e8-1e3b-0a5d-ec2f-7b8d9e0a1f2c', name: 'Rotator Cuff' },
     { id: 'cmb6zrcud0010uhmhok7xvy58', name: 'Deltoid Anterior' },
@@ -30,10 +26,11 @@ export const MUSCLE_GROUP_MAPPING_BY_MUSCLE_ID: Record<
     { id: 'cmb6zrb14000guhmhn1oykc26', name: 'Biceps Brachii' },
     { id: 'cmb6zrbch000kuhmhnz10504n', name: 'Brachialis' },
   ],
-  Obliques: [{ id: 'cmb6zrdn50019uhmhr743v0jd', name: 'Obliques' }],
-  Abs: [
+  // Combined Abs + Obliques into Core
+  Core: [
     { id: 'cmb6zrdgy0017uhmhira269ib', name: 'Rectus Abdominis' },
     { id: 'cmb6zrdu5001buhmhwq3vjavd', name: 'Transverse Abdominis' },
+    { id: 'cmb6zrdn50019uhmhr743v0jd', name: 'Obliques' },
   ],
   'Inner Thighs': [{ id: 'cmb6zrccn000vuhmhcrpcrkuo', name: 'Adductors' }],
 
@@ -58,10 +55,6 @@ export const MUSCLE_GROUP_MAPPING_BY_MUSCLE_ID: Record<
 // Map body view labels to muscle group names for heatmap visualization
 // These aliases match the SVG path muscle group aliases in background.tsx files
 export const LABEL_TO_GROUP_MAPPING: Record<string, string> = {
-  // Neck
-  neck: 'Neck',
-  anterior: 'Neck',
-
   // Shoulders
   shoulders: 'Shoulders',
   'front delts': 'Shoulders',
@@ -77,9 +70,9 @@ export const LABEL_TO_GROUP_MAPPING: Record<string, string> = {
   triceps: 'Triceps',
   forearms: 'Forearms',
 
-  // Core
-  abs: 'Abs',
-  obliques: 'Obliques',
+  // Core (combined Abs + Obliques)
+  abs: 'Core',
+  obliques: 'Core',
 
   // Back
   traps: 'Traps',
