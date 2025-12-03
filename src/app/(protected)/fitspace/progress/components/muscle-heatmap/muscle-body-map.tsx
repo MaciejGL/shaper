@@ -97,7 +97,7 @@ export const FRONT_POSITIONS: MusclePosition[] = [
     side: 'right',
   },
   {
-    muscle: 'Adductors',
+    muscle: 'Inner Thighs',
     maleBodyX: 105,
     maleBodyY: 220,
     femaleBodyX: 110,
@@ -120,7 +120,7 @@ export const BACK_POSITIONS: MusclePosition[] = [
     side: 'left',
   },
   {
-    muscle: 'Up-Back',
+    muscle: 'Upper Back',
     maleBodyX: 95,
     maleBodyY: 95,
     femaleBodyX: 90,
@@ -147,7 +147,7 @@ export const BACK_POSITIONS: MusclePosition[] = [
     side: 'left',
   },
   {
-    muscle: 'Hams',
+    muscle: 'Hamstrings',
     maleBodyX: 72,
     maleBodyY: 235,
     femaleBodyX: 75,
@@ -175,7 +175,7 @@ export const BACK_POSITIONS: MusclePosition[] = [
     side: 'right',
   },
   {
-    muscle: 'Low-Back',
+    muscle: 'Lower Back',
     maleBodyX: 97,
     maleBodyY: 150,
     femaleBodyX: 98,

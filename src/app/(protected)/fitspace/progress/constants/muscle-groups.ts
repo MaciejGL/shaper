@@ -39,7 +39,7 @@ export const MUSCLE_GROUP_MAPPING_BY_MUSCLE_ID: Record<
   Lats: [{ id: 'cmb6zra6y0007uhmhbhffb2h4', name: 'Latissimus Dorsi' }],
   Hamstrings: [{ id: 'cmb6zrc1d000ruhmhk2vqyoxz', name: 'Hamstrings' }],
   Triceps: [{ id: 'cmb6zrb6n000iuhmhseibwmiy', name: 'Triceps Brachii' }],
-  LowerBack: [{ id: 'cmb6zranq000duhmhxh7mcq2i', name: 'Erector Spinae' }],
+  'Lower Back': [{ id: 'cmb6zranq000duhmhxh7mcq2i', name: 'Erector Spinae' }],
   Glutes: [
     { id: 'cmb6zrc71000tuhmhqkgbwcrt', name: 'Gluteus Maximus' },
     { id: 'c0f5e3d4-7a9d-6c1f-ae8b-3d4f5a6e7c8d', name: 'Gluteus Medius' },
@@ -79,8 +79,8 @@ export const LABEL_TO_GROUP_MAPPING: Record<string, string> = {
   upper_back: 'Upper Back',
   rhomboids: 'Upper Back',
   lats: 'Lats',
-  lower_back: 'LowerBack',
-  'lower back': 'LowerBack',
+  lower_back: 'Lower Back',
+  'lower back': 'Lower Back',
 
   // Legs
   quads: 'Quads',

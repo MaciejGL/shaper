@@ -538,10 +538,12 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       hamstrings: 'Hamstrings',
       glutes: 'Glutes',
       calves: 'Calves',
-      core: 'Core', // Maps to combined Core
+      core: 'Core',
       forearms: 'Forearms',
       'hip-adductors': 'Inner Thighs',
       'lower-back': 'Lower Back',
+      lats: 'Lats',
+      traps: 'Traps',
     }
 
     // Initialize progress for all muscle groups
@@ -554,6 +556,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     })
 
     // Aggregate sets by muscle group
+    const unmappedSlugs = new Set<string>()
     completedExercises.forEach((exercise) => {
       if (!exercise.base?.muscleGroups) return
 
@@ -569,9 +572,20 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           ) {
             muscleProgress[mappedGroup].lastTrained = exercise.completedAt
           }
+        } else if (muscleGroup.groupSlug) {
+          unmappedSlugs.add(muscleGroup.groupSlug)
         }
       })
     })
+
+    // DEBUG: Log unmapped muscle group slugs
+    if (unmappedSlugs.size > 0) {
+      console.warn(
+        '[MUSCLE-HEATMAP] Unmapped groupSlugs found:',
+        Array.from(unmappedSlugs),
+      )
+    }
+    console.info('[MUSCLE-HEATMAP] Final muscleProgress:', muscleProgress)
 
     // Calculate weekly progress array
     const weeklyMuscleProgress = trackedMuscleGroups.map((group) => {

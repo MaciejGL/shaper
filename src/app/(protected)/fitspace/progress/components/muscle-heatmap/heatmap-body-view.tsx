@@ -16,6 +16,13 @@ import {
 } from './muscle-body-map'
 import type { MuscleProgressData } from './types'
 
+const DISPLAY_NAMES: Record<string, string> = {
+  'Upper Back': 'Up-Back',
+  'Lower Back': 'Low-Back',
+  Hamstrings: 'Hams',
+  'Inner Thighs': 'Adductors',
+}
+
 interface MuscleProgressLabelProps {
   position: MusclePosition
   progress: MuscleProgressData | undefined
@@ -34,8 +41,7 @@ function MuscleProgressLabel({
   const percentage = progress?.percentage ?? 0
   const colorLevel = HEATMAP_COLORS.getColorForProgress(percentage / 100)
   const isLeft = position.side === 'left'
-  const displayName =
-    position.muscle === 'LowerBack' ? 'Lower Back' : position.muscle
+  const displayName = DISPLAY_NAMES[position.muscle] ?? position.muscle
 
   return (
     <button
