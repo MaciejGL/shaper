@@ -2,7 +2,6 @@ import {
   addDays,
   endOfWeek,
   format,
-  getDay,
   isThisWeek,
   parseISO,
   startOfWeek,
@@ -20,7 +19,7 @@ export interface DayCell {
   dayLabel: string
 }
 
-export interface WeekColumn {
+interface WeekColumn {
   weekIndex: number
   weekStartDate: string
   weekEndDate: string
@@ -28,14 +27,14 @@ export interface WeekColumn {
   isCurrentWeek: boolean
 }
 
-export interface WeekStats {
+interface WeekStats {
   totalSets: number
   activeDays: number
   weekLabel: string
   days: DayCell[]
 }
 
-export const ACTIVITY_WEEK_COUNT = 8
+const ACTIVITY_WEEK_COUNT = 8
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 interface UseActivityHeatmapProps {
