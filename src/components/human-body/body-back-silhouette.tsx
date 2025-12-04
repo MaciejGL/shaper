@@ -15,31 +15,19 @@ const noopGetPathProps = () => ({
   onClick: () => {},
 })
 
-const noopHandler = () => false
-
 export function BodyBackSilhouette({ className }: BodyBackSilhouetteProps) {
   const { user } = useUser()
   if (user?.profile?.sex === 'Female') {
     return (
       <div className={className}>
-        <FemaleBodyBackView
-          getPathProps={noopGetPathProps}
-          isRegionSelected={noopHandler}
-          handleRegionClick={() => {}}
-          hideLabels
-        />
+        <FemaleBodyBackView getPathProps={noopGetPathProps} />
       </div>
     )
   }
 
   return (
     <div className={className}>
-      <MaleBodyBackView
-        getPathProps={noopGetPathProps}
-        isRegionSelected={noopHandler}
-        handleRegionClick={() => {}}
-        hideLabels
-      />
+      <MaleBodyBackView getPathProps={noopGetPathProps} />
     </div>
   )
 }

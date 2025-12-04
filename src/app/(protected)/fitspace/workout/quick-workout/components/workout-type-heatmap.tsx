@@ -1,7 +1,12 @@
+'use client'
+
 import { useMemo } from 'react'
 
-import { BackBodyView } from '@/components/human-body/body-back/body-back'
-import { FrontBodyView } from '@/components/human-body/body-front/body-front'
+import { FemaleBodyBackView } from '@/components/human-body/female-body-back/female-body-back'
+import { FemaleBodyFrontView } from '@/components/human-body/female-body-front/female-body-front'
+import { MaleBodyBackView } from '@/components/human-body/male-body-back/male-body-back'
+import { MaleBodyFrontView } from '@/components/human-body/male-body-front/male-body-front'
+import { useUser } from '@/context/user-context'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 
@@ -16,20 +21,18 @@ export function WorkoutTypeHeatmap({
   muscleGroups,
   colorClassName = 'fill-primary',
 }: WorkoutTypeHeatmapProps) {
-  // Create muscle intensity data for heatmap visualization
+  const { user } = useUser()
+  const isMale = user?.profile?.sex !== 'Female'
+
   const muscleIntensity = useMemo(() => {
     const intensity: Record<string, number> = {}
-
-    // Set high intensity (80) for all selected muscle groups
     muscleGroups.forEach((muscle) => {
       intensity[muscle] = 80
     })
-
     return intensity
   }, [muscleGroups])
 
   const getPathProps = (aliases: string[]) => {
-    // Find the muscle group for these aliases
     let muscleGroupName: string | null = null
     for (const alias of aliases) {
       if (LABEL_TO_GROUP_MAPPING[alias]) {
@@ -51,9 +54,8 @@ export function WorkoutTypeHeatmap({
     }
   }
 
-  const isRegionSelected = () => false
-  const handleRegionClick = () => {}
-  const hasMuscleData = () => true
+  const FrontView = isMale ? MaleBodyFrontView : FemaleBodyFrontView
+  const BackView = isMale ? MaleBodyBackView : FemaleBodyBackView
 
   return (
     <div>
@@ -86,26 +88,13 @@ export function WorkoutTypeHeatmap({
           value="front"
           className="flex flex-col items-center scale-100 sm:scale-90"
         >
-          <FrontBodyView
-            getPathProps={getPathProps}
-            isRegionSelected={isRegionSelected}
-            handleRegionClick={handleRegionClick}
-            hasMuscleData={hasMuscleData}
-            hideLabels={true}
-          />
+          <FrontView getPathProps={getPathProps} />
         </TabsContent>
 
         <TabsContent value="back" className="flex flex-col items-center">
-          <BackBodyView
-            getPathProps={getPathProps}
-            isRegionSelected={isRegionSelected}
-            handleRegionClick={handleRegionClick}
-            hasMuscleData={hasMuscleData}
-            hideLabels={true}
-          />
+          <BackView getPathProps={getPathProps} />
         </TabsContent>
       </Tabs>
-      {/* Legend hidden for compact view */}
     </div>
   )
 }

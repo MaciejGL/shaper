@@ -2,17 +2,14 @@
 
 import { motion } from 'framer-motion'
 
-import { LazyEnhancedBodyView as EnhancedBodyView } from '@/components/human-body/lazy-enhanced-body-view'
-import { GQLMuscleGroup } from '@/generated/graphql-client'
+import { SelectableMuscleBodyMap } from '@/app/(protected)/fitspace/progress/components/muscle-heatmap/selectable-muscle-body-map'
 
 interface ManualMuscleGroupsStepProps {
-  muscleGroups: Pick<GQLMuscleGroup, 'id' | 'alias' | 'groupSlug'>[]
   selectedMuscleGroups: string[]
   onMuscleGroupToggle: (alias: string) => void
 }
 
 export function ManualMuscleGroupsStep({
-  muscleGroups,
   selectedMuscleGroups,
   onMuscleGroupToggle,
 }: ManualMuscleGroupsStepProps) {
@@ -24,10 +21,9 @@ export function ManualMuscleGroupsStep({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <EnhancedBodyView
+        <SelectableMuscleBodyMap
           selectedMuscleGroups={selectedMuscleGroups}
           onMuscleGroupClick={onMuscleGroupToggle}
-          muscleGroups={muscleGroups}
         />
       </motion.div>
 
