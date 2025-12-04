@@ -1,6 +1,6 @@
 import { BaseExercise as BaseExerciseType } from '@/generated/prisma/client'
 
-import { MUSCLES_V2 } from '../src/constants/muscles-v2'
+import { MUSCLES } from '../src/constants/muscles'
 import { prisma } from '../src/lib/db'
 
 type BaseExercise = Pick<
@@ -8,71 +8,26 @@ type BaseExercise = Pick<
   'name' | 'description' | 'equipment'
 > & { muscleGroupIds: string[] }
 
-export async function seedMuscleGroupsV2() {
-  // Create categories based on muscles-v2.ts structure
-  const muscleCategoriesV2 = [
-    { name: 'Chest', slug: 'chest' },
-    { name: 'Upper Back', slug: 'upper-back' },
-    { name: 'Lower Back', slug: 'lower-back' },
-    { name: 'Shoulders', slug: 'shoulders' },
-    { name: 'Biceps', slug: 'biceps' },
-    { name: 'Triceps', slug: 'triceps' },
-    { name: 'Forearms', slug: 'forearms' },
-    { name: 'Quads', slug: 'quads' },
-    { name: 'Hamstrings', slug: 'hamstrings' },
-    { name: 'Glutes', slug: 'glutes' },
-    { name: 'Calves', slug: 'calves' },
-    { name: 'Core', slug: 'core' },
-    { name: 'Hip Adductors', slug: 'hip-adductors' },
-    { name: 'Hip Abductors', slug: 'hip-abductors' },
-    { name: 'Neck', slug: 'neck' },
-    { name: 'Stabilizers', slug: 'stabilizers' },
-  ]
-
-  // Create muscle group categories
-  const categoryMap: Record<string, string> = {}
-  for (const cat of muscleCategoriesV2) {
-    const category = await prisma.muscleGroupCategory.upsert({
-      where: { slug: cat.slug },
-      update: {
-        name: cat.name,
-        slug: cat.slug,
-      },
-      create: {
-        name: cat.name,
-        slug: cat.slug,
-      },
-    })
-    categoryMap[cat.name] = category.id
-    console.info(`Added/Updated MuscleGroupCategory: ${cat.name}`)
-  }
-
-  // Create muscle groups using data from muscles-v2.ts
-  for (const muscle of MUSCLES_V2) {
+export async function seedMuscleGroups() {
+  for (const muscle of MUSCLES) {
     await prisma.muscleGroup.upsert({
       where: { id: muscle.id },
       update: {
         name: muscle.name,
         alias: muscle.alias,
-        groupSlug: muscle.groupSlug,
-        categoryId: categoryMap[muscle.group],
-        isPrimary: muscle.isPrimary !== false, // Default to true if not specified
+        displayGroup: muscle.displayGroup,
       },
       create: {
-        id: muscle.id, // Use specific ID from muscles-v2.ts
+        id: muscle.id,
         name: muscle.name,
         alias: muscle.alias,
-        groupSlug: muscle.groupSlug,
-        categoryId: categoryMap[muscle.group],
-        isPrimary: muscle.isPrimary !== false, // Default to true if not specified
+        displayGroup: muscle.displayGroup,
       },
     })
     console.info(`Added/Updated MuscleGroup: ${muscle.name} (${muscle.alias})`)
   }
 
-  console.info(
-    `Seeded ${MUSCLES_V2.length} muscle groups across ${muscleCategoriesV2.length} categories`,
-  )
+  console.info(`Seeded ${MUSCLES.length} muscle groups`)
 }
 
 export async function seedBaseExercisesChest() {

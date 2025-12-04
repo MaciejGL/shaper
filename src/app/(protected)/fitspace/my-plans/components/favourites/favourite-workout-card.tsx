@@ -143,7 +143,7 @@ export function FavouriteWorkoutCard({
                         size="sm"
                         className="capitalize"
                       >
-                        {muscleGroup?.groupSlug}
+                        {muscleGroup?.displayGroup}
                       </Badge>
                     ))}
                   {hasMuscleGroups && uniqueMuscleGroups.length > 2 && (

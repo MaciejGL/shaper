@@ -7,8 +7,7 @@ query MuscleGroupCategories {
       id
       name
       alias
-      groupSlug
-      isPrimary
+      displayGroup
     }
   }
 }
@@ -48,13 +47,13 @@ query TrainerExercises($where: ExerciseWhereInput) {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
     secondaryMuscleGroups {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
   }
 
@@ -79,13 +78,13 @@ query TrainerExercises($where: ExerciseWhereInput) {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
     secondaryMuscleGroups {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
   }
 }
@@ -102,19 +101,14 @@ query PublicExercises($where: ExerciseWhereInput) {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
     secondaryMuscleGroups {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
-    # muscleGroupCategories {
-    #   id
-    #   name
-    #   slug
-    # }
   }
 }
 

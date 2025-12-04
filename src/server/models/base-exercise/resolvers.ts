@@ -55,16 +55,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       },
       include: {
         images: true,
-        muscleGroups: {
-          include: {
-            category: true,
-          },
-        },
-        secondaryMuscleGroups: {
-          include: {
-            category: true,
-          },
-        },
+        muscleGroups: true,
+        secondaryMuscleGroups: true,
       },
     })
 
@@ -101,16 +93,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           },
           include: {
             images: true,
-            muscleGroups: {
-              include: {
-                category: true,
-              },
-            },
-            secondaryMuscleGroups: {
-              include: {
-                category: true,
-              },
-            },
+            muscleGroups: true,
+            secondaryMuscleGroups: true,
           },
         }),
     ])
@@ -136,16 +120,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         where: { id },
         include: {
           images: true,
-          muscleGroups: {
-            include: {
-              category: true,
-            },
-          },
-          secondaryMuscleGroups: {
-            include: {
-              category: true,
-            },
-          },
+          muscleGroups: true,
+          secondaryMuscleGroups: true,
         },
       })
     }
@@ -198,9 +174,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     const baseExercises = await prisma.baseExercise.findMany({
       where: { id: { in: baseExerciseIds } },
       include: {
-        muscleGroups: {
-          include: { category: true },
-        },
+        muscleGroups: true,
       },
     })
 

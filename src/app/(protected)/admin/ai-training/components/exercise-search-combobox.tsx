@@ -57,7 +57,7 @@ export function ExerciseSearchCombobox({
       equipment: ex.equipment,
       muscleGroups:
         ex.muscleGroups
-          ?.map((mg) => mg.alias || mg.groupSlug || '')
+          ?.map((mg) => mg.alias || mg.displayGroup || '')
           .filter(Boolean) || [],
     }))
   }, [data])

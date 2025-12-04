@@ -170,7 +170,7 @@ function AiSuggestionItem({
           <Badge
             variant="secondary"
             className="capitalize"
-            key={`${group.groupSlug}-${index}`}
+            key={`${group.displayGroup}-${index}`}
           >
             {group.alias}
           </Badge>

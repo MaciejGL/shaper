@@ -155,7 +155,7 @@ export function Sidebar({
       const matchesMuscleGroup =
         selectedMuscleGroup === 'all' ||
         exercise.muscleGroups.some(
-          (muscleGroup) => muscleGroup.groupSlug === selectedMuscleGroup,
+          (muscleGroup) => muscleGroup.displayGroup === selectedMuscleGroup,
         )
       const matchesEquipment =
         selectedEquipment === 'all' || exercise.equipment === selectedEquipment

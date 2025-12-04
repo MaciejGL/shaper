@@ -46,7 +46,7 @@ const DUMMY_WEEK = {
           {
             id: 'skeleton-muscle-1',
             alias: 'Chest',
-            groupSlug: 'chest',
+            displayGroup: 'chest',
           },
         ],
         sets: Array.from({ length: 3 }, (_, setIndex) => ({
@@ -84,7 +84,7 @@ const DUMMY_WEEK = {
           {
             id: 'skeleton-muscle-2',
             alias: 'Triceps',
-            groupSlug: 'triceps',
+            displayGroup: 'triceps',
           },
         ],
         sets: Array.from({ length: 2 }, (_, setIndex) => ({
@@ -122,7 +122,7 @@ const DUMMY_WEEK = {
           {
             id: 'skeleton-muscle-3',
             alias: 'Biceps',
-            groupSlug: 'biceps',
+            displayGroup: 'biceps',
           },
         ],
         sets: Array.from({ length: 2 }, (_, setIndex) => ({

@@ -112,7 +112,7 @@ export function WorkoutSummaryDrawer({
   const muscleGroups = useMemo(() => {
     return uniq(
       completedExercises?.flatMap((exercise) =>
-        exercise.muscleGroups.map((group) => group.groupSlug),
+        exercise.muscleGroups.map((group) => group.displayGroup),
       ),
     )
   }, [completedExercises])

@@ -8,7 +8,6 @@ type BaseExercise {
   equipment: Equipment
   muscleGroups: [MuscleGroup!]!
   secondaryMuscleGroups: [MuscleGroup!]!
-  muscleGroupCategories: [MuscleGroupCategory!]!
   isPublic: Boolean!
   createdBy: UserPublic
   createdAt: String!

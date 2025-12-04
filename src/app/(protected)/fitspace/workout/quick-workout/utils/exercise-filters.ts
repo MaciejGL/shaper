@@ -11,8 +11,11 @@ import { Exercise } from '../components/exercise-card'
  * Type for exercises from GraphQL queries with required fields
  */
 type GraphQLExercise = Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
-  muscleGroups: Pick<GQLMuscleGroup, 'id' | 'alias' | 'groupSlug'>[]
-  secondaryMuscleGroups?: Pick<GQLMuscleGroup, 'id' | 'alias' | 'groupSlug'>[]
+  muscleGroups: Pick<GQLMuscleGroup, 'id' | 'alias' | 'displayGroup'>[]
+  secondaryMuscleGroups?: Pick<
+    GQLMuscleGroup,
+    'id' | 'alias' | 'displayGroup'
+  >[]
   images: Pick<GQLImage, 'id' | 'thumbnail' | 'order'>[]
 }
 
@@ -66,12 +69,12 @@ export function filterExercises({
       muscleGroups: ex.muscleGroups.map((mg) => ({
         id: mg.id,
         alias: mg.alias,
-        groupSlug: mg.groupSlug,
+        displayGroup: mg.displayGroup,
       })),
       secondaryMuscleGroups: ex.secondaryMuscleGroups?.map((mg) => ({
         id: mg.id,
         alias: mg.alias,
-        groupSlug: mg.groupSlug,
+        displayGroup: mg.displayGroup,
       })),
     }))
 }

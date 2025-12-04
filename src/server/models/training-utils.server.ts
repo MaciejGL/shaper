@@ -48,7 +48,7 @@ export async function getLightPlanById(id: string) {
                           id: true,
                           name: true,
                           alias: true,
-                          groupSlug: true,
+                          displayGroup: true,
                         },
                       },
                     },

@@ -767,7 +767,7 @@ export const getAiExerciseSuggestions = async (
   /* 5. Hydrate BaseExercise entities */
   const baseExercises = await prisma.baseExercise.findMany({
     where: { id: { in: exercises.map((s) => s.id) } },
-    include: { muscleGroups: { include: { category: true } } },
+    include: { muscleGroups: true },
   })
 
   const results = baseExercises.map((exercise) => {

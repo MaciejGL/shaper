@@ -96,7 +96,7 @@ query FitspaceGetQuickWorkoutDay($dayId: ID) {
         muscleGroups {
           id
           alias
-          groupSlug
+          displayGroup
         }
         sets {
           id
@@ -156,13 +156,13 @@ query QuickWorkoutExercises($where: ExerciseWhereInput) {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
     secondaryMuscleGroups {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
   }
 
@@ -185,13 +185,13 @@ query QuickWorkoutExercises($where: ExerciseWhereInput) {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
     secondaryMuscleGroups {
       id
       name
       alias
-      groupSlug
+      displayGroup
     }
   }
 }
@@ -232,7 +232,7 @@ query FitspaceGetUserQuickWorkoutPlan {
             id
             name
             alias
-            groupSlug
+            displayGroup
           }
           sets {
             id
@@ -280,7 +280,7 @@ mutation FitspaceCreateQuickWorkout($input: CreateQuickWorkoutInput!) {
           muscleGroups {
             id
             alias
-            groupSlug
+            displayGroup
           }
           sets {
             id
@@ -322,7 +322,7 @@ mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
           muscleGroups {
             id
             alias
-            groupSlug
+            displayGroup
           }
         }
         sets {
@@ -379,7 +379,7 @@ mutation FitspaceAddExercisesToQuickWorkout(
           muscleGroups {
             id
             alias
-            groupSlug
+            displayGroup
           }
           sets {
             id

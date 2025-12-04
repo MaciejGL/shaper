@@ -11,7 +11,7 @@ query MuscleGroupDistribution($userId: ID!, $days: Int = 30) {
 
 query MuscleGroupFrequency($userId: ID!, $days: Int = 30) {
   muscleGroupFrequency(userId: $userId, days: $days) {
-    groupSlug
+    displayGroup
     groupName
     sessionsCount
     totalSets
@@ -24,7 +24,7 @@ query MuscleFrequency($userId: ID!, $days: Int = 30) {
     muscleId
     muscleName
     muscleAlias
-    groupSlug
+    displayGroup
     groupName
     sessionsCount
     totalSets

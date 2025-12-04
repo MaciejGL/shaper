@@ -2,9 +2,17 @@ type MuscleGroup {
   id: ID!
   name: String!
   alias: String
-  groupSlug: String!
-  isPrimary: Boolean!
-  createdAt: String!
-  category: MuscleGroupCategory!
-  exercises: [BaseExercise!]!
+  displayGroup: String!
+}
+
+type MuscleGroupCategory {
+  id: ID!
+  name: String!
+  slug: String!
+  muscles: [MuscleGroup!]!
+}
+
+type Query {
+  muscleGroups: [MuscleGroup!]!
+  muscleGroupCategories: [MuscleGroupCategory!]!
 }

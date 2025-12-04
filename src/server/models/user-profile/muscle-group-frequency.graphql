@@ -1,6 +1,6 @@
 # Muscle Group Training Frequency Schema
 type MuscleGroupFrequency {
-  groupSlug: String!
+  displayGroup: String!
   groupName: String!
   sessionsCount: Int!
   totalSets: Int!
@@ -12,7 +12,7 @@ type MuscleFrequency {
   muscleId: String!
   muscleName: String!
   muscleAlias: String!
-  groupSlug: String!
+  displayGroup: String!
   groupName: String!
   sessionsCount: Int!
   totalSets: Int!

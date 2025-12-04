@@ -30,15 +30,15 @@ export function ExerciseLogs({ clientId }: ExerciseLogsProps) {
   )
 
   const uniqueMuscleGroups = sortBy(
-    uniqBy(allMuscleGroups, (mg) => mg?.groupSlug),
-    (mg) => mg?.category?.name,
+    uniqBy(allMuscleGroups, (mg) => mg?.displayGroup),
+    (mg) => mg?.displayGroup,
   )
 
-  const exercisesCounter = groupBy(allMuscleGroups, (mg) => mg?.groupSlug)
+  const exercisesCounter = groupBy(allMuscleGroups, (mg) => mg?.displayGroup)
 
   const filteredExercises = data?.exercisesProgressByUser.filter((exercise) =>
     exercise.baseExercise?.muscleGroups.some(
-      (group) => group?.category?.name === selectedMuscleGroup,
+      (group) => group?.displayGroup === selectedMuscleGroup,
     ),
   )
 
@@ -64,10 +64,10 @@ export function ExerciseLogs({ clientId }: ExerciseLogsProps) {
           </TabsTrigger>
           {uniqueMuscleGroups.map(
             (mg) =>
-              mg?.category?.name && (
-                <TabsTrigger key={mg.category.name} value={mg.category.name}>
-                  {mg?.category?.name} ({exercisesCounter[mg.groupSlug]?.length}
-                  )
+              mg?.displayGroup && (
+                <TabsTrigger key={mg.displayGroup} value={mg.displayGroup}>
+                  {mg?.displayGroup} (
+                  {exercisesCounter[mg.displayGroup]?.length})
                 </TabsTrigger>
               ),
           )}
@@ -89,8 +89,8 @@ export function ExerciseLogs({ clientId }: ExerciseLogsProps) {
         {/* GROUPED BY MUSCLE GROUP */}
         {uniqueMuscleGroups.map((mg) => (
           <TabsContent
-            key={mg?.category?.name}
-            value={mg?.category?.name ?? ''}
+            key={mg?.displayGroup}
+            value={mg?.displayGroup ?? ''}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
             {filteredExercises?.map((exercise) => (

@@ -48,7 +48,7 @@ export function useExerciseUpdate({
                 id: muscleGroup.id,
                 name: muscleGroup.name,
                 alias: muscleGroup.alias,
-                groupSlug: muscleGroup.groupSlug,
+                displayGroup: muscleGroup.displayGroup,
               }
             : null
         })
@@ -56,7 +56,7 @@ export function useExerciseUpdate({
         id: string
         name: string
         alias: string | null
-        groupSlug: string
+        displayGroup: string
       }[]
     },
     [muscleGroupsData],

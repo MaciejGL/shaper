@@ -1,15 +1,6 @@
 import { prisma } from '../src/lib/db'
 
-import {
-  // seedBaseExercisesArms,
-  // seedBaseExercisesBack,
-  // seedBaseExercisesChest,
-  // seedBaseExercisesCore,
-  // seedBaseExercisesLegs,
-  // seedBaseExercisesShoulders,
-  // seedMuscleGroups,
-  seedMuscleGroupsV2,
-} from './seedContent'
+import { seedMuscleGroups } from './seedContent'
 
 // async function updateTrainingExercises() {
 //   // 1. Find all non-public BaseExercises
@@ -52,8 +43,8 @@ async function main() {
   console.info('Updating training exercises...')
   // await updateTrainingExercises()
 
-  console.info('Seeding muscle groups V2...')
-  await seedMuscleGroupsV2()
+  console.info('Seeding muscle groups...')
+  await seedMuscleGroups()
   // console.info('Seeding chest exercises...')
   // await seedBaseExercisesChest()
   // console.info('Seeding back exercises...')

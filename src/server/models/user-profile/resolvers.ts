@@ -7,6 +7,7 @@ import {
   subWeeks,
 } from 'date-fns'
 
+import { TRACKED_DISPLAY_GROUPS, getMuscleById } from '@/constants/muscles'
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,
@@ -105,7 +106,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     const muscleGroupStats = new Map<
       string,
       {
-        groupSlug: string
+        displayGroup: string
         groupName: string
         sessionsCount: number
         totalSets: number
@@ -117,10 +118,13 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       if (!exercise.base?.muscleGroups) return
 
       exercise.base.muscleGroups.forEach((muscleGroup) => {
-        const key = muscleGroup.groupSlug
+        const staticMuscle = getMuscleById(muscleGroup.id)
+        const key =
+          staticMuscle?.displayGroup || muscleGroup.displayGroup || 'Other'
         const existing = muscleGroupStats.get(key) || {
-          groupSlug: muscleGroup.groupSlug,
-          groupName: muscleGroup.alias || muscleGroup.name,
+          displayGroup: key,
+          groupName:
+            staticMuscle?.displayGroup || muscleGroup.alias || muscleGroup.name,
           sessionsCount: 0,
           totalSets: 0,
           lastTrained: null,
@@ -186,7 +190,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         muscleId: string
         muscleName: string
         muscleAlias: string
-        groupSlug: string
+        displayGroup: string
         groupName: string
         sessionsCount: number
         totalSets: number
@@ -199,12 +203,15 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
       exercise.base.muscleGroups.forEach((muscleGroup) => {
         const key = muscleGroup.id // Use individual muscle ID as key
+        const staticMuscle = getMuscleById(muscleGroup.id)
+        const displayGroup =
+          staticMuscle?.displayGroup || muscleGroup.displayGroup || 'Other'
         const existing = muscleStats.get(key) || {
           muscleId: muscleGroup.id,
           muscleName: muscleGroup.name,
           muscleAlias: muscleGroup.alias || muscleGroup.name,
-          groupSlug: muscleGroup.groupSlug,
-          groupName: muscleGroup.alias || muscleGroup.name, // This will be the group name
+          displayGroup,
+          groupName: displayGroup,
           sessionsCount: 0,
           totalSets: 0,
           lastTrained: null,
@@ -274,177 +281,39 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       other: 0, // for neck, stabilizers
     }
 
-    // Map muscle group slugs to main categories
-    const muscleGroupMapping: Record<string, keyof typeof distribution> = {
-      chest: 'chest',
-      'upper-back': 'back',
-      'lower-back': 'back',
-      neck: 'back',
-      shoulders: 'shoulders',
-      biceps: 'arms',
-      triceps: 'arms',
-      forearms: 'arms',
-      quads: 'legs',
-      hamstrings: 'legs',
-      glutes: 'legs',
-      calves: 'legs',
-      'hip-adductors': 'legs',
-      'hip-abductors': 'legs',
-      core: 'core',
-      stabilizers: 'core',
+    // Map display groups to main categories
+    const displayGroupMapping: Record<string, keyof typeof distribution> = {
+      Chest: 'chest',
+      'Upper Back': 'back',
+      'Lower Back': 'back',
+      Lats: 'back',
+      Traps: 'back',
+      Shoulders: 'shoulders',
+      Biceps: 'arms',
+      Triceps: 'arms',
+      Forearms: 'arms',
+      Quads: 'legs',
+      Hamstrings: 'legs',
+      Glutes: 'legs',
+      Calves: 'legs',
+      'Inner Thighs': 'legs',
+      Core: 'core',
     }
-
-    // Enhanced debugging disabled - use admin panel to fix broken exercise relationships
-    // console.info('🔍 Enhanced debugging muscle group mapping...')
-
-    // Debugging code commented out - use admin panel instead
-    /* 
-    const allGroupSlugs = new Set<string>()
-    const exercisesWithIssues: string[] = []
-
-    completedExercises.forEach((exercise) => {
-      // Check for exercises without base
-      if (!exercise.base) {
-        console.info(
-          `❌ Exercise "${exercise.name}" has NO BASE EXERCISE (baseId: ${exercise.baseId})`,
-        )
-        exercisesWithIssues.push(`${exercise.name} - NO BASE`)
-        return
-      }
-
-      // Check for exercises without muscle groups
-      if (
-        !exercise.base.muscleGroups ||
-        exercise.base.muscleGroups.length === 0
-      ) {
-        console.info(`⚠️ Exercise "${exercise.name}" has NO MUSCLE GROUPS`)
-        exercisesWithIssues.push(`${exercise.name} - NO MUSCLE GROUPS`)
-        return
-      }
-
-      exercise.base.muscleGroups.forEach((muscleGroup) => {
-        if (muscleGroup.groupSlug) {
-          allGroupSlugs.add(muscleGroup.groupSlug)
-        } else {
-          console.info(
-            `⚠️ Exercise "${exercise.name}" has muscle group "${muscleGroup.name}" with NULL/UNDEFINED groupSlug:`,
-            muscleGroup,
-          )
-          exercisesWithIssues.push(`${exercise.name} - NULL groupSlug`)
-        }
-      })
-    })
-
-    if (exercisesWithIssues.length > 0) {
-      console.info('🚨 Exercises with issues:', exercisesWithIssues)
-    }
-
-    // ALSO check ALL training exercises (not just completed) for muscle group issues
-    console.info(
-      '🔍 Checking ALL training exercises for muscle group issues...',
-    )
-    const allTrainingExercises = await prisma.trainingExercise.findMany({
-      where: {
-        day: {
-          week: {
-            plan: {
-              assignedToId: userId,
-            },
-          },
-        },
-      },
-      include: {
-        base: {
-          include: {
-            muscleGroups: true,
-          },
-        },
-      },
-      take: 50, // Limit to recent exercises
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-
-    const allExerciseIssues: string[] = []
-    allTrainingExercises.forEach((exercise) => {
-      if (!exercise.base) {
-        allExerciseIssues.push(`${exercise.name} - NO BASE`)
-      } else if (
-        !exercise.base.muscleGroups ||
-        exercise.base.muscleGroups.length === 0
-      ) {
-        allExerciseIssues.push(`${exercise.name} - NO MUSCLE GROUPS`)
-      } else {
-        const nullGroupSlugs = exercise.base.muscleGroups.filter(
-          (mg) => !mg.groupSlug,
-        )
-        if (nullGroupSlugs.length > 0) {
-          allExerciseIssues.push(
-            `${exercise.name} - ${nullGroupSlugs.length} NULL groupSlugs`,
-          )
-        }
-      }
-    })
-
-    if (allExerciseIssues.length > 0) {
-      console.info(
-        '🚨 ALL training exercises with muscle group issues:',
-        allExerciseIssues,
-      )
-    } else {
-      console.info('✅ All training exercises have proper muscle group data')
-    }
-
-    console.info(
-      '📊 All groupSlug values found in data:',
-      Array.from(allGroupSlugs),
-    )
-    console.info('🗺️ Available in mapping:', Object.keys(muscleGroupMapping))
-
-    // Find missing mappings
-    const missingMappings = Array.from(allGroupSlugs).filter(
-      (slug) => !muscleGroupMapping[slug],
-    )
-    if (missingMappings.length > 0) {
-      console.info('❌ Missing mappings for:', missingMappings)
-    }
-
-    // Log detailed issues per exercise
-    completedExercises.forEach((exercise) => {
-      if (!exercise.base?.muscleGroups) return
-
-      const problematicGroups = exercise.base.muscleGroups.filter(
-        (mg) => !mg.groupSlug || !muscleGroupMapping[mg.groupSlug],
-      )
-
-      if (problematicGroups.length > 0) {
-        console.info(
-          `🚨 "${exercise.name}" has problematic muscle groups:`,
-          problematicGroups.map((mg) => ({
-            id: mg.id,
-            name: mg.name,
-            groupSlug: mg.groupSlug,
-            isMapped: !!muscleGroupMapping[mg.groupSlug],
-          })),
-        )
-      }
-    })
-    */
 
     // Count sets per muscle group category
     completedExercises.forEach((exercise) => {
       if (!exercise.base?.muscleGroups) return
 
       exercise.base.muscleGroups.forEach((muscleGroup) => {
-        const category = muscleGroupMapping[muscleGroup.groupSlug]
+        const staticMuscle = getMuscleById(muscleGroup.id)
+        const displayGroup =
+          staticMuscle?.displayGroup || muscleGroup.displayGroup || 'Other'
+        const category = displayGroupMapping[displayGroup]
         if (category) {
           distribution[category] += exercise.sets.length
         }
       })
     })
-
-    // console.info(distribution) // Debug output disabled
 
     return distribution
   },
@@ -515,48 +384,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       },
     })
 
-    // Define muscle groups ordered by popularity (most trained first)
-    const trackedMuscleGroups = [
-      'Chest',
-      'Upper Back',
-      'Lower Back',
-      'Lats',
-      'Shoulders',
-      'Biceps',
-      'Triceps',
-      'Quads',
-      'Hamstrings',
-      'Glutes',
-      'Calves',
-      'Core', // Combined Abs + Obliques
-      'Forearms',
-      'Traps',
-      'Inner Thighs',
-    ]
-
-    // Map groupSlug to our muscle group names
-    const slugToMuscleGroup: Record<string, string> = {
-      chest: 'Chest',
-      'upper-back': 'Upper Back',
-      shoulders: 'Shoulders',
-      biceps: 'Biceps',
-      triceps: 'Triceps',
-      quads: 'Quads',
-      hamstrings: 'Hamstrings',
-      glutes: 'Glutes',
-      calves: 'Calves',
-      core: 'Core',
-      forearms: 'Forearms',
-      'hip-adductors': 'Inner Thighs',
-      'lower-back': 'Lower Back',
-    }
-
-    // Map specific muscle names to separate display groups
-    // (for muscles that share a groupSlug but need separate tracking)
-    const muscleNameToGroup: Record<string, string> = {
-      'Latissimus Dorsi': 'Lats',
-      Trapezius: 'Traps',
-    }
+    // Use tracked display groups from static muscles file
+    const trackedMuscleGroups = [...TRACKED_DISPLAY_GROUPS]
 
     // Initialize progress for all muscle groups
     const muscleProgress: Record<
@@ -586,10 +415,10 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
       // Primary muscle groups (100% weight)
       exercise.base.muscleGroups?.forEach((muscleGroup) => {
-        // Check muscle name first for separate tracking, then fall back to groupSlug
+        // Get display group from static muscle data
+        const staticMuscle = getMuscleById(muscleGroup.id)
         const mappedGroup =
-          muscleNameToGroup[muscleGroup.name] ||
-          slugToMuscleGroup[muscleGroup.groupSlug]
+          staticMuscle?.displayGroup || muscleGroup.displayGroup
         if (mappedGroup && muscleProgress[mappedGroup]) {
           muscleProgress[mappedGroup].completedSets += setCount
 
@@ -618,10 +447,10 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
       // Secondary muscle groups (25% weight)
       exercise.base.secondaryMuscleGroups?.forEach((muscleGroup) => {
-        // Check muscle name first for separate tracking, then fall back to groupSlug
+        // Get display group from static muscle data
+        const staticMuscle = getMuscleById(muscleGroup.id)
         const mappedGroup =
-          muscleNameToGroup[muscleGroup.name] ||
-          slugToMuscleGroup[muscleGroup.groupSlug]
+          staticMuscle?.displayGroup || muscleGroup.displayGroup
         if (mappedGroup && muscleProgress[mappedGroup]) {
           muscleProgress[mappedGroup].completedSets +=
             setCount * SECONDARY_MUSCLE_WEIGHT
@@ -734,7 +563,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         prevWeekExercises.forEach((exercise) => {
           if (!exercise.base?.muscleGroups) return
           exercise.base.muscleGroups.forEach((muscleGroup) => {
-            const mappedGroup = slugToMuscleGroup[muscleGroup.groupSlug]
+            const staticMuscle = getMuscleById(muscleGroup.id)
+            const mappedGroup =
+              staticMuscle?.displayGroup || muscleGroup.displayGroup
             if (mappedGroup && prevMuscleProgress[mappedGroup] !== undefined) {
               prevMuscleProgress[mappedGroup] += exercise.sets.length
             }

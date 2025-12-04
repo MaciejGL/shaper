@@ -40,7 +40,7 @@ query GetFavouriteWorkouts {
           id
           name
           alias
-          groupSlug
+          displayGroup
         }
         images {
           id
@@ -98,7 +98,7 @@ query GetFavouriteWorkout($id: ID!) {
           id
           name
           alias
-          groupSlug
+          displayGroup
         }
         images {
           id

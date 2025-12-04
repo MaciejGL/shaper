@@ -75,5 +75,5 @@ export interface ExerciseSubmission {
 export interface MuscleGroupData {
   id: string
   alias?: string | null
-  groupSlug?: string | null
+  displayGroup?: string | null
 }

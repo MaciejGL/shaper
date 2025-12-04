@@ -11,13 +11,11 @@ import {
   BaseExerciseSubstitute as PrismaBaseExerciseSubstitute,
   Image as PrismaImage,
   MuscleGroup as PrismaMuscleGroup,
-  MuscleGroupCategory as PrismaMuscleGroupCategory,
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
 import Image from '../image/model'
-import MuscleGroupCategory from '../muscle-group-category/model'
 import MuscleGroup from '../muscle-group/model'
 import UserPublic from '../user-public/model'
 
@@ -25,14 +23,10 @@ export class BaseExerciseSubstitute implements GQLBaseExerciseSubstitute {
   constructor(
     protected data: PrismaBaseExerciseSubstitute & {
       original?: PrismaBaseExercise & {
-        muscleGroups: (PrismaMuscleGroup & {
-          category: PrismaMuscleGroupCategory
-        })[]
+        muscleGroups: PrismaMuscleGroup[]
       }
       substitute?: PrismaBaseExercise & {
-        muscleGroups: (PrismaMuscleGroup & {
-          category: PrismaMuscleGroupCategory
-        })[]
+        muscleGroups: PrismaMuscleGroup[]
       }
     },
     protected context: GQLContext,
@@ -86,25 +80,17 @@ export class BaseExerciseSubstitute implements GQLBaseExerciseSubstitute {
 export default class BaseExercise implements GQLBaseExercise {
   constructor(
     protected data: PrismaBaseExercise & {
-      muscleGroups: (PrismaMuscleGroup & {
-        category: PrismaMuscleGroupCategory
-      })[]
-      secondaryMuscleGroups?: (PrismaMuscleGroup & {
-        category: PrismaMuscleGroupCategory
-      })[]
+      muscleGroups: PrismaMuscleGroup[]
+      secondaryMuscleGroups?: PrismaMuscleGroup[]
       images?: PrismaImage[]
       substitutes?: (PrismaBaseExerciseSubstitute & {
         substitute: PrismaBaseExercise & {
-          muscleGroups: (PrismaMuscleGroup & {
-            category: PrismaMuscleGroupCategory
-          })[]
+          muscleGroups: PrismaMuscleGroup[]
         }
       })[]
       substitutedBy?: (PrismaBaseExerciseSubstitute & {
         original: PrismaBaseExercise & {
-          muscleGroups: (PrismaMuscleGroup & {
-            category: PrismaMuscleGroupCategory
-          })[]
+          muscleGroups: PrismaMuscleGroup[]
         }
       })[]
     },
@@ -199,19 +185,6 @@ export default class BaseExercise implements GQLBaseExercise {
     return []
   }
 
-  async muscleGroupCategories() {
-    if (this.data.muscleGroups.length) {
-      return this.data.muscleGroups.map((muscleGroup) => {
-        return new MuscleGroupCategory(muscleGroup.category, this.context)
-      })
-    } else {
-      console.error(
-        `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
-      )
-      throw new GraphQLError('No muscle groups found for exercise')
-    }
-  }
-
   get isPublic() {
     return this.data.isPublic
   }
@@ -257,11 +230,7 @@ export default class BaseExercise implements GQLBaseExercise {
       include: {
         substitute: {
           include: {
-            muscleGroups: {
-              include: {
-                category: true,
-              },
-            },
+            muscleGroups: true,
           },
         },
       },
@@ -284,11 +253,7 @@ export default class BaseExercise implements GQLBaseExercise {
       include: {
         original: {
           include: {
-            muscleGroups: {
-              include: {
-                category: true,
-              },
-            },
+            muscleGroups: true,
           },
         },
       },
@@ -307,7 +272,6 @@ export default class BaseExercise implements GQLBaseExercise {
     }
   }
 
-  // V2 Exercise Integration Field Getters
   get version() {
     return this.data.version
   }

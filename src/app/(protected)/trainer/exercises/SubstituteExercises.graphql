@@ -36,7 +36,7 @@ query GetExerciseWithSubstitutes($id: ID!) {
         muscleGroups {
           id
           name
-          groupSlug
+          displayGroup
         }
       }
     }
@@ -54,7 +54,7 @@ query GetExerciseWithSubstitutes($id: ID!) {
         muscleGroups {
           id
           name
-          groupSlug
+          displayGroup
         }
       }
     }

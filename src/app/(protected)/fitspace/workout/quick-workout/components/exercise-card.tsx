@@ -14,8 +14,11 @@ import { cn } from '@/lib/utils'
 import { translateEquipment } from '@/utils/translate-equipment'
 
 export type Exercise = Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
-  muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
-  secondaryMuscleGroups?: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
+  muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'displayGroup' | 'id'>[]
+  secondaryMuscleGroups?: Pick<
+    GQLMuscleGroup,
+    'alias' | 'displayGroup' | 'id'
+  >[]
   completedAt?: string | null
   images: Pick<GQLImage, 'id' | 'thumbnail' | 'order'>[]
 }

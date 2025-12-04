@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       conditions.push({
         muscleGroups: {
           some: {
-            groupSlug: muscleFilter,
+            displayGroup: muscleFilter,
           },
         },
       })
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             alias: true,
-            groupSlug: true,
+            displayGroup: true,
           },
           orderBy: { name: 'asc' },
         },
@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             alias: true,
-            groupSlug: true,
+            displayGroup: true,
           },
           orderBy: { name: 'asc' },
         },

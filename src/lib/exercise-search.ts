@@ -17,13 +17,13 @@ export interface SearchableExercise {
     id: string
     name: string
     alias?: string | null
-    groupSlug: string
+    displayGroup: string
   }[]
   secondaryMuscleGroups?: {
     id: string
     name: string
     alias?: string | null
-    groupSlug: string
+    displayGroup: string
   }[]
 }
 
@@ -59,7 +59,7 @@ export class ExerciseSearchEngine {
           weight: 0.6,
         },
         {
-          name: 'muscleGroups.groupSlug',
+          name: 'muscleGroups.displayGroup',
           weight: 0.5,
         },
         {
@@ -71,7 +71,7 @@ export class ExerciseSearchEngine {
           weight: 0.4,
         },
         {
-          name: 'secondaryMuscleGroups.groupSlug',
+          name: 'secondaryMuscleGroups.displayGroup',
           weight: 0.3,
         },
       ],
@@ -236,10 +236,10 @@ export function fallbackSearch(
       exercise.description || '',
       exercise.equipment,
       ...(exercise.muscleGroups?.map(
-        (mg) => `${mg.name} ${mg.alias} ${mg.groupSlug}`,
+        (mg) => `${mg.name} ${mg.alias} ${mg.displayGroup}`,
       ) || []),
       ...(exercise.secondaryMuscleGroups?.map(
-        (mg) => `${mg.name} ${mg.alias} ${mg.groupSlug}`,
+        (mg) => `${mg.name} ${mg.alias} ${mg.displayGroup}`,
       ) || []),
     ]
       .join(' ')

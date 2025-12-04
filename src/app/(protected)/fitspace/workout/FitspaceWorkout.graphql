@@ -18,12 +18,12 @@ fragment BaseExerciseData on BaseExercise {
   muscleGroups {
     id
     alias
-    groupSlug
+    displayGroup
   }
   secondaryMuscleGroups {
     id
     alias
-    groupSlug
+    displayGroup
   }
 }
 
@@ -93,7 +93,7 @@ fragment WorkoutExerciseData on TrainingExercise {
   muscleGroups {
     id
     alias
-    groupSlug
+    displayGroup
   }
   sets {
     ...WorkoutSetData
@@ -157,7 +157,7 @@ query FitspaceGetExercises {
     muscles {
       id
       alias
-      groupSlug
+      displayGroup
     }
   }
 }
@@ -235,12 +235,12 @@ mutation FitspaceGetAiExerciseSuggestions($dayId: ID!) {
       muscleGroups {
         id
         alias
-        groupSlug
+        displayGroup
       }
       secondaryMuscleGroups {
         id
         alias
-        groupSlug
+        displayGroup
       }
     }
     sets {

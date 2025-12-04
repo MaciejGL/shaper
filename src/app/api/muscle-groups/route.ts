@@ -1,18 +1,10 @@
 import { NextResponse } from 'next/server'
 
-import { prisma } from '@/lib/db'
+import { getMusclesGroupedForGraphQL } from '@/constants/muscles'
 
 export async function GET() {
   try {
-    const categories = await prisma.muscleGroupCategory.findMany({
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-      },
-      orderBy: { name: 'asc' },
-    })
-
+    const categories = getMusclesGroupedForGraphQL()
     return NextResponse.json(categories)
   } catch (error) {
     console.error('Failed to fetch muscle group categories:', error)

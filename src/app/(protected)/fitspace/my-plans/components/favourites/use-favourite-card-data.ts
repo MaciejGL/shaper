@@ -27,14 +27,15 @@ export function useFavouriteCardData({
   )
   const isEmpty = totalExercises === 0
 
-  // Get unique muscle groups by filtering duplicates based on groupSlug
+  // Get unique muscle groups by filtering duplicates based on displayGroup
   const uniqueMuscleGroups = useMemo(() => {
     return favourite.exercises
       .flatMap((exercise) => exercise.base?.muscleGroups ?? [])
       .filter(
         (muscleGroup, index, array) =>
-          array.findIndex((mg) => mg.groupSlug === muscleGroup.groupSlug) ===
-          index,
+          array.findIndex(
+            (mg) => mg.displayGroup === muscleGroup.displayGroup,
+          ) === index,
       )
   }, [favourite.exercises])
 

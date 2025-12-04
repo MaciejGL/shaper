@@ -4,7 +4,6 @@ import { GQLGenerateAiWorkoutInput } from '@/generated/graphql-server'
 import {
   BaseExercise as PrismaBaseExercise,
   MuscleGroup as PrismaMuscleGroup,
-  MuscleGroupCategory as PrismaMuscleGroupCategory,
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getExerciseVersionWhereClause } from '@/lib/exercise-version-filter'
@@ -119,12 +118,8 @@ type FinalWorkoutVariant = {
 }
 
 type BaseExerciseWithRelations = PrismaBaseExercise & {
-  muscleGroups: (PrismaMuscleGroup & {
-    category: PrismaMuscleGroupCategory
-  })[]
-  secondaryMuscleGroups: (PrismaMuscleGroup & {
-    category: PrismaMuscleGroupCategory
-  })[]
+  muscleGroups: PrismaMuscleGroup[]
+  secondaryMuscleGroups: PrismaMuscleGroup[]
 }
 
 type MappedExercise = {
@@ -269,8 +264,8 @@ async function hydrateExercisesFromDatabase(
       ],
     },
     include: {
-      muscleGroups: { include: { category: true } },
-      secondaryMuscleGroups: { include: { category: true } },
+      muscleGroups: true,
+      secondaryMuscleGroups: true,
     },
   })
 

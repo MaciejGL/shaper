@@ -6,11 +6,13 @@ import { FemaleBodyBackView } from '@/components/human-body/female-body-back/fem
 import { FemaleBodyFrontView } from '@/components/human-body/female-body-front/female-body-front'
 import { MaleBodyBackView } from '@/components/human-body/male-body-back/male-body-back'
 import { MaleBodyFrontView } from '@/components/human-body/male-body-front/male-body-front'
+import { SVG_ALIAS_TO_DISPLAY_GROUP } from '@/constants/muscles'
 import { useUser } from '@/context/user-context'
 import { cn } from '@/lib/utils'
 
 import { getProgressColor } from '../../constants/heatmap-colors'
-import { LABEL_TO_GROUP_MAPPING } from '../../constants/muscle-groups'
+
+const LABEL_TO_GROUP_MAPPING = SVG_ALIAS_TO_DISPLAY_GROUP
 
 // Base dimensions for body SVG
 const BASE_SVG_WIDTH = 194

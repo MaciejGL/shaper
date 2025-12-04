@@ -24,7 +24,7 @@ export async function POST() {
           select: {
             name: true,
             alias: true,
-            groupSlug: true,
+            displayGroup: true,
           },
         },
       },
@@ -83,7 +83,7 @@ export async function GET() {
           select: {
             name: true,
             alias: true,
-            groupSlug: true,
+            displayGroup: true,
           },
         },
       },

@@ -30,13 +30,13 @@ export interface Exercise {
     id: string
     name: string
     alias?: string | null
-    groupSlug: string
+    displayGroup: string
   }[]
   secondaryMuscleGroups?: {
     id: string
     name: string
     alias?: string | null
-    groupSlug: string
+    displayGroup: string
   }[]
   substitutes?: {
     id: string

@@ -109,7 +109,7 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
                       className="w-fit capitalize"
                       key={muscleGroup.id}
                     >
-                      {muscleGroup.groupSlug}
+                      {muscleGroup.displayGroup}
                     </Badge>
                   ))}
               </div>

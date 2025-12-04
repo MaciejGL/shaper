@@ -528,26 +528,15 @@ model Image {
 }
 
 model MuscleGroup {
-  id                 String              @id @default(uuid())
-  name               String              @unique
+  id                 String         @id @default(uuid())
+  name               String         @unique
   alias              String?
-  groupSlug          String
-  isPrimary          Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  categoryId         String
-  category           MuscleGroupCategory @relation(fields: [categoryId], references: [id])
-  exercises          BaseExercise[]      @relation("ExerciseMuscleGroups")
-  secondaryExercises BaseExercise[]      @relation("ExerciseSecondaryMuscleGroups")
+  displayGroup       String?
+  createdAt          DateTime       @default(now())
+  exercises          BaseExercise[] @relation("ExerciseMuscleGroups")
+  secondaryExercises BaseExercise[] @relation("ExerciseSecondaryMuscleGroups")
 
-  @@index([categoryId])
-}
-
-model MuscleGroupCategory {
-  id        String        @id @default(uuid())
-  name      String        @unique
-  slug      String        @unique
-  createdAt DateTime      @default(now())
-  muscles   MuscleGroup[]
+  @@index([displayGroup])
 }
 
 model Note {

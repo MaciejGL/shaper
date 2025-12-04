@@ -101,9 +101,11 @@ export async function POST() {
     const baseExercises = await prisma.baseExercise.findMany({
       where: { isPublic: true },
       include: {
-        muscleGroups: { select: { name: true, alias: true, groupSlug: true } },
+        muscleGroups: {
+          select: { name: true, alias: true, displayGroup: true },
+        },
         secondaryMuscleGroups: {
-          select: { name: true, alias: true, groupSlug: true },
+          select: { name: true, alias: true, displayGroup: true },
         },
         createdBy: { select: { id: true } },
         _count: { select: { substitutes: true } },
@@ -153,10 +155,10 @@ Popularity: ${ex._count.substitutes > 0 ? 'High (has substitutes)' : 'Standard'}
             equipment: equipment.toLowerCase(),
             difficulty: difficulty.toLowerCase(),
             primaryMuscles: ex.muscleGroups.map(
-              (m) => m.groupSlug || m.name.toLowerCase(),
+              (m) => m.displayGroup || m.name.toLowerCase(),
             ),
             secondaryMuscles: ex.secondaryMuscleGroups.map(
-              (m) => m.groupSlug || m.name.toLowerCase(),
+              (m) => m.displayGroup || m.name.toLowerCase(),
             ),
             type: type.toLowerCase(),
           },

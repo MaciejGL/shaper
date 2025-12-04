@@ -64,7 +64,7 @@ export const useFilteredExercises = ({
     const matchesCategory =
       selectedCategory === 'all' ||
       exercise.muscleGroups.some(
-        (mg) => mg.groupSlug.toLowerCase() === selectedCategory,
+        (mg) => mg.displayGroup.toLowerCase() === selectedCategory,
       )
 
     return matchesSearch && matchesEquipment && matchesCategory

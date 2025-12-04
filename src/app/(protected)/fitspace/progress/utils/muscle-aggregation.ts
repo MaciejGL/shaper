@@ -1,6 +1,5 @@
+import { DISPLAY_GROUPS, getMuscleById } from '@/constants/muscles'
 import type { GQLMuscleFrequency } from '@/generated/graphql-client'
-
-import { MUSCLE_GROUP_MAPPING_BY_MUSCLE_ID } from '../constants/muscle-groups'
 
 export interface GroupedMuscleData {
   groupName: string
@@ -20,8 +19,8 @@ export function aggregateMuscleDataToGroups(
 ): Record<string, GroupedMuscleData> {
   const groupedData: Record<string, GroupedMuscleData> = {}
 
-  // Initialize all muscle groups from the mapping
-  Object.keys(MUSCLE_GROUP_MAPPING_BY_MUSCLE_ID).forEach((groupName) => {
+  // Initialize all display groups
+  DISPLAY_GROUPS.forEach((groupName) => {
     groupedData[groupName] = {
       groupName,
       totalSets: 0,
@@ -33,15 +32,11 @@ export function aggregateMuscleDataToGroups(
 
   // Aggregate muscle data into groups
   rawMuscleData.forEach((muscle) => {
-    // Find which group this muscle belongs to
-    const groupEntry = Object.entries(MUSCLE_GROUP_MAPPING_BY_MUSCLE_ID).find(
-      ([, muscleIds]) => muscleIds.some((m) => m.id === muscle.muscleId),
-    )
+    // Find which group this muscle belongs to using static data
+    const staticMuscle = getMuscleById(muscle.muscleId)
+    const groupName = staticMuscle?.displayGroup
 
-    // Debug: console.log(`Muscle ${muscle.muscleName} (${muscle.muscleId}):`, groupEntry ? `mapped to ${groupEntry[0]}` : 'NOT MAPPED')
-
-    if (groupEntry) {
-      const [groupName] = groupEntry
+    if (groupName && groupedData[groupName]) {
       const group = groupedData[groupName]
 
       group.totalSets += muscle.totalSets

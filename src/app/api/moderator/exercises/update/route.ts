@@ -198,7 +198,7 @@ export async function PATCH(request: NextRequest) {
               id: true,
               name: true,
               alias: true,
-              groupSlug: true,
+              displayGroup: true,
             },
           },
           secondaryMuscleGroups: {
@@ -206,7 +206,7 @@ export async function PATCH(request: NextRequest) {
               id: true,
               name: true,
               alias: true,
-              groupSlug: true,
+              displayGroup: true,
             },
           },
           updatedAt: true,

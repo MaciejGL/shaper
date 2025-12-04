@@ -54,16 +54,8 @@ const CACHE_KEYS = {
 export type CachedBaseExercise = Prisma.BaseExerciseGetPayload<{
   include: {
     images: true
-    muscleGroups: {
-      include: {
-        category: true
-      }
-    }
-    secondaryMuscleGroups: {
-      include: {
-        category: true
-      }
-    }
+    muscleGroups: true
+    secondaryMuscleGroups: true
   }
 }>
 
@@ -126,16 +118,8 @@ async function fetchPublicExercisesFromDB(
     },
     include: {
       images: true,
-      muscleGroups: {
-        include: {
-          category: true,
-        },
-      },
-      secondaryMuscleGroups: {
-        include: {
-          category: true,
-        },
-      },
+      muscleGroups: true,
+      secondaryMuscleGroups: true,
     },
   })
 
@@ -207,16 +191,8 @@ export async function getPublicExerciseById(
       },
       include: {
         images: true,
-        muscleGroups: {
-          include: {
-            category: true,
-          },
-        },
-        secondaryMuscleGroups: {
-          include: {
-            category: true,
-          },
-        },
+        muscleGroups: true,
+        secondaryMuscleGroups: true,
       },
     })
   }
@@ -241,16 +217,8 @@ export async function getPublicExerciseById(
       },
       include: {
         images: true,
-        muscleGroups: {
-          include: {
-            category: true,
-          },
-        },
-        secondaryMuscleGroups: {
-          include: {
-            category: true,
-          },
-        },
+        muscleGroups: true,
+        secondaryMuscleGroups: true,
       },
     })
 
@@ -268,16 +236,8 @@ export async function getPublicExerciseById(
       where: { id },
       include: {
         images: true,
-        muscleGroups: {
-          include: {
-            category: true,
-          },
-        },
-        secondaryMuscleGroups: {
-          include: {
-            category: true,
-          },
-        },
+        muscleGroups: true,
+        secondaryMuscleGroups: true,
       },
     })
   }
