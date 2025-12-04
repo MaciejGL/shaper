@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const generator = new ExerciseDescriptionGenerator({
       dryRun,
       batchSize,
-      skipExisting: false,
+      skipExisting: skipExisting,
       maxRetries: 3,
       delayBetweenRequests: 2000,
     })

@@ -62,6 +62,16 @@ interface DescriptionGenerationState {
   error: string | null
 }
 
+interface GenerationProgress {
+  isRunning: boolean
+  total: number
+  processed: number
+  successful: number
+  failed: number
+  currentExercise: string | null
+  startedAt: string | null
+}
+
 interface MuscleStats {
   totalPublicExercises: number
   exercisesWithoutPrimary: number
@@ -69,6 +79,7 @@ interface MuscleStats {
   exercisesNeedingMuscles: number
   exercisesFullyAssigned: number
   percentageComplete: number
+  progress?: GenerationProgress
 }
 
 interface MuscleGenerationState {
@@ -372,9 +383,9 @@ export function ExercisesTab() {
         error: null,
       })
 
-      // Refresh stats after generation
+      // Refresh stats after generation (without showing loading)
       if (!dryRun) {
-        await fetchStats()
+        await fetchStats(false)
       }
     } catch (err) {
       setDescriptionGeneration({
@@ -424,9 +435,9 @@ export function ExercisesTab() {
         error: null,
       }))
 
-      // Refresh stats after generation
+      // Refresh stats after generation (without showing loading)
       if (!dryRun) {
-        await fetchStats()
+        await fetchStats(false)
       }
     } catch (err) {
       setMuscleGeneration((prev) => ({
@@ -453,7 +464,7 @@ export function ExercisesTab() {
         progress: result.message,
       }))
 
-      await fetchStats()
+      await fetchStats(false)
     } catch (err) {
       setMuscleGeneration((prev) => ({
         ...prev,
@@ -469,7 +480,7 @@ export function ExercisesTab() {
     if (!response.ok) {
       throw new Error('Failed to upload exercises')
     }
-    await fetchStats()
+    await fetchStats(false)
   }
 
   const searchExerciseUsage = async () => {
@@ -517,6 +528,56 @@ export function ExercisesTab() {
   useEffect(() => {
     fetchStats()
   }, [])
+
+  // Poll for progress when generation is running
+  useEffect(() => {
+    const serverIsRunning = muscleStats?.progress?.isRunning
+
+    // Sync local state with server state on mount/refresh
+    if (serverIsRunning && !muscleGeneration.isRunning) {
+      setMuscleGeneration((prev) => ({
+        ...prev,
+        isRunning: true,
+        progress: `Resuming... ${muscleStats.progress?.processed ?? 0}/${muscleStats.progress?.total ?? 0}`,
+      }))
+    }
+
+    if (!serverIsRunning && !muscleGeneration.isRunning) return
+
+    const pollProgress = async () => {
+      try {
+        const response = await fetch(
+          '/api/admin/exercises/generate-muscles?progress=true',
+        )
+        if (response.ok) {
+          const data = await response.json()
+          const progress = data.progress as GenerationProgress
+
+          if (progress.isRunning) {
+            setMuscleGeneration((prev) => ({
+              ...prev,
+              isRunning: true,
+              progress: `Analyzing: ${progress.currentExercise || '...'} (${progress.processed}/${progress.total})`,
+            }))
+          } else {
+            // Generation finished
+            setMuscleGeneration((prev) => ({
+              ...prev,
+              isRunning: false,
+              progress: `Complete! ${progress.successful} updated, ${progress.failed} failed`,
+            }))
+            // Refresh full stats
+            await fetchStats(false)
+          }
+        }
+      } catch {
+        // Ignore polling errors
+      }
+    }
+
+    const interval = setInterval(pollProgress, 2000)
+    return () => clearInterval(interval)
+  }, [muscleStats?.progress?.isRunning, muscleGeneration.isRunning])
 
   const formatNumber = (num: number) => num.toLocaleString()
 
@@ -1238,9 +1299,7 @@ export function ExercisesTab() {
                   className="h-4 w-4 rounded border-gray-300"
                 />
                 <Label htmlFor="processAll" className="flex-1 cursor-pointer">
-                  <span className="font-medium">
-                    Re-analyze all exercises
-                  </span>
+                  <span className="font-medium">Re-analyze all exercises</span>
                   <span className="text-sm text-muted-foreground block">
                     {muscleGeneration.processAll
                       ? `Process all ${muscleStats?.totalPublicExercises ?? '...'} public exercises (overwrite existing assignments)`

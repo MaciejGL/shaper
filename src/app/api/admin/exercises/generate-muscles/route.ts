@@ -4,6 +4,7 @@ import { isAdminUser } from '@/lib/admin-auth'
 import {
   abortMuscleGeneration,
   ExerciseMuscleGenerator,
+  getGenerationProgress,
   isGenerationRunning,
 } from '@/scripts/generate-exercise-muscles'
 
@@ -115,13 +116,23 @@ export async function DELETE() {
   }
 }
 
-// GET endpoint to check exercises that need muscle groups
-export async function GET() {
+// GET endpoint to check exercises that need muscle groups and generation progress
+export async function GET(request: NextRequest) {
   try {
     // Check admin access
     const hasAdminAccess = await isAdminUser()
     if (!hasAdminAccess) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if only progress is requested
+    const progressOnly = request.nextUrl.searchParams.get('progress') === 'true'
+
+    // Always include generation progress
+    const progress = getGenerationProgress()
+
+    if (progressOnly) {
+      return NextResponse.json({ progress })
     }
 
     const { prisma } = await import('@/lib/db')
@@ -163,6 +174,7 @@ export async function GET() {
       percentageComplete: Math.round(
         (exercisesFullyAssigned / totalPublicExercises) * 100,
       ),
+      progress,
     })
   } catch (error) {
     console.error('Failed to fetch exercise muscle stats:', error)

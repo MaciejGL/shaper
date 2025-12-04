@@ -4,8 +4,25 @@ import { MUSCLES } from '@/constants/muscles'
 import { prisma } from '@/lib/db'
 import { openai } from '@/lib/open-ai/open-ai'
 
-// Module-level abort controller for stopping generation
+// Module-level state for tracking generation progress
 let currentAbortController: AbortController | null = null
+let generationProgress: {
+  isRunning: boolean
+  total: number
+  processed: number
+  successful: number
+  failed: number
+  currentExercise: string | null
+  startedAt: Date | null
+} = {
+  isRunning: false,
+  total: 0,
+  processed: 0,
+  successful: 0,
+  failed: 0,
+  currentExercise: null,
+  startedAt: null,
+}
 
 export function abortMuscleGeneration(): boolean {
   if (currentAbortController) {
@@ -18,6 +35,10 @@ export function abortMuscleGeneration(): boolean {
 
 export function isGenerationRunning(): boolean {
   return currentAbortController !== null
+}
+
+export function getGenerationProgress() {
+  return { ...generationProgress }
 }
 
 interface GenerationConfig {
@@ -110,6 +131,17 @@ class ExerciseMuscleGenerator {
     currentAbortController = new AbortController()
     const signal = currentAbortController.signal
 
+    // Initialize progress tracking
+    generationProgress = {
+      isRunning: true,
+      total: 0,
+      processed: 0,
+      successful: 0,
+      failed: 0,
+      currentExercise: null,
+      startedAt: new Date(),
+    }
+
     console.info('💪 Starting exercise muscle group generation...\n')
     console.info(`Configuration:`)
     console.info(`  • Batch size: ${this.config.batchSize}`)
@@ -128,10 +160,12 @@ class ExerciseMuscleGenerator {
 
     try {
       const exercises = await this.getExercisesForGeneration()
+      generationProgress.total = exercises.length
       console.info(`📋 Found ${exercises.length} exercises to process\n`)
 
       if (exercises.length === 0) {
         console.info('✅ All exercises already have muscle groups assigned!')
+        generationProgress.isRunning = false
         return {
           processed: 0,
           successful: 0,
@@ -162,6 +196,9 @@ class ExerciseMuscleGenerator {
             break
           }
 
+          // Update progress
+          generationProgress.currentExercise = exercise.name
+
           try {
             console.info(`  💪 Analyzing: ${exercise.name}`)
 
@@ -184,9 +221,11 @@ class ExerciseMuscleGenerator {
               await this.updateExerciseMuscles(exercise.id, muscles)
               console.info(`    ✅ Updated successfully`)
               successful++
+              generationProgress.successful = successful
             }
 
             processed++
+            generationProgress.processed = processed
 
             if (i + batch.indexOf(exercise) < exercises.length - 1) {
               await this.delay(this.config.delayBetweenRequests)
@@ -194,6 +233,7 @@ class ExerciseMuscleGenerator {
           } catch (error) {
             console.error(`    ❌ Failed to process ${exercise.name}:`, error)
             failed++
+            generationProgress.failed = failed
           }
         }
 
@@ -214,6 +254,8 @@ class ExerciseMuscleGenerator {
       console.error('❌ Error in generation process:', error)
       throw error
     } finally {
+      generationProgress.isRunning = false
+      generationProgress.currentExercise = null
       currentAbortController = null
       await prisma.$disconnect()
     }
