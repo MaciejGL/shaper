@@ -62,6 +62,23 @@ interface DescriptionGenerationState {
   error: string | null
 }
 
+interface MuscleStats {
+  totalPublicExercises: number
+  exercisesWithoutPrimary: number
+  exercisesWithoutSecondary: number
+  exercisesNeedingMuscles: number
+  exercisesFullyAssigned: number
+  percentageComplete: number
+}
+
+interface MuscleGenerationState {
+  isRunning: boolean
+  isDryRun: boolean
+  progress: string | null
+  error: string | null
+  processAll: boolean
+}
+
 interface BaseIdRewriteState {
   isProcessing: boolean
   isPreviewing: boolean
@@ -131,6 +148,16 @@ export function ExercisesTab() {
       error: null,
     })
 
+  const [muscleStats, setMuscleStats] = useState<MuscleStats | null>(null)
+  const [muscleGeneration, setMuscleGeneration] =
+    useState<MuscleGenerationState>({
+      isRunning: false,
+      isDryRun: false,
+      progress: null,
+      error: null,
+      processAll: false,
+    })
+
   const [baseIdRewrite, setBaseIdRewrite] = useState<BaseIdRewriteState>({
     isProcessing: false,
     isPreviewing: false,
@@ -156,10 +183,12 @@ export function ExercisesTab() {
         setLoading(true)
         setError(null)
       }
-      const [statsResponse, descriptionResponse] = await Promise.all([
-        fetch('/api/admin/exercises/stats'),
-        fetch('/api/admin/exercises/generate-descriptions'),
-      ])
+      const [statsResponse, descriptionResponse, muscleResponse] =
+        await Promise.all([
+          fetch('/api/admin/exercises/stats'),
+          fetch('/api/admin/exercises/generate-descriptions'),
+          fetch('/api/admin/exercises/generate-muscles'),
+        ])
 
       if (!statsResponse.ok) {
         throw new Error('Failed to fetch exercise statistics')
@@ -167,12 +196,17 @@ export function ExercisesTab() {
       if (!descriptionResponse.ok) {
         throw new Error('Failed to fetch description statistics')
       }
+      if (!muscleResponse.ok) {
+        throw new Error('Failed to fetch muscle statistics')
+      }
 
       const statsData = await statsResponse.json()
       const descriptionData = await descriptionResponse.json()
+      const muscleData = await muscleResponse.json()
 
       setStats(statsData)
       setDescriptionStats(descriptionData)
+      setMuscleStats(muscleData)
     } catch (err) {
       if (showLoading) {
         setError(err instanceof Error ? err.message : 'Unknown error occurred')
@@ -349,6 +383,82 @@ export function ExercisesTab() {
         progress: null,
         error: err instanceof Error ? err.message : 'Generation failed',
       })
+    }
+  }
+
+  const generateMuscles = async (dryRun: boolean = false) => {
+    try {
+      setMuscleGeneration((prev) => ({
+        ...prev,
+        isRunning: true,
+        isDryRun: dryRun,
+        progress: 'Starting AI muscle group analysis...',
+        error: null,
+      }))
+
+      const response = await fetch('/api/admin/exercises/generate-muscles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dryRun,
+          batchSize: 10,
+          skipExisting: !muscleGeneration.processAll,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(
+          errorData.error ||
+            `Failed to generate muscle groups: ${response.statusText}`,
+        )
+      }
+
+      const result = await response.json()
+
+      setMuscleGeneration((prev) => ({
+        ...prev,
+        isRunning: false,
+        isDryRun: dryRun,
+        progress: result.message,
+        error: null,
+      }))
+
+      // Refresh stats after generation
+      if (!dryRun) {
+        await fetchStats()
+      }
+    } catch (err) {
+      setMuscleGeneration((prev) => ({
+        ...prev,
+        isRunning: false,
+        isDryRun: dryRun,
+        progress: null,
+        error: err instanceof Error ? err.message : 'Generation failed',
+      }))
+    }
+  }
+
+  const stopMuscleGeneration = async () => {
+    try {
+      const response = await fetch('/api/admin/exercises/generate-muscles', {
+        method: 'DELETE',
+      })
+
+      const result = await response.json()
+
+      setMuscleGeneration((prev) => ({
+        ...prev,
+        isRunning: false,
+        progress: result.message,
+      }))
+
+      await fetchStats()
+    } catch (err) {
+      setMuscleGeneration((prev) => ({
+        ...prev,
+        error: err instanceof Error ? err.message : 'Failed to stop generation',
+      }))
     }
   }
 
@@ -1025,6 +1135,197 @@ export function ExercisesTab() {
                 content.
               </AlertDescription>
             </Alert>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Muscle Group Generation */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Dumbbell className="h-5 w-5" />
+            AI Muscle Group Analysis
+          </CardTitle>
+          <CardDescription>
+            Use AI to analyze exercises and assign correct primary/secondary
+            muscle groups
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Muscle Stats */}
+            {muscleStats && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 rounded-lg bg-card-on-card">
+                  <div className="text-2xl font-bold text-red-600">
+                    {formatNumber(muscleStats.exercisesWithoutPrimary)}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Missing Primary
+                  </p>
+                </div>
+
+                <div className="text-center p-4 rounded-lg bg-card-on-card">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {formatNumber(muscleStats.exercisesWithoutSecondary)}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Missing Secondary
+                  </p>
+                </div>
+
+                <div className="text-center p-4 rounded-lg bg-card-on-card">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {formatNumber(muscleStats.exercisesNeedingMuscles)}
+                  </div>
+                  <p className="text-sm text-muted-foreground">Need Review</p>
+                </div>
+
+                <div className="text-center p-4 rounded-lg bg-card-on-card">
+                  <div className="text-2xl font-bold text-green-600">
+                    {muscleStats.percentageComplete}%
+                  </div>
+                  <p className="text-sm text-muted-foreground">Complete</p>
+                </div>
+              </div>
+            )}
+
+            {/* Generation Progress */}
+            {muscleGeneration.progress && (
+              <Alert
+                className={`mb-6 ${muscleGeneration.error ? 'border-red-200' : 'border-blue-200'}`}
+              >
+                <Bot className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="flex items-center gap-2">
+                    {muscleGeneration.isRunning && (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    )}
+                    <span>{muscleGeneration.progress}</span>
+                    {muscleGeneration.isDryRun && (
+                      <Badge variant="outline" className="ml-2">
+                        DRY RUN
+                      </Badge>
+                    )}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Generation Error */}
+            {muscleGeneration.error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{muscleGeneration.error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Generation Actions */}
+            <div className="space-y-4">
+              {/* Process All Toggle */}
+              <div className="flex items-center gap-3 p-4 border rounded-lg bg-muted/30">
+                <input
+                  type="checkbox"
+                  id="processAll"
+                  checked={muscleGeneration.processAll}
+                  onChange={(e) =>
+                    setMuscleGeneration((prev) => ({
+                      ...prev,
+                      processAll: e.target.checked,
+                    }))
+                  }
+                  disabled={muscleGeneration.isRunning}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <Label htmlFor="processAll" className="flex-1 cursor-pointer">
+                  <span className="font-medium">
+                    Re-analyze all exercises
+                  </span>
+                  <span className="text-sm text-muted-foreground block">
+                    {muscleGeneration.processAll
+                      ? `Process all ${muscleStats?.totalPublicExercises ?? '...'} public exercises (overwrite existing assignments)`
+                      : `Process only ${muscleStats?.exercisesNeedingMuscles ?? '...'} exercises missing muscle assignments`}
+                  </span>
+                </Label>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Dry Run */}
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h5 className="font-medium text-blue-600">
+                      Preview Analysis
+                    </h5>
+                    <p className="text-sm text-muted-foreground">
+                      Test AI muscle analysis without saving changes
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => generateMuscles(true)}
+                    variant="outline"
+                    disabled={muscleGeneration.isRunning}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {muscleGeneration.isRunning && muscleGeneration.isDryRun
+                      ? 'Running...'
+                      : 'Preview'}
+                  </Button>
+                </div>
+
+                {/* Full Generation */}
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h5 className="font-medium text-green-600">
+                      Update Muscle Groups
+                    </h5>
+                    <p className="text-sm text-muted-foreground">
+                      {muscleGeneration.processAll
+                        ? 'Re-analyze ALL exercises with AI'
+                        : 'Analyze exercises missing muscles'}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => generateMuscles(false)}
+                    disabled={muscleGeneration.isRunning}
+                    loading={
+                      muscleGeneration.isRunning && !muscleGeneration.isDryRun
+                    }
+                  >
+                    <Bot className="h-4 w-4 mr-2" />
+                    {muscleGeneration.isRunning && !muscleGeneration.isDryRun
+                      ? 'Analyzing...'
+                      : muscleGeneration.processAll
+                        ? 'Re-analyze All'
+                        : 'Analyze Missing'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Stop Button */}
+              {muscleGeneration.isRunning && (
+                <div className="flex justify-center">
+                  <Button
+                    onClick={stopMuscleGeneration}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    Stop Generation
+                  </Button>
+                </div>
+              )}
+
+              {/* Information Alert */}
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>How it works:</strong> AI analyzes each exercise using
+                  its name, description, instructions, and equipment. It selects
+                  1-3 primary muscles (main movers) and 0-4 secondary muscles
+                  (assisters/stabilizers) from the 32 available muscle groups.
+                  Uses GPT-5.1 with deep reasoning for anatomy analysis.
+                </AlertDescription>
+              </Alert>
+            </div>
           </div>
         </CardContent>
       </Card>
