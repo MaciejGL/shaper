@@ -6,8 +6,8 @@ import { FemaleBodyBackView } from '@/components/human-body/female-body-back/fem
 import { FemaleBodyFrontView } from '@/components/human-body/female-body-front/female-body-front'
 import { MaleBodyBackView } from '@/components/human-body/male-body-back/male-body-back'
 import { MaleBodyFrontView } from '@/components/human-body/male-body-front/male-body-front'
-import { useUser } from '@/context/user-context'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useUser } from '@/context/user-context'
 import { cn } from '@/lib/utils'
 
 import { LABEL_TO_GROUP_MAPPING } from '../../../progress/constants/muscle-groups'
