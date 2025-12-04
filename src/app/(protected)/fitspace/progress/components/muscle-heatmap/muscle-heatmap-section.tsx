@@ -9,6 +9,7 @@ import { useUser } from '@/context/user-context'
 
 import { ActivityHeatmap } from './activity-heatmap'
 import { HeatmapBodyView } from './heatmap-body-view'
+import { HeatmapLegend } from './heatmap-legend'
 import { SelectedMuscleDetails } from './selected-muscle-details'
 import { useMuscleHeatmap } from './use-muscle-heatmap'
 import { WeekNavigator } from './week-navigator'
@@ -65,13 +66,18 @@ export function MuscleHeatmapSection() {
         >
           <div>
             {/* Body Heatmap View */}
-            <div className="mb-16">
+            <div className="mb-6">
               <HeatmapBodyView
                 muscleIntensity={muscleIntensity}
                 muscleProgress={muscleProgress}
                 selectedMuscle={selectedMuscle}
                 onMuscleClick={handleMuscleClick}
               />
+            </div>
+
+            {/* Color Legend */}
+            <div className="mb-6">
+              <HeatmapLegend />
             </div>
 
             {/* Selected Muscle Details */}

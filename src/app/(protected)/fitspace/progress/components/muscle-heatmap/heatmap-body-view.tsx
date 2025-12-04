@@ -60,11 +60,9 @@ function MuscleProgressLabel({
         )}
       >
         <span className="font-medium truncate">{displayName}</span>
-        {completedSets > 0 && (
-          <span className="tabular-nums text-muted-foreground whitespace-nowrap">
-            {completedSets}x
-          </span>
-        )}
+        <span className="tabular-nums text-muted-foreground whitespace-nowrap">
+          {completedSets}/12
+        </span>
       </div>
 
       <Progress

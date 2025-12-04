@@ -150,12 +150,12 @@ export function ActivityHeatmap({
       </AnimatePresence>
 
       <div className="flex gap-0.5">
-        <div className="flex flex-col gap-1 p-1 pr-1.5">
+        <div className="flex flex-col gap-1 py-1 pr-1.5">
           {orderedDayLabels.map((label, i) => (
             <div
               key={`label-${i}`}
               className={cn(
-                'flex aspect-square items-center text-[10px] text-muted-foreground',
+                'flex h-0 flex-1 items-center text-[10px] text-muted-foreground',
                 i % 2 === 1 && 'invisible',
               )}
             >
