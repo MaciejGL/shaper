@@ -261,8 +261,8 @@ export function ClientMeetingsSection() {
             const statusLabel = getStatusDisplay()
 
             return (
-              <Card key={meeting.id} className={cn('p-3 bg-card-on-card')}>
-                <CardContent className="space-y-2 p-0">
+              <Card key={meeting.id} className={cn('')}>
+                <CardContent className="space-y-2">
                   {/* Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -360,7 +360,7 @@ export function ClientMeetingsSection() {
                   )}
                 </CardContent>
 
-                <CardFooter className="gap-2 p-0">
+                <CardFooter className="gap-2">
                   {/* Add to Calendar Button */}
                   <Button
                     size="sm"

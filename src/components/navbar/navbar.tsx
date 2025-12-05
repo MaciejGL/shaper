@@ -153,7 +153,7 @@ export const Navbar = ({
                   className="rounded-full"
                 />
                 {totalUnreadCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-sky-700 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
+                  <span className="absolute -top-0.5 -right-0.5 bg-sky-700 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
                     {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
                   </span>
                 )}

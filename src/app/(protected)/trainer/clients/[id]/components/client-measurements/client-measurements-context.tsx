@@ -2,11 +2,11 @@
 
 import { ReactNode, createContext, useContext, useMemo } from 'react'
 
-// Copy the utility hook from fitspace progress to use here
+// Copy the utility hook from hypro progress to use here
 import { useBodyMeasurements } from '@/app/(protected)/fitspace/progress/components/use-body-measurements'
 import { GQLClientBodyMeasuresQuery } from '@/generated/graphql-client'
 
-// Match the exact interface expected by fitspace components
+// Match the exact interface expected by hypro components
 interface ClientMeasurementsContextType {
   bodyMeasures: GQLClientBodyMeasuresQuery['clientBodyMeasures']
   isLoading: boolean
@@ -45,7 +45,7 @@ export function ClientMeasurementsProvider({
 
   const contextValue = useMemo(
     () => ({
-      bodyMeasures: measurements, // Rename to match fitspace interface
+      bodyMeasures: measurements, // Rename to match hypro interface
       isLoading: false, // Not loading since we already have the data
       onMeasurementAdded: () => {}, // No-op for trainer view
       getLatestMeasurement,

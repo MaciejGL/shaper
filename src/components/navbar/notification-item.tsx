@@ -80,7 +80,7 @@ function getNotificationTitle(
     case GQLNotificationType.Reminder:
       return 'Reminder'
     case GQLNotificationType.System:
-      return 'Fitspace Team'
+      return 'Hypro Team'
     case GQLNotificationType.NewTrainingPlanAssigned:
       return 'New Training Plan'
     case GQLNotificationType.NewMealPlanAssigned:
@@ -95,6 +95,8 @@ function getNotificationTitle(
       return 'Subscription Renewed'
     case GQLNotificationType.MeetingReminder:
       return 'Meeting Reminder'
+    case GQLNotificationType.MeetingScheduled:
+      return 'Meeting Scheduled'
     default:
       return null
   }

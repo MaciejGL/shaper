@@ -1,6 +1,6 @@
 # PostHog Integration Setup
 
-This guide explains how to set up PostHog integration in the Fitspace application for feature flags, session recordings, and page view tracking.
+This guide explains how to set up PostHog integration in the Hypro application for feature flags, session recordings, and page view tracking.
 
 ## Environment Variables
 

@@ -56,6 +56,15 @@ export async function sendPushForNotification(
 
   try {
     switch (type) {
+      case GQLNotificationType.MeetingScheduled:
+        // Push notification for meeting scheduled is sent directly from meeting factory
+        // This case handles any edge cases where it might be triggered from notification system
+        return await notifySystemAnnouncement([userId], 'New Meeting', message)
+
+      case GQLNotificationType.MeetingUpdated:
+        // Push notification for meeting updated is sent directly from meeting factory
+        return await notifySystemAnnouncement([userId], 'Meeting Updated', message)
+
       case GQLNotificationType.MeetingReminder:
         return await notifyMeetingReminder(
           userId,

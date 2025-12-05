@@ -33,12 +33,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import {
   GQLGetTraineeMeetingsQuery,
   GQLMeetingStatus,
   useCancelMeetingMutation,
@@ -220,7 +214,8 @@ export function ClientMeetingsDashboard({
               </div>
               {nextMeeting.locationType === 'VIRTUAL' &&
                 nextMeeting.meetingLink &&
-                (nextMeeting.virtualMethod === 'VIDEO_CALL' || !nextMeeting.virtualMethod) && (
+                (nextMeeting.virtualMethod === 'VIDEO_CALL' ||
+                  !nextMeeting.virtualMethod) && (
                   <Button
                     size="sm"
                     variant="secondary"
@@ -233,13 +228,20 @@ export function ClientMeetingsDashboard({
                     Join Video Call
                   </Button>
                 )}
-              {nextMeeting.locationType === 'VIRTUAL' && 
-                (nextMeeting.virtualMethod === 'PHONE' || nextMeeting.virtualMethod === 'WHATSAPP') &&
+              {nextMeeting.locationType === 'VIRTUAL' &&
+                (nextMeeting.virtualMethod === 'PHONE' ||
+                  nextMeeting.virtualMethod === 'WHATSAPP') &&
                 clientPhone && (
                   <Button
                     size="sm"
                     variant="secondary"
-                    iconStart={nextMeeting.virtualMethod === 'PHONE' ? <Phone /> : <MessageCircle />}
+                    iconStart={
+                      nextMeeting.virtualMethod === 'PHONE' ? (
+                        <Phone />
+                      ) : (
+                        <MessageCircle />
+                      )
+                    }
                     onClick={() => window.open(`tel:${clientPhone}`, '_self')}
                     className="w-full"
                   >
@@ -492,7 +494,7 @@ function CompactMeetingCard({
         <div className="p-3">
           <div className="flex items-start gap-3">
             {/* Status Icon */}
-            <div className="pt-0.5">
+            <div className="flex items-center justify-center pt-0.5">
               {isCompleted ? (
                 <CheckCircle2 className="size-5 text-primary" />
               ) : isCancelled ? (
@@ -562,8 +564,9 @@ function CompactMeetingCard({
                   </div>
                 )}
                 {/* Phone number for phone/whatsapp meetings */}
-                {meeting.locationType === 'VIRTUAL' && 
-                  (meeting.virtualMethod === 'PHONE' || meeting.virtualMethod === 'WHATSAPP') && 
+                {meeting.locationType === 'VIRTUAL' &&
+                  (meeting.virtualMethod === 'PHONE' ||
+                    meeting.virtualMethod === 'WHATSAPP') &&
                   clientPhone && (
                     <a
                       href={`tel:${clientPhone}`}
@@ -578,56 +581,37 @@ function CompactMeetingCard({
 
             {/* Actions */}
             {isUpcoming && !isCompleted && !isCancelled && (
-              <div className="flex flex-col gap-1 pl-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon-sm"
-                        variant="ghost"
-                        onClick={() => setIsEditModalOpen(true)}
-                        disabled={isUpdating}
-                        iconOnly={<Edit />}
-                        className="h-7 w-7"
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>Edit</TooltipContent>
-                  </Tooltip>
+              <div className="flex flex-col items-end gap-1 pl-2">
+                <div className="flex gap-1">
+                  <Button
+                    size="icon-md"
+                    variant="outline"
+                    onClick={() => setIsEditModalOpen(true)}
+                    disabled={isUpdating}
+                    iconOnly={<Edit />}
+                  />
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon-sm"
-                        variant="ghost"
-                        onClick={handleComplete}
-                        disabled={isUpdating}
-                        iconOnly={<CheckCircle2 />}
-                        className="h-7 w-7"
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>Complete</TooltipContent>
-                  </Tooltip>
+                  <Button
+                    size="icon-md"
+                    variant="outline"
+                    onClick={handleComplete}
+                    disabled={isUpdating}
+                    iconOnly={<CheckCircle2 />}
+                  />
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon-sm"
-                        variant="ghost"
-                        onClick={handleCancel}
-                        disabled={isUpdating}
-                        iconOnly={<XCircle />}
-                        className="h-7 w-7"
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>Cancel</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                  <Button
+                    size="icon-md"
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={isUpdating}
+                    iconOnly={<XCircle />}
+                  />
+                </div>
 
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="icon-md"
                   onClick={() => setExpanded(!expanded)}
-                  className="h-7 w-7"
                   iconOnly={
                     expanded ? (
                       <ChevronUp className="size-4" />
@@ -653,7 +637,8 @@ function CompactMeetingCard({
             {/* Video call with link (including legacy meetings without virtualMethod) */}
             {meeting.locationType === 'VIRTUAL' &&
               meeting.meetingLink &&
-              (meeting.virtualMethod === 'VIDEO_CALL' || !meeting.virtualMethod) && (
+              (meeting.virtualMethod === 'VIDEO_CALL' ||
+                !meeting.virtualMethod) && (
                 <Button
                   size="sm"
                   variant="secondary"
@@ -666,19 +651,26 @@ function CompactMeetingCard({
               )}
 
             {/* Phone/WhatsApp meeting with client phone */}
-            {meeting.locationType === 'VIRTUAL' && 
-              (meeting.virtualMethod === 'PHONE' || meeting.virtualMethod === 'WHATSAPP') && 
+            {meeting.locationType === 'VIRTUAL' &&
+              (meeting.virtualMethod === 'PHONE' ||
+                meeting.virtualMethod === 'WHATSAPP') &&
               clientPhone && (
-              <Button
-                size="sm"
-                variant="secondary"
-                iconStart={meeting.virtualMethod === 'PHONE' ? <Phone /> : <MessageCircle />}
-                onClick={() => window.open(`tel:${clientPhone}`, '_self')}
-                className="w-full"
-              >
-                Call {clientPhone}
-              </Button>
-            )}
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  iconStart={
+                    meeting.virtualMethod === 'PHONE' ? (
+                      <Phone />
+                    ) : (
+                      <MessageCircle />
+                    )
+                  }
+                  onClick={() => window.open(`tel:${clientPhone}`, '_self')}
+                  className="w-full"
+                >
+                  Call {clientPhone}
+                </Button>
+              )}
 
             {meeting.address && (
               <a

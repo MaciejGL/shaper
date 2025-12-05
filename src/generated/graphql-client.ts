@@ -2252,6 +2252,8 @@ export enum GQLNotificationType {
   ExerciseNoteAdded = 'EXERCISE_NOTE_ADDED',
   ExerciseNoteReply = 'EXERCISE_NOTE_REPLY',
   MeetingReminder = 'MEETING_REMINDER',
+  MeetingScheduled = 'MEETING_SCHEDULED',
+  MeetingUpdated = 'MEETING_UPDATED',
   Message = 'MESSAGE',
   NewMealPlanAssigned = 'NEW_MEAL_PLAN_ASSIGNED',
   NewTrainingPlanAssigned = 'NEW_TRAINING_PLAN_ASSIGNED',

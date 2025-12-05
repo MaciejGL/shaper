@@ -50,6 +50,10 @@ export default class UserPublic implements GQLUserPublic {
     return this.data.profile?.lastName
   }
 
+  get phone() {
+    return this.data.profile?.phone
+  }
+
   get image() {
     return this.data.profile?.avatarUrl
   }

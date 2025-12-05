@@ -177,6 +177,8 @@ export function usePromotionalToastConfigs(): Record<
     [GQLNotificationType.TrainerWorkoutCompleted]: undefined,
     [GQLNotificationType.TeamInvitation]: undefined,
     [GQLNotificationType.BodyProgressShared]: undefined,
+    [GQLNotificationType.MeetingScheduled]: undefined,
+    [GQLNotificationType.MeetingUpdated]: undefined,
     [GQLNotificationType.MeetingReminder]: undefined,
     [GQLNotificationType.Reminder]: undefined,
     [GQLNotificationType.System]: undefined,

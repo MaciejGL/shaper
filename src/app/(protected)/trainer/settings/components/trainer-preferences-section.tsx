@@ -21,7 +21,7 @@ import type { WeekStartDay } from '@/lib/date-utils'
 
 /**
  * Trainer-specific preferences section
- * Similar to fitspace preferences but focused on trainer needs
+ * Similar to hypro preferences but focused on trainer needs
  */
 export function TrainerPreferencesSection() {
   const {

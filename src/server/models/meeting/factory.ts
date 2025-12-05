@@ -2,6 +2,7 @@ import { format } from 'date-fns'
 
 import {
   GQLCreateMeetingInput,
+  GQLNotificationType,
   GQLUpdateMeetingInput,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
@@ -12,257 +13,10 @@ import {
 } from '@/lib/notifications/push-notification-service'
 import { GQLContext } from '@/types/gql-context'
 
+import { createNotification } from '../notification/factory'
 import { completeTaskByAction } from '../service-task/factory'
 
 import Meeting from './model'
-
-// Helper function to send meeting notification via messenger and push
-async function sendMeetingNotification(
-  trainerId: string,
-  traineeId: string,
-  meeting: {
-    title: string
-    type: string
-    scheduledAt: Date
-    duration: number
-    locationType: string
-    address: string | null
-    meetingLink: string | null
-  },
-) {
-  try {
-    // Get trainer info and trainee's time format preference
-    const [trainer, trainee] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: trainerId },
-        select: {
-          profile: {
-            select: { firstName: true, lastName: true },
-          },
-        },
-      }),
-      prisma.user.findUnique({
-        where: { id: traineeId },
-        select: {
-          profile: {
-            select: { timeFormat: true },
-          },
-        },
-      }),
-    ])
-
-    const trainerName = trainer?.profile?.firstName
-      ? `${trainer.profile.firstName}${trainer.profile.lastName ? ` ${trainer.profile.lastName}` : ''}`
-      : 'Your trainer'
-
-    // Get or create chat between trainer and trainee
-    let chat = await prisma.chat.findFirst({
-      where: {
-        trainerId,
-        clientId: traineeId,
-      },
-    })
-
-    if (!chat) {
-      chat = await prisma.chat.create({
-        data: {
-          trainerId,
-          clientId: traineeId,
-        },
-      })
-    }
-
-    // Format meeting details message using trainee's preferred time format
-    const timeFormat =
-      trainee?.profile?.timeFormat === 'h12' ? 'h:mm a' : 'HH:mm'
-    const meetingDate = format(meeting.scheduledAt, 'EEEE, MMMM d, yyyy')
-    const meetingTime = format(meeting.scheduledAt, timeFormat)
-
-    const meetingTypeLabels: Record<string, string> = {
-      INITIAL_CONSULTATION: 'Initial Consultation',
-      IN_PERSON_TRAINING: 'In-Person Training',
-      CHECK_IN: 'Check-In',
-      PLAN_REVIEW: 'Plan Review',
-    }
-
-    let locationInfo = ''
-    if (meeting.locationType === 'VIRTUAL' && meeting.meetingLink) {
-      locationInfo = `📍 Location: Virtual Meeting\n🔗 Join here: ${meeting.meetingLink}`
-    } else if (meeting.address) {
-      locationInfo = `📍 Location: ${meeting.address}`
-    }
-
-    const messageContent = `🗓️ New Meeting Scheduled
-
-${meeting.title}
-${meetingTypeLabels[meeting.type] || meeting.type}
-
-📅 Date: ${meetingDate}
-⏰ Time: ${meetingTime}
-⏱️ Duration: ${meeting.duration} minutes
-
-${locationInfo}
-
-Looking forward to seeing you!`
-
-    // Send the message
-    await prisma.message.create({
-      data: {
-        chatId: chat.id,
-        senderId: trainerId,
-        content: messageContent,
-      },
-    })
-
-    // Update chat's updatedAt timestamp
-    await prisma.chat.update({
-      where: { id: chat.id },
-      data: { updatedAt: new Date() },
-    })
-
-    // Send push notification
-    const shortTimeFormat =
-      trainee?.profile?.timeFormat === 'h12' ? 'h:mm a' : 'HH:mm'
-    const shortDate = format(meeting.scheduledAt, `MMM d, ${shortTimeFormat}`)
-    await notifyMeetingScheduled(
-      traineeId,
-      meeting.title,
-      shortDate,
-      trainerName,
-    )
-  } catch (error) {
-    // Log error but don't fail the meeting creation
-    console.error('Failed to send meeting notification:', error)
-  }
-}
-
-// Helper function to send meeting update notification via messenger and push
-async function sendMeetingUpdateNotification(
-  trainerId: string,
-  traineeId: string,
-  meeting: {
-    title: string
-    type: string
-    scheduledAt: Date
-    duration: number
-    locationType: string
-    address: string | null
-    meetingLink: string | null
-  },
-  changedFields: string[],
-) {
-  try {
-    // Get trainer info and trainee's time format preference
-    const [trainer, trainee] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: trainerId },
-        select: {
-          profile: {
-            select: { firstName: true, lastName: true },
-          },
-        },
-      }),
-      prisma.user.findUnique({
-        where: { id: traineeId },
-        select: {
-          profile: {
-            select: { timeFormat: true },
-          },
-        },
-      }),
-    ])
-
-    const trainerName = trainer?.profile?.firstName
-      ? `${trainer.profile.firstName}${trainer.profile.lastName ? ` ${trainer.profile.lastName}` : ''}`
-      : 'Your trainer'
-
-    // Get or create chat between trainer and trainee
-    let chat = await prisma.chat.findFirst({
-      where: {
-        trainerId,
-        clientId: traineeId,
-      },
-    })
-
-    if (!chat) {
-      chat = await prisma.chat.create({
-        data: {
-          trainerId,
-          clientId: traineeId,
-        },
-      })
-    }
-
-    // Format meeting details message using trainee's preferred time format
-    const timeFormat =
-      trainee?.profile?.timeFormat === 'h12' ? 'h:mm a' : 'HH:mm'
-    const meetingDate = format(meeting.scheduledAt, 'EEEE, MMMM d, yyyy')
-    const meetingTime = format(meeting.scheduledAt, timeFormat)
-
-    const meetingTypeLabels: Record<string, string> = {
-      INITIAL_CONSULTATION: 'Initial Consultation',
-      IN_PERSON_TRAINING: 'In-Person Training',
-      CHECK_IN: 'Check-In',
-      PLAN_REVIEW: 'Plan Review',
-    }
-
-    let locationInfo = ''
-    if (meeting.locationType === 'VIRTUAL' && meeting.meetingLink) {
-      locationInfo = `📍 Location: Virtual Meeting\n🔗 Join here: ${meeting.meetingLink}`
-    } else if (meeting.address) {
-      locationInfo = `📍 Location: ${meeting.address}`
-    }
-
-    // Create a more specific message based on what changed
-    const changesList = changedFields.join(', ')
-    const messageContent = `🔄 Meeting Updated
-
-Your trainer has updated the following meeting details:
-
-${meeting.title}
-${meetingTypeLabels[meeting.type] || meeting.type}
-
-Updated: ${changesList}
-
-📅 Date: ${meetingDate}
-⏰ Time: ${meetingTime}
-⏱️ Duration: ${meeting.duration} minutes
-
-${locationInfo}
-
-Please check the updated details!`
-
-    // Send the message
-    await prisma.message.create({
-      data: {
-        chatId: chat.id,
-        senderId: trainerId,
-        content: messageContent,
-      },
-    })
-
-    // Update chat's updatedAt timestamp
-    await prisma.chat.update({
-      where: { id: chat.id },
-      data: { updatedAt: new Date() },
-    })
-
-    // Send push notification
-    const shortTimeFormat =
-      trainee?.profile?.timeFormat === 'h12' ? 'h:mm a' : 'HH:mm'
-    const shortDate = format(meeting.scheduledAt, `MMM d, ${shortTimeFormat}`)
-    await notifyMeetingUpdated(
-      traineeId,
-      meeting.title,
-      changesList,
-      shortDate,
-      trainerName,
-    )
-  } catch (error) {
-    // Log error but don't fail the meeting update
-    console.error('Failed to send meeting update notification:', error)
-  }
-}
 
 export async function createMeeting(
   input: GQLCreateMeetingInput,
@@ -348,16 +102,32 @@ export async function createMeeting(
     },
   })
 
-  // Send automatic notification via messenger
-  await sendMeetingNotification(currentUserId, input.traineeId, {
-    title: input.title,
-    type: input.type,
-    scheduledAt,
-    duration: input.duration,
-    locationType: input.locationType,
-    address: input.address || null,
-    meetingLink: input.meetingLink || null,
-  })
+  // Get trainer name for notification
+  const trainerName = meeting.coach?.profile?.firstName
+    ? `${meeting.coach.profile.firstName}${meeting.coach.profile.lastName ? ` ${meeting.coach.profile.lastName}` : ''}`
+    : 'Your trainer'
+
+  // Create in-app notification for trainee
+  await createNotification(
+    {
+      userId: input.traineeId,
+      createdBy: currentUserId,
+      message: `${trainerName} scheduled a meeting: ${input.title}`,
+      type: GQLNotificationType.MeetingScheduled,
+      link: '/fitspace/my-trainer',
+      relatedItemId: meeting.id,
+    },
+    context,
+  )
+
+  // Send push notification for meeting scheduled
+  const shortDate = format(scheduledAt, 'MMM d, h:mm a')
+  await notifyMeetingScheduled(
+    input.traineeId,
+    input.title,
+    shortDate,
+    trainerName,
+  )
 
   return new Meeting(meeting, context)
 }
@@ -494,19 +264,34 @@ export async function updateMeeting(
 
   // Send notification to trainee if coach made significant changes
   if (isCoachUpdate && changedFields.length > 0) {
-    await sendMeetingUpdateNotification(
-      existingMeeting.coachId,
-      existingMeeting.traineeId,
+    // Get trainer name for notification
+    const trainerName = meeting.coach?.profile?.firstName
+      ? `${meeting.coach.profile.firstName}${meeting.coach.profile.lastName ? ` ${meeting.coach.profile.lastName}` : ''}`
+      : 'Your trainer'
+
+    const changesList = changedFields.join(', ')
+
+    // Create in-app notification for trainee
+    await createNotification(
       {
-        title: meeting.title,
-        type: meeting.type,
-        scheduledAt: meeting.scheduledAt,
-        duration: meeting.duration,
-        locationType: meeting.locationType,
-        address: meeting.address,
-        meetingLink: meeting.meetingLink,
+        userId: existingMeeting.traineeId,
+        createdBy: currentUserId,
+        message: `${trainerName} updated meeting "${meeting.title}": ${changesList}`,
+        type: GQLNotificationType.MeetingUpdated,
+        link: '/fitspace/my-trainer',
+        relatedItemId: meeting.id,
       },
-      changedFields,
+      context,
+    )
+
+    // Send push notification
+    const shortDate = format(meeting.scheduledAt, 'MMM d, h:mm a')
+    await notifyMeetingUpdated(
+      existingMeeting.traineeId,
+      meeting.title,
+      changesList,
+      shortDate,
+      trainerName,
     )
   }
 

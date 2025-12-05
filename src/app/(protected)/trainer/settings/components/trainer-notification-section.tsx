@@ -4,7 +4,7 @@ import { PushNotificationSettings } from '@/components/settings/push-notificatio
 
 /**
  * Trainer-specific notification settings
- * Reuses the same push notification settings component that works for fitspace users
+ * Reuses the same push notification settings component that works for hypro users
  * This ensures trainers get the same mobile app push notification controls
  */
 export function TrainerNotificationSection() {
