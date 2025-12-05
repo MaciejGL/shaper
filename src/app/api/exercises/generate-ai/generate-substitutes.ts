@@ -28,10 +28,10 @@ const SUBSTITUTES_SCHEMA = {
   properties: {
     substituteIds: {
       type: 'array',
-      description: 'Array of 3-5 exercise IDs that are good substitutes',
+      description: 'Array of 1-3 exercise IDs that are the best substitutes',
       items: { type: 'string' },
       minItems: 0,
-      maxItems: 5,
+      maxItems: 3,
     },
     reasoning: {
       type: 'string',
@@ -77,7 +77,7 @@ async function getExercisesMatchingMuscles(
 function buildSystemPrompt(): string {
   return `You are a fitness expert helping select substitute exercises.
 
-Your task is to select 3-5 exercises that are good substitutes for a given exercise.
+Your task is to select 1-3 exercises that are the best substitutes for a given exercise.
 
 SUBSTITUTE SELECTION CRITERIA:
 1. Same primary muscle groups targeted
@@ -104,7 +104,7 @@ EXERCISE: ${exerciseName}
 EQUIPMENT: ${equipment}
 PRIMARY MUSCLES: ${primaryMuscles}
 
-AVAILABLE EXERCISES (select 3-5 from this list):
+AVAILABLE EXERCISES (select 1-3 from this list):
 ${exerciseList}
 
 Select exercises that target similar muscles and movement patterns. Return their exact IDs.`

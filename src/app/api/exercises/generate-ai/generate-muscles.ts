@@ -10,12 +10,14 @@ export interface GenerateExerciseMusclesResult {
   primaryMuscleIds: string[]
   secondaryMuscleIds: string[]
   equipment: string
+  suggestedName: string
 }
 
 interface GeneratedMusclesResponse {
   primaryMuscleIds: string[]
   secondaryMuscleIds: string[]
   equipment: string
+  suggestedName: string
   reasoning: string
 }
 
@@ -56,6 +58,11 @@ const MUSCLE_EQUIPMENT_SCHEMA = {
       description:
         'The equipment ID that best matches this exercise from the available options',
     },
+    suggestedName: {
+      type: 'string',
+      description:
+        'A properly formatted exercise name following the standard naming convention',
+    },
     reasoning: {
       type: 'string',
       description: 'Brief explanation of muscle and equipment selection',
@@ -65,6 +72,7 @@ const MUSCLE_EQUIPMENT_SCHEMA = {
     'primaryMuscleIds',
     'secondaryMuscleIds',
     'equipment',
+    'suggestedName',
     'reasoning',
   ],
   additionalProperties: false,
@@ -109,6 +117,22 @@ EQUIPMENT SELECTION:
    - For bodyweight exercises with no equipment, use BODYWEIGHT
    - When multiple equipment could work, pick the most common/traditional one
 
+EXERCISE NAME FORMATTING:
+   Format the exercise name following this standard convention:
+   - Pattern: [Position/Variation] [Equipment] [Movement]
+   - Examples:
+     * "Incline Dumbbell Press" - position + equipment + movement
+     * "Flat Bench Dumbbell Fly" - position + bench + equipment + movement
+     * "Cable Lateral Raise" - equipment + movement
+     * "Barbell Bent-Over Row" - equipment + style + movement
+     * "Close-Grip Bench Press" - grip variation + movement
+     * "Single-Arm Cable Fly" - unilateral + equipment + movement
+   - Use Title Case (capitalize each word)
+   - Include position modifiers when relevant: Incline, Decline, Flat, Seated, Standing
+   - Include grip variations when relevant: Close-Grip, Wide-Grip, Reverse-Grip, Neutral-Grip
+   - For unilateral exercises: Single-Arm, Single-Leg, Alternating
+   - Keep names concise but descriptive (2-5 words typically)
+
 CRITICAL ANTI-PATTERNS - DO NOT MAKE THESE MISTAKES:
    - Bench Press / Chest Press: Triceps are SECONDARY (target is CHEST only)
    - Shoulder Press: Triceps are SECONDARY (target is SHOULDERS only)
@@ -132,13 +156,14 @@ IMPORTANT: You must return exact IDs from the lists above. Do not invent new IDs
 }
 
 function buildUserPrompt(input: GenerateExerciseMusclesInput): string {
-  return `Analyze this exercise and identify the muscles activated and equipment needed:
+  return `Analyze this exercise and identify the muscles activated, equipment needed, and suggest a properly formatted name:
 
 EXERCISE: ${input.name}
 
 Based on biomechanics and muscle activation patterns:
 1. Select the correct primary and secondary muscles using EXACT muscle IDs
-2. Select the appropriate equipment using EXACT equipment ID`
+2. Select the appropriate equipment using EXACT equipment ID
+3. Suggest a properly formatted exercise name following the naming convention`
 }
 
 export async function generateExerciseMuscles(
@@ -196,6 +221,7 @@ export async function generateExerciseMuscles(
         primaryMuscleIds: parsed.primaryMuscleIds,
         secondaryMuscleIds: parsed.secondaryMuscleIds,
         equipment,
+        suggestedName: parsed.suggestedName || input.name,
       }
     } catch (error) {
       if (attempt === maxRetries) {

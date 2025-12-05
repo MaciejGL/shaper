@@ -98,6 +98,7 @@ export function CreateExerciseDialog({
     onSuccess: (data) => {
       setFormData((prev) => ({
         ...prev,
+        name: data.suggestedName,
         description: data.description,
         instructions: data.instructions,
         tips: data.tips,

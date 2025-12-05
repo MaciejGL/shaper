@@ -12,6 +12,7 @@ export interface GenerateExerciseAIRequest {
 }
 
 export interface GenerateExerciseAIResponse {
+  suggestedName: string
   description: string
   instructions: [string, string]
   tips: string[]
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
     })
 
     const response: GenerateExerciseAIResponse = {
+      suggestedName: muscles.suggestedName,
       description: content.description,
       instructions: content.instructions,
       tips: content.tips,
