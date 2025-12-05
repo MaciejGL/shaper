@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, X } from 'lucide-react'
+import { Plus, Sparkles, X } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -42,6 +42,7 @@ import { cn } from '@/lib/utils'
 
 import { MuscleGroupSelector } from './muscle-group-selector'
 import { SubstituteExercisesManager } from './substitute-exercises-manager'
+import { useGenerateExerciseAI } from './use-generate-exercise-ai'
 
 interface CreateExerciseDialogProps {
   open: boolean
@@ -90,6 +91,45 @@ export function CreateExerciseDialog({
 
   // Track original image URLs to detect changes
   const [originalImageUrls, setOriginalImageUrls] = useState<string[]>([])
+
+  // AI generation
+  const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false)
+  const { generate: generateAI, isGenerating } = useGenerateExerciseAI({
+    onSuccess: (data) => {
+      setFormData((prev) => ({
+        ...prev,
+        description: data.description,
+        instructions: data.instructions,
+        tips: data.tips,
+        muscleGroups: data.primaryMuscleIds.map((id) => ({ id })),
+        secondaryMuscleGroups: data.secondaryMuscleIds.map((id) => ({ id })),
+      }))
+      toast.success('Exercise content generated')
+    },
+    onError: (error) => {
+      toast.error(error)
+    },
+  })
+
+  const hasExistingContent =
+    !!formData.description?.trim() ||
+    formData.instructions.some((i) => i.trim()) ||
+    formData.tips.length > 0 ||
+    formData.muscleGroups.length > 0 ||
+    formData.secondaryMuscleGroups.length > 0
+
+  const handleGenerateAI = () => {
+    if (hasExistingContent) {
+      setShowOverwriteConfirm(true)
+    } else {
+      generateAI(formData.name, formData.equipment)
+    }
+  }
+
+  const handleConfirmOverwrite = () => {
+    setShowOverwriteConfirm(false)
+    generateAI(formData.name, formData.equipment)
+  }
 
   // Load existing substitute IDs when editing
   const {
@@ -296,8 +336,23 @@ export function CreateExerciseDialog({
         className="sm:max-w-[900px] !pb-0 !px-0"
       >
         <DialogHeader className="px-6 py-4">
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription>{description}</DialogDescription>
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              iconStart={<Sparkles />}
+              onClick={handleGenerateAI}
+              disabled={!formData.name.trim() || isGenerating}
+              loading={isGenerating}
+            >
+              Generate with AI
+            </Button>
+          </div>
         </DialogHeader>
 
         <form
@@ -616,6 +671,31 @@ export function CreateExerciseDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <Dialog
+        open={showOverwriteConfirm}
+        onOpenChange={setShowOverwriteConfirm}
+      >
+        <DialogContent dialogTitle="Overwrite existing content?">
+          <DialogHeader>
+            <DialogTitle>Overwrite existing content?</DialogTitle>
+            <DialogDescription>
+              This exercise already has content filled in. Generating with AI
+              will replace the description, instructions, tips, and muscle
+              groups.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-row gap-2 justify-end">
+            <Button
+              variant="secondary"
+              onClick={() => setShowOverwriteConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmOverwrite}>Generate</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 }
