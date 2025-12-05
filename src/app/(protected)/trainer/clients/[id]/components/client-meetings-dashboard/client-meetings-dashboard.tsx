@@ -9,7 +9,10 @@ import {
   ChevronUp,
   Clock,
   Edit,
+  Globe,
   MapPin,
+  MessageCircle,
+  Phone,
   Plus,
   UserCheck,
   Video,
@@ -56,6 +59,7 @@ type Meeting = NonNullable<
 interface ClientMeetingsDashboardProps {
   clientId: string
   clientName: string
+  clientPhone?: string | null
 }
 
 const MEETING_TYPE_LABELS = {
@@ -68,6 +72,7 @@ const MEETING_TYPE_LABELS = {
 export function ClientMeetingsDashboard({
   clientId,
   clientName,
+  clientPhone,
 }: ClientMeetingsDashboardProps) {
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
 
@@ -130,6 +135,7 @@ export function ClientMeetingsDashboard({
           pastMeetings={pastMeetings}
           clientId={clientId}
           clientName={clientName}
+          clientPhone={clientPhone}
           onRefetch={refetch}
           onSchedule={() => setIsScheduleModalOpen(true)}
         />
@@ -213,7 +219,8 @@ export function ClientMeetingsDashboard({
                 {nextMeeting.duration}min
               </div>
               {nextMeeting.locationType === 'VIRTUAL' &&
-                nextMeeting.meetingLink && (
+                nextMeeting.meetingLink &&
+                (nextMeeting.virtualMethod === 'VIDEO_CALL' || !nextMeeting.virtualMethod) && (
                   <Button
                     size="sm"
                     variant="secondary"
@@ -223,7 +230,20 @@ export function ClientMeetingsDashboard({
                     }
                     className="w-full"
                   >
-                    Join Meeting
+                    Join Video Call
+                  </Button>
+                )}
+              {nextMeeting.locationType === 'VIRTUAL' && 
+                (nextMeeting.virtualMethod === 'PHONE' || nextMeeting.virtualMethod === 'WHATSAPP') &&
+                clientPhone && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    iconStart={nextMeeting.virtualMethod === 'PHONE' ? <Phone /> : <MessageCircle />}
+                    onClick={() => window.open(`tel:${clientPhone}`, '_self')}
+                    className="w-full"
+                  >
+                    Call {clientPhone}
                   </Button>
                 )}
             </CardContent>
@@ -237,6 +257,7 @@ export function ClientMeetingsDashboard({
         onOpenChange={setIsScheduleModalOpen}
         traineeId={clientId}
         traineeName={clientName}
+        traineePhone={clientPhone}
       />
     </div>
   )
@@ -248,6 +269,7 @@ interface MeetingsListSectionProps {
   pastMeetings: Meeting[]
   clientId: string
   clientName: string
+  clientPhone?: string | null
   onRefetch: () => void
   onSchedule: () => void
 }
@@ -258,6 +280,7 @@ function MeetingsListSection({
   pastMeetings,
   clientId,
   clientName,
+  clientPhone,
   onRefetch,
   onSchedule,
 }: MeetingsListSectionProps) {
@@ -300,6 +323,7 @@ function MeetingsListSection({
                 key={meeting.id}
                 meeting={meeting}
                 clientId={clientId}
+                clientPhone={clientPhone}
                 onRefetch={onRefetch}
               />
             ))}
@@ -327,6 +351,7 @@ function MeetingsListSection({
                     key={meeting.id}
                     meeting={meeting}
                     clientId={clientId}
+                    clientPhone={clientPhone}
                     onRefetch={onRefetch}
                     isPast
                   />
@@ -343,6 +368,7 @@ function MeetingsListSection({
 interface CompactMeetingCardProps {
   meeting: Meeting
   clientId: string
+  clientPhone?: string | null
   onRefetch: () => void
   isPast?: boolean
 }
@@ -350,6 +376,7 @@ interface CompactMeetingCardProps {
 function CompactMeetingCard({
   meeting,
   clientId,
+  clientPhone,
   onRefetch,
   isPast = false,
 }: CompactMeetingCardProps) {
@@ -506,8 +533,27 @@ function CompactMeetingCard({
                 </div>
                 {meeting.locationType === 'VIRTUAL' ? (
                   <div className="flex items-center gap-1">
-                    <Video className="size-3" />
-                    Virtual
+                    {meeting.virtualMethod === 'PHONE' ? (
+                      <>
+                        <Phone className="size-3" />
+                        Phone
+                      </>
+                    ) : meeting.virtualMethod === 'WHATSAPP' ? (
+                      <>
+                        <MessageCircle className="size-3" />
+                        WhatsApp
+                      </>
+                    ) : meeting.virtualMethod === 'OTHER' ? (
+                      <>
+                        <Globe className="size-3" />
+                        Virtual
+                      </>
+                    ) : (
+                      <>
+                        <Video className="size-3" />
+                        Video Call
+                      </>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center gap-1">
@@ -515,6 +561,18 @@ function CompactMeetingCard({
                     In Person
                   </div>
                 )}
+                {/* Phone number for phone/whatsapp meetings */}
+                {meeting.locationType === 'VIRTUAL' && 
+                  (meeting.virtualMethod === 'PHONE' || meeting.virtualMethod === 'WHATSAPP') && 
+                  clientPhone && (
+                    <a
+                      href={`tel:${clientPhone}`}
+                      className="flex items-center gap-1 text-primary hover:underline"
+                    >
+                      <Phone className="size-3" />
+                      {clientPhone}
+                    </a>
+                  )}
               </div>
             </div>
 
@@ -592,15 +650,33 @@ function CompactMeetingCard({
               </p>
             )}
 
-            {meeting.locationType === 'VIRTUAL' && meeting.meetingLink && (
+            {/* Video call with link (including legacy meetings without virtualMethod) */}
+            {meeting.locationType === 'VIRTUAL' &&
+              meeting.meetingLink &&
+              (meeting.virtualMethod === 'VIDEO_CALL' || !meeting.virtualMethod) && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  iconStart={<Video />}
+                  onClick={() => window.open(meeting.meetingLink!, '_blank')}
+                  className="w-full"
+                >
+                  Join Video Call
+                </Button>
+              )}
+
+            {/* Phone/WhatsApp meeting with client phone */}
+            {meeting.locationType === 'VIRTUAL' && 
+              (meeting.virtualMethod === 'PHONE' || meeting.virtualMethod === 'WHATSAPP') && 
+              clientPhone && (
               <Button
                 size="sm"
                 variant="secondary"
-                iconStart={<Video />}
-                onClick={() => window.open(meeting.meetingLink!, '_blank')}
+                iconStart={meeting.virtualMethod === 'PHONE' ? <Phone /> : <MessageCircle />}
+                onClick={() => window.open(`tel:${clientPhone}`, '_self')}
                 className="w-full"
               >
-                Join Virtual Meeting
+                Call {clientPhone}
               </Button>
             )}
 
@@ -645,6 +721,7 @@ function CompactMeetingCard({
         onOpenChange={setIsEditModalOpen}
         meeting={meeting}
         clientId={clientId}
+        clientPhone={clientPhone}
       />
     </>
   )

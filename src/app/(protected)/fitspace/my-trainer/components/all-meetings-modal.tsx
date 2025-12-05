@@ -1,7 +1,16 @@
 'use client'
 
 import { format, isPast, isToday } from 'date-fns'
-import { Calendar, CalendarPlus, Clock, MapPin, Video } from 'lucide-react'
+import {
+  Calendar,
+  CalendarPlus,
+  Clock,
+  Globe,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Video,
+} from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,6 +23,7 @@ import {
 } from '@/components/ui/drawer'
 import {
   GQLGetAllClientMeetingsQuery,
+  GQLVirtualMethod,
   useGetAllClientMeetingsQuery,
 } from '@/generated/graphql-client'
 import { useTimeFormatting } from '@/hooks/use-time-formatting'
@@ -142,12 +152,37 @@ export function AllMeetingsDrawer({
           </div>
 
           {/* Location */}
-          {meeting.locationType === 'VIRTUAL' && meeting.meetingLink && (
+          {meeting.locationType === 'VIRTUAL' && (
             <div className="flex items-center gap-1.5 text-sm">
-              <Video className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-              <span className="text-xs text-muted-foreground truncate">
-                Virtual Meeting
-              </span>
+              {meeting.virtualMethod === GQLVirtualMethod.Phone ? (
+                <>
+                  <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-xs text-muted-foreground truncate">
+                    Phone Call
+                  </span>
+                </>
+              ) : meeting.virtualMethod === GQLVirtualMethod.Whatsapp ? (
+                <>
+                  <MessageCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-xs text-muted-foreground truncate">
+                    WhatsApp
+                  </span>
+                </>
+              ) : meeting.virtualMethod === GQLVirtualMethod.Other ? (
+                <>
+                  <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-xs text-muted-foreground truncate">
+                    Virtual Meeting
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Video className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-xs text-muted-foreground truncate">
+                    Video Call
+                  </span>
+                </>
+              )}
             </div>
           )}
 
@@ -195,18 +230,21 @@ export function AllMeetingsDrawer({
             >
               Add to Calendar
             </Button>
-            {/* Join Button for Virtual Meetings */}
-            {meeting.locationType === 'VIRTUAL' && meeting.meetingLink && (
-              <Button
-                size="sm"
-                variant="default"
-                className="flex-1"
-                iconStart={<Video />}
-                onClick={() => window.open(meeting.meetingLink!, '_blank')}
-              >
-                Join
-              </Button>
-            )}
+            {/* Join Button for Video Call Meetings (including legacy meetings without virtualMethod) */}
+            {meeting.locationType === 'VIRTUAL' &&
+              meeting.meetingLink &&
+              (meeting.virtualMethod === GQLVirtualMethod.VideoCall ||
+                !meeting.virtualMethod) && (
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="flex-1"
+                  iconStart={<Video />}
+                  onClick={() => window.open(meeting.meetingLink!, '_blank')}
+                >
+                  Join
+                </Button>
+              )}
           </CardFooter>
         )}
       </Card>

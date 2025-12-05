@@ -2,12 +2,14 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
+import { AlertCircle, MessageCircle, Phone, Video } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { DatePicker } from '@/components/date-picker'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -37,6 +39,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   GQLLocationType,
   GQLMeetingType,
+  GQLVirtualMethod,
   useCreateMeetingMutation,
   useGetTraineeMeetingsQuery,
 } from '@/generated/graphql-client'
@@ -46,6 +49,7 @@ interface ScheduleMeetingModalProps {
   onOpenChange: (open: boolean) => void
   traineeId: string
   traineeName: string
+  traineePhone?: string | null
   serviceDeliveryId?: string
 }
 
@@ -62,20 +66,26 @@ const scheduleMeetingSchema = z
     scheduledTime: z.string().min(1, 'Time is required'),
     duration: z.string().min(1, 'Duration is required'),
     locationType: z.enum(['VIRTUAL', 'IN_PERSON']),
+    virtualMethod: z
+      .enum(['VIDEO_CALL', 'PHONE', 'WHATSAPP', 'OTHER'])
+      .optional(),
     address: z.string().optional(),
     meetingLink: z.string().optional(),
     description: z.string().optional(),
   })
   .refine(
     (data) => {
-      // If VIRTUAL, meeting link is required
-      if (data.locationType === 'VIRTUAL') {
+      // If VIRTUAL with VIDEO_CALL, meeting link is required
+      if (
+        data.locationType === 'VIRTUAL' &&
+        data.virtualMethod === 'VIDEO_CALL'
+      ) {
         return !!data.meetingLink && data.meetingLink.trim().length > 0
       }
       return true
     },
     {
-      message: 'Meeting link is required for virtual meetings',
+      message: 'Meeting link is required for video calls',
       path: ['meetingLink'],
     },
   )
@@ -118,6 +128,7 @@ export function ScheduleMeetingModal({
   onOpenChange,
   traineeId,
   traineeName,
+  traineePhone,
   serviceDeliveryId,
 }: ScheduleMeetingModalProps) {
   const queryClient = useQueryClient()
@@ -149,6 +160,7 @@ export function ScheduleMeetingModal({
       scheduledTime: getDefaultTime(),
       duration: '60',
       locationType: 'VIRTUAL' as const,
+      virtualMethod: 'VIDEO_CALL' as const,
       address: '',
       meetingLink: '',
       description: '',
@@ -156,6 +168,7 @@ export function ScheduleMeetingModal({
   })
 
   const locationType = form.watch('locationType')
+  const virtualMethod = form.watch('virtualMethod')
   const scheduledDate = form.watch('scheduledDate')
 
   const onSubmit = async (values: ScheduleMeetingFormValues) => {
@@ -175,6 +188,12 @@ export function ScheduleMeetingModal({
           ? GQLLocationType.Virtual
           : GQLLocationType.CoachLocation // Physical meetings default to coach location
 
+      // Map virtual method to backend enum
+      const backendVirtualMethod =
+        values.locationType === 'VIRTUAL' && values.virtualMethod
+          ? (values.virtualMethod as GQLVirtualMethod)
+          : null
+
       await createMutation.mutateAsync({
         input: {
           traineeId,
@@ -183,6 +202,7 @@ export function ScheduleMeetingModal({
           duration: parseInt(values.duration),
           timezone,
           locationType: backendLocationType,
+          virtualMethod: backendVirtualMethod,
           address: values.address || null,
           meetingLink: values.meetingLink || null,
           title: values.title,
@@ -349,7 +369,13 @@ export function ScheduleMeetingModal({
                 <FormItem>
                   <FormLabel>Location Type</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      // Reset virtual method when switching location type
+                      if (value === 'VIRTUAL') {
+                        form.setValue('virtualMethod', 'VIDEO_CALL')
+                      }
+                    }}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -367,14 +393,83 @@ export function ScheduleMeetingModal({
               )}
             />
 
-            {/* Meeting Link (for virtual) */}
+            {/* Virtual Method (for virtual meetings) */}
             {locationType === 'VIRTUAL' && (
+              <FormField
+                control={form.control}
+                name="virtualMethod"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Virtual Method</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="VIDEO_CALL">
+                          <div className="flex items-center gap-2">
+                            <Video className="size-4" />
+                            Video Call
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="PHONE">
+                          <div className="flex items-center gap-2">
+                            <Phone className="size-4" />
+                            Phone Call
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="WHATSAPP">
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="size-4" />
+                            WhatsApp
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="OTHER">
+                          <div className="flex items-center gap-2">Other</div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {/* Client Phone Display (for phone/whatsapp) */}
+            {locationType === 'VIRTUAL' &&
+              (virtualMethod === 'PHONE' || virtualMethod === 'WHATSAPP') && (
+                <Alert variant={traineePhone ? 'default' : 'warning'}>
+                  {traineePhone ? (
+                    <AlertDescription className="flex items-center justify-between">
+                      <span className="text-muted-foreground">
+                        {traineeName}&apos;s phone:
+                      </span>
+                      <a
+                        href={`tel:${traineePhone}`}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {traineePhone}
+                      </a>
+                    </AlertDescription>
+                  ) : (
+                    <AlertDescription className="flex items-center gap-2">
+                      <AlertCircle className="size-4" />
+                      {traineeName} hasn&apos;t provided their phone number
+                    </AlertDescription>
+                  )}
+                </Alert>
+              )}
+
+            {/* Meeting Link (for video calls) */}
+            {locationType === 'VIRTUAL' && virtualMethod === 'VIDEO_CALL' && (
               <FormField
                 control={form.control}
                 name="meetingLink"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Meeting Link (optional)</FormLabel>
+                    <FormLabel>Meeting Link</FormLabel>
                     <FormControl>
                       <Input
                         id="meetingLink"

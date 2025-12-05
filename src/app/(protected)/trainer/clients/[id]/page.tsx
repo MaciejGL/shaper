@@ -128,6 +128,7 @@ export default function ClientDetailPage({
           <ClientMeetingsDashboard
             clientId={client.id}
             clientName={clientName}
+            clientPhone={client.phone}
           />
         </TabsContent>
       </Tabs>

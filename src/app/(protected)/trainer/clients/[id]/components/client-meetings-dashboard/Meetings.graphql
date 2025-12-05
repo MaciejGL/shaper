@@ -7,6 +7,7 @@ query GetTraineeMeetings($traineeId: ID!) {
     duration
     timezone
     locationType
+    virtualMethod
     address
     meetingLink
     title
@@ -17,6 +18,7 @@ query GetTraineeMeetings($traineeId: ID!) {
       firstName
       lastName
       email
+      phone
     }
     serviceDelivery {
       id

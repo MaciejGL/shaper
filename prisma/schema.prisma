@@ -818,6 +818,7 @@ model Meeting {
   duration          Int
   timezone          String
   locationType      LocationType
+  virtualMethod     VirtualMethod?
   address           String?
   meetingLink       String?
   title             String
@@ -1210,5 +1211,12 @@ enum LocationType {
   VIRTUAL
   COACH_LOCATION
   TRAINEE_LOCATION
+  OTHER
+}
+
+enum VirtualMethod {
+  VIDEO_CALL
+  PHONE
+  WHATSAPP
   OTHER
 }

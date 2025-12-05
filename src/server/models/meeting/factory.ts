@@ -312,6 +312,7 @@ export async function createMeeting(
       duration: input.duration,
       timezone: input.timezone,
       locationType: input.locationType,
+      virtualMethod: input.virtualMethod || null,
       address: input.address || null,
       meetingLink: input.meetingLink || null,
       title: input.title,
@@ -417,6 +418,13 @@ export async function updateMeeting(
     ) {
       updateData.locationType = input.locationType
       changedFields.push('location type')
+    }
+    if (
+      input.virtualMethod !== undefined &&
+      input.virtualMethod !== existingMeeting.virtualMethod
+    ) {
+      updateData.virtualMethod = input.virtualMethod
+      changedFields.push('virtual method')
     }
     if (
       input.address !== undefined &&

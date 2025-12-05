@@ -562,6 +562,7 @@ export type GQLCreateMeetingInput = {
   title: Scalars['String']['input'];
   traineeId: Scalars['ID']['input'];
   type: GQLMeetingType;
+  virtualMethod?: InputMaybe<GQLVirtualMethod>;
 };
 
 export type GQLCreateNoteInput = {
@@ -1074,6 +1075,7 @@ export type GQLMeeting = {
   traineeId: Scalars['ID']['output'];
   type: GQLMeetingType;
   updatedAt: Scalars['String']['output'];
+  virtualMethod?: Maybe<GQLVirtualMethod>;
 };
 
 export enum GQLMeetingStatus {
@@ -3619,6 +3621,7 @@ export type GQLUpdateMeetingInput = {
   timezone?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<GQLMeetingType>;
+  virtualMethod?: InputMaybe<GQLVirtualMethod>;
 };
 
 export type GQLUpdateNoteInput = {
@@ -3962,6 +3965,13 @@ export type GQLUsersWithSubscriptionsResult = {
   totalCount: Scalars['Int']['output'];
   users: Array<GQLUserWithSubscription>;
 };
+
+export enum GQLVirtualMethod {
+  Other = 'OTHER',
+  Phone = 'PHONE',
+  VideoCall = 'VIDEO_CALL',
+  Whatsapp = 'WHATSAPP'
+}
 
 export type GQLVolumeEntry = {
   __typename?: 'VolumeEntry';
@@ -4338,12 +4348,12 @@ export type GQLRejectTrainerOfferMutation = { __typename?: 'Mutation', rejectTra
 export type GQLGetAllClientMeetingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetAllClientMeetingsQuery = { __typename?: 'Query', myUpcomingMeetings: Array<{ __typename?: 'Meeting', id: string, title: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, timezone: string, locationType: GQLLocationType, address?: string | undefined | null, meetingLink?: string | undefined | null, description?: string | undefined | null, notes?: string | undefined | null, createdAt: string, coach: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } }> };
+export type GQLGetAllClientMeetingsQuery = { __typename?: 'Query', myUpcomingMeetings: Array<{ __typename?: 'Meeting', id: string, title: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, timezone: string, locationType: GQLLocationType, virtualMethod?: GQLVirtualMethod | undefined | null, address?: string | undefined | null, meetingLink?: string | undefined | null, description?: string | undefined | null, notes?: string | undefined | null, createdAt: string, coach: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } }> };
 
 export type GQLGetMyMeetingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetMyMeetingsQuery = { __typename?: 'Query', myUpcomingMeetings: Array<{ __typename?: 'Meeting', id: string, title: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, timezone: string, locationType: GQLLocationType, address?: string | undefined | null, meetingLink?: string | undefined | null, description?: string | undefined | null, notes?: string | undefined | null, createdAt: string, coach: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } }> };
+export type GQLGetMyMeetingsQuery = { __typename?: 'Query', myUpcomingMeetings: Array<{ __typename?: 'Meeting', id: string, title: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, timezone: string, locationType: GQLLocationType, virtualMethod?: GQLVirtualMethod | undefined | null, address?: string | undefined | null, meetingLink?: string | undefined | null, description?: string | undefined | null, notes?: string | undefined | null, createdAt: string, coach: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } }> };
 
 export type GQLGetMyMacroTargetsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4899,7 +4909,7 @@ export type GQLGetTraineeMeetingsQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetTraineeMeetingsQuery = { __typename?: 'Query', getTraineeMeetings: Array<{ __typename?: 'Meeting', id: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, timezone: string, locationType: GQLLocationType, address?: string | undefined | null, meetingLink?: string | undefined | null, title: string, description?: string | undefined | null, notes?: string | undefined | null, createdAt: string, updatedAt: string, trainee: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, serviceDelivery?: { __typename?: 'ServiceDelivery', id: string, packageName: string } | undefined | null }> };
+export type GQLGetTraineeMeetingsQuery = { __typename?: 'Query', getTraineeMeetings: Array<{ __typename?: 'Meeting', id: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, timezone: string, locationType: GQLLocationType, virtualMethod?: GQLVirtualMethod | undefined | null, address?: string | undefined | null, meetingLink?: string | undefined | null, title: string, description?: string | undefined | null, notes?: string | undefined | null, createdAt: string, updatedAt: string, trainee: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null }, serviceDelivery?: { __typename?: 'ServiceDelivery', id: string, packageName: string } | undefined | null }> };
 
 export type GQLCreateMeetingMutationVariables = Exact<{
   input: GQLCreateMeetingInput;
@@ -8254,6 +8264,7 @@ export const GetAllClientMeetingsDocument = `
     duration
     timezone
     locationType
+    virtualMethod
     address
     meetingLink
     description
@@ -8322,6 +8333,7 @@ export const GetMyMeetingsDocument = `
     duration
     timezone
     locationType
+    virtualMethod
     address
     meetingLink
     description
@@ -12224,6 +12236,7 @@ export const GetTraineeMeetingsDocument = `
     duration
     timezone
     locationType
+    virtualMethod
     address
     meetingLink
     title
@@ -12234,6 +12247,7 @@ export const GetTraineeMeetingsDocument = `
       firstName
       lastName
       email
+      phone
     }
     serviceDelivery {
       id

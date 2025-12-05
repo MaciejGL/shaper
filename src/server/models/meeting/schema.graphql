@@ -20,6 +20,13 @@ enum LocationType {
   OTHER # Custom location
 }
 
+enum VirtualMethod {
+  VIDEO_CALL # Video call requiring a meeting link
+  PHONE # Phone call
+  WHATSAPP # WhatsApp call/chat
+  OTHER # Other virtual method
+}
+
 type Meeting {
   id: ID!
   coachId: ID!
@@ -34,8 +41,9 @@ type Meeting {
 
   # Location
   locationType: LocationType!
+  virtualMethod: VirtualMethod # For virtual meetings (VIDEO_CALL, PHONE, WHATSAPP, OTHER)
   address: String
-  meetingLink: String # For virtual meetings
+  meetingLink: String # For video call meetings
   # Details
   title: String!
   description: String
@@ -60,6 +68,7 @@ input CreateMeetingInput {
   duration: Int!
   timezone: String!
   locationType: LocationType!
+  virtualMethod: VirtualMethod
   address: String
   meetingLink: String
   title: String!
@@ -74,6 +83,7 @@ input UpdateMeetingInput {
   duration: Int
   timezone: String
   locationType: LocationType
+  virtualMethod: VirtualMethod
   address: String
   meetingLink: String
   title: String

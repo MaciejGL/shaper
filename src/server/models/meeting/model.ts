@@ -3,6 +3,7 @@ import {
   GQLMeeting,
   GQLMeetingStatus,
   GQLMeetingType,
+  GQLVirtualMethod,
 } from '@/generated/graphql-server'
 import {
   Meeting as PrismaMeeting,
@@ -72,6 +73,10 @@ export class Meeting implements GQLMeeting {
 
   get locationType(): GQLLocationType {
     return this.data.locationType as GQLLocationType
+  }
+
+  get virtualMethod(): GQLVirtualMethod | null {
+    return this.data.virtualMethod as GQLVirtualMethod | null
   }
 
   get address() {

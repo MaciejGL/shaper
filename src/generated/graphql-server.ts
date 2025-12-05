@@ -564,6 +564,7 @@ export type GQLCreateMeetingInput = {
   title: Scalars['String']['input'];
   traineeId: Scalars['ID']['input'];
   type: GQLMeetingType;
+  virtualMethod?: InputMaybe<GQLVirtualMethod>;
 };
 
 export type GQLCreateNoteInput = {
@@ -1076,6 +1077,7 @@ export type GQLMeeting = {
   traineeId: EntireFieldWrapper<Scalars['ID']['output']>;
   type: EntireFieldWrapper<GQLMeetingType>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  virtualMethod?: EntireFieldWrapper<Maybe<GQLVirtualMethod>>;
 };
 
 export enum GQLMeetingStatus {
@@ -3621,6 +3623,7 @@ export type GQLUpdateMeetingInput = {
   timezone?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<GQLMeetingType>;
+  virtualMethod?: InputMaybe<GQLVirtualMethod>;
 };
 
 export type GQLUpdateNoteInput = {
@@ -3964,6 +3967,13 @@ export type GQLUsersWithSubscriptionsResult = {
   totalCount: EntireFieldWrapper<Scalars['Int']['output']>;
   users: EntireFieldWrapper<Array<GQLUserWithSubscription>>;
 };
+
+export enum GQLVirtualMethod {
+  Other = 'OTHER',
+  Phone = 'PHONE',
+  VideoCall = 'VIDEO_CALL',
+  Whatsapp = 'WHATSAPP'
+}
 
 export type GQLVolumeEntry = {
   __typename?: 'VolumeEntry';
@@ -4373,6 +4383,7 @@ export type GQLResolversTypes = {
   UserSubscriptionStatus: ResolverTypeWrapper<GQLUserSubscriptionStatus>;
   UserWithSubscription: ResolverTypeWrapper<GQLUserWithSubscription>;
   UsersWithSubscriptionsResult: ResolverTypeWrapper<GQLUsersWithSubscriptionsResult>;
+  VirtualMethod: GQLVirtualMethod;
   VolumeEntry: ResolverTypeWrapper<GQLVolumeEntry>;
   WeeklyMuscleProgress: ResolverTypeWrapper<GQLWeeklyMuscleProgress>;
   WeeklyProgressSummary: ResolverTypeWrapper<GQLWeeklyProgressSummary>;
@@ -5116,6 +5127,7 @@ export type GQLMeetingResolvers<ContextType = GQLContext, ParentType extends GQL
   traineeId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   type?: Resolver<GQLResolversTypes['MeetingType'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  virtualMethod?: Resolver<Maybe<GQLResolversTypes['VirtualMethod']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

@@ -8,6 +8,7 @@ query GetMyMeetings {
     duration
     timezone
     locationType
+    virtualMethod
     address
     meetingLink
     description

@@ -1,9 +1,20 @@
 'use client'
 
 import { format, isPast, isToday } from 'date-fns'
-import { Calendar, CalendarPlus, Clock, MapPin, Video } from 'lucide-react'
+import {
+  Calendar,
+  CalendarPlus,
+  Clock,
+  Globe,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Video,
+} from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,12 +24,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { SectionIcon } from '@/components/ui/section-icon'
+import { useUser } from '@/context/user-context'
 import {
   GQLGetMyMeetingsQuery,
+  GQLVirtualMethod,
   useGetMyMeetingsQuery,
+  useUpdateProfileMutation,
+  useUserBasicQuery,
 } from '@/generated/graphql-client'
 import { useTimeFormatting } from '@/hooks/use-time-formatting'
+import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 import { addToCalendar } from '@/utils/calendar-utils'
 
@@ -46,7 +63,15 @@ const MEETING_TYPE_LABELS: Record<Meeting['type'], string> = {
 
 export function ClientMeetingsSection() {
   const [showAllMeetings, setShowAllMeetings] = useState(false)
+  const [phoneInput, setPhoneInput] = useState('')
+  const [isSavingPhone, setIsSavingPhone] = useState(false)
   const { formatTime } = useTimeFormatting()
+  const { user } = useUser()
+  const invalidateQuery = useInvalidateQuery()
+
+  const userPhone = user?.profile?.phone
+
+  const updateProfileMutation = useUpdateProfileMutation()
 
   const { data, isLoading } = useGetMyMeetingsQuery(
     {},
@@ -56,6 +81,45 @@ export function ClientMeetingsSection() {
   )
 
   const allMeetings = data?.myUpcomingMeetings || []
+
+  // Check if any meeting needs phone (PHONE or WHATSAPP virtual method)
+  const hasPhoneMeeting = allMeetings.some(
+    (m) =>
+      m.locationType === 'VIRTUAL' &&
+      (m.virtualMethod === GQLVirtualMethod.Phone ||
+        m.virtualMethod === GQLVirtualMethod.Whatsapp),
+  )
+  const needsPhonePrompt = hasPhoneMeeting && !userPhone
+
+  const handleSavePhone = async () => {
+    if (!phoneInput.trim()) return
+
+    // Basic phone validation
+    const phoneRegex = /^[+]?[\d\s-()]{7,}$/
+    if (!phoneRegex.test(phoneInput.trim())) {
+      toast.error('Please enter a valid phone number')
+      return
+    }
+
+    setIsSavingPhone(true)
+    try {
+      await updateProfileMutation.mutateAsync({
+        input: {
+          phone: phoneInput.trim(),
+          firstName: user?.profile?.firstName || '',
+          lastName: user?.profile?.lastName || '',
+          email: user?.email || '',
+        },
+      })
+      await invalidateQuery({ queryKey: useUserBasicQuery.getKey({}) })
+      toast.success('Phone number saved')
+      setPhoneInput('')
+    } catch {
+      toast.error('Failed to save phone number')
+    } finally {
+      setIsSavingPhone(false)
+    }
+  }
 
   // Show meetings from today and future, excluding completed/cancelled
   const meetings = allMeetings.filter((meeting) => {
@@ -148,6 +212,37 @@ export function ClientMeetingsSection() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
+          {/* Phone number prompt for phone/whatsapp meetings */}
+          {needsPhonePrompt && (
+            <Alert variant="warning" className="mb-3">
+              <AlertDescription className="space-y-2">
+                <p className="text-sm">
+                  Your trainer may contact you via phone or WhatsApp. Add your
+                  phone number so they can reach you.
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    id="phone-input"
+                    placeholder="Enter phone number"
+                    type="tel"
+                    autoComplete="tel"
+                    value={phoneInput}
+                    onChange={(e) => setPhoneInput(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleSavePhone}
+                    loading={isSavingPhone}
+                    disabled={isSavingPhone || !phoneInput.trim()}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {meetings.map((meeting: Meeting) => {
             const meetingDate = new Date(meeting.scheduledAt)
 
@@ -208,15 +303,40 @@ export function ClientMeetingsSection() {
                   </div>
 
                   {/* Location */}
-                  {meeting.locationType === 'VIRTUAL' &&
-                    meeting.meetingLink && (
-                      <div className="flex items-center gap-1.5 text-sm">
-                        <Video className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        <span className="text-xs text-muted-foreground truncate">
-                          Virtual Meeting
-                        </span>
-                      </div>
-                    )}
+                  {meeting.locationType === 'VIRTUAL' && (
+                    <div className="flex items-center gap-1.5 text-sm">
+                      {meeting.virtualMethod === GQLVirtualMethod.Phone ? (
+                        <>
+                          <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="text-xs text-muted-foreground truncate">
+                            Phone Call
+                          </span>
+                        </>
+                      ) : meeting.virtualMethod ===
+                        GQLVirtualMethod.Whatsapp ? (
+                        <>
+                          <MessageCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="text-xs text-muted-foreground truncate">
+                            WhatsApp
+                          </span>
+                        </>
+                      ) : meeting.virtualMethod === GQLVirtualMethod.Other ? (
+                        <>
+                          <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="text-xs text-muted-foreground truncate">
+                            Virtual Meeting
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Video className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="text-xs text-muted-foreground truncate">
+                            Video Call
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
 
                   {meeting.locationType !== 'VIRTUAL' && meeting.address && (
                     <div className="flex items-center gap-1.5 text-sm">
@@ -261,9 +381,11 @@ export function ClientMeetingsSection() {
                   >
                     Add to Calendar
                   </Button>
-                  {/* Join Button for Virtual Meetings */}
+                  {/* Join Button for Video Call Meetings (including legacy meetings without virtualMethod) */}
                   {meeting.locationType === 'VIRTUAL' &&
-                    meeting.meetingLink && (
+                    meeting.meetingLink &&
+                    (meeting.virtualMethod === GQLVirtualMethod.VideoCall ||
+                      !meeting.virtualMethod) && (
                       <Button
                         size="sm"
                         variant="default"
