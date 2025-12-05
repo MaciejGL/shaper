@@ -63,6 +63,10 @@ export default class Notification implements GQLNotification {
         return GQLNotificationType.TeamInvitation
       case 'BODY_PROGRESS_SHARED':
         return GQLNotificationType.BodyProgressShared
+      case 'MEETING_SCHEDULED':
+        return GQLNotificationType.MeetingScheduled
+      case 'MEETING_UPDATED':
+        return GQLNotificationType.MeetingUpdated
       case 'PAYMENT_RECEIVED':
         return GQLNotificationType.PaymentReceived
       case 'SUBSCRIPTION_PAYMENT_RECEIVED':
