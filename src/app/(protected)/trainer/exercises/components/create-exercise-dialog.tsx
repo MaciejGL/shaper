@@ -103,6 +103,8 @@ export function CreateExerciseDialog({
         tips: data.tips,
         muscleGroups: data.primaryMuscleIds.map((id) => ({ id })),
         secondaryMuscleGroups: data.secondaryMuscleIds.map((id) => ({ id })),
+        equipment: data.equipment as GQLEquipment,
+        substituteIds: data.suggestedSubstituteIds,
       }))
       toast.success('Exercise content generated')
     },
@@ -122,13 +124,13 @@ export function CreateExerciseDialog({
     if (hasExistingContent) {
       setShowOverwriteConfirm(true)
     } else {
-      generateAI(formData.name, formData.equipment)
+      generateAI(formData.name)
     }
   }
 
   const handleConfirmOverwrite = () => {
     setShowOverwriteConfirm(false)
-    generateAI(formData.name, formData.equipment)
+    generateAI(formData.name)
   }
 
   // Load existing substitute IDs when editing

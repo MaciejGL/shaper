@@ -11,7 +11,7 @@ export function useGenerateExerciseAI(options?: UseGenerateExerciseAIOptions) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const generate = async (name: string, equipment?: string | null) => {
+  const generate = async (name: string) => {
     if (!name.trim()) {
       const errorMsg = 'Exercise name is required'
       setError(errorMsg)
@@ -26,7 +26,7 @@ export function useGenerateExerciseAI(options?: UseGenerateExerciseAIOptions) {
       const response = await fetch('/api/exercises/generate-ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, equipment }),
+        body: JSON.stringify({ name }),
       })
 
       if (!response.ok) {

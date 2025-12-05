@@ -4,19 +4,24 @@ import { openai } from '@/lib/open-ai/open-ai'
 
 export interface GenerateExerciseMusclesInput {
   name: string
-  equipment?: string | null
 }
 
 export interface GenerateExerciseMusclesResult {
   primaryMuscleIds: string[]
   secondaryMuscleIds: string[]
+  equipment: string
 }
 
 interface GeneratedMusclesResponse {
   primaryMuscleIds: string[]
   secondaryMuscleIds: string[]
+  equipment: string
   reasoning: string
 }
+
+const EQUIPMENT_LIST = EQUIPMENT_OPTIONS.map(
+  (e) => `${e.label} [${e.value}]`,
+).join(', ')
 
 const MUSCLES_BY_GROUP = MUSCLES.reduce(
   (acc, m) => {
@@ -27,7 +32,7 @@ const MUSCLES_BY_GROUP = MUSCLES.reduce(
   {} as Record<string, string[]>,
 )
 
-const MUSCLE_SELECTION_SCHEMA = {
+const MUSCLE_EQUIPMENT_SCHEMA = {
   type: 'object',
   properties: {
     primaryMuscleIds: {
@@ -46,12 +51,22 @@ const MUSCLE_SELECTION_SCHEMA = {
       minItems: 0,
       maxItems: 4,
     },
+    equipment: {
+      type: 'string',
+      description:
+        'The equipment ID that best matches this exercise from the available options',
+    },
     reasoning: {
       type: 'string',
-      description: 'Brief explanation of muscle selection',
+      description: 'Brief explanation of muscle and equipment selection',
     },
   },
-  required: ['primaryMuscleIds', 'secondaryMuscleIds', 'reasoning'],
+  required: [
+    'primaryMuscleIds',
+    'secondaryMuscleIds',
+    'equipment',
+    'reasoning',
+  ],
   additionalProperties: false,
 } as const
 
@@ -62,11 +77,14 @@ function buildSystemPrompt(): string {
 
   return `You are an expert exercise physiologist specializing in muscle activation patterns during resistance training.
 
-Your task is to identify which muscles are targeted by exercises based on TRAINING INTENT, not just activation.
+Your task is to identify which muscles are targeted by exercises and what equipment is needed.
 
 AVAILABLE MUSCLES (you MUST use exact IDs from this list):
 
 ${muscleList}
+
+AVAILABLE EQUIPMENT (you MUST use exact IDs from this list):
+${EQUIPMENT_LIST}
 
 CORE PRINCIPLE - TRAINING INTENT:
 The PRIMARY muscle is what the exercise is DESIGNED to train, not just what works hard.
@@ -84,6 +102,12 @@ MUSCLE SELECTION RULES:
    - ALL other muscles that assist, stabilize, or work during the movement
    - Even muscles that work VERY HARD belong here if they're not the TARGET
    - Synergists, stabilizers, and support muscles
+
+EQUIPMENT SELECTION:
+   - Select the PRIMARY equipment needed for the exercise
+   - If exercise name includes equipment (e.g., "Barbell Bench Press"), use that equipment
+   - For bodyweight exercises with no equipment, use BODYWEIGHT
+   - When multiple equipment could work, pick the most common/traditional one
 
 CRITICAL ANTI-PATTERNS - DO NOT MAKE THESE MISTAKES:
    - Bench Press / Chest Press: Triceps are SECONDARY (target is CHEST only)
@@ -104,21 +128,17 @@ If you titled this exercise "[Muscle] Builder", which muscle would it be?
    - Barbell Curl = "Bicep Builder" → Biceps is primary only
    - Lat Pulldown = "Back Builder" → Lats are primary, biceps are secondary
 
-IMPORTANT: You must return the exact muscle IDs from the list above. Do not invent new IDs.`
+IMPORTANT: You must return exact IDs from the lists above. Do not invent new IDs.`
 }
 
 function buildUserPrompt(input: GenerateExerciseMusclesInput): string {
-  const equipmentLabel =
-    EQUIPMENT_OPTIONS.find((e) => e.value === input.equipment)?.label ||
-    input.equipment ||
-    'Bodyweight'
-
-  return `Analyze this exercise and identify the exact muscles activated:
+  return `Analyze this exercise and identify the muscles activated and equipment needed:
 
 EXERCISE: ${input.name}
-EQUIPMENT: ${equipmentLabel}
 
-Based on biomechanics and muscle activation patterns, select the correct primary and secondary muscles using EXACT muscle IDs from the provided list.`
+Based on biomechanics and muscle activation patterns:
+1. Select the correct primary and secondary muscles using EXACT muscle IDs
+2. Select the appropriate equipment using EXACT equipment ID`
 }
 
 export async function generateExerciseMuscles(
@@ -137,9 +157,9 @@ export async function generateExerciseMuscles(
         response_format: {
           type: 'json_schema',
           json_schema: {
-            name: 'muscle_selection',
+            name: 'muscle_equipment_selection',
             strict: true,
-            schema: MUSCLE_SELECTION_SCHEMA,
+            schema: MUSCLE_EQUIPMENT_SCHEMA,
           },
         },
       })
@@ -151,6 +171,7 @@ export async function generateExerciseMuscles(
 
       const parsed = JSON.parse(content) as GeneratedMusclesResponse
 
+      // Validate muscle IDs
       const validMuscleIds = new Set(MUSCLES.map((m) => m.id))
       const invalidPrimary = parsed.primaryMuscleIds.filter(
         (id) => !validMuscleIds.has(id),
@@ -165,9 +186,16 @@ export async function generateExerciseMuscles(
         )
       }
 
+      // Validate equipment ID
+      const validEquipmentIds = EQUIPMENT_OPTIONS.map((e) => e.value as string)
+      const equipment = validEquipmentIds.includes(parsed.equipment)
+        ? parsed.equipment
+        : 'BODYWEIGHT'
+
       return {
         primaryMuscleIds: parsed.primaryMuscleIds,
         secondaryMuscleIds: parsed.secondaryMuscleIds,
+        equipment,
       }
     } catch (error) {
       if (attempt === maxRetries) {

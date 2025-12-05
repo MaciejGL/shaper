@@ -5,10 +5,10 @@ import { authOptions } from '@/lib/auth/config'
 
 import { generateExerciseContent } from './generate-content'
 import { generateExerciseMuscles } from './generate-muscles'
+import { generateSubstitutes } from './generate-substitutes'
 
 export interface GenerateExerciseAIRequest {
   name: string
-  equipment?: string | null
 }
 
 export interface GenerateExerciseAIResponse {
@@ -17,6 +17,8 @@ export interface GenerateExerciseAIResponse {
   tips: string[]
   primaryMuscleIds: string[]
   secondaryMuscleIds: string[]
+  equipment: string
+  suggestedSubstituteIds: string[]
 }
 
 export async function POST(request: NextRequest) {
@@ -35,18 +37,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate muscles first
+    // Step 1: Generate muscles and equipment
     const muscles = await generateExerciseMuscles({
       name: body.name,
-      equipment: body.equipment,
     })
 
-    // Generate content with muscle context
+    // Step 2: Generate content with muscle context
     const content = await generateExerciseContent({
       name: body.name,
-      equipment: body.equipment,
+      equipment: muscles.equipment,
       primaryMuscleIds: muscles.primaryMuscleIds,
       secondaryMuscleIds: muscles.secondaryMuscleIds,
+    })
+
+    // Step 3: Generate substitute suggestions based on muscles
+    const substitutes = await generateSubstitutes({
+      exerciseName: body.name,
+      primaryMuscleIds: muscles.primaryMuscleIds,
+      equipment: muscles.equipment,
     })
 
     const response: GenerateExerciseAIResponse = {
@@ -55,6 +63,8 @@ export async function POST(request: NextRequest) {
       tips: content.tips,
       primaryMuscleIds: muscles.primaryMuscleIds,
       secondaryMuscleIds: muscles.secondaryMuscleIds,
+      equipment: muscles.equipment,
+      suggestedSubstituteIds: substitutes.suggestedSubstituteIds,
     }
 
     return NextResponse.json(response)
