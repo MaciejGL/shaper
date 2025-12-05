@@ -16,15 +16,15 @@ export const FemaleBodyBackBackground = ({
       {/* Upper back - left */}
       <path
         d="M57.2185 77.7073C55.6275 77.3453 56.2805 76.9713 59.1455 76.6013C66.3145 75.6773 79.0646 78.6673 82.9486 82.1843L83.9146 83.0583L84.0916 96.1643C84.3166 112.751 84.4466 111.851 82.0136 110.522C76.0816 107.281 73.2005 103.053 68.7175 91.0113C65.5955 82.6243 62.3565 78.8763 57.2185 77.7073Z"
-        className={getPathProps(['upper-back']).className ?? defaultFillClass}
-        name="upper-back"
+        className={getPathProps(['upper_back']).className ?? defaultFillClass}
+        name="upper_back"
       />
 
       {/* Upper back - right */}
       <path
         d="M88.8845 81.4222C92.1565 79.1962 98.5675 77.2882 104.771 76.6942C110.125 76.1822 116.815 76.9302 113.808 77.7052C107.83 79.2452 105.389 82.2682 101.315 93.1752C98.6125 100.409 96.5655 104.001 93.3265 107.187C91.3275 109.154 88.3515 111.13 87.3745 111.14L86.8535 111.146L86.8655 97.2652C86.8785 81.4252 86.6875 82.9162 88.8845 81.4222Z"
-        className={getPathProps(['upper-back']).className ?? defaultFillClass}
-        name="upper-back"
+        className={getPathProps(['upper_back']).className ?? defaultFillClass}
+        name="upper_back"
       />
 
       {/* Shoulder - left */}
@@ -44,15 +44,15 @@ export const FemaleBodyBackBackground = ({
       {/* Upper Back - left */}
       <path
         d="M54.2747 97.7712C55.3647 93.5662 58.4677 89.1602 62.0287 86.7622C63.4347 85.8152 63.4027 85.8052 64.5077 87.5522C67.2427 91.8752 68.6327 95.4912 69.3617 100.185L69.5047 101.099L67.5537 100.955C64.5927 100.736 55.7007 99.2312 54.5237 98.7492C54.1117 98.5812 54.0887 98.4882 54.2747 97.7712Z"
-        className={getPathProps(['upper-back']).className ?? defaultFillClass}
-        name="upper-back"
+        className={getPathProps(['upper_back']).className ?? defaultFillClass}
+        name="upper_back"
       />
 
       {/* Upper Back - right */}
       <path
         d="M101.542 100.578C101.542 97.6233 103.478 92.2443 106.05 88.0523C107.456 85.7613 107.344 85.8113 108.838 86.7863C112.612 89.2493 117.891 97.3813 116.522 98.6243C116.033 99.0683 106.964 100.664 103.365 100.939L101.542 101.079V100.578Z"
-        className={getPathProps(['upper-back']).className ?? defaultFillClass}
-        name="upper-back"
+        className={getPathProps(['upper_back']).className ?? defaultFillClass}
+        name="upper_back"
       />
 
       {/* Triceps left */}
@@ -128,15 +128,15 @@ export const FemaleBodyBackBackground = ({
       {/* Lower back left */}
       <path
         d="M78.6212 143.229C79.3552 142.427 80.6171 141.078 81.4261 140.232L82.8961 138.693L82.9632 149.19C83.0242 158.815 82.8322 165.252 82.4062 167.793L82.2701 168.607L81.4391 167.585C80.9821 167.022 79.5251 165.391 78.2011 163.958C73.6321 159.015 71.7472 156.68 69.5862 153.286L68.8271 152.093L69.7151 151.536C71.7441 150.266 74.7342 147.477 78.6212 143.229Z"
-        className={getPathProps(['lower-back']).className ?? defaultFillClass}
-        name="lower-back"
+        className={getPathProps(['lower_back']).className ?? defaultFillClass}
+        name="lower_back"
       />
 
       {/* Lower back right */}
       <path
         d="M88.5269 168.294C88.0059 166.792 87.7019 156.539 87.8919 146.823C87.9779 142.383 88.0689 138.75 88.0939 138.75C88.1179 138.75 89.4989 140.227 91.1629 142.031C96.4679 147.787 100.287 151.373 101.535 151.769C102.145 151.962 102.095 152.104 100.672 154.227C98.8379 156.962 96.8279 159.437 93.5299 163.021C91.9489 164.74 90.1969 166.691 89.6379 167.357C89.0199 168.093 88.5849 168.46 88.5269 168.294Z"
-        className={getPathProps(['lower-back']).className ?? defaultFillClass}
-        name="lower-back"
+        className={getPathProps(['lower_back']).className ?? defaultFillClass}
+        name="lower_back"
       />
 
       {/* Forearms left */}
@@ -180,15 +180,15 @@ export const FemaleBodyBackBackground = ({
       {/* Lower back left */}
       <path
         d="M63.6293 153.958C63.8703 151.925 64.3423 149.773 64.6923 149.119C65.0323 148.485 65.2543 148.697 66.1173 150.48C67.4773 153.289 68.6303 159.078 67.9533 159.697C67.5473 160.068 63.0383 162.677 62.9513 162.59C62.8553 162.494 63.3203 156.571 63.6293 153.958Z"
-        className={getPathProps(['lower-back']).className ?? defaultFillClass}
-        name="lower-back"
+        className={getPathProps(['lower_back']).className ?? defaultFillClass}
+        name="lower_back"
       />
 
       {/* Lower back right */}
       <path
         d="M102.876 157.774C103.09 154.631 104.097 151.284 105.452 149.215C106.344 147.852 107.029 150.757 107.694 158.726C107.87 160.832 107.987 162.581 107.955 162.611C107.922 162.642 106.737 161.997 105.321 161.177L102.746 159.688L102.876 157.774Z"
-        className={getPathProps(['lower-back']).className ?? defaultFillClass}
-        name="lower-back"
+        className={getPathProps(['lower_back']).className ?? defaultFillClass}
+        name="lower_back"
       />
 
       {/* Glutes Upper Part Left */}
