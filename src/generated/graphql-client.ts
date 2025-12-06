@@ -2963,6 +2963,7 @@ export type GQLQueryUserPublicArgs = {
 
 
 export type GQLQueryWeeklyMuscleProgressArgs = {
+  targetDate?: InputMaybe<Scalars['String']['input']>;
   userId: Scalars['ID']['input'];
   weekOffset?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -4441,6 +4442,7 @@ export type GQLMuscleFrequencyQuery = { __typename?: 'Query', muscleFrequency: A
 export type GQLWeeklyMuscleProgressQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
   weekOffset?: InputMaybe<Scalars['Int']['input']>;
+  targetDate?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -9053,8 +9055,12 @@ useInfiniteMuscleFrequencyQuery.getKey = (variables: GQLMuscleFrequencyQueryVari
 useMuscleFrequencyQuery.fetcher = (variables: GQLMuscleFrequencyQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMuscleFrequencyQuery, GQLMuscleFrequencyQueryVariables>(MuscleFrequencyDocument, variables, options);
 
 export const WeeklyMuscleProgressDocument = `
-    query WeeklyMuscleProgress($userId: ID!, $weekOffset: Int = 0) {
-  weeklyMuscleProgress(userId: $userId, weekOffset: $weekOffset) {
+    query WeeklyMuscleProgress($userId: ID!, $weekOffset: Int = 0, $targetDate: String) {
+  weeklyMuscleProgress(
+    userId: $userId
+    weekOffset: $weekOffset
+    targetDate: $targetDate
+  ) {
     weekStartDate
     weekEndDate
     overallPercentage

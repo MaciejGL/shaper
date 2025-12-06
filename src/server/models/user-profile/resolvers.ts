@@ -320,7 +320,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
   weeklyMuscleProgress: async (
     _parent,
-    { userId, weekOffset = 0 },
+    { userId, weekOffset = 0, targetDate },
     context,
   ) => {
     const TARGET_SETS_PER_MUSCLE = 12
@@ -338,51 +338,72 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       | 6
 
     // Calculate the target week's boundaries
-    const now = new Date()
-    const targetWeekStart = startOfWeek(subWeeks(now, weekOffset), {
+    // If targetDate is provided, use that to determine the week
+    // Otherwise fall back to weekOffset from current date
+    const baseDate = targetDate ? new Date(targetDate) : subWeeks(new Date(), weekOffset)
+    const targetWeekStart = startOfWeek(baseDate, { weekStartsOn })
+    const targetWeekEnd = endOfWeek(baseDate, { weekStartsOn })
+
+    // DEBUG logging
+    console.log('[weeklyMuscleProgress] DEBUG:', {
+      targetDate,
+      weekOffset,
       weekStartsOn,
-    })
-    const targetWeekEnd = endOfWeek(subWeeks(now, weekOffset), {
-      weekStartsOn,
+      baseDate: baseDate.toISOString(),
+      targetWeekStart: targetWeekStart.toISOString(),
+      targetWeekEnd: targetWeekEnd.toISOString(),
     })
 
-    // Get exercises that have sets completed in the target week
-    // (counts individual sets, not just fully completed exercises)
+    // Get exercises where the day is SCHEDULED in the target week
+    // This counts sets based on when the workout was planned, not when it was logged
     const exercisesWithCompletedSets = await prisma.trainingExercise.findMany({
       where: {
         day: {
+          scheduledAt: {
+            gte: targetWeekStart,
+            lte: targetWeekEnd,
+          },
           week: {
             plan: {
               assignedToId: userId,
             },
           },
         },
+        // Only include exercises that have at least one completed set
         sets: {
           some: {
-            completedAt: {
-              gte: targetWeekStart,
-              lte: targetWeekEnd,
-            },
+            completedAt: { not: null },
           },
         },
       },
       include: {
+        day: {
+          select: {
+            scheduledAt: true,
+          },
+        },
         base: {
           include: {
             muscleGroups: true,
             secondaryMuscleGroups: true,
           },
         },
+        // Only get the completed sets (not pending ones)
         sets: {
           where: {
-            completedAt: {
-              gte: targetWeekStart,
-              lte: targetWeekEnd,
-            },
+            completedAt: { not: null },
           },
         },
       },
     })
+
+    // DEBUG: Log found exercises
+    console.log('[weeklyMuscleProgress] Found exercises:', exercisesWithCompletedSets.map(e => ({
+      name: e.base?.name || e.name,
+      dayScheduledAt: e.day?.scheduledAt,
+      completedSetsCount: e.sets.length,
+      muscleGroups: e.base?.muscleGroups?.map(m => m.displayGroup),
+    })))
 
     // Use tracked display groups from static muscles file
     const trackedMuscleGroups = [...TRACKED_DISPLAY_GROUPS]
@@ -406,23 +427,33 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     })
 
     // Aggregate sets by muscle group
-    // Primary muscles = 100%, Secondary muscles = 25%
+    // Count sets ONCE per display group per exercise (not per sub-muscle)
+    // Secondary muscles = 25% weight
     const SECONDARY_MUSCLE_WEIGHT = 0.25
 
     exercisesWithCompletedSets.forEach((exercise) => {
       if (!exercise.base) return
       const setCount = exercise.sets.length
 
-      // Primary muscle groups (100% weight)
+      // Track which display groups we've already counted for THIS exercise
+      // to avoid double-counting when exercise targets multiple muscles in same group
+      const countedPrimaryGroups = new Set<string>()
+      const countedSecondaryGroups = new Set<string>()
+
+      // Primary muscle groups (100% weight) - count only ONCE per display group
       exercise.base.muscleGroups?.forEach((muscleGroup) => {
-        // Get display group from static muscle data
         const staticMuscle = getMuscleById(muscleGroup.id)
         const mappedGroup =
           staticMuscle?.displayGroup || muscleGroup.displayGroup
-        if (mappedGroup && muscleProgress[mappedGroup]) {
-          muscleProgress[mappedGroup].completedSets += setCount
 
-          // Track sub-muscle breakdown
+        if (mappedGroup && muscleProgress[mappedGroup]) {
+          // Only add sets if we haven't counted this display group yet for this exercise
+          if (!countedPrimaryGroups.has(mappedGroup)) {
+            muscleProgress[mappedGroup].completedSets += setCount
+            countedPrimaryGroups.add(mappedGroup)
+          }
+
+          // Track sub-muscle breakdown (still track each sub-muscle)
           const subMuscleKey = muscleGroup.name
           if (!subMuscleProgress[mappedGroup][subMuscleKey]) {
             subMuscleProgress[mappedGroup][subMuscleKey] = {
@@ -433,6 +464,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           }
           subMuscleProgress[mappedGroup][subMuscleKey].completedSets += setCount
 
+          // Update lastTrained
           exercise.sets.forEach((set) => {
             if (
               set.completedAt &&
@@ -445,15 +477,23 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         }
       })
 
-      // Secondary muscle groups (25% weight)
+      // Secondary muscle groups (25% weight) - count only ONCE per display group
       exercise.base.secondaryMuscleGroups?.forEach((muscleGroup) => {
-        // Get display group from static muscle data
         const staticMuscle = getMuscleById(muscleGroup.id)
         const mappedGroup =
           staticMuscle?.displayGroup || muscleGroup.displayGroup
+
         if (mappedGroup && muscleProgress[mappedGroup]) {
-          muscleProgress[mappedGroup].completedSets +=
-            setCount * SECONDARY_MUSCLE_WEIGHT
+          // Only add sets if we haven't counted this display group yet
+          // (check both primary and secondary to avoid double-counting)
+          if (
+            !countedPrimaryGroups.has(mappedGroup) &&
+            !countedSecondaryGroups.has(mappedGroup)
+          ) {
+            muscleProgress[mappedGroup].completedSets +=
+              setCount * SECONDARY_MUSCLE_WEIGHT
+            countedSecondaryGroups.add(mappedGroup)
+          }
 
           // Track sub-muscle breakdown (with weight)
           const subMuscleKey = muscleGroup.name
@@ -467,6 +507,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           subMuscleProgress[mappedGroup][subMuscleKey].completedSets +=
             setCount * SECONDARY_MUSCLE_WEIGHT
 
+          // Update lastTrained
           exercise.sets.forEach((set) => {
             if (
               set.completedAt &&
@@ -492,12 +533,12 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       const subMuscles = Object.values(subMuscleProgress[group]).map((sub) => ({
         name: sub.name,
         alias: sub.alias,
-        completedSets: Math.round(sub.completedSets),
+        completedSets: Math.floor(sub.completedSets),
       }))
 
       return {
         muscleGroup: group,
-        completedSets: Math.round(progress.completedSets),
+        completedSets: Math.floor(progress.completedSets),
         targetSets: TARGET_SETS_PER_MUSCLE,
         percentage: Math.round(percentage * 10) / 10,
         lastTrained: progress.lastTrained?.toISOString() || null,
@@ -517,24 +558,31 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     let streakWeeks = 0
     const STREAK_THRESHOLD = 80
 
-    // Only calculate streak if looking at current week
-    if (weekOffset === 0) {
-      // Check previous weeks for streak
+    // Only calculate streak if looking at current week (no targetDate and weekOffset = 0)
+    const now = new Date()
+    const isCurrentWeek = !targetDate && weekOffset === 0
+    if (isCurrentWeek) {
+      // Check previous weeks for streak (based on scheduled dates, not completion dates)
       for (let i = 1; i <= 12; i++) {
         const prevWeekStart = startOfWeek(subWeeks(now, i), { weekStartsOn })
         const prevWeekEnd = endOfWeek(subWeeks(now, i), { weekStartsOn })
 
         const prevWeekExercises = await prisma.trainingExercise.findMany({
           where: {
-            completedAt: {
-              gte: prevWeekStart,
-              lte: prevWeekEnd,
-            },
             day: {
+              scheduledAt: {
+                gte: prevWeekStart,
+                lte: prevWeekEnd,
+              },
               week: {
                 plan: {
                   assignedToId: userId,
                 },
+              },
+            },
+            sets: {
+              some: {
+                completedAt: { not: null },
               },
             },
           },
@@ -546,9 +594,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             },
             sets: {
               where: {
-                completedAt: {
-                  not: null,
-                },
+                completedAt: { not: null },
               },
             },
           },
@@ -616,14 +662,16 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     })
     const endDate = endOfWeek(now, { weekStartsOn })
 
+    // Query sets with their day's scheduledAt date
     const completedSets = await prisma.exerciseSet.findMany({
       where: {
-        completedAt: {
-          gte: startDate,
-          lte: endDate,
-        },
+        completedAt: { not: null }, // Only completed sets
         exercise: {
           day: {
+            scheduledAt: {
+              gte: startDate,
+              lte: endDate,
+            },
             week: {
               plan: {
                 assignedToId: userId,
@@ -633,15 +681,25 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         },
       },
       select: {
-        completedAt: true,
+        exercise: {
+          select: {
+            day: {
+              select: {
+                scheduledAt: true,
+              },
+            },
+          },
+        },
       },
     })
 
     const dailyTotals = new Map<string, number>()
 
+    // Group by day.scheduledAt instead of set.completedAt
     completedSets.forEach((set) => {
-      if (set.completedAt) {
-        const dateKey = format(set.completedAt, 'yyyy-MM-dd')
+      const scheduledAt = set.exercise?.day?.scheduledAt
+      if (scheduledAt) {
+        const dateKey = format(scheduledAt, 'yyyy-MM-dd')
         dailyTotals.set(dateKey, (dailyTotals.get(dateKey) || 0) + 1)
       }
     })

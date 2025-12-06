@@ -368,3 +368,49 @@ export const getMusclesGroupedForGraphQL = (): {
     muscles: getMusclesByDisplayGroup(displayGroup),
   }))
 }
+
+// High-level groups for Weekly Focus feature (aggregates 16 display groups into 8)
+export const HIGH_LEVEL_GROUPS = [
+  'Chest',
+  'Back',
+  'Shoulders',
+  'Arms',
+  'Core',
+  'Quads',
+  'Hams/Glutes',
+  'Calves',
+] as const
+
+export type HighLevelGroup = (typeof HIGH_LEVEL_GROUPS)[number]
+
+export const DISPLAY_GROUP_TO_HIGH_LEVEL: Record<string, HighLevelGroup> = {
+  Chest: 'Chest',
+  'Upper Back': 'Back',
+  'Lower Back': 'Back',
+  Lats: 'Back',
+  Traps: 'Back',
+  Shoulders: 'Shoulders',
+  Neck: 'Shoulders',
+  Biceps: 'Arms',
+  Triceps: 'Arms',
+  Forearms: 'Arms',
+  Core: 'Core',
+  Quads: 'Quads',
+  Hamstrings: 'Hams/Glutes',
+  Glutes: 'Hams/Glutes',
+  'Inner Thighs': 'Hams/Glutes',
+  Calves: 'Calves',
+}
+
+export const HIGH_LEVEL_TO_DISPLAY_GROUPS: Record<HighLevelGroup, string[]> = {
+  Chest: ['Chest'],
+  Back: ['Upper Back', 'Lower Back', 'Lats', 'Traps'],
+  Shoulders: ['Shoulders', 'Neck'],
+  Arms: ['Biceps', 'Triceps', 'Forearms'],
+  Core: ['Core'],
+  Quads: ['Quads'],
+  'Hams/Glutes': ['Hamstrings', 'Glutes', 'Inner Thighs'],
+  Calves: ['Calves'],
+}
+
+export const DEFAULT_SETS_GOAL_PER_GROUP = 12

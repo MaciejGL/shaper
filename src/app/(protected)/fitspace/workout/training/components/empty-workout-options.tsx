@@ -263,6 +263,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
         variant="drawer-only"
         open={showExerciseDrawer}
         onOpenChange={setShowExerciseDrawer}
+        scheduledAt={day.scheduledAt}
       />
     </>
   )

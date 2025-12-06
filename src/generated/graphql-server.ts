@@ -2965,6 +2965,7 @@ export type GQLQueryUserPublicArgs = {
 
 
 export type GQLQueryWeeklyMuscleProgressArgs = {
+  targetDate?: InputMaybe<Scalars['String']['input']>;
   userId: Scalars['ID']['input'];
   weekOffset?: InputMaybe<Scalars['Int']['input']>;
 };

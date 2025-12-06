@@ -32,8 +32,16 @@ query MuscleFrequency($userId: ID!, $days: Int = 30) {
   }
 }
 
-query WeeklyMuscleProgress($userId: ID!, $weekOffset: Int = 0) {
-  weeklyMuscleProgress(userId: $userId, weekOffset: $weekOffset) {
+query WeeklyMuscleProgress(
+  $userId: ID!
+  $weekOffset: Int = 0
+  $targetDate: String
+) {
+  weeklyMuscleProgress(
+    userId: $userId
+    weekOffset: $weekOffset
+    targetDate: $targetDate
+  ) {
     weekStartDate
     weekEndDate
     overallPercentage

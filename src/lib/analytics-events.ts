@@ -62,4 +62,3 @@ export const analyticsEvents = {
     captureEvent(ANALYTICS_EVENTS.TODAY_EMPTY_MY_PLANS_TAP, properties)
   },
 }
-
