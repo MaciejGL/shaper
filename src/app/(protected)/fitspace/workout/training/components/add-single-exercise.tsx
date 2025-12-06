@@ -37,14 +37,24 @@ type Exercise = NonNullable<
 
 interface AddSingleExerciseProps {
   dayId: string
-  variant?: 'card' | 'button'
+  variant?: 'card' | 'button' | 'drawer-only'
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export function AddSingleExercise({
   dayId,
   variant = 'card',
+  open: controlledOpen,
+  onOpenChange,
 }: AddSingleExerciseProps) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpen = isControlled
+    ? (value: boolean) => onOpenChange?.(value)
+    : setInternalOpen
   const [addingExerciseId, setAddingExerciseId] = useState<string | null>(null)
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -105,6 +115,31 @@ export function AddSingleExercise({
     },
     [addExercise, dayId],
   )
+
+  if (variant === 'drawer-only') {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerContent
+          dialogTitle="Build my own workout"
+          className="max-h-[85vh]"
+        >
+          <DrawerHeader>
+            <DrawerTitle>Build my own workout</DrawerTitle>
+            <DrawerDescription>
+              Choose exercises and sets manually
+            </DrawerDescription>
+          </DrawerHeader>
+          <ExerciseList
+            exercises={allExercises}
+            onSelectExercise={handleSelectExercise}
+            isAdding={isAdding}
+            isLoading={isLoading}
+            addingExerciseId={addingExerciseId}
+          />
+        </DrawerContent>
+      </Drawer>
+    )
+  }
 
   if (variant === 'button') {
     return (

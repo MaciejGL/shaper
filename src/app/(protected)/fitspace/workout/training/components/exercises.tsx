@@ -80,7 +80,7 @@ export function Exercises({
     return (
       <div className="px-4 ">
         {isQuickWorkout ? (
-          <EmptyWorkoutOptions dayId={day.id} />
+          <EmptyWorkoutOptions day={day} />
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             <p>No exercises scheduled for this day</p>
