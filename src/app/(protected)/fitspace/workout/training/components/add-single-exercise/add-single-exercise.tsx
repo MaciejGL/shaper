@@ -1,11 +1,17 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { PlusIcon, SearchIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { CheckIcon, PlusIcon, SearchIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import { useCallback, useDeferredValue, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 
+import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,6 +20,15 @@ import {
   CardDescription,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import {
@@ -26,9 +41,12 @@ import {
   useFitspaceAddSingleExerciseToDayMutation,
   useFitspaceGetExercisesQuery,
   useFitspaceGetWorkoutDayQuery,
+  useFitspaceRemoveExerciseFromWorkoutMutation,
 } from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
+import { cn } from '@/lib/utils'
 
+import type { AddedExerciseInfo } from './types'
 import { useWeeklyFocus } from './use-weekly-focus'
 import { WeeklyFocusChips } from './weekly-focus-chips'
 
@@ -59,11 +77,54 @@ export function AddSingleExercise({
     ? (value: boolean) => onOpenChange?.(value)
     : setInternalOpen
   const [addingExerciseId, setAddingExerciseId] = useState<string | null>(null)
+  const [removingExerciseId, setRemovingExerciseId] = useState<string | null>(
+    null,
+  )
+  const [addedExercises, setAddedExercises] = useState<
+    Map<string, AddedExerciseInfo>
+  >(new Map())
+  const [exerciseToRemove, setExerciseToRemove] = useState<{
+    baseId: string
+    trainingExerciseId: string
+    hasLogs: boolean
+  } | null>(null)
   const queryClient = useQueryClient()
-  const router = useRouter()
   const [dayIdFromUrl] = useQueryState('day')
 
   const { data: exercisesData, isLoading } = useFitspaceGetExercisesQuery()
+
+  // Helper to invalidate workout queries after mutations
+  const invalidateWorkoutQueries = useCallback(async () => {
+    await queryInvalidation.workoutAndPlans(queryClient)
+    const queryKey = useFitspaceGetWorkoutDayQuery.getKey({
+      dayId: dayIdFromUrl || dayId,
+    })
+    await queryClient.refetchQueries({ queryKey })
+  }, [queryClient, dayIdFromUrl, dayId])
+
+  // Fetch current workout day to get existing exercises
+  const { data: workoutDayData } = useFitspaceGetWorkoutDayQuery(
+    { dayId },
+    { enabled: !!dayId },
+  )
+
+  // Sync addedExercises with exercises from workout day (source of truth)
+  useEffect(() => {
+    const existingExercises =
+      workoutDayData?.getWorkoutDay?.day?.exercises || []
+
+    const newMap = new Map<string, AddedExerciseInfo>()
+    existingExercises.forEach((ex) => {
+      if (ex.baseId) {
+        newMap.set(ex.baseId, {
+          trainingExerciseId: ex.id,
+          hasLogs: ex.sets.some((set) => set.completedAt != null),
+        })
+      }
+    })
+
+    setAddedExercises(newMap)
+  }, [workoutDayData])
 
   const allExercises = useMemo(() => {
     const publicExercises = exercisesData?.getExercises?.publicExercises || []
@@ -84,24 +145,79 @@ export function AddSingleExercise({
 
   const { mutate: addExercise, isPending: isAdding } =
     useFitspaceAddSingleExerciseToDayMutation({
-      onSuccess: async () => {
-        await queryInvalidation.workoutAndPlans(queryClient)
+      onSuccess: async (data, variables) => {
+        // Track the added exercise with its training exercise ID
+        const trainingExerciseId = data?.addSingleExerciseToDay?.id
+        if (trainingExerciseId) {
+          setAddedExercises(
+            (prev) =>
+              new Map([
+                ...prev,
+                [
+                  variables.exerciseBaseId,
+                  { trainingExerciseId, hasLogs: false },
+                ],
+              ]),
+          )
+        }
 
-        const queryKeyToInvalidate = useFitspaceGetWorkoutDayQuery.getKey({
-          dayId: dayIdFromUrl || dayId,
-        })
-        await queryClient.refetchQueries({
-          queryKey: queryKeyToInvalidate,
-        })
-
+        await invalidateWorkoutQueries()
         setAddingExerciseId(null)
-        setOpen(false)
-        router.refresh()
       },
       onError: () => {
         setAddingExerciseId(null)
       },
     })
+
+  const { mutate: removeExercise, isPending: isRemoving } =
+    useFitspaceRemoveExerciseFromWorkoutMutation({
+      onSuccess: async (_data, variables) => {
+        // Remove from map by finding the baseId
+        setAddedExercises((prev) => {
+          const newMap = new Map(prev)
+          for (const [baseId, info] of newMap) {
+            if (info.trainingExerciseId === variables.exerciseId) {
+              newMap.delete(baseId)
+              break
+            }
+          }
+          return newMap
+        })
+
+        setExerciseToRemove(null)
+        setRemovingExerciseId(null)
+
+        await invalidateWorkoutQueries()
+      },
+      onError: () => {
+        setRemovingExerciseId(null)
+        setExerciseToRemove(null)
+      },
+    })
+
+  const handleRemoveExercise = useCallback(
+    (baseId: string) => {
+      const info = addedExercises.get(baseId)
+      if (!info) return
+
+      setRemovingExerciseId(baseId)
+
+      if (info.hasLogs) {
+        // Show confirmation dialog
+        setExerciseToRemove({ baseId, ...info })
+      } else {
+        // Remove directly
+        removeExercise({ exerciseId: info.trainingExerciseId })
+      }
+    },
+    [addedExercises, removeExercise],
+  )
+
+  const confirmRemove = useCallback(() => {
+    if (exerciseToRemove) {
+      removeExercise({ exerciseId: exerciseToRemove.trainingExerciseId })
+    }
+  }, [exerciseToRemove, removeExercise])
 
   const handleSelectExercise = useCallback(
     (exerciseId: string) => {
@@ -115,14 +231,55 @@ export function AddSingleExercise({
   )
 
   const drawerContent = (
-    <ExerciseListWithFilters
-      exercises={allExercises}
-      onSelectExercise={handleSelectExercise}
-      isAdding={isAdding}
-      isLoading={isLoading}
-      addingExerciseId={addingExerciseId}
-      scheduledAt={scheduledAt}
-    />
+    <>
+      <ExerciseListWithFilters
+        exercises={allExercises}
+        onSelectExercise={handleSelectExercise}
+        onRemoveExercise={handleRemoveExercise}
+        isAdding={isAdding}
+        isRemoving={isRemoving}
+        isLoading={isLoading}
+        addingExerciseId={addingExerciseId}
+        removingExerciseId={removingExerciseId}
+        addedExercises={addedExercises}
+        scheduledAt={scheduledAt}
+      />
+
+      <Dialog
+        open={!!exerciseToRemove}
+        onOpenChange={(open: boolean) => {
+          if (!open) {
+            setExerciseToRemove(null)
+            setRemovingExerciseId(null)
+          }
+        }}
+      >
+        <DialogContent dialogTitle="Remove exercise?">
+          <DialogHeader>
+            <DialogTitle>Remove exercise?</DialogTitle>
+            <DialogDescription>
+              This exercise has logged sets. Removing it will delete all your
+              workout data for this exercise.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-row gap-2">
+            <DialogClose asChild>
+              <Button variant="secondary" className="flex-1">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              className="flex-1"
+              onClick={confirmRemove}
+              loading={isRemoving}
+            >
+              Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 
   if (variant === 'drawer-only') {
@@ -143,7 +300,7 @@ export function AddSingleExercise({
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           <Button size="lg" iconStart={<PlusIcon />} className="w-full">
-            Add Single Exercise
+            Add Exercise
           </Button>
         </DrawerTrigger>
         <DrawerContent
@@ -186,16 +343,24 @@ export function AddSingleExercise({
 function ExerciseListWithFilters({
   exercises,
   onSelectExercise,
+  onRemoveExercise,
   isAdding,
+  isRemoving,
   isLoading,
   addingExerciseId,
+  removingExerciseId,
+  addedExercises,
   scheduledAt,
 }: {
   exercises: Exercise[]
   onSelectExercise: (id: string) => void
+  onRemoveExercise: (baseId: string) => void
   isAdding: boolean
+  isRemoving: boolean
   isLoading: boolean
   addingExerciseId: string | null
+  removingExerciseId: string | null
+  addedExercises: Map<string, AddedExerciseInfo>
   scheduledAt?: string | null
 }) {
   const [searchQuery, setSearchQuery] = useState('')
@@ -270,7 +435,9 @@ function ExerciseListWithFilters({
           ) : (
             filteredExercises.map((exercise) => {
               const isThisExerciseAdding = addingExerciseId === exercise.id
-              const isAnyExerciseAdding = isAdding
+              const isThisExerciseRemoving = removingExerciseId === exercise.id
+              const isAnyOperationPending = isAdding || isRemoving
+              const isAlreadyAdded = addedExercises.has(exercise.id)
 
               const primaryDisplayGroup =
                 exercise.muscleGroups?.[0]?.displayGroup
@@ -291,34 +458,68 @@ function ExerciseListWithFilters({
                 <Card
                   key={exercise.id}
                   variant="secondary"
-                  className="cursor-pointer transition-all hover:scale-[1.01]"
+                  className={cn(
+                    'p-0',
+                    !isAlreadyAdded &&
+                      'cursor-pointer transition-all hover:scale-[1.01]',
+                  )}
                   onClick={() =>
-                    !isAnyExerciseAdding && onSelectExercise(exercise.id)
+                    !isAnyOperationPending &&
+                    !isAlreadyAdded &&
+                    onSelectExercise(exercise.id)
                   }
                 >
-                  <CardContent>
-                    <div className="flex items-center">
-                      <div className="flex-1">
+                  <CardContent className="p-0 pr-2">
+                    <div className="flex items-center gap-3">
+                      {/* Wrapper to prevent click propagation on media preview */}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <ExerciseMediaPreview
+                          images={exercise.images}
+                          videoUrl={exercise.videoUrl}
+                          className="size-20 shrink-0"
+                          hidePagination={true}
+                          hideVideoOverlay={true}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
                         <CardTitle className="text-base">
                           {exercise.name}
                         </CardTitle>
                         {muscleDisplay && (
-                          <CardDescription>{muscleDisplay}</CardDescription>
+                          <CardDescription className="truncate">
+                            {muscleDisplay}
+                          </CardDescription>
                         )}
                       </div>
-                      <Button
-                        size="icon-md"
-                        variant="ghost"
-                        iconOnly={<PlusIcon />}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onSelectExercise(exercise.id)
-                        }}
-                        disabled={isAnyExerciseAdding}
-                        loading={isThisExerciseAdding}
-                      >
-                        Add
-                      </Button>
+                      {isAlreadyAdded ? (
+                        <Button
+                          size="icon-md"
+                          variant="default"
+                          iconOnly={<CheckIcon />}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onRemoveExercise(exercise.id)
+                          }}
+                          disabled={isAnyOperationPending}
+                          loading={isThisExerciseRemoving}
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          size="icon-md"
+                          variant="secondary"
+                          iconOnly={<PlusIcon />}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onSelectExercise(exercise.id)
+                          }}
+                          disabled={isAnyOperationPending}
+                          loading={isThisExerciseAdding}
+                        >
+                          Add
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -330,4 +531,3 @@ function ExerciseListWithFilters({
     </div>
   )
 }
-

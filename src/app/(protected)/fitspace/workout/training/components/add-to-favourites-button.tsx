@@ -118,7 +118,7 @@ export function AddToFavouritesButton({ day }: AddToFavouritesButtonProps) {
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           <Button
-            variant="tertiary"
+            variant="secondary"
             iconStart={<BookmarkIcon />}
             onClick={() => setOpen(true)}
             className="w-full"
@@ -128,7 +128,7 @@ export function AddToFavouritesButton({ day }: AddToFavouritesButtonProps) {
         </DrawerTrigger>
         <DrawerContent
           dialogTitle="Save as Favourite Workout"
-          className="max-h-[85vh]"
+          className="max-h-[85vh]D"
         >
           <DrawerHeader>
             <DrawerTitle>Save as Favourite Workout</DrawerTitle>

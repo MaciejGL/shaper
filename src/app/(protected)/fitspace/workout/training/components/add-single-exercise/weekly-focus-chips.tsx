@@ -1,5 +1,6 @@
 'use client'
 
+import { Progress } from '@/components/ui/progress'
 import type { HighLevelGroup } from '@/constants/muscles'
 import { cn } from '@/lib/utils'
 
@@ -69,7 +70,8 @@ function MiniHeatmapTile({
   onClick,
   disabled,
 }: MiniHeatmapTileProps) {
-  const progress = summary.setsGoal > 0 ? summary.setsDone / summary.setsGoal : 0
+  const progress =
+    summary.setsGoal > 0 ? summary.setsDone / summary.setsGoal : 0
   const progressPercent = Math.min(progress * 100, 100)
   const progressBarColor = getProgressBarColor(summary.setsDone)
 
@@ -80,12 +82,12 @@ function MiniHeatmapTile({
       disabled={disabled}
       className={cn(
         'flex items-start gap-3 p-3 rounded-lg min-h-[60px] text-left transition-all',
-        'bg-card-on-card border',
+        'border shadow-xs',
         'disabled:opacity-50 disabled:pointer-events-none',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         isSelected
-          ? 'border-primary bg-primary/5'
-          : 'border-transparent hover:bg-muted/50',
+          ? 'border-border bg-card-on-card'
+          : 'border-border hover:bg-muted/50',
       )}
     >
       {/* Radio indicator */}
@@ -119,12 +121,10 @@ function MiniHeatmapTile({
           </span>
         </div>
 
-        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-          <div
-            className={cn('h-full rounded-full transition-all', progressBarColor)}
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
+        <Progress
+          value={progressPercent}
+          classNameIndicator={progressBarColor}
+        />
       </div>
     </button>
   )

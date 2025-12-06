@@ -6,3 +6,8 @@ export interface WeeklyGroupSummary {
   setsDone: number
   setsGoal: number
 }
+
+export interface AddedExerciseInfo {
+  trainingExerciseId: string
+  hasLogs: boolean
+}

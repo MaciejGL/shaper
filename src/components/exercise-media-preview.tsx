@@ -13,6 +13,8 @@ interface ExerciseMediaPreviewProps {
   videoUrl?: string | null
   alt?: string
   className?: string
+  hidePagination?: boolean
+  hideVideoOverlay?: boolean
 }
 
 export function ExerciseMediaPreview({
@@ -20,6 +22,8 @@ export function ExerciseMediaPreview({
   videoUrl,
   alt = 'Exercise preview',
   className,
+  hidePagination = false,
+  hideVideoOverlay = false,
 }: ExerciseMediaPreviewProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
@@ -66,14 +70,16 @@ export function ExerciseMediaPreview({
                 loading="eager"
               />
             ))}
-            {videoUrl && <VideoOverlayButton videoUrl={videoUrl} />}
+            {videoUrl && !hideVideoOverlay && (
+              <VideoOverlayButton videoUrl={videoUrl} />
+            )}
           </>
         ) : (
           <ImagePlaceholder />
         )}
       </div>
 
-      {hasMultipleImages && (
+      {hasMultipleImages && !hidePagination && (
         <div className="flex items-center justify-center gap-1">
           {validImages.map((_, index) => (
             <button
