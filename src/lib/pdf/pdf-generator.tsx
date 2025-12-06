@@ -2,25 +2,35 @@ import type { DocumentProps } from '@react-pdf/renderer'
 import { Font, pdf } from '@react-pdf/renderer'
 import type { JSXElementConstructor, ReactElement } from 'react'
 
+// Get font base URL - works both client-side and server-side
+function getFontBaseUrl(): string {
+  // Client-side
+  if (typeof window !== 'undefined') {
+    return window.location.origin
+  }
+  // Server-side - use production URL or NEXTAUTH_URL
+  return process.env.NEXTAUTH_URL || 'https://hypro.app'
+}
+
 // Register Inter font for PDF using local WOFF font files
-// Using WOFF files from public/fonts directory (downloaded from Fontsource CDN)
+// Works both client-side (local fonts) and server-side (production URL)
 Font.register({
   family: 'Inter',
   fonts: [
     {
-      src: `${typeof window !== 'undefined' ? window.location.origin : ''}/fonts/Inter-Regular.woff`,
+      src: `${getFontBaseUrl()}/fonts/Inter-Regular.woff`,
       fontWeight: 400,
     },
     {
-      src: `${typeof window !== 'undefined' ? window.location.origin : ''}/fonts/Inter-Medium.woff`,
+      src: `${getFontBaseUrl()}/fonts/Inter-Medium.woff`,
       fontWeight: 500,
     },
     {
-      src: `${typeof window !== 'undefined' ? window.location.origin : ''}/fonts/Inter-SemiBold.woff`,
+      src: `${getFontBaseUrl()}/fonts/Inter-SemiBold.woff`,
       fontWeight: 600,
     },
     {
-      src: `${typeof window !== 'undefined' ? window.location.origin : ''}/fonts/Inter-Bold.woff`,
+      src: `${getFontBaseUrl()}/fonts/Inter-Bold.woff`,
       fontWeight: 700,
     },
   ],
@@ -111,6 +121,43 @@ function blobToBase64(blob: Blob): Promise<string> {
     reader.onerror = reject
     reader.readAsDataURL(blob)
   })
+}
+
+/**
+ * Check if running in native mobile app
+ */
+export function isNativeApp(): boolean {
+  return typeof window !== 'undefined' && window?.isNativeApp === true
+}
+
+/**
+ * Open PDF in system browser (for mobile) or download directly (for web)
+ *
+ * On mobile apps: Opens the PDF URL in the system browser (Safari/Chrome)
+ * which provides native PDF viewing and download capabilities.
+ *
+ * On web: Falls back to direct link opening.
+ */
+export function openPdfInBrowser(pdfUrl: string): void {
+  if (typeof window === 'undefined') return
+
+  const absoluteUrl = pdfUrl.startsWith('http')
+    ? pdfUrl
+    : `${window.location.origin}${pdfUrl.startsWith('/') ? pdfUrl : `/${pdfUrl}`}`
+
+  // On iOS native app: use bridge to open in system browser
+  if (
+    window.isNativeApp &&
+    window.mobilePlatform === 'ios' &&
+    window.nativeApp?.openExternalUrl
+  ) {
+    window.nativeApp.openExternalUrl(absoluteUrl)
+    return
+  }
+
+  // On Android native app or web: open in new tab
+  // Android WebView will handle PDF natively, web browsers have built-in PDF viewers
+  window.open(absoluteUrl, '_blank', 'noopener,noreferrer')
 }
 
 /**

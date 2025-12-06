@@ -52,14 +52,24 @@ interface PDFLogoProps {
   size?: number
 }
 
+// Get logo URL - works both client-side and server-side
+function getLogoUrl(): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/favicons/android-chrome-192x192.png`
+  }
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://hypro.app'
+  return `${baseUrl}/favicons/android-chrome-192x192.png`
+}
+
 /**
  * Hypro logo for PDF documents
  * Uses the actual PNG logo from public folder
  */
 export function PDFLogo({ size = 32 }: PDFLogoProps) {
   return (
+    // eslint-disable-next-line jsx-a11y/alt-text
     <Image
-      src="/favicons/android-chrome-192x192.png"
+      src={getLogoUrl()}
       style={{ width: size, height: size, borderRadius: size / 2 }}
     />
   )

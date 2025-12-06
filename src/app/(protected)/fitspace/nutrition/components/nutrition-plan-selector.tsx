@@ -15,7 +15,12 @@ import type {
   GQLGetMyNutritionPlanQuery,
   GQLGetMyNutritionPlansQuery,
 } from '@/generated/graphql-client'
-import { downloadPDF, generateFilename } from '@/lib/pdf/pdf-generator'
+import {
+  downloadPDF,
+  generateFilename,
+  isNativeApp,
+  openPdfInBrowser,
+} from '@/lib/pdf/pdf-generator'
 
 import { NutritionPlanPDF } from './pdf/nutrition-plan-pdf'
 
@@ -44,6 +49,14 @@ export function NutritionPlanSelector({
   const handleExportPDF = async () => {
     if (!nutritionPlan) return
 
+    // On mobile: open server-generated PDF in system browser
+    // This provides native PDF viewing with download/share options
+    if (isNativeApp()) {
+      openPdfInBrowser(`/api/pdf/nutrition-plan/${nutritionPlan.id}`)
+      return
+    }
+
+    // On web: generate PDF client-side
     setIsGeneratingPDF(true)
     try {
       const filename = generateFilename({
