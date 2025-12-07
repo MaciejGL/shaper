@@ -4,6 +4,8 @@ interface ClientSubscription {
   id: string
   status: string
   isPaused: boolean
+  cancelAt: string | null
+  upcomingBillingDates: string[]
   package: {
     name: string
     stripeLookupKey: string | null
@@ -45,5 +47,8 @@ export function useClientSubscription(clientId: string) {
     isLoading,
     error,
     isPaused: data?.isPaused ?? false,
+    cancelAt: data?.cancelAt ?? null,
+    upcomingBillingDates: data?.upcomingBillingDates ?? [],
+    isScheduledToCancel: !!data?.cancelAt,
   }
 }

@@ -24,3 +24,30 @@ mutation ResumeClientCoachingSubscription($clientId: ID!) {
     }
   }
 }
+
+mutation CancelClientCoachingSubscription($clientId: ID!, $cancelAt: String!) {
+  cancelClientCoachingSubscription(clientId: $clientId, cancelAt: $cancelAt) {
+    success
+    message
+    cancelAt
+    subscription {
+      id
+      status
+      startDate
+      endDate
+    }
+  }
+}
+
+mutation UndoCancelClientCoachingSubscription($clientId: ID!) {
+  undoCancelClientCoachingSubscription(clientId: $clientId) {
+    success
+    message
+    subscription {
+      id
+      status
+      startDate
+      endDate
+    }
+  }
+}

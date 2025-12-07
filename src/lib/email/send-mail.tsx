@@ -2,6 +2,7 @@
 import { render } from '@react-email/render'
 
 import { resend } from './resend'
+import { CoachingScheduledToEndEmail } from './templates/coaching-scheduled-to-end-email'
 import { DisputeAlertEmail } from './templates/dispute-alert-email'
 import { EmailChangeOtp } from './templates/email-change-otp'
 import { OfferExpiredEmail } from './templates/offer-expired-email'
@@ -529,6 +530,38 @@ export const sendEmail = {
       from: FROM_EMAIL,
       to,
       subject: `Credit applied from subscription upgrade - ${creditAmount} ${currency.toUpperCase()}`,
+      html,
+    })
+  },
+
+  // Coaching scheduled to end notification (for clients)
+  coachingScheduledToEnd: async (
+    to: string,
+    {
+      clientName,
+      trainerName,
+      endDate,
+      packageName,
+    }: {
+      clientName?: string | null
+      trainerName: string
+      endDate: string
+      packageName: string
+    },
+  ): Promise<void> => {
+    const html = await render(
+      <CoachingScheduledToEndEmail
+        clientName={clientName}
+        trainerName={trainerName}
+        endDate={endDate}
+        packageName={packageName}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Your coaching with ${trainerName} is scheduled to end`,
       html,
     })
   },

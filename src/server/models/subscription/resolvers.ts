@@ -4,6 +4,7 @@ import {
 } from '@/generated/graphql-server'
 
 import {
+  cancelClientCoachingSubscription,
   checkPremiumAccess,
   getActivePackageTemplates,
   getAllUsersWithSubscriptions,
@@ -14,6 +15,7 @@ import {
   pauseClientCoachingSubscription,
   removeUserSubscription,
   resumeClientCoachingSubscription,
+  undoCancelClientCoachingSubscription,
   updateServiceDelivery,
 } from './factory'
 
@@ -46,6 +48,12 @@ export const Mutation: GQLMutationResolvers = {
 
   resumeClientCoachingSubscription: async (_, args, context) =>
     resumeClientCoachingSubscription(args.clientId, context),
+
+  cancelClientCoachingSubscription: async (_, args, context) =>
+    cancelClientCoachingSubscription(args.clientId, args.cancelAt, context),
+
+  undoCancelClientCoachingSubscription: async (_, args, context) =>
+    undoCancelClientCoachingSubscription(args.clientId, context),
 
   // Admin subscription management
   giveLifetimePremium: async (_, args, context) =>

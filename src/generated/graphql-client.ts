@@ -297,6 +297,14 @@ export type GQLBodyProgressLog = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type GQLCancelCoachingResult = {
+  __typename?: 'CancelCoachingResult';
+  cancelAt?: Maybe<Scalars['String']['output']>;
+  message: Scalars['String']['output'];
+  subscription?: Maybe<GQLUserSubscription>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type GQLChat = {
   __typename?: 'Chat';
   client: GQLUserPublic;
@@ -1200,6 +1208,7 @@ export type GQLMutation = {
   archiveMeal: GQLMeal;
   assignTemplateToSelf: Scalars['ID']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
+  cancelClientCoachingSubscription: GQLCancelCoachingResult;
   cancelCoaching: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   cancelMeeting: GQLMeeting;
@@ -1304,6 +1313,7 @@ export type GQLMutation = {
   startWorkoutFromFavourite: Scalars['ID']['output'];
   swapExercise: GQLSubstitute;
   unarchiveMeal: GQLMeal;
+  undoCancelClientCoachingSubscription: GQLUndoCancelCoachingResult;
   unshareNutritionPlanFromClient: GQLNutritionPlan;
   updateBodyMeasurement: GQLUserBodyMeasure;
   updateBodyProgressLog: GQLBodyProgressLog;
@@ -1462,6 +1472,12 @@ export type GQLMutationAssignTemplateToSelfArgs = {
 
 export type GQLMutationAssignTrainingPlanToClientArgs = {
   input: GQLAssignTrainingPlanToClientInput;
+};
+
+
+export type GQLMutationCancelClientCoachingSubscriptionArgs = {
+  cancelAt: Scalars['String']['input'];
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -1971,6 +1987,11 @@ export type GQLMutationSwapExerciseArgs = {
 
 export type GQLMutationUnarchiveMealArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationUndoCancelClientCoachingSubscriptionArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -3468,6 +3489,13 @@ export type GQLTrainingWeek = {
   weekNumber: Scalars['Int']['output'];
 };
 
+export type GQLUndoCancelCoachingResult = {
+  __typename?: 'UndoCancelCoachingResult';
+  message: Scalars['String']['output'];
+  subscription?: Maybe<GQLUserSubscription>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type GQLUpdateBodyMeasurementInput = {
   bicepsLeft?: InputMaybe<Scalars['Float']['input']>;
   bicepsRight?: InputMaybe<Scalars['Float']['input']>;
@@ -4951,6 +4979,21 @@ export type GQLResumeClientCoachingSubscriptionMutationVariables = Exact<{
 
 
 export type GQLResumeClientCoachingSubscriptionMutation = { __typename?: 'Mutation', resumeClientCoachingSubscription: { __typename?: 'ResumeCoachingResult', success: boolean, message: string, subscription?: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string } | undefined | null } };
+
+export type GQLCancelClientCoachingSubscriptionMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+  cancelAt: Scalars['String']['input'];
+}>;
+
+
+export type GQLCancelClientCoachingSubscriptionMutation = { __typename?: 'Mutation', cancelClientCoachingSubscription: { __typename?: 'CancelCoachingResult', success: boolean, message: string, cancelAt?: string | undefined | null, subscription?: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string } | undefined | null } };
+
+export type GQLUndoCancelClientCoachingSubscriptionMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLUndoCancelClientCoachingSubscriptionMutation = { __typename?: 'Mutation', undoCancelClientCoachingSubscription: { __typename?: 'UndoCancelCoachingResult', success: boolean, message: string, subscription?: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string } | undefined | null } };
 
 export type GQLSearchUsersQueryVariables = Exact<{
   email: Scalars['String']['input'];
@@ -12464,6 +12507,73 @@ useResumeClientCoachingSubscriptionMutation.getKey = () => ['ResumeClientCoachin
 
 
 useResumeClientCoachingSubscriptionMutation.fetcher = (variables: GQLResumeClientCoachingSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLResumeClientCoachingSubscriptionMutation, GQLResumeClientCoachingSubscriptionMutationVariables>(ResumeClientCoachingSubscriptionDocument, variables, options);
+
+export const CancelClientCoachingSubscriptionDocument = `
+    mutation CancelClientCoachingSubscription($clientId: ID!, $cancelAt: String!) {
+  cancelClientCoachingSubscription(clientId: $clientId, cancelAt: $cancelAt) {
+    success
+    message
+    cancelAt
+    subscription {
+      id
+      status
+      startDate
+      endDate
+    }
+  }
+}
+    `;
+
+export const useCancelClientCoachingSubscriptionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCancelClientCoachingSubscriptionMutation, TError, GQLCancelClientCoachingSubscriptionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCancelClientCoachingSubscriptionMutation, TError, GQLCancelClientCoachingSubscriptionMutationVariables, TContext>(
+      {
+    mutationKey: ['CancelClientCoachingSubscription'],
+    mutationFn: (variables?: GQLCancelClientCoachingSubscriptionMutationVariables) => fetchData<GQLCancelClientCoachingSubscriptionMutation, GQLCancelClientCoachingSubscriptionMutationVariables>(CancelClientCoachingSubscriptionDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCancelClientCoachingSubscriptionMutation.getKey = () => ['CancelClientCoachingSubscription'];
+
+
+useCancelClientCoachingSubscriptionMutation.fetcher = (variables: GQLCancelClientCoachingSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelClientCoachingSubscriptionMutation, GQLCancelClientCoachingSubscriptionMutationVariables>(CancelClientCoachingSubscriptionDocument, variables, options);
+
+export const UndoCancelClientCoachingSubscriptionDocument = `
+    mutation UndoCancelClientCoachingSubscription($clientId: ID!) {
+  undoCancelClientCoachingSubscription(clientId: $clientId) {
+    success
+    message
+    subscription {
+      id
+      status
+      startDate
+      endDate
+    }
+  }
+}
+    `;
+
+export const useUndoCancelClientCoachingSubscriptionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUndoCancelClientCoachingSubscriptionMutation, TError, GQLUndoCancelClientCoachingSubscriptionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUndoCancelClientCoachingSubscriptionMutation, TError, GQLUndoCancelClientCoachingSubscriptionMutationVariables, TContext>(
+      {
+    mutationKey: ['UndoCancelClientCoachingSubscription'],
+    mutationFn: (variables?: GQLUndoCancelClientCoachingSubscriptionMutationVariables) => fetchData<GQLUndoCancelClientCoachingSubscriptionMutation, GQLUndoCancelClientCoachingSubscriptionMutationVariables>(UndoCancelClientCoachingSubscriptionDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUndoCancelClientCoachingSubscriptionMutation.getKey = () => ['UndoCancelClientCoachingSubscription'];
+
+
+useUndoCancelClientCoachingSubscriptionMutation.fetcher = (variables: GQLUndoCancelClientCoachingSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUndoCancelClientCoachingSubscriptionMutation, GQLUndoCancelClientCoachingSubscriptionMutationVariables>(UndoCancelClientCoachingSubscriptionDocument, variables, options);
 
 export const SearchUsersDocument = `
     query SearchUsers($email: String!, $limit: Int) {

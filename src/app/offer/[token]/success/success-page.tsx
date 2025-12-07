@@ -186,36 +186,27 @@ export function SuccessPage({
                 Your {packageSummary.length === 1 ? 'Package' : 'Bundle'}{' '}
                 Includes:
               </h4>
-              {packageSummary.length === 1 ? (
-                // Single package - show services directly
-                <div className="space-y-1">
-                  {packageSummary[0]?.serviceType && (
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-sm text-foreground">
-                        {serviceLabels[packageSummary[0].serviceType]}
-                        {packageSummary[0].quantity > 1 &&
-                          ` (${packageSummary[0].quantity}x)`}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                packageSummary.map((packageItem) => (
-                  // Multiple packages - show grouped by package
-                  <div key={packageItem.packageId}>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <h5 className="text-sm text-foreground">
-                        {packageItem.name}
-                      </h5>
+              <div className="space-y-2">
+                {packageSummary.map((packageItem) => (
+                  <div
+                    key={packageItem.packageId}
+                    className="flex items-center space-x-3"
+                  >
+                    <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0"></div>
+                    <span className="text-sm text-foreground">
+                      {packageItem.serviceType
+                        ? serviceLabels[packageItem.serviceType]
+                        : packageItem.name}
                       {packageItem.quantity > 1 && (
-                        <Badge variant="outline">x{packageItem.quantity}</Badge>
+                        <span className="text-muted-foreground">
+                          {' '}
+                          ({packageItem.quantity}x)
+                        </span>
                       )}
-                    </div>
+                    </span>
                   </div>
-                ))
-              )}
+                ))}
+              </div>
             </Card>
 
             {/* Mobile App Redirect */}

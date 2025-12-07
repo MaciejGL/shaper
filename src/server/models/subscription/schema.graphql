@@ -164,6 +164,11 @@ type Mutation {
   # Coaching subscription management
   pauseClientCoachingSubscription(clientId: ID!): PauseCoachingResult!
   resumeClientCoachingSubscription(clientId: ID!): ResumeCoachingResult!
+  cancelClientCoachingSubscription(
+    clientId: ID!
+    cancelAt: String!
+  ): CancelCoachingResult!
+  undoCancelClientCoachingSubscription(clientId: ID!): UndoCancelCoachingResult!
 
   # Admin subscription management
   giveLifetimePremium(userId: ID!): UserSubscription!
@@ -178,6 +183,19 @@ type PauseCoachingResult {
 }
 
 type ResumeCoachingResult {
+  success: Boolean!
+  message: String!
+  subscription: UserSubscription
+}
+
+type CancelCoachingResult {
+  success: Boolean!
+  message: String!
+  cancelAt: String # The date subscription will end
+  subscription: UserSubscription
+}
+
+type UndoCancelCoachingResult {
   success: Boolean!
   message: String!
   subscription: UserSubscription

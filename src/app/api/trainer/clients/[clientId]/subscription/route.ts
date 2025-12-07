@@ -7,6 +7,31 @@ import { getCurrentUser } from '@/lib/getUser'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 
+/**
+ * Calculate the next N billing dates based on the billing cycle anchor
+ * Uses the actual day-of-month from current period end to maintain consistency
+ */
+function calculateUpcomingBillingDates(
+  currentPeriodEnd: number,
+  count: number = 6,
+): string[] {
+  const dates: string[] = []
+  const baseDate = new Date(currentPeriodEnd * 1000)
+
+  // Set to end of day to ensure cancellation happens AFTER the billing period
+  // This prevents the edge case where cancel_at is a few minutes before renewal
+  baseDate.setHours(23, 59, 59, 999)
+
+  for (let i = 0; i < count; i++) {
+    const date = new Date(baseDate)
+    // Add months properly (handles different month lengths correctly)
+    date.setMonth(date.getMonth() + i)
+    dates.push(date.toISOString())
+  }
+
+  return dates
+}
+
 export async function GET(
   _: NextRequest,
   { params }: { params: Promise<{ clientId: string }> },
@@ -30,12 +55,14 @@ export async function GET(
       )
     }
 
-    // Find client's coaching subscription
+    // Find client's coaching subscription (include CANCELLED_ACTIVE for scheduled cancellations)
     const coachingSubscription = await prisma.userSubscription.findFirst({
       where: {
         userId: clientId,
         trainerId: user.user.id,
-        status: SubscriptionStatus.ACTIVE,
+        status: {
+          in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELLED_ACTIVE],
+        },
         package: {
           stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
         },
@@ -50,14 +77,31 @@ export async function GET(
       )
     }
 
-    // Check if paused in Stripe
+    // Check Stripe subscription status
     let isPaused = false
+    let cancelAt: string | null = null
+    let upcomingBillingDates: string[] = []
+
     if (coachingSubscription.stripeSubscriptionId) {
       try {
         const stripeSubscription = await stripe.subscriptions.retrieve(
           coachingSubscription.stripeSubscriptionId,
         )
         isPaused = !!stripeSubscription.pause_collection
+
+        // Check if scheduled to cancel
+        if (stripeSubscription.cancel_at) {
+          cancelAt = new Date(stripeSubscription.cancel_at * 1000).toISOString()
+        }
+
+        // Calculate upcoming billing dates for the dropdown
+        const currentPeriodEnd =
+          stripeSubscription.items.data[0]?.current_period_end ||
+          Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+        upcomingBillingDates = calculateUpcomingBillingDates(
+          currentPeriodEnd,
+          6,
+        )
       } catch (error) {
         console.error('Error checking Stripe subscription:', error)
       }
@@ -67,6 +111,8 @@ export async function GET(
       id: coachingSubscription.id,
       status: coachingSubscription.status,
       isPaused,
+      cancelAt,
+      upcomingBillingDates,
       package: {
         name: coachingSubscription.package.name,
         stripeLookupKey: coachingSubscription.package.stripeLookupKey,

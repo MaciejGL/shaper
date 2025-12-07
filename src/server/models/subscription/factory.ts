@@ -8,6 +8,7 @@ import {
 import { ensureTrainerClientAccess } from '@/lib/access-control'
 import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
+import { sendEmail } from '@/lib/email/send-mail'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
@@ -648,6 +649,218 @@ export async function resumeClientCoachingSubscription(
   return {
     success: true,
     message: 'Coaching subscription resumed successfully',
+    subscription: new UserSubscription(coachingSubscription),
+  }
+}
+
+/**
+ * Trainer: Cancel client's coaching subscription at a specific date
+ */
+export async function cancelClientCoachingSubscription(
+  clientId: string,
+  cancelAt: string,
+  context: GQLContext,
+) {
+  const userId = context.user?.user.id
+  if (!userId) {
+    throw new Error('Authentication required')
+  }
+
+  // Verify trainer has permission
+  await ensureTrainerClientAccess(userId, clientId)
+
+  // Parse and validate the cancelAt date
+  let cancelAtDate = new Date(cancelAt)
+  if (isNaN(cancelAtDate.getTime())) {
+    throw new Error('Invalid cancellation date')
+  }
+
+  if (cancelAtDate <= new Date()) {
+    throw new Error('Cancellation date must be in the future')
+  }
+
+  // Find client's coaching subscription
+  const coachingSubscription = await prisma.userSubscription.findFirst({
+    where: {
+      userId: clientId,
+      trainerId: userId,
+      status: 'ACTIVE',
+      package: {
+        stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+      },
+    },
+    include: { package: true, user: true },
+  })
+
+  if (!coachingSubscription?.stripeSubscriptionId) {
+    throw new Error('No active coaching subscription found for this client')
+  }
+
+  // Fetch current Stripe subscription to validate cancel date against billing cycle
+  const stripeSubscription = await stripe.subscriptions.retrieve(
+    coachingSubscription.stripeSubscriptionId,
+  )
+
+  const currentPeriodEnd =
+    stripeSubscription.items.data[0]?.current_period_end ||
+    Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+
+  // Ensure cancel_at is set to end of day (23:59:59) to prevent edge cases
+  // where the subscription might renew just before the cancel time
+  cancelAtDate.setHours(23, 59, 59, 999)
+
+  // Validate that cancel date is at or after the current period end
+  // This prevents setting cancel_at in the middle of a billing period
+  const currentPeriodEndDate = new Date(currentPeriodEnd * 1000)
+  if (cancelAtDate < currentPeriodEndDate) {
+    // If the selected date is before current period end, use current period end
+    // This ensures we don't accidentally set cancel_at to a time that's already passed
+    // in the current billing cycle
+    cancelAtDate = new Date(currentPeriodEnd * 1000)
+    cancelAtDate.setHours(23, 59, 59, 999)
+  }
+
+  // Get trainer info for email
+  const trainer = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { profile: true },
+  })
+
+  const trainerName =
+    trainer?.name || trainer?.profile?.firstName || 'Your trainer'
+
+  // Update Stripe subscription with cancel_at
+  // Adding a small buffer (1 hour after end of day) to be absolutely safe
+  const cancelAtTimestamp = Math.floor(cancelAtDate.getTime() / 1000)
+  await stripe.subscriptions.update(coachingSubscription.stripeSubscriptionId, {
+    cancel_at: cancelAtTimestamp,
+    metadata: {
+      scheduledCancelByTrainer: 'true',
+      scheduledCancelAt: cancelAtDate.toISOString(),
+      trainerId: userId,
+    },
+  })
+
+  // Update database status to CANCELLED_ACTIVE
+  await prisma.userSubscription.update({
+    where: { id: coachingSubscription.id },
+    data: {
+      status: 'CANCELLED_ACTIVE',
+      endDate: cancelAtDate,
+    },
+  })
+
+  // Send email notification to client
+  const clientEmail = coachingSubscription.user.email
+  const clientName =
+    coachingSubscription.user.name ||
+    (coachingSubscription.user as { profile?: { firstName?: string } })?.profile
+      ?.firstName ||
+    null
+
+  try {
+    await sendEmail.coachingScheduledToEnd(clientEmail, {
+      clientName,
+      trainerName,
+      endDate: cancelAtDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+      packageName: coachingSubscription.package.name,
+    })
+  } catch (emailError) {
+    console.error('Failed to send cancellation email:', emailError)
+    // Don't throw - the cancellation succeeded
+  }
+
+  console.info(
+    `✅ Trainer ${userId} scheduled coaching subscription ${coachingSubscription.stripeSubscriptionId} to end on ${cancelAtDate.toISOString()} for client ${clientId}`,
+  )
+
+  return {
+    success: true,
+    message: `Coaching subscription scheduled to end on ${cancelAtDate.toLocaleDateString()}`,
+    cancelAt: cancelAtDate.toISOString(),
+    subscription: new UserSubscription(coachingSubscription),
+  }
+}
+
+/**
+ * Trainer: Undo cancellation of client's coaching subscription
+ */
+export async function undoCancelClientCoachingSubscription(
+  clientId: string,
+  context: GQLContext,
+) {
+  const userId = context.user?.user.id
+  if (!userId) {
+    throw new Error('Authentication required')
+  }
+
+  // Verify trainer has permission
+  await ensureTrainerClientAccess(userId, clientId)
+
+  // Find client's coaching subscription that's scheduled to cancel
+  const coachingSubscription = await prisma.userSubscription.findFirst({
+    where: {
+      userId: clientId,
+      trainerId: userId,
+      status: 'CANCELLED_ACTIVE',
+      package: {
+        stripeLookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+      },
+    },
+    include: { package: true },
+  })
+
+  if (!coachingSubscription?.stripeSubscriptionId) {
+    throw new Error(
+      'No coaching subscription scheduled to cancel found for this client',
+    )
+  }
+
+  // Check if subscription is actually scheduled to cancel in Stripe
+  const stripeSubscription = await stripe.subscriptions.retrieve(
+    coachingSubscription.stripeSubscriptionId,
+  )
+
+  if (!stripeSubscription.cancel_at) {
+    throw new Error('Subscription is not scheduled for cancellation')
+  }
+
+  // Remove the cancel_at from Stripe subscription
+  await stripe.subscriptions.update(coachingSubscription.stripeSubscriptionId, {
+    cancel_at: null,
+    metadata: {
+      scheduledCancelByTrainer: null,
+      scheduledCancelAt: null,
+      undoCancelAt: new Date().toISOString(),
+    },
+  })
+
+  // Update database status back to ACTIVE
+  // Set endDate to current_period_end from Stripe
+  const currentPeriodEnd =
+    stripeSubscription.items.data[0]?.current_period_end ||
+    Math.floor(Date.now() / 1000) + 86400 * 30 // fallback to 30 days
+  const newEndDate = new Date(currentPeriodEnd * 1000)
+  await prisma.userSubscription.update({
+    where: { id: coachingSubscription.id },
+    data: {
+      status: 'ACTIVE',
+      endDate: newEndDate,
+    },
+  })
+
+  console.info(
+    `✅ Trainer ${userId} undid cancellation of coaching subscription ${coachingSubscription.stripeSubscriptionId} for client ${clientId}`,
+  )
+
+  return {
+    success: true,
+    message: 'Subscription cancellation has been undone',
     subscription: new UserSubscription(coachingSubscription),
   }
 }
