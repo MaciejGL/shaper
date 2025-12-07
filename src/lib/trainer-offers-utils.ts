@@ -4,6 +4,29 @@ import { prisma } from '@/lib/db'
 import { getMultipleStripePrices } from '@/lib/stripe/pricing-utils'
 import { PackageSummary } from '@/types/trainer-offer'
 
+interface TransformedOfferItem {
+  id: string
+  token: string
+  packageName: string
+  packageDescription: string | null
+  amount: number
+  currency: string
+  type: 'one-time' | 'subscription'
+  recurring: { interval: string; interval_count: number } | null
+  status: string
+  createdAt: string
+  updatedAt: string
+  expiresAt: string
+  completedAt: string | null
+  personalMessage: string | null
+  clientEmail: string
+  services: { serviceType: string }[]
+  stripeLookupKey: string | null
+  quantity: number
+  discountPercent?: number
+  discountMonths?: number
+}
+
 /**
  * Validates trainer offer query parameters and user authorization
  */
@@ -104,7 +127,7 @@ export async function fetchOfferPricingData(
  */
 function createFallbackOfferItem(
   offer: Awaited<ReturnType<typeof fetchTrainerOffers>>[0],
-) {
+): TransformedOfferItem {
   return {
     id: offer.id,
     token: offer.token,
@@ -136,7 +159,7 @@ function createOfferItemFromPackage(
   index: number,
   pricingData: Awaited<ReturnType<typeof fetchOfferPricingData>>,
   totalPackages: number,
-) {
+): TransformedOfferItem {
   const stripeLookupKey = packageItem.stripeLookupKey
   const pricing = stripeLookupKey ? pricingData[stripeLookupKey] : null
 
@@ -144,11 +167,11 @@ function createOfferItemFromPackage(
     id: totalPackages === 1 ? offer.id : `${offer.id}-item-${index}`,
     token: offer.token,
     packageName: packageItem.name || 'Unknown Package',
-    packageDescription: packageItem.description,
+    packageDescription: packageItem.description ?? null,
     amount: (pricing?.amount || 0) * packageItem.quantity,
     currency: pricing?.currency || 'USD',
     type: pricing?.type || 'one-time',
-    recurring: pricing?.recurring,
+    recurring: pricing?.recurring ?? null,
     status: offer.status.toLowerCase(),
     createdAt: offer.createdAt.toISOString(),
     updatedAt: offer.updatedAt.toISOString(),
@@ -159,7 +182,7 @@ function createOfferItemFromPackage(
     services: packageItem.serviceType
       ? [{ serviceType: packageItem.serviceType }]
       : [],
-    stripeLookupKey: packageItem.stripeLookupKey,
+    stripeLookupKey: packageItem.stripeLookupKey ?? null,
     quantity: packageItem.quantity,
     // Custom discount applied by trainer
     discountPercent: packageItem.discountPercent,
@@ -173,7 +196,7 @@ function createOfferItemFromPackage(
 export function transformTrainerOffers(
   offers: Awaited<ReturnType<typeof fetchTrainerOffers>>,
   pricingData: Awaited<ReturnType<typeof fetchOfferPricingData>>,
-) {
+): TransformedOfferItem[] {
   return offers.flatMap((offer) => {
     const packageSummary = offer.packageSummary as PackageSummary | null
 

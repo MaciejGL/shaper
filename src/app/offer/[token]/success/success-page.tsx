@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { BiggyIcon } from '@/components/biggy-icon'
 import { useMobileApp } from '@/components/mobile-app-bridge'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ServiceType } from '@/generated/prisma/client'

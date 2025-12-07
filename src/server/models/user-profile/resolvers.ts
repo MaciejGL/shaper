@@ -340,19 +340,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     // Calculate the target week's boundaries
     // If targetDate is provided, use that to determine the week
     // Otherwise fall back to weekOffset from current date
-    const baseDate = targetDate ? new Date(targetDate) : subWeeks(new Date(), weekOffset)
+    const baseDate = targetDate
+      ? new Date(targetDate)
+      : subWeeks(new Date(), weekOffset)
     const targetWeekStart = startOfWeek(baseDate, { weekStartsOn })
     const targetWeekEnd = endOfWeek(baseDate, { weekStartsOn })
-
-    // DEBUG logging
-    console.log('[weeklyMuscleProgress] DEBUG:', {
-      targetDate,
-      weekOffset,
-      weekStartsOn,
-      baseDate: baseDate.toISOString(),
-      targetWeekStart: targetWeekStart.toISOString(),
-      targetWeekEnd: targetWeekEnd.toISOString(),
-    })
 
     // Get exercises where the day is SCHEDULED in the target week
     // This counts sets based on when the workout was planned, not when it was logged
@@ -396,14 +388,6 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         },
       },
     })
-
-    // DEBUG: Log found exercises
-    console.log('[weeklyMuscleProgress] Found exercises:', exercisesWithCompletedSets.map(e => ({
-      name: e.base?.name || e.name,
-      dayScheduledAt: e.day?.scheduledAt,
-      completedSetsCount: e.sets.length,
-      muscleGroups: e.base?.muscleGroups?.map(m => m.displayGroup),
-    })))
 
     // Use tracked display groups from static muscles file
     const trackedMuscleGroups = [...TRACKED_DISPLAY_GROUPS]

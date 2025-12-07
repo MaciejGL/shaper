@@ -8,15 +8,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
-import { cn } from '@/lib/utils'
-
 import {
   PREMIUM_BENEFITS,
   PREMIUM_YEARLY_BENEFITS,
   TRIAL_COPY,
 } from '@/constants/product-copy'
 import { SUBSCRIPTION_CONFIG } from '@/constants/subscription-config'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
+import { cn } from '@/lib/utils'
 
 interface PriceInfo {
   lookupKey: string
@@ -201,8 +200,8 @@ export function PremiumPricingSelector({
                     </p>
                     {calculateSavingsAmount() && (
                       <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                        Save NOK {calculateSavingsAmount()?.toLocaleString()} per
-                        year vs monthly
+                        Save NOK {calculateSavingsAmount()?.toLocaleString()}{' '}
+                        per year vs monthly
                       </p>
                     )}
                   </>
@@ -254,11 +253,11 @@ export function PremiumPricingSelector({
               <p className="text-xs text-center text-muted-foreground">
                 {isYearly && yearlyPrice
                   ? hasUsedTrial
-                    ? `NOK ${formatCleanPrice(yearlyPrice.formattedPrice)}/year. Cancel anytime.`
-                    : `NOK ${formatCleanPrice(yearlyPrice.formattedPrice)}/year after trial. Cancel anytime.`
+                    ? `NOK ${formatCleanPrice(yearlyPrice.formattedPrice || '0')}/year. Cancel anytime.`
+                    : `NOK ${formatCleanPrice(yearlyPrice.formattedPrice || '0')}/year after trial. Cancel anytime.`
                   : hasUsedTrial
-                    ? `NOK ${formatCleanPrice(monthlyPrice?.formattedPrice || 'NOK 149')}/month. Cancel anytime.`
-                    : `NOK ${formatCleanPrice(monthlyPrice?.formattedPrice || 'NOK 149')}/month after trial. Cancel anytime.`}
+                    ? `NOK ${formatCleanPrice(monthlyPrice?.formattedPrice || '0')}/month. Cancel anytime.`
+                    : `NOK ${formatCleanPrice(monthlyPrice?.formattedPrice || '0')}/month after trial. Cancel anytime.`}
               </p>
             </CardContent>
           </Card>

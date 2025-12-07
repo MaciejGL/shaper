@@ -23,21 +23,23 @@ async function fetchPromotionalDiscount(
   try {
     const stripeSubscription = await stripe.subscriptions.retrieve(
       stripeSubscriptionId,
-      { expand: ['discount.coupon'] },
+      { expand: ['discounts.source.coupon'] },
     )
 
-    const discount = stripeSubscription.discount
-    if (!discount?.coupon) return null
+    const discount = stripeSubscription.discounts?.[0]
+    if (!discount || typeof discount === 'string') return null
+
+    const coupon = discount.source?.coupon
+    if (!coupon || typeof coupon === 'string') return null
 
     // Only return trainer custom discounts
     if (
-      discount.coupon.metadata?.discountType !==
-      DISCOUNT_TYPES.TRAINER_CUSTOM_DISCOUNT
+      coupon.metadata?.discountType !== DISCOUNT_TYPES.TRAINER_CUSTOM_DISCOUNT
     ) {
       return null
     }
 
-    const percentOff = discount.coupon.percent_off
+    const percentOff = coupon.percent_off
     if (!percentOff || !discount.end) return null
 
     const now = new Date()
