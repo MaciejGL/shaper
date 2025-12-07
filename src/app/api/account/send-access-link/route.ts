@@ -4,8 +4,6 @@ import { prisma } from '@/lib/_db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { getCurrentUser } from '@/lib/getUser'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hypro.app'
-
 export async function POST(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser()
@@ -23,8 +21,8 @@ export async function POST(request: NextRequest) {
     if (type === 'premium') {
       // Send premium access email with upgrade link
       await sendEmail.premiumAccess(user.email, {
+        userId: user.id,
         userName,
-        upgradeUrl: `${BASE_URL}/account-management`,
       })
     } else {
       // Send account access link email
@@ -39,8 +37,8 @@ export async function POST(request: NextRequest) {
       })
 
       await sendEmail.accessLink(user.email, {
+        userId: user.id,
         userName,
-        accessUrl: `${BASE_URL}/account-management`,
         isSubscriber: !!activeSubscription,
       })
     }

@@ -22,8 +22,6 @@ import {
 
 import { AppleJWTProfile } from './types'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hypro.app'
-
 /**
  * Maps NextAuth Apple JWT profile to our AppleProfile interface
  */
@@ -126,8 +124,8 @@ export async function handleAppleSignIn(
       // Send welcome email to new user
       sendEmail
         .newUserWelcome(newUser.email, {
+          userId: newUser.id,
           userName: sanitizedProfile.name?.firstName || null,
-          upgradeUrl: `${BASE_URL}/account-management`,
         })
         .catch((error) => {
           console.error('Failed to send welcome email:', error)

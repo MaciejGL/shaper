@@ -9,6 +9,7 @@ import { UserFull } from '@/types/UserWithSession'
 import { createUserLoaders } from '../loaders/user.loader'
 
 import { handleAppleSignIn } from './apple-signin'
+import { verifyEmailAccessToken } from './email-access-token'
 import { handleGoogleSignIn } from './google-signin'
 
 export const authOptions = {
@@ -125,6 +126,55 @@ export const authOptions = {
           return user as UserFull
         } catch (error) {
           console.error('🔐 [SERVER-NONCE] Authorization error:', error)
+          return null
+        }
+      },
+    }),
+    // Email access token provider for email links
+    CredentialsProvider({
+      id: 'email-access',
+      name: 'Email Access',
+      credentials: {
+        token: { label: 'Token', type: 'text' },
+      },
+      async authorize(credentials) {
+        const { token } = credentials ?? {}
+        if (!token) return null
+
+        try {
+          const tokenData = verifyEmailAccessToken(token)
+
+          if (!tokenData) {
+            console.error('🔐 [EMAIL-ACCESS] Invalid or expired token')
+            return null
+          }
+
+          const user = await prisma.user.findUnique({
+            where: { id: tokenData.userId },
+            include: {
+              profile: true,
+            },
+          })
+
+          if (!user) {
+            console.error('🔐 [EMAIL-ACCESS] User not found:', tokenData.userId)
+            return null
+          }
+
+          // Verify email matches
+          if (user.email !== tokenData.email) {
+            console.error('🔐 [EMAIL-ACCESS] Email mismatch')
+            return null
+          }
+
+          console.info('🔐 [EMAIL-ACCESS] User authenticated via email link:', {
+            userId: user.id,
+            email: user.email,
+          })
+
+          return user as UserFull
+        } catch (error) {
+          console.error('🔐 [EMAIL-ACCESS] Authorization error:', error)
           return null
         }
       },

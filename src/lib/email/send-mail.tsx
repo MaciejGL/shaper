@@ -1,6 +1,8 @@
 // lib/email/send-email.ts
 import { render } from '@react-email/render'
 
+import { generateEmailAccessToken } from '@/lib/auth/email-access-token'
+
 import { resend } from './resend'
 import { AccessLinkEmail } from './templates/access-link-email'
 import { CoachingScheduledToEndEmail } from './templates/coaching-scheduled-to-end-email'
@@ -34,8 +36,22 @@ import { TrialReminderEmail } from './templates/trial-reminder-email'
 
 const NO_REPLY_EMAIL = 'noreply@hypro.app'
 const NO_REPLY_NAME = 'Hypro'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hypro.app'
 
 const FROM_EMAIL = `${NO_REPLY_NAME} <${NO_REPLY_EMAIL}>`
+
+/**
+ * Generate an authenticated URL with email access token
+ * User will be auto-logged in when clicking this link
+ */
+function generateAuthenticatedUrl(
+  userId: string,
+  email: string,
+  redirectPath: string,
+): string {
+  const token = generateEmailAccessToken(userId, email, redirectPath)
+  return `${BASE_URL}/auth/email-access?token=${encodeURIComponent(token)}`
+}
 
 export const sendEmail = {
   otp: async (
@@ -574,15 +590,20 @@ export const sendEmail = {
   accessLink: async (
     to: string,
     {
+      userId,
       userName,
-      accessUrl,
       isSubscriber,
     }: {
+      userId: string
       userName?: string | null
-      accessUrl: string
       isSubscriber: boolean
     },
   ): Promise<void> => {
+    const accessUrl = generateAuthenticatedUrl(
+      userId,
+      to,
+      '/account-management',
+    )
     const html = await render(
       <AccessLinkEmail
         userName={userName}
@@ -605,13 +626,18 @@ export const sendEmail = {
   premiumAccess: async (
     to: string,
     {
+      userId,
       userName,
-      upgradeUrl,
     }: {
+      userId: string
       userName?: string | null
-      upgradeUrl: string
     },
   ): Promise<void> => {
+    const upgradeUrl = generateAuthenticatedUrl(
+      userId,
+      to,
+      '/account-management',
+    )
     const html = await render(
       <PremiumAccessEmail userName={userName} upgradeUrl={upgradeUrl} />,
     )
@@ -628,13 +654,18 @@ export const sendEmail = {
   newUserWelcome: async (
     to: string,
     {
+      userId,
       userName,
-      upgradeUrl,
     }: {
+      userId: string
       userName?: string | null
-      upgradeUrl: string
     },
   ): Promise<void> => {
+    const upgradeUrl = generateAuthenticatedUrl(
+      userId,
+      to,
+      '/account-management',
+    )
     const html = await render(
       <NewUserWelcomeEmail userName={userName} upgradeUrl={upgradeUrl} />,
     )
@@ -651,13 +682,18 @@ export const sendEmail = {
   trialReminder: async (
     to: string,
     {
+      userId,
       userName,
-      upgradeUrl,
     }: {
+      userId: string
       userName?: string | null
-      upgradeUrl: string
     },
   ): Promise<void> => {
+    const upgradeUrl = generateAuthenticatedUrl(
+      userId,
+      to,
+      '/account-management',
+    )
     const html = await render(
       <TrialReminderEmail userName={userName} upgradeUrl={upgradeUrl} />,
     )

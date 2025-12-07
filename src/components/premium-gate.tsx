@@ -134,17 +134,17 @@ export function PremiumGate({
 
           <div className="pt-4 space-y-3">
             {rules.canShowUpgradeUI ? (
-              <Button
-                onClick={handleViewPlans}
-                className="w-full"
-                size={compact ? 'sm' : 'lg'}
-                iconStart={<Crown />}
-                variant="gradient"
-                loading={isOpeningUrl}
-                disabled={isOpeningUrl}
-              >
-                Upgrade
-              </Button>
+            <Button
+              onClick={handleViewPlans}
+              className="w-full"
+              size={compact ? 'sm' : 'lg'}
+              iconStart={<Crown />}
+              variant="gradient"
+              loading={isOpeningUrl}
+              disabled={isOpeningUrl}
+            >
+              Upgrade
+            </Button>
             ) : (
               <>
                 <p className="text-muted-foreground text-sm">

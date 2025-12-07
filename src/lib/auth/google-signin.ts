@@ -24,8 +24,6 @@ import {
 
 import { GoogleAccount, GoogleJWTProfile } from './types'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hypro.app'
-
 /**
  * Maps NextAuth Google JWT profile to our GoogleProfile interface
  */
@@ -159,8 +157,8 @@ export async function handleGoogleSignIn(
       // Send welcome email to new user
       sendEmail
         .newUserWelcome(newUser.email, {
+          userId: newUser.id,
           userName: sanitizedProfile.given_name || null,
-          upgradeUrl: `${BASE_URL}/account-management`,
         })
         .catch((error) => {
           console.error('Failed to send welcome email:', error)

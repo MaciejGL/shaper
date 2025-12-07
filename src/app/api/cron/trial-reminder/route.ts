@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/_db'
 import { sendEmail } from '@/lib/email/send-mail'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hypro.app'
-
 // Hours after signup to send trial reminder (3 days = 72 hours)
 const REMINDER_HOURS = 72
 
@@ -62,8 +60,8 @@ export async function GET() {
           user.profile?.firstName || user.name?.split(' ')[0] || null
 
         await sendEmail.trialReminder(user.email, {
+          userId: user.id,
           userName,
-          upgradeUrl: `${BASE_URL}/account-management`,
         })
 
         sentCount++
