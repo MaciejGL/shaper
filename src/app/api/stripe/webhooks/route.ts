@@ -13,6 +13,8 @@ import { handlePaymentFailed } from './handlers/payment-failed'
 import { handlePaymentSucceeded } from './handlers/payment-succeeded'
 import { handleSubscriptionCreated } from './handlers/subscription-created'
 import { handleSubscriptionDeleted } from './handlers/subscription-deleted'
+import { handleSubscriptionPaused } from './handlers/subscription-paused'
+import { handleSubscriptionResumed } from './handlers/subscription-resumed'
 import { handleSubscriptionUpdated } from './handlers/subscription-updated'
 import { handleTrialWillEnd } from './handlers/trial-will-end'
 
@@ -84,15 +86,15 @@ export async function POST(request: NextRequest) {
           break
 
         case STRIPE_WEBHOOK_EVENTS.SUBSCRIPTION_PAUSED:
-          console.info(`[WEBHOOK] subscription.paused - not yet implemented`)
-          // TODO: Add support for paused subscriptions
-          // await handleSubscriptionPaused(event.data.object)
+          console.info(`[WEBHOOK] Processing subscription.paused`)
+          await handleSubscriptionPaused(event.data.object)
+          console.info(`[WEBHOOK] ✅ subscription.paused processed`)
           break
 
         case STRIPE_WEBHOOK_EVENTS.SUBSCRIPTION_RESUMED:
-          console.info(`[WEBHOOK] subscription.resumed - not yet implemented`)
-          // TODO: Add support for resumed subscriptions
-          // await handleSubscriptionResumed(event.data.object)
+          console.info(`[WEBHOOK] Processing subscription.resumed`)
+          await handleSubscriptionResumed(event.data.object)
+          console.info(`[WEBHOOK] ✅ subscription.resumed processed`)
           break
 
         case STRIPE_WEBHOOK_EVENTS.PAYMENT_SUCCEEDED:

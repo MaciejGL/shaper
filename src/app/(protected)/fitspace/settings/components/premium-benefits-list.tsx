@@ -50,26 +50,3 @@ export function PremiumBenefitsList({
     </div>
   )
 }
-
-// Predefined benefit lists
-export const PREMIUM_BENEFITS = [
-  'Premium training plans',
-  'Premium exercise library',
-  'Exercise video',
-  'Unlimited training plans',
-  'Advanced logging & analytics',
-  'Progress tracking & PRs',
-  'Photo Snapshots',
-  'Priority support',
-] as const
-
-export const UPGRADE_BENEFITS = [
-  'Premium training plans',
-  'Premium exercise library',
-  'Exercise video',
-  'Unlimited training plans',
-  'Advanced logging & analytics',
-  'Progress tracking & PRs',
-  'Photo Snapshots',
-  'Priority support',
-] as const

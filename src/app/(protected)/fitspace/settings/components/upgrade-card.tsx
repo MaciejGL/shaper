@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { useStripePrice } from '@/hooks/use-stripe-price'
 
-import { PremiumBenefitsList, UPGRADE_BENEFITS } from './premium-benefits-list'
+import { PREMIUM_BENEFITS } from '@/constants/product-copy'
+
+import { PremiumBenefitsList } from './premium-benefits-list'
 
 interface Package {
   id: string
@@ -65,7 +67,7 @@ export function UpgradeCard({
           </div>
           <h5 className="text-lg font-bold">Premium Features</h5>
         </div>
-        <PremiumBenefitsList benefits={UPGRADE_BENEFITS} variant="secondary" />
+        <PremiumBenefitsList benefits={PREMIUM_BENEFITS} variant="secondary" />
       </div>
 
       {/* Pricing Options */}

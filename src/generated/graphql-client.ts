@@ -885,6 +885,25 @@ export type GQLFreeWorkoutDay = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type GQLFreezeEligibility = {
+  __typename?: 'FreezeEligibility';
+  availableFrom?: Maybe<Scalars['String']['output']>;
+  canFreeze: Scalars['Boolean']['output'];
+  daysRemaining: Scalars['Int']['output'];
+  isPaused: Scalars['Boolean']['output'];
+  maxDays: Scalars['Int']['output'];
+  minDays: Scalars['Int']['output'];
+  pauseEndsAt?: Maybe<Scalars['String']['output']>;
+  reason?: Maybe<Scalars['String']['output']>;
+};
+
+export type GQLFreezeResult = {
+  __typename?: 'FreezeResult';
+  message?: Maybe<Scalars['String']['output']>;
+  pauseEndsAt?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type GQLGenerateAiWorkoutInput = {
   exerciseCount: Scalars['Int']['input'];
   maxSetsPerExercise: Scalars['Int']['input'];
@@ -1277,6 +1296,7 @@ export type GQLMutation = {
   moderateReview: Scalars['Boolean']['output'];
   moveExercise: Scalars['Boolean']['output'];
   pauseClientCoachingSubscription: GQLPauseCoachingResult;
+  pauseMySubscription: GQLFreezeResult;
   pausePlan: Scalars['Boolean']['output'];
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   rejectTrainerOffer: GQLTrainerOffer;
@@ -1305,6 +1325,7 @@ export type GQLMutation = {
   resetUserLogs: Scalars['Boolean']['output'];
   respondToTeamInvitation: GQLTeamInvitation;
   resumeClientCoachingSubscription: GQLResumeCoachingResult;
+  resumeMySubscription: GQLFreezeResult;
   sendMessage: GQLMessage;
   setMacroTargets: GQLMacroTarget;
   shareNutritionPlanWithClient: GQLNutritionPlan;
@@ -1808,6 +1829,11 @@ export type GQLMutationMoveExerciseArgs = {
 
 export type GQLMutationPauseClientCoachingSubscriptionArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationPauseMySubscriptionArgs = {
+  days: Scalars['Int']['input'];
 };
 
 
@@ -2534,6 +2560,7 @@ export type GQLQuery = {
   getFavouriteWorkouts: Array<GQLFavouriteWorkout>;
   getFeaturedTrainers: Array<GQLPublicTrainer>;
   getFreeWorkoutDays: Array<GQLFreeWorkoutDay>;
+  getFreezeEligibility: GQLFreezeEligibility;
   getMessengerInitialData: GQLMessengerInitialData;
   getMyChats: Array<GQLChat>;
   getMyClientSurvey?: Maybe<GQLClientSurvey>;
@@ -4084,6 +4111,23 @@ export enum GQLWorkoutType {
   Triceps = 'Triceps',
   UpperBody = 'UpperBody'
 }
+
+export type GQLGetFreezeEligibilityQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetFreezeEligibilityQuery = { __typename?: 'Query', getFreezeEligibility: { __typename?: 'FreezeEligibility', canFreeze: boolean, reason?: string | undefined | null, daysRemaining: number, minDays: number, maxDays: number, availableFrom?: string | undefined | null, isPaused: boolean, pauseEndsAt?: string | undefined | null } };
+
+export type GQLPauseMySubscriptionMutationVariables = Exact<{
+  days: Scalars['Int']['input'];
+}>;
+
+
+export type GQLPauseMySubscriptionMutation = { __typename?: 'Mutation', pauseMySubscription: { __typename?: 'FreezeResult', success: boolean, message?: string | undefined | null, pauseEndsAt?: string | undefined | null } };
+
+export type GQLResumeMySubscriptionMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLResumeMySubscriptionMutation = { __typename?: 'Mutation', resumeMySubscription: { __typename?: 'FreezeResult', success: boolean, message?: string | undefined | null, pauseEndsAt?: string | undefined | null } };
 
 export type GQLGetAdminFreeWorkoutDaysQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6107,6 +6151,119 @@ export const TrainingTemplateFragmentDoc = `
   }
 }
     `;
+export const GetFreezeEligibilityDocument = `
+    query GetFreezeEligibility {
+  getFreezeEligibility {
+    canFreeze
+    reason
+    daysRemaining
+    minDays
+    maxDays
+    availableFrom
+    isPaused
+    pauseEndsAt
+  }
+}
+    `;
+
+export const useGetFreezeEligibilityQuery = <
+      TData = GQLGetFreezeEligibilityQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetFreezeEligibilityQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetFreezeEligibilityQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetFreezeEligibilityQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetFreezeEligibilityQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetFreezeEligibility'] : ['GetFreezeEligibility', variables],
+    queryFn: fetchData<GQLGetFreezeEligibilityQuery, GQLGetFreezeEligibilityQueryVariables>(GetFreezeEligibilityDocument, variables),
+    ...options
+  }
+    )};
+
+useGetFreezeEligibilityQuery.getKey = (variables?: GQLGetFreezeEligibilityQueryVariables) => variables === undefined ? ['GetFreezeEligibility'] : ['GetFreezeEligibility', variables];
+
+export const useInfiniteGetFreezeEligibilityQuery = <
+      TData = InfiniteData<GQLGetFreezeEligibilityQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetFreezeEligibilityQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetFreezeEligibilityQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetFreezeEligibilityQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetFreezeEligibilityQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetFreezeEligibility.infinite'] : ['GetFreezeEligibility.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetFreezeEligibilityQuery, GQLGetFreezeEligibilityQueryVariables>(GetFreezeEligibilityDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetFreezeEligibilityQuery.getKey = (variables?: GQLGetFreezeEligibilityQueryVariables) => variables === undefined ? ['GetFreezeEligibility.infinite'] : ['GetFreezeEligibility.infinite', variables];
+
+
+useGetFreezeEligibilityQuery.fetcher = (variables?: GQLGetFreezeEligibilityQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetFreezeEligibilityQuery, GQLGetFreezeEligibilityQueryVariables>(GetFreezeEligibilityDocument, variables, options);
+
+export const PauseMySubscriptionDocument = `
+    mutation PauseMySubscription($days: Int!) {
+  pauseMySubscription(days: $days) {
+    success
+    message
+    pauseEndsAt
+  }
+}
+    `;
+
+export const usePauseMySubscriptionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLPauseMySubscriptionMutation, TError, GQLPauseMySubscriptionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLPauseMySubscriptionMutation, TError, GQLPauseMySubscriptionMutationVariables, TContext>(
+      {
+    mutationKey: ['PauseMySubscription'],
+    mutationFn: (variables?: GQLPauseMySubscriptionMutationVariables) => fetchData<GQLPauseMySubscriptionMutation, GQLPauseMySubscriptionMutationVariables>(PauseMySubscriptionDocument, variables)(),
+    ...options
+  }
+    )};
+
+usePauseMySubscriptionMutation.getKey = () => ['PauseMySubscription'];
+
+
+usePauseMySubscriptionMutation.fetcher = (variables: GQLPauseMySubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLPauseMySubscriptionMutation, GQLPauseMySubscriptionMutationVariables>(PauseMySubscriptionDocument, variables, options);
+
+export const ResumeMySubscriptionDocument = `
+    mutation ResumeMySubscription {
+  resumeMySubscription {
+    success
+    message
+    pauseEndsAt
+  }
+}
+    `;
+
+export const useResumeMySubscriptionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLResumeMySubscriptionMutation, TError, GQLResumeMySubscriptionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLResumeMySubscriptionMutation, TError, GQLResumeMySubscriptionMutationVariables, TContext>(
+      {
+    mutationKey: ['ResumeMySubscription'],
+    mutationFn: (variables?: GQLResumeMySubscriptionMutationVariables) => fetchData<GQLResumeMySubscriptionMutation, GQLResumeMySubscriptionMutationVariables>(ResumeMySubscriptionDocument, variables)(),
+    ...options
+  }
+    )};
+
+useResumeMySubscriptionMutation.getKey = () => ['ResumeMySubscription'];
+
+
+useResumeMySubscriptionMutation.fetcher = (variables?: GQLResumeMySubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLResumeMySubscriptionMutation, GQLResumeMySubscriptionMutationVariables>(ResumeMySubscriptionDocument, variables, options);
+
 export const GetAdminFreeWorkoutDaysDocument = `
     query GetAdminFreeWorkoutDays {
   getAdminFreeWorkoutDays {

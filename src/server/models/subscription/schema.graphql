@@ -151,6 +151,9 @@ type Query {
 
   # Basic subscription info (simplified)
   getMySubscriptions: [UserSubscription!]!
+
+  # Subscription freeze (Premium Yearly only)
+  getFreezeEligibility: FreezeEligibility!
 }
 
 type Mutation {
@@ -173,6 +176,10 @@ type Mutation {
   # Admin subscription management
   giveLifetimePremium(userId: ID!): UserSubscription!
   removeUserSubscription(userId: ID!): Boolean!
+
+  # Subscription freeze (Premium Yearly only)
+  pauseMySubscription(days: Int!): FreezeResult!
+  resumeMySubscription: FreezeResult!
 }
 
 type PauseCoachingResult {
@@ -199,4 +206,22 @@ type UndoCancelCoachingResult {
   success: Boolean!
   message: String!
   subscription: UserSubscription
+}
+
+# Subscription Freeze (Premium Yearly only)
+type FreezeEligibility {
+  canFreeze: Boolean!
+  reason: String
+  daysRemaining: Int!
+  minDays: Int!
+  maxDays: Int!
+  availableFrom: String
+  isPaused: Boolean!
+  pauseEndsAt: String
+}
+
+type FreezeResult {
+  success: Boolean!
+  message: String
+  pauseEndsAt: String
 }

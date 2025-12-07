@@ -18,6 +18,11 @@ import {
   undoCancelClientCoachingSubscription,
   updateServiceDelivery,
 } from './factory'
+import {
+  getFreezeEligibility,
+  pauseSubscription,
+  resumeSubscription,
+} from './freeze-service'
 
 export const Query: GQLQueryResolvers = {
   checkPremiumAccess: async (_, __, context) => checkPremiumAccess(context),
@@ -36,6 +41,20 @@ export const Query: GQLQueryResolvers = {
     getAllUsersWithSubscriptions(args),
 
   getSubscriptionStats: async () => getSubscriptionStats(),
+
+  // Subscription freeze (Premium Yearly only)
+  getFreezeEligibility: async (_, __, context) => {
+    const userId = context.user?.user?.id
+    if (!userId) {
+      throw new Error('Authentication required')
+    }
+    const eligibility = await getFreezeEligibility(userId)
+    return {
+      ...eligibility,
+      availableFrom: eligibility.availableFrom?.toISOString() ?? null,
+      pauseEndsAt: eligibility.pauseEndsAt?.toISOString() ?? null,
+    }
+  },
 }
 
 export const Mutation: GQLMutationResolvers = {
@@ -61,4 +80,29 @@ export const Mutation: GQLMutationResolvers = {
 
   removeUserSubscription: async (_, args) =>
     removeUserSubscription(args.userId),
+
+  // Subscription freeze (Premium Yearly only)
+  pauseMySubscription: async (_, args, context) => {
+    const userId = context.user?.user?.id
+    if (!userId) {
+      throw new Error('Authentication required')
+    }
+    const result = await pauseSubscription(userId, args.days)
+    return {
+      ...result,
+      pauseEndsAt: result.pauseEndsAt?.toISOString() ?? null,
+    }
+  },
+
+  resumeMySubscription: async (_, __, context) => {
+    const userId = context.user?.user?.id
+    if (!userId) {
+      throw new Error('Authentication required')
+    }
+    const result = await resumeSubscription(userId)
+    return {
+      ...result,
+      pauseEndsAt: result.pauseEndsAt?.toISOString() ?? null,
+    }
+  },
 }

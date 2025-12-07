@@ -1,0 +1,28 @@
+query GetFreezeEligibility {
+  getFreezeEligibility {
+    canFreeze
+    reason
+    daysRemaining
+    minDays
+    maxDays
+    availableFrom
+    isPaused
+    pauseEndsAt
+  }
+}
+
+mutation PauseMySubscription($days: Int!) {
+  pauseMySubscription(days: $days) {
+    success
+    message
+    pauseEndsAt
+  }
+}
+
+mutation ResumeMySubscription {
+  resumeMySubscription {
+    success
+    message
+    pauseEndsAt
+  }
+}

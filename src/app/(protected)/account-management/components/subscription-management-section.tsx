@@ -12,6 +12,7 @@ import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
+import { FreezeSubscriptionSection } from './freeze-subscription-section/freeze-subscription-section'
 import { PremiumPricingSelector } from './premium-pricing-selector'
 
 export function SubscriptionManagementSection() {
@@ -248,6 +249,10 @@ export function SubscriptionManagementSection() {
               )}
             </CardContent>
           </Card>
+
+          {/* Freeze Subscription (Premium Yearly only) */}
+          {subscriptionData?.subscription?.package?.stripeLookupKey ===
+            STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY && <FreezeSubscriptionSection />}
 
           {/* Manage Billing Button */}
           <div className="flex flex-col gap-2">

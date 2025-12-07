@@ -6,7 +6,9 @@ import { AlertTriangle, Clock, Crown } from 'lucide-react'
 import { BadgeProps } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
-import { PREMIUM_BENEFITS, PremiumBenefitsList } from './premium-benefits-list'
+import { PREMIUM_BENEFITS } from '@/constants/product-copy'
+
+import { PremiumBenefitsList } from './premium-benefits-list'
 import { SubscriptionActionButtons } from './subscription-action-buttons'
 
 interface SubscriptionState {

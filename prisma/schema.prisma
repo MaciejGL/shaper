@@ -706,6 +706,8 @@ model UserSubscription {
   lastPaymentAttempt   DateTime?
   trialEnd             DateTime?
   trialStart           DateTime?
+  freezeDaysUsed       Int                @default(0)
+  freezeUsageYear      Int?
   package              PackageTemplate    @relation(fields: [packageId], references: [id])
   trainer              User?              @relation("TrainerSubscriptions", fields: [trainerId], references: [id])
   user                 User               @relation("UserSubscriptions", fields: [userId], references: [id])

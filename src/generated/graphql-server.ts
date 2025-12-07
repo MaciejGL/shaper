@@ -887,6 +887,25 @@ export type GQLFreeWorkoutDay = {
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
+export type GQLFreezeEligibility = {
+  __typename?: 'FreezeEligibility';
+  availableFrom?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  canFreeze: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  daysRemaining: EntireFieldWrapper<Scalars['Int']['output']>;
+  isPaused: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  maxDays: EntireFieldWrapper<Scalars['Int']['output']>;
+  minDays: EntireFieldWrapper<Scalars['Int']['output']>;
+  pauseEndsAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  reason?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+};
+
+export type GQLFreezeResult = {
+  __typename?: 'FreezeResult';
+  message?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  pauseEndsAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  success: EntireFieldWrapper<Scalars['Boolean']['output']>;
+};
+
 export type GQLGenerateAiWorkoutInput = {
   exerciseCount: Scalars['Int']['input'];
   maxSetsPerExercise: Scalars['Int']['input'];
@@ -1279,6 +1298,7 @@ export type GQLMutation = {
   moderateReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   moveExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   pauseClientCoachingSubscription: EntireFieldWrapper<GQLPauseCoachingResult>;
+  pauseMySubscription: EntireFieldWrapper<GQLFreezeResult>;
   pausePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   rejectTrainerOffer: EntireFieldWrapper<GQLTrainerOffer>;
@@ -1307,6 +1327,7 @@ export type GQLMutation = {
   resetUserLogs: EntireFieldWrapper<Scalars['Boolean']['output']>;
   respondToTeamInvitation: EntireFieldWrapper<GQLTeamInvitation>;
   resumeClientCoachingSubscription: EntireFieldWrapper<GQLResumeCoachingResult>;
+  resumeMySubscription: EntireFieldWrapper<GQLFreezeResult>;
   sendMessage: EntireFieldWrapper<GQLMessage>;
   setMacroTargets: EntireFieldWrapper<GQLMacroTarget>;
   shareNutritionPlanWithClient: EntireFieldWrapper<GQLNutritionPlan>;
@@ -1810,6 +1831,11 @@ export type GQLMutationMoveExerciseArgs = {
 
 export type GQLMutationPauseClientCoachingSubscriptionArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationPauseMySubscriptionArgs = {
+  days: Scalars['Int']['input'];
 };
 
 
@@ -2536,6 +2562,7 @@ export type GQLQuery = {
   getFavouriteWorkouts: EntireFieldWrapper<Array<GQLFavouriteWorkout>>;
   getFeaturedTrainers: EntireFieldWrapper<Array<GQLPublicTrainer>>;
   getFreeWorkoutDays: EntireFieldWrapper<Array<GQLFreeWorkoutDay>>;
+  getFreezeEligibility: EntireFieldWrapper<GQLFreezeEligibility>;
   getMessengerInitialData: EntireFieldWrapper<GQLMessengerInitialData>;
   getMyChats: EntireFieldWrapper<Array<GQLChat>>;
   getMyClientSurvey?: EntireFieldWrapper<Maybe<GQLClientSurvey>>;
@@ -4255,6 +4282,8 @@ export type GQLResolversTypes = {
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   FocusTag: GQLFocusTag;
   FreeWorkoutDay: ResolverTypeWrapper<GQLFreeWorkoutDay>;
+  FreezeEligibility: ResolverTypeWrapper<GQLFreezeEligibility>;
+  FreezeResult: ResolverTypeWrapper<GQLFreezeResult>;
   GenerateAiWorkoutInput: GQLGenerateAiWorkoutInput;
   GetExercisesResponse: ResolverTypeWrapper<GQLGetExercisesResponse>;
   GetWorkoutDayPayload: ResolverTypeWrapper<GQLGetWorkoutDayPayload>;
@@ -4518,6 +4547,8 @@ export type GQLResolversParentTypes = {
   FavouriteWorkoutSet: GQLFavouriteWorkoutSet;
   Float: Scalars['Float']['output'];
   FreeWorkoutDay: GQLFreeWorkoutDay;
+  FreezeEligibility: GQLFreezeEligibility;
+  FreezeResult: GQLFreezeResult;
   GenerateAiWorkoutInput: GQLGenerateAiWorkoutInput;
   GetExercisesResponse: GQLGetExercisesResponse;
   GetWorkoutDayPayload: GQLGetWorkoutDayPayload;
@@ -5035,6 +5066,25 @@ export type GQLFreeWorkoutDayResolvers<ContextType = GQLContext, ParentType exte
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLFreezeEligibilityResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FreezeEligibility'] = GQLResolversParentTypes['FreezeEligibility']> = {
+  availableFrom?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  canFreeze?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  daysRemaining?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  isPaused?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  maxDays?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  minDays?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  pauseEndsAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  reason?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLFreezeResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FreezeResult'] = GQLResolversParentTypes['FreezeResult']> = {
+  message?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  pauseEndsAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLGetExercisesResponseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetExercisesResponse'] = GQLResolversParentTypes['GetExercisesResponse']> = {
   publicExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType>;
   trainerExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType>;
@@ -5335,6 +5385,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   moderateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationModerateReviewArgs, 'input'>>;
   moveExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationMoveExerciseArgs, 'input'>>;
   pauseClientCoachingSubscription?: Resolver<GQLResolversTypes['PauseCoachingResult'], ParentType, ContextType, RequireFields<GQLMutationPauseClientCoachingSubscriptionArgs, 'clientId'>>;
+  pauseMySubscription?: Resolver<GQLResolversTypes['FreezeResult'], ParentType, ContextType, RequireFields<GQLMutationPauseMySubscriptionArgs, 'days'>>;
   pausePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationPausePlanArgs, 'planId'>>;
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
   rejectTrainerOffer?: Resolver<GQLResolversTypes['TrainerOffer'], ParentType, ContextType, RequireFields<GQLMutationRejectTrainerOfferArgs, 'offerId'>>;
@@ -5363,6 +5414,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   resetUserLogs?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationResetUserLogsArgs, 'input'>>;
   respondToTeamInvitation?: Resolver<GQLResolversTypes['TeamInvitation'], ParentType, ContextType, RequireFields<GQLMutationRespondToTeamInvitationArgs, 'input'>>;
   resumeClientCoachingSubscription?: Resolver<GQLResolversTypes['ResumeCoachingResult'], ParentType, ContextType, RequireFields<GQLMutationResumeClientCoachingSubscriptionArgs, 'clientId'>>;
+  resumeMySubscription?: Resolver<GQLResolversTypes['FreezeResult'], ParentType, ContextType>;
   sendMessage?: Resolver<GQLResolversTypes['Message'], ParentType, ContextType, RequireFields<GQLMutationSendMessageArgs, 'input'>>;
   setMacroTargets?: Resolver<GQLResolversTypes['MacroTarget'], ParentType, ContextType, RequireFields<GQLMutationSetMacroTargetsArgs, 'input'>>;
   shareNutritionPlanWithClient?: Resolver<GQLResolversTypes['NutritionPlan'], ParentType, ContextType, RequireFields<GQLMutationShareNutritionPlanWithClientArgs, 'id'>>;
@@ -5701,6 +5753,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getFavouriteWorkouts?: Resolver<Array<GQLResolversTypes['FavouriteWorkout']>, ParentType, ContextType>;
   getFeaturedTrainers?: Resolver<Array<GQLResolversTypes['PublicTrainer']>, ParentType, ContextType, Partial<GQLQueryGetFeaturedTrainersArgs>>;
   getFreeWorkoutDays?: Resolver<Array<GQLResolversTypes['FreeWorkoutDay']>, ParentType, ContextType>;
+  getFreezeEligibility?: Resolver<GQLResolversTypes['FreezeEligibility'], ParentType, ContextType>;
   getMessengerInitialData?: Resolver<GQLResolversTypes['MessengerInitialData'], ParentType, ContextType, Partial<GQLQueryGetMessengerInitialDataArgs>>;
   getMyChats?: Resolver<Array<GQLResolversTypes['Chat']>, ParentType, ContextType>;
   getMyClientSurvey?: Resolver<Maybe<GQLResolversTypes['ClientSurvey']>, ParentType, ContextType>;
@@ -6329,6 +6382,8 @@ export type GQLResolvers<ContextType = GQLContext> = {
   FavouriteWorkoutFolder?: GQLFavouriteWorkoutFolderResolvers<ContextType>;
   FavouriteWorkoutSet?: GQLFavouriteWorkoutSetResolvers<ContextType>;
   FreeWorkoutDay?: GQLFreeWorkoutDayResolvers<ContextType>;
+  FreezeEligibility?: GQLFreezeEligibilityResolvers<ContextType>;
+  FreezeResult?: GQLFreezeResultResolvers<ContextType>;
   GetExercisesResponse?: GQLGetExercisesResponseResolvers<ContextType>;
   GetWorkoutDayPayload?: GQLGetWorkoutDayPayloadResolvers<ContextType>;
   GetWorkoutNavigationPayload?: GQLGetWorkoutNavigationPayloadResolvers<ContextType>;

@@ -11,7 +11,12 @@ import { Switch } from '@/components/ui/switch'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { cn } from '@/lib/utils'
 
-import { PREMIUM_BENEFITS } from '../../fitspace/settings/components/premium-benefits-list'
+import {
+  PREMIUM_BENEFITS,
+  PREMIUM_YEARLY_BENEFITS,
+  TRIAL_COPY,
+} from '@/constants/product-copy'
+import { SUBSCRIPTION_CONFIG } from '@/constants/subscription-config'
 
 interface PriceInfo {
   lookupKey: string
@@ -127,7 +132,7 @@ export function PremiumPricingSelector({
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
             <Sparkles className="size-4" />
-            7-Day Free Trial
+            {TRIAL_COPY.badge}
           </div>
         </div>
       )}
@@ -209,12 +214,14 @@ export function PremiumPricingSelector({
             </CardHeader>
             <CardContent className="space-y-6">
               <ul className="space-y-3">
-                {PREMIUM_BENEFITS.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <Check className="size-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
+                {(isYearly ? PREMIUM_YEARLY_BENEFITS : PREMIUM_BENEFITS).map(
+                  (feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <Check className="size-5 text-primary shrink-0 mt-0.5" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ),
+                )}
               </ul>
 
               <Button
@@ -237,8 +244,8 @@ export function PremiumPricingSelector({
                     ? `${yearlyPrice.formattedPrice}/year. Cancel anytime.`
                     : `${monthlyPrice?.formattedPrice || 'NOK 149.00'}/month. Cancel anytime.`
                   : isYearly && yearlyPrice
-                    ? `7-day free trial, then ${yearlyPrice.formattedPrice}/year. Cancel anytime.`
-                    : `7-day free trial, then ${monthlyPrice?.formattedPrice || 'NOK 149.00'}/month. Cancel anytime.`}
+                    ? `${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day free trial, then ${yearlyPrice.formattedPrice}/year. Cancel anytime.`
+                    : `${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day free trial, then ${monthlyPrice?.formattedPrice || 'NOK 149.00'}/month. Cancel anytime.`}
               </p>
             </CardContent>
           </Card>
@@ -255,9 +262,7 @@ export function PremiumPricingSelector({
                 Terms of Service
               </button>
             </p>
-            {!hasUsedTrial && (
-              <p>No commitment. Cancel anytime before trial ends.</p>
-            )}
+            {!hasUsedTrial && <p>{TRIAL_COPY.noCommitment}</p>}
           </div>
         )}
       </div>
