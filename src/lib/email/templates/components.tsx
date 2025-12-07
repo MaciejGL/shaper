@@ -111,36 +111,42 @@ export const EmailHeader = ({ brandName = 'Hypro' }: EmailHeaderProps) => (
         textAlign: 'center',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '12px',
-        }}
+      <table
+        role="presentation"
+        cellSpacing="0"
+        cellPadding="0"
+        border={0}
+        style={{ margin: '0 auto' }}
       >
-        <img
-          src="https://www.hypro.app/favicons/android-chrome-192x192.png"
-          alt="Hypro Logo"
-          width="32"
-          height="32"
-          style={{
-            display: 'block',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%', // Ensure rounded logo
-          }}
-        />
-        <span
-          style={{
-            fontSize: '24px',
-            fontWeight: '500',
-            color: theme.colors.headerText,
-          }}
-        >
-          {brandName}
-        </span>
-      </div>
+        <tr>
+          <td style={{ verticalAlign: 'middle' }}>
+            <img
+              src="https://www.hypro.app/favicons/android-chrome-192x192.png"
+              alt="Hypro Logo"
+              width="32"
+              height="32"
+              style={{
+                display: 'block',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+              }}
+            />
+          </td>
+          <td style={{ width: '16px' }}></td>
+          <td style={{ verticalAlign: 'middle' }}>
+            <span
+              style={{
+                fontSize: '24px',
+                fontWeight: '500',
+                color: theme.colors.headerText,
+              }}
+            >
+              {brandName}
+            </span>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
 )
