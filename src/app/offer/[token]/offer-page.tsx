@@ -7,6 +7,7 @@ import {
   Clock,
   CreditCard,
   Info,
+  Percent,
   Shield,
 } from 'lucide-react'
 import { useCallback, useState } from 'react'
@@ -315,8 +316,12 @@ export function OfferPage({
                   const isInPersonItem =
                     item.stripeLookupKey ===
                     STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
-                  const hasDiscount =
+                  const hasInPersonDiscount =
                     isInPersonItem && qualifiesForInPersonDiscount
+
+                  // Check for custom promotional discount
+                  const hasCustomDiscount =
+                    !!item.discountPercent && !!item.discountMonths
 
                   return (
                     <div
@@ -328,12 +333,20 @@ export function OfferPage({
                           {item.name.replaceAll('[TEST]', ' ')}
                         </h4>
                         <div className="flex items-center gap-2">
-                          {hasDiscount && (
+                          {hasInPersonDiscount && (
                             <Badge
                               variant="secondary"
                               className="text-xs bg-green-100 text-green-700"
                             >
                               50% off
+                            </Badge>
+                          )}
+                          {hasCustomDiscount && (
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-primary/10 text-primary"
+                            >
+                              {item.discountPercent}% off
                             </Badge>
                           )}
                           {item.quantity > 1 && (
@@ -349,6 +362,19 @@ export function OfferPage({
                             ' ',
                           )}
                         </p>
+                      )}
+
+                      {/* Promotional discount details */}
+                      {hasCustomDiscount && (
+                        <div className="flex items-center gap-2 text-sm text-primary">
+                          <Percent className="size-3" />
+                          <span>
+                            {item.discountPercent}% off for first{' '}
+                            {item?.discountMonths ?? 0} month
+                            {(item?.discountMonths ?? 0) > 1 ? 's' : ''}, then
+                            full price
+                          </span>
+                        </div>
                       )}
                     </div>
                   )

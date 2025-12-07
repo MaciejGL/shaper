@@ -24,6 +24,7 @@ import {
   buildSessionMetadata,
   calculateBundleDiscounts,
   ensureStripeCustomer,
+  extractCustomDiscountFromOffer,
   fetchAndValidateOffer,
   findOrCreateUser,
   formatCheckoutResponse,
@@ -108,11 +109,16 @@ export async function POST(request: NextRequest) {
     const zeroVatTaxRateId = getZeroVatTaxRateId()
     const lineItems = await prepareLineItems(checkoutItems, zeroVatTaxRateId)
 
-    // Calculate bundle discounts (considers both bundle contents and user subscription)
+    // Extract custom discount info from offer (trainer promotional discounts)
+    const customDiscountInfo = extractCustomDiscountFromOffer(offer)
+
+    // Calculate bundle discounts (considers bundle contents, user subscription, and custom discounts)
     const discounts = await calculateBundleDiscounts(
       checkoutItems,
       hasPremiumCoaching || hasCoachingSubscription,
       offerToken,
+      customDiscountInfo,
+      offer.trainerId,
     )
 
     // Setup revenue sharing for subscriptions

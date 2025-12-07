@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { CreditCard, SparklesIcon } from 'lucide-react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { PromotionalDiscountBanner } from '@/components/subscription/promotional-discount-banner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
@@ -105,6 +106,7 @@ export function SubscriptionInfoSection() {
   const subscriptionInfo = getSubscriptionDisplayInfo()
   const nextBilling = getNextBillingInfo()
   const hasActiveSubscription = subscriptionData?.hasPremiumAccess
+  const promotionalDiscount = subscriptionData?.promotionalDiscount
 
   return (
     <Card>
@@ -163,6 +165,10 @@ export function SubscriptionInfoSection() {
               )}
           </div>
         </div>
+
+        {promotionalDiscount && (
+          <PromotionalDiscountBanner discount={promotionalDiscount} />
+        )}
 
         {hasActiveSubscription && (
           <Button

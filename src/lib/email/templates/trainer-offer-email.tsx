@@ -78,14 +78,16 @@ export const TrainerOfferEmail = ({
                   fontSize: '16px',
                   fontWeight: '600',
                   color: '#18181b',
-                  marginBottom: '4px',
+                  marginBottom: item.services.length > 0 ? '4px' : '0',
                 }}
               >
                 {item.quantity}x {item.packageName}
               </div>
-              <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                Includes: {item.services.join(', ')}
-              </div>
+              {item.services.length > 0 && (
+                <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                  Includes: {item.services.join(', ')}
+                </div>
+              )}
             </div>
           ))}
 

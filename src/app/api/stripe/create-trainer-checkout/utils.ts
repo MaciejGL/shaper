@@ -2,6 +2,8 @@ import { prisma } from '@/lib/db'
 import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
 import {
   createInPersonDiscountIfEligible,
+  createTrainerCustomDiscountIfEligible,
+  CustomDiscountInfo,
   // createMealTrainingBundleDiscountIfEligible,
 } from '@/lib/stripe/discount-utils'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
@@ -58,18 +60,24 @@ export async function fetchAndValidateOffer(
 }
 
 /**
+ * Package summary item from offer with optional discount info
+ */
+interface PackageSummaryItem {
+  packageId: string
+  quantity: number
+  name: string
+  discountPercent?: number
+  discountMonths?: number
+  stripeLookupKey?: string | null
+}
+
+/**
  * Parses package summary and fetches package details from database
  */
 export async function parseOfferPackages(
   offer: OfferWithTrainer,
 ): Promise<BundleItem[]> {
-  const packageSummary = offer.packageSummary as
-    | {
-        packageId: string
-        quantity: number
-        name: string
-      }[]
-    | null
+  const packageSummary = offer.packageSummary as PackageSummaryItem[] | null
 
   if (!packageSummary || packageSummary.length === 0) {
     throw new Error('Offer contains no packages')
@@ -92,6 +100,36 @@ export async function parseOfferPackages(
       package: packageData,
     }
   })
+}
+
+/**
+ * Extracts custom discount info from offer's package summary
+ * Returns discount info for the first package that has discount configured
+ */
+export function extractCustomDiscountFromOffer(
+  offer: OfferWithTrainer,
+): CustomDiscountInfo | null {
+  const packageSummary = offer.packageSummary as PackageSummaryItem[] | null
+
+  if (!packageSummary) {
+    return null
+  }
+
+  // Find the first package with custom discount
+  const packageWithDiscount = packageSummary.find(
+    (pkg) => pkg.discountPercent && pkg.discountMonths && pkg.stripeLookupKey,
+  )
+
+  if (!packageWithDiscount) {
+    return null
+  }
+
+  return {
+    packageId: packageWithDiscount.packageId,
+    stripeLookupKey: packageWithDiscount.stripeLookupKey!,
+    discountPercent: packageWithDiscount.discountPercent!,
+    discountMonths: packageWithDiscount.discountMonths!,
+  }
 }
 
 /**
@@ -261,8 +299,22 @@ export async function calculateBundleDiscounts(
   checkoutItems: BundleItem[],
   hasPremiumCoaching: boolean,
   offerToken: string,
+  customDiscountInfo: CustomDiscountInfo | null = null,
+  trainerId: string = '',
 ) {
   const discounts = []
+
+  // Apply trainer custom discount first (for promotional coaching discounts)
+  if (customDiscountInfo && trainerId) {
+    const customDiscount = await createTrainerCustomDiscountIfEligible(
+      customDiscountInfo,
+      offerToken,
+      trainerId,
+    )
+    if (customDiscount) {
+      discounts.push(customDiscount)
+    }
+  }
 
   const inPersonDiscount = await createInPersonDiscountIfEligible(
     checkoutItems,

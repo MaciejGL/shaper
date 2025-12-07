@@ -89,6 +89,12 @@ export function SendOfferForm({
           packages: selectedPackages.map((item) => ({
             packageId: item.packageId,
             quantity: item.quantity,
+            // Include custom discount if set
+            ...(item.discountPercent &&
+              item.discountMonths && {
+                discountPercent: item.discountPercent,
+                discountMonths: item.discountMonths,
+              }),
           })),
           personalMessage: personalMessage || null,
         }),
@@ -140,6 +146,20 @@ export function SendOfferForm({
     )
   }
 
+  const updateDiscount = (
+    packageId: string,
+    discountPercent?: number,
+    discountMonths?: number,
+  ) => {
+    setSelectedPackages((prev) =>
+      prev.map((item) =>
+        item.packageId === packageId
+          ? { ...item, discountPercent, discountMonths }
+          : item,
+      ),
+    )
+  }
+
   // Calculate bundle discount from selected packages and subscription status
   const bundleDiscount = findInPersonDiscountPercentage(
     selectedPackages.map((item) => item.package),
@@ -185,6 +205,7 @@ export function SendOfferForm({
           clientName={clientName}
           handleSendOffer={handleSendOffer}
           isLoading={isLoading}
+          onUpdateDiscount={updateDiscount}
         />
       )}
     </div>

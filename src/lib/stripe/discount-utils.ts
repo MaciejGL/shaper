@@ -321,3 +321,81 @@ export async function createMealTrainingBundleDiscountIfEligible(
 
   return { coupon: coupon.id }
 }
+
+/**
+ * Creates a trainer custom discount coupon with repeating duration
+ * Used for promotional discounts on coaching subscriptions
+ */
+export async function createTrainerCustomDiscountCoupon(
+  productIds: string[],
+  discountPercent: number,
+  discountMonths: number,
+  offerToken: string,
+  trainerId: string,
+): Promise<Stripe.Coupon> {
+  return await stripe.coupons.create({
+    percent_off: discountPercent,
+    duration: 'repeating',
+    duration_in_months: discountMonths,
+    name: `${discountPercent}% off for ${discountMonths} month${discountMonths > 1 ? 's' : ''}`,
+    applies_to: {
+      products: productIds,
+    },
+    metadata: {
+      source: 'trainer_offer',
+      discountType: DISCOUNT_TYPES.TRAINER_CUSTOM_DISCOUNT,
+      offerToken,
+      trainerId,
+      discountPercent: String(discountPercent),
+      discountMonths: String(discountMonths),
+    },
+  })
+}
+
+/**
+ * Custom discount info extracted from package summary
+ */
+export interface CustomDiscountInfo {
+  packageId: string
+  stripeLookupKey: string
+  discountPercent: number
+  discountMonths: number
+}
+
+/**
+ * Creates trainer custom discount coupon if package has discount configured
+ * Returns the coupon to apply to checkout session
+ */
+export async function createTrainerCustomDiscountIfEligible(
+  customDiscountInfo: CustomDiscountInfo | null,
+  offerToken: string,
+  trainerId: string,
+): Promise<{ coupon: string } | null> {
+  if (!customDiscountInfo) {
+    return null
+  }
+
+  const { stripeLookupKey, discountPercent, discountMonths } =
+    customDiscountInfo
+
+  // Get product ID for the coaching package
+  const productIds = await getProductIdsFromLookupKeys([stripeLookupKey])
+
+  if (productIds.length === 0) {
+    console.warn(
+      `Could not find product for lookup key ${stripeLookupKey} to apply custom discount`,
+    )
+    return null
+  }
+
+  // Create the repeating coupon
+  const coupon = await createTrainerCustomDiscountCoupon(
+    productIds,
+    discountPercent,
+    discountMonths,
+    offerToken,
+    trainerId,
+  )
+
+  return { coupon: coupon.id }
+}

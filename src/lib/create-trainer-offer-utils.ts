@@ -58,6 +58,23 @@ export function validatePackages(packages: CreateOfferPackageInput[]): void {
     if (pkg.quantity < 1 || pkg.quantity > 20) {
       throw new Error('Quantity must be between 1 and 20 for each package')
     }
+
+    // Validate discount if provided (both values must be set together)
+    if (pkg.discountPercent !== undefined || pkg.discountMonths !== undefined) {
+      if (!pkg.discountPercent || !pkg.discountMonths) {
+        throw new Error(
+          'Both discountPercent and discountMonths must be provided together',
+        )
+      }
+
+      if (pkg.discountPercent < 1 || pkg.discountPercent > 50) {
+        throw new Error('Discount percentage must be between 1 and 50')
+      }
+
+      if (pkg.discountMonths < 1 || pkg.discountMonths > 12) {
+        throw new Error('Discount duration must be between 1 and 12 months')
+      }
+    }
   }
 }
 
@@ -97,6 +114,7 @@ export async function fetchOfferData(input: CreateOfferInput) {
 
 /**
  * Creates enriched package summary with template details
+ * Includes custom discount data if provided
  */
 export function createPackageSummary(
   packages: CreateOfferPackageInput[],
@@ -112,6 +130,12 @@ export function createPackageSummary(
       name: template.name,
       description: template.description,
       stripeLookupKey: template.stripeLookupKey,
+      // Include custom discount if set
+      ...(pkg.discountPercent &&
+        pkg.discountMonths && {
+          discountPercent: pkg.discountPercent,
+          discountMonths: pkg.discountMonths,
+        }),
     }
   })
 }

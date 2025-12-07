@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { CoachingServiceTerms } from '@/components/subscription/coaching-service-terms'
+import { PromotionalDiscountBanner } from '@/components/subscription/promotional-discount-banner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
@@ -179,6 +180,7 @@ export function SubscriptionManagementSection() {
   const hasActiveSubscription = subscriptionData?.hasPremiumAccess
   const hasStripeHistory =
     !!subscriptionData?.subscription?.stripeSubscriptionId
+  const promotionalDiscount = subscriptionData?.promotionalDiscount
 
   return (
     <div className="space-y-6">
@@ -237,6 +239,13 @@ export function SubscriptionManagementSection() {
                     )}
                 </div>
               </div>
+
+              {promotionalDiscount && (
+                <PromotionalDiscountBanner
+                  discount={promotionalDiscount}
+                  className="mt-4"
+                />
+              )}
             </CardContent>
           </Card>
 

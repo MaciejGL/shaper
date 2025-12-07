@@ -1,6 +1,13 @@
 'use client'
 
-import { CheckCircle, Clock, Copy, ExternalLink, XCircle } from 'lucide-react'
+import {
+  CheckCircle,
+  Clock,
+  Copy,
+  ExternalLink,
+  Percent,
+  XCircle,
+} from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { Loader } from '@/components/loader'
@@ -49,6 +56,9 @@ interface TrainerOffer {
   clientEmail: string
   services: { serviceType: string; quantity: number }[]
   stripeLookupKey: string | null
+  // Custom discount applied by trainer
+  discountPercent?: number
+  discountMonths?: number
 }
 
 export function OfferHistory({ clientId, trainerId }: OfferHistoryProps) {
@@ -308,11 +318,11 @@ export function OfferHistory({ clientId, trainerId }: OfferHistoryProps) {
           filteredOffers.map((offer) => (
             <Card key={offer.id}>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
                     <CardTitle className="flex items-center gap-2">
                       {getStatusIcon(offer.status)}
-                      {offer.packageName}
+                      <span className="truncate">{offer.packageName}</span>
                     </CardTitle>
                     <CardDescription>
                       {formatCurrency(offer.amount, offer.currency)}
@@ -326,7 +336,7 @@ export function OfferHistory({ clientId, trainerId }: OfferHistoryProps) {
                       • Created {formatDate(offer.createdAt)}
                     </CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <Badge variant={getStatusColor(offer.status)}>
                       {offer.status}
                     </Badge>
@@ -337,6 +347,16 @@ export function OfferHistory({ clientId, trainerId }: OfferHistoryProps) {
                     )}
                   </div>
                 </div>
+                {offer.discountPercent && offer.discountMonths && (
+                  <div className="flex items-center gap-2 mt-2 text-sm text-primary">
+                    <Percent className="size-3" />
+                    <span>
+                      {offer.discountPercent}% off for first{' '}
+                      {offer.discountMonths}{' '}
+                      {offer.discountMonths === 1 ? 'month' : 'months'}
+                    </span>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">

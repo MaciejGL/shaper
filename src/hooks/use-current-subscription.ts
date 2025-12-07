@@ -1,5 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 
+export interface PromotionalDiscount {
+  percentOff: number
+  monthsRemaining: number
+  endsAt: string
+  fullPriceAmount: number
+  discountedAmount: number
+  currency: string
+}
+
 export interface CurrentSubscription {
   hasPremiumAccess: boolean
   status:
@@ -24,6 +33,7 @@ export interface CurrentSubscription {
     stripeSubscriptionId?: string
     isCancelledButActive?: boolean
   } | null
+  promotionalDiscount?: PromotionalDiscount | null
   trial?: {
     isActive: boolean
     startDate: string

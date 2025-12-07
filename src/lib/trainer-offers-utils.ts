@@ -161,6 +161,9 @@ function createOfferItemFromPackage(
       : [],
     stripeLookupKey: packageItem.stripeLookupKey,
     quantity: packageItem.quantity,
+    // Custom discount applied by trainer
+    discountPercent: packageItem.discountPercent,
+    discountMonths: packageItem.discountMonths,
   }
 }
 

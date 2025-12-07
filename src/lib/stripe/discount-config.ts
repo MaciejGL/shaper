@@ -24,6 +24,7 @@ export const DISCOUNT_CONFIG = {
 export const DISCOUNT_TYPES = {
   IN_PERSON_COACHING_COMBO: 'in_person_coaching_combo',
   MEAL_TRAINING_BUNDLE: 'meal_training_bundle',
+  TRAINER_CUSTOM_DISCOUNT: 'trainer_custom_discount',
 } as const
 
 /**

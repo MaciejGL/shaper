@@ -1,10 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Stripe from 'stripe'
 
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { SUBSCRIPTION_HELPERS } from '@/lib/stripe/config'
+import { DISCOUNT_TYPES } from '@/lib/stripe/discount-config'
 import { getPremiumLookupKeys } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
+
+interface PromotionalDiscount {
+  percentOff: number
+  monthsRemaining: number
+  endsAt: string
+  fullPriceAmount: number
+  discountedAmount: number
+  currency: string
+}
+
+async function fetchPromotionalDiscount(
+  stripeSubscriptionId: string,
+): Promise<PromotionalDiscount | null> {
+  try {
+    const stripeSubscription = await stripe.subscriptions.retrieve(
+      stripeSubscriptionId,
+      { expand: ['discount.coupon'] },
+    )
+
+    const discount = stripeSubscription.discount
+    if (!discount?.coupon) return null
+
+    // Only return trainer custom discounts
+    if (
+      discount.coupon.metadata?.discountType !==
+      DISCOUNT_TYPES.TRAINER_CUSTOM_DISCOUNT
+    ) {
+      return null
+    }
+
+    const percentOff = discount.coupon.percent_off
+    if (!percentOff || !discount.end) return null
+
+    const now = new Date()
+    const discountEnd = new Date(discount.end * 1000)
+
+    // Check if discount is still active
+    if (discountEnd <= now) return null
+
+    // Calculate months remaining
+    const monthsRemaining = Math.ceil(
+      (discountEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30),
+    )
+
+    // Get current subscription price info
+    const subscriptionItem = stripeSubscription.items.data[0]
+    const price = subscriptionItem?.price as Stripe.Price | undefined
+    const fullPriceAmount = price?.unit_amount ?? 0
+    const discountedAmount = Math.round(
+      fullPriceAmount * (1 - percentOff / 100),
+    )
+    const currency = price?.currency ?? 'nok'
+
+    return {
+      percentOff,
+      monthsRemaining,
+      endsAt: discountEnd.toISOString(),
+      fullPriceAmount,
+      discountedAmount,
+      currency,
+    }
+  } catch (error) {
+    console.error('Failed to fetch promotional discount from Stripe:', error)
+    return null
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -238,6 +306,14 @@ export async function GET(request: NextRequest) {
       status = 'ACTIVE'
     }
 
+    // Fetch promotional discount from Stripe if subscription has stripeSubscriptionId
+    let promotionalDiscount: PromotionalDiscount | null = null
+    if (subscription.stripeSubscriptionId) {
+      promotionalDiscount = await fetchPromotionalDiscount(
+        subscription.stripeSubscriptionId,
+      )
+    }
+
     return NextResponse.json({
       hasPremiumAccess,
       status,
@@ -256,6 +332,7 @@ export async function GET(request: NextRequest) {
         stripeSubscriptionId: subscription.stripeSubscriptionId,
         isCancelledButActive,
       },
+      promotionalDiscount,
       trial: isInTrial
         ? {
             isActive: true,

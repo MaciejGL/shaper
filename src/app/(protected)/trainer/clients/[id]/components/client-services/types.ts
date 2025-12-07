@@ -42,6 +42,9 @@ export interface SelectedPackageItem {
   packageId: string
   quantity: number
   package: TrainerPackage
+  // Custom discount applied by trainer (for coaching subscriptions)
+  discountPercent?: number
+  discountMonths?: number
 }
 
 export interface SendOfferFormProps {
@@ -60,6 +63,11 @@ export interface BundleSummaryProps {
   clientName: string
   handleSendOffer: () => void
   isLoading: boolean
+  onUpdateDiscount?: (
+    packageId: string,
+    discountPercent?: number,
+    discountMonths?: number,
+  ) => void
 }
 
 export interface PackageCardProps {
