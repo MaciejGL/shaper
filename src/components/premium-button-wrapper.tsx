@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cloneElement, isValidElement } from 'react'
 
 import { useOpenUrl } from '@/hooks/use-open-url'
+import { usePaymentRules } from '@/hooks/use-payment-rules'
 import { cn } from '@/lib/utils'
 
 import { BiggyIcon } from './biggy-icon'
@@ -39,6 +40,7 @@ export function PremiumButtonWrapper({
   showIndicator = true,
 }: PremiumButtonWrapperProps) {
   const pathname = usePathname()
+  const rules = usePaymentRules()
   const { openUrl, isLoading } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
   })
@@ -87,18 +89,22 @@ export function PremiumButtonWrapper({
       <TooltipContent className="flex flex-col items-center gap-2 p-4">
         <BiggyIcon icon={Crown} variant="amber" size="xs" />
         <p className="font-medium text-amber-400 text-base">Premium feature</p>
-        <p className="text-xs">{tooltipText}</p>
+        <p className="text-xs">
+          {rules.canShowUpgradeUI ? tooltipText : rules.premiumGateText}
+        </p>
 
-        <Button
-          variant="gradient"
-          size="sm"
-          className="w-full mt-4"
-          onClick={handleViewPlans}
-          loading={isLoading}
-          disabled={isLoading}
-        >
-          Upgrade
-        </Button>
+        {rules.canShowUpgradeUI && (
+          <Button
+            variant="gradient"
+            size="sm"
+            className="w-full mt-4"
+            onClick={handleViewPlans}
+            loading={isLoading}
+            disabled={isLoading}
+          >
+            Upgrade
+          </Button>
+        )}
       </TooltipContent>
     </Tooltip>
   )

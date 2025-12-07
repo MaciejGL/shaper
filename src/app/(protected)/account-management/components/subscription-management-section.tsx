@@ -1,6 +1,6 @@
 'use client'
 
-import { CreditCard, ExternalLink } from 'lucide-react'
+import { CreditCard, ExternalLink, Lock } from 'lucide-react'
 import { useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { usePaymentRules } from '@/hooks/use-payment-rules'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 import { FreezeSubscriptionSection } from './freeze-subscription-section/freeze-subscription-section'
@@ -17,6 +18,7 @@ import { PremiumPricingSelector } from './premium-pricing-selector'
 
 export function SubscriptionManagementSection() {
   const { user } = useUser()
+  const rules = usePaymentRules()
   const {
     data: subscriptionData,
     isLoading: isLoadingSubscription,
@@ -269,17 +271,28 @@ export function SubscriptionManagementSection() {
         </>
       ) : (
         <>
-          {/* No subscription - show upgrade options directly */}
+          {/* No subscription - show upgrade options or companion mode message */}
           <div className="space-y-6">
-            <PremiumPricingSelector
-              hasPremium={subscriptionData?.hasPremiumAccess}
-              hasUsedTrial={subscriptionData?.hasUsedTrial}
-              isSubscribing={isSubscribing}
-              onSubscribe={handleSubscribe}
-              showTrialBadge={true}
-              showTermsLink={true}
-              onShowTerms={() => setShowTermsModal(true)}
-            />
+            {rules.canShowUpgradeUI ? (
+              <PremiumPricingSelector
+                hasPremium={subscriptionData?.hasPremiumAccess}
+                hasUsedTrial={subscriptionData?.hasUsedTrial}
+                isSubscribing={isSubscribing}
+                onSubscribe={handleSubscribe}
+                showTrialBadge={true}
+                showTermsLink={true}
+                onShowTerms={() => setShowTermsModal(true)}
+              />
+            ) : (
+              <Card className="bg-card-on-card">
+                <CardContent className="py-8 text-center space-y-4">
+                  <Lock className="size-8 mx-auto text-muted-foreground" />
+                  <p className="text-muted-foreground">
+                    {rules.premiumGateText}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Show billing portal access if user has previous Stripe subscription */}
             {hasStripeHistory && (

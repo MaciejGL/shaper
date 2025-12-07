@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 
 import { useUser } from '@/context/user-context'
 import { useOpenUrl } from '@/hooks/use-open-url'
+import { usePaymentRules } from '@/hooks/use-payment-rules'
 import { cn } from '@/lib/utils'
 
 import { Badge } from './ui/badge'
@@ -30,6 +31,7 @@ export function PremiumGate({
 }: PremiumGateProps) {
   const pathname = usePathname()
   const { hasPremium, isLoading, user } = useUser()
+  const rules = usePaymentRules()
   const { openUrl, isLoading: isOpeningUrl } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
   })
@@ -110,17 +112,23 @@ export function PremiumGate({
           )}
 
           <div className="pt-4 space-y-3">
-            <Button
-              onClick={handleViewPlans}
-              className="w-full"
-              size={compact ? 'sm' : 'lg'}
-              iconStart={<Crown />}
-              variant="gradient"
-              loading={isOpeningUrl}
-              disabled={isOpeningUrl}
-            >
-              Upgrade
-            </Button>
+            {rules.canShowUpgradeUI ? (
+              <Button
+                onClick={handleViewPlans}
+                className="w-full"
+                size={compact ? 'sm' : 'lg'}
+                iconStart={<Crown />}
+                variant="gradient"
+                loading={isOpeningUrl}
+                disabled={isOpeningUrl}
+              >
+                Upgrade
+              </Button>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                {rules.premiumGateText}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
