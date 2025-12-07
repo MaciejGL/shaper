@@ -3,6 +3,7 @@
 import { Crown, Mail } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { cloneElement, isValidElement, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useOpenUrl } from '@/hooks/use-open-url'
 import { usePaymentRules } from '@/hooks/use-payment-rules'
@@ -73,9 +74,12 @@ export function PremiumButtonWrapper({
       })
       if (response.ok) {
         setEmailSent(true)
+      } else {
+        toast.error('Failed to send email. Please try again.')
       }
     } catch (error) {
       console.error('Failed to send access email:', error)
+      toast.error('Failed to send email. Please try again.')
     } finally {
       setIsSendingEmail(false)
     }

@@ -9,15 +9,17 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { reportExternalTransaction } from '@/lib/external-reporting'
 import { notifyTrainerSubscriptionPayment } from '@/lib/notifications/push-notification-service'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { createTasksForDelivery } from '@/server/models/service-task/factory'
 
 import { StripeServiceType } from '../../enums'
 
-// Extend Stripe Invoice type to include subscription field that exists in API
+// Extend Stripe Invoice type to include fields that exist in API
 interface InvoiceWithSubscription extends Stripe.Invoice {
   subscription?: string | null
+  payment_intent?: string | Stripe.PaymentIntent | null
 }
 
 export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
@@ -65,6 +67,34 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     console.info(
       `✅ Payment processed for subscription ${subscriptionId} (invoice: ${invoice.id})`,
     )
+
+    // Report to Apple/Google if required for this platform + region
+    const packageTemplate = await prisma.packageTemplate.findUnique({
+      where: { id: subscription.packageId },
+    })
+    if (packageTemplate?.stripeLookupKey && subscription.stripeSubscriptionId) {
+      // Get platform from Stripe subscription metadata
+      const { stripe } = await import('@/lib/stripe/stripe')
+      const stripeSub = await stripe.subscriptions.retrieve(
+        subscription.stripeSubscriptionId,
+      )
+      const platform =
+        (stripeSub.metadata?.platform as 'ios' | 'android') || null
+
+      await reportExternalTransaction({
+        userId: subscription.userId,
+        stripeTransactionId: invoice.payment_intent as string,
+        amount: invoice.amount_paid || 0,
+        currency: invoice.currency || 'usd',
+        stripeLookupKey:
+          packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
+        transactionType:
+          invoice.billing_reason === 'subscription_create'
+            ? 'purchase'
+            : 'renewal',
+        platform,
+      })
+    }
 
     // Notify trainer about subscription payment
     if (
@@ -237,25 +267,25 @@ async function createRecurringServiceDelivery(
 
     // Create new service delivery with recurring tasks (meetings only, not plans)
     const delivery = await prisma.serviceDelivery.create({
-        data: {
+      data: {
         stripePaymentIntentId: invoice.id!,
-          trainerId: subscription.trainerId!,
-          clientId: subscription.userId,
-          serviceType: ServiceType.COACHING_COMPLETE,
-          packageName: `${packageTemplate.name} - ${monthYear}`,
-          quantity: 1,
-          status: 'PENDING',
-          metadata: {
-            subscriptionId: subscription.id,
-            stripeSubscriptionId: subscription.stripeSubscriptionId,
-            invoiceId: invoice.id,
-            billingPeriodStart: invoice.period_start,
-            billingPeriodEnd: invoice.period_end,
-            recurringPayment: true,
-            monthYear,
-          } as Prisma.InputJsonValue,
-        },
-      })
+        trainerId: subscription.trainerId!,
+        clientId: subscription.userId,
+        serviceType: ServiceType.COACHING_COMPLETE,
+        packageName: `${packageTemplate.name} - ${monthYear}`,
+        quantity: 1,
+        status: 'PENDING',
+        metadata: {
+          subscriptionId: subscription.id,
+          stripeSubscriptionId: subscription.stripeSubscriptionId,
+          invoiceId: invoice.id,
+          billingPeriodStart: invoice.period_start,
+          billingPeriodEnd: invoice.period_end,
+          recurringPayment: true,
+          monthYear,
+        } as Prisma.InputJsonValue,
+      },
+    })
 
     // Create ONLY recurring tasks (meetings) - plans are one-time and already delivered
     await createTasksForDelivery(
@@ -264,9 +294,9 @@ async function createRecurringServiceDelivery(
       true, // isRecurringPayment = true -> only creates meeting tasks
     )
 
-      console.info(
-        `✅ Created recurring service delivery for ${monthYear}: ${delivery.id} (Client: ${subscription.userId}, Trainer: ${subscription.trainerId})`,
-      )
+    console.info(
+      `✅ Created recurring service delivery for ${monthYear}: ${delivery.id} (Client: ${subscription.userId}, Trainer: ${subscription.trainerId})`,
+    )
   } catch (error) {
     console.error('Failed to create recurring service delivery:', error)
   }

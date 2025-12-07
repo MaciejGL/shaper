@@ -1,9 +1,10 @@
 'use client'
 
-import { CreditCard, ExternalLink, Lock } from 'lucide-react'
+import { CreditCard, ExternalLink, Lock, Mail } from 'lucide-react'
 import { useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { CoachingServiceTerms } from '@/components/subscription/coaching-service-terms'
 import { PromotionalDiscountBanner } from '@/components/subscription/promotional-discount-banner'
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,7 @@ import { PremiumPricingSelector } from './premium-pricing-selector'
 export function SubscriptionManagementSection() {
   const { user } = useUser()
   const rules = usePaymentRules()
+  const { isNativeApp, platform } = useMobileApp()
   const {
     data: subscriptionData,
     isLoading: isLoadingSubscription,
@@ -30,6 +32,8 @@ export function SubscriptionManagementSection() {
 
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [isSubscribing, setIsSubscribing] = useState(false)
+  const [isSendingBillingLink, setIsSendingBillingLink] = useState(false)
+  const [billingLinkSent, setBillingLinkSent] = useState(false)
 
   const handleSubscribe = async (lookupKey: string) => {
     if (!user?.id) return
@@ -47,6 +51,7 @@ export function SubscriptionManagementSection() {
           lookupKey,
           returnUrl: `${window.location.origin}/account-management`,
           cancelUrl: `${window.location.origin}/account-management`,
+          platform: isNativeApp ? platform : undefined,
         }),
       })
 
@@ -83,6 +88,24 @@ export function SubscriptionManagementSection() {
       window.open(url, '_blank', 'noopener,noreferrer')
     } catch (error) {
       console.error('Failed to open billing portal:', error)
+    }
+  }
+
+  const handleSendBillingLink = async () => {
+    setIsSendingBillingLink(true)
+    try {
+      const response = await fetch('/api/account/send-access-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'access' }),
+      })
+      if (response.ok) {
+        setBillingLinkSent(true)
+      }
+    } catch (error) {
+      console.error('Failed to send billing link:', error)
+    } finally {
+      setIsSendingBillingLink(false)
     }
   }
 
@@ -258,15 +281,32 @@ export function SubscriptionManagementSection() {
 
           {/* Manage Billing Button */}
           <div className="flex flex-col gap-2">
-            <Button
-              onClick={handleManageSubscription}
-              variant="secondary"
-              className="w-full"
-              iconStart={<CreditCard />}
-              iconEnd={<ExternalLink />}
-            >
-              Manage Billing & Payment
-            </Button>
+            {rules.canLinkToPayment ? (
+              <Button
+                onClick={handleManageSubscription}
+                variant="secondary"
+                className="w-full"
+                iconStart={<CreditCard />}
+                iconEnd={<ExternalLink />}
+              >
+                Manage Billing & Payment
+              </Button>
+            ) : billingLinkSent ? (
+              <p className="text-sm text-green-600 text-center py-2">
+                Billing link sent to your email
+              </p>
+            ) : (
+              <Button
+                onClick={handleSendBillingLink}
+                variant="secondary"
+                className="w-full"
+                iconStart={<Mail />}
+                loading={isSendingBillingLink}
+                disabled={isSendingBillingLink}
+              >
+                Send billing link to my email
+              </Button>
+            )}
           </div>
         </>
       ) : (

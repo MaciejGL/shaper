@@ -1,8 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { sendCheckinNotifications } from '@/lib/notifications/checkin-notification-service'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Verify cron secret
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return new NextResponse('Unauthorized', { status: 401 })
+  }
+
   try {
     console.info('🔔 Starting check-in notification cron job...')
 

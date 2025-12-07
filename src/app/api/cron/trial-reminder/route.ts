@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { prisma } from '@/lib/_db'
 import { sendEmail } from '@/lib/email/send-mail'
@@ -6,7 +6,13 @@ import { sendEmail } from '@/lib/email/send-mail'
 // Hours after signup to send trial reminder (3 days = 72 hours)
 const REMINDER_HOURS = 72
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Verify cron secret
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return new NextResponse('Unauthorized', { status: 401 })
+  }
+
   try {
     console.info('📧 Starting trial reminder cron job...')
 

@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { reportRefund } from '@/lib/external-reporting'
 
 /**
  * Handles charge.refunded webhook
@@ -85,6 +86,16 @@ export async function handleChargeRefunded(charge: Stripe.Charge) {
     console.info(
       `✅ Processed refund for charge ${charge.id}: ${refundAmount / 100} ${currency} refunded`,
     )
+
+    // Report refund to Apple/Google for Premium subscriptions
+    if (deliveries[0]?.client.id) {
+      await reportRefund({
+        userId: deliveries[0].client.id,
+        chargeId: charge.id,
+        amount: refundAmount,
+        currency,
+      })
+    }
   } catch (error) {
     console.error('Error handling charge refunded:', error)
   }

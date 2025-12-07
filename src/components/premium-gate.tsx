@@ -3,6 +3,7 @@
 import { Crown, Lock, Mail, Sparkles } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { useUser } from '@/context/user-context'
 import { useOpenUrl } from '@/hooks/use-open-url'
@@ -62,9 +63,12 @@ export function PremiumGate({
       })
       if (response.ok) {
         setEmailSent(true)
+      } else {
+        toast.error('Failed to send email. Please try again.')
       }
     } catch (error) {
       console.error('Failed to send access email:', error)
+      toast.error('Failed to send email. Please try again.')
     } finally {
       setIsSendingEmail(false)
     }
