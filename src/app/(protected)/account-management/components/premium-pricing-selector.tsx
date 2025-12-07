@@ -89,30 +89,36 @@ export function PremiumPricingSelector({
   const selectedPrice = isYearly ? yearlyPrice : monthlyPrice
   const selectedLookupKey = selectedPrice?.lookupKey || ''
 
-  const calculateMonthlyEquivalent = (yearlyTotal: number) => {
-    return (yearlyTotal / 12).toFixed(2)
-  }
-
-  const getYearlyTotal = (formattedPrice: string) => {
+  // Extract clean integer price from Stripe formatted string (e.g., "NOK 149.00" -> 149)
+  const extractPrice = (formattedPrice: string): number => {
     const match = formattedPrice.match(/[\d,]+/)
     if (!match) return 0
-    return parseFloat(match[0].replace(',', ''))
+    return Math.round(parseFloat(match[0].replace(',', '')))
   }
 
-  const calculateSavingsPercentage = () => {
+  // Format price as clean integer with locale separators
+  const formatCleanPrice = (formattedPrice: string): string => {
+    return extractPrice(formattedPrice).toLocaleString()
+  }
+
+  // Calculate monthly equivalent from yearly price
+  const calculateMonthlyEquivalent = (yearlyTotal: number): string => {
+    return Math.round(yearlyTotal / 12).toLocaleString()
+  }
+
+  // Calculate concrete savings amount in NOK
+  const calculateSavingsAmount = (): number | null => {
     if (!monthlyPrice?.formattedPrice || !yearlyPrice?.formattedPrice) {
       return null
     }
 
-    const monthlyTotal = getYearlyTotal(monthlyPrice.formattedPrice)
-    const yearlyTotal = getYearlyTotal(yearlyPrice.formattedPrice)
+    const monthlyTotal = extractPrice(monthlyPrice.formattedPrice)
+    const yearlyTotal = extractPrice(yearlyPrice.formattedPrice)
     const yearlyAtMonthlyRate = monthlyTotal * 12
 
     if (yearlyAtMonthlyRate === 0) return null
 
-    const savings =
-      ((yearlyAtMonthlyRate - yearlyTotal) / yearlyAtMonthlyRate) * 100
-    return Math.round(savings)
+    return yearlyAtMonthlyRate - yearlyTotal
   }
 
   if (isLoadingPrices) {
@@ -180,33 +186,40 @@ export function PremiumPricingSelector({
                 {isYearly && yearlyPrice ? (
                   <>
                     <div className="text-3xl font-bold">
-                      NOK{' '}
-                      {calculateMonthlyEquivalent(
-                        getYearlyTotal(yearlyPrice.formattedPrice || '1149'),
-                      )}
+                      NOK {formatCleanPrice(yearlyPrice.formattedPrice || '0')}
                       <span className="text-lg font-normal text-muted-foreground">
-                        /month
+                        {' '}
+                        /year
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Billed annually {yearlyPrice.formattedPrice}/year
+                      ≈ NOK{' '}
+                      {calculateMonthlyEquivalent(
+                        extractPrice(yearlyPrice.formattedPrice || '0'),
+                      )}
+                      /month (billed annually)
                     </p>
-                    {calculateSavingsPercentage() && (
+                    {calculateSavingsAmount() && (
                       <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                        Save {calculateSavingsPercentage()}% compared to monthly
+                        Save NOK {calculateSavingsAmount()?.toLocaleString()} per
+                        year vs monthly
                       </p>
                     )}
                   </>
                 ) : (
                   <>
                     <div className="text-3xl font-bold">
-                      {monthlyPrice?.formattedPrice || 'NOK 149.00'}
+                      NOK{' '}
+                      {formatCleanPrice(
+                        monthlyPrice?.formattedPrice || 'NOK 149',
+                      )}
                       <span className="text-lg font-normal text-muted-foreground">
+                        {' '}
                         /month
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Billed monthly, cancel anytime
+                      Billed monthly. Cancel anytime.
                     </p>
                   </>
                 )}
@@ -235,17 +248,17 @@ export function PremiumPricingSelector({
                   ? 'Already Subscribed'
                   : hasUsedTrial
                     ? 'Subscribe Now'
-                    : 'Start Free Trial'}
+                    : `Start ${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day free trial`}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">
-                {hasUsedTrial
-                  ? isYearly && yearlyPrice
-                    ? `${yearlyPrice.formattedPrice}/year. Cancel anytime.`
-                    : `${monthlyPrice?.formattedPrice || 'NOK 149.00'}/month. Cancel anytime.`
-                  : isYearly && yearlyPrice
-                    ? `${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day free trial, then ${yearlyPrice.formattedPrice}/year. Cancel anytime.`
-                    : `${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day free trial, then ${monthlyPrice?.formattedPrice || 'NOK 149.00'}/month. Cancel anytime.`}
+                {isYearly && yearlyPrice
+                  ? hasUsedTrial
+                    ? `NOK ${formatCleanPrice(yearlyPrice.formattedPrice)}/year. Cancel anytime.`
+                    : `NOK ${formatCleanPrice(yearlyPrice.formattedPrice)}/year after trial. Cancel anytime.`
+                  : hasUsedTrial
+                    ? `NOK ${formatCleanPrice(monthlyPrice?.formattedPrice || 'NOK 149')}/month. Cancel anytime.`
+                    : `NOK ${formatCleanPrice(monthlyPrice?.formattedPrice || 'NOK 149')}/month after trial. Cancel anytime.`}
               </p>
             </CardContent>
           </Card>
