@@ -14,6 +14,10 @@
     {
       "path": "/api/cron/meeting-reminders",
       "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/trial-reminder",
+      "schedule": "0 * * * *"
     }
   ],
   "build": {

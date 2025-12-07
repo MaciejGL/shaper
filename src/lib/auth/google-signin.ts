@@ -9,6 +9,7 @@
 import { Account, Profile } from 'next-auth'
 
 import { prisma } from '@/lib/db'
+import { sendEmail } from '@/lib/email/send-mail'
 import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
 
 import {
@@ -22,6 +23,8 @@ import {
 } from '../google-profile-mapper'
 
 import { GoogleAccount, GoogleJWTProfile } from './types'
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hypro.app'
 
 /**
  * Maps NextAuth Google JWT profile to our GoogleProfile interface
@@ -152,6 +155,16 @@ export async function handleGoogleSignIn(
       }).catch((error) => {
         console.error('Failed to notify admin about new user:', error)
       })
+
+      // Send welcome email to new user
+      sendEmail
+        .newUserWelcome(newUser.email, {
+          userName: sanitizedProfile.given_name || null,
+          upgradeUrl: `${BASE_URL}/account-management`,
+        })
+        .catch((error) => {
+          console.error('Failed to send welcome email:', error)
+        })
 
       return true
     }

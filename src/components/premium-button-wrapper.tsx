@@ -1,8 +1,8 @@
 'use client'
 
-import { Crown } from 'lucide-react'
+import { Crown, Mail } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { cloneElement, isValidElement } from 'react'
+import { cloneElement, isValidElement, useState } from 'react'
 
 import { useOpenUrl } from '@/hooks/use-open-url'
 import { usePaymentRules } from '@/hooks/use-payment-rules'
@@ -44,6 +44,8 @@ export function PremiumButtonWrapper({
   const { openUrl, isLoading } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
   })
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
 
   // If user has premium, render button without wrapper
   if (hasPremium) {
@@ -59,6 +61,24 @@ export function PremiumButtonWrapper({
     openUrl(
       `/account-management/offers?redirectUrl=${encodeURIComponent(pathname)}`,
     )
+  }
+
+  const handleSendAccessEmail = async () => {
+    setIsSendingEmail(true)
+    try {
+      const response = await fetch('/api/account/send-access-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'premium' }),
+      })
+      if (response.ok) {
+        setEmailSent(true)
+      }
+    } catch (error) {
+      console.error('Failed to send access email:', error)
+    } finally {
+      setIsSendingEmail(false)
+    }
   }
 
   // Clone the button element and add relative class + crown badge
@@ -93,7 +113,7 @@ export function PremiumButtonWrapper({
           {rules.canShowUpgradeUI ? tooltipText : rules.premiumGateText}
         </p>
 
-        {rules.canShowUpgradeUI && (
+        {rules.canShowUpgradeUI ? (
           <Button
             variant="gradient"
             size="sm"
@@ -103,6 +123,20 @@ export function PremiumButtonWrapper({
             disabled={isLoading}
           >
             Upgrade
+          </Button>
+        ) : emailSent ? (
+          <p className="text-xs text-green-600 mt-2">Link sent to your email</p>
+        ) : (
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full mt-4"
+            onClick={handleSendAccessEmail}
+            loading={isSendingEmail}
+            disabled={isSendingEmail}
+            iconStart={<Mail />}
+          >
+            Get access via email
           </Button>
         )}
       </TooltipContent>

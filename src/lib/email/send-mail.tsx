@@ -2,15 +2,18 @@
 import { render } from '@react-email/render'
 
 import { resend } from './resend'
+import { AccessLinkEmail } from './templates/access-link-email'
 import { CoachingScheduledToEndEmail } from './templates/coaching-scheduled-to-end-email'
 import { DisputeAlertEmail } from './templates/dispute-alert-email'
 import { EmailChangeOtp } from './templates/email-change-otp'
+import { NewUserWelcomeEmail } from './templates/new-user-welcome-email'
 import { OfferExpiredEmail } from './templates/offer-expired-email'
 import { OtpEmail } from './templates/otp-email'
 import {
   PaymentReceivedEmail,
   PaymentReceivedEmailProps,
 } from './templates/payment-received-email'
+import { PremiumAccessEmail } from './templates/premium-access-email'
 import { RefundNotificationEmail } from './templates/refund-notification-email'
 import {
   GracePeriodEndingEmail,
@@ -27,6 +30,7 @@ import {
 import { SubscriptionUpgradeCreditEmail } from './templates/subscription-upgrade-credit-email'
 import { TeamInvitationEmail } from './templates/team-invitation-email'
 import { TrainerOfferEmail } from './templates/trainer-offer-email'
+import { TrialReminderEmail } from './templates/trial-reminder-email'
 
 const NO_REPLY_EMAIL = 'noreply@hypro.app'
 const NO_REPLY_NAME = 'Hypro'
@@ -562,6 +566,106 @@ export const sendEmail = {
       from: FROM_EMAIL,
       to,
       subject: `Your coaching with ${trainerName} is scheduled to end`,
+      html,
+    })
+  },
+
+  // Access link email (for account management)
+  accessLink: async (
+    to: string,
+    {
+      userName,
+      accessUrl,
+      isSubscriber,
+    }: {
+      userName?: string | null
+      accessUrl: string
+      isSubscriber: boolean
+    },
+  ): Promise<void> => {
+    const html = await render(
+      <AccessLinkEmail
+        userName={userName}
+        accessUrl={accessUrl}
+        isSubscriber={isSubscriber}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: isSubscriber
+        ? 'Your subscription management link'
+        : 'Your account access link',
+      html,
+    })
+  },
+
+  // Premium access email (for upgrade from companion mode)
+  premiumAccess: async (
+    to: string,
+    {
+      userName,
+      upgradeUrl,
+    }: {
+      userName?: string | null
+      upgradeUrl: string
+    },
+  ): Promise<void> => {
+    const html = await render(
+      <PremiumAccessEmail userName={userName} upgradeUrl={upgradeUrl} />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: 'Your premium access link',
+      html,
+    })
+  },
+
+  // New user welcome email
+  newUserWelcome: async (
+    to: string,
+    {
+      userName,
+      upgradeUrl,
+    }: {
+      userName?: string | null
+      upgradeUrl: string
+    },
+  ): Promise<void> => {
+    const html = await render(
+      <NewUserWelcomeEmail userName={userName} upgradeUrl={upgradeUrl} />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: 'Welcome to Hypro - Start your fitness journey',
+      html,
+    })
+  },
+
+  // Trial reminder email (sent 3 days after signup if no subscription)
+  trialReminder: async (
+    to: string,
+    {
+      userName,
+      upgradeUrl,
+    }: {
+      userName?: string | null
+      upgradeUrl: string
+    },
+  ): Promise<void> => {
+    const html = await render(
+      <TrialReminderEmail userName={userName} upgradeUrl={upgradeUrl} />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: 'Your free trial is waiting',
       html,
     })
   },
