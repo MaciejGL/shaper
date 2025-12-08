@@ -1,12 +1,15 @@
 'use client'
 
 import { ArrowRight, Salad } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
+import { ComingSoonCard } from '@/components/coming-soon-card'
 import { EmptyStateCard } from '@/components/empty-state-card'
 import { ExtendHeader } from '@/components/extend-header'
 import { MacroCard } from '@/components/macro-card/macro-card'
-import { ButtonLink } from '@/components/ui/button-link'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useUser } from '@/context/user-context'
 import {
@@ -14,12 +17,19 @@ import {
   useGetMyNutritionPlanQuery,
   useGetMyNutritionPlansQuery,
 } from '@/generated/graphql-client'
+import { useTrainerServiceAccess } from '@/hooks/use-trainer-service-access'
 
 import { NutritionPlanSelector } from './components/nutrition-plan-selector'
 import { NutritionPlanViewer } from './components/nutrition-plan-viewer'
 
 export default function NutritionPage() {
+  const router = useRouter()
   const { user } = useUser()
+  const {
+    canAccessTrainerFeatures,
+    isTrainerServiceEnabled,
+    isLoading: isAccessLoading,
+  } = useTrainerServiceAccess()
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const { data, isLoading } = useGetMyMacroTargetsQuery()
   const { data: nutritionPlansData, isLoading: isNutritionPlansLoading } =
@@ -39,6 +49,14 @@ export default function NutritionPage() {
     setSelectedPlanId(planId)
   }
 
+  const handleFindTrainer = () => {
+    if (!isTrainerServiceEnabled) {
+      toast.info('Trainer services are coming soon to your region.')
+      return
+    }
+    router.push('/fitspace/explore?tab=trainers')
+  }
+
   const hasPlans = (nutritionPlansData?.nutritionPlans.length ?? 0) > 0
   const hasMacroTargets =
     macroTargets?.calories ||
@@ -47,23 +65,23 @@ export default function NutritionPage() {
     macroTargets?.fat
 
   const isLoadingAll =
-    isLoading || isNutritionPlansLoading || isNutritionPlanLoading
+    isLoading ||
+    isNutritionPlansLoading ||
+    isNutritionPlanLoading ||
+    isAccessLoading
 
-  // if (isLoadingAll) {
-  //   return (
-  //     <ExtendHeader
-  //       headerChildren={
-  //         <div className="dark space-y-6 pt-4 pb-4">
-  //           <LoadingSkeleton count={1} cardVariant="tertiary" />
-  //         </div>
-  //       }
-  //     >
-  //       <div className="container-hypertro mx-auto space-y-4">
-  //         <LoadingSkeleton count={4} />
-  //       </div>
-  //     </ExtendHeader>
-  //   )
-  // }
+  // Show Coming Soon if no trainer relationship and service disabled
+  if (!isLoadingAll && !canAccessTrainerFeatures) {
+    return (
+      <div className="pt-4 px-4">
+        <ComingSoonCard
+          title="Nutrition Plans Coming Soon"
+          description="Nutrition planning services are not yet available in your region. We're working to bring this feature to you soon."
+          icon={Salad}
+        />
+      </div>
+    )
+  }
 
   const showEmptyState = !hasMacroTargets && !hasPlans && !isLoadingAll
 
@@ -136,12 +154,9 @@ export default function NutritionPage() {
               icon={Salad}
               cta={
                 !user?.trainerId && (
-                  <ButtonLink
-                    href="/fitspace/explore?tab=trainers"
-                    iconEnd={<ArrowRight />}
-                  >
+                  <Button iconEnd={<ArrowRight />} onClick={handleFindTrainer}>
                     Find a Trainer
-                  </ButtonLink>
+                  </Button>
                 )
               }
             />

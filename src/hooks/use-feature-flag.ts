@@ -7,6 +7,7 @@ import { getPostHogInstance } from '@/lib/posthog'
 
 export const FEATURE_FLAGS = {
   teams: 'teams-feature',
+  trainersService: 'trainers-service',
 }
 
 /**
