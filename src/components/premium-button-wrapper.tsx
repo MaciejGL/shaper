@@ -37,7 +37,7 @@ interface PremiumButtonWrapperProps {
 export function PremiumButtonWrapper({
   children,
   hasPremium,
-  tooltipText = 'Premium feature required',
+  tooltipText = 'Requires additional access',
   showIndicator = true,
 }: PremiumButtonWrapperProps) {
   const pathname = usePathname()
@@ -75,6 +75,7 @@ export function PremiumButtonWrapper({
       })
       if (response.ok) {
         setEmailSent(true)
+        toast.success('Information sent to your email!')
       } else {
         toast.error('Failed to send email. Please try again.')
       }
@@ -113,7 +114,9 @@ export function PremiumButtonWrapper({
       </TooltipTrigger>
       <TooltipContent className="flex flex-col items-center gap-2 p-4">
         <BiggyIcon icon={Crown} variant="amber" size="xs" />
-        <p className="font-medium text-amber-400 text-base">Premium feature</p>
+        <p className="font-medium text-amber-400 text-base">
+          Requires additional access
+        </p>
         <p className="text-xs">
           {rules.canShowUpgradeUI ? tooltipText : rules.premiumGateText}
         </p>
@@ -141,7 +144,7 @@ export function PremiumButtonWrapper({
             disabled={isSendingEmail}
             iconStart={<Mail />}
           >
-            Get access via email
+            Get details by email
           </Button>
         )}
       </TooltipContent>

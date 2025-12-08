@@ -72,14 +72,17 @@ export const EU_COUNTRIES = [
   'SE',
 ] as const
 
-export function getRegionFromTimezone(timezone: string | null | undefined): string {
+export function getRegionFromTimezone(
+  timezone: string | null | undefined,
+): string {
   if (!timezone) return 'DEFAULT'
 
   const country = TIMEZONE_TO_COUNTRY[timezone]
   if (country) {
     if (country === 'US') return 'US'
     if (country === 'NO') return 'NO'
-    if (EU_COUNTRIES.includes(country as (typeof EU_COUNTRIES)[number])) return 'EU'
+    if (EU_COUNTRIES.includes(country as (typeof EU_COUNTRIES)[number]))
+      return 'EU'
   }
 
   return 'DEFAULT'
@@ -100,7 +103,7 @@ const COMPANION_MODE: PaymentRule = {
   canShowPricing: false,
   canLinkToPayment: false,
   paymentModel: 'companion',
-  premiumGateText: 'Subscription required. Not available for purchase in the app.',
+  premiumGateText: 'Not available for purchase in the app.',
 }
 
 export const PAYMENT_RULES: Record<string, Record<Platform, PaymentRule>> = {
@@ -132,4 +135,3 @@ export const PAYMENT_RULES: Record<string, Record<Platform, PaymentRule>> = {
     web: FULL_MODE, // Web is always safe
   },
 }
-

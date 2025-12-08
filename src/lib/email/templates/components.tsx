@@ -182,11 +182,11 @@ export const EmailFooter = ({
   address,
   unsubscribeUrl,
 }: EmailFooterProps) => (
-  <tr>
+  <tr style={{ backgroundColor: theme.colors.background }}>
     <td
       style={{
         padding: '32px 40px',
-        backgroundColor: '#f8fafc',
+        backgroundColor: theme.colors.background,
         borderTop: `1px solid ${theme.colors.border}`,
         textAlign: 'center',
       }}

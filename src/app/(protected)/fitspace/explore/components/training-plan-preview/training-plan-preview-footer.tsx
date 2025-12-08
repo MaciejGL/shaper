@@ -1,5 +1,6 @@
 import { Crown, Dumbbell } from 'lucide-react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import { DrawerFooter } from '@/components/ui/drawer'
 import { useUser } from '@/context/user-context'
@@ -46,16 +47,21 @@ export function TrainingPlanPreviewFooter({
 
   return (
     <DrawerFooter className="border-t">
-      <Button
-        className="w-full"
-        size="lg"
-        onClick={handleAddPlan}
-        disabled={isLoading}
-        loading={isLoading}
-        iconStart={plan.premium ? <Crown /> : <Dumbbell />}
+      <PremiumButtonWrapper
+        hasPremium={hasPremium}
+        tooltipText="Requires additional access"
       >
-        Add to My Plans
-      </Button>
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={hasPremium ? handleAddPlan : undefined}
+          disabled={isLoading || !hasPremium}
+          loading={isLoading}
+          iconStart={plan.premium ? <Crown /> : <Dumbbell />}
+        >
+          Add to My Plans
+        </Button>
+      </PremiumButtonWrapper>
     </DrawerFooter>
   )
 }

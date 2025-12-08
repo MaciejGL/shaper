@@ -344,7 +344,7 @@ export function CheckinScheduleSection({
             <div className="flex gap-2">
               <PremiumButtonWrapper
                 hasPremium={hasPremium}
-                tooltipText="Premium feature - Upgrade to complete check-ins"
+                tooltipText="Requires additional access"
               >
                 <Button
                   onClick={() => setShowCheckinDrawer(true)}

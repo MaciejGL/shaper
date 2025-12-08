@@ -64,6 +64,7 @@ export function PremiumGate({
       })
       if (response.ok) {
         setEmailSent(true)
+        toast.success('Access link sent to your email!')
       } else {
         toast.error('Failed to send email. Please try again.')
       }
@@ -97,7 +98,7 @@ export function PremiumGate({
           )}
           <CardTitle className="flex items-center justify-center gap-2">
             <Crown className="w-5 h-5 text-amber-600" />
-            Premium Feature
+            Requires additional access
           </CardTitle>
           {!compact && (
             <Badge variant="outline" className="w-fit mx-auto">
@@ -139,17 +140,17 @@ export function PremiumGate({
 
           <div className="pt-4 space-y-3">
             {rules.canShowUpgradeUI ? (
-            <Button
-              onClick={handleViewPlans}
-              className="w-full"
-              size={compact ? 'sm' : 'lg'}
-              iconStart={<Crown />}
-              variant="gradient"
-              loading={isOpeningUrl}
-              disabled={isOpeningUrl}
-            >
-              Upgrade
-            </Button>
+              <Button
+                onClick={handleViewPlans}
+                className="w-full"
+                size={compact ? 'sm' : 'lg'}
+                iconStart={<Crown />}
+                variant="gradient"
+                loading={isOpeningUrl}
+                disabled={isOpeningUrl}
+              >
+                Upgrade
+              </Button>
             ) : (
               <>
                 <p className="text-muted-foreground text-sm">
@@ -157,7 +158,7 @@ export function PremiumGate({
                 </p>
                 {emailSent ? (
                   <p className="text-sm text-green-600">
-                    Access link sent to your email
+                    Details sent to your email
                   </p>
                 ) : (
                   <Button
@@ -169,7 +170,7 @@ export function PremiumGate({
                     loading={isSendingEmail}
                     disabled={isSendingEmail}
                   >
-                    Get access via email
+                    Get details by email
                   </Button>
                 )}
               </>
