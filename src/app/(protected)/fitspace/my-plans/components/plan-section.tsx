@@ -14,6 +14,7 @@ import {
   CarouselDots,
   CarouselItem,
 } from '@/components/ui/carousel'
+import { useTrainerServiceAccess } from '@/hooks/use-trainer-service-access'
 import { cn } from '@/lib/utils'
 
 import { UnifiedPlan } from '../types'
@@ -42,12 +43,17 @@ export function PlanSection({
   titleLink,
 }: PlanSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const { isTrainerServiceEnabled } = useTrainerServiceAccess()
 
   if (plans.length === 0 && !showEmptyState && !showPromoCard) {
     return null
   }
 
   if (plans.length === 0 && showEmptyState) {
+    const emptyStateDescription = isTrainerServiceEnabled
+      ? 'Explore ready-made plans or get a personalized one from a trainer'
+      : 'Explore ready-made workout plans to get started'
+
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-4">
@@ -57,7 +63,7 @@ export function PlanSection({
           <div className="flex-1 min-w-0">
             <h4 className="font-semibold text-sm mb-1">No Template Plans</h4>
             <p className="text-sm text-muted-foreground">
-              Explore ready-made plans or get a personalized one from a trainer
+              {emptyStateDescription}
             </p>
           </div>
           <ButtonLink

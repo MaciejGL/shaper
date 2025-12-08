@@ -1,10 +1,11 @@
 'use client'
 
-import { User } from 'lucide-react'
+import { User, Users } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { ClientSurveyModal } from '@/components/client-survey/client-survey-modal'
 import { useClientSurvey } from '@/components/client-survey/use-client-survey.hook'
+import { ComingSoonCard } from '@/components/coming-soon-card'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { ServiceInterestSelector } from '@/components/service-interest-selector/service-interest-selector'
 import { TrainerCard, TrainerData } from '@/components/trainer/trainer-card'
@@ -16,6 +17,7 @@ import {
   useGetFeaturedTrainersQuery,
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
+import { useTrainerServiceAccess } from '@/hooks/use-trainer-service-access'
 
 import { FeaturedTrainer } from './explore.client'
 
@@ -28,6 +30,9 @@ export function TrainersTab({
   initialTrainers = [],
   initialTrainerId,
 }: TrainersTabProps) {
+  const { isTrainerServiceEnabled, isLoading: isAccessLoading } =
+    useTrainerServiceAccess()
+
   const [selectedTrainer, setSelectedTrainer] =
     useState<FeaturedTrainer | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -45,7 +50,7 @@ export function TrainersTab({
     isSubmitting,
   } = useClientSurvey()
 
-  const { data, isLoading } = useGetFeaturedTrainersQuery(
+  const { data, isLoading: isTrainersLoading } = useGetFeaturedTrainersQuery(
     { limit: 30 },
     {
       initialData:
@@ -146,6 +151,8 @@ export function TrainersTab({
     openSurvey()
   }
 
+  const isLoading = isAccessLoading || isTrainersLoading
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -153,6 +160,17 @@ export function TrainersTab({
       </div>
     )
   }
+
+  if (!isTrainerServiceEnabled) {
+    return (
+      <ComingSoonCard
+        title="Trainer Services Coming Soon"
+        description="Personal training services are not yet available in your region. We're working to bring this feature to you soon."
+        icon={Users}
+      />
+    )
+  }
+
   return (
     <>
       <div className="space-y-3">

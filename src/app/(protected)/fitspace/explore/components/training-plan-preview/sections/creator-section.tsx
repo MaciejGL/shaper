@@ -4,6 +4,7 @@ import { ChevronRight, User } from 'lucide-react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
+import { useTrainerServiceAccess } from '@/hooks/use-trainer-service-access'
 import { cn } from '@/lib/utils'
 
 interface CreatorSectionProps {
@@ -17,6 +18,8 @@ interface CreatorSectionProps {
 }
 
 export function CreatorSection({ creator, onClick }: CreatorSectionProps) {
+  const { isTrainerServiceEnabled } = useTrainerServiceAccess()
+
   if (!creator) return null
 
   const creatorName =
@@ -26,18 +29,21 @@ export function CreatorSection({ creator, onClick }: CreatorSectionProps) {
   const initials =
     (creator.firstName?.charAt(0) || '') + (creator.lastName?.charAt(0) || '')
 
+  // Disable click when trainer service is not enabled
+  const isClickable = onClick && isTrainerServiceEnabled
+
   return (
     <div>
       <h3 className="font-semibold mb-2 text-sm">Created By</h3>
       <Card
         className={cn(
           'p-0',
-          onClick
+          isClickable
             ? 'cursor-pointer hover:border-primary/50 transition-colors'
             : '',
         )}
         variant="highlighted"
-        onClick={onClick}
+        onClick={isClickable ? onClick : undefined}
       >
         <CardContent className="p-3">
           <div className="flex items-center gap-3">
@@ -48,12 +54,14 @@ export function CreatorSection({ creator, onClick }: CreatorSectionProps) {
 
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm">{creatorName}</p>
-              <p className="text-xs text-muted-foreground">
-                View trainer profile
-              </p>
+              {isClickable && (
+                <p className="text-xs text-muted-foreground">
+                  View trainer profile
+                </p>
+              )}
             </div>
 
-            {onClick && <ChevronRight className="size-4" />}
+            {isClickable && <ChevronRight className="size-4" />}
           </div>
         </CardContent>
       </Card>
