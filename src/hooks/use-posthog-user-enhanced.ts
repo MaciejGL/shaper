@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { useUser } from '@/context/user-context'
 import { identifyUser, resetUser } from '@/lib/posthog'
 
@@ -14,7 +15,7 @@ export function usePostHogUserEnhanced() {
   const status = session.status
   const lastUserIdRef = useRef<string | null>(null)
   const [hasIdentified, setHasIdentified] = useState(false)
-
+  const { isNativeApp, platform: mobilePlatform } = useMobileApp()
   useEffect(() => {
     if (status === 'loading') {
       return // Wait for session to load
@@ -27,6 +28,12 @@ export function usePostHogUserEnhanced() {
     if (status === 'authenticated' && user?.email) {
       const userId = user.email
 
+      // Determine platform
+      let platform: 'ios' | 'android' | 'web' = 'web'
+      if (isNativeApp) {
+        platform = mobilePlatform === 'ios' ? 'ios' : 'android'
+      }
+
       // Only identify if it's a different user or first time
       if (lastUserIdRef.current !== userId || !hasIdentified) {
         // Simple user properties - just ID and email
@@ -37,6 +44,7 @@ export function usePostHogUserEnhanced() {
           firstName: user.profile?.firstName,
           lastName: user.profile?.lastName,
           role: user.role,
+          platform,
         }
 
         // Identify user with PostHog
