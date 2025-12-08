@@ -14,6 +14,7 @@ import {
   useAssignTemplateToSelfMutation,
 } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
+import { usePaymentRules } from '@/hooks/use-payment-rules'
 
 import { FreeWorkoutsTab } from './free-workouts-tab'
 import { TrainersTab } from './trainers-tab'
@@ -47,8 +48,10 @@ export function ExploreClient({
 }: ExploreClientProps) {
   const queryClient = useQueryClient()
   const router = useRouter()
+  const rules = usePaymentRules()
   const { openUrl } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
+    openInApp: rules.canLinkToPayment,
   })
 
   const [params, setParams] = useQueryStates(

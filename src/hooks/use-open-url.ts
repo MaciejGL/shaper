@@ -14,6 +14,12 @@ interface UseOpenUrlOptions {
    * @default 'Failed to open page'
    */
   errorMessage?: string
+  /**
+   * Whether to open the URL in-app instead of external browser
+   * Use this for full payment mode where in-app navigation is allowed
+   * @default false
+   */
+  openInApp?: boolean
 }
 
 /**
@@ -33,8 +39,11 @@ interface UseOpenUrlOptions {
  * ```
  */
 export function useOpenUrl(options: UseOpenUrlOptions = {}) {
-  const { withSessionToken = true, errorMessage = 'Failed to open page' } =
-    options
+  const {
+    withSessionToken = true,
+    errorMessage = 'Failed to open page',
+    openInApp = false,
+  } = options
 
   const { isNativeApp, openExternalUrl } = useMobileApp()
   const [isLoading, setIsLoading] = useState(false)
@@ -48,7 +57,13 @@ export function useOpenUrl(options: UseOpenUrlOptions = {}) {
         ? path
         : `${window.location.origin}${path.startsWith('/') ? path : `/${path}`}`
 
-      // If in native app and session token is needed
+      // If opening in-app, just navigate directly (no session token needed)
+      if (openInApp) {
+        window.location.href = targetUrl
+        return
+      }
+
+      // If in native app and session token is needed for external browser
       if (isNativeApp && withSessionToken) {
         try {
           const response = await fetch('/api/auth/generate-session-token', {

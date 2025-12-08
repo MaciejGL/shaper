@@ -6,6 +6,7 @@ import { useUser } from '@/context/user-context'
 import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 import { useOpenUrl } from '@/hooks/use-open-url'
+import { usePaymentRules } from '@/hooks/use-payment-rules'
 
 interface TrainingPlanPreviewFooterProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
@@ -19,8 +20,10 @@ export function TrainingPlanPreviewFooter({
   isAssigning,
 }: TrainingPlanPreviewFooterProps) {
   const { user } = useUser()
+  const rules = usePaymentRules()
   const { openUrl, isLoading: isOpeningUrl } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
+    openInApp: rules.canLinkToPayment,
   })
   const { data: subscriptionData } = useCurrentSubscription(user?.id)
   const hasPremium = subscriptionData?.hasPremiumAccess || false

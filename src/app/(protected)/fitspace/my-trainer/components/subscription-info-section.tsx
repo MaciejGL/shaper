@@ -11,6 +11,7 @@ import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 import { useOpenUrl } from '@/hooks/use-open-url'
+import { usePaymentRules } from '@/hooks/use-payment-rules'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 export function SubscriptionInfoSection() {
@@ -21,11 +22,13 @@ export function SubscriptionInfoSection() {
       lookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING, // Show only Premium Coaching subscription
     },
   )
+  const rules = usePaymentRules()
   const {
     openUrl: openAccountManagement,
     isLoading: isOpeningAccountManagement,
   } = useOpenUrl({
     errorMessage: 'Failed to open account management',
+    openInApp: rules.canLinkToPayment,
   })
 
   const handleManageSubscription = () => {

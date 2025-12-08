@@ -24,6 +24,7 @@ import {
   useGetPublicTrainingPlansQuery,
 } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
+import { usePaymentRules } from '@/hooks/use-payment-rules'
 import { cn } from '@/lib/utils'
 import { formatUserCount } from '@/utils/format-user-count'
 
@@ -49,8 +50,10 @@ export function TrainingPlansTab({
   >([])
   const queryClient = useQueryClient()
   const router = useRouter()
+  const rules = usePaymentRules()
   const { openUrl } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
+    openInApp: rules.canLinkToPayment,
   })
   // Fetch public training plans
   const { data, isLoading } = useGetPublicTrainingPlansQuery(

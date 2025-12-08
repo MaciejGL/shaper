@@ -5,10 +5,13 @@ import { ExternalLink, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useOpenUrl } from '@/hooks/use-open-url'
+import { usePaymentRules } from '@/hooks/use-payment-rules'
 
 export function ExternalAccountManagement() {
+  const rules = usePaymentRules()
   const { openUrl, isLoading } = useOpenUrl({
     errorMessage: 'Failed to open account management',
+    openInApp: rules.canLinkToPayment,
   })
 
   const handleOpenAccountManagement = () => {

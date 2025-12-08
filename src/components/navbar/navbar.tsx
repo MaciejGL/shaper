@@ -22,6 +22,7 @@ import {
   useNotificationsQuery,
 } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
+import { usePaymentRules } from '@/hooks/use-payment-rules'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
@@ -308,10 +309,12 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const [isOpen, setIsOpen] = useState(false)
   const isProduction = process.env.NODE_ENV === 'production'
   const queryClient = useQueryClient()
+  const rules = usePaymentRules()
 
   // Use the hook to properly handle session tokens
   const { openUrl: openAccountManagement } = useOpenUrl({
     errorMessage: 'Failed to open account management',
+    openInApp: rules.canLinkToPayment,
   })
 
   const handleLogout = async () => {
