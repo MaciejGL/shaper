@@ -1,7 +1,9 @@
 import { BookOpenCheckIcon, DumbbellIcon, User2Icon } from 'lucide-react'
+import { useMemo } from 'react'
 
 import { RadioButtons } from '@/components/radio-buttons'
 import { SectionIcon } from '@/components/ui/section-icon'
+import { useTrainerServiceAccess } from '@/hooks/use-trainer-service-access'
 
 interface TrainingChoiceStepProps {
   trainingChoice: string
@@ -12,6 +14,36 @@ export function TrainingChoiceStep({
   trainingChoice,
   onTrainingChoiceChange,
 }: TrainingChoiceStepProps) {
+  const { isTrainerServiceEnabled } = useTrainerServiceAccess()
+
+  const options = useMemo(() => {
+    const baseOptions = [
+      {
+        value: 'custom',
+        label: 'Build Custom Workout',
+        description: 'Create your own workout with our wizard',
+        icon: <SectionIcon size="sm" icon={DumbbellIcon} variant="green" />,
+      },
+      {
+        value: 'plans',
+        label: 'Browse Training Plans',
+        description: 'Explore structured workout programs',
+        icon: <SectionIcon size="sm" icon={BookOpenCheckIcon} variant="sky" />,
+      },
+    ]
+
+    if (isTrainerServiceEnabled) {
+      baseOptions.push({
+        value: 'trainer',
+        label: 'Find a Trainer',
+        description: 'Get personalized coaching',
+        icon: <SectionIcon size="sm" icon={User2Icon} variant="amber" />,
+      })
+    }
+
+    return baseOptions
+  }, [isTrainerServiceEnabled])
+
   return (
     <div className="text-center space-y-6">
       <div className="space-y-2">
@@ -26,30 +58,7 @@ export function TrainingChoiceStep({
           onValueChange={onTrainingChoiceChange}
           columns={1}
           itemClassName="h-auto text-left justify-start"
-          options={[
-            {
-              value: 'custom',
-              label: 'Build Custom Workout',
-              description: 'Create your own workout with our wizard',
-              icon: (
-                <SectionIcon size="sm" icon={DumbbellIcon} variant="green" />
-              ),
-            },
-            {
-              value: 'plans',
-              label: 'Browse Training Plans',
-              description: 'Explore structured workout programs',
-              icon: (
-                <SectionIcon size="sm" icon={BookOpenCheckIcon} variant="sky" />
-              ),
-            },
-            {
-              value: 'trainer',
-              label: 'Find a Trainer',
-              description: 'Get personalized coaching',
-              icon: <SectionIcon size="sm" icon={User2Icon} variant="amber" />,
-            },
-          ]}
+          options={options}
         />
       </div>
     </div>

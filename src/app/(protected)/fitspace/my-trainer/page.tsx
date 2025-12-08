@@ -2,9 +2,12 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { Clock, UserCheck, Users } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
+import { ComingSoonCard } from '@/components/coming-soon-card'
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { ExtendHeader } from '@/components/extend-header'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
@@ -12,7 +15,6 @@ import { TrainerCard } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ButtonLink } from '@/components/ui/button-link'
 import {
   Card,
   CardContent,
@@ -34,6 +36,7 @@ import {
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
 import { useScrollToFromParams } from '@/hooks/use-scroll-to'
+import { useTrainerServiceAccess } from '@/hooks/use-trainer-service-access'
 
 import { ClientMeetingsSection } from './components/client-meetings-section'
 import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'
@@ -47,6 +50,11 @@ type CoachingRequest = GQLMyCoachingRequestsQuery['coachingRequests'][0]
 export default function MyTrainerPage() {
   const { data: requestsData } = useMyCoachingRequestsQuery()
   const coachingRequests = requestsData?.coachingRequests || []
+  const {
+    canAccessTrainerFeatures,
+    isTrainerServiceEnabled,
+    isLoading: isAccessLoading,
+  } = useTrainerServiceAccess()
 
   const { data: trainerData, isLoading: isLoadingTrainer } =
     useGetMyTrainerQuery()
@@ -56,9 +64,29 @@ export default function MyTrainerPage() {
   // Handle scrolling to specific sections from notifications
   useScrollToFromParams([isLoadingTrainer, trainer])
 
+  const isLoading = isLoadingTrainer || isAccessLoading
+
+  // If user has a trainer, always show TrainerView (existing relationship)
+  if (!isLoading && trainer) {
+    return <TrainerView trainer={trainer} />
+  }
+
+  // If no trainer and service not accessible, show Coming Soon
+  if (!isLoading && !trainer && !canAccessTrainerFeatures) {
+    return (
+      <div className="pt-4 px-4">
+        <ComingSoonCard
+          title="Trainer Services Coming Soon"
+          description="Personal training services are not yet available in your region. We're working to bring this feature to you soon."
+          icon={Users}
+        />
+      </div>
+    )
+  }
+
   return (
     <>
-      {isLoadingTrainer && (
+      {isLoading && (
         <ExtendHeader
           headerChildren={
             <div className="px-2 py-4 dark">
@@ -77,11 +105,13 @@ export default function MyTrainerPage() {
           </div>
         </ExtendHeader>
       )}
-      {!isLoadingTrainer && trainer && <TrainerView trainer={trainer} />}
 
-      {!isLoadingTrainer && !trainer && (
+      {!isLoading && !trainer && (
         <div className="pt-4 px-4">
-          <NoTrainerView requests={coachingRequests} />
+          <NoTrainerView
+            requests={coachingRequests}
+            isTrainerServiceEnabled={isTrainerServiceEnabled}
+          />
         </div>
       )}
     </>
@@ -237,9 +267,14 @@ function TrainerView({ trainer }: TrainerViewProps) {
 
 interface NoTrainerViewProps {
   requests: CoachingRequest[]
+  isTrainerServiceEnabled: boolean
 }
 
-function NoTrainerView({ requests }: NoTrainerViewProps) {
+function NoTrainerView({
+  requests,
+  isTrainerServiceEnabled,
+}: NoTrainerViewProps) {
+  const router = useRouter()
   const { user } = useUser()
   const currentUserId = user?.id
   const queryClient = useQueryClient()
@@ -362,6 +397,18 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
     )
   }
 
+  const handleFindTrainer = () => {
+    if (!isTrainerServiceEnabled) {
+      toast.info('Trainer services are coming soon to your region.')
+      return
+    }
+    router.push('/fitspace/explore?tab=trainers')
+  }
+
+  const noTrainerDescription = isTrainerServiceEnabled
+    ? "You haven't connected with a trainer yet. Explore our featured trainers to find the perfect match for your fitness goals."
+    : 'Trainer services are coming soon to your region. Stay tuned for updates.'
+
   // No trainer and no pending requests - show find trainer
   return (
     <Card>
@@ -369,16 +416,15 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
         <UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-lg font-semibold mb-2">No Trainer Connected</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          You haven't connected with a trainer yet. Explore our featured
-          trainers to find the perfect match for your fitness goals.
+          {noTrainerDescription}
         </p>
-        <ButtonLink
-          href="/fitspace/explore?tab=trainers"
+        <Button
           className="mt-2"
           iconStart={<Users />}
+          onClick={handleFindTrainer}
         >
           Find a Trainer
-        </ButtonLink>
+        </Button>
       </CardContent>
     </Card>
   )
