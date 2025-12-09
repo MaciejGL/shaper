@@ -12,7 +12,8 @@ export async function POST(req: Request) {
 
   // Demo account gets fixed OTP, others get random
   const isDemoAccount =
-    email === 'demo@hypertro.app' || email === 'googleplayreview@hypertro.app'
+    email.trim().toLowerCase() === 'demo@hypertro.app' ||
+    email.trim().toLowerCase() === 'googleplayreview@hypertro.app'
   const otp = isDemoAccount ? '0977' : randomInt(1000, 10000).toString()
   const expiresAt = new Date(Date.now() + SESSION_EXPIRATION_TIME)
 

@@ -57,7 +57,7 @@ export const CLIENT_LINKS = {
   },
   accountManagement: {
     href: '/account-management',
-    label: 'Manage Account & Subscriptions',
+    label: 'Manage Account',
     disabled: false,
   },
 }

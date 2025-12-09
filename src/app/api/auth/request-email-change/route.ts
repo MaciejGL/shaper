@@ -58,8 +58,8 @@ export async function POST(req: Request) {
 
     // Generate OTP (special handling for demo accounts)
     const isDemoAccount =
-      newEmail === 'demo@hypertro.app' ||
-      newEmail === 'googleplayreview@hypertro.app'
+      newEmail.trim().toLowerCase() === 'demo@hypertro.app' ||
+      newEmail.trim().toLowerCase() === 'googleplayreview@hypertro.app'
     const otp = isDemoAccount ? '0977' : randomInt(1000, 10000).toString()
     const expiresAt = new Date(Date.now() + SESSION_EXPIRATION_TIME)
 

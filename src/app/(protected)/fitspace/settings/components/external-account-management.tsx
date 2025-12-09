@@ -26,10 +26,7 @@ export function ExternalAccountManagement() {
             <Settings className="w-5 h-5 text-white" />
           </div>
           <div>
-            <CardTitle>Manage Account &amp; Subscriptions</CardTitle>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Manage subscriptions, billing, and account data
-            </p>
+            <CardTitle>Access Account Management</CardTitle>
           </div>
         </div>
       </CardHeader>

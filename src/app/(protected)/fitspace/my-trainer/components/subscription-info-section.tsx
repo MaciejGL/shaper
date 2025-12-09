@@ -188,7 +188,7 @@ export function SubscriptionInfoSection() {
           >
             {subscriptionData?.status === 'CANCELLED_ACTIVE'
               ? 'Reactivate or Manage Coaching'
-              : 'Manage Account & Billing'}
+              : 'Manage Account'}
           </Button>
         )}
       </CardContent>
