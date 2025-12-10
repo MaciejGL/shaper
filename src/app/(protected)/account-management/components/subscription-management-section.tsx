@@ -136,6 +136,49 @@ export function SubscriptionManagementSection() {
     )
   }
 
+  // Companion mode: Show simple "Manage your account" section only
+  // No subscription details, pricing, or billing UI - just email link to dashboard
+  if (!rules.canShowUpgradeUI && !rules.canLinkToPayment) {
+    return (
+      <Card className="bg-card-on-card">
+        <CardContent className="py-6 space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">
+              Manage your Hypertro account
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              You can manage your Hypertro account (profile, security, plan
+              details and data) in your browser. We can send you a secure
+              sign-in link by email.
+            </p>
+          </div>
+
+          {billingLinkSent ? (
+            <p className="text-sm text-green-600 text-center py-2">
+              Link sent to your email
+            </p>
+          ) : (
+            <Button
+              onClick={handleSendBillingLink}
+              variant="secondary"
+              className="w-full"
+              iconStart={<Mail />}
+              loading={isSendingBillingLink}
+              disabled={isSendingBillingLink}
+            >
+              Send account management link
+            </Button>
+          )}
+
+          <p className="text-xs text-muted-foreground">
+            Some features depend on your Hypertro plan. Plans are set up and
+            managed outside this app.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const getSubscriptionTypeInfo = () => {
     if (!subscriptionData?.subscription) {
       return {

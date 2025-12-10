@@ -625,9 +625,7 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: isSubscriber
-        ? 'Your subscription management link'
-        : 'Your account access link',
+      subject: 'Your Hypertro account link',
       html,
     })
   },

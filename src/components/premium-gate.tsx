@@ -1,9 +1,7 @@
 'use client'
 
-import { Crown, Lock, Mail, Sparkles } from 'lucide-react'
+import { Crown, Lock, Sparkles } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { useUser } from '@/context/user-context'
 import { useOpenUrl } from '@/hooks/use-open-url'
@@ -38,8 +36,6 @@ export function PremiumGate({
     errorMessage: 'Failed to open subscription plans',
     openInApp: rules.canLinkToPayment,
   })
-  const [isSendingEmail, setIsSendingEmail] = useState(false)
-  const [emailSent, setEmailSent] = useState(false)
 
   const isAdmin = user?.email === 'm.glowacki01@gmail.com'
 
@@ -52,28 +48,6 @@ export function PremiumGate({
     openUrl(
       `/account-management/offers?redirectUrl=${encodeURIComponent(pathname)}`,
     )
-  }
-
-  const handleSendAccessEmail = async () => {
-    setIsSendingEmail(true)
-    try {
-      const response = await fetch('/api/account/send-access-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'premium' }),
-      })
-      if (response.ok) {
-        setEmailSent(true)
-        toast.success('Access link sent to your email!')
-      } else {
-        toast.error('Failed to send email. Please try again.')
-      }
-    } catch (error) {
-      console.error('Failed to send access email:', error)
-      toast.error('Failed to send email. Please try again.')
-    } finally {
-      setIsSendingEmail(false)
-    }
   }
 
   // Show premium gate
@@ -152,28 +126,9 @@ export function PremiumGate({
                 Upgrade
               </Button>
             ) : (
-              <>
-                <p className="text-muted-foreground text-sm">
-                  {rules.premiumGateText}
-                </p>
-                {emailSent ? (
-                  <p className="text-sm text-green-600">
-                    Details sent to your email
-                  </p>
-                ) : (
-                  <Button
-                    onClick={handleSendAccessEmail}
-                    className="w-full"
-                    size={compact ? 'sm' : 'lg'}
-                    iconStart={<Mail />}
-                    variant="secondary"
-                    loading={isSendingEmail}
-                    disabled={isSendingEmail}
-                  >
-                    Get details by email
-                  </Button>
-                )}
-              </>
+              <p className="text-muted-foreground text-sm">
+                {rules.premiumGateText}
+              </p>
             )}
           </div>
         </CardContent>

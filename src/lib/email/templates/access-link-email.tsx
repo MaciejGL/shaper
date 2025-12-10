@@ -19,23 +19,16 @@ export const AccessLinkEmail = ({
   accessUrl,
   isSubscriber,
 }: AccessLinkEmailProps) => (
-  <EmailWrapper
-    previewText={
-      isSubscriber
-        ? 'Manage your subscription and billing'
-        : 'Access your account and subscription options'
-    }
-  >
+  <EmailWrapper previewText="Your secure link to the Hypertro Account Dashboard">
     <EmailHeader brandName="Hypro" />
     <EmailContent>
       <EmailHeading as="h1">
-        {userName ? `Hi ${userName}` : 'Your Account Access Link'}
+        {userName ? `Hi ${userName}` : 'Your Hypertro account link'}
       </EmailHeading>
 
       <EmailText>
-        {isSubscriber
-          ? 'Here is your account management link. From here you can:'
-          : 'You requested access to your account. Click the button below to view subscription options and manage your account.'}
+        Here's your secure link to the Hypertro Account Dashboard. From there
+        you can manage your profile, security, plan details and data.
       </EmailText>
 
       {isSubscriber && (
@@ -55,9 +48,7 @@ export const AccessLinkEmail = ({
         </>
       )}
 
-      <EmailButton href={accessUrl}>
-        {isSubscriber ? 'Manage My Subscription' : 'View Account'}
-      </EmailButton>
+      <EmailButton href={accessUrl}>Open Account Dashboard</EmailButton>
 
       <EmailText size="14px" color="muted">
         This secure link will log you in automatically and take you to your
