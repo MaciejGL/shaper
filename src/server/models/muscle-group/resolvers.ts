@@ -1,4 +1,4 @@
-import { MUSCLES, getMusclesGroupedForGraphQL } from '@/constants/muscles'
+import { MUSCLES, getMusclesGroupedForGraphQL } from '@/config/muscles'
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,

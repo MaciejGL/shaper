@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { getServiceTerms } from '@/constants/terms-versions'
+import { getServiceTerms } from '@/config/terms-versions'
 
 interface CoachingServiceTermsProps {
   isOpen: boolean

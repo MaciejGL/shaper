@@ -36,7 +36,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { TRAINER_LINKS } from '@/constants/user-links'
+import { TRAINER_LINKS } from '@/config/user-links'
 import {
   GQLUserRole,
   useCreateDraftTemplateMutation,

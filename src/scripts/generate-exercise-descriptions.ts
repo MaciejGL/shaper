@@ -1,5 +1,5 @@
 #!/usr/bin/env ts-node
-import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
+import { EQUIPMENT_OPTIONS } from '@/config/equipment'
 import { prisma } from '@/lib/db'
 import { openai } from '@/lib/open-ai/open-ai'
 

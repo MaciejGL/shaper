@@ -3,7 +3,7 @@ import Fuse from 'fuse.js'
 import {
   EQUIPMENT_SYNONYMS,
   expandSearchTerm,
-} from '@/constants/exercise-keywords'
+} from '@/config/exercise-keywords'
 
 /**
  * Exercise interface for search

@@ -1,4 +1,4 @@
-import { DisplayGroup } from '@/constants/muscles'
+import { DisplayGroup } from '@/config/muscles'
 import { GQLMuscleGroup } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
 

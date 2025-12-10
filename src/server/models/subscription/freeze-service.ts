@@ -5,7 +5,7 @@
  * Uses Stripe's pause_collection as source of truth for pause state,
  * with local DB tracking for calendar year quota.
  */
-import { FREEZE_CONFIG } from '@/constants/freeze-config'
+import { FREEZE_CONFIG } from '@/config/freeze-config'
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'

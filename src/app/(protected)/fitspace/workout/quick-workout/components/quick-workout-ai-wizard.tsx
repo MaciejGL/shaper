@@ -16,7 +16,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { EQUIPMENT_OPTIONS, equipmentImages } from '@/constants/equipment'
+import { EQUIPMENT_OPTIONS, equipmentImages } from '@/config/equipment'
 import {
   useFitspaceCreateQuickWorkoutMutation,
   useFitspaceGetWorkoutDayQuery,

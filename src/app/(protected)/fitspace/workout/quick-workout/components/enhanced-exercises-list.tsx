@@ -6,7 +6,7 @@ import { useMemo } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
+import { EQUIPMENT_OPTIONS } from '@/config/equipment'
 import { GQLEquipment } from '@/generated/graphql-client'
 
 import { Exercise, ExerciseCard } from './exercise-card'

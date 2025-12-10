@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import { getMusclesGroupedForGraphQL } from '@/constants/muscles'
+import { getMusclesGroupedForGraphQL } from '@/config/muscles'
 
 export async function GET() {
   try {

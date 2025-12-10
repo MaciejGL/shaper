@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
+import { EQUIPMENT_OPTIONS } from '@/config/equipment'
 import {
   GQLEquipment,
   GQLMuscleGroupCategoriesQuery,

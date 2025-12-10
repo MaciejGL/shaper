@@ -1,4 +1,4 @@
-import { MUSCLES } from '@/constants/muscles'
+import { MUSCLES } from '@/config/muscles'
 import { prisma } from '@/lib/db'
 import { openai } from '@/lib/open-ai/open-ai'
 

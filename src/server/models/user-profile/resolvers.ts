@@ -7,7 +7,7 @@ import {
   subWeeks,
 } from 'date-fns'
 
-import { TRACKED_DISPLAY_GROUPS, getMuscleById } from '@/constants/muscles'
+import { TRACKED_DISPLAY_GROUPS, getMuscleById } from '@/config/muscles'
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,

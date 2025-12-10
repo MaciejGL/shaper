@@ -3,8 +3,8 @@ import {
   getDaysUntilDue,
   getDeliverableLabel,
   isOverdue,
-} from '@/constants/deliverable-config'
-import { TaskStatus } from '@/constants/task-templates'
+} from '@/config/deliverable-config'
+import { TaskStatus } from '@/config/task-templates'
 import {
   GQLDeliveryStatus,
   GQLPackageTemplate,

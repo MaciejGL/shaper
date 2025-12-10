@@ -6,7 +6,7 @@ import { FemaleBodyBackView } from '@/components/human-body/female-body-back/fem
 import { FemaleBodyFrontView } from '@/components/human-body/female-body-front/female-body-front'
 import { MaleBodyBackView } from '@/components/human-body/male-body-back/male-body-back'
 import { MaleBodyFrontView } from '@/components/human-body/male-body-front/male-body-front'
-import { SVG_ALIAS_TO_DISPLAY_GROUP } from '@/constants/muscles'
+import { SVG_ALIAS_TO_DISPLAY_GROUP } from '@/config/muscles'
 import { useUser } from '@/context/user-context'
 import { cn } from '@/lib/utils'
 

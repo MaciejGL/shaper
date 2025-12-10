@@ -35,7 +35,7 @@ import {
   DISPLAY_GROUP_TO_HIGH_LEVEL,
   HIGH_LEVEL_TO_DISPLAY_GROUPS,
   type HighLevelGroup,
-} from '@/constants/muscles'
+} from '@/config/muscles'
 import {
   type GQLFitspaceGetExercisesQuery,
   useFitspaceAddSingleExerciseToDayMutation,

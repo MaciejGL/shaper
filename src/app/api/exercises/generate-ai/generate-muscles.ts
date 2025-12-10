@@ -1,5 +1,5 @@
-import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
-import { MUSCLES } from '@/constants/muscles'
+import { EQUIPMENT_OPTIONS } from '@/config/equipment'
+import { MUSCLES } from '@/config/muscles'
 import { openai } from '@/lib/open-ai/open-ai'
 
 export interface GenerateExerciseMusclesInput {

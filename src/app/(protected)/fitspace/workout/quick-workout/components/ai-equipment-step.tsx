@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 
-import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
+import { EQUIPMENT_OPTIONS } from '@/config/equipment'
 import { GQLEquipment } from '@/generated/graphql-client'
 
 import { EquipmentFilters } from '../../training/components/equipment-filters'

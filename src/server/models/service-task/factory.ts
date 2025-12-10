@@ -1,4 +1,4 @@
-import { AutoCompleteAction, TaskStatus } from '@/constants/task-templates'
+import { AutoCompleteAction, TaskStatus } from '@/config/task-templates'
 import {
   GQLMutationUpdateServiceTaskArgs,
   GQLQueryGetServiceDeliveryTasksArgs,
@@ -261,7 +261,7 @@ export async function createTasksForDelivery(
   serviceType: ServiceType,
   isRecurringPayment: boolean,
 ) {
-  const { generateTasks } = await import('@/constants/task-templates')
+  const { generateTasks } = await import('@/config/task-templates')
 
   const taskData = generateTasks({
     serviceDeliveryId,

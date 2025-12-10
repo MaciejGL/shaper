@@ -1,4 +1,4 @@
-import type { HighLevelGroup } from '@/constants/muscles'
+import type { HighLevelGroup } from '@/config/muscles'
 
 export interface WeeklyGroupSummary {
   groupId: HighLevelGroup

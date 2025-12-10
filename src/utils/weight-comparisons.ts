@@ -1,7 +1,7 @@
 import {
   WEIGHT_COMPARISONS,
   WeightComparison,
-} from '@/constants/weight-comparisons'
+} from '@/config/weight-comparisons'
 
 /**
  * Generates a fun weight comparison for gamification

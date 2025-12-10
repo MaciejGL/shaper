@@ -1,4 +1,4 @@
-import { DISPLAY_GROUPS, getMuscleById } from '@/constants/muscles'
+import { DISPLAY_GROUPS, getMuscleById } from '@/config/muscles'
 import type { GQLMuscleFrequency } from '@/generated/graphql-client'
 
 export interface GroupedMuscleData {

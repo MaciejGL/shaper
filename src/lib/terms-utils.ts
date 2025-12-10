@@ -1,7 +1,7 @@
 import {
   getCurrentTermsVersion,
   getTermsByVersion,
-} from '@/constants/terms-versions'
+} from '@/config/terms-versions'
 import { prisma } from '@/lib/db'
 
 /**

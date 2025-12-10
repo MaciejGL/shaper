@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
-import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
+import { CLIENT_LINKS, TRAINER_LINKS } from '@/config/user-links'
 import { UserContextType, useUser } from '@/context/user-context'
 import {
   GQLUserRole,

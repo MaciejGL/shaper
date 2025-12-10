@@ -12,8 +12,8 @@ import {
   PREMIUM_BENEFITS,
   PREMIUM_YEARLY_BENEFITS,
   TRIAL_COPY,
-} from '@/constants/product-copy'
-import { SUBSCRIPTION_CONFIG } from '@/constants/subscription-config'
+} from '@/config/product-copy'
+import { SUBSCRIPTION_CONFIG } from '@/config/subscription-config'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { cn } from '@/lib/utils'
 

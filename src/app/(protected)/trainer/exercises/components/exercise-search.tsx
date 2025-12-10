@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
+import { EQUIPMENT_OPTIONS } from '@/config/equipment'
 
 import { useSearchQueries } from './hooks'
 

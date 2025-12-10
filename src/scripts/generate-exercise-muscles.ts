@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
-import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
-import { MUSCLES } from '@/constants/muscles'
+import { EQUIPMENT_OPTIONS } from '@/config/equipment'
+import { MUSCLES } from '@/config/muscles'
 import { prisma } from '@/lib/db'
 import { openai } from '@/lib/open-ai/open-ai'
 

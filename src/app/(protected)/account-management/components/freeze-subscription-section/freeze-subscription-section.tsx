@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { FREEZE_COPY } from '@/constants/product-copy'
+import { FREEZE_COPY } from '@/config/product-copy'
 
 import { useFreezeSubscription } from './use-freeze-subscription'
 

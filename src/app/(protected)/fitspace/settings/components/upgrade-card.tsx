@@ -4,7 +4,7 @@ import { Sparkles } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { PREMIUM_BENEFITS } from '@/constants/product-copy'
+import { PREMIUM_BENEFITS } from '@/config/product-copy'
 import { useStripePrice } from '@/hooks/use-stripe-price'
 
 import { PremiumBenefitsList } from './premium-benefits-list'

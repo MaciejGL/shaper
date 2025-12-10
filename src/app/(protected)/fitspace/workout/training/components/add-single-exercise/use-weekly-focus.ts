@@ -5,7 +5,7 @@ import {
   DISPLAY_GROUP_TO_HIGH_LEVEL,
   HIGH_LEVEL_GROUPS,
   type HighLevelGroup,
-} from '@/constants/muscles'
+} from '@/config/muscles'
 import { useUser } from '@/context/user-context'
 import { useWeeklyMuscleProgressQuery } from '@/generated/graphql-client'
 

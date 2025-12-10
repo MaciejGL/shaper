@@ -4,4 +4,4 @@ export {
   SVG_ALIAS_TO_DISPLAY_GROUP as LABEL_TO_GROUP_MAPPING,
   groupMusclesByDisplayGroup,
   getMusclesByDisplayGroup,
-} from '@/constants/muscles'
+} from '@/config/muscles'

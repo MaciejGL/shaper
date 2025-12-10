@@ -1,7 +1,7 @@
 'use client'
 
 import { Progress } from '@/components/ui/progress'
-import type { HighLevelGroup } from '@/constants/muscles'
+import type { HighLevelGroup } from '@/config/muscles'
 import { cn } from '@/lib/utils'
 
 import type { WeeklyGroupSummary } from './types'
