@@ -33,6 +33,9 @@ import { SubscriptionUpgradeCreditEmail } from './templates/subscription-upgrade
 import { TeamInvitationEmail } from './templates/team-invitation-email'
 import { TrainerOfferEmail } from './templates/trainer-offer-email'
 import { TrialReminderEmail } from './templates/trial-reminder-email'
+import { WeeklyProgressEmail } from './templates/weekly-progress-email'
+import { WinbackEmail } from './templates/winback-email'
+import { WorkoutMilestoneEmail } from './templates/workout-milestone-email'
 
 const NO_REPLY_EMAIL = 'noreply@hypro.app'
 const NO_REPLY_NAME = 'Hypro'
@@ -599,11 +602,18 @@ export const sendEmail = {
       isSubscriber: boolean
     },
   ): Promise<void> => {
-    const accessUrl = generateAuthenticatedUrl(
-      userId,
-      to,
-      '/account-management',
-    )
+    let accessUrl: string
+
+    if (isSubscriber) {
+      // Subscribers: direct link to billing-portal server page with token
+      // billing-portal verifies token and redirects to Stripe portal
+      const token = generateEmailAccessToken(userId, to, '/auth/billing-portal')
+      accessUrl = `${BASE_URL}/auth/billing-portal?token=${encodeURIComponent(token)}`
+    } else {
+      // Non-subscribers: authenticated URL to account management
+      accessUrl = generateAuthenticatedUrl(userId, to, '/account-management')
+    }
+
     const html = await render(
       <AccessLinkEmail
         userName={userName}
@@ -701,7 +711,136 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: 'Your free trial is waiting',
+      subject: 'Your first week with Hypro',
+      html,
+    })
+  },
+
+  // Workout milestone email (sent after 3rd workout if no subscription)
+  workoutMilestone: async (
+    to: string,
+    {
+      userId,
+      userName,
+      totalSets,
+      exerciseCount,
+      topExercises,
+    }: {
+      userId: string
+      userName?: string | null
+      totalSets: number
+      exerciseCount: number
+      topExercises: string[]
+    },
+  ): Promise<void> => {
+    const upgradeUrl = generateAuthenticatedUrl(
+      userId,
+      to,
+      '/account-management',
+    )
+    const html = await render(
+      <WorkoutMilestoneEmail
+        userName={userName}
+        upgradeUrl={upgradeUrl}
+        totalSets={totalSets}
+        exerciseCount={exerciseCount}
+        topExercises={topExercises}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "Nice work on workout #3 - here's what we tracked",
+      html,
+    })
+  },
+
+  // Weekly progress email (sent 7 days after signup if active and no subscription)
+  weeklyProgress: async (
+    to: string,
+    {
+      userId,
+      userName,
+      workoutCount,
+      totalSets,
+      exerciseCount,
+      topMuscleGroups,
+    }: {
+      userId: string
+      userName?: string | null
+      workoutCount: number
+      totalSets: number
+      exerciseCount: number
+      topMuscleGroups: string[]
+    },
+  ): Promise<void> => {
+    const upgradeUrl = generateAuthenticatedUrl(
+      userId,
+      to,
+      '/account-management',
+    )
+    const html = await render(
+      <WeeklyProgressEmail
+        userName={userName}
+        upgradeUrl={upgradeUrl}
+        workoutCount={workoutCount}
+        totalSets={totalSets}
+        exerciseCount={exerciseCount}
+        topMuscleGroups={topMuscleGroups}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Your week: ${workoutCount} workouts, ${totalSets} sets logged`,
+      html,
+    })
+  },
+
+  // Win-back email (sent 14 days after last workout if no subscription)
+  winback: async (
+    to: string,
+    {
+      userId,
+      userName,
+      daysSinceLastWorkout,
+      totalWorkouts,
+      lastWorkoutName,
+      lastWorkoutDate,
+      topLifts,
+    }: {
+      userId: string
+      userName?: string | null
+      daysSinceLastWorkout: number
+      totalWorkouts: number
+      lastWorkoutName?: string | null
+      lastWorkoutDate?: string | null
+      topLifts: Array<{ name: string; weight: number; unit: string }>
+    },
+  ): Promise<void> => {
+    const upgradeUrl = generateAuthenticatedUrl(
+      userId,
+      to,
+      '/account-management',
+    )
+    const html = await render(
+      <WinbackEmail
+        userName={userName}
+        upgradeUrl={upgradeUrl}
+        daysSinceLastWorkout={daysSinceLastWorkout}
+        totalWorkouts={totalWorkouts}
+        lastWorkoutName={lastWorkoutName}
+        lastWorkoutDate={lastWorkoutDate}
+        topLifts={topLifts}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Your last workout was ${daysSinceLastWorkout} days ago`,
       html,
     })
   },

@@ -1,7 +1,8 @@
 'use client'
 
 import { format } from 'date-fns'
-import { CreditCard, SparklesIcon } from 'lucide-react'
+import { CreditCard, Mail, SparklesIcon } from 'lucide-react'
+import { useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { PromotionalDiscountBanner } from '@/components/subscription/promotional-discount-banner'
@@ -23,6 +24,8 @@ export function SubscriptionInfoSection() {
     },
   )
   const rules = usePaymentRules()
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
   const {
     openUrl: openAccountManagement,
     isLoading: isOpeningAccountManagement,
@@ -30,6 +33,24 @@ export function SubscriptionInfoSection() {
     errorMessage: 'Failed to open account management',
     openInApp: rules.canLinkToPayment,
   })
+
+  const handleSendAccountEmail = async () => {
+    setIsSendingEmail(true)
+    try {
+      const response = await fetch('/api/account/send-access-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'access' }),
+      })
+      if (response.ok) {
+        setEmailSent(true)
+      }
+    } catch (error) {
+      console.error('Failed to send account email:', error)
+    } finally {
+      setIsSendingEmail(false)
+    }
+  }
 
   const handleManageSubscription = () => {
     openAccountManagement('/account-management')
@@ -173,24 +194,40 @@ export function SubscriptionInfoSection() {
           <PromotionalDiscountBanner discount={promotionalDiscount} />
         )}
 
-        {hasActiveSubscription && (
-          <Button
-            onClick={handleManageSubscription}
-            variant={
-              subscriptionData?.status === 'CANCELLED_ACTIVE'
-                ? 'default'
-                : 'tertiary'
-            }
-            className="w-full"
-            iconStart={<CreditCard />}
-            loading={isOpeningAccountManagement}
-            disabled={isOpeningAccountManagement}
-          >
-            {subscriptionData?.status === 'CANCELLED_ACTIVE'
-              ? 'Reactivate or Manage Coaching'
-              : 'Manage Account'}
-          </Button>
-        )}
+        {hasActiveSubscription &&
+          (rules.canLinkToPayment ? (
+            <Button
+              onClick={handleManageSubscription}
+              variant={
+                subscriptionData?.status === 'CANCELLED_ACTIVE'
+                  ? 'default'
+                  : 'tertiary'
+              }
+              className="w-full"
+              iconStart={<CreditCard />}
+              loading={isOpeningAccountManagement}
+              disabled={isOpeningAccountManagement}
+            >
+              {subscriptionData?.status === 'CANCELLED_ACTIVE'
+                ? 'Reactivate or Manage Coaching'
+                : 'Manage Account'}
+            </Button>
+          ) : emailSent ? (
+            <p className="text-sm text-green-600 text-center py-2">
+              Account info sent to your email
+            </p>
+          ) : (
+            <Button
+              onClick={handleSendAccountEmail}
+              variant="tertiary"
+              className="w-full"
+              iconStart={<Mail />}
+              loading={isSendingEmail}
+              disabled={isSendingEmail}
+            >
+              Email Me My Account Info
+            </Button>
+          ))}
       </CardContent>
     </Card>
   )

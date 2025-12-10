@@ -293,7 +293,7 @@ export function SubscriptionManagementSection() {
               </Button>
             ) : billingLinkSent ? (
               <p className="text-sm text-green-600 text-center py-2">
-                Billing link sent to your email
+                Account info sent to your email
               </p>
             ) : (
               <Button
@@ -304,7 +304,7 @@ export function SubscriptionManagementSection() {
                 loading={isSendingBillingLink}
                 disabled={isSendingBillingLink}
               >
-                Send billing link to my email
+                Email Me My Account Info
               </Button>
             )}
           </div>

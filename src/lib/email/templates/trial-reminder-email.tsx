@@ -18,47 +18,53 @@ export const TrialReminderEmail = ({
   userName,
   upgradeUrl,
 }: TrialReminderEmailProps) => (
-  <EmailWrapper previewText="Your free trial is waiting - try Premium for 7 days">
+  <EmailWrapper previewText="How's your first week going?">
     <EmailHeader brandName="Hypro" />
     <EmailContent>
       <EmailHeading as="h1">
-        {userName
-          ? `${userName}, your free trial is waiting`
-          : 'Your free trial is waiting'}
+        {userName ? `Hey ${userName}!` : 'Your first week with Hypro'}
       </EmailHeading>
 
       <EmailText>
-        You joined Hypro a few days ago but haven't tried Premium yet. Start
-        your free 7-day trial today and unlock the full experience.
+        How's training going? Just checking in after your first few days with
+        Hypro.
+      </EmailText>
+
+      <EmailText>
+        If you want to take your tracking to the next level, full access gives
+        you:
       </EmailText>
 
       <EmailCard>
-        <EmailText
-          size="14px"
-          weight="600"
-          style={{ marginBottom: '12px', color: '#18181b' }}
-        >
-          What you're missing:
+        <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
+          • See exactly which muscles you're hitting (and which need more work)
         </EmailText>
         <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
-          • Premium training plans designed by experts
+          • Track body changes with secure progress photos
         </EmailText>
         <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
-          • Complete exercise library with HD videos
-        </EmailText>
-        <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
-          • Advanced analytics to track your progress
+          • Get notified when you hit new PRs
         </EmailText>
         <EmailText size="14px" color="muted" style={{ marginBottom: '0' }}>
-          • No charge for 7 days - cancel anytime
+          • Follow premium training plans designed by coaches
         </EmailText>
       </EmailCard>
 
-      <EmailButton href={upgradeUrl}>Start Free Trial</EmailButton>
+      <EmailText weight="600">
+        Your first 7 days of full access are free to try.
+      </EmailText>
+
+      <EmailButton href={upgradeUrl}>Start 7-Day Free Trial</EmailButton>
 
       <EmailText size="14px" color="muted">
-        Not interested? No worries - you can continue using Hypro with basic
-        features.
+        No pressure - the free version works great for basic training. But if
+        you want the full picture of your progress, we're here.
+      </EmailText>
+
+      <EmailText size="14px" color="muted">
+        Happy training,
+        <br />
+        Hypro
       </EmailText>
     </EmailContent>
     <EmailFooter companyName="Hypro" />

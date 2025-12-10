@@ -8,8 +8,12 @@ import {
   GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { sendEmail } from '@/lib/email/send-mail'
 import {
+  notifyFirstWorkoutCompleted,
+  notifyPRDetectedFreeUser,
   notifyPlanCompleted,
+  notifyThirdWorkoutMilestone,
   notifyTrainerWorkoutCompleted,
   notifyWorkoutCompleted,
 } from '@/lib/notifications/push-notification-service'
@@ -260,6 +264,25 @@ export const markSetAsCompleted = async (
   if (reps && weight && userId) {
     try {
       prInfo = await checkIfPersonalRecord(setId, weight, reps, userId)
+
+      // P3: If PR detected, send push notification to free users
+      if (prInfo.isPersonalRecord) {
+        after(async () => {
+          const hasActiveSubscription =
+            await subscriptionValidator.hasPremiumAccess(userId)
+          if (!hasActiveSubscription) {
+            // Get exercise name for the notification
+            const setInfo = await prisma.exerciseSet.findUnique({
+              where: { id: setId },
+              select: {
+                exercise: { select: { name: true } },
+              },
+            })
+            const exerciseName = setInfo?.exercise?.name || 'your exercise'
+            await notifyPRDetectedFreeUser(userId, exerciseName)
+          }
+        })
+      }
     } catch (error) {
       console.error('Error checking PR status:', error)
       // Continue without PR info rather than failing the mutation
@@ -553,6 +576,108 @@ const saveExercisePR = async (
   }
 }
 
+/**
+ * Check workout milestones and send appropriate emails/push notifications
+ * Only for users without active subscription
+ */
+const checkWorkoutMilestones = async (userId: string) => {
+  // Count user's completed workouts
+  const completedWorkoutCount = await prisma.trainingDay.count({
+    where: {
+      completedAt: { not: null },
+      week: {
+        plan: {
+          OR: [{ assignedToId: userId }, { createdById: userId }],
+        },
+      },
+    },
+  })
+
+  // Check if user has an active subscription
+  const hasPremium = await subscriptionValidator.hasPremiumAccess(userId)
+  if (hasPremium) return
+
+  // P1: First workout completed - send push notification
+  if (completedWorkoutCount === 1) {
+    await notifyFirstWorkoutCompleted(userId)
+    return
+  }
+
+  // P2 + Email: 3rd workout completed - send push notification + milestone email
+  if (completedWorkoutCount === 3) {
+    await notifyThirdWorkoutMilestone(userId)
+
+    // Get user and workout data for email
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        email: true,
+        name: true,
+        profile: { select: { firstName: true } },
+      },
+    })
+
+    if (!user?.email) return
+
+    // Get completed exercises with sets for stats
+    const completedDays = await prisma.trainingDay.findMany({
+      where: {
+        completedAt: { not: null },
+        week: {
+          plan: {
+            OR: [{ assignedToId: userId }, { createdById: userId }],
+          },
+        },
+      },
+      select: {
+        exercises: {
+          select: {
+            name: true,
+            baseId: true,
+            sets: {
+              where: { completedAt: { not: null } },
+              select: { id: true },
+            },
+          },
+        },
+      },
+    })
+
+    // Calculate stats from fetched data
+    const allSets = completedDays.flatMap((d) =>
+      d.exercises.flatMap((e) => e.sets),
+    )
+    const uniqueBaseIds = new Set(
+      completedDays.flatMap((d) =>
+        d.exercises.map((e) => e.baseId).filter(Boolean),
+      ),
+    )
+
+    // Get top exercises by set count
+    const exerciseSetCounts = new Map<string, number>()
+    for (const day of completedDays) {
+      for (const exercise of day.exercises) {
+        const current = exerciseSetCounts.get(exercise.name) || 0
+        exerciseSetCounts.set(exercise.name, current + exercise.sets.length)
+      }
+    }
+    const topExercises = [...exerciseSetCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name]) => name)
+
+    const userName = user.profile?.firstName || user.name || undefined
+
+    await sendEmail.workoutMilestone(user.email, {
+      userId,
+      userName,
+      totalSets: allSets.length,
+      exerciseCount: uniqueBaseIds.size,
+      topExercises,
+    })
+  }
+}
+
 export const markWorkoutAsCompleted = async (
   args: GQLMutationMarkWorkoutAsCompletedArgs,
 ) => {
@@ -629,6 +754,11 @@ export const markWorkoutAsCompleted = async (
         dayWithInfo.workoutType || undefined,
       )
     }
+
+    // Check workout milestones (push + email) - async, don't block
+    after(async () => {
+      await checkWorkoutMilestones(client.id)
+    })
   }
 
   // ✅ Cascade completion checks remain sequential

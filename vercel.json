@@ -18,6 +18,14 @@
     {
       "path": "/api/cron/trial-reminder",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/weekly-progress",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/winback-emails",
+      "schedule": "0 10 * * *"
     }
   ],
   "build": {

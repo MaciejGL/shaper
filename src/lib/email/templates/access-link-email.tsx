@@ -34,17 +34,34 @@ export const AccessLinkEmail = ({
 
       <EmailText>
         {isSubscriber
-          ? 'You requested access to manage your subscription. Click the button below to view your billing details, update payment methods, or manage your plan.'
+          ? 'Here is your account management link. From here you can:'
           : 'You requested access to your account. Click the button below to view subscription options and manage your account.'}
       </EmailText>
 
+      {isSubscriber && (
+        <>
+          <EmailText size="14px" color="muted" style={{ marginBottom: '4px' }}>
+            • View your subscription details and billing history
+          </EmailText>
+          <EmailText size="14px" color="muted" style={{ marginBottom: '4px' }}>
+            • Update your payment method
+          </EmailText>
+          <EmailText size="14px" color="muted" style={{ marginBottom: '4px' }}>
+            • Cancel or pause your subscription
+          </EmailText>
+          <EmailText size="14px" color="muted" style={{ marginBottom: '16px' }}>
+            • Download invoices
+          </EmailText>
+        </>
+      )}
+
       <EmailButton href={accessUrl}>
-        {isSubscriber ? 'Manage Subscription' : 'View Account'}
+        {isSubscriber ? 'Manage My Subscription' : 'View Account'}
       </EmailButton>
 
       <EmailText size="14px" color="muted">
-        This link will take you to your account management page where you can
-        securely manage your subscription.
+        This secure link will log you in automatically and take you to your
+        account page.
       </EmailText>
 
       <EmailText size="14px" color="muted">

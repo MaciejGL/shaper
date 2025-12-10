@@ -1,14 +1,33 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
 import { Loader } from '@/components/loader'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 
+/**
+ * Decode JWT token to extract redirectUrl (without verification - server does that)
+ * Handles base64url encoding (used by JWT) which uses - and _ instead of + and /
+ */
+function getRedirectFromToken(token: string): string {
+  try {
+    // Convert base64url to standard base64
+    const base64 = token
+      .split('.')[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+    const payload = JSON.parse(atob(base64))
+    return payload.redirectUrl || '/account-management'
+  } catch {
+    return '/account-management'
+  }
+}
+
 function EmailAccessContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const token = searchParams.get('token')
   const [error, setError] = useState<string | null>(null)
 
@@ -18,16 +37,29 @@ function EmailAccessContent() {
       return
     }
 
-    // Trigger sign in with email-access provider
-    signIn('email-access', {
-      token,
-      callbackUrl: '/account-management',
-    }).catch(() => {
-      setError('Failed to authenticate. The link may have expired.')
-    })
-  }, [token])
+    const authenticate = async () => {
+      const redirectUrl = getRedirectFromToken(token)
 
-  if (!error) {
+      // Use redirect: false to handle errors manually
+      // Without this, NextAuth redirects to error page instead of throwing
+      const result = await signIn('email-access', {
+        token,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError('Failed to authenticate. The link may have expired.')
+      } else if (result?.ok) {
+        router.push(redirectUrl)
+      } else {
+        setError('Authentication failed. Please try again.')
+      }
+    }
+
+    authenticate()
+  }, [token, router])
+
+  if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="text-center space-y-4">

@@ -520,3 +520,55 @@ export async function sendBatchNotifications(
     total: notifications.length,
   }
 }
+
+// ================================
+// PREMIUM MARKETING NOTIFICATIONS
+// (For free users without subscription)
+// ================================
+
+/**
+ * P1: First workout completed - direct to email
+ */
+export async function notifyFirstWorkoutCompleted(userId: string) {
+  return await sendPushNotificationToUsers(
+    [userId],
+    'First one done',
+    'Check your email for tips on getting the most from Hypro.',
+  )
+}
+
+/**
+ * P2: 3rd workout milestone - direct to email
+ */
+export async function notifyThirdWorkoutMilestone(userId: string) {
+  return await sendPushNotificationToUsers(
+    [userId],
+    '3 sessions logged',
+    'We sent you something about tracking your progress.',
+  )
+}
+
+/**
+ * P3: PR detected for free user - direct to email
+ */
+export async function notifyPRDetectedFreeUser(
+  userId: string,
+  exerciseName: string,
+) {
+  return await sendPushNotificationToUsers(
+    [userId],
+    `Strong lift on ${exerciseName}!`,
+    'Full access tracks PRs automatically - check your email.',
+  )
+}
+
+/**
+ * P4: Weekly streak achieved - direct to email
+ */
+export async function notifyWeeklyStreak(userId: string, workoutCount: number) {
+  return await sendPushNotificationToUsers(
+    [userId],
+    `${workoutCount} workouts this week`,
+    'Solid week of training. Your progress details are in your email.',
+  )
+}
