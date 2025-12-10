@@ -16,7 +16,7 @@ interface WinbackEmailProps {
   totalWorkouts: number
   lastWorkoutName?: string | null
   lastWorkoutDate?: string | null
-  topLifts: Array<{ name: string; weight: number; unit: string }>
+  topLifts: { name: string; weight: number; unit: string }[]
 }
 
 export const WinbackEmail = ({
@@ -109,4 +109,3 @@ export const WinbackEmail = ({
     <EmailFooter companyName="Hypro" />
   </EmailWrapper>
 )
-

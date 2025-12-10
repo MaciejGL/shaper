@@ -1,6 +1,6 @@
+import { MUSCLES } from '@/config/muscles'
 import { BaseExercise as BaseExerciseType } from '@/generated/prisma/client'
 
-import { MUSCLES } from '../src/constants/muscles'
 import { prisma } from '../src/lib/db'
 
 type BaseExercise = Pick<

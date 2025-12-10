@@ -817,7 +817,7 @@ export const sendEmail = {
       totalWorkouts: number
       lastWorkoutName?: string | null
       lastWorkoutDate?: string | null
-      topLifts: Array<{ name: string; weight: number; unit: string }>
+      topLifts: { name: string; weight: number; unit: string }[]
     },
   ): Promise<void> => {
     const upgradeUrl = generateAuthenticatedUrl(

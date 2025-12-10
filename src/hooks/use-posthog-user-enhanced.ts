@@ -75,7 +75,7 @@ export function usePostHogUserEnhanced() {
         }
       }
     }
-  }, [user, status, hasIdentified])
+  }, [user, status, hasIdentified, isNativeApp, mobilePlatform])
 
   return {
     isAuthenticated: status === 'authenticated',
