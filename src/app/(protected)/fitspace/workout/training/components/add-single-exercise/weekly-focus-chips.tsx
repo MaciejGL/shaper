@@ -131,10 +131,9 @@ function MiniHeatmapTile({
 }
 
 function getProgressBarColor(setsDone: number): string {
-  if (setsDone >= 12) return 'bg-orange-500'
-  if (setsDone >= 10) return 'bg-orange-400'
-  if (setsDone >= 7) return 'bg-orange-300'
-  if (setsDone >= 4) return 'bg-orange-200'
+  if (setsDone >= 17) return 'bg-orange-500'
+  if (setsDone >= 12) return 'bg-orange-400'
+  if (setsDone >= 7) return 'bg-orange-200'
   if (setsDone >= 1) return 'bg-orange-100'
   return 'bg-neutral-500 dark:bg-neutral-700'
 }

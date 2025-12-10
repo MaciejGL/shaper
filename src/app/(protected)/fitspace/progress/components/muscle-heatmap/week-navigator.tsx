@@ -26,9 +26,9 @@ export function WeekNavigator({
     const start = parseISO(weekStartDate)
     const end = parseISO(weekEndDate)
 
-    if (weekOffset === 0) {
-      return 'This Week'
-    }
+    // if (weekOffset === 0) {
+    //   return 'This Week'
+    // }
 
     // Format as "Dec 1-7" or "Nov 25 - Dec 1" if spans months
     const startMonth = format(start, 'MMM')
@@ -43,19 +43,19 @@ export function WeekNavigator({
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant="outline"
-        size="icon-sm"
-        iconOnly={<ChevronLeft className="size-4" />}
+        variant="ghost"
+        size="icon-lg"
+        iconOnly={<ChevronLeft className="!size-5" />}
         onClick={onPrevious}
         aria-label="Previous week"
       />
-      <span className="min-w-[100px] text-center text-sm font-medium">
-        {formatWeekRange()}
+      <span className="min-w-[100px] text-center text-sm font-medium flex flex-col items-center justify-center">
+        Week of {formatWeekRange()}
       </span>
       <Button
-        variant="outline"
-        size="icon-sm"
-        iconOnly={<ChevronRight className="size-4" />}
+        variant="ghost"
+        size="icon-lg"
+        iconOnly={<ChevronRight className="!size-5" />}
         onClick={onNext}
         disabled={weekOffset === 0}
         aria-label="Next week"

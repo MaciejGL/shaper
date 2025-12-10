@@ -7,21 +7,18 @@ import { cn } from '@/lib/utils'
 
 import { DayCell, useActivityHeatmap } from './use-activity-heatmap'
 
-function getIntensityLevel(sets: number, maxSets: number): number {
+function getIntensityLevel(sets: number): number {
   if (sets === 0) return 0
-  const ratio = sets / maxSets
-  if (ratio >= 0.8) return 4
-  if (ratio >= 0.6) return 3
-  if (ratio >= 0.4) return 2
-  if (ratio >= 0.2) return 1
+  if (sets >= 17) return 3
+  if (sets >= 12) return 3
+  if (sets >= 7) return 2
   return 1
 }
 
 const INTENSITY_CLASSES = [
   'bg-muted',
-  'bg-orange-200 dark:bg-orange-900/50',
-  'bg-orange-300 dark:bg-orange-800/60',
-  'bg-orange-400 dark:bg-orange-700/70',
+  'bg-orange-200 dark:bg-orange-900/60',
+  'bg-orange-400 dark:bg-orange-700/75',
   'bg-orange-500 dark:bg-orange-600',
 ]
 
@@ -39,10 +36,9 @@ function Legend() {
 
 interface DailyBreakdownProps {
   days: DayCell[]
-  maxSets: number
 }
 
-function DailyBreakdown({ days, maxSets }: DailyBreakdownProps) {
+function DailyBreakdown({ days }: DailyBreakdownProps) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -52,7 +48,7 @@ function DailyBreakdown({ days, maxSets }: DailyBreakdownProps) {
       className="grid w-full grid-cols-7 gap-1"
     >
       {days.map((day, index) => {
-        const level = getIntensityLevel(day.totalSets, maxSets)
+        const level = getIntensityLevel(day.totalSets)
         const date = parseISO(day.date)
         const isTodayCell = isToday(date)
 
@@ -64,7 +60,8 @@ function DailyBreakdown({ days, maxSets }: DailyBreakdownProps) {
             transition={{ delay: index * 0.02, duration: 0.15 }}
             className={cn(
               'flex flex-col items-center gap-0.5 rounded-lg p-1.5',
-              isTodayCell && 'bg-muted/50',
+              isTodayCell &&
+                'ring-1 ring-foreground ring-offset-1 ring-offset-background',
             )}
           >
             <span className="text-[10px] font-medium text-muted-foreground">
@@ -102,7 +99,6 @@ export function ActivityHeatmap({
 }: ActivityHeatmapProps) {
   const {
     weeks,
-    maxSets,
     selectedWeekIndex,
     setSelectedWeekIndex,
     selectedWeekStats,
@@ -123,18 +119,19 @@ export function ActivityHeatmap({
   }
 
   return (
-    <div className="space-y-3 pt-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="space-y-[20px] pt-6">
+      <div className="mb-4 space-y-1">
         <h3 className="text-sm font-medium text-muted-foreground">Activity</h3>
         {selectedWeekStats && (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">
+            <p className="text-xs font-medium text-foreground">
               {selectedWeekStats.weekLabel}
-            </span>
+            </p>
+            •
             <span className="font-medium text-orange-500">
               {selectedWeekStats.totalSets} sets
             </span>
-            <span>{selectedWeekStats.activeDays}/7 days</span>
+            •<span>{selectedWeekStats.activeDays}/7 days</span>
           </div>
         )}
       </div>
@@ -144,7 +141,6 @@ export function ActivityHeatmap({
           <DailyBreakdown
             key={selectedWeekIndex}
             days={selectedWeekStats.days}
-            maxSets={maxSets}
           />
         )}
       </AnimatePresence>
@@ -174,7 +170,7 @@ export function ActivityHeatmap({
                 className={cn(
                   'flex flex-col gap-1 rounded-md p-1 transition-all',
                   isSelected
-                    ? 'bg-muted/10 ring-1 ring-foreground/20'
+                    ? 'bg-muted/10 ring-2 ring-foreground/20'
                     : 'hover:bg-muted/30',
                 )}
               >
@@ -185,9 +181,7 @@ export function ActivityHeatmap({
                       key={cell.date}
                       className={cn(
                         'aspect-square w-full rounded transition-all',
-                        INTENSITY_CLASSES[
-                          getIntensityLevel(cell.totalSets, maxSets)
-                        ],
+                        INTENSITY_CLASSES[getIntensityLevel(cell.totalSets)],
                         isTodayCell &&
                           'ring-1 ring-foreground ring-offset-1 ring-offset-background',
                       )}

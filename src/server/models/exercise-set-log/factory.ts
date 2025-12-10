@@ -340,7 +340,13 @@ export const markExerciseAsCompleted = async (
   // Get userId for cache invalidation
   const exerciseWithUser = await prisma.trainingExercise.findUnique({
     where: { id: exerciseId },
-    select: { day: { select: { week: { select: { plan: { select: { assignedToId: true } } } } } } },
+    select: {
+      day: {
+        select: {
+          week: { select: { plan: { select: { assignedToId: true } } } },
+        },
+      },
+    },
   })
   const userId = exerciseWithUser?.day?.week?.plan?.assignedToId
 

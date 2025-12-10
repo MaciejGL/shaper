@@ -9,4 +9,3 @@ export async function invalidateTrainingAnalyticsCache(
 ): Promise<void> {
   await deleteFromCache(getTrainingAnalyticsCacheKey(userId))
 }
-

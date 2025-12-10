@@ -1,51 +1,44 @@
 import { cn } from '@/lib/utils'
 
 // Progress-based color configuration for weekly muscle heatmap
-// Colors represent progress toward weekly target (12 sets = 100%)
+// Colors represent progress toward weekly target (16 sets = 100%)
+// 4 colors + neutral: Low (1-6), Moderate (7-11), Optimal (12-16), Maximum (17+)
 export const HEATMAP_COLORS = {
   levels: [
     {
-      threshold: 1.0, // 100% - Complete
+      threshold: 1.0625, // 106%+ = 17+ sets - Maximum
       fillColor: cn('fill-orange-500'),
       bgColor: cn('bg-orange-500'),
       textColor: cn('text-white'),
       progressColor: cn('bg-orange-500 dark:bg-orange-500'),
-      label: 'Complete',
+      label: 'Maximum',
     },
     {
-      threshold: 0.75, // 75-99%
+      threshold: 0.75, // 75-106% = 12-16 sets - Optimal
       fillColor: cn('fill-orange-400'),
       bgColor: cn('bg-orange-400'),
       textColor: cn('text-white'),
       progressColor: cn('bg-orange-400 dark:bg-orange-400'),
-      label: 'Almost',
+      label: 'Optimal',
     },
     {
-      threshold: 0.5, // 50-74%
-      fillColor: cn('fill-orange-300'),
-      bgColor: cn('bg-orange-300'),
-      textColor: cn('text-orange-900'),
-      progressColor: cn('bg-orange-300 dark:bg-orange-300'),
-      label: 'Good',
-    },
-    {
-      threshold: 0.25, // 25-49%
+      threshold: 0.44, // 44-74% = 7-11 sets - Moderate
       fillColor: cn('fill-orange-200'),
       bgColor: cn('bg-orange-200'),
       textColor: cn('text-orange-900'),
       progressColor: cn('bg-orange-200 dark:bg-orange-200'),
-      label: 'Started',
+      label: 'Moderate',
     },
     {
-      threshold: 0.01, // 1-24%
+      threshold: 0.01, // 1-43% = 1-6 sets - Low
       fillColor: cn('fill-orange-100'),
       bgColor: cn('bg-orange-100'),
       textColor: cn('text-orange-800'),
       progressColor: cn('bg-orange-100 dark:bg-orange-100'),
-      label: 'Light',
+      label: 'Low',
     },
     {
-      threshold: 0, // 0% - Not trained
+      threshold: 0, // 0% = 0 sets - Not trained
       fillColor: cn('fill-neutral-500 dark:fill-neutral-700'),
       bgColor: cn('bg-neutral-500 dark:bg-neutral-700'),
       textColor: cn('text-muted-foreground'),

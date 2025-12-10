@@ -1,10 +1,11 @@
 'use client'
 
-import { ArrowLeftRight } from 'lucide-react'
+import { ArrowLeftRight, RotateCcwIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useUser } from '@/context/user-context'
 import { cn } from '@/lib/utils'
 
 import { HEATMAP_COLORS } from '../../constants/heatmap-colors'
@@ -87,19 +88,13 @@ export function HeatmapBodyView({
   onMuscleClick,
 }: HeatmapBodyViewProps) {
   const [view, setView] = useState<'front' | 'back'>('front')
+  const { user } = useUser()
+  const isFemale = user?.profile?.sex === 'Female'
 
   return (
     <div className="relative">
       <Tabs value={view} onValueChange={(v) => setView(v as 'front' | 'back')}>
-        <TabsList className="mx-auto border border-border grid grid-cols-[1fr_auto_1fr]">
-          <TabsTrigger value="front">Front</TabsTrigger>
-          <TabsTrigger value="swap" disabled>
-            <ArrowLeftRight className="size-3" />
-          </TabsTrigger>
-          <TabsTrigger value="back">Back</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="front" className="pt-4 -mx-2">
+        <TabsContent value="front" className="-mx-2">
           <BaseMuscleBodyMap
             view="front"
             muscleIntensity={muscleIntensity}
@@ -116,7 +111,7 @@ export function HeatmapBodyView({
           />
         </TabsContent>
 
-        <TabsContent value="back" className="pt-4 -mx-2">
+        <TabsContent value="back" className="-mx-2">
           <BaseMuscleBodyMap
             view="back"
             muscleIntensity={muscleIntensity}
@@ -132,6 +127,24 @@ export function HeatmapBodyView({
             )}
           />
         </TabsContent>
+        <div
+          className={cn(
+            'mx-auto flex flex-col items-center',
+            isFemale && 'mt-10',
+          )}
+        >
+          <TabsList
+            className={cn(
+              'mx-auto border border-border grid grid-cols-[1fr_1fr_auto]',
+            )}
+          >
+            <TabsTrigger value="front">Front</TabsTrigger>
+            <TabsTrigger value="back">Back</TabsTrigger>
+            <TabsTrigger value="swap" disabled className="disabled:opacity-100">
+              <RotateCcwIcon className="size-3 text-muted-foreground" />
+            </TabsTrigger>
+          </TabsList>
+        </div>
       </Tabs>
     </div>
   )
