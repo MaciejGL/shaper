@@ -9,12 +9,33 @@ import {
 } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
+import {
+  DEFAULT_VOLUME_PRESET,
+  VOLUME_PRESETS,
+} from '../../constants/heatmap-colors'
+
 const LEGEND_ITEMS = [
   { bg: 'bg-neutral-500 dark:bg-neutral-700', sets: '0', label: 'Not trained' },
-  { bg: 'bg-orange-100', sets: '1-6', label: 'Low' },
-  { bg: 'bg-orange-200', sets: '7-11', label: 'Moderate' },
-  { bg: 'bg-orange-400', sets: '12-16', label: 'Optimal' },
-  { bg: 'bg-orange-500', sets: '17+', label: 'Maximum' },
+  {
+    bg: 'bg-orange-100',
+    sets: `${DEFAULT_VOLUME_PRESET.ranges.low.min}-${DEFAULT_VOLUME_PRESET.ranges.low.max}`,
+    label: 'Low',
+  },
+  {
+    bg: 'bg-orange-200',
+    sets: `${DEFAULT_VOLUME_PRESET.ranges.moderate.min}-${DEFAULT_VOLUME_PRESET.ranges.moderate.max}`,
+    label: 'Moderate',
+  },
+  {
+    bg: 'bg-orange-400',
+    sets: `${DEFAULT_VOLUME_PRESET.ranges.optimal.min}-${DEFAULT_VOLUME_PRESET.ranges.optimal.max}`,
+    label: 'Optimal',
+  },
+  {
+    bg: 'bg-orange-500',
+    sets: `${DEFAULT_VOLUME_PRESET.ranges.maximum.min}+`,
+    label: 'Maximum',
+  },
 ]
 
 export function HeatmapLegend() {
@@ -33,35 +54,53 @@ export function HeatmapLegend() {
               <Info className="size-4" />
             </button>
           </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-[280px] p-4">
+          <TooltipContent side="top" className="max-w-[300px] p-4">
             <div className="space-y-3">
               <div className="space-y-1">
-                <p className="font-medium text-sm">Volume Insights</p>
+                <p className="font-medium text-sm">Weekly Volume Guide</p>
                 <p className="text-xs text-muted-foreground">
-                  Track your weekly set volume per muscle group to ensure
-                  optimal growth.
+                  Optimal sets per muscle group vary by training goal.
                 </p>
               </div>
 
               <div className="space-y-1.5 rounded-md bg-muted/50 p-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">1-6 sets</span>
-                  <span>Low volume</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">7-11 sets</span>
-                  <span>Moderate</span>
-                </div>
-                <div className="flex items-center justify-between font-medium">
-                  <span className="text-primary">12-16 sets</span>
-                  <span className="text-primary">Optimal</span>
-                </div>
+                {Object.values(VOLUME_PRESETS).map((preset) => (
+                  <div
+                    key={preset.id}
+                    className={cn(
+                      'flex items-center justify-between',
+                      preset.id === DEFAULT_VOLUME_PRESET.id && 'font-medium',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        preset.id === DEFAULT_VOLUME_PRESET.id
+                          ? 'text-primary'
+                          : 'text-muted-foreground',
+                      )}
+                    >
+                      {preset.name}
+                    </span>
+                    <span
+                      className={cn(
+                        preset.id === DEFAULT_VOLUME_PRESET.id &&
+                          'text-primary',
+                      )}
+                    >
+                      {preset.ranges.optimal.min}-{preset.ranges.optimal.max}{' '}
+                      sets
+                    </span>
+                  </div>
+                ))}
               </div>
 
               <p className="text-xs text-muted-foreground">
-                Research suggests{' '}
-                <span className="font-medium text-foreground">12-16 sets</span>{' '}
-                weekly for optimal results.
+                Currently using{' '}
+                <span className="font-medium text-foreground">
+                  {DEFAULT_VOLUME_PRESET.name}
+                </span>{' '}
+                preset ({DEFAULT_VOLUME_PRESET.ranges.optimal.min}-
+                {DEFAULT_VOLUME_PRESET.ranges.optimal.max} sets optimal).
               </p>
             </div>
           </TooltipContent>

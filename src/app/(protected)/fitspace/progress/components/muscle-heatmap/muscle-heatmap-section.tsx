@@ -4,7 +4,6 @@ import { TabsContent } from '@radix-ui/react-tabs'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 
-import { Divider } from '@/components/divider'
 import { PremiumGate } from '@/components/premium-gate'
 import {
   Card,

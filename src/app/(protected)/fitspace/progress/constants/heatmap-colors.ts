@@ -1,5 +1,77 @@
 import { cn } from '@/lib/utils'
 
+// Volume preset types
+export interface VolumePreset {
+  id: string
+  name: string
+  description: string
+  targetSets: number
+  ranges: {
+    low: { min: number; max: number }
+    moderate: { min: number; max: number }
+    optimal: { min: number; max: number }
+    maximum: { min: number }
+  }
+}
+
+// Training volume presets based on scientific recommendations
+export const VOLUME_PRESETS = {
+  general: {
+    id: 'general',
+    name: 'General Fitness',
+    description: 'Balanced approach for overall fitness and health',
+    targetSets: 16,
+    ranges: {
+      low: { min: 1, max: 6 },
+      moderate: { min: 7, max: 11 },
+      optimal: { min: 12, max: 16 },
+      maximum: { min: 17 },
+    },
+  },
+  hypertrophy: {
+    id: 'hypertrophy',
+    name: 'Hypertrophy',
+    description: 'Optimized for muscle growth (10-20 sets recommended)',
+    targetSets: 20,
+    ranges: {
+      low: { min: 1, max: 9 },
+      moderate: { min: 10, max: 14 },
+      optimal: { min: 15, max: 20 },
+      maximum: { min: 21 },
+    },
+  },
+  strength: {
+    id: 'strength',
+    name: 'Strength',
+    description:
+      'Focused on building strength (lower volume, higher intensity)',
+    targetSets: 12,
+    ranges: {
+      low: { min: 1, max: 4 },
+      moderate: { min: 5, max: 8 },
+      optimal: { min: 9, max: 12 },
+      maximum: { min: 13 },
+    },
+  },
+  maintenance: {
+    id: 'maintenance',
+    name: 'Maintenance',
+    description: 'Minimal effective dose to maintain muscle',
+    targetSets: 8,
+    ranges: {
+      low: { min: 1, max: 3 },
+      moderate: { min: 4, max: 5 },
+      optimal: { min: 6, max: 8 },
+      maximum: { min: 9 },
+    },
+  },
+} as const satisfies Record<string, VolumePreset>
+
+export type VolumePresetId = keyof typeof VOLUME_PRESETS
+
+// Default preset
+export const DEFAULT_VOLUME_PRESET = VOLUME_PRESETS.general
+
 // Progress-based color configuration for weekly muscle heatmap
 // Colors represent progress toward weekly target (16 sets = 100%)
 // 4 colors + neutral: Low (1-6), Moderate (7-11), Optimal (12-16), Maximum (17+)
