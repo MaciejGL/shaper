@@ -231,12 +231,12 @@ export async function POST(request: NextRequest) {
 
     // Check premium access
     const hasPremium = await checkPremiumAccess(userId)
-    // if (!hasPremium) {
-    //   return NextResponse.json(
-    //     { error: 'Premium subscription required' },
-    //     { status: 403 },
-    //   )
-    // }
+    if (!hasPremium && process.env.ENABLE_ALL_FEATURES !== 'true') {
+      return NextResponse.json(
+        { error: 'Premium subscription required' },
+        { status: 403 },
+      )
+    }
 
     // Parse optional workoutType from body
     let workoutType: string | undefined

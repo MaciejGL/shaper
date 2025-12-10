@@ -320,7 +320,7 @@ export async function POST(_request: NextRequest) {
 
     // Check premium access
     const hasPremium = await checkPremiumAccess(userId)
-    if (!hasPremium) {
+    if (!hasPremium && process.env.ENABLE_ALL_FEATURES !== 'true') {
       return NextResponse.json(
         { error: 'Premium subscription required' },
         { status: 403 },
@@ -496,7 +496,6 @@ export async function POST(_request: NextRequest) {
       recovery,
     }
 
-    console.log('result', result)
     // Cache the result
     await setInCache(cacheKey, result, CACHE_TTL)
 

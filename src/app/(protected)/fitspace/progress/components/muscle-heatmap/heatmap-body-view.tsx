@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeftRight, RotateCcwIcon } from 'lucide-react'
+import { RotateCcwIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { Progress } from '@/components/ui/progress'

@@ -1,5 +1,8 @@
 import { Redis } from '@upstash/redis'
 
+// Colored cache tag for log clarity (magenta to avoid clashing with GQL blue)
+const CACHE_TAG = '\x1b[35m[CACHE]\x1b[0m'
+
 // Use global to persist Redis client across module reloads in development
 declare global {
   var __upstashRedis: Redis | undefined
@@ -15,7 +18,7 @@ function getRedisClient(): Redis | null {
     !process.env.UPSTASH_KV_REST_API_URL ||
     !process.env.UPSTASH_KV_REST_API_TOKEN
   ) {
-    console.warn('[REDIS] Upstash environment variables not configured')
+    console.warn(`${CACHE_TAG} Upstash environment variables not configured`)
     return null
   }
 
@@ -26,7 +29,7 @@ function getRedisClient(): Redis | null {
 
   // Create new Upstash Redis client
   try {
-    console.info('[REDIS] Creating Upstash Redis client...')
+    console.info(`${CACHE_TAG} Creating Upstash Redis client...`)
 
     const client = new Redis({
       url: process.env.UPSTASH_KV_REST_API_URL,
@@ -35,11 +38,11 @@ function getRedisClient(): Redis | null {
 
     // Store in global for reuse
     global.__upstashRedis = client
-    console.info('[REDIS] Upstash Redis client ready')
+    console.info(`${CACHE_TAG} Upstash Redis client ready`)
 
     return client
   } catch (error) {
-    console.error('[REDIS] Failed to create Upstash Redis client:', error)
+    console.error(`${CACHE_TAG} Failed to create Upstash Redis client:`, error)
     return null
   }
 }
@@ -57,6 +60,7 @@ async function getFromCache<T>(key: string): Promise<T | null> {
     const value = await client.get<string>(key)
 
     if (value) {
+      console.info(`${CACHE_TAG} HIT ${key}`)
       // Upstash returns parsed JSON if it's valid JSON, otherwise string
       // We need to handle both cases
       if (typeof value === 'string') {
@@ -73,7 +77,7 @@ async function getFromCache<T>(key: string): Promise<T | null> {
     }
     return null
   } catch (error) {
-    console.error(`[REDIS] GET error for ${key}:`, error)
+    console.error(`${CACHE_TAG} GET error for ${key}:`, error)
     return null
   }
 }
@@ -96,7 +100,7 @@ async function setInCache<T>(
     // Use SETEX: set key with expiration
     await client.setex(key, ttlSeconds, serialized)
   } catch (error) {
-    console.error(`[REDIS] SET error for ${key}:`, error)
+    console.error(`${CACHE_TAG} SET error for ${key}:`, error)
   }
 }
 
@@ -111,7 +115,7 @@ async function existsInCache(key: string): Promise<boolean> {
     const result = await client.exists(key)
     return result === 1
   } catch (error) {
-    console.error('[REDIS] EXISTS error:', error)
+    console.error(`${CACHE_TAG} EXISTS error:`, error)
     return false
   }
 }
@@ -126,7 +130,7 @@ async function deleteFromCache(key: string): Promise<void> {
   try {
     await client.del(key)
   } catch (error) {
-    console.error('[REDIS] DEL error:', error)
+    console.error(`${CACHE_TAG} DEL error:`, error)
   }
 }
 
@@ -143,7 +147,7 @@ async function clearCachePattern(pattern: string): Promise<void> {
       await client.del(...keys)
     }
   } catch (error) {
-    console.error('[REDIS] CLEAR PATTERN error:', error)
+    console.error(`${CACHE_TAG} CLEAR PATTERN error:`, error)
   }
 }
 
@@ -169,7 +173,7 @@ function getRedisStatus(): {
 async function closeRedis(): Promise<void> {
   if (global.__upstashRedis) {
     global.__upstashRedis = undefined
-    console.info('[REDIS] Upstash client cleared')
+    console.info(`${CACHE_TAG} Upstash client cleared`)
   }
 }
 
