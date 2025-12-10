@@ -28,14 +28,8 @@ export function TrainingAnalyticsSection() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <PremiumGate
-          feature="Weekly Muscle Progress"
-          compact
-          showPartialContent
-        >
+        <PremiumGate feature="Muscle Recovery & Focus" compact>
           <div>
-            {/* AI Training Analytics */}
-
             <TrainingAnalytics />
           </div>
         </PremiumGate>

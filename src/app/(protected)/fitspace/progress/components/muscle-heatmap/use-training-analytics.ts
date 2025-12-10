@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { useUser } from '@/context/user-context'
+
 import type { TrainingAnalytics } from './analytics-types'
 
 async function fetchTrainingAnalytics(): Promise<TrainingAnalytics> {
@@ -17,6 +19,8 @@ async function fetchTrainingAnalytics(): Promise<TrainingAnalytics> {
 }
 
 export function useTrainingAnalytics() {
+  const { hasPremium, isLoading: isUserLoading } = useUser()
+
   const query = useQuery({
     queryKey: ['training-analytics'],
     queryFn: fetchTrainingAnalytics,
@@ -24,12 +28,14 @@ export function useTrainingAnalytics() {
     gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
     retry: 1,
     refetchOnWindowFocus: false,
+    enabled: hasPremium && !isUserLoading, // Only fetch for premium users
   })
 
   return {
-    analytics: query.data,
-    isLoading: query.isLoading,
+    analytics: hasPremium ? query.data : undefined,
+    isLoading: query.isLoading || isUserLoading,
     error: query.error,
     refetch: query.refetch,
+    hasPremium,
   }
 }

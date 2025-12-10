@@ -180,7 +180,13 @@ function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
 }
 
 export function TrainingAnalytics() {
-  const { analytics, isLoading, error, refetch } = useTrainingAnalytics()
+  const { analytics, isLoading, error, refetch, hasPremium } =
+    useTrainingAnalytics()
+
+  // Don't render anything for non-premium users
+  if (!hasPremium) {
+    return null
+  }
 
   if (isLoading) {
     return <AnalyticsSkeleton />

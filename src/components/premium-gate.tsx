@@ -30,17 +30,19 @@ export function PremiumGate({
   className,
 }: PremiumGateProps) {
   const pathname = usePathname()
-  const { hasPremium, isLoading, user } = useUser()
+  const { hasPremium, isLoading } = useUser()
   const rules = usePaymentRules()
   const { openUrl, isLoading: isOpeningUrl } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
     openInApp: rules.canLinkToPayment,
   })
 
-  const isAdmin = user?.email === 'm.glowacki01@gmail.com'
-
   // If user has premium access or is admin, show the content
-  if (hasPremium || isLoading || isAdmin) {
+  if (
+    hasPremium ||
+    isLoading ||
+    process.env.NEXT_PUBLIC_ENABLE_ALL_FEATURES === 'true'
+  ) {
     return children
   }
 
@@ -56,8 +58,8 @@ export function PremiumGate({
       {/* Show partial content if allowed */}
       {showPartialContent && (
         <div className="mb-6 opacity-50 pointer-events-none relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10 rounded-xl" />
-          <div className="w-full max-h-[300px] rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10 rounded-b-xl" />
+          <div className="w-full max-h-[200px] rounded-xl overflow-hidden">
             {children}
           </div>
         </div>
@@ -72,7 +74,7 @@ export function PremiumGate({
           )}
           <CardTitle className="flex items-center justify-center gap-2">
             <Crown className="w-5 h-5 text-amber-600" />
-            Requires additional access
+            Locked feature
           </CardTitle>
           {!compact && (
             <Badge variant="outline" className="w-fit mx-auto">
@@ -85,7 +87,7 @@ export function PremiumGate({
         <CardContent className="text-center space-y-4">
           <p className="text-muted-foreground">
             {description ||
-              `Access to ${feature.toLowerCase()} requires a Premium.`}
+              `${feature.charAt(0).toUpperCase() + feature.slice(1)} is available as part of our Premium experience.`}
           </p>
 
           {!compact && (

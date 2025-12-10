@@ -69,11 +69,7 @@ export function MuscleHeatmapSection() {
 
         <CardContent className="flex flex-col">
           <TabsContent value="heatmap" className="pt-4 flex flex-col gap-4">
-            <PremiumGate
-              feature="Weekly Muscle Progress"
-              compact
-              showPartialContent
-            >
+            <PremiumGate feature="Muscle Heatmap" compact showPartialContent>
               <div>
                 <div className="mx-auto mb-6 w-max">
                   <WeekNavigator
@@ -122,11 +118,7 @@ export function MuscleHeatmapSection() {
             </PremiumGate>
           </TabsContent>
           <TabsContent value="day">
-            <PremiumGate
-              feature="Weekly Muscle Progress"
-              compact
-              showPartialContent
-            >
+            <PremiumGate feature="Activity Heatmap" compact showPartialContent>
               <div>
                 {/* Body Heatmap View */}
 
