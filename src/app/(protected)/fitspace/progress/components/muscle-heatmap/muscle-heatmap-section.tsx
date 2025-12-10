@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 
 import { PremiumGate } from '@/components/premium-gate'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 
 import { ActivityHeatmap } from './activity-heatmap'
@@ -12,7 +12,6 @@ import { HeatmapBodyView } from './heatmap-body-view'
 import { HeatmapLegend } from './heatmap-legend'
 import { SelectedMuscleDetails } from './selected-muscle-details'
 import { useMuscleHeatmap } from './use-muscle-heatmap'
-import { WeekNavigator } from './week-navigator'
 
 export function MuscleHeatmapSection() {
   const { user } = useUser()
@@ -22,13 +21,9 @@ export function MuscleHeatmapSection() {
     muscleIntensity,
     muscleProgress,
     streakWeeks,
-    weekStartDate,
-    weekEndDate,
     weekOffset,
     setWeekOffset,
     isCurrentWeek,
-    goToPreviousWeek,
-    goToNextWeek,
   } = useMuscleHeatmap()
 
   const handleMuscleClick = (muscle: string) => {
@@ -42,14 +37,15 @@ export function MuscleHeatmapSection() {
   return (
     <Card>
       <CardHeader className="pb-2">
+        <CardTitle>Muscle Heatmap</CardTitle>
         <div className="flex flex-col gap-2 items-center justify-center">
-          <WeekNavigator
+          {/* <WeekNavigator
             weekStartDate={weekStartDate}
             weekEndDate={weekEndDate}
             weekOffset={weekOffset}
             onPrevious={goToPreviousWeek}
             onNext={goToNextWeek}
-          />
+          /> */}
           {streakWeeks > 0 && isCurrentWeek && (
             <div className="flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-300">
               <span className="font-semibold">{streakWeeks}</span>
@@ -66,7 +62,7 @@ export function MuscleHeatmapSection() {
         >
           <div>
             {/* Body Heatmap View */}
-            <div className="mb-6">
+            <div className="mb-10">
               <HeatmapBodyView
                 muscleIntensity={muscleIntensity}
                 muscleProgress={muscleProgress}

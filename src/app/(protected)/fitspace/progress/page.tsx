@@ -13,6 +13,7 @@ import {
 import { LatestPRs } from './components/latest-prs/latest-prs'
 import { LogsSection } from './components/logs-section/logs-section'
 import { MuscleHeatmapSection } from './components/muscle-heatmap/muscle-heatmap-section'
+import { TrainingAnalyticsSection } from './components/muscle-heatmap/training-analytics-section'
 import { SnapshotsSection } from './components/snapshots-section/snapshots-section'
 
 export default function ProgressPage() {
@@ -39,13 +40,13 @@ export default function ProgressPage() {
       headerChildren={showInHeader ? <CheckinScheduleSection /> : null}
     >
       <div className="space-y-6">
+        <MuscleHeatmapSection />
+        <TrainingAnalyticsSection />
         <BodyMeasurementsProvider>
           <LogsSection />
 
           <SnapshotsSection />
         </BodyMeasurementsProvider>
-
-        <MuscleHeatmapSection />
 
         <LatestPRs />
 

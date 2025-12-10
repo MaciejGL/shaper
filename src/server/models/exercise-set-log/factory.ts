@@ -7,6 +7,7 @@ import {
   GQLMutationUpdateSetLogArgs,
   GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
+import { invalidateTrainingAnalyticsCache } from '@/lib/cache/training-analytics-cache'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import {
@@ -95,6 +96,9 @@ const markSetAsCompletedRelatedData = async (
   })
 
   const exerciseId = updatedSet.exerciseId
+
+  // Invalidate training analytics cache (async, non-blocking)
+  after(invalidateTrainingAnalyticsCache(userId))
 
   // 2. Check if all sets in this exercise are completed
   const incompleteSets = await prisma.exerciseSet.count({
@@ -232,6 +236,9 @@ const unmarkSetCompletedRelatedData = async (setId: string, userId: string) => {
 
   updateWorkoutSessionEvent(set.exercise.dayId, GQLWorkoutSessionEvent.Progress)
 
+  // Invalidate training analytics cache (async, non-blocking)
+  after(invalidateTrainingAnalyticsCache(userId))
+
   if (userId) {
     after(saveExercisePR(set.exerciseId, set.exercise.dayId, userId))
   }
@@ -329,6 +336,14 @@ export const markExerciseAsCompleted = async (
   args: GQLMutationMarkExerciseAsCompletedArgs,
 ) => {
   const { exerciseId, completed } = args
+
+  // Get userId for cache invalidation
+  const exerciseWithUser = await prisma.trainingExercise.findUnique({
+    where: { id: exerciseId },
+    select: { day: { select: { week: { select: { plan: { select: { assignedToId: true } } } } } } },
+  })
+  const userId = exerciseWithUser?.day?.week?.plan?.assignedToId
+
   if (!completed) {
     const exercise = await prisma.trainingExercise.update({
       where: { id: exerciseId },
@@ -372,6 +387,11 @@ export const markExerciseAsCompleted = async (
       GQLWorkoutSessionEvent.Progress,
     )
 
+    // Invalidate training analytics cache
+    if (userId) {
+      after(invalidateTrainingAnalyticsCache(userId))
+    }
+
     return true
   }
 
@@ -389,6 +409,11 @@ export const markExerciseAsCompleted = async (
   })
 
   if (!exercise) return null
+
+  // Invalidate training analytics cache
+  if (userId) {
+    after(invalidateTrainingAnalyticsCache(userId))
+  }
 
   const day = await prisma.trainingDay.findFirst({
     where: { exercises: { some: { id: exerciseId } } },
@@ -731,6 +756,11 @@ export const markWorkoutAsCompleted = async (
   })
 
   await updateWorkoutSessionEvent(dayId, GQLWorkoutSessionEvent.Complete)
+
+  // Invalidate training analytics cache
+  if (dayWithInfo?.week?.plan?.assignedTo?.id) {
+    after(invalidateTrainingAnalyticsCache(dayWithInfo.week.plan.assignedTo.id))
+  }
 
   // Send workout completion notifications
   if (dayWithInfo?.week?.plan?.assignedTo) {

@@ -46,6 +46,7 @@ import {
 import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 
+import { AiExerciseSuggestions } from './ai-exercise-suggestions'
 import type { AddedExerciseInfo } from './types'
 import { useWeeklyFocus } from './use-weekly-focus'
 import { WeeklyFocusChips } from './weekly-focus-chips'
@@ -230,14 +231,40 @@ export function AddSingleExercise({
     [addExercise, dayId],
   )
 
+  // Handle batch adding exercises from AI suggestions
+  const [isBatchAdding, setIsBatchAdding] = useState(false)
+  const handleAddMultipleExercises = useCallback(
+    async (exerciseIds: string[]) => {
+      if (exerciseIds.length === 0) return
+      setIsBatchAdding(true)
+      
+      // Add exercises sequentially to avoid race conditions
+      for (const exerciseId of exerciseIds) {
+        await new Promise<void>((resolve) => {
+          addExercise(
+            { dayId, exerciseBaseId: exerciseId },
+            {
+              onSettled: () => resolve(),
+            },
+          )
+        })
+      }
+      
+      setIsBatchAdding(false)
+    },
+    [addExercise, dayId],
+  )
+
   const drawerContent = (
     <>
       <ExerciseListWithFilters
         exercises={allExercises}
         onSelectExercise={handleSelectExercise}
         onRemoveExercise={handleRemoveExercise}
+        onAddMultipleExercises={handleAddMultipleExercises}
         isAdding={isAdding}
         isRemoving={isRemoving}
+        isBatchAdding={isBatchAdding}
         isLoading={isLoading}
         addingExerciseId={addingExerciseId}
         removingExerciseId={removingExerciseId}
@@ -344,8 +371,10 @@ function ExerciseListWithFilters({
   exercises,
   onSelectExercise,
   onRemoveExercise,
+  onAddMultipleExercises,
   isAdding,
   isRemoving,
+  isBatchAdding,
   isLoading,
   addingExerciseId,
   removingExerciseId,
@@ -355,8 +384,10 @@ function ExerciseListWithFilters({
   exercises: Exercise[]
   onSelectExercise: (id: string) => void
   onRemoveExercise: (baseId: string) => void
+  onAddMultipleExercises: (ids: string[]) => void
   isAdding: boolean
   isRemoving: boolean
+  isBatchAdding: boolean
   isLoading: boolean
   addingExerciseId: string | null
   removingExerciseId: string | null
@@ -407,6 +438,11 @@ function ExerciseListWithFilters({
             Choose exercises and sets manually.
           </p>
         </div>
+
+        <AiExerciseSuggestions
+          onAddExercises={onAddMultipleExercises}
+          isAddingExercises={isBatchAdding}
+        />
 
         <WeeklyFocusChips
           groupSummaries={groupSummaries}
