@@ -2,7 +2,7 @@ import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
-import { reportRefund } from '@/lib/external-reporting'
+import { reportRefund } from '@/lib/external-reporting/report-refund'
 
 /**
  * Handles charge.refunded webhook

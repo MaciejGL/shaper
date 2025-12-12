@@ -9,7 +9,7 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
-import { reportExternalTransaction } from '@/lib/external-reporting'
+import { reportTransaction } from '@/lib/external-reporting/report-transaction'
 import { notifyTrainerSubscriptionPayment } from '@/lib/notifications/push-notification-service'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { createTasksForDelivery } from '@/server/models/service-task/factory'
@@ -81,7 +81,7 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       const platform =
         (stripeSub.metadata?.platform as 'ios' | 'android') || null
 
-      await reportExternalTransaction({
+      await reportTransaction({
         userId: subscription.userId,
         stripeTransactionId: invoice.payment_intent as string,
         amount: invoice.amount_paid || 0,

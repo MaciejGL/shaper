@@ -90,6 +90,7 @@
     "expo-server-sdk": "^3.15.0",
     "framer-motion": "12.23.12",
     "fuse.js": "7.1.0",
+    "googleapis": "^168.0.0",
     "graphql": "16.11.0",
     "graphql-yoga": "5.15.1",
     "input-otp": "1.4.2",

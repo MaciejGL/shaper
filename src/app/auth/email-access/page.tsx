@@ -14,10 +14,7 @@ import { LoadingSkeleton } from '@/components/loading-skeleton'
 function getRedirectFromToken(token: string): string {
   try {
     // Convert base64url to standard base64
-    const base64 = token
-      .split('.')[1]
-      .replace(/-/g, '+')
-      .replace(/_/g, '/')
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
     const payload = JSON.parse(atob(base64))
     return payload.redirectUrl || '/account-management'
   } catch {

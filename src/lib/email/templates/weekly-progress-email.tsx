@@ -96,5 +96,3 @@ export const WeeklyProgressEmail = ({
     <EmailFooter companyName="Hypro" />
   </EmailWrapper>
 )
-
-

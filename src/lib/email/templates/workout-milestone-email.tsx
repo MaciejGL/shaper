@@ -88,5 +88,3 @@ export const WorkoutMilestoneEmail = ({
     <EmailFooter companyName="Hypro" />
   </EmailWrapper>
 )
-
-
