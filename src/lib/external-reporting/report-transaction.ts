@@ -4,7 +4,11 @@
  * Reports Premium subscription transactions to Apple/Google
  * for external payment compliance.
  */
-import { PAYMENT_RULES, getRegionFromTimezone } from '@/config/payment-rules'
+import {
+  PAYMENT_RULES,
+  getCountryCodeFromTimezone,
+  getRegionFromTimezone,
+} from '@/config/payment-rules'
 import prisma from '@/lib/db'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
@@ -24,6 +28,7 @@ const REPORTABLE_PRODUCTS = [
  * 1. Product is Premium (monthly/yearly)
  * 2. Platform is iOS or Android (not web)
  * 3. Platform is in "full" mode for user's region
+ * 4. For Android: country code is known (Google requires ISO country code)
  */
 export async function reportTransaction(
   params: ReportTransactionParams,
@@ -75,13 +80,24 @@ export async function reportTransaction(
     if (platform === 'ios') {
       await reportToApple()
     } else {
+      // For Android, we need an actual ISO country code
+      const countryCode = getCountryCodeFromTimezone(user.profile?.timezone)
+      if (!countryCode) {
+        console.warn(
+          '[REPORTING] Skipping - no country code for timezone:',
+          user.profile?.timezone,
+        )
+        return
+      }
+
       await reportToGoogle({
         externalTransactionId: params.stripeTransactionId,
         transactionType: params.transactionType,
         amount: params.amount,
         currency: params.currency,
-        regionCode: region,
-        originalTransactionId: params.originalTransactionId,
+        countryCode,
+        externalOfferToken: params.externalOfferToken,
+        initialExternalTransactionId: params.initialExternalTransactionId,
       })
     }
   } catch (error) {

@@ -88,6 +88,18 @@ export function getRegionFromTimezone(
   return 'DEFAULT'
 }
 
+/**
+ * Get ISO country code from timezone for Google reporting.
+ * Returns the actual country code (NO, DE, FR, etc.) or null if unknown.
+ * Google's userTaxAddress.regionCode requires real ISO country codes.
+ */
+export function getCountryCodeFromTimezone(
+  timezone: string | null | undefined,
+): string | null {
+  if (!timezone) return null
+  return TIMEZONE_TO_COUNTRY[timezone] || null
+}
+
 // Full mode config - shows all upgrade UI
 const FULL_MODE: PaymentRule = {
   canShowUpgradeUI: true,

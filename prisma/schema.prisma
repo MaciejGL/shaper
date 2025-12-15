@@ -686,31 +686,35 @@ model PackageTemplate {
 }
 
 model UserSubscription {
-  id                   String             @id @default(uuid())
-  userId               String
-  packageId            String
-  trainerId            String?
-  status               SubscriptionStatus @default(ACTIVE)
-  startDate            DateTime
-  endDate              DateTime
-  stripeSubscriptionId String?
-  stripeLookupKey      String?
-  mockPaymentStatus    String?            @default("COMPLETED")
-  mockTransactionId    String?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-  failedPaymentRetries Int                @default(0)
-  gracePeriodEnd       DateTime?
-  isInGracePeriod      Boolean            @default(false)
-  isTrialActive        Boolean            @default(false)
-  lastPaymentAttempt   DateTime?
-  trialEnd             DateTime?
-  trialStart           DateTime?
-  freezeDaysUsed       Int                @default(0)
-  freezeUsageYear      Int?
-  package              PackageTemplate    @relation(fields: [packageId], references: [id])
-  trainer              User?              @relation("TrainerSubscriptions", fields: [trainerId], references: [id])
-  user                 User               @relation("UserSubscriptions", fields: [userId], references: [id])
+  id                     String             @id @default(uuid())
+  userId                 String
+  packageId              String
+  trainerId              String?
+  status                 SubscriptionStatus @default(ACTIVE)
+  startDate              DateTime
+  endDate                DateTime
+  stripeSubscriptionId   String?
+  stripeLookupKey        String?
+  mockPaymentStatus      String?            @default("COMPLETED")
+  mockTransactionId      String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  failedPaymentRetries   Int                @default(0)
+  gracePeriodEnd         DateTime?
+  isInGracePeriod        Boolean            @default(false)
+  isTrialActive          Boolean            @default(false)
+  lastPaymentAttempt     DateTime?
+  trialEnd               DateTime?
+  trialStart             DateTime?
+  freezeDaysUsed         Int                @default(0)
+  freezeUsageYear        Int?
+  // External Offers tracking (for Google/Apple reporting)
+  externalOfferToken     String?
+  initialStripeInvoiceId String?
+  originPlatform         String?
+  package                PackageTemplate    @relation(fields: [packageId], references: [id])
+  trainer                User?              @relation("TrainerSubscriptions", fields: [trainerId], references: [id])
+  user                   User               @relation("UserSubscriptions", fields: [userId], references: [id])
 
   @@index([userId])
   @@index([trainerId])

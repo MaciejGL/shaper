@@ -15,6 +15,7 @@ import { useAndroidBackButton } from '../hooks/use-android-back-button'
 import { useAuthTokenManagement } from '../hooks/use-auth-token-management'
 import { usePushNotificationSync } from '../hooks/use-push-notification-sync'
 import { useThemeManager } from '../hooks/use-theme-manager'
+import { initExternalOffers } from '../services/external-offers'
 
 import { EnhancedWebView } from './enhanced-webview'
 import {
@@ -89,8 +90,11 @@ function HyproAppContent({ authToken }: HyproAppProps) {
     }
   }
 
-  // Check for initial URL from notification on cold start
+  // Initialize External Offers (Android only) and check for initial URL
   useEffect(() => {
+    // Initialize External Offers for Google Play compliance
+    initExternalOffers()
+
     const checkInitialUrl = async () => {
       try {
         // Check for deep link URL

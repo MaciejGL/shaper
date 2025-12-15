@@ -19,8 +19,9 @@ export async function reportToGoogle(
     transactionType,
     amount,
     currency,
-    regionCode,
-    originalTransactionId,
+    countryCode,
+    externalOfferToken,
+    initialExternalTransactionId,
   } = params
 
   const androidPublisher = getAndroidPublisher()
@@ -30,7 +31,9 @@ export async function reportToGoogle(
   const priceMicros = String(amount * 10000)
 
   if (transactionType === 'refund') {
-    const name = `${parent}/externalTransactions/${originalTransactionId || externalTransactionId}`
+    // For refunds, use the initial transaction ID to reference the original purchase
+    const refundTarget = initialExternalTransactionId || externalTransactionId
+    const name = `${parent}/externalTransactions/${refundTarget}`
     await androidPublisher.externaltransactions.refundexternaltransaction({
       name,
       requestBody: {
@@ -38,22 +41,41 @@ export async function reportToGoogle(
         refundTime: new Date().toISOString(),
       },
     })
-    console.info('[GOOGLE] Refund reported:', externalTransactionId)
+    console.info('[GOOGLE] Refund reported:', refundTarget)
     return
   }
 
-  // Purchase or renewal
+  // Build request body for purchase or renewal
   const requestBody: Record<string, unknown> = {
     transactionTime: new Date().toISOString(),
-    userTaxAddress: { regionCode: regionCode.toUpperCase() },
+    userTaxAddress: { regionCode: countryCode.toUpperCase() },
     currentPreTaxAmount: {
       priceMicros,
       currency: currency.toUpperCase(),
     },
   }
 
-  if (transactionType === 'renewal' && originalTransactionId) {
-    requestBody.originalTransactionId = originalTransactionId
+  // Use recurringTransaction structure for subscriptions
+  if (transactionType === 'purchase' && externalOfferToken) {
+    // Initial purchase: requires the token from Android app
+    requestBody.recurringTransaction = {
+      externalTransactionToken: externalOfferToken,
+      externalSubscription: { subscriptionType: 'RECURRING' },
+    }
+  } else if (transactionType === 'renewal' && initialExternalTransactionId) {
+    // Renewal: references the initial purchase
+    requestBody.recurringTransaction = {
+      initialExternalTransactionId,
+      externalSubscription: { subscriptionType: 'RECURRING' },
+    }
+  } else {
+    // Missing required data - can't report
+    const reason =
+      transactionType === 'purchase'
+        ? 'Missing externalOfferToken for initial purchase'
+        : 'Missing initialExternalTransactionId for renewal'
+    console.warn('[GOOGLE] Skipping report:', reason)
+    throw new Error(reason)
   }
 
   await androidPublisher.externaltransactions.createexternaltransaction({

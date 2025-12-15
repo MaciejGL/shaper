@@ -5,7 +5,6 @@
  */
 import prisma from '@/lib/db'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
-import { stripe } from '@/lib/stripe/stripe'
 
 import { reportTransaction } from './report-transaction'
 
@@ -14,13 +13,15 @@ interface ReportRefundParams {
   chargeId: string
   amount: number
   currency: string
+  invoiceId?: string
 }
 
 /**
  * Report a refund - looks up subscription details automatically
+ * Uses stored originPlatform and initialStripeInvoiceId for correct Google reporting
  */
 export async function reportRefund(params: ReportRefundParams): Promise<void> {
-  const { userId, chargeId, amount, currency } = params
+  const { userId, chargeId, amount, currency, invoiceId } = params
 
   try {
     const subscription = await prisma.userSubscription.findFirst({
@@ -46,20 +47,28 @@ export async function reportRefund(params: ReportRefundParams): Promise<void> {
       return
     }
 
-    const stripeSub = await stripe.subscriptions.retrieve(
-      subscription.stripeSubscriptionId,
-    )
-    const platform = (stripeSub.metadata?.platform as 'ios' | 'android') || null
+    // Use stored originPlatform instead of fetching from Stripe metadata
+    const storedPlatform = subscription.originPlatform
+    const platform =
+      storedPlatform === 'ios' || storedPlatform === 'android'
+        ? storedPlatform
+        : null
+
+    // Use invoice ID if provided, otherwise fall back to charge ID
+    // For Google reporting, we need the initialStripeInvoiceId to reference the original transaction
+    const transactionId = invoiceId || chargeId
 
     await reportTransaction({
       userId,
-      stripeTransactionId: chargeId,
+      stripeTransactionId: transactionId,
       amount,
       currency,
       stripeLookupKey: subscription.package
         .stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
       transactionType: 'refund',
       platform,
+      initialExternalTransactionId:
+        subscription.initialStripeInvoiceId || undefined,
     })
   } catch (error) {
     console.error('[REPORTING] Refund failed:', error)

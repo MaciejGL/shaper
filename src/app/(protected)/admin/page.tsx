@@ -7,6 +7,7 @@ import {
   CreditCard,
   Dumbbell,
   Flame,
+  Globe,
   UserCheck,
   Users,
 } from 'lucide-react'
@@ -18,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   LazyAwsTab as AwsTab,
   LazyExercisesTab as ExercisesTab,
+  LazyExternalOffersTab as ExternalOffersTab,
   LazyFreeWorkoutDaysAdmin as FreeWorkoutDaysAdmin,
   LazyPushNotificationsTab as PushNotificationsTab,
   LazyStripeTab as StripeTab,
@@ -38,6 +40,7 @@ export default function AdminPage() {
       | 'exercises'
       | 'push'
       | 'stripe'
+      | 'external'
       | 'aws'
     >([
       'users',
@@ -47,6 +50,7 @@ export default function AdminPage() {
       'exercises',
       'push',
       'stripe',
+      'external',
       'aws',
     ])
       .withDefault('users')
@@ -68,6 +72,7 @@ export default function AdminPage() {
               | 'exercises'
               | 'push'
               | 'stripe'
+              | 'external'
               | 'aws',
           )
         }
@@ -102,12 +107,14 @@ export default function AdminPage() {
             <Bell className="h-4 w-4" />
             Push Notifications
           </TabsTrigger>
+          <TabsTrigger value="external">
+            <Globe className="h-4 w-4" />
+            External Offers
+          </TabsTrigger>
           <TabsTrigger value="aws">
             <Cloud className="h-4 w-4" />
             AWS Storage
           </TabsTrigger>
-          {/* Future tabs can be added here */}
-          {/* <TabsTrigger value="database">Database</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="users" className="mt-6">
@@ -136,6 +143,10 @@ export default function AdminPage() {
 
         <TabsContent value="push" className="mt-6">
           <PushNotificationsTab />
+        </TabsContent>
+
+        <TabsContent value="external" className="mt-6">
+          <ExternalOffersTab />
         </TabsContent>
 
         <TabsContent value="aws" className="mt-6">

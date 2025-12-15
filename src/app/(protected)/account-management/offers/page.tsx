@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { CoachingServiceTerms } from '@/components/subscription/coaching-service-terms'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
@@ -14,6 +15,8 @@ export default function OffersPage() {
   const searchParams = useSearchParams()
   const redirectUrl = searchParams.get('redirectUrl')
   const { user } = useUser()
+  const { isNativeApp, platform, getExternalOfferToken, openExternalCheckout } =
+    useMobileApp()
 
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [isSubscribing, setIsSubscribing] = useState(false)
@@ -30,6 +33,12 @@ export default function OffersPage() {
     setIsSubscribing(true)
 
     try {
+      // For Android in-app, get external offer token for Google compliance
+      let extToken: string | null = null
+      if (isNativeApp && platform === 'android') {
+        extToken = await getExternalOfferToken()
+      }
+
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -42,6 +51,8 @@ export default function OffersPage() {
             ? `${window.location.origin}${redirectUrl}`
             : `${window.location.origin}/fitspace/my-plans`,
           cancelUrl: `${window.location.origin}/account-management/offers${redirectUrl ? `?redirectUrl=${encodeURIComponent(redirectUrl)}` : ''}`,
+          platform: isNativeApp ? platform : undefined,
+          extToken,
         }),
       })
 
@@ -50,7 +61,9 @@ export default function OffersPage() {
       }
 
       const { checkoutUrl } = await response.json()
-      window.location.href = checkoutUrl
+
+      // Open checkout in Custom Tabs (Android) or Safari (iOS) or redirect (web)
+      openExternalCheckout(checkoutUrl)
     } catch (error) {
       console.error('Subscription error:', error)
       setIsSubscribing(false)

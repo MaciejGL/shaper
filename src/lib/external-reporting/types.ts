@@ -11,7 +11,8 @@ export interface ReportTransactionParams {
   stripeLookupKey: (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS]
   transactionType: TransactionType
   platform: Platform | null
-  originalTransactionId?: string
+  externalOfferToken?: string
+  initialExternalTransactionId?: string
 }
 
 export interface GoogleReportParams {
@@ -19,6 +20,7 @@ export interface GoogleReportParams {
   transactionType: TransactionType
   amount: number
   currency: string
-  regionCode: string
-  originalTransactionId?: string
+  countryCode: string
+  externalOfferToken?: string
+  initialExternalTransactionId?: string
 }

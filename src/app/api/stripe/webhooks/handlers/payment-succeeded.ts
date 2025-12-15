@@ -73,27 +73,63 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       where: { id: subscription.packageId },
     })
     if (packageTemplate?.stripeLookupKey && subscription.stripeSubscriptionId) {
-      // Get platform from Stripe subscription metadata
       const { stripe } = await import('@/lib/stripe/stripe')
       const stripeSub = await stripe.subscriptions.retrieve(
         subscription.stripeSubscriptionId,
       )
-      const platform =
-        (stripeSub.metadata?.platform as 'ios' | 'android') || null
 
-      await reportTransaction({
-        userId: subscription.userId,
-        stripeTransactionId: invoice.payment_intent as string,
-        amount: invoice.amount_paid || 0,
-        currency: invoice.currency || 'usd',
-        stripeLookupKey:
-          packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
-        transactionType:
-          invoice.billing_reason === 'subscription_create'
-            ? 'purchase'
-            : 'renewal',
-        platform,
-      })
+      const isInitialPurchase = invoice.billing_reason === 'subscription_create'
+
+      if (isInitialPurchase) {
+        // Initial purchase: store external offer data from Stripe metadata
+        const platform =
+          (stripeSub.metadata?.platform as 'ios' | 'android') || null
+        const extToken = stripeSub.metadata?.extToken || null
+
+        // Save origin data for future renewals
+        if (platform) {
+          await prisma.userSubscription.update({
+            where: { id: subscription.id },
+            data: {
+              originPlatform: platform,
+              externalOfferToken: extToken,
+              initialStripeInvoiceId: invoice.id,
+            },
+          })
+        }
+
+        await reportTransaction({
+          userId: subscription.userId,
+          stripeTransactionId: invoice.id!, // Use invoice.id for consistent reporting
+          amount: invoice.amount_paid || 0,
+          currency: invoice.currency || 'usd',
+          stripeLookupKey:
+            packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
+          transactionType: 'purchase',
+          platform,
+          externalOfferToken: extToken || undefined,
+        })
+      } else {
+        // Renewal: use stored origin platform and initial invoice ID
+        const storedPlatform = subscription.originPlatform
+        const platform =
+          storedPlatform === 'ios' || storedPlatform === 'android'
+            ? storedPlatform
+            : null
+
+        await reportTransaction({
+          userId: subscription.userId,
+          stripeTransactionId: invoice.id!, // Use invoice.id for consistent reporting
+          amount: invoice.amount_paid || 0,
+          currency: invoice.currency || 'usd',
+          stripeLookupKey:
+            packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
+          transactionType: 'renewal',
+          platform,
+          initialExternalTransactionId:
+            subscription.initialStripeInvoiceId || undefined,
+        })
+      }
     }
 
     // Notify trainer about subscription payment

@@ -60,6 +60,8 @@ interface NativeAppAPI {
     filename: string
     mimeType: string
   }) => void
+  getExternalOfferToken: () => Promise<string | null>
+  openExternalCheckout: (url: string) => void
 }
 
 declare global {
@@ -210,6 +212,37 @@ export function useMobileApp() {
   }
 
   /**
+   * Get external offer token for Google Play External Offers compliance (Android only)
+   * Returns null on iOS/web or if not available
+   */
+  const getExternalOfferToken = async (): Promise<string | null> => {
+    if (!isNativeApp || platform !== 'android') {
+      return null
+    }
+    if (!window.nativeApp?.getExternalOfferToken) {
+      return null
+    }
+    try {
+      return await window.nativeApp.getExternalOfferToken()
+    } catch (error) {
+      console.error('Failed to get external offer token:', error)
+      return null
+    }
+  }
+
+  /**
+   * Open checkout URL in Custom Tabs (Android) or Safari (iOS)
+   * Falls back to regular window.location for web
+   */
+  const openExternalCheckout = (url: string) => {
+    if (isNativeApp && window.nativeApp?.openExternalCheckout) {
+      window.nativeApp.openExternalCheckout(url)
+    } else {
+      window.location.href = url
+    }
+  }
+
+  /**
    * Get available capabilities in the mobile app
    */
   const getCapabilities = () => {
@@ -241,6 +274,8 @@ export function useMobileApp() {
     setAuthToken,
     openExternalUrl,
     downloadFile,
+    getExternalOfferToken,
+    openExternalCheckout,
 
     // Convenience functions
     isIOS: platform === 'ios',

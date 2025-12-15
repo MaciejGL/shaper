@@ -11,6 +11,10 @@ import { Alert, Linking, Platform, StyleSheet, View } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import { APP_CONFIG } from '../config/app-config'
+import {
+  getExternalOfferToken,
+  openExternalCheckout,
+} from '../services/external-offers'
 import { shouldLoadUrlInWebView } from '../utils/webview-navigation'
 
 import { OfflineScreen } from './offline-screen'
@@ -116,6 +120,33 @@ function setupNativeAppAPI(): string {
         window.ReactNativeWebView?.postMessage(JSON.stringify({
           type: 'download_file',
           data: data
+        }));
+      },
+      
+      // External Offers: get token for Google Play compliance (Android only)
+      getExternalOfferToken: function() {
+        return new Promise(function(resolve) {
+          var callbackId = 'ext_token_' + Date.now();
+          window['__extTokenCallback_' + callbackId] = resolve;
+          window.ReactNativeWebView?.postMessage(JSON.stringify({
+            type: 'get_external_offer_token',
+            callbackId: callbackId
+          }));
+          // Timeout after 10 seconds
+          setTimeout(function() {
+            if (window['__extTokenCallback_' + callbackId]) {
+              window['__extTokenCallback_' + callbackId](null);
+              delete window['__extTokenCallback_' + callbackId];
+            }
+          }, 10000);
+        });
+      },
+      
+      // External Offers: open checkout URL in Custom Tabs (Android) or Safari (iOS)
+      openExternalCheckout: function(url) {
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'open_external_checkout',
+          url: url
         }));
       }
     };
@@ -506,6 +537,30 @@ export const EnhancedWebView = forwardRef<
           case 'download_file':
             handleFileDownload(message.data).catch((err) => {
               console.error('File download failed:', err)
+            })
+            break
+
+          case 'get_external_offer_token':
+            // Get external offer token and send it back to web
+            getExternalOfferToken().then((token) => {
+              const callbackId = message.callbackId
+              webViewRef.current?.injectJavaScript(`
+                (function() {
+                  var callback = window['__extTokenCallback_${callbackId}'];
+                  if (callback) {
+                    callback(${token ? `'${token}'` : 'null'});
+                    delete window['__extTokenCallback_${callbackId}'];
+                  }
+                })();
+                true;
+              `)
+            })
+            break
+
+          case 'open_external_checkout':
+            // Open checkout URL in Custom Tabs (Android) or Safari (iOS)
+            openExternalCheckout(message.url).catch((err) => {
+              console.error('Failed to open external checkout:', err)
             })
             break
 

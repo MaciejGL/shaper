@@ -17,8 +17,15 @@ import { recordTermsAgreement } from '@/lib/terms-utils'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { userId, packageId, lookupKey, returnUrl, cancelUrl, platform } =
-      body
+    const {
+      userId,
+      packageId,
+      lookupKey,
+      returnUrl,
+      cancelUrl,
+      platform,
+      extToken,
+    } = body
 
     if (!userId || (!packageId && !lookupKey)) {
       return NextResponse.json(
@@ -281,6 +288,7 @@ export async function POST(request: NextRequest) {
           lookupKey: stripeLookupKey,
           trainerIdAssigned: packageTemplate?.trainerId || '',
           platform: platform || '', // ios, android, or empty for web
+          extToken: extToken || '', // External offer token for Google reporting
           ...invoiceMetadata,
         },
       },
