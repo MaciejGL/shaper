@@ -82,8 +82,11 @@ export async function initExternalOffers(): Promise<void> {
 /**
  * Get external offer token for Google reporting (Android only)
  * Returns null if not available or not Android
+ * @param productId - Product SKU being purchased (e.g., 'premium_monthly')
  */
-export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult> {
+export async function getExternalOfferToken(
+  productId?: string,
+): Promise<ExternalOfferTokenResult> {
   const baseDiagnostics: ExternalOfferTokenDiagnostics = {
     isInitialized,
     isAvailable: null,
@@ -105,6 +108,7 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
     // #region agent log
     console.info('[DBG_EXT_OFFERS_APP][TOKEN_START]', {
       isInitialized,
+      productId: productId || null,
     })
     // #endregion agent log
 
@@ -156,7 +160,8 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
             ...baseDiagnostics,
             isAvailable,
             errorName: error instanceof Error ? error.name : 'UnknownError',
-            errorMessage: error instanceof Error ? error.message : String(error),
+            errorMessage:
+              error instanceof Error ? error.message : String(error),
             stage: 'dialog_error',
             dialogShown: false,
           },
@@ -165,9 +170,14 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
     }
 
     // Create the token for external transaction reporting
+    // Note: TypeScript types are outdated - the JS implementation accepts an optional sku parameter
     let token: string | null
     try {
-      token = await createAlternativeBillingTokenAndroid()
+      token = await (
+        createAlternativeBillingTokenAndroid as (
+          sku?: string,
+        ) => Promise<string | null>
+      )(productId)
     } catch (error) {
       return {
         token: null,

@@ -60,7 +60,7 @@ interface NativeAppAPI {
     filename: string
     mimeType: string
   }) => void
-  getExternalOfferToken: () => Promise<
+  getExternalOfferToken: (productId?: string) => Promise<
     | string
     | null
     | {
@@ -233,8 +233,11 @@ export function useMobileApp() {
   /**
    * Get external offer token for Google Play External Offers compliance (Android only)
    * Returns null on iOS/web or if not available
+   * @param productId - Product SKU being purchased (e.g., 'premium_monthly')
    */
-  const getExternalOfferToken = async (): Promise<{
+  const getExternalOfferToken = async (
+    productId?: string,
+  ): Promise<{
     token: string | null
     diagnostics: Record<string, unknown> | null
   }> => {
@@ -253,7 +256,7 @@ export function useMobileApp() {
       return { token: null, diagnostics: null }
     }
     try {
-      const result = await window.nativeApp.getExternalOfferToken()
+      const result = await window.nativeApp.getExternalOfferToken(productId)
       if (typeof result === 'string' || result === null) {
         window.__externalOfferDiagnostics = null
         return { token: result, diagnostics: null }

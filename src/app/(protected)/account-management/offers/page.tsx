@@ -45,7 +45,7 @@ export default function OffersPage() {
       let externalOfferDiagnostics: Record<string, unknown> | null = null
       if (isNativeApp && platform === 'android') {
         console.info('[OFFERS] Requesting external offer token...')
-        const result = await getExternalOfferToken()
+        const result = await getExternalOfferToken(lookupKey)
         extToken = result.token
         externalOfferDiagnostics = result.diagnostics
         console.info('[OFFERS] Token received:', extToken ? 'yes' : 'no')

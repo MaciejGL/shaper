@@ -44,7 +44,7 @@ export function SubscriptionManagementSection() {
     try {
       // For Android in-app, get external offer token for Google compliance
       const { token: extToken, diagnostics: externalOfferDiagnostics } =
-        await getExternalOfferToken()
+        await getExternalOfferToken(lookupKey)
       const clientDebug = {
         isNativeApp,
         platform: platform ?? null,
