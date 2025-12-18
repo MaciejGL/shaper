@@ -44,6 +44,17 @@ export function SubscriptionManagementSection() {
     try {
       // For Android in-app, get external offer token for Google compliance
       const extToken = await getExternalOfferToken()
+      const clientDebug = {
+        isNativeApp,
+        platform: platform ?? null,
+        hasNativeAppObject: typeof window !== 'undefined' && !!window.nativeApp,
+        hasNativeOpenExternalCheckout:
+          typeof window !== 'undefined' &&
+          !!window.nativeApp?.openExternalCheckout,
+        hasNativeGetExternalOfferToken:
+          typeof window !== 'undefined' &&
+          !!window.nativeApp?.getExternalOfferToken,
+      }
 
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
@@ -57,6 +68,7 @@ export function SubscriptionManagementSection() {
           cancelUrl: `${window.location.origin}/account-management`,
           platform: isNativeApp ? platform : undefined,
           extToken,
+          clientDebug,
         }),
       })
 

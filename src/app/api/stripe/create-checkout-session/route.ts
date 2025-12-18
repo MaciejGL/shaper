@@ -25,16 +25,56 @@ export async function POST(request: NextRequest) {
       cancelUrl,
       platform,
       extToken,
+      clientDebug,
     } = body
 
     // #region agent log
+    const ua = request.headers.get('user-agent') || ''
+    const uaFlags = {
+      hasWv: ua.includes('; wv'),
+      hasAndroid: ua.toLowerCase().includes('android'),
+      hasExpo: ua.toLowerCase().includes('expo'),
+      hasHypertro: ua.toLowerCase().includes('hypertro'),
+    }
     console.info('[DBG_EXT_OFFERS][CHECKOUT_RECEIVED]', {
       platform: typeof platform === 'string' ? platform : null,
       hasExtToken: typeof extToken === 'string' && extToken.length > 0,
       hasUserId: typeof userId === 'string' && userId.length > 0,
       hasLookupKey: typeof lookupKey === 'string' && lookupKey.length > 0,
+      uaFlags,
+      clientDebug:
+        clientDebug && typeof clientDebug === 'object'
+          ? {
+              isNativeApp: !!clientDebug.isNativeApp,
+              platform:
+                typeof clientDebug.platform === 'string'
+                  ? clientDebug.platform
+                  : null,
+              hasNativeAppObject: !!clientDebug.hasNativeAppObject,
+              hasNativeOpenExternalCheckout:
+                !!clientDebug.hasNativeOpenExternalCheckout,
+              hasNativeGetExternalOfferToken:
+                !!clientDebug.hasNativeGetExternalOfferToken,
+            }
+          : null,
     })
-    fetch('http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'run1',hypothesisId:'H2',location:'src/app/api/stripe/create-checkout-session/route.ts:POST',message:'checkout_received',data:{platform:typeof platform==='string'?platform:null,hasExtToken:typeof extToken==='string'&&extToken.length>0,hasUserId:typeof userId==='string'&&userId.length>0},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'H2',
+        location: 'src/app/api/stripe/create-checkout-session/route.ts:POST',
+        message: 'checkout_received',
+        data: {
+          platform: typeof platform === 'string' ? platform : null,
+          hasExtToken: typeof extToken === 'string' && extToken.length > 0,
+          hasUserId: typeof userId === 'string' && userId.length > 0,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {})
     // #endregion agent log
 
     if (!userId || (!packageId && !lookupKey)) {
@@ -278,7 +318,28 @@ export async function POST(request: NextRequest) {
         typeof extToken === 'string' && extToken.length > 0,
       hasUsedTrial,
     })
-    fetch('http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'run1',hypothesisId:'H4',location:'src/app/api/stripe/create-checkout-session/route.ts:checkout_sessions_create',message:'checkout_create_params',data:{subscriptionMetadataPlatform:typeof platform==='string'&&platform.length>0?platform:null,subscriptionMetadataHasExtToken:typeof extToken==='string'&&extToken.length>0,hasUsedTrial},timestamp:Date.now()})}).catch(()=>{});
+    fetch('http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'H4',
+        location:
+          'src/app/api/stripe/create-checkout-session/route.ts:checkout_sessions_create',
+        message: 'checkout_create_params',
+        data: {
+          subscriptionMetadataPlatform:
+            typeof platform === 'string' && platform.length > 0
+              ? platform
+              : null,
+          subscriptionMetadataHasExtToken:
+            typeof extToken === 'string' && extToken.length > 0,
+          hasUsedTrial,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {})
     // #endregion agent log
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
