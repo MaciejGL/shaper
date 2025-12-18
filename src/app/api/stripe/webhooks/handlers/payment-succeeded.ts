@@ -80,6 +80,14 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
 
       const isInitialPurchase = invoice.billing_reason === 'subscription_create'
 
+      // Debug: Log metadata for external offers tracking
+      console.info('[EXTERNAL_OFFERS] Stripe metadata:', {
+        platform: stripeSub.metadata?.platform,
+        extToken: stripeSub.metadata?.extToken ? 'present' : 'missing',
+        billingReason: invoice.billing_reason,
+        invoiceId: invoice.id,
+      })
+
       if (isInitialPurchase) {
         // Initial purchase: store external offer data from Stripe metadata
         const platform =

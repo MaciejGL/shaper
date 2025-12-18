@@ -27,6 +27,12 @@ export async function POST(request: NextRequest) {
       extToken,
     } = body
 
+    // Debug: Log external offers data
+    console.info('[CHECKOUT] Received:', {
+      platform: platform || 'none',
+      hasExtToken: !!extToken,
+    })
+
     if (!userId || (!packageId && !lookupKey)) {
       return NextResponse.json(
         { error: 'User ID and either Package ID or Lookup Key are required' },

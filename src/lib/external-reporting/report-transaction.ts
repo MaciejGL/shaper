@@ -35,17 +35,26 @@ export async function reportTransaction(
 ): Promise<void> {
   const { stripeLookupKey, platform } = params
 
+  console.info('[REPORTING] Starting report check:', {
+    stripeLookupKey,
+    platform,
+    transactionType: params.transactionType,
+    hasToken: !!params.externalOfferToken,
+  })
+
   // Only Premium subscriptions
   if (
     !REPORTABLE_PRODUCTS.includes(
       stripeLookupKey as (typeof REPORTABLE_PRODUCTS)[number],
     )
   ) {
+    console.info('[REPORTING] Skipped - not a reportable product')
     return
   }
 
   // Web never needs reporting
   if (!platform || platform === 'web') {
+    console.info('[REPORTING] Skipped - platform is web or null:', platform)
     return
   }
 
@@ -64,8 +73,15 @@ export async function reportTransaction(
   const rules = PAYMENT_RULES[region] || PAYMENT_RULES.DEFAULT
   const platformRules = rules[platform]
 
+  console.info('[REPORTING] Region check:', {
+    timezone: user.profile?.timezone,
+    region,
+    paymentModel: platformRules.paymentModel,
+  })
+
   // Only "full" mode requires reporting
   if (platformRules.paymentModel !== 'full') {
+    console.info('[REPORTING] Skipped - not in full mode')
     return
   }
 

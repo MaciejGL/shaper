@@ -33,11 +33,25 @@ export default function OffersPage() {
     setIsSubscribing(true)
 
     try {
+      // Debug: Log platform detection
+      console.info('[OFFERS] Subscribe clicked:', {
+        isNativeApp,
+        platform,
+        lookupKey,
+      })
+
       // For Android in-app, get external offer token for Google compliance
       let extToken: string | null = null
       if (isNativeApp && platform === 'android') {
+        console.info('[OFFERS] Requesting external offer token...')
         extToken = await getExternalOfferToken()
+        console.info('[OFFERS] Token received:', extToken ? 'yes' : 'no')
       }
+
+      console.info('[OFFERS] Creating checkout session with:', {
+        platform: isNativeApp ? platform : undefined,
+        hasToken: !!extToken,
+      })
 
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
