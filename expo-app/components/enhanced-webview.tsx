@@ -124,14 +124,13 @@ function setupNativeAppAPI(): string {
       },
       
       // External Offers: get token for Google Play compliance (Android only)
-      getExternalOfferToken: function(productId) {
+      getExternalOfferToken: function() {
         return new Promise(function(resolve) {
           var callbackId = 'ext_token_' + Date.now();
           window['__extTokenCallback_' + callbackId] = resolve;
           window.ReactNativeWebView?.postMessage(JSON.stringify({
             type: 'get_external_offer_token',
-            callbackId: callbackId,
-            productId: productId || null
+            callbackId: callbackId
           }));
           // Timeout after 10 seconds
           setTimeout(function() {
@@ -546,10 +545,9 @@ export const EnhancedWebView = forwardRef<
             // #region agent log
             console.info('[DBG_EXT_OFFERS_APP][WV_TOKEN_REQUEST]', {
               hasCallbackId: !!message.callbackId,
-              productId: message.productId || null,
             })
             // #endregion agent log
-            getExternalOfferToken(message.productId).then((result) => {
+            getExternalOfferToken().then((result) => {
               // #region agent log
               console.info('[DBG_EXT_OFFERS_APP][WV_TOKEN_RESPONSE]', {
                 hasToken: !!result.token,

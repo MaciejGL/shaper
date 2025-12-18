@@ -1,22 +1,22 @@
 /**
  * External Offers Service for Android
  *
- * Handles Google Play External Offers program compliance:
- * - Initializes alternative billing
- * - Generates external transaction tokens
- * - Opens checkout via Custom Tabs
+ * Handles Google Play External Offers program compliance using Billing Programs API:
+ * - Initializes billing with external-offer program enabled
+ * - Generates external transaction tokens for Google reporting
+ * - Opens checkout via Custom Tabs with compliance dialog
  */
 import * as WebBrowser from 'expo-web-browser'
 import { Platform } from 'react-native'
 import {
-  checkAlternativeBillingAvailabilityAndroid,
-  createAlternativeBillingTokenAndroid,
+  createBillingProgramReportingDetailsAndroid,
+  enableBillingProgramAndroid,
   initConnection,
-  showAlternativeBillingDialogAndroid,
+  isBillingProgramAvailableAndroid,
+  launchExternalLinkAndroid,
 } from 'react-native-iap'
 
 let isInitialized = false
-let hasShownAlternativeBillingDialog = false
 
 export interface ExternalOfferTokenDiagnostics {
   isInitialized: boolean
@@ -26,15 +26,13 @@ export interface ExternalOfferTokenDiagnostics {
   failedStep: 'availability' | 'token' | 'unknown' | null
   stage:
     | 'not_android'
+    | 'not_initialized'
     | 'availability_false'
-    | 'dialog_error'
-    | 'token_null'
     | 'token_ok'
     | 'availability_error'
     | 'token_error'
     | 'unknown_error'
     | null
-  dialogShown: boolean
 }
 
 export interface ExternalOfferTokenResult {
@@ -44,6 +42,7 @@ export interface ExternalOfferTokenResult {
 
 /**
  * Initialize External Offers on app startup (Android only)
+ * MUST call enableBillingProgramAndroid BEFORE initConnection
  */
 export async function initExternalOffers(): Promise<void> {
   if (Platform.OS !== 'android' || isInitialized) {
@@ -58,10 +57,12 @@ export async function initExternalOffers(): Promise<void> {
     })
     // #endregion agent log
 
-    // Initialize with alternative billing mode for external offers
-    isInitialized = await initConnection({
-      alternativeBillingModeAndroid: 'alternative-only',
-    })
+    // Enable External Offers program BEFORE connecting
+    enableBillingProgramAndroid('external-offer')
+
+    // Now initialize the connection
+    isInitialized = await initConnection()
+
     // #region agent log
     console.info('[DBG_EXT_OFFERS_APP][INIT_RESULT]', {
       isInitialized,
@@ -81,12 +82,9 @@ export async function initExternalOffers(): Promise<void> {
 
 /**
  * Get external offer token for Google reporting (Android only)
- * Returns null if not available or not Android
- * @param productId - Product SKU being purchased (e.g., 'premium_monthly')
+ * Uses Billing Programs API (not Alternative Billing API)
  */
-export async function getExternalOfferToken(
-  productId?: string,
-): Promise<ExternalOfferTokenResult> {
+export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult> {
   const baseDiagnostics: ExternalOfferTokenDiagnostics = {
     isInitialized,
     isAvailable: null,
@@ -94,7 +92,6 @@ export async function getExternalOfferToken(
     errorMessage: null,
     failedStep: null,
     stage: null,
-    dialogShown: hasShownAlternativeBillingDialog,
   }
 
   if (Platform.OS !== 'android') {
@@ -104,18 +101,25 @@ export async function getExternalOfferToken(
     }
   }
 
+  if (!isInitialized) {
+    return {
+      token: null,
+      diagnostics: { ...baseDiagnostics, stage: 'not_initialized' },
+    }
+  }
+
   try {
     // #region agent log
     console.info('[DBG_EXT_OFFERS_APP][TOKEN_START]', {
       isInitialized,
-      productId: productId || null,
     })
     // #endregion agent log
 
-    // Check if alternative billing is available
+    // Check if External Offers program is available for this user
     let isAvailable: boolean
     try {
-      isAvailable = await checkAlternativeBillingAvailabilityAndroid()
+      const result = await isBillingProgramAvailableAndroid('external-offer')
+      isAvailable = result.isAvailable
     } catch (error) {
       return {
         token: null,
@@ -136,7 +140,7 @@ export async function getExternalOfferToken(
     // #endregion agent log
 
     if (!isAvailable) {
-      console.warn('[EXTERNAL_OFFERS] Alternative billing not available')
+      console.warn('[EXTERNAL_OFFERS] External Offers program not available')
       return {
         token: null,
         diagnostics: {
@@ -147,37 +151,12 @@ export async function getExternalOfferToken(
       }
     }
 
-    // Show the alternative billing dialog before generating a token.
-    // Empirically, some Play Store configurations will not yield a token until the user has acknowledged this.
-    if (!hasShownAlternativeBillingDialog) {
-      try {
-        await showAlternativeBillingDialogAndroid()
-        hasShownAlternativeBillingDialog = true
-      } catch (error) {
-        return {
-          token: null,
-          diagnostics: {
-            ...baseDiagnostics,
-            isAvailable,
-            errorName: error instanceof Error ? error.name : 'UnknownError',
-            errorMessage:
-              error instanceof Error ? error.message : String(error),
-            stage: 'dialog_error',
-            dialogShown: false,
-          },
-        }
-      }
-    }
-
-    // Create the token for external transaction reporting
-    // Note: TypeScript types are outdated - the JS implementation accepts an optional sku parameter
-    let token: string | null
+    // Get the external transaction token via Billing Programs API
+    let token: string
     try {
-      token = await (
-        createAlternativeBillingTokenAndroid as (
-          sku?: string,
-        ) => Promise<string | null>
-      )(productId)
+      const details =
+        await createBillingProgramReportingDetailsAndroid('external-offer')
+      token = details.externalTransactionToken
     } catch (error) {
       return {
         token: null,
@@ -188,7 +167,6 @@ export async function getExternalOfferToken(
           errorMessage: error instanceof Error ? error.message : String(error),
           failedStep: 'token',
           stage: 'token_error',
-          dialogShown: hasShownAlternativeBillingDialog,
         },
       }
     }
@@ -196,22 +174,9 @@ export async function getExternalOfferToken(
     // #region agent log
     console.info('[DBG_EXT_OFFERS_APP][TOKEN_RESULT]', {
       hasToken: !!token,
-      tokenType: typeof token,
+      tokenLength: token?.length || 0,
     })
     // #endregion agent log
-
-    if (!token) {
-      console.warn('[EXTERNAL_OFFERS] No token received')
-      return {
-        token: null,
-        diagnostics: {
-          ...baseDiagnostics,
-          isAvailable,
-          stage: 'token_null',
-          dialogShown: hasShownAlternativeBillingDialog,
-        },
-      }
-    }
 
     console.info('[EXTERNAL_OFFERS] Token generated successfully')
     return {
@@ -220,7 +185,6 @@ export async function getExternalOfferToken(
         ...baseDiagnostics,
         isAvailable,
         stage: 'token_ok',
-        dialogShown: hasShownAlternativeBillingDialog,
       },
     }
   } catch (error) {
@@ -245,24 +209,37 @@ export async function getExternalOfferToken(
 }
 
 /**
- * Open checkout URL in Custom Tabs (Android) or Safari (iOS)
- * Makes required compliance call to Play Billing before opening
+ * Open checkout URL with External Offers compliance
+ * Shows Google's required information dialog before opening Custom Tabs
  */
 export async function openExternalCheckout(checkoutUrl: string): Promise<void> {
   try {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === 'android' && isInitialized) {
       // #region agent log
-      console.info('[DBG_EXT_OFFERS_APP][DIALOG_SHOW]', {
+      console.info('[DBG_EXT_OFFERS_APP][LAUNCH_EXTERNAL_LINK]', {
         isInitialized,
+        checkoutUrl: checkoutUrl.slice(0, 50) + '...',
       })
       // #endregion agent log
-      // Show the alternative billing dialog for compliance (unless already shown)
-      if (!hasShownAlternativeBillingDialog) {
-        await showAlternativeBillingDialogAndroid()
-        hasShownAlternativeBillingDialog = true
-        // #region agent log
-        console.info('[DBG_EXT_OFFERS_APP][DIALOG_SHOWN]')
-        // #endregion agent log
+
+      // Launch external link with compliance dialog
+      // Using 'caller-will-launch-link' so we control opening via Custom Tabs
+      const userAccepted = await launchExternalLinkAndroid({
+        billingProgram: 'external-offer',
+        launchMode: 'caller-will-launch-link',
+        linkType: 'link-to-digital-content-offer',
+        linkUri: checkoutUrl,
+      })
+
+      // #region agent log
+      console.info('[DBG_EXT_OFFERS_APP][LAUNCH_RESULT]', {
+        userAccepted,
+      })
+      // #endregion agent log
+
+      if (!userAccepted) {
+        console.info('[EXTERNAL_OFFERS] User declined external link')
+        return
       }
     }
 
