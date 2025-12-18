@@ -11,12 +11,14 @@ import { Platform } from 'react-native'
 import {
   createBillingProgramReportingDetailsAndroid,
   enableBillingProgramAndroid,
+  endConnection,
   initConnection,
   isBillingProgramAvailableAndroid,
   launchExternalLinkAndroid,
 } from 'react-native-iap'
 
 let isInitialized = false
+let initPromise: Promise<boolean> | null = null
 
 export interface ExternalOfferTokenDiagnostics {
   isInitialized: boolean
@@ -44,11 +46,26 @@ export interface ExternalOfferTokenResult {
  * Initialize External Offers on app startup (Android only)
  * MUST call enableBillingProgramAndroid BEFORE initConnection
  */
-export async function initExternalOffers(): Promise<void> {
-  if (Platform.OS !== 'android' || isInitialized) {
-    return
+export async function initExternalOffers(): Promise<boolean> {
+  if (Platform.OS !== 'android') {
+    return false
   }
 
+  // Return existing promise if init is in progress
+  if (initPromise) {
+    return initPromise
+  }
+
+  // Already initialized successfully
+  if (isInitialized) {
+    return true
+  }
+
+  initPromise = doInit()
+  return initPromise
+}
+
+async function doInit(): Promise<boolean> {
   try {
     // #region agent log
     console.info('[DBG_EXT_OFFERS_APP][INIT_START]', {
@@ -61,7 +78,8 @@ export async function initExternalOffers(): Promise<void> {
     enableBillingProgramAndroid('external-offer')
 
     // Now initialize the connection
-    isInitialized = await initConnection()
+    const result = await initConnection()
+    isInitialized = !!result
 
     // #region agent log
     console.info('[DBG_EXT_OFFERS_APP][INIT_RESULT]', {
@@ -69,6 +87,9 @@ export async function initExternalOffers(): Promise<void> {
     })
     // #endregion agent log
     console.info('[EXTERNAL_OFFERS] Initialized successfully')
+
+    initPromise = null
+    return isInitialized
   } catch (error) {
     // #region agent log
     console.error('[DBG_EXT_OFFERS_APP][INIT_ERROR]', {
@@ -77,14 +98,77 @@ export async function initExternalOffers(): Promise<void> {
     })
     // #endregion agent log
     console.error('[EXTERNAL_OFFERS] Failed to initialize:', error)
+
+    isInitialized = false
+    initPromise = null
+    return false
   }
+}
+
+/**
+ * Force re-initialization of the billing connection
+ * Used when the billing client becomes disconnected
+ */
+async function reinitialize(): Promise<boolean> {
+  // #region agent log
+  console.info('[DBG_EXT_OFFERS_APP][REINIT_START]')
+  // #endregion agent log
+
+  try {
+    // End existing connection first
+    await endConnection()
+  } catch {
+    // Ignore end connection errors
+  }
+
+  isInitialized = false
+  initPromise = null
+
+  return initExternalOffers()
 }
 
 /**
  * Get external offer token for Google reporting (Android only)
  * Uses Billing Programs API (not Alternative Billing API)
+ * Will attempt to initialize/reinitialize if needed
  */
 export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult> {
+  if (Platform.OS !== 'android') {
+    return {
+      token: null,
+      diagnostics: {
+        isInitialized: false,
+        isAvailable: null,
+        errorName: null,
+        errorMessage: null,
+        failedStep: null,
+        stage: 'not_android',
+      },
+    }
+  }
+
+  // Try to get token, with one retry after reinit if billing client disconnected
+  const result = await attemptGetToken()
+
+  // If we got a "billing client not ready" error, try reinitializing once
+  if (
+    result.diagnostics.stage === 'availability_error' &&
+    result.diagnostics.errorMessage?.includes('not ready')
+  ) {
+    // #region agent log
+    console.info('[DBG_EXT_OFFERS_APP][RETRY_AFTER_REINIT]')
+    // #endregion agent log
+
+    const reinitSuccess = await reinitialize()
+    if (reinitSuccess) {
+      return attemptGetToken()
+    }
+  }
+
+  return result
+}
+
+async function attemptGetToken(): Promise<ExternalOfferTokenResult> {
   const baseDiagnostics: ExternalOfferTokenDiagnostics = {
     isInitialized,
     isAvailable: null,
@@ -94,18 +178,20 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
     stage: null,
   }
 
-  if (Platform.OS !== 'android') {
-    return {
-      token: null,
-      diagnostics: { ...baseDiagnostics, stage: 'not_android' },
-    }
-  }
-
+  // Ensure initialized before proceeding
   if (!isInitialized) {
-    return {
-      token: null,
-      diagnostics: { ...baseDiagnostics, stage: 'not_initialized' },
+    const initSuccess = await initExternalOffers()
+    if (!initSuccess) {
+      return {
+        token: null,
+        diagnostics: {
+          ...baseDiagnostics,
+          isInitialized: false,
+          stage: 'not_initialized',
+        },
+      }
     }
+    baseDiagnostics.isInitialized = true
   }
 
   try {
