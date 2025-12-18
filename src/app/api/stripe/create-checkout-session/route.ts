@@ -27,11 +27,15 @@ export async function POST(request: NextRequest) {
       extToken,
     } = body
 
-    // Debug: Log external offers data
-    console.info('[CHECKOUT] Received:', {
-      platform: platform || 'none',
-      hasExtToken: !!extToken,
+    // #region agent log
+    console.info('[DBG_EXT_OFFERS][CHECKOUT_RECEIVED]', {
+      platform: typeof platform === 'string' ? platform : null,
+      hasExtToken: typeof extToken === 'string' && extToken.length > 0,
+      hasUserId: typeof userId === 'string' && userId.length > 0,
+      hasLookupKey: typeof lookupKey === 'string' && lookupKey.length > 0,
     })
+    fetch('http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'run1',hypothesisId:'H2',location:'src/app/api/stripe/create-checkout-session/route.ts:POST',message:'checkout_received',data:{platform:typeof platform==='string'?platform:null,hasExtToken:typeof extToken==='string'&&extToken.length>0,hasUserId:typeof userId==='string'&&userId.length>0},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion agent log
 
     if (!userId || (!packageId && !lookupKey)) {
       return NextResponse.json(
@@ -264,6 +268,18 @@ export async function POST(request: NextRequest) {
     })
 
     // Create checkout session
+    // #region agent log
+    console.info('[DBG_EXT_OFFERS][CHECKOUT_CREATE_PARAMS]', {
+      sessionMetadataHasPlatform: false,
+      sessionMetadataHasExtToken: false,
+      subscriptionMetadataPlatform:
+        typeof platform === 'string' && platform.length > 0 ? platform : null,
+      subscriptionMetadataHasExtToken:
+        typeof extToken === 'string' && extToken.length > 0,
+      hasUsedTrial,
+    })
+    fetch('http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'run1',hypothesisId:'H4',location:'src/app/api/stripe/create-checkout-session/route.ts:checkout_sessions_create',message:'checkout_create_params',data:{subscriptionMetadataPlatform:typeof platform==='string'&&platform.length>0?platform:null,subscriptionMetadataHasExtToken:typeof extToken==='string'&&extToken.length>0,hasUsedTrial},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion agent log
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -293,8 +309,8 @@ export async function POST(request: NextRequest) {
           packageName,
           lookupKey: stripeLookupKey,
           trainerIdAssigned: packageTemplate?.trainerId || '',
-          platform: platform || '', // ios, android, or empty for web
-          extToken: extToken || '', // External offer token for Google reporting
+          platform: platform || '', // ios, android, or empty for web (Stripe treats '' as unset)
+          extToken: extToken || '', // External offer token for Google reporting (Stripe treats '' as unset)
           ...invoiceMetadata,
         },
       },

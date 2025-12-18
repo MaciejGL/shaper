@@ -25,6 +25,36 @@ export async function handleCheckoutCompleted(
   session: Stripe.Checkout.Session,
 ) {
   try {
+    // #region agent log
+    console.info('[DBG_EXT_OFFERS][CHECKOUT_COMPLETED]', {
+      mode: session.mode,
+      hasInvoice: !!session.invoice,
+      hasSubscription: !!session.subscription,
+      hasSessionMetadataPlatform: !!session.metadata?.platform,
+      hasSessionMetadataExtToken: !!session.metadata?.extToken,
+      hasSessionMetadataOfferToken: !!session.metadata?.offerToken,
+    })
+    fetch('http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'H3',
+        location:
+          'src/app/api/stripe/webhooks/handlers/checkout-completed.ts:handleCheckoutCompleted',
+        message: 'checkout_completed',
+        data: {
+          mode: session.mode,
+          hasInvoice: !!session.invoice,
+          hasSubscription: !!session.subscription,
+          hasSessionMetadataPlatform: !!session.metadata?.platform,
+          hasSessionMetadataExtToken: !!session.metadata?.extToken,
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {})
+    // #endregion agent log
     console.info(`handleCheckoutCompleted`, session)
 
     if (!session.customer) {
