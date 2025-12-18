@@ -20,7 +20,8 @@ import { PremiumPricingSelector } from './premium-pricing-selector'
 export function SubscriptionManagementSection() {
   const { user } = useUser()
   const rules = usePaymentRules()
-  const { isNativeApp, platform } = useMobileApp()
+  const { isNativeApp, platform, getExternalOfferToken, openExternalCheckout } =
+    useMobileApp()
   const {
     data: subscriptionData,
     isLoading: isLoadingSubscription,
@@ -41,6 +42,9 @@ export function SubscriptionManagementSection() {
     setIsSubscribing(true)
 
     try {
+      // For Android in-app, get external offer token for Google compliance
+      const extToken = await getExternalOfferToken()
+
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -52,6 +56,7 @@ export function SubscriptionManagementSection() {
           returnUrl: `${window.location.origin}/account-management`,
           cancelUrl: `${window.location.origin}/account-management`,
           platform: isNativeApp ? platform : undefined,
+          extToken,
         }),
       })
 
@@ -60,7 +65,7 @@ export function SubscriptionManagementSection() {
       }
 
       const { checkoutUrl } = await response.json()
-      window.location.href = checkoutUrl
+      openExternalCheckout(checkoutUrl)
     } catch (error) {
       console.error('Subscription error:', error)
       setIsSubscribing(false)
