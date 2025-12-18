@@ -21,6 +21,8 @@ export interface ExternalOfferTokenDiagnostics {
   isInitialized: boolean
   isAvailable: boolean | null
   errorName: string | null
+  errorMessage: string | null
+  failedStep: 'availability' | 'token' | 'unknown' | null
 }
 
 export interface ExternalOfferTokenResult {
@@ -74,6 +76,8 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
     isInitialized,
     isAvailable: null,
     errorName: null,
+    errorMessage: null,
+    failedStep: null,
   }
 
   if (Platform.OS !== 'android') {
@@ -88,7 +92,20 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
     // #endregion agent log
 
     // Check if alternative billing is available
-    const isAvailable = await checkAlternativeBillingAvailabilityAndroid()
+    let isAvailable: boolean
+    try {
+      isAvailable = await checkAlternativeBillingAvailabilityAndroid()
+    } catch (error) {
+      return {
+        token: null,
+        diagnostics: {
+          ...baseDiagnostics,
+          errorName: error instanceof Error ? error.name : 'UnknownError',
+          errorMessage: error instanceof Error ? error.message : String(error),
+          failedStep: 'availability',
+        },
+      }
+    }
 
     // #region agent log
     console.info('[DBG_EXT_OFFERS_APP][TOKEN_AVAILABILITY]', {
@@ -105,7 +122,21 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
     }
 
     // Create the token for external transaction reporting
-    const token = await createAlternativeBillingTokenAndroid()
+    let token: string | null
+    try {
+      token = await createAlternativeBillingTokenAndroid()
+    } catch (error) {
+      return {
+        token: null,
+        diagnostics: {
+          ...baseDiagnostics,
+          isAvailable,
+          errorName: error instanceof Error ? error.name : 'UnknownError',
+          errorMessage: error instanceof Error ? error.message : String(error),
+          failedStep: 'token',
+        },
+      }
+    }
 
     // #region agent log
     console.info('[DBG_EXT_OFFERS_APP][TOKEN_RESULT]', {
@@ -140,6 +171,8 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
       diagnostics: {
         ...baseDiagnostics,
         errorName: error instanceof Error ? error.name : 'UnknownError',
+        errorMessage: error instanceof Error ? error.message : String(error),
+        failedStep: 'unknown',
       },
     }
   }

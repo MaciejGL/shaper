@@ -55,6 +55,14 @@ export async function POST(request: NextRequest) {
                 typeof externalOfferDiagnostics.errorName === 'string'
                   ? externalOfferDiagnostics.errorName
                   : null,
+              errorMessage:
+                typeof externalOfferDiagnostics.errorMessage === 'string'
+                  ? externalOfferDiagnostics.errorMessage.slice(0, 400)
+                  : null,
+              failedStep:
+                typeof externalOfferDiagnostics.failedStep === 'string'
+                  ? externalOfferDiagnostics.failedStep
+                  : null,
             }
           : null,
       clientDebug:

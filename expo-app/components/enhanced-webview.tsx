@@ -555,6 +555,8 @@ export const EnhancedWebView = forwardRef<
                   isInitialized: result.diagnostics.isInitialized,
                   isAvailable: result.diagnostics.isAvailable,
                   errorName: result.diagnostics.errorName,
+                  errorMessage: result.diagnostics.errorMessage,
+                  failedStep: result.diagnostics.failedStep,
                 },
               })
               // #endregion agent log
