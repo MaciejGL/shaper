@@ -63,6 +63,7 @@ interface NativeAppAPI {
   getExternalOfferToken: () => Promise<{
     token: string | null
     error: string | null
+    diagnostics?: Record<string, unknown>
   }>
   openExternalCheckout: (url: string) => void
 }
@@ -232,6 +233,7 @@ export function useMobileApp() {
   const getExternalOfferToken = async (): Promise<{
     token: string | null
     error: string | null
+    diagnostics: Record<string, unknown> | null
   }> => {
     const isNativeNow =
       typeof window !== 'undefined' &&
@@ -240,20 +242,21 @@ export function useMobileApp() {
       typeof window !== 'undefined' ? window.mobilePlatform : undefined
 
     if (!isNativeNow || platformNow !== 'android') {
-      return { token: null, error: null }
+      return { token: null, error: null, diagnostics: null }
     }
     if (!window.nativeApp?.getExternalOfferToken) {
-      return { token: null, error: 'native_api_unavailable' }
+      return { token: null, error: 'native_api_unavailable', diagnostics: null }
     }
     try {
       const result = await window.nativeApp.getExternalOfferToken()
       return {
         token: result?.token ?? null,
         error: result?.error ?? null,
+        diagnostics: result?.diagnostics ?? null,
       }
     } catch (error) {
       console.error('Failed to get external offer token:', error)
-      return { token: null, error: 'bridge_error' }
+      return { token: null, error: 'bridge_error', diagnostics: null }
     }
   }
 

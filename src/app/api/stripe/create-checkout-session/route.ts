@@ -25,7 +25,15 @@ export async function POST(request: NextRequest) {
       cancelUrl,
       platform,
       extToken,
+      extDiagnostics,
     } = body
+
+    // Log external offers data for debugging (forwarded from native app)
+    console.info('[EXTERNAL_OFFERS] Checkout request:', {
+      platform: platform || null,
+      hasExtToken: !!extToken,
+      diagnostics: extDiagnostics || null,
+    })
 
     if (!userId || (!packageId && !lookupKey)) {
       return NextResponse.json(

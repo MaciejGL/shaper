@@ -541,9 +541,10 @@ export const EnhancedWebView = forwardRef<
             break
 
           case 'get_external_offer_token':
-            // Get external offer token and send it back to web
+            // Get external offer token and send it back to web (including diagnostics)
             getExternalOfferToken().then((result) => {
               const callbackId = message.callbackId
+              // Result includes { token, error, diagnostics }
               webViewRef.current?.injectJavaScript(`
                 (function() {
                   var callback = window['__extTokenCallback_${callbackId}'];

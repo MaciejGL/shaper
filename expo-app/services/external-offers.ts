@@ -19,6 +19,42 @@ import {
 let isInitialized = false
 let initPromise: Promise<boolean> | null = null
 
+// Diagnostics collection for server-side logging
+interface Diagnostics {
+  stage: string
+  isInitialized: boolean
+  initError: string | null
+  isAvailable: boolean | null
+  availabilityError: string | null
+  tokenError: string | null
+  attempts: number
+  lastError: string | null
+}
+
+let currentDiagnostics: Diagnostics = {
+  stage: 'idle',
+  isInitialized: false,
+  initError: null,
+  isAvailable: null,
+  availabilityError: null,
+  tokenError: null,
+  attempts: 0,
+  lastError: null,
+}
+
+function resetDiagnostics() {
+  currentDiagnostics = {
+    stage: 'idle',
+    isInitialized: false,
+    initError: null,
+    isAvailable: null,
+    availabilityError: null,
+    tokenError: null,
+    attempts: 0,
+    lastError: null,
+  }
+}
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -26,6 +62,7 @@ let initPromise: Promise<boolean> | null = null
 export interface ExternalOfferTokenResult {
   token: string | null
   error: string | null
+  diagnostics: Diagnostics
 }
 
 // ============================================================================
@@ -54,18 +91,28 @@ export async function initExternalOffers(): Promise<boolean> {
 }
 
 async function doInit(): Promise<boolean> {
+  currentDiagnostics.stage = 'init_start'
+
   try {
     // Step 1: Enable billing program BEFORE initConnection (per docs)
+    currentDiagnostics.stage = 'enable_program'
     enableBillingProgramAndroid('external-offer')
 
     // Step 2: Initialize connection (NO alternativeBillingModeAndroid option!)
+    currentDiagnostics.stage = 'init_connection'
     const result = await initConnection()
     isInitialized = !!result
+    currentDiagnostics.isInitialized = isInitialized
+    currentDiagnostics.stage = isInitialized ? 'init_ok' : 'init_failed'
 
     initPromise = null
     return isInitialized
   } catch (error) {
-    console.error('[EXTERNAL_OFFERS] Init failed:', error)
+    const msg = error instanceof Error ? error.message : String(error)
+    currentDiagnostics.initError = msg.slice(0, 500)
+    currentDiagnostics.stage = 'init_error'
+    currentDiagnostics.lastError = msg.slice(0, 500)
+    console.error('[EXTERNAL_OFFERS] Init failed:', msg)
     isInitialized = false
     initPromise = null
     return false
@@ -98,50 +145,96 @@ async function reinitialize(): Promise<boolean> {
  * Implements retry logic for SERVICE_DISCONNECTED (-1) errors
  */
 export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult> {
+  resetDiagnostics()
+
   if (Platform.OS !== 'android') {
-    return { token: null, error: null }
+    currentDiagnostics.stage = 'not_android'
+    return { token: null, error: null, diagnostics: { ...currentDiagnostics } }
   }
 
   // Ensure initialized
+  currentDiagnostics.stage = 'checking_init'
   if (!isInitialized) {
     const initSuccess = await initExternalOffers()
+    currentDiagnostics.isInitialized = initSuccess
     if (!initSuccess) {
-      return { token: null, error: 'init_failed' }
+      return {
+        token: null,
+        error: 'init_failed',
+        diagnostics: { ...currentDiagnostics },
+      }
     }
+  } else {
+    currentDiagnostics.isInitialized = true
   }
 
   // Retry up to 3 times for SERVICE_DISCONNECTED errors
   for (let attempt = 1; attempt <= 3; attempt++) {
+    currentDiagnostics.attempts = attempt
+
     try {
       // Step 3: Check if program is available
+      currentDiagnostics.stage = 'checking_availability'
       const { isAvailable } =
         await isBillingProgramAvailableAndroid('external-offer')
+      currentDiagnostics.isAvailable = isAvailable
+
       if (!isAvailable) {
-        return { token: null, error: 'not_available' }
+        currentDiagnostics.stage = 'not_available'
+        return {
+          token: null,
+          error: 'not_available',
+          diagnostics: { ...currentDiagnostics },
+        }
       }
 
       // Step 5: Get reporting token
+      currentDiagnostics.stage = 'getting_token'
       const details =
         await createBillingProgramReportingDetailsAndroid('external-offer')
 
-      return { token: details.externalTransactionToken, error: null }
+      currentDiagnostics.stage = 'token_ok'
+      return {
+        token: details.externalTransactionToken,
+        error: null,
+        diagnostics: { ...currentDiagnostics },
+      }
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error)
+      currentDiagnostics.lastError = msg.slice(0, 500)
+
+      // Determine which stage failed
+      if (currentDiagnostics.stage === 'checking_availability') {
+        currentDiagnostics.availabilityError = msg.slice(0, 500)
+        currentDiagnostics.stage = 'availability_error'
+      } else {
+        currentDiagnostics.tokenError = msg.slice(0, 500)
+        currentDiagnostics.stage = 'token_error'
+      }
+
       const isServiceDisconnected = msg.includes('responseCode":-1')
 
       if (isServiceDisconnected && attempt < 3) {
-        // Reinitialize and retry
+        currentDiagnostics.stage = 'reinitializing'
         await reinitialize()
         await new Promise((r) => setTimeout(r, 500))
         continue
       }
 
-      console.error('[EXTERNAL_OFFERS] Token generation failed:', msg)
-      return { token: null, error: msg }
+      return {
+        token: null,
+        error: msg.slice(0, 500),
+        diagnostics: { ...currentDiagnostics },
+      }
     }
   }
 
-  return { token: null, error: 'max_retries_exceeded' }
+  currentDiagnostics.stage = 'max_retries'
+  return {
+    token: null,
+    error: 'max_retries_exceeded',
+    diagnostics: { ...currentDiagnostics },
+  }
 }
 
 // ============================================================================

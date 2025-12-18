@@ -42,9 +42,11 @@ export default function OffersPage() {
 
       // For Android in-app, get external offer token for Google compliance
       let extToken: string | null = null
+      let extDiagnostics: Record<string, unknown> | null = null
       if (isNativeApp && platform === 'android') {
         const result = await getExternalOfferToken()
         extToken = result.token
+        extDiagnostics = result.diagnostics
       }
 
       const response = await fetch('/api/stripe/create-checkout-session', {
@@ -61,6 +63,7 @@ export default function OffersPage() {
           cancelUrl: `${window.location.origin}/account-management/offers${redirectUrl ? `?redirectUrl=${encodeURIComponent(redirectUrl)}` : ''}`,
           platform: isNativeApp ? platform : undefined,
           extToken,
+          extDiagnostics,
         }),
       })
 
