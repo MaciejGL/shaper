@@ -5,6 +5,9 @@
  * - Initializes billing with external-offer program enabled
  * - Generates external transaction tokens for Google reporting
  * - Opens checkout via Custom Tabs with compliance dialog
+ *
+ * Implements retry logic for SERVICE_DISCONNECTED (-1) errors per Google's docs:
+ * https://developer.android.com/google/play/billing/errors#service_disconnected_error_code_-1
  */
 import * as WebBrowser from 'expo-web-browser'
 import { Platform } from 'react-native'
@@ -20,27 +23,149 @@ import {
 let isInitialized = false
 let initPromise: Promise<boolean> | null = null
 
+// ============================================================================
+// Types
+// ============================================================================
+
+interface RetryAttempt {
+  attempt: number
+  error: string | null
+  responseCode: number | null // -1 = SERVICE_DISCONNECTED
+  reinitSuccess: boolean | null
+}
+
 export interface ExternalOfferTokenDiagnostics {
   isInitialized: boolean
   isAvailable: boolean | null
-  errorName: string | null
-  errorMessage: string | null
-  failedStep: 'availability' | 'token' | 'unknown' | null
-  stage:
-    | 'not_android'
-    | 'not_initialized'
-    | 'availability_false'
-    | 'token_ok'
-    | 'availability_error'
-    | 'token_error'
-    | 'unknown_error'
-    | null
+  stage: string | null
+  totalAttempts: number
+  attempts: RetryAttempt[]
+  finalError: string | null
+  finalResponseCode: number | null
 }
 
 export interface ExternalOfferTokenResult {
   token: string | null
   diagnostics: ExternalOfferTokenDiagnostics
 }
+
+// ============================================================================
+// Retry Utilities
+// ============================================================================
+
+/**
+ * Parse responseCode from JSON error message
+ * Error format: {"code":"service-error","message":"...","responseCode":-1,"debugMessage":"..."}
+ */
+function parseResponseCode(errorMessage: string): number | null {
+  try {
+    // The error message might have a JSON object in it
+    const jsonMatch = errorMessage.match(/\{[^}]+\}/)
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0])
+      return typeof parsed.responseCode === 'number'
+        ? parsed.responseCode
+        : null
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Generic retry utility with diagnostics collection
+ * Retries up to maxAttempts times, calling beforeRetry (reinit) between attempts
+ */
+async function withRetry<T>(
+  operation: () => Promise<T>,
+  options: {
+    maxAttempts?: number
+    delayMs?: number
+    shouldRetry?: (error: unknown) => boolean
+    beforeRetry?: () => Promise<boolean>
+  },
+): Promise<{ result: T | null; success: boolean; attempts: RetryAttempt[] }> {
+  const { maxAttempts = 3, delayMs = 500, shouldRetry, beforeRetry } = options
+  const attempts: RetryAttempt[] = []
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const result = await operation()
+      // Success - record successful attempt
+      attempts.push({
+        attempt,
+        error: null,
+        responseCode: null,
+        reinitSuccess: null,
+      })
+      return { result, success: true, attempts }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      const responseCode = parseResponseCode(errorMsg)
+
+      // #region agent log
+      console.info('[DBG_EXT_OFFERS_APP][RETRY_ATTEMPT]', {
+        attempt,
+        responseCode,
+        errorPreview: errorMsg.slice(0, 200),
+      })
+      // #endregion agent log
+
+      attempts.push({
+        attempt,
+        error: errorMsg.slice(0, 500), // Truncate for logging
+        responseCode,
+        reinitSuccess: null,
+      })
+
+      // Check if we should retry
+      const canRetry =
+        attempt < maxAttempts && (!shouldRetry || shouldRetry(error))
+      if (!canRetry) {
+        // #region agent log
+        console.info('[DBG_EXT_OFFERS_APP][RETRY_STOP]', {
+          attempt,
+          reason: attempt >= maxAttempts ? 'max_attempts' : 'should_not_retry',
+        })
+        // #endregion agent log
+        break
+      }
+
+      // Run beforeRetry (e.g., reinitialize billing client)
+      if (beforeRetry) {
+        const reinitSuccess = await beforeRetry()
+        attempts[attempts.length - 1].reinitSuccess = reinitSuccess
+
+        // #region agent log
+        console.info('[DBG_EXT_OFFERS_APP][REINIT_RESULT]', {
+          attempt,
+          reinitSuccess,
+        })
+        // #endregion agent log
+
+        if (!reinitSuccess) {
+          // #region agent log
+          console.info('[DBG_EXT_OFFERS_APP][RETRY_STOP]', {
+            attempt,
+            reason: 'reinit_failed',
+          })
+          // #endregion agent log
+          break
+        }
+      }
+
+      // Delay before next retry
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+  }
+
+  return { result: null, success: false, attempts }
+}
+
+// ============================================================================
+// Initialization
+// ============================================================================
 
 /**
  * Initialize External Offers on app startup (Android only)
@@ -107,7 +232,7 @@ async function doInit(): Promise<boolean> {
 
 /**
  * Force re-initialization of the billing connection
- * Used when the billing client becomes disconnected
+ * Used when the billing client becomes disconnected (SERVICE_DISCONNECTED = -1)
  */
 async function reinitialize(): Promise<boolean> {
   // #region agent log
@@ -127,10 +252,19 @@ async function reinitialize(): Promise<boolean> {
   return initExternalOffers()
 }
 
+// ============================================================================
+// Token Generation with Retry
+// ============================================================================
+
 /**
  * Get external offer token for Google reporting (Android only)
- * Uses Billing Programs API (not Alternative Billing API)
- * Will attempt to initialize/reinitialize if needed
+ * Uses Billing Programs API with retry logic for SERVICE_DISCONNECTED errors
+ *
+ * Retry strategy (per Google's docs):
+ * - Up to 3 attempts
+ * - 500ms delay between retries
+ * - Reinitialize billing connection before each retry
+ * - Only retry on responseCode -1 (SERVICE_DISCONNECTED)
  */
 export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult> {
   if (Platform.OS !== 'android') {
@@ -139,160 +273,108 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
       diagnostics: {
         isInitialized: false,
         isAvailable: null,
-        errorName: null,
-        errorMessage: null,
-        failedStep: null,
         stage: 'not_android',
+        totalAttempts: 0,
+        attempts: [],
+        finalError: null,
+        finalResponseCode: null,
       },
     }
   }
 
-  // Try to get token, with one retry after reinit if billing client disconnected
-  const result = await attemptGetToken()
-
-  // If we got a "billing client not ready" error, try reinitializing once
-  if (
-    result.diagnostics.stage === 'availability_error' &&
-    result.diagnostics.errorMessage?.includes('not ready')
-  ) {
-    // #region agent log
-    console.info('[DBG_EXT_OFFERS_APP][RETRY_AFTER_REINIT]')
-    // #endregion agent log
-
-    const reinitSuccess = await reinitialize()
-    if (reinitSuccess) {
-      return attemptGetToken()
-    }
-  }
-
-  return result
-}
-
-async function attemptGetToken(): Promise<ExternalOfferTokenResult> {
-  const baseDiagnostics: ExternalOfferTokenDiagnostics = {
-    isInitialized,
-    isAvailable: null,
-    errorName: null,
-    errorMessage: null,
-    failedStep: null,
-    stage: null,
-  }
-
-  // Ensure initialized before proceeding
+  // Ensure initialized first
   if (!isInitialized) {
     const initSuccess = await initExternalOffers()
     if (!initSuccess) {
       return {
         token: null,
         diagnostics: {
-          ...baseDiagnostics,
           isInitialized: false,
-          stage: 'not_initialized',
+          isAvailable: null,
+          stage: 'init_failed',
+          totalAttempts: 0,
+          attempts: [],
+          finalError: 'Failed to initialize billing connection',
+          finalResponseCode: null,
         },
       }
     }
-    baseDiagnostics.isInitialized = true
   }
 
-  try {
-    // #region agent log
-    console.info('[DBG_EXT_OFFERS_APP][TOKEN_START]', {
-      isInitialized,
-    })
-    // #endregion agent log
+  // #region agent log
+  console.info('[DBG_EXT_OFFERS_APP][TOKEN_START]', {
+    isInitialized,
+  })
+  // #endregion agent log
 
-    // Check if External Offers program is available for this user
-    let isAvailable: boolean
-    try {
-      const result = await isBillingProgramAvailableAndroid('external-offer')
-      isAvailable = result.isAvailable
-    } catch (error) {
-      return {
-        token: null,
-        diagnostics: {
-          ...baseDiagnostics,
-          errorName: error instanceof Error ? error.name : 'UnknownError',
-          errorMessage: error instanceof Error ? error.message : String(error),
-          failedStep: 'availability',
-          stage: 'availability_error',
-        },
+  // Use withRetry for the token generation with reinit between retries
+  const { result, success, attempts } = await withRetry(
+    async () => {
+      // Step 1: Check if External Offers program is available
+      const availResult =
+        await isBillingProgramAvailableAndroid('external-offer')
+
+      // #region agent log
+      console.info('[DBG_EXT_OFFERS_APP][TOKEN_AVAILABILITY]', {
+        isAvailable: availResult.isAvailable,
+      })
+      // #endregion agent log
+
+      if (!availResult.isAvailable) {
+        throw new Error('NOT_AVAILABLE')
       }
-    }
 
-    // #region agent log
-    console.info('[DBG_EXT_OFFERS_APP][TOKEN_AVAILABILITY]', {
-      isAvailable,
-    })
-    // #endregion agent log
-
-    if (!isAvailable) {
-      console.warn('[EXTERNAL_OFFERS] External Offers program not available')
-      return {
-        token: null,
-        diagnostics: {
-          ...baseDiagnostics,
-          isAvailable,
-          stage: 'availability_false',
-        },
-      }
-    }
-
-    // Get the external transaction token via Billing Programs API
-    let token: string
-    try {
+      // Step 2: Get the external transaction token
       const details =
         await createBillingProgramReportingDetailsAndroid('external-offer')
-      token = details.externalTransactionToken
-    } catch (error) {
-      return {
-        token: null,
-        diagnostics: {
-          ...baseDiagnostics,
-          isAvailable,
-          errorName: error instanceof Error ? error.name : 'UnknownError',
-          errorMessage: error instanceof Error ? error.message : String(error),
-          failedStep: 'token',
-          stage: 'token_error',
-        },
-      }
-    }
 
-    // #region agent log
-    console.info('[DBG_EXT_OFFERS_APP][TOKEN_RESULT]', {
-      hasToken: !!token,
-      tokenLength: token?.length || 0,
-    })
-    // #endregion agent log
+      // #region agent log
+      console.info('[DBG_EXT_OFFERS_APP][TOKEN_CREATED]', {
+        hasToken: !!details.externalTransactionToken,
+        tokenLength: details.externalTransactionToken?.length || 0,
+      })
+      // #endregion agent log
 
+      return details.externalTransactionToken
+    },
+    {
+      maxAttempts: 3,
+      delayMs: 500,
+      shouldRetry: (error) => {
+        const msg = error instanceof Error ? error.message : String(error)
+        const code = parseResponseCode(msg)
+        // Only retry on SERVICE_DISCONNECTED (-1)
+        return code === -1
+      },
+      beforeRetry: reinitialize,
+    },
+  )
+
+  const lastAttempt = attempts[attempts.length - 1]
+
+  if (success) {
     console.info('[EXTERNAL_OFFERS] Token generated successfully')
-    return {
-      token,
-      diagnostics: {
-        ...baseDiagnostics,
-        isAvailable,
-        stage: 'token_ok',
-      },
-    }
-  } catch (error) {
-    // #region agent log
-    console.error('[DBG_EXT_OFFERS_APP][TOKEN_ERROR]', {
-      name: error instanceof Error ? error.name : 'UnknownError',
-      message: error instanceof Error ? error.message : String(error),
-    })
-    // #endregion agent log
-    console.error('[EXTERNAL_OFFERS] Failed to get token:', error)
-    return {
-      token: null,
-      diagnostics: {
-        ...baseDiagnostics,
-        errorName: error instanceof Error ? error.name : 'UnknownError',
-        errorMessage: error instanceof Error ? error.message : String(error),
-        failedStep: 'unknown',
-        stage: 'unknown_error',
-      },
-    }
+  } else {
+    console.warn('[EXTERNAL_OFFERS] Token generation failed after retries')
+  }
+
+  return {
+    token: success ? result : null,
+    diagnostics: {
+      isInitialized,
+      isAvailable: success ? true : null,
+      stage: success ? 'token_ok' : 'retry_exhausted',
+      totalAttempts: attempts.length,
+      attempts,
+      finalError: lastAttempt?.error || null,
+      finalResponseCode: lastAttempt?.responseCode || null,
+    },
   }
 }
+
+// ============================================================================
+// Checkout
+// ============================================================================
 
 /**
  * Open checkout URL with External Offers compliance
