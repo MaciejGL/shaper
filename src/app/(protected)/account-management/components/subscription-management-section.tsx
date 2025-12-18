@@ -55,6 +55,11 @@ export function SubscriptionManagementSection() {
           typeof window !== 'undefined' &&
           !!window.nativeApp?.getExternalOfferToken,
       }
+      const isNativeForCheckout =
+        typeof window !== 'undefined' &&
+        (window.isNativeApp === true || !!window.nativeApp)
+      const platformForCheckout =
+        typeof window !== 'undefined' ? window.mobilePlatform : undefined
 
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
@@ -66,7 +71,7 @@ export function SubscriptionManagementSection() {
           lookupKey,
           returnUrl: `${window.location.origin}/account-management`,
           cancelUrl: `${window.location.origin}/account-management`,
-          platform: isNativeApp ? platform : undefined,
+          platform: isNativeForCheckout ? platformForCheckout : undefined,
           extToken,
           clientDebug,
         }),

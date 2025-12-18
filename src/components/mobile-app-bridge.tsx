@@ -80,13 +80,21 @@ export function useMobileApp() {
   >()
   const initRef = useRef(false)
 
+  const derivedIsNativeApp =
+    isNativeApp ||
+    (typeof window !== 'undefined' &&
+      (window.isNativeApp === true || !!window.nativeApp))
+  const derivedPlatform =
+    platform ||
+    (typeof window !== 'undefined' ? window.mobilePlatform : undefined)
+
   useEffect(() => {
     // Prevent double initialization in React Strict Mode
     if (initRef.current) return
     initRef.current = true
 
     // Check if running in native app
-    const isNative = window.isNativeApp === true
+    const isNative = window.isNativeApp === true || !!window.nativeApp
     const currentPlatform = window.mobilePlatform
 
     setIsNativeApp(isNative)
@@ -111,7 +119,7 @@ export function useMobileApp() {
    * or opens device settings if permissions were previously denied
    */
   const requestPushPermissions = () => {
-    if (isNativeApp && window.nativeApp?.requestNotificationPermission) {
+    if (derivedIsNativeApp && window.nativeApp?.requestNotificationPermission) {
       console.info(
         '📱 Requesting push notification permissions from native app',
       )
@@ -128,7 +136,7 @@ export function useMobileApp() {
    * Useful when user might have enabled permissions in device settings
    */
   const checkPushPermissions = () => {
-    if (isNativeApp && window.nativeApp?.checkNotificationPermissions) {
+    if (derivedIsNativeApp && window.nativeApp?.checkNotificationPermissions) {
       console.info('📱 Checking push notification permissions status')
       window.nativeApp.checkNotificationPermissions()
     } else {
@@ -143,7 +151,10 @@ export function useMobileApp() {
    * This will update the backend to disable the push token
    */
   const disablePushPermissions = () => {
-    if (isNativeApp && window.nativeApp?.disableNotificationPermissions) {
+    if (
+      derivedIsNativeApp &&
+      window.nativeApp?.disableNotificationPermissions
+    ) {
       console.info('📱 Disabling push notification permissions')
       window.nativeApp.disableNotificationPermissions()
     } else {
@@ -157,7 +168,7 @@ export function useMobileApp() {
    * Navigate to a specific path in the app
    */
   const navigateToPath = (path: string) => {
-    if (isNativeApp && window.nativeApp?.onNavigate) {
+    if (derivedIsNativeApp && window.nativeApp?.onNavigate) {
       window.nativeApp.onNavigate(path)
     }
   }
@@ -166,7 +177,7 @@ export function useMobileApp() {
    * Update the app theme (for status bar/navigation bar styling)
    */
   const updateTheme = (theme: 'light' | 'dark') => {
-    if (isNativeApp && window.nativeApp?.updateTheme) {
+    if (derivedIsNativeApp && window.nativeApp?.updateTheme) {
       window.nativeApp.updateTheme(theme)
     }
   }
@@ -176,7 +187,7 @@ export function useMobileApp() {
    * This enables push notification registration for the authenticated user
    */
   const setAuthToken = (token: string) => {
-    if (isNativeApp && window.nativeApp?.setAuthToken) {
+    if (derivedIsNativeApp && window.nativeApp?.setAuthToken) {
       console.info('📱 Sending auth token to native app')
       window.nativeApp.setAuthToken(token)
     }
@@ -184,8 +195,8 @@ export function useMobileApp() {
 
   const openExternalUrl = (url: string) => {
     if (
-      isNativeApp &&
-      platform === 'ios' &&
+      derivedIsNativeApp &&
+      derivedPlatform === 'ios' &&
       window.nativeApp?.openExternalUrl
     ) {
       window.nativeApp.openExternalUrl(url)
@@ -199,7 +210,7 @@ export function useMobileApp() {
     filename: string,
     mimeType: string,
   ) => {
-    if (!isNativeApp || !window.nativeApp?.downloadFile) {
+    if (!derivedIsNativeApp || !window.nativeApp?.downloadFile) {
       return
     }
 
@@ -216,7 +227,13 @@ export function useMobileApp() {
    * Returns null on iOS/web or if not available
    */
   const getExternalOfferToken = async (): Promise<string | null> => {
-    if (!isNativeApp || platform !== 'android') {
+    const isNativeNow =
+      typeof window !== 'undefined' &&
+      (window.isNativeApp === true || !!window.nativeApp)
+    const platformNow =
+      typeof window !== 'undefined' ? window.mobilePlatform : undefined
+
+    if (!isNativeNow || platformNow !== 'android') {
       return null
     }
     if (!window.nativeApp?.getExternalOfferToken) {
@@ -235,7 +252,10 @@ export function useMobileApp() {
    * Falls back to regular window.location for web
    */
   const openExternalCheckout = (url: string) => {
-    if (isNativeApp && window.nativeApp?.openExternalCheckout) {
+    const isNativeNow =
+      typeof window !== 'undefined' &&
+      (window.isNativeApp === true || !!window.nativeApp)
+    if (isNativeNow && window.nativeApp?.openExternalCheckout) {
       window.nativeApp.openExternalCheckout(url)
     } else {
       window.location.href = url
@@ -246,7 +266,7 @@ export function useMobileApp() {
    * Get available capabilities in the mobile app
    */
   const getCapabilities = () => {
-    const nativeAPI = isNativeApp ? window.nativeApp : null
+    const nativeAPI = derivedIsNativeApp ? window.nativeApp : null
     return {
       canRequestPushPermissions: !!nativeAPI?.requestNotificationPermission,
       canCheckPushPermissions: !!nativeAPI?.checkNotificationPermissions,
@@ -254,15 +274,16 @@ export function useMobileApp() {
       canNavigate: !!nativeAPI?.onNavigate,
       canUpdateTheme: !!nativeAPI?.updateTheme,
       canSetAuthToken: !!nativeAPI?.setAuthToken,
-      canOpenExternalUrl: !!nativeAPI?.openExternalUrl && platform === 'ios',
+      canOpenExternalUrl:
+        !!nativeAPI?.openExternalUrl && derivedPlatform === 'ios',
       canDownloadFile: !!nativeAPI?.downloadFile,
     }
   }
 
   return {
     // Basic info
-    isNativeApp,
-    platform,
+    isNativeApp: derivedIsNativeApp,
+    platform: derivedPlatform,
     capabilities: getCapabilities(),
 
     // Core functions
@@ -278,8 +299,8 @@ export function useMobileApp() {
     openExternalCheckout,
 
     // Convenience functions
-    isIOS: platform === 'ios',
-    isAndroid: platform === 'android',
+    isIOS: derivedPlatform === 'ios',
+    isAndroid: derivedPlatform === 'android',
   }
 }
 
