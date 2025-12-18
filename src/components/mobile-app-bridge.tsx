@@ -60,14 +60,10 @@ interface NativeAppAPI {
     filename: string
     mimeType: string
   }) => void
-  getExternalOfferToken: () => Promise<
-    | string
-    | null
-    | {
-        token: string | null
-        diagnostics: Record<string, unknown>
-      }
-  >
+  getExternalOfferToken: () => Promise<{
+    token: string | null
+    error: string | null
+  }>
   openExternalCheckout: (url: string) => void
 }
 
@@ -77,7 +73,6 @@ declare global {
     mobilePlatform?: 'ios' | 'android' | 'expo' | 'web'
     appEnvironment?: string
     nativeApp?: NativeAppAPI
-    __externalOfferDiagnostics?: Record<string, unknown> | null
   }
 }
 
@@ -236,7 +231,7 @@ export function useMobileApp() {
    */
   const getExternalOfferToken = async (): Promise<{
     token: string | null
-    diagnostics: Record<string, unknown> | null
+    error: string | null
   }> => {
     const isNativeNow =
       typeof window !== 'undefined' &&
@@ -245,61 +240,20 @@ export function useMobileApp() {
       typeof window !== 'undefined' ? window.mobilePlatform : undefined
 
     if (!isNativeNow || platformNow !== 'android') {
-      window.__externalOfferDiagnostics = null
-      return { token: null, diagnostics: null }
+      return { token: null, error: null }
     }
     if (!window.nativeApp?.getExternalOfferToken) {
-      window.__externalOfferDiagnostics = null
-      return { token: null, diagnostics: null }
+      return { token: null, error: 'native_api_unavailable' }
     }
     try {
       const result = await window.nativeApp.getExternalOfferToken()
-      if (typeof result === 'string' || result === null) {
-        window.__externalOfferDiagnostics = null
-        return { token: result, diagnostics: null }
+      return {
+        token: result?.token ?? null,
+        error: result?.error ?? null,
       }
-
-      if (
-        typeof result === 'object' &&
-        result !== null &&
-        'token' in result &&
-        'diagnostics' in result
-      ) {
-        const token =
-          typeof result.token === 'string' || result.token === null
-            ? result.token
-            : null
-        const diagnostics =
-          typeof result.diagnostics === 'object' && result.diagnostics !== null
-            ? {
-                ...(result.diagnostics as Record<string, unknown>),
-                // Force known keys into stable shapes (but keep extras)
-                isInitialized: !!(result.diagnostics as Record<string, unknown>)
-                  .isInitialized,
-                isAvailable:
-                  typeof (result.diagnostics as Record<string, unknown>)
-                    .isAvailable === 'boolean'
-                    ? ((result.diagnostics as Record<string, unknown>)
-                        .isAvailable as boolean)
-                    : null,
-                errorName:
-                  typeof (result.diagnostics as Record<string, unknown>)
-                    .errorName === 'string'
-                    ? ((result.diagnostics as Record<string, unknown>)
-                        .errorName as string)
-                    : null,
-              }
-            : null
-        window.__externalOfferDiagnostics = diagnostics
-        return { token, diagnostics }
-      }
-
-      window.__externalOfferDiagnostics = null
-      return { token: null, diagnostics: null }
     } catch (error) {
       console.error('Failed to get external offer token:', error)
-      window.__externalOfferDiagnostics = null
-      return { token: null, diagnostics: null }
+      return { token: null, error: 'bridge_error' }
     }
   }
 

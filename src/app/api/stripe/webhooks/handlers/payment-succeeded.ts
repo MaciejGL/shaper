@@ -24,33 +24,6 @@ interface InvoiceWithSubscription extends Stripe.Invoice {
 
 export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
   try {
-    // #region agent log
-    console.info('[DBG_EXT_OFFERS][PAYMENT_SUCCEEDED_RECEIVED]', {
-      billingReason: invoice.billing_reason || null,
-      hasInvoiceId: !!invoice.id,
-      hasDirectSubscriptionField: !!invoice.subscription,
-      hasLineItems: !!invoice.lines?.data?.length,
-    })
-    fetch('http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sessionId: 'debug-session',
-        runId: 'run1',
-        hypothesisId: 'H1',
-        location:
-          'src/app/api/stripe/webhooks/handlers/payment-succeeded.ts:handlePaymentSucceeded',
-        message: 'payment_succeeded_received',
-        data: {
-          billingReason: invoice.billing_reason || null,
-          hasInvoiceId: !!invoice.id,
-          hasDirectSubscriptionField: !!invoice.subscription,
-          hasLineItems: !!invoice.lines?.data?.length,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {})
-    // #endregion agent log
     // Extract subscription ID from invoice
     let subscriptionId: string | null = null
 
@@ -82,32 +55,6 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     const subscription = await findSubscriptionById(subscriptionId)
 
     if (!subscription) {
-      // #region agent log
-      console.info('[DBG_EXT_OFFERS][PAYMENT_SUCCEEDED_DB_MISS]', {
-        stripeSubscriptionId: subscriptionId,
-        invoiceId: invoice.id || null,
-      })
-      fetch(
-        'http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'run1',
-            hypothesisId: 'H1',
-            location:
-              'src/app/api/stripe/webhooks/handlers/payment-succeeded.ts:findSubscriptionById',
-            message: 'db_subscription_missing',
-            data: {
-              hasInvoiceId: !!invoice.id,
-              hasStripeSubscriptionId: !!subscriptionId,
-            },
-            timestamp: Date.now(),
-          }),
-        },
-      ).catch(() => {})
-      // #endregion agent log
       console.warn(`Subscription not found in database: ${subscriptionId}`)
       return
     }
@@ -131,50 +78,7 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
         subscription.stripeSubscriptionId,
       )
 
-      // #region agent log
-      console.info('[DBG_EXT_OFFERS][STRIPE_SUB_METADATA]', {
-        hasPlatform:
-          typeof stripeSub.metadata?.platform === 'string' &&
-          stripeSub.metadata.platform.length > 0,
-        hasExtToken:
-          typeof stripeSub.metadata?.extToken === 'string' &&
-          stripeSub.metadata.extToken.length > 0,
-      })
-      fetch(
-        'http://127.0.0.1:7243/ingest/ff67e938-d34a-495d-99c6-d347bebc5d85',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: 'debug-session',
-            runId: 'run1',
-            hypothesisId: 'H4',
-            location:
-              'src/app/api/stripe/webhooks/handlers/payment-succeeded.ts:stripe_subscriptions_retrieve',
-            message: 'stripe_subscription_metadata_presence',
-            data: {
-              hasPlatform:
-                typeof stripeSub.metadata?.platform === 'string' &&
-                stripeSub.metadata.platform.length > 0,
-              hasExtToken:
-                typeof stripeSub.metadata?.extToken === 'string' &&
-                stripeSub.metadata.extToken.length > 0,
-            },
-            timestamp: Date.now(),
-          }),
-        },
-      ).catch(() => {})
-      // #endregion agent log
-
       const isInitialPurchase = invoice.billing_reason === 'subscription_create'
-
-      // Debug: Log metadata for external offers tracking
-      console.info('[EXTERNAL_OFFERS] Stripe metadata:', {
-        platform: stripeSub.metadata?.platform,
-        extToken: stripeSub.metadata?.extToken ? 'present' : 'missing',
-        billingReason: invoice.billing_reason,
-        invoiceId: invoice.id,
-      })
 
       if (isInitialPurchase) {
         // Initial purchase: store external offer data from Stripe metadata

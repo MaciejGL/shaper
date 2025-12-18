@@ -42,19 +42,10 @@ export default function OffersPage() {
 
       // For Android in-app, get external offer token for Google compliance
       let extToken: string | null = null
-      let externalOfferDiagnostics: Record<string, unknown> | null = null
       if (isNativeApp && platform === 'android') {
-        console.info('[OFFERS] Requesting external offer token...')
         const result = await getExternalOfferToken()
         extToken = result.token
-        externalOfferDiagnostics = result.diagnostics
-        console.info('[OFFERS] Token received:', extToken ? 'yes' : 'no')
       }
-
-      console.info('[OFFERS] Creating checkout session with:', {
-        platform: isNativeApp ? platform : undefined,
-        hasToken: !!extToken,
-      })
 
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
@@ -70,7 +61,6 @@ export default function OffersPage() {
           cancelUrl: `${window.location.origin}/account-management/offers${redirectUrl ? `?redirectUrl=${encodeURIComponent(redirectUrl)}` : ''}`,
           platform: isNativeApp ? platform : undefined,
           extToken,
-          externalOfferDiagnostics,
         }),
       })
 
