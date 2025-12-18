@@ -542,13 +542,31 @@ export const EnhancedWebView = forwardRef<
 
           case 'get_external_offer_token':
             // Get external offer token and send it back to web
-            getExternalOfferToken().then((token) => {
+            // #region agent log
+            console.info('[DBG_EXT_OFFERS_APP][WV_TOKEN_REQUEST]', {
+              hasCallbackId: !!message.callbackId,
+            })
+            // #endregion agent log
+            getExternalOfferToken().then((result) => {
+              // #region agent log
+              console.info('[DBG_EXT_OFFERS_APP][WV_TOKEN_RESPONSE]', {
+                hasToken: !!result.token,
+                diagnostics: {
+                  isInitialized: result.diagnostics.isInitialized,
+                  isAvailable: result.diagnostics.isAvailable,
+                  errorName: result.diagnostics.errorName,
+                },
+              })
+              // #endregion agent log
               const callbackId = message.callbackId
               webViewRef.current?.injectJavaScript(`
                 (function() {
                   var callback = window['__extTokenCallback_${callbackId}'];
                   if (callback) {
-                    callback(${token ? `'${token}'` : 'null'});
+                    callback(${JSON.stringify({
+                      token: result.token,
+                      diagnostics: result.diagnostics,
+                    })});
                     delete window['__extTokenCallback_${callbackId}'];
                   }
                 })();

@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
       platform,
       extToken,
       clientDebug,
+      externalOfferDiagnostics,
     } = body
 
     // #region agent log
@@ -42,6 +43,20 @@ export async function POST(request: NextRequest) {
       hasUserId: typeof userId === 'string' && userId.length > 0,
       hasLookupKey: typeof lookupKey === 'string' && lookupKey.length > 0,
       uaFlags,
+      externalOfferDiagnostics:
+        externalOfferDiagnostics && typeof externalOfferDiagnostics === 'object'
+          ? {
+              isInitialized: !!externalOfferDiagnostics.isInitialized,
+              isAvailable:
+                typeof externalOfferDiagnostics.isAvailable === 'boolean'
+                  ? externalOfferDiagnostics.isAvailable
+                  : null,
+              errorName:
+                typeof externalOfferDiagnostics.errorName === 'string'
+                  ? externalOfferDiagnostics.errorName
+                  : null,
+            }
+          : null,
       clientDebug:
         clientDebug && typeof clientDebug === 'object'
           ? {

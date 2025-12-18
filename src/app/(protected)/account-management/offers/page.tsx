@@ -42,9 +42,18 @@ export default function OffersPage() {
 
       // For Android in-app, get external offer token for Google compliance
       let extToken: string | null = null
+      let externalOfferDiagnostics:
+        | {
+            isInitialized: boolean
+            isAvailable: boolean | null
+            errorName: string | null
+          }
+        | null = null
       if (isNativeApp && platform === 'android') {
         console.info('[OFFERS] Requesting external offer token...')
-        extToken = await getExternalOfferToken()
+        const result = await getExternalOfferToken()
+        extToken = result.token
+        externalOfferDiagnostics = result.diagnostics
         console.info('[OFFERS] Token received:', extToken ? 'yes' : 'no')
       }
 
@@ -67,6 +76,7 @@ export default function OffersPage() {
           cancelUrl: `${window.location.origin}/account-management/offers${redirectUrl ? `?redirectUrl=${encodeURIComponent(redirectUrl)}` : ''}`,
           platform: isNativeApp ? platform : undefined,
           extToken,
+          externalOfferDiagnostics,
         }),
       })
 

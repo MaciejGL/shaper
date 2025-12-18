@@ -60,7 +60,18 @@ interface NativeAppAPI {
     filename: string
     mimeType: string
   }) => void
-  getExternalOfferToken: () => Promise<string | null>
+  getExternalOfferToken: () => Promise<
+    | string
+    | null
+    | {
+        token: string | null
+        diagnostics: {
+          isInitialized: boolean
+          isAvailable: boolean | null
+          errorName: string | null
+        }
+      }
+  >
   openExternalCheckout: (url: string) => void
 }
 
@@ -70,6 +81,11 @@ declare global {
     mobilePlatform?: 'ios' | 'android' | 'expo' | 'web'
     appEnvironment?: string
     nativeApp?: NativeAppAPI
+    __externalOfferDiagnostics?: {
+      isInitialized: boolean
+      isAvailable: boolean | null
+      errorName: string | null
+    } | null
   }
 }
 
@@ -226,7 +242,14 @@ export function useMobileApp() {
    * Get external offer token for Google Play External Offers compliance (Android only)
    * Returns null on iOS/web or if not available
    */
-  const getExternalOfferToken = async (): Promise<string | null> => {
+  const getExternalOfferToken = async (): Promise<{
+    token: string | null
+    diagnostics: {
+      isInitialized: boolean
+      isAvailable: boolean | null
+      errorName: string | null
+    } | null
+  }> => {
     const isNativeNow =
       typeof window !== 'undefined' &&
       (window.isNativeApp === true || !!window.nativeApp)
@@ -234,16 +257,54 @@ export function useMobileApp() {
       typeof window !== 'undefined' ? window.mobilePlatform : undefined
 
     if (!isNativeNow || platformNow !== 'android') {
-      return null
+      window.__externalOfferDiagnostics = null
+      return { token: null, diagnostics: null }
     }
     if (!window.nativeApp?.getExternalOfferToken) {
-      return null
+      window.__externalOfferDiagnostics = null
+      return { token: null, diagnostics: null }
     }
     try {
-      return await window.nativeApp.getExternalOfferToken()
+      const result = await window.nativeApp.getExternalOfferToken()
+      if (typeof result === 'string' || result === null) {
+        window.__externalOfferDiagnostics = null
+        return { token: result, diagnostics: null }
+      }
+
+      if (
+        typeof result === 'object' &&
+        result !== null &&
+        'token' in result &&
+        'diagnostics' in result
+      ) {
+        const token =
+          typeof result.token === 'string' || result.token === null
+            ? result.token
+            : null
+        const diagnostics =
+          typeof result.diagnostics === 'object' && result.diagnostics !== null
+            ? {
+                isInitialized: !!result.diagnostics.isInitialized,
+                isAvailable:
+                  typeof result.diagnostics.isAvailable === 'boolean'
+                    ? result.diagnostics.isAvailable
+                    : null,
+                errorName:
+                  typeof result.diagnostics.errorName === 'string'
+                    ? result.diagnostics.errorName
+                    : null,
+              }
+            : null
+        window.__externalOfferDiagnostics = diagnostics
+        return { token, diagnostics }
+      }
+
+      window.__externalOfferDiagnostics = null
+      return { token: null, diagnostics: null }
     } catch (error) {
       console.error('Failed to get external offer token:', error)
-      return null
+      window.__externalOfferDiagnostics = null
+      return { token: null, diagnostics: null }
     }
   }
 

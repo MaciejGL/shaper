@@ -43,7 +43,8 @@ export function SubscriptionManagementSection() {
 
     try {
       // For Android in-app, get external offer token for Google compliance
-      const extToken = await getExternalOfferToken()
+      const { token: extToken, diagnostics: externalOfferDiagnostics } =
+        await getExternalOfferToken()
       const clientDebug = {
         isNativeApp,
         platform: platform ?? null,
@@ -73,6 +74,7 @@ export function SubscriptionManagementSection() {
           cancelUrl: `${window.location.origin}/account-management`,
           platform: isNativeForCheckout ? platformForCheckout : undefined,
           extToken,
+          externalOfferDiagnostics,
           clientDebug,
         }),
       })
