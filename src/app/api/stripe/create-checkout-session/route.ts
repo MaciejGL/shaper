@@ -85,25 +85,25 @@ export async function POST(request: NextRequest) {
                 typeof externalOfferDiagnostics.isAvailable === 'boolean'
                   ? externalOfferDiagnostics.isAvailable
                   : null,
-              errorName:
-                typeof externalOfferDiagnostics.errorName === 'string'
-                  ? externalOfferDiagnostics.errorName
-                  : null,
-              errorMessage:
-                typeof externalOfferDiagnostics.errorMessage === 'string'
-                  ? externalOfferDiagnostics.errorMessage.slice(0, 400)
-                  : null,
-              failedStep:
-                typeof externalOfferDiagnostics.failedStep === 'string'
-                  ? externalOfferDiagnostics.failedStep
-                  : null,
               stage:
                 typeof externalOfferDiagnostics.stage === 'string'
                   ? externalOfferDiagnostics.stage
                   : null,
-              dialogShown:
-                typeof externalOfferDiagnostics.dialogShown === 'boolean'
-                  ? externalOfferDiagnostics.dialogShown
+              // New retry fields
+              totalAttempts:
+                typeof externalOfferDiagnostics.totalAttempts === 'number'
+                  ? externalOfferDiagnostics.totalAttempts
+                  : null,
+              attempts: Array.isArray(externalOfferDiagnostics.attempts)
+                ? externalOfferDiagnostics.attempts.slice(0, 5) // Limit to 5 attempts
+                : null,
+              finalError:
+                typeof externalOfferDiagnostics.finalError === 'string'
+                  ? externalOfferDiagnostics.finalError.slice(0, 400)
+                  : null,
+              finalResponseCode:
+                typeof externalOfferDiagnostics.finalResponseCode === 'number'
+                  ? externalOfferDiagnostics.finalResponseCode
                   : null,
             }
           : null,
