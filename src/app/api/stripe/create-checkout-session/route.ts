@@ -29,6 +29,39 @@ export async function POST(request: NextRequest) {
       externalOfferDiagnostics,
     } = body
 
+    const sanitizeDiagnostics = (
+      input: unknown,
+    ): Record<string, unknown> | null => {
+      if (!input || typeof input !== 'object') return null
+      if (Array.isArray(input)) return { _type: 'array', length: input.length }
+      const obj = input as Record<string, unknown>
+      const out: Record<string, unknown> = {}
+      const keys = Object.keys(obj).slice(0, 40)
+      for (const key of keys) {
+        if (key.toLowerCase().includes('token')) continue
+        const value = obj[key]
+        if (value === null) {
+          out[key] = null
+          continue
+        }
+        if (typeof value === 'boolean' || typeof value === 'number') {
+          out[key] = value
+          continue
+        }
+        if (typeof value === 'string') {
+          out[key] = value.length > 300 ? `${value.slice(0, 300)}…` : value
+          continue
+        }
+        // Avoid deep/nested logging
+        out[key] = Array.isArray(value) ? `[array:${value.length}]` : '[object]'
+      }
+      if (Object.keys(obj).length > keys.length) out._truncatedKeys = true
+      return out
+    }
+    const externalOfferDiagnosticsRaw = sanitizeDiagnostics(
+      externalOfferDiagnostics,
+    )
+
     // #region agent log
     const ua = request.headers.get('user-agent') || ''
     const uaFlags = {
@@ -43,6 +76,7 @@ export async function POST(request: NextRequest) {
       hasUserId: typeof userId === 'string' && userId.length > 0,
       hasLookupKey: typeof lookupKey === 'string' && lookupKey.length > 0,
       uaFlags,
+      externalOfferDiagnosticsRaw,
       externalOfferDiagnostics:
         externalOfferDiagnostics && typeof externalOfferDiagnostics === 'object'
           ? {
@@ -62,6 +96,14 @@ export async function POST(request: NextRequest) {
               failedStep:
                 typeof externalOfferDiagnostics.failedStep === 'string'
                   ? externalOfferDiagnostics.failedStep
+                  : null,
+              stage:
+                typeof externalOfferDiagnostics.stage === 'string'
+                  ? externalOfferDiagnostics.stage
+                  : null,
+              dialogShown:
+                typeof externalOfferDiagnostics.dialogShown === 'boolean'
+                  ? externalOfferDiagnostics.dialogShown
                   : null,
             }
           : null,

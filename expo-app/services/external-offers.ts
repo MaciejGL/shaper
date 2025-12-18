@@ -16,6 +16,7 @@ import {
 } from 'react-native-iap'
 
 let isInitialized = false
+let hasShownAlternativeBillingDialog = false
 
 export interface ExternalOfferTokenDiagnostics {
   isInitialized: boolean
@@ -23,6 +24,17 @@ export interface ExternalOfferTokenDiagnostics {
   errorName: string | null
   errorMessage: string | null
   failedStep: 'availability' | 'token' | 'unknown' | null
+  stage:
+    | 'not_android'
+    | 'availability_false'
+    | 'dialog_error'
+    | 'token_null'
+    | 'token_ok'
+    | 'availability_error'
+    | 'token_error'
+    | 'unknown_error'
+    | null
+  dialogShown: boolean
 }
 
 export interface ExternalOfferTokenResult {
@@ -78,10 +90,15 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
     errorName: null,
     errorMessage: null,
     failedStep: null,
+    stage: null,
+    dialogShown: hasShownAlternativeBillingDialog,
   }
 
   if (Platform.OS !== 'android') {
-    return { token: null, diagnostics: baseDiagnostics }
+    return {
+      token: null,
+      diagnostics: { ...baseDiagnostics, stage: 'not_android' },
+    }
   }
 
   try {
@@ -103,6 +120,7 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
           errorName: error instanceof Error ? error.name : 'UnknownError',
           errorMessage: error instanceof Error ? error.message : String(error),
           failedStep: 'availability',
+          stage: 'availability_error',
         },
       }
     }
@@ -117,7 +135,32 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
       console.warn('[EXTERNAL_OFFERS] Alternative billing not available')
       return {
         token: null,
-        diagnostics: { ...baseDiagnostics, isAvailable },
+        diagnostics: {
+          ...baseDiagnostics,
+          isAvailable,
+          stage: 'availability_false',
+        },
+      }
+    }
+
+    // Show the alternative billing dialog before generating a token.
+    // Empirically, some Play Store configurations will not yield a token until the user has acknowledged this.
+    if (!hasShownAlternativeBillingDialog) {
+      try {
+        await showAlternativeBillingDialogAndroid()
+        hasShownAlternativeBillingDialog = true
+      } catch (error) {
+        return {
+          token: null,
+          diagnostics: {
+            ...baseDiagnostics,
+            isAvailable,
+            errorName: error instanceof Error ? error.name : 'UnknownError',
+            errorMessage: error instanceof Error ? error.message : String(error),
+            stage: 'dialog_error',
+            dialogShown: false,
+          },
+        }
       }
     }
 
@@ -134,6 +177,8 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
           errorName: error instanceof Error ? error.name : 'UnknownError',
           errorMessage: error instanceof Error ? error.message : String(error),
           failedStep: 'token',
+          stage: 'token_error',
+          dialogShown: hasShownAlternativeBillingDialog,
         },
       }
     }
@@ -149,14 +194,24 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
       console.warn('[EXTERNAL_OFFERS] No token received')
       return {
         token: null,
-        diagnostics: { ...baseDiagnostics, isAvailable },
+        diagnostics: {
+          ...baseDiagnostics,
+          isAvailable,
+          stage: 'token_null',
+          dialogShown: hasShownAlternativeBillingDialog,
+        },
       }
     }
 
     console.info('[EXTERNAL_OFFERS] Token generated successfully')
     return {
       token,
-      diagnostics: { ...baseDiagnostics, isAvailable },
+      diagnostics: {
+        ...baseDiagnostics,
+        isAvailable,
+        stage: 'token_ok',
+        dialogShown: hasShownAlternativeBillingDialog,
+      },
     }
   } catch (error) {
     // #region agent log
@@ -173,6 +228,7 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
         errorName: error instanceof Error ? error.name : 'UnknownError',
         errorMessage: error instanceof Error ? error.message : String(error),
         failedStep: 'unknown',
+        stage: 'unknown_error',
       },
     }
   }
@@ -190,11 +246,14 @@ export async function openExternalCheckout(checkoutUrl: string): Promise<void> {
         isInitialized,
       })
       // #endregion agent log
-      // Show the alternative billing dialog for compliance
-      await showAlternativeBillingDialogAndroid()
-      // #region agent log
-      console.info('[DBG_EXT_OFFERS_APP][DIALOG_SHOWN]')
-      // #endregion agent log
+      // Show the alternative billing dialog for compliance (unless already shown)
+      if (!hasShownAlternativeBillingDialog) {
+        await showAlternativeBillingDialogAndroid()
+        hasShownAlternativeBillingDialog = true
+        // #region agent log
+        console.info('[DBG_EXT_OFFERS_APP][DIALOG_SHOWN]')
+        // #endregion agent log
+      }
     }
 
     // Open in Custom Tabs / Safari

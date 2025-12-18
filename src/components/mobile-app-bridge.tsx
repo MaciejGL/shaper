@@ -65,11 +65,7 @@ interface NativeAppAPI {
     | null
     | {
         token: string | null
-        diagnostics: {
-          isInitialized: boolean
-          isAvailable: boolean | null
-          errorName: string | null
-        }
+        diagnostics: Record<string, unknown>
       }
   >
   openExternalCheckout: (url: string) => void
@@ -81,11 +77,7 @@ declare global {
     mobilePlatform?: 'ios' | 'android' | 'expo' | 'web'
     appEnvironment?: string
     nativeApp?: NativeAppAPI
-    __externalOfferDiagnostics?: {
-      isInitialized: boolean
-      isAvailable: boolean | null
-      errorName: string | null
-    } | null
+    __externalOfferDiagnostics?: Record<string, unknown> | null
   }
 }
 
@@ -244,11 +236,7 @@ export function useMobileApp() {
    */
   const getExternalOfferToken = async (): Promise<{
     token: string | null
-    diagnostics: {
-      isInitialized: boolean
-      isAvailable: boolean | null
-      errorName: string | null
-    } | null
+    diagnostics: Record<string, unknown> | null
   }> => {
     const isNativeNow =
       typeof window !== 'undefined' &&
@@ -284,14 +272,21 @@ export function useMobileApp() {
         const diagnostics =
           typeof result.diagnostics === 'object' && result.diagnostics !== null
             ? {
-                isInitialized: !!result.diagnostics.isInitialized,
+                ...(result.diagnostics as Record<string, unknown>),
+                // Force known keys into stable shapes (but keep extras)
+                isInitialized: !!(result.diagnostics as Record<string, unknown>)
+                  .isInitialized,
                 isAvailable:
-                  typeof result.diagnostics.isAvailable === 'boolean'
-                    ? result.diagnostics.isAvailable
+                  typeof (result.diagnostics as Record<string, unknown>)
+                    .isAvailable === 'boolean'
+                    ? ((result.diagnostics as Record<string, unknown>)
+                        .isAvailable as boolean)
                     : null,
                 errorName:
-                  typeof result.diagnostics.errorName === 'string'
-                    ? result.diagnostics.errorName
+                  typeof (result.diagnostics as Record<string, unknown>)
+                    .errorName === 'string'
+                    ? ((result.diagnostics as Record<string, unknown>)
+                        .errorName as string)
                     : null,
               }
             : null

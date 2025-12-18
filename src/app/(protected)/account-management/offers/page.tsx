@@ -42,13 +42,7 @@ export default function OffersPage() {
 
       // For Android in-app, get external offer token for Google compliance
       let extToken: string | null = null
-      let externalOfferDiagnostics:
-        | {
-            isInitialized: boolean
-            isAvailable: boolean | null
-            errorName: string | null
-          }
-        | null = null
+      let externalOfferDiagnostics: Record<string, unknown> | null = null
       if (isNativeApp && platform === 'android') {
         console.info('[OFFERS] Requesting external offer token...')
         const result = await getExternalOfferToken()
