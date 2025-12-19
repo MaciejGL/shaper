@@ -8,6 +8,7 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { reportTransaction } from '@/lib/external-reporting/report-transaction'
 import { getBaseUrl } from '@/lib/get-base-url'
 import {
   STRIPE_LOOKUP_KEYS,
@@ -114,7 +115,58 @@ export async function handleSubscriptionCreated(
       trialEnd: trialEnd?.toISOString() || null,
       isTrialActive: isTrial,
       trainerId: assignedTrainerId || null,
+      originPlatform,
+      hasExternalOfferToken: !!externalOfferToken,
+      initialStripeInvoiceId,
     })
+
+    // Report initial purchase to Google (Android only)
+    // Done here to avoid race condition with invoice.payment_succeeded
+    if (
+      originPlatform === 'android' &&
+      externalOfferToken &&
+      initialStripeInvoiceId
+    ) {
+      try {
+        // Fetch invoice for amount/currency
+        const invoice = await stripe.invoices.retrieve(initialStripeInvoiceId)
+        const amount = invoice.amount_paid || invoice.total || 0
+
+        console.info(
+          '[GOOGLE_REPORTING][SUBSCRIPTION_CREATED] Reporting initial purchase:',
+          {
+            userId: user.id,
+            invoiceId: initialStripeInvoiceId,
+            amount,
+            currency: invoice.currency,
+            lookupKey,
+          },
+        )
+
+        await reportTransaction({
+          userId: user.id,
+          stripeTransactionId: initialStripeInvoiceId,
+          amount,
+          currency: invoice.currency || 'usd',
+          stripeLookupKey: lookupKey as Parameters<
+            typeof reportTransaction
+          >[0]['stripeLookupKey'],
+          transactionType: 'purchase',
+          platform: 'android',
+          externalOfferToken,
+        })
+
+        console.info(
+          '[GOOGLE_REPORTING][SUBSCRIPTION_CREATED] Report sent successfully',
+        )
+      } catch (reportError) {
+        // Log but don't fail subscription creation
+        console.error(
+          '[GOOGLE_REPORTING][SUBSCRIPTION_CREATED] Failed to report:',
+          reportError,
+        )
+      }
+    }
 
     // Mark customer as having used a trial in Stripe
     if (isTrial) {

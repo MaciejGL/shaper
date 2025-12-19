@@ -217,6 +217,9 @@ importers:
       posthog-js:
         specifier: 1.258.6
         version: 1.258.6
+      posthog-node:
+        specifier: 5.17.4
+        version: 5.17.4
       prisma:
         specifier: 7.1.0
         version: 7.1.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
@@ -2057,6 +2060,9 @@ packages:
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
+
+  '@posthog/core@1.8.1':
+    resolution: {integrity: sha512-jfzBtQIk9auRi/biO+G/gumK5KxqsD5wOr7XpYMROE/I3pazjP4zIziinp21iQuIQJMXrDvwt9Af3njgOGwtew==}
 
   '@prisma/adapter-pg@7.1.0':
     resolution: {integrity: sha512-DSAnUwkKfX4bUzhkrjGN4IBQzwg0nvFw2W17H0Oa532I5w9nLtTJ9mAEGDs1nUBEGRAsa0c7qsf8CSgfJ4DsBQ==}
@@ -6113,6 +6119,10 @@ packages:
       rrweb-snapshot:
         optional: true
 
+  posthog-node@5.17.4:
+    resolution: {integrity: sha512-hrd+Do/DMt40By12ESIDUfD81V9OASjq9XHjycZrGiD8cX/ZwCIVSJLUb7nQmvSCWcKII+u+nnPVuc4LjTDl9g==}
+    engines: {node: '>=20'}
+
   preact-render-to-string@5.2.6:
     resolution: {integrity: sha512-JyhErpYOvBV1hEPwIxc/fHWXPfnEGdRKxc8gFdAZ7XV4tlzyzG847XAyEZqoDnynP88akM4eaHcSOzNcLWFguw==}
     peerDependencies:
@@ -9477,6 +9487,10 @@ snapshots:
   '@pkgr/core@0.1.2': {}
 
   '@polka/url@1.0.0-next.29': {}
+
+  '@posthog/core@1.8.1':
+    dependencies:
+      cross-spawn: 7.0.6
 
   '@prisma/adapter-pg@7.1.0':
     dependencies:
@@ -14008,6 +14022,10 @@ snapshots:
       fflate: 0.4.8
       preact: 10.27.2
       web-vitals: 4.2.4
+
+  posthog-node@5.17.4:
+    dependencies:
+      '@posthog/core': 1.8.1
 
   preact-render-to-string@5.2.6(preact@10.27.2):
     dependencies:

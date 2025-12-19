@@ -74,28 +74,49 @@ export async function reportToGoogle(
       transactionType === 'purchase'
         ? 'Missing externalOfferToken for initial purchase'
         : 'Missing initialExternalTransactionId for renewal'
-    console.warn('[GOOGLE] Skipping report:', reason)
+    console.error('[GOOGLE][SKIP_MISSING_DATA]', {
+      externalTransactionId,
+      transactionType,
+      reason,
+      hasToken: !!externalOfferToken,
+      hasInitialId: !!initialExternalTransactionId,
+    })
     throw new Error(reason)
   }
 
-  try {
-    await androidPublisher.externaltransactions.createexternaltransaction({
-      parent,
-      externalTransactionId,
-      requestBody,
-    })
+  console.info('[GOOGLE][API_CALL] Creating external transaction:', {
+    externalTransactionId,
+    transactionType,
+    amount: `${amount / 100} ${currency.toUpperCase()}`,
+    countryCode,
+    hasToken: !!externalOfferToken,
+    hasInitialId: !!initialExternalTransactionId,
+  })
 
-    console.info('[GOOGLE] Transaction reported:', externalTransactionId)
+  try {
+    const response =
+      await androidPublisher.externaltransactions.createexternaltransaction({
+        parent,
+        externalTransactionId,
+        requestBody,
+      })
+
+    console.info('[GOOGLE][API_SUCCESS] Transaction reported:', {
+      externalTransactionId,
+      responseStatus: response.status,
+    })
   } catch (error) {
     // Treat "already exists" as success to keep webhook processing idempotent
     const err = error as { code?: number; message?: string }
     if (err.code === 409) {
-      console.info(
-        '[GOOGLE] Transaction already exists:',
-        externalTransactionId,
-      )
+      console.info('[GOOGLE][API_ALREADY_EXISTS]', externalTransactionId)
       return
     }
+    console.error('[GOOGLE][API_ERROR]', {
+      externalTransactionId,
+      code: err.code,
+      message: err.message,
+    })
     throw error
   }
 }

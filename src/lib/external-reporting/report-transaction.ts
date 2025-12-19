@@ -10,6 +10,7 @@ import {
   getRegionFromTimezone,
 } from '@/config/payment-rules'
 import prisma from '@/lib/db'
+import { ServerEvent, captureServerEvent } from '@/lib/posthog-server'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 import { reportToApple } from './apple'
@@ -103,6 +104,15 @@ export async function reportTransaction(
           '[REPORTING] Skipping - no country code for timezone:',
           user.profile?.timezone,
         )
+        captureServerEvent({
+          distinctId: params.userId,
+          event: ServerEvent.GOOGLE_REPORT_SKIPPED,
+          properties: {
+            reason: 'no_country_code',
+            timezone: user.profile?.timezone,
+            transactionType: params.transactionType,
+          },
+        })
         return
       }
 
@@ -115,8 +125,34 @@ export async function reportTransaction(
         externalOfferToken: params.externalOfferToken,
         initialExternalTransactionId: params.initialExternalTransactionId,
       })
+
+      // Success event
+      captureServerEvent({
+        distinctId: params.userId,
+        event: ServerEvent.GOOGLE_REPORT_SUCCESS,
+        properties: {
+          transactionType: params.transactionType,
+          transactionId: params.stripeTransactionId,
+          amount: params.amount,
+          currency: params.currency,
+          countryCode,
+        },
+      })
     }
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error'
     console.error('[REPORTING] Failed:', error)
+
+    // Error event
+    captureServerEvent({
+      distinctId: params.userId,
+      event: ServerEvent.GOOGLE_REPORT_ERROR,
+      properties: {
+        transactionType: params.transactionType,
+        transactionId: params.stripeTransactionId,
+        error: errorMessage,
+      },
+    })
   }
 }

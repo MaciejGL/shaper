@@ -152,8 +152,27 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       packageTemplate?.stripeLookupKey &&
       reportableLookupKeys.includes(packageTemplate.stripeLookupKey)
 
+    // #region agent log
+    console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][REPORT_CHECK]', {
+      invoiceId: invoice.id,
+      isInitialPurchase,
+      platform,
+      stripeLookupKey: packageTemplate?.stripeLookupKey ?? null,
+      isReportable,
+      hasExternalOfferToken: !!subscription.externalOfferToken,
+      hasInitialStripeInvoiceId: !!subscription.initialStripeInvoiceId,
+    })
+    // #endregion
+
     if (isReportable && packageTemplate?.stripeLookupKey) {
       if (isInitialPurchase) {
+        console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][CALLING_REPORT]', {
+          type: 'purchase',
+          invoiceId: invoice.id,
+          amount: amountForReporting,
+          currency: invoice.currency,
+          hasToken: !!subscription.externalOfferToken,
+        })
         await reportTransaction({
           userId: subscription.userId,
           stripeTransactionId: invoice.id!,
@@ -165,6 +184,10 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
           platform,
           externalOfferToken: subscription.externalOfferToken || undefined,
         })
+        console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][REPORT_DONE]', {
+          type: 'purchase',
+          invoiceId: invoice.id,
+        })
       } else {
         // Renewal: use stored origin platform and initial invoice ID
         const storedPlatform = subscription.originPlatform
@@ -173,6 +196,16 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
 
         // Only report renewal if original was from Android
         if (renewalPlatform) {
+          console.info(
+            '[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][CALLING_REPORT]',
+            {
+              type: 'renewal',
+              invoiceId: invoice.id,
+              amount: amountForReporting,
+              currency: invoice.currency,
+              hasInitialInvoiceId: !!subscription.initialStripeInvoiceId,
+            },
+          )
           await reportTransaction({
             userId: subscription.userId,
             stripeTransactionId: invoice.id!,
@@ -185,8 +218,24 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
             initialExternalTransactionId:
               subscription.initialStripeInvoiceId || undefined,
           })
+          console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][REPORT_DONE]', {
+            type: 'renewal',
+            invoiceId: invoice.id,
+          })
+        } else {
+          console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][SKIP_RENEWAL]', {
+            invoiceId: invoice.id,
+            reason: 'originPlatform not android',
+            storedPlatform,
+          })
         }
       }
+    } else {
+      console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][NOT_REPORTABLE]', {
+        invoiceId: invoice.id,
+        platform,
+        stripeLookupKey: packageTemplate?.stripeLookupKey ?? null,
+      })
     }
 
     // Notify trainer about subscription payment
