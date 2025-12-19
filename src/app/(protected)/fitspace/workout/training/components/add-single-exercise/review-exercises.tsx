@@ -24,6 +24,7 @@ interface ReviewExercisesProps {
   onGoBack: () => void
   onStart: () => void
   isAdding: boolean
+  onDraggingChange?: (isDragging: boolean) => void
 }
 
 function ReorderableExerciseItem({
@@ -31,11 +32,13 @@ function ReorderableExerciseItem({
   index,
   onRemove,
   isAdding,
+  onDraggingChange,
 }: {
   exercise: Exercise
   index: number
   onRemove: (id: string) => void
   isAdding: boolean
+  onDraggingChange?: (isDragging: boolean) => void
 }) {
   const dragControls = useDragControls()
 
@@ -46,6 +49,7 @@ function ReorderableExerciseItem({
       value={exercise.id}
       dragListener={false}
       dragControls={dragControls}
+      onDragEnd={() => onDraggingChange?.(false)}
     >
       <div className={cn(isAdding && 'opacity-50 pointer-events-none')}>
         <DraggableExerciseItem
@@ -60,6 +64,7 @@ function ReorderableExerciseItem({
             // Prevent Vaul (drawer) from treating this gesture as a dismiss drag.
             e.stopPropagation()
             e.preventDefault()
+            onDraggingChange?.(true)
             dragControls.start(e.nativeEvent)
           }}
         />
@@ -76,6 +81,7 @@ export function ReviewExercises({
   onGoBack,
   onStart,
   isAdding,
+  onDraggingChange,
 }: ReviewExercisesProps) {
   const exercisesMap = useMemo(
     () => new Map(exercises.map((ex) => [ex.id, ex])),
@@ -130,6 +136,7 @@ export function ReviewExercises({
                 index={index}
                 onRemove={onRemove}
                 isAdding={isAdding}
+                onDraggingChange={onDraggingChange}
               />
             ))}
           </Reorder.Group>

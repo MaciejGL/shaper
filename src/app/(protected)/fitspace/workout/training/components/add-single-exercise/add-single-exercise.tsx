@@ -75,6 +75,7 @@ export function AddSingleExercise({
   const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([])
   const [isBatchAdding, setIsBatchAdding] = useState(false)
   const [isReviewMode, setIsReviewMode] = useState(false)
+  const [isReorderDragging, setIsReorderDragging] = useState(false)
 
   const queryClient = useQueryClient()
   const [dayIdFromUrl] = useQueryState('day')
@@ -178,6 +179,7 @@ export function AddSingleExercise({
     if (!open) {
       setSelectedExerciseIds([])
       setIsReviewMode(false)
+      setIsReorderDragging(false)
     }
   }, [open])
 
@@ -190,6 +192,7 @@ export function AddSingleExercise({
       onGoBack={handleGoBack}
       onStart={handleStart}
       isAdding={isBatchAdding}
+      onDraggingChange={setIsReorderDragging}
     />
   ) : (
     <>
@@ -211,7 +214,11 @@ export function AddSingleExercise({
 
   if (variant === 'drawer-only') {
     return (
-      <Drawer open={open} onOpenChange={setOpen} dismissible={!isReviewMode}>
+      <Drawer
+        open={open}
+        onOpenChange={setOpen}
+        dismissible={!isReorderDragging}
+      >
         <DrawerContent
           dialogTitle="Build my own workout"
           className="max-h-[85vh]"
@@ -224,7 +231,11 @@ export function AddSingleExercise({
 
   if (variant === 'button') {
     return (
-      <Drawer open={open} onOpenChange={setOpen} dismissible={!isReviewMode}>
+      <Drawer
+        open={open}
+        onOpenChange={setOpen}
+        dismissible={!isReorderDragging}
+      >
         <DrawerTrigger asChild>
           <Button size="lg" iconStart={<PlusIcon />} className="w-full">
             Add Exercise
@@ -241,7 +252,7 @@ export function AddSingleExercise({
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen} dismissible={!isReviewMode}>
+    <Drawer open={open} onOpenChange={setOpen} dismissible={!isReorderDragging}>
       <DrawerTrigger asChild>
         <Card className="cursor-pointer transition-all hover:scale-[1.01]">
           <CardContent>
