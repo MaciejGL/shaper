@@ -72,7 +72,6 @@ export async function handleCheckoutCompleted(
       webhook: 'checkout-completed',
       sessionId: session.id,
     })
-    throw error
   }
 }
 

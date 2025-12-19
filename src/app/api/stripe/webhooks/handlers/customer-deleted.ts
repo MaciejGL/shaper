@@ -46,7 +46,6 @@ export async function handleCustomerDeleted(customer: Stripe.Customer) {
       webhook: 'customer-deleted',
       stripeCustomerId: customer.id,
     })
-    throw error
   }
 }
 

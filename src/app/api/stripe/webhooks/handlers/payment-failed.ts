@@ -66,7 +66,6 @@ export async function handlePaymentFailed(invoice: InvoiceWithSubscription) {
       webhook: 'payment-failed',
       invoiceId: invoice.id,
     })
-    throw error
   }
 }
 

@@ -42,6 +42,5 @@ export async function handleSubscriptionResumed(
       webhook: 'subscription-resumed',
       stripeSubscriptionId: subscription.id,
     })
-    throw error
   }
 }

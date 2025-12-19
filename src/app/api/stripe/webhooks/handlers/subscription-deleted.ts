@@ -136,7 +136,6 @@ export async function handleSubscriptionDeleted(
       webhook: 'subscription-deleted',
       stripeSubscriptionId: subscription.id,
     })
-    throw error
   }
 }
 

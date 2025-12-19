@@ -31,7 +31,6 @@ export async function handleTrialWillEnd(subscription: Stripe.Subscription) {
       webhook: 'trial-will-end',
       stripeSubscriptionId: subscription.id,
     })
-    throw error
   }
 }
 

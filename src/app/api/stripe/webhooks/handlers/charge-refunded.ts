@@ -137,7 +137,6 @@ export async function handleChargeRefunded(charge: Stripe.Charge) {
       webhook: 'charge-refunded',
       chargeId: charge.id,
     })
-    throw error
   }
 }
 

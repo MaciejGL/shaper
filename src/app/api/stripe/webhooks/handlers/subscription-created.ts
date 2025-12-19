@@ -244,7 +244,6 @@ export async function handleSubscriptionCreated(
       webhook: 'subscription-created',
       stripeSubscriptionId: subscription.id,
     })
-    throw error
   }
 }
 

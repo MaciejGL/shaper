@@ -97,6 +97,5 @@ export async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
       webhook: 'checkout-expired',
       sessionId: session.id,
     })
-    throw error
   }
 }

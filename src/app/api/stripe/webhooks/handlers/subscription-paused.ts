@@ -50,6 +50,5 @@ export async function handleSubscriptionPaused(
       webhook: 'subscription-paused',
       stripeSubscriptionId: subscription.id,
     })
-    throw error
   }
 }

@@ -123,7 +123,6 @@ export async function handleSubscriptionUpdated(
       webhook: 'subscription-updated',
       stripeSubscriptionId: subscription.id,
     })
-    throw error
   }
 }
 

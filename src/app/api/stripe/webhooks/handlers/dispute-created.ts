@@ -113,7 +113,6 @@ export async function handleDisputeCreated(dispute: Stripe.Dispute) {
       webhook: 'dispute-created',
       disputeId: dispute.id,
     })
-    throw error
   }
 }
 

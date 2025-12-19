@@ -334,7 +334,6 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       webhook: 'payment-succeeded',
       invoiceId: invoice.id,
     })
-    throw error
   }
 }
 
