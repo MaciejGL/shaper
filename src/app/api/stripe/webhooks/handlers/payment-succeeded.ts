@@ -46,6 +46,19 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       }
     }
 
+    // Method 3: Fetch full invoice from Stripe API if subscription not found
+    // Webhook payloads sometimes don't include subscription field
+    if (!subscriptionId && invoice.id) {
+      console.info(`Fetching full invoice from Stripe API: ${invoice.id}`)
+      const fullInvoice = (await stripe.invoices.retrieve(
+        invoice.id,
+      )) as InvoiceWithSubscription
+      console.info(`Full invoice: ${fullInvoice}`)
+      if (fullInvoice.subscription) {
+        subscriptionId = fullInvoice.subscription
+      }
+    }
+
     if (!subscriptionId) {
       console.info(
         `No subscription found in invoice ${invoice.id} - this is likely a manual invoice`,
