@@ -27,9 +27,8 @@ export default function OffersPage() {
 
   const handleSubscribe = async (lookupKey: string) => {
     await subscribe(lookupKey, {
-      returnUrl: redirectUrl
-        ? `${window.location.origin}${redirectUrl}`
-        : `${window.location.origin}/fitspace/my-plans`,
+      // Always use checkout/success for deep link redirect back to app
+      returnUrl: `${window.location.origin}/checkout/success`,
       cancelUrl: `${window.location.origin}/account-management/offers${redirectUrl ? `?redirectUrl=${encodeURIComponent(redirectUrl)}` : ''}`,
     })
   }

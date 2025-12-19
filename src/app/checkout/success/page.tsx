@@ -1,7 +1,6 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 
@@ -12,21 +11,16 @@ import { Button } from '@/components/ui/button'
  * via deep link so the user returns to the native app instead of staying
  * in the browser.
  */
-export default function CheckoutSuccessPage() {
-  const searchParams = useSearchParams()
-  const sessionId = searchParams?.get('session_id')
+function CheckoutSuccessContent() {
   const [redirectAttempted, setRedirectAttempted] = useState(false)
 
   useEffect(() => {
     // Redirect to app via deep link
-    const deepLink = `hypro://fitspace/progress?premium_activated=true${sessionId ? `&session_id=${sessionId}` : ''}`
-
-    // Try to open the deep link
+    const deepLink = 'hypro://fitspace/progress?premium_activated=true'
     window.location.href = deepLink
     setRedirectAttempted(true)
-  }, [sessionId])
+  }, [])
 
-  // Fallback UI if deep link doesn't work (e.g., on desktop)
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background">
       <div className="text-center space-y-6 max-w-md">
@@ -44,7 +38,8 @@ export default function CheckoutSuccessPage() {
             </p>
             <Button
               onClick={() => {
-                window.location.href = `hypro://fitspace/progress?premium_activated=true`
+                window.location.href =
+                  'hypro://fitspace/progress?premium_activated=true'
               }}
               className="w-full"
             >
@@ -64,5 +59,19 @@ export default function CheckoutSuccessPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Redirecting...</p>
+        </div>
+      }
+    >
+      <CheckoutSuccessContent />
+    </Suspense>
   )
 }
