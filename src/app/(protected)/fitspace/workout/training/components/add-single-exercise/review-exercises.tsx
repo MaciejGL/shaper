@@ -1,13 +1,16 @@
 'use client'
 
-import { Reorder } from 'framer-motion'
-import { ArrowLeft, GripVertical, XIcon } from 'lucide-react'
+import { Reorder, useDragControls } from 'framer-motion'
+import { ArrowLeft } from 'lucide-react'
 import { useMemo } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { DrawerFooter } from '@/components/ui/drawer'
 import type { GQLFitspaceGetExercisesQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
+
+import { DraggableExerciseItem } from './selectable-exercise-item'
+import { getExerciseMuscleDisplay } from './utils'
 
 type Exercise = NonNullable<
   NonNullable<GQLFitspaceGetExercisesQuery['getExercises']>['publicExercises']
@@ -34,37 +37,33 @@ function ReorderableExerciseItem({
   onRemove: (id: string) => void
   isAdding: boolean
 }) {
+  const dragControls = useDragControls()
+
+  const muscleDisplay = getExerciseMuscleDisplay(exercise)
+
   return (
     <Reorder.Item
       value={exercise.id}
-      className={cn(
-        'flex items-center gap-3 p-3 rounded-lg bg-card border border-border',
-        'cursor-grab active:cursor-grabbing shadow-sm',
-        isAdding && 'opacity-50 pointer-events-none',
-      )}
+      dragListener={false}
+      dragControls={dragControls}
     >
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <GripVertical className="size-5 text-muted-foreground shrink-0" />
-        <span className="text-sm font-medium text-muted-foreground shrink-0 w-6">
-          {index + 1}.
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{exercise.name}</p>
-        </div>
+      <div className={cn(isAdding && 'opacity-50 pointer-events-none')}>
+        <DraggableExerciseItem
+          id={exercise.id}
+          name={`${index + 1}. ${exercise.name}`}
+          muscleDisplay={muscleDisplay}
+          images={exercise.images}
+          videoUrl={exercise.videoUrl}
+          disabled={isAdding}
+          onRemove={onRemove}
+          onDragHandlePointerDown={(e) => {
+            // Prevent Vaul (drawer) from treating this gesture as a dismiss drag.
+            e.stopPropagation()
+            e.preventDefault()
+            dragControls.start(e.nativeEvent)
+          }}
+        />
       </div>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        iconOnly={<XIcon />}
-        onClick={(e) => {
-          e.stopPropagation()
-          onRemove(exercise.id)
-        }}
-        disabled={isAdding}
-        className="shrink-0"
-      >
-        Remove
-      </Button>
     </Reorder.Item>
   )
 }
@@ -91,6 +90,10 @@ export function ReviewExercises({
     [selectedExerciseIds, exercisesMap],
   )
 
+  const handleReorder = (newOrder: string[]) => {
+    onReorder(newOrder)
+  }
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -108,7 +111,7 @@ export function ReviewExercises({
             <div>
               <h2 className="text-lg font-semibold">Review your workout</h2>
               <p className="text-sm text-muted-foreground">
-                Drag to reorder exercises
+                Drag the handle to reorder exercises
               </p>
             </div>
           </div>
@@ -116,8 +119,9 @@ export function ReviewExercises({
           <Reorder.Group
             axis="y"
             values={selectedExerciseIds}
-            onReorder={onReorder}
-            className="space-y-2"
+            onReorder={handleReorder}
+            layout // Animates layout changes smoothly
+            className="flex flex-col gap-2"
           >
             {selectedExercises.map((exercise, index) => (
               <ReorderableExerciseItem
@@ -155,4 +159,3 @@ export function ReviewExercises({
     </div>
   )
 }
-

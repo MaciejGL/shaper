@@ -22,7 +22,6 @@ import {
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import {
-  DISPLAY_GROUP_TO_HIGH_LEVEL,
   HIGH_LEVEL_TO_DISPLAY_GROUPS,
   type HighLevelGroup,
 } from '@/config/muscles'
@@ -39,6 +38,7 @@ import { ReviewExercises } from './review-exercises'
 import { SelectableExerciseItem } from './selectable-exercise-item'
 import { SelectedExercisesFooter } from './selected-exercises-footer'
 import { useWeeklyFocus } from './use-weekly-focus'
+import { getExerciseMuscleDisplay } from './utils'
 import { WeeklyFocusChips } from './weekly-focus-chips'
 
 type Exercise = NonNullable<
@@ -211,7 +211,7 @@ export function AddSingleExercise({
 
   if (variant === 'drawer-only') {
     return (
-      <Drawer open={open} onOpenChange={setOpen}>
+      <Drawer open={open} onOpenChange={setOpen} dismissible={!isReviewMode}>
         <DrawerContent
           dialogTitle="Build my own workout"
           className="max-h-[85vh]"
@@ -224,7 +224,7 @@ export function AddSingleExercise({
 
   if (variant === 'button') {
     return (
-      <Drawer open={open} onOpenChange={setOpen}>
+      <Drawer open={open} onOpenChange={setOpen} dismissible={!isReviewMode}>
         <DrawerTrigger asChild>
           <Button size="lg" iconStart={<PlusIcon />} className="w-full">
             Add Exercise
@@ -241,7 +241,7 @@ export function AddSingleExercise({
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer open={open} onOpenChange={setOpen} dismissible={!isReviewMode}>
       <DrawerTrigger asChild>
         <Card className="cursor-pointer transition-all hover:scale-[1.01]">
           <CardContent>
@@ -378,20 +378,7 @@ function ExerciseListWithFilters({
             filteredExercises.map((exercise) => {
               const isSelected = selectedExerciseIds.includes(exercise.id)
 
-              const primaryDisplayGroup =
-                exercise.muscleGroups?.[0]?.displayGroup
-              const highLevelGroup = primaryDisplayGroup
-                ? DISPLAY_GROUP_TO_HIGH_LEVEL[primaryDisplayGroup]
-                : null
-
-              const muscleAliases =
-                exercise.muscleGroups
-                  ?.map((mg) => mg.alias)
-                  .filter((alias): alias is string => Boolean(alias)) || []
-
-              const muscleDisplay = highLevelGroup
-                ? `${highLevelGroup} · ${muscleAliases.join(', ')}`
-                : muscleAliases.join(', ')
+              const muscleDisplay = getExerciseMuscleDisplay(exercise)
 
               return (
                 <SelectableExerciseItem

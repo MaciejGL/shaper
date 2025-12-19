@@ -5,13 +5,12 @@ import { ChevronRight, SparklesIcon, XIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { DISPLAY_GROUP_TO_HIGH_LEVEL } from '@/config/muscles'
-import type { HighLevelGroup } from '@/config/muscles'
 import type { GQLFitspaceGetExercisesQuery } from '@/generated/graphql-client'
 
 import { SelectableExerciseItem } from './selectable-exercise-item'
 import { useAiSuggestions } from './use-ai-suggestions'
 import type { ExerciseSuggestion } from './use-ai-suggestions'
+import { getExerciseMuscleDisplay } from './utils'
 
 type Exercise = NonNullable<
   NonNullable<GQLFitspaceGetExercisesQuery['getExercises']>['publicExercises']
@@ -84,19 +83,7 @@ function SuggestionsResultsContent({
           const exercise = exercisesMap.get(suggestion.exerciseId)
           if (!exercise) return null
 
-          const primaryDisplayGroup = exercise.muscleGroups?.[0]?.displayGroup
-          const highLevelGroup: HighLevelGroup | null = primaryDisplayGroup
-            ? DISPLAY_GROUP_TO_HIGH_LEVEL[primaryDisplayGroup]
-            : null
-
-          const muscleAliases =
-            exercise.muscleGroups
-              ?.map((mg) => mg.alias)
-              .filter((alias): alias is string => Boolean(alias)) || []
-
-          const muscleDisplay = highLevelGroup
-            ? `${highLevelGroup} · ${muscleAliases.join(', ')}`
-            : muscleAliases.join(', ')
+          const muscleDisplay = getExerciseMuscleDisplay(exercise)
 
           return (
             <SelectableExerciseItem
