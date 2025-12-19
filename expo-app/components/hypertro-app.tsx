@@ -7,7 +7,7 @@ import * as Linking from 'expo-linking'
 import * as Notifications from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { Platform, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { APP_CONFIG } from '../config/app-config'
@@ -83,6 +83,11 @@ function HyproAppContent({ authToken }: HyproAppProps) {
     ? colors.appBackground
     : colors.statusBarBackground
 
+  const contentEdges = Platform.select({
+    android: ['left', 'right', 'bottom'] as const,
+    default: ['left', 'right'] as const,
+  })
+
   // Handle navigation state changes to track current URL
   const handleNavigationStateChange = (navState: any) => {
     if (navState.url) {
@@ -141,7 +146,7 @@ function HyproAppContent({ authToken }: HyproAppProps) {
         />
         <SafeAreaView
           style={[styles.content, { backgroundColor: bottomBarColor }]}
-          edges={['left', 'right']}
+          edges={contentEdges}
         >
           <EnhancedWebView
             ref={webViewRef}
