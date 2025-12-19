@@ -25,106 +25,45 @@ interface InvoiceWithSubscription extends Stripe.Invoice {
 
 export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
   try {
-    // Extract subscription ID from invoice
-    let subscriptionId: string | null = null
+    // Get customer ID and price ID from invoice (always available)
+    const customerId = invoice.customer as string
+    const firstLineItem = invoice.lines?.data?.[0] as
+      | (Stripe.InvoiceLineItem & { price?: { id: string } })
+      | undefined
+    const invoicePriceId = firstLineItem?.price?.id
 
-    // #region agent log
-    console.info(
-      '[DEBUG] Webhook invoice payload:',
-      JSON.stringify({
-        invoiceId: invoice.id,
-        hasSubscription: !!invoice.subscription,
-        subscriptionValue: invoice.subscription,
-        linesCount: invoice.lines?.data?.length,
-        linesSubs: invoice.lines?.data?.map(
-          (l: { subscription?: unknown }) => l.subscription,
-        ),
-      }),
-    )
-    // #endregion
-
-    // Method 1: Direct subscription field (most common for subscription invoices)
-    if (invoice.subscription) {
-      subscriptionId = invoice.subscription
-    }
-
-    // Method 2: Fallback to line items if subscription not directly on invoice
-    if (!subscriptionId && invoice.lines?.data?.length > 0) {
-      for (const lineItem of invoice.lines.data) {
-        if (lineItem.subscription) {
-          subscriptionId =
-            typeof lineItem.subscription === 'string'
-              ? lineItem.subscription
-              : lineItem.subscription.id
-          break
-        }
-      }
-    }
-
-    // Method 3: Fetch full invoice from Stripe API if subscription not found
-    // Webhook payloads sometimes don't include subscription field
-    if (!subscriptionId && invoice.id) {
-      const fullInvoice = (await stripe.invoices.retrieve(invoice.id, {
-        expand: ['subscription', 'lines.data.subscription'],
-      })) as InvoiceWithSubscription
-      // #region agent log
+    if (!customerId || !invoicePriceId) {
       console.info(
-        '[DEBUG] Full invoice from Stripe API:',
-        JSON.stringify({
-          invoiceId: fullInvoice.id,
-          hasSubscription: !!fullInvoice.subscription,
-          subscriptionValue: fullInvoice.subscription,
-          subscriptionType: typeof fullInvoice.subscription,
-          subscriptionIsObject:
-            typeof fullInvoice.subscription === 'object' &&
-            fullInvoice.subscription !== null,
-          subscriptionIdFromObject:
-            typeof fullInvoice.subscription === 'object' &&
-            fullInvoice.subscription !== null
-              ? (fullInvoice.subscription as Stripe.Subscription).id
-              : null,
-          linesCount: fullInvoice.lines?.data?.length,
-          linesSubs: fullInvoice.lines?.data?.map(
-            (l: { subscription?: unknown }) =>
-              typeof l.subscription === 'object' && l.subscription !== null
-                ? (l.subscription as { id: string }).id
-                : l.subscription,
-          ),
-        }),
-      )
-      // #endregion
-      // Handle both string and object subscription
-      if (fullInvoice.subscription) {
-        subscriptionId =
-          typeof fullInvoice.subscription === 'object'
-            ? (fullInvoice.subscription as Stripe.Subscription).id
-            : fullInvoice.subscription
-      }
-      // Also try lines if subscription still not found
-      if (!subscriptionId && fullInvoice.lines?.data?.length > 0) {
-        for (const lineItem of fullInvoice.lines.data) {
-          if (lineItem.subscription) {
-            subscriptionId =
-              typeof lineItem.subscription === 'object'
-                ? (lineItem.subscription as Stripe.Subscription).id
-                : lineItem.subscription
-            break
-          }
-        }
-      }
-    }
-
-    if (!subscriptionId) {
-      console.info(
-        `No subscription found in invoice ${invoice.id} - this is likely a manual invoice`,
+        `Missing customer or price ID in invoice ${invoice.id} - skipping`,
       )
       return
     }
 
-    const subscription = await findSubscriptionById(subscriptionId)
+    // Fetch all active subscriptions for this customer from Stripe
+    const stripeSubscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'active',
+    })
+
+    // Match subscription by price ID (handles upgrade scenario with 2 active subs)
+    const stripeSubscription = stripeSubscriptions.data.find((sub) =>
+      sub.items.data.some((item) => item.price.id === invoicePriceId),
+    )
+
+    if (!stripeSubscription) {
+      console.info(
+        `No matching Stripe subscription for price ${invoicePriceId} - skipping`,
+      )
+      return
+    }
+
+    // Find our DB subscription by Stripe subscription ID
+    const subscription = await findSubscriptionById(stripeSubscription.id)
 
     if (!subscription) {
-      console.warn(`Subscription not found in database: ${subscriptionId}`)
+      console.warn(
+        `Subscription not found in database: ${stripeSubscription.id}`,
+      )
       return
     }
 
@@ -134,42 +73,45 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     await createRecurringServiceDelivery(subscription, invoice)
 
     console.info(
-      `✅ Payment processed for subscription ${subscriptionId} (invoice: ${invoice.id})`,
+      `✅ Payment processed for subscription ${stripeSubscription.id} (invoice: ${invoice.id})`,
     )
 
     const isInitialPurchase = invoice.billing_reason === 'subscription_create'
 
-    // Save Android/iOS origin data for initial purchases (before package checks)
-    // This must run independently of package lookup to ensure token is always saved
-    let platform: 'ios' | 'android' | null = null
-    let extToken: string | null = null
+    // Read platform and token from Stripe subscription metadata
+    const metaPlatform = stripeSubscription.metadata?.platform
+    const platform: 'ios' | 'android' | null =
+      metaPlatform === 'android' || metaPlatform === 'ios' ? metaPlatform : null
+    const extToken = stripeSubscription.metadata?.extToken || null
 
-    if (isInitialPurchase && subscription.stripeSubscriptionId) {
-      const stripeSub = await stripe.subscriptions.retrieve(
-        subscription.stripeSubscriptionId,
-      )
-      const metaPlatform = stripeSub.metadata?.platform
-
-      if (metaPlatform === 'android' || metaPlatform === 'ios') {
-        platform = metaPlatform
-        extToken = stripeSub.metadata?.extToken || null
-
-        await prisma.userSubscription.update({
-          where: { id: subscription.id },
-          data: {
-            originPlatform: platform,
-            externalOfferToken: extToken,
-            initialStripeInvoiceId: invoice.id,
-          },
-        })
-      }
+    // Save Android/iOS origin data for initial purchases
+    if (isInitialPurchase && platform) {
+      await prisma.userSubscription.update({
+        where: { id: subscription.id },
+        data: {
+          originPlatform: platform,
+          externalOfferToken: extToken,
+          initialStripeInvoiceId: invoice.id,
+        },
+      })
     }
 
-    // Report to Apple/Google if required for this platform + region
+    // Get package template for reporting decision
     const packageTemplate = await prisma.packageTemplate.findUnique({
       where: { id: subscription.packageId },
     })
-    if (packageTemplate?.stripeLookupKey && subscription.stripeSubscriptionId) {
+
+    // Only report premium_monthly and premium_yearly from Android
+    const reportableLookupKeys: string[] = [
+      STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY,
+      STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY,
+    ]
+    const isReportable =
+      platform === 'android' &&
+      packageTemplate?.stripeLookupKey &&
+      reportableLookupKeys.includes(packageTemplate.stripeLookupKey)
+
+    if (isReportable && packageTemplate?.stripeLookupKey) {
       if (isInitialPurchase) {
         await reportTransaction({
           userId: subscription.userId,
@@ -186,22 +128,23 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
         // Renewal: use stored origin platform and initial invoice ID
         const storedPlatform = subscription.originPlatform
         const renewalPlatform =
-          storedPlatform === 'ios' || storedPlatform === 'android'
-            ? storedPlatform
-            : null
+          storedPlatform === 'android' ? storedPlatform : null
 
-        await reportTransaction({
-          userId: subscription.userId,
-          stripeTransactionId: invoice.id!,
-          amount: invoice.amount_paid || 0,
-          currency: invoice.currency || 'usd',
-          stripeLookupKey:
-            packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
-          transactionType: 'renewal',
-          platform: renewalPlatform,
-          initialExternalTransactionId:
-            subscription.initialStripeInvoiceId || undefined,
-        })
+        // Only report renewal if original was from Android
+        if (renewalPlatform) {
+          await reportTransaction({
+            userId: subscription.userId,
+            stripeTransactionId: invoice.id!,
+            amount: invoice.amount_paid || 0,
+            currency: invoice.currency || 'usd',
+            stripeLookupKey:
+              packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
+            transactionType: 'renewal',
+            platform: renewalPlatform,
+            initialExternalTransactionId:
+              subscription.initialStripeInvoiceId || undefined,
+          })
+        }
       }
     }
 
@@ -221,7 +164,7 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     // If this is a coaching payment, check if user has paused yearly to extend pause
     if (subscription) {
       const coachingSub = await prisma.userSubscription.findFirst({
-        where: { stripeSubscriptionId: subscriptionId },
+        where: { stripeSubscriptionId: stripeSubscription.id },
         include: { package: true },
       })
 
@@ -243,7 +186,6 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
           if (!yearly.stripeSubscriptionId) continue
 
           try {
-            const { stripe } = await import('@/lib/stripe/stripe')
             const stripeSub = await stripe.subscriptions.retrieve(
               yearly.stripeSubscriptionId,
             )
