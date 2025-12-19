@@ -18,6 +18,7 @@ import {
 
 let isInitialized = false
 let initPromise: Promise<boolean> | null = null
+let billingProgramEnabled = false
 
 // Diagnostics collection for server-side logging
 interface Diagnostics {
@@ -95,18 +96,35 @@ async function doInit(): Promise<boolean> {
 
   try {
     // Step 1: Enable billing program BEFORE initConnection (per docs)
-    currentDiagnostics.stage = 'enable_program'
-    enableBillingProgramAndroid('external-offer')
+    // Only call once per app lifecycle
+    if (!billingProgramEnabled) {
+      currentDiagnostics.stage = 'enable_program'
+      enableBillingProgramAndroid('external-offer')
+      billingProgramEnabled = true
+    }
 
     // Step 2: Initialize connection (NO alternativeBillingModeAndroid option!)
     currentDiagnostics.stage = 'init_connection'
     const result = await initConnection()
-    isInitialized = !!result
-    currentDiagnostics.isInitialized = isInitialized
-    currentDiagnostics.stage = isInitialized ? 'init_ok' : 'init_failed'
+
+    if (!result) {
+      currentDiagnostics.isInitialized = false
+      currentDiagnostics.stage = 'init_failed_no_result'
+      initPromise = null
+      return false
+    }
+
+    // Step 3: Wait for billing service to fully bind
+    // Some devices report success but the client isn't ready for API calls immediately
+    currentDiagnostics.stage = 'waiting_for_bind'
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+
+    isInitialized = true
+    currentDiagnostics.isInitialized = true
+    currentDiagnostics.stage = 'init_ok'
 
     initPromise = null
-    return isInitialized
+    return true
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
     currentDiagnostics.initError = msg.slice(0, 500)
@@ -171,6 +189,11 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
   // Retry up to 3 times for SERVICE_DISCONNECTED errors
   for (let attempt = 1; attempt <= 3; attempt++) {
     currentDiagnostics.attempts = attempt
+
+    // Small delay before first attempt to ensure billing client is ready
+    if (attempt === 1) {
+      await new Promise((resolve) => setTimeout(resolve, 300))
+    }
 
     try {
       // Step 3: Check if program is available
