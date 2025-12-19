@@ -1,7 +1,12 @@
 'use client'
 
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
 import { ExtendHeader } from '@/components/extend-header'
+import { PremiumActivatedModal } from '@/components/premium-activated-modal'
 import { useUser } from '@/context/user-context'
+import { usePostPaymentSuccess } from '@/hooks/use-post-payment-success'
 
 import { BodyMeasurementsProvider } from './components/body-measurements-context'
 import { CheckinScheduleSection } from './components/checkin-schedule/checkin-schedule-section'
@@ -17,9 +22,27 @@ import { TrainingAnalyticsSection } from './components/muscle-heatmap/training-a
 import { SnapshotsSection } from './components/snapshots-section/snapshots-section'
 
 export default function ProgressPage() {
-  const { hasPremium } = useUser()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { user, hasPremium } = useUser()
   const { data } = useCheckinStatus()
   const { isDismissed } = useCheckinDismissal()
+
+  const isPremiumActivated = searchParams?.get('premium_activated') === 'true'
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
+
+  const { state: paymentState } = usePostPaymentSuccess(user?.id)
+
+  useEffect(() => {
+    if (isPremiumActivated) {
+      setShowPremiumModal(true)
+    }
+  }, [isPremiumActivated])
+
+  const handleCloseModal = () => {
+    setShowPremiumModal(false)
+    router.replace('/fitspace/progress', { scroll: false })
+  }
 
   const checkinStatus = data?.checkinStatus
   const hasSchedule = checkinStatus?.hasSchedule
@@ -36,22 +59,29 @@ export default function ProgressPage() {
   const showAtBottom = hasPremium && !showInHeader
 
   return (
-    <ExtendHeader
-      headerChildren={showInHeader ? <CheckinScheduleSection /> : null}
-    >
-      <div className="space-y-6">
-        <MuscleHeatmapSection />
-        <TrainingAnalyticsSection />
-        <BodyMeasurementsProvider>
-          <LogsSection />
+    <>
+      <PremiumActivatedModal
+        open={!showPremiumModal}
+        onClose={handleCloseModal}
+        isVerifying={paymentState === 'polling'}
+      />
+      <ExtendHeader
+        headerChildren={showInHeader ? <CheckinScheduleSection /> : null}
+      >
+        <div className="space-y-6">
+          <MuscleHeatmapSection />
+          <TrainingAnalyticsSection />
+          <BodyMeasurementsProvider>
+            <LogsSection />
 
-          <SnapshotsSection />
-        </BodyMeasurementsProvider>
+            <SnapshotsSection />
+          </BodyMeasurementsProvider>
 
-        <LatestPRs />
+          <LatestPRs />
 
-        {showAtBottom && <CheckinScheduleSection variant="minimal" />}
-      </div>
-    </ExtendHeader>
+          {showAtBottom && <CheckinScheduleSection variant="minimal" />}
+        </div>
+      </ExtendHeader>
+    </>
   )
 }

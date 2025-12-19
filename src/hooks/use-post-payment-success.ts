@@ -8,7 +8,9 @@ import { CurrentSubscription } from './use-current-subscription'
 
 export function usePostPaymentSuccess(userId?: string) {
   const searchParams = useSearchParams()
-  const isPostPayment = searchParams?.get('success') === 'true'
+  const isPostPayment =
+    searchParams?.get('success') === 'true' ||
+    searchParams?.get('premium_activated') === 'true'
 
   const [isTimeout, setIsTimeout] = useState(false)
 

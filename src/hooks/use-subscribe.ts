@@ -41,7 +41,7 @@ export function useSubscribe() {
           lookupKey,
           returnUrl:
             options?.returnUrl ||
-            `${window.location.origin}/account-management`,
+            `${window.location.origin}/fitspace/progress?premium_activated=true`,
           cancelUrl:
             options?.cancelUrl ||
             `${window.location.origin}/account-management`,
