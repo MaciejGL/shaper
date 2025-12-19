@@ -109,11 +109,12 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
 
     const isInitialPurchase = invoice.billing_reason === 'subscription_create'
 
-    // Read platform and token from Stripe subscription metadata
-    const metaPlatform = stripeSubscription?.metadata?.platform
+    // Read platform and token from DB subscription (saved in subscription-created.ts)
     const platform: 'ios' | 'android' | null =
-      metaPlatform === 'android' || metaPlatform === 'ios' ? metaPlatform : null
-    const extToken = stripeSubscription?.metadata?.extToken || null
+      subscription.originPlatform === 'android' ||
+      subscription.originPlatform === 'ios'
+        ? subscription.originPlatform
+        : null
 
     // #region agent log
     console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][META]', {
@@ -122,7 +123,7 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       dbSubscriptionId: subscription.id,
       isInitialPurchase,
       platform,
-      hasExtToken: !!extToken,
+      hasExtToken: !!subscription.externalOfferToken,
       hasInitialStripeInvoiceId: !!subscription.initialStripeInvoiceId,
     })
     // #endregion
@@ -135,33 +136,6 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
           : typeof invoice.amount_due === 'number'
             ? invoice.amount_due
             : 0
-
-    // Save Android/iOS origin data for initial purchases
-    if (isInitialPurchase && platform) {
-      const updated = await prisma.userSubscription.update({
-        where: { id: subscription.id },
-        data: {
-          originPlatform: platform,
-          externalOfferToken: extToken,
-          initialStripeInvoiceId: invoice.id,
-        },
-        select: {
-          id: true,
-          originPlatform: true,
-          initialStripeInvoiceId: true,
-          externalOfferToken: true,
-        },
-      })
-
-      // #region agent log
-      console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][DB_UPDATED]', {
-        dbSubscriptionId: updated.id,
-        originPlatform: updated.originPlatform,
-        hasExternalOfferToken: !!updated.externalOfferToken,
-        hasInitialStripeInvoiceId: !!updated.initialStripeInvoiceId,
-      })
-      // #endregion
-    }
 
     // Get package template for reporting decision
     const packageTemplate = await prisma.packageTemplate.findUnique({
@@ -189,7 +163,7 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
             packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
           transactionType: 'purchase',
           platform,
-          externalOfferToken: extToken || undefined,
+          externalOfferToken: subscription.externalOfferToken || undefined,
         })
       } else {
         // Renewal: use stored origin platform and initial invoice ID

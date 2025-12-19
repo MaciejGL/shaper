@@ -75,6 +75,16 @@ export async function handleSubscriptionCreated(
       return
     }
 
+    // Extract platform/token from Stripe subscription metadata (for Google reporting)
+    const metaPlatform = subscription.metadata?.platform
+    const originPlatform =
+      metaPlatform === 'android' || metaPlatform === 'ios' ? metaPlatform : null
+    const externalOfferToken = subscription.metadata?.extToken || null
+    const initialStripeInvoiceId =
+      typeof subscription.latest_invoice === 'string'
+        ? subscription.latest_invoice
+        : subscription.latest_invoice?.id || null
+
     // Create new subscription record
     await createUserSubscription({
       user,
@@ -87,6 +97,9 @@ export async function handleSubscriptionCreated(
       trialEnd,
       isTrial,
       assignedTrainerId,
+      originPlatform,
+      externalOfferToken,
+      initialStripeInvoiceId,
     })
 
     // Log what was stored in database
@@ -237,6 +250,9 @@ async function createUserSubscription({
   trialEnd,
   isTrial,
   assignedTrainerId,
+  originPlatform,
+  externalOfferToken,
+  initialStripeInvoiceId,
 }: {
   user: User & { profile?: UserProfile | null }
   packageTemplate: PackageTemplate
@@ -248,6 +264,9 @@ async function createUserSubscription({
   trialEnd: Date | null
   isTrial: boolean
   assignedTrainerId?: string
+  originPlatform: string | null
+  externalOfferToken: string | null
+  initialStripeInvoiceId: string | null
 }) {
   await prisma.userSubscription.create({
     data: {
@@ -264,6 +283,11 @@ async function createUserSubscription({
       trialStart,
       trialEnd,
       isTrialActive: isTrial || false,
+
+      // External offers (Google Play reporting)
+      originPlatform,
+      externalOfferToken,
+      initialStripeInvoiceId,
     },
   })
 }
