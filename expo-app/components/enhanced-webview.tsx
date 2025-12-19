@@ -124,13 +124,14 @@ function setupNativeAppAPI(): string {
       },
       
       // External Offers: get token for Google Play compliance (Android only)
-      getExternalOfferToken: function() {
+      getExternalOfferToken: function(productId) {
         return new Promise(function(resolve) {
           var callbackId = 'ext_token_' + Date.now();
           window['__extTokenCallback_' + callbackId] = resolve;
           window.ReactNativeWebView?.postMessage(JSON.stringify({
             type: 'get_external_offer_token',
-            callbackId: callbackId
+            callbackId: callbackId,
+            productId: productId || 'premium_monthly'
           }));
           // Timeout after 10 seconds
           setTimeout(function() {
@@ -542,7 +543,8 @@ export const EnhancedWebView = forwardRef<
 
           case 'get_external_offer_token':
             // Get external offer token and send it back to web (including diagnostics)
-            getExternalOfferToken().then((result) => {
+            const productId = message.productId || 'premium_monthly'
+            getExternalOfferToken(productId).then((result) => {
               const callbackId = message.callbackId
               // Result includes { token, error, diagnostics }
               webViewRef.current?.injectJavaScript(`

@@ -42,11 +42,9 @@ export function SubscriptionManagementSection() {
     setIsSubscribing(true)
 
     try {
-      // For Android in-app, get external offer token for Google compliance
-      const {
-        token: extToken,
-        diagnostics: extDiagnostics,
-      } = await getExternalOfferToken()
+      // For Android in-app, get alternative billing token for Google compliance
+      const { token: extToken, diagnostics: extDiagnostics } =
+        await getExternalOfferToken(lookupKey)
 
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',

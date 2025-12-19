@@ -40,11 +40,11 @@ export default function OffersPage() {
         lookupKey,
       })
 
-      // For Android in-app, get external offer token for Google compliance
+      // For Android in-app, get alternative billing token for Google compliance
       let extToken: string | null = null
       let extDiagnostics: Record<string, unknown> | null = null
       if (isNativeApp && platform === 'android') {
-        const result = await getExternalOfferToken()
+        const result = await getExternalOfferToken(lookupKey)
         extToken = result.token
         extDiagnostics = result.diagnostics
       }

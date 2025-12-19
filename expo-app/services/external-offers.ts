@@ -1,24 +1,22 @@
 /**
  * External Offers Service for Android
  *
- * Handles Google Play External Offers program compliance using Billing Programs API.
- * Follows react-native-iap documentation exactly:
+ * Handles Google Play Alternative Billing compliance.
+ * Users stay in-app, complete Stripe checkout, and we report to Google.
  * https://hyochan.github.io/react-native-iap/docs/guides/alternative-billing
  */
 import * as WebBrowser from 'expo-web-browser'
 import { Platform } from 'react-native'
 import {
-  createBillingProgramReportingDetailsAndroid,
-  enableBillingProgramAndroid,
+  checkAlternativeBillingAvailabilityAndroid,
+  createAlternativeBillingTokenAndroid,
   endConnection,
   initConnection,
-  isBillingProgramAvailableAndroid,
-  launchExternalLinkAndroid,
+  showAlternativeBillingDialogAndroid,
 } from 'react-native-iap'
 
 let isInitialized = false
 let initPromise: Promise<boolean> | null = null
-let billingProgramEnabled = false
 
 // Diagnostics collection for server-side logging
 interface Diagnostics {
@@ -27,6 +25,8 @@ interface Diagnostics {
   initError: string | null
   isAvailable: boolean | null
   availabilityError: string | null
+  dialogShown: boolean | null
+  dialogError: string | null
   tokenError: string | null
   attempts: number
   lastError: string | null
@@ -38,6 +38,8 @@ let currentDiagnostics: Diagnostics = {
   initError: null,
   isAvailable: null,
   availabilityError: null,
+  dialogShown: null,
+  dialogError: null,
   tokenError: null,
   attempts: 0,
   lastError: null,
@@ -50,6 +52,8 @@ function resetDiagnostics() {
     initError: null,
     isAvailable: null,
     availabilityError: null,
+    dialogShown: null,
+    dialogError: null,
     tokenError: null,
     attempts: 0,
     lastError: null,
@@ -71,8 +75,8 @@ export interface ExternalOfferTokenResult {
 // ============================================================================
 
 /**
- * Initialize External Offers on app startup (Android only)
- * Per docs: enableBillingProgramAndroid MUST be called BEFORE initConnection
+ * Initialize Alternative Billing on app startup (Android only)
+ * Per docs: Use alternativeBillingModeAndroid: 'alternative-only'
  */
 export async function initExternalOffers(): Promise<boolean> {
   if (Platform.OS !== 'android') {
@@ -95,17 +99,11 @@ async function doInit(): Promise<boolean> {
   currentDiagnostics.stage = 'init_start'
 
   try {
-    // Step 1: Enable billing program BEFORE initConnection (per docs)
-    // Only call once per app lifecycle
-    if (!billingProgramEnabled) {
-      currentDiagnostics.stage = 'enable_program'
-      enableBillingProgramAndroid('external-offer')
-      billingProgramEnabled = true
-    }
-
-    // Step 2: Initialize connection (NO alternativeBillingModeAndroid option!)
+    // Initialize connection with Alternative Billing mode
     currentDiagnostics.stage = 'init_connection'
-    const result = await initConnection()
+    const result = await initConnection({
+      alternativeBillingModeAndroid: 'alternative-only',
+    })
 
     if (!result) {
       currentDiagnostics.isInitialized = false
@@ -114,8 +112,7 @@ async function doInit(): Promise<boolean> {
       return false
     }
 
-    // Step 3: Wait for billing service to fully bind
-    // Some devices report success but the client isn't ready for API calls immediately
+    // Wait for billing service to fully bind
     currentDiagnostics.stage = 'waiting_for_bind'
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
@@ -159,10 +156,14 @@ async function reinitialize(): Promise<boolean> {
 // ============================================================================
 
 /**
- * Get external offer token for Google reporting (Android only)
+ * Get alternative billing token for Google reporting (Android only)
+ * Implements 3-step flow: check availability → show dialog → get token
  * Implements retry logic for SERVICE_DISCONNECTED (-1) errors
+ * @param productId - The Stripe lookup key (e.g. 'premium_monthly')
  */
-export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult> {
+export async function getExternalOfferToken(
+  productId: string = 'premium_monthly',
+): Promise<ExternalOfferTokenResult> {
   resetDiagnostics()
 
   if (Platform.OS !== 'android') {
@@ -196,10 +197,9 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
     }
 
     try {
-      // Step 3: Check if program is available
+      // Step 1: Check availability (returns boolean)
       currentDiagnostics.stage = 'checking_availability'
-      const { isAvailable } =
-        await isBillingProgramAvailableAndroid('external-offer')
+      const isAvailable = await checkAlternativeBillingAvailabilityAndroid()
       currentDiagnostics.isAvailable = isAvailable
 
       if (!isAvailable) {
@@ -211,14 +211,28 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
         }
       }
 
-      // Step 5: Get reporting token
+      // Step 2: Show Google's information dialog (returns boolean)
+      currentDiagnostics.stage = 'showing_dialog'
+      const userAccepted = await showAlternativeBillingDialogAndroid()
+      currentDiagnostics.dialogShown = userAccepted
+
+      if (!userAccepted) {
+        currentDiagnostics.stage = 'dialog_declined'
+        return {
+          token: null,
+          error: 'user_declined',
+          diagnostics: { ...currentDiagnostics },
+        }
+      }
+
+      // Step 3: Get the token (returns string | null)
       currentDiagnostics.stage = 'getting_token'
-      const details =
-        await createBillingProgramReportingDetailsAndroid('external-offer')
+      // @ts-expect-error - Types incorrectly show 0 args, but implementation accepts optional sku
+      const token = await createAlternativeBillingTokenAndroid(productId)
 
       currentDiagnostics.stage = 'token_ok'
       return {
-        token: details.externalTransactionToken,
+        token,
         error: null,
         diagnostics: { ...currentDiagnostics },
       }
@@ -230,6 +244,9 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
       if (currentDiagnostics.stage === 'checking_availability') {
         currentDiagnostics.availabilityError = msg.slice(0, 500)
         currentDiagnostics.stage = 'availability_error'
+      } else if (currentDiagnostics.stage === 'showing_dialog') {
+        currentDiagnostics.dialogError = msg.slice(0, 500)
+        currentDiagnostics.stage = 'dialog_error'
       } else {
         currentDiagnostics.tokenError = msg.slice(0, 500)
         currentDiagnostics.stage = 'token_error'
@@ -265,26 +282,12 @@ export async function getExternalOfferToken(): Promise<ExternalOfferTokenResult>
 // ============================================================================
 
 /**
- * Open checkout URL with External Offers compliance
- * Shows Google's required disclosure dialog before opening browser
+ * Open checkout URL in Custom Tabs (stays within app context)
+ * User completes Stripe payment, then we report to Google
  */
 export async function openExternalCheckout(checkoutUrl: string): Promise<void> {
   try {
-    if (Platform.OS === 'android' && isInitialized) {
-      // Step 4: Launch external link (shows Google's disclosure dialog)
-      const userAccepted = await launchExternalLinkAndroid({
-        billingProgram: 'external-offer',
-        launchMode: 'caller-will-launch-link',
-        linkType: 'link-to-digital-content-offer',
-        linkUri: checkoutUrl,
-      })
-
-      if (!userAccepted) {
-        return // User declined
-      }
-    }
-
-    // Open in Custom Tabs
+    // Open in Custom Tabs (in-app browser)
     await WebBrowser.openBrowserAsync(checkoutUrl, {
       presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
       createTask: false,
