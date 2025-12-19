@@ -102,8 +102,8 @@ export function ReviewExercises({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
-        <div className="space-y-4 pt-4">
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="px-4 pb-4 pt-2 space-y-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
