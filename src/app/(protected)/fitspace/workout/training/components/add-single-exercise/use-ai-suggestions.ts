@@ -1,10 +1,18 @@
 import { useMutation } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
+export type ExerciseSuggestionRole =
+  | 'activation'
+  | 'primary_compound'
+  | 'secondary_compound'
+  | 'accessory'
+  | 'isolation'
+
 export interface ExerciseSuggestion {
   exerciseId: string
   exerciseName: string
   muscleGroup: string
+  role: ExerciseSuggestionRole
 }
 
 export interface SuggestionsResponse {
@@ -43,9 +51,19 @@ export function useAiSuggestions({
   const mutation = useMutation({
     mutationFn: fetchExerciseSuggestions,
     onSuccess: (data) => {
-      // Auto-select first 2 suggestions
-      const firstTwo = data.suggestions.slice(0, 2).map((s) => s.exerciseId)
-      onSuggestionsLoaded?.(firstTwo)
+      const compoundIds = data.suggestions
+        .filter(
+          (s) =>
+            s.role === 'primary_compound' || s.role === 'secondary_compound',
+        )
+        .map((s) => s.exerciseId)
+
+      const idsToSelect =
+        compoundIds.length >= 2
+          ? compoundIds.slice(0, 2)
+          : data.suggestions.slice(0, 2).map((s) => s.exerciseId)
+
+      onSuggestionsLoaded?.(idsToSelect)
     },
   })
 

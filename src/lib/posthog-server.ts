@@ -43,6 +43,10 @@ export enum ServerEvent {
   // Payment events
   PAYMENT_SUCCEEDED = 'payment_succeeded',
   PAYMENT_FAILED = 'payment_failed',
+
+  // AI
+  AI_EXERCISE_SUGGESTIONS_SUCCESS = 'ai_exercise_suggestions_success',
+  AI_EXERCISE_SUGGESTIONS_ERROR = 'ai_exercise_suggestions_error',
 }
 
 interface CaptureParams {

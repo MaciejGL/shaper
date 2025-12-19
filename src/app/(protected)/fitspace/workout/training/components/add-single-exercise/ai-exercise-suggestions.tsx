@@ -135,7 +135,7 @@ export function AiExerciseSuggestions({
 
   return (
     <div>
-      <div className="rounded-full border-none bg-primary/5 px-1 py-1 shadow-md mb-4">
+      <div className="rounded-full border-none bg-primary/5 px-1 py-1 shadow-md">
         <div className="grid grid-cols-[1fr_auto] gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="bg-white/60 dark:bg-black/60 rounded-full p-3">
@@ -177,12 +177,19 @@ export function AiExerciseSuggestions({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="mt-2 p-3 rounded-lg border border-destructive/50 bg-destructive/10"
+            className="rounded-lg border border-destructive/50 bg-destructive/10"
           >
-            <p className="text-sm text-destructive">{error.message}</p>
-            <Button variant="ghost" size="sm" className="mt-2" onClick={reset}>
-              Dismiss
-            </Button>
+            <div className="p-3 pt-5">
+              <p className="text-sm text-destructive">{error.message}</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2"
+                onClick={reset}
+              >
+                Dismiss
+              </Button>
+            </div>
           </motion.div>
         )}
 
@@ -193,16 +200,18 @@ export function AiExerciseSuggestions({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-            className="bg-muted/20 dark:bg-black/20 -mx-4 px-4 pt-4 pb-6 rounded-lg"
+            className="bg-muted/20 dark:bg-black/20 -mx-4 px-4 rounded-lg"
           >
-            <SuggestionsResultsContent
-              suggestions={suggestions}
-              allExercises={allExercises}
-              context={context}
-              selectedIds={selectedExerciseIds}
-              onToggle={onToggleExercise}
-              onClose={reset}
-            />
+            <div className="pt-4 pb-6">
+              <SuggestionsResultsContent
+                suggestions={suggestions}
+                allExercises={allExercises}
+                context={context}
+                selectedIds={selectedExerciseIds}
+                onToggle={onToggleExercise}
+                onClose={reset}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
