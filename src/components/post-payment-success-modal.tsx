@@ -30,11 +30,15 @@ export function PostPaymentSuccessModal({
     window.location.href = '/fitspace/workout'
   }
 
-  // Prevent closing modal until ready or timeout
+  // Prevent closing modal while polling - only allow closing when ready or timeout
   const handleOpenChange = (newOpen: boolean) => {
-    // Can only close after subscription is ready or timeout
-    if (!newOpen && (state === 'ready' || state === 'timeout')) {
+    if (!newOpen && state === 'polling') {
+      // Prevent closing while still polling
       return
+    }
+    // Allow closing when ready or timeout - navigate away to clear URL params
+    if (!newOpen) {
+      handleReturnToApp()
     }
   }
 

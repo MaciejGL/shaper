@@ -40,7 +40,8 @@ export function useSubscribe() {
           userId: user.id,
           lookupKey,
           returnUrl:
-            options?.returnUrl || `${window.location.origin}/checkout/success`,
+            options?.returnUrl ||
+            `${window.location.origin}/fitspace/progress?premium_activated=true`,
           cancelUrl:
             options?.cancelUrl ||
             `${window.location.origin}/account-management`,

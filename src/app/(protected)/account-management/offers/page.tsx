@@ -27,8 +27,8 @@ export default function OffersPage() {
 
   const handleSubscribe = async (lookupKey: string) => {
     await subscribe(lookupKey, {
-      // Always use checkout/success for deep link redirect back to app
-      returnUrl: `${window.location.origin}/checkout/success`,
+      // Use /fitspace/progress which is intercepted by Android intent filters
+      returnUrl: `${window.location.origin}/fitspace/progress?premium_activated=true`,
       cancelUrl: `${window.location.origin}/account-management/offers${redirectUrl ? `?redirectUrl=${encodeURIComponent(redirectUrl)}` : ''}`,
     })
   }

@@ -1,10 +1,9 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 import { ExtendHeader } from '@/components/extend-header'
-import { PremiumActivatedModal } from '@/components/premium-activated-modal'
+import { PostPaymentSuccessModal } from '@/components/post-payment-success-modal'
 import { useUser } from '@/context/user-context'
 import { usePostPaymentSuccess } from '@/hooks/use-post-payment-success'
 
@@ -22,27 +21,21 @@ import { TrainingAnalyticsSection } from './components/muscle-heatmap/training-a
 import { SnapshotsSection } from './components/snapshots-section/snapshots-section'
 
 export default function ProgressPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { user, hasPremium } = useUser()
   const { data } = useCheckinStatus()
   const { isDismissed } = useCheckinDismissal()
 
   const isPremiumActivated = searchParams?.get('premium_activated') === 'true'
-  const [showPremiumModal, setShowPremiumModal] = useState(false)
 
-  const { state: paymentState } = usePostPaymentSuccess(user?.id)
+  const {
+    isPostPayment,
+    state: paymentState,
+    refetch,
+  } = usePostPaymentSuccess(user?.id)
 
-  useEffect(() => {
-    if (isPremiumActivated) {
-      setShowPremiumModal(true)
-    }
-  }, [isPremiumActivated])
-
-  const handleCloseModal = () => {
-    setShowPremiumModal(false)
-    router.replace('/fitspace/progress', { scroll: false })
-  }
+  // Show modal when coming from payment success
+  const showPaymentModal = isPremiumActivated || isPostPayment
 
   const checkinStatus = data?.checkinStatus
   const hasSchedule = checkinStatus?.hasSchedule
@@ -60,10 +53,10 @@ export default function ProgressPage() {
 
   return (
     <>
-      <PremiumActivatedModal
-        open={showPremiumModal}
-        onClose={handleCloseModal}
-        isVerifying={paymentState === 'polling'}
+      <PostPaymentSuccessModal
+        open={showPaymentModal}
+        state={paymentState}
+        onRefresh={refetch}
       />
       <ExtendHeader
         headerChildren={showInHeader ? <CheckinScheduleSection /> : null}
