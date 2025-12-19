@@ -29,6 +29,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -73,10 +80,22 @@ interface VerifyResult {
   message?: string
 }
 
+interface VerifyBatchResult {
+  id: string
+  invoiceId: string | null
+  verified: boolean
+  googleData?: Record<string, unknown>
+  error?: string
+}
+
 export function ExternalOffersTab() {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
   const [verifyResult, setVerifyResult] = useState<VerifyResult | null>(null)
+  const [details, setDetails] = useState<{
+    open: boolean
+    sub: Subscription | null
+  }>({ open: false, sub: null })
   const [refundDialog, setRefundDialog] = useState<{
     open: boolean
     invoiceId: string
@@ -92,6 +111,43 @@ export function ExternalOffersTab() {
     },
   })
 
+  const filteredSubscriptions = data?.subscriptions.filter((s) => {
+    if (!searchQuery) return true
+    const q = searchQuery.toLowerCase()
+    return (
+      s.initialStripeInvoiceId?.toLowerCase().includes(q) ||
+      s.user.email.toLowerCase().includes(q) ||
+      s.user.name?.toLowerCase().includes(q)
+    )
+  })
+
+  const verifyBatchQuery = useQuery<{ results: VerifyBatchResult[] }>({
+    queryKey: [
+      'external-offers-verify-batch',
+      (filteredSubscriptions || []).map((s) => s.id),
+    ],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/external-offers/verify-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscriptionIds: (filteredSubscriptions || [])
+            .filter((s) => !!s.initialStripeInvoiceId)
+            .map((s) => s.id),
+        }),
+      })
+      if (!res.ok) throw new Error('Batch verification failed')
+      return res.json()
+    },
+    enabled: !!filteredSubscriptions && filteredSubscriptions.length > 0,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  })
+
+  const verifyById = new Map(
+    (verifyBatchQuery.data?.results || []).map((r) => [r.id, r]),
+  )
+
   // Verify single
   const verifyMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -103,6 +159,21 @@ export function ExternalOffersTab() {
     },
     onSuccess: (result) => {
       setVerifyResult(result)
+    },
+  })
+
+  const reportMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/external-offers/${id}/report`, {
+        method: 'POST',
+      })
+      if (!res.ok) throw new Error('Report failed')
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['external-offers-verify-batch'],
+      })
     },
   })
 
@@ -123,16 +194,6 @@ export function ExternalOffersTab() {
         queryKey: ['external-offers-subscriptions'],
       })
     },
-  })
-
-  const filteredSubscriptions = data?.subscriptions.filter((s) => {
-    if (!searchQuery) return true
-    const q = searchQuery.toLowerCase()
-    return (
-      s.initialStripeInvoiceId?.toLowerCase().includes(q) ||
-      s.user.email.toLowerCase().includes(q) ||
-      s.user.name?.toLowerCase().includes(q)
-    )
   })
 
   return (
@@ -219,72 +280,211 @@ export function ExternalOffersTab() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredSubscriptions?.map((sub) => (
-                  <TableRow key={sub.id}>
-                    <TableCell className="font-mono text-xs">
-                      {sub.initialStripeInvoiceId
-                        ? `${sub.initialStripeInvoiceId.slice(0, 20)}...`
-                        : '—'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">{sub.user.name || 'N/A'}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {sub.user.email}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{sub.package.name}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {sub.externalOfferToken ? (
-                        <Check className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {new Date(sub.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <ChevronDown className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => verifyMutation.mutate(sub.id)}
-                            disabled={
-                              !sub.initialStripeInvoiceId ||
-                              verifyMutation.isPending
-                            }
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Verify with Google
-                          </DropdownMenuItem>
-                          {sub.initialStripeInvoiceId && (
-                            <DropdownMenuItem
-                              onClick={() =>
-                                setRefundDialog({
-                                  open: true,
-                                  invoiceId: sub.initialStripeInvoiceId!,
-                                })
-                              }
-                            >
-                              Report Refund
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
+                filteredSubscriptions?.map((sub) =>
+                  (() => {
+                    const v = verifyById.get(sub.id)
+                    return (
+                      <TableRow key={sub.id}>
+                        <TableCell className="font-mono text-xs">
+                          {sub.initialStripeInvoiceId
+                            ? `${sub.initialStripeInvoiceId.slice(0, 20)}...`
+                            : '—'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            {sub.user.name || 'N/A'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {sub.user.email}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{sub.package.name}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {sub.externalOfferToken ? (
+                              <Check className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                            {v ? (
+                              v.verified ? (
+                                <Badge className="bg-green-600">Verified</Badge>
+                              ) : v.error === 'not_found' ? (
+                                <Badge variant="secondary">Not found</Badge>
+                              ) : (
+                                <Badge variant="destructive">Error</Badge>
+                              )
+                            ) : sub.initialStripeInvoiceId ? (
+                              <Badge variant="outline">Checking…</Badge>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(sub.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => setDetails({ open: true, sub })}
+                              >
+                                Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => verifyMutation.mutate(sub.id)}
+                                disabled={
+                                  !sub.initialStripeInvoiceId ||
+                                  verifyMutation.isPending
+                                }
+                              >
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                Verify with Google
+                              </DropdownMenuItem>
+                              {sub.initialStripeInvoiceId && (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    setRefundDialog({
+                                      open: true,
+                                      invoiceId: sub.initialStripeInvoiceId!,
+                                    })
+                                  }
+                                >
+                                  Report Refund
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })(),
+                )
               )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Details Drawer */}
+      <Drawer
+        open={details.open}
+        onOpenChange={(open) => setDetails({ open, sub: details.sub })}
+      >
+        <DrawerContent
+          dialogTitle="External transaction details"
+          className="p-4"
+        >
+          <DrawerHeader>
+            <DrawerTitle>External transaction</DrawerTitle>
+          </DrawerHeader>
+
+          {details.sub ? (
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">User</p>
+                <p className="text-sm">{details.sub.user.email}</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Invoice ID</p>
+                <p className="font-mono text-xs break-all">
+                  {details.sub.initialStripeInvoiceId || '—'}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Token</p>
+                <p className="text-sm">
+                  {details.sub.externalOfferToken ? 'Present' : 'Missing'}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Google status</p>
+                {(() => {
+                  const v = verifyById.get(details.sub!.id)
+                  if (!details.sub?.initialStripeInvoiceId) {
+                    return <p className="text-sm text-muted-foreground">—</p>
+                  }
+                  if (!v) {
+                    return <Badge variant="outline">Checking…</Badge>
+                  }
+                  if (v.verified) {
+                    return (
+                      <>
+                        <Badge className="bg-green-600">Verified</Badge>
+                        {v.googleData ? (
+                          <pre className="bg-muted p-4 rounded text-xs overflow-auto max-h-64">
+                            {JSON.stringify(v.googleData, null, 2)}
+                          </pre>
+                        ) : null}
+                      </>
+                    )
+                  }
+                  if (v.error === 'not_found') {
+                    return (
+                      <Badge variant="secondary">Not found in Google</Badge>
+                    )
+                  }
+                  return (
+                    <Badge variant="destructive">
+                      {v.error || 'Verification failed'}
+                    </Badge>
+                  )
+                })()}
+              </div>
+            </div>
+          ) : null}
+
+          <DrawerFooter className="mt-6 gap-2">
+            <Button
+              variant="secondary"
+              onClick={() =>
+                details.sub && verifyMutation.mutate(details.sub.id)
+              }
+              disabled={
+                !details.sub?.initialStripeInvoiceId || verifyMutation.isPending
+              }
+              loading={verifyMutation.isPending}
+            >
+              Verify now
+            </Button>
+            <Button
+              onClick={() =>
+                details.sub && reportMutation.mutate(details.sub.id)
+              }
+              disabled={
+                !details.sub?.initialStripeInvoiceId ||
+                !details.sub?.externalOfferToken ||
+                reportMutation.isPending
+              }
+              loading={reportMutation.isPending}
+            >
+              Report purchase to Google
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                details.sub?.initialStripeInvoiceId &&
+                setRefundDialog({
+                  open: true,
+                  invoiceId: details.sub.initialStripeInvoiceId,
+                })
+              }
+              disabled={!details.sub?.initialStripeInvoiceId}
+            >
+              Report refund
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {/* Verify Result Dialog */}
       <Dialog open={!!verifyResult} onOpenChange={() => setVerifyResult(null)}>
