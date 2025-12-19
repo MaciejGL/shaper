@@ -7,45 +7,25 @@ import { Button } from '@/components/ui/button'
 import { getBaseUrl } from '@/lib/get-base-url'
 
 const TARGET_PATH = 'fitspace/progress?premium_activated=true'
-const APP_LINK_URL =
-  'https://www.hypro.app/fitspace/progress?premium_activated=true'
 
 export default function CheckoutSuccessPage() {
   const [showManualButton, setShowManualButton] = useState(false)
-  const appOpenedRef = useRef(false)
+  const linkRef = useRef<HTMLAnchorElement>(null)
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        appOpenedRef.current = true
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('blur', () => {
-      appOpenedRef.current = true
-    })
-
-    // Try App Link (HTTPS URL that Android/iOS intercepts)
+    // Try programmatic click on hidden link after short delay
     const timer = setTimeout(() => {
-      window.location.href = APP_LINK_URL
+      linkRef.current?.click()
 
-      // If still here after 1.5s and page never went to background, show manual button
-      setTimeout(() => {
-        if (!appOpenedRef.current) {
-          setShowManualButton(true)
-        }
-      }, 1500)
+      // If still here after 1.5s, show manual button
+      setTimeout(() => setShowManualButton(true), 1500)
     }, 500)
 
-    return () => {
-      clearTimeout(timer)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
+    return () => clearTimeout(timer)
   }, [])
 
   const handleOpenApp = () => {
-    window.location.href = APP_LINK_URL
+    window.location.href = `hypro://${TARGET_PATH}`
   }
 
   const handleContinueWeb = () => {
@@ -54,6 +34,14 @@ export default function CheckoutSuccessPage() {
 
   return (
     <div className="min-h-screen w-screen flex items-center justify-center p-4 bg-background">
+      {/* Hidden anchor for programmatic click attempt */}
+      <a
+        ref={linkRef}
+        href={`hypro://${TARGET_PATH}`}
+        className="hidden"
+        aria-hidden="true"
+      />
+
       <div className="container-hypertro text-center space-y-6 max-w-sm">
         <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
         <h1 className="text-2xl font-bold">Payment Successful!</h1>
