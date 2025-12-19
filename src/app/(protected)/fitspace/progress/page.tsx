@@ -61,7 +61,7 @@ export default function ProgressPage() {
   return (
     <>
       <PremiumActivatedModal
-        open={!showPremiumModal}
+        open={showPremiumModal}
         onClose={handleCloseModal}
         isVerifying={paymentState === 'polling'}
       />
