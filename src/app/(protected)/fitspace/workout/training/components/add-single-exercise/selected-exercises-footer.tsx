@@ -20,20 +20,18 @@ export function SelectedExercisesFooter({
 
   return (
     <DrawerFooter className="border-t">
-      <div className="flex items-center justify-between w-full gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">
-            {selectedCount} exercise{selectedCount !== 1 ? 's' : ''} selected
-          </span>
-          <Button variant="ghost" size="sm" onClick={onClearAll}>
-            Clear
-          </Button>
-        </div>
-        <Button onClick={onReview} size="lg">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center justify-between w-full gap-3">
+        <span className="text-sm font-medium">
+          {selectedCount} exercise{selectedCount !== 1 ? 's' : ''} selected
+        </span>
+        <Button variant="outline" size="md" onClick={onClearAll}>
+          Clear
+        </Button>
+
+        <Button onClick={onReview} size="md">
           Review workout
         </Button>
       </div>
     </DrawerFooter>
   )
 }
-
