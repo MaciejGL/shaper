@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { CheckCircle, Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { getBaseUrl } from '@/lib/get-base-url'
@@ -64,4 +64,3 @@ export default function CheckoutSuccessPage() {
     </div>
   )
 }
-
