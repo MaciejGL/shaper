@@ -46,13 +46,15 @@ export async function reportToGoogle(
   }
 
   // Build request body for purchase or renewal
+  const preTaxAmount = {
+    priceMicros,
+    currency: currency.toUpperCase(),
+  }
   const requestBody: Record<string, unknown> = {
     transactionTime: new Date().toISOString(),
     userTaxAddress: { regionCode: countryCode.toUpperCase() },
-    currentPreTaxAmount: {
-      priceMicros,
-      currency: currency.toUpperCase(),
-    },
+    originalPreTaxAmount: preTaxAmount,
+    currentPreTaxAmount: preTaxAmount,
   }
 
   // Use recurringTransaction structure for subscriptions
@@ -88,6 +90,7 @@ export async function reportToGoogle(
     externalTransactionId,
     transactionType,
     amount: `${amount / 100} ${currency.toUpperCase()}`,
+    priceMicros,
     countryCode,
     hasToken: !!externalOfferToken,
     hasInitialId: !!initialExternalTransactionId,
