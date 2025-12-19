@@ -135,7 +135,7 @@ export function LogsSection() {
         </div>
       </CardContent>
       <CardFooter>
-        <div className="grid grid-cols-1 w-full">
+        <div className="grid grid-cols-2 gap-2 w-full">
           <Button
             variant="tertiary"
             size="sm"
@@ -145,6 +145,33 @@ export function LogsSection() {
           >
             Detailed Logs
           </Button>
+          <PremiumButtonWrapper
+            hasPremium={hasPremium}
+            tooltipText="Upgrade to log measurements"
+          >
+            {hasPremium ? (
+              <AddMeasurementModal onSuccess={onMeasurementAdded}>
+                <Button
+                  variant="default"
+                  size="sm"
+                  iconStart={<Plus />}
+                  className="w-full"
+                >
+                  Add Logs
+                </Button>
+              </AddMeasurementModal>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                iconStart={<Plus />}
+                disabled={!hasPremium}
+                className="w-full"
+              >
+                Add Logs
+              </Button>
+            )}
+          </PremiumButtonWrapper>
         </div>
         <MuscleLogsDrawer
           isOpen={isDrawerOpen}

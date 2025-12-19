@@ -60,7 +60,7 @@ export function MuscleHeatmapSection() {
           <CardTitle>Muscle Heatmap</CardTitle>
           <div className="flex items-center justify-between gap-2">
             <CardDescription>Weekly sets per muscle.</CardDescription>
-            <TabsList>
+            <TabsList variant="secondary">
               <TabsTrigger value="heatmap">By Muscle</TabsTrigger>
               <TabsTrigger value="day">By Day</TabsTrigger>
             </TabsList>

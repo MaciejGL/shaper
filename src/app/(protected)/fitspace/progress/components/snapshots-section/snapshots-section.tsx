@@ -48,7 +48,24 @@ export function SnapshotsSection() {
     shareWithTrainer: boolean
   } | null>(null)
 
-  const { latestSnapshot, previousSnapshot, isLoading } = useSnapshots()
+  const { latestSnapshot, previousSnapshot, progressLogs, isLoading } =
+    useSnapshots()
+
+  const handleEditSnapshot = (snapshotId: string) => {
+    const log = progressLogs?.find((l) => l.id === snapshotId)
+    if (log) {
+      setEditLog({
+        id: log.id,
+        loggedAt: log.loggedAt,
+        notes: log.notes,
+        image1Url: log.image1?.url,
+        image2Url: log.image2?.url,
+        image3Url: log.image3?.url,
+        shareWithTrainer: log.shareWithTrainer,
+      })
+      setIsCreateDialogOpen(true)
+    }
+  }
 
   const handleToggleBlur = () => {
     updatePreferences({
@@ -90,36 +107,31 @@ export function SnapshotsSection() {
             <Camera className="h-5 w-5 text-purple-500" />
             Progress Snapshots
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {(latestSnapshot || previousSnapshot) && (
-              <Button
-                variant="tertiary"
-                size="icon-sm"
-                iconOnly={
-                  preferences.blurProgressSnapshots ? <Eye /> : <EyeOff />
-                }
-                onClick={handleToggleBlur}
-                title={
-                  preferences.blurProgressSnapshots
-                    ? 'Show images'
-                    : 'Blur images'
-                }
-              />
+              <>
+                <Button
+                  variant="tertiary"
+                  size="icon-sm"
+                  iconOnly={
+                    preferences.blurProgressSnapshots ? <Eye /> : <EyeOff />
+                  }
+                  onClick={handleToggleBlur}
+                  title={
+                    preferences.blurProgressSnapshots
+                      ? 'Show images'
+                      : 'Blur images'
+                  }
+                />
+                <Button
+                  variant="tertiary"
+                  size="icon-sm"
+                  iconOnly={<Pen />}
+                  onClick={() => setIsDrawerOpen(true)}
+                  title="View history"
+                />
+              </>
             )}
-            <PremiumButtonWrapper
-              hasPremium={hasPremium}
-              tooltipText="Upgrade to add snapshots"
-            >
-              <Button
-                variant="default"
-                size="sm"
-                iconStart={<Plus />}
-                onClick={() => setIsCreateDialogOpen(true)}
-                disabled={!hasPremium}
-              >
-                Add
-              </Button>
-            </PremiumButtonWrapper>
           </div>
         </CardHeader>
         <CardContent>
@@ -191,6 +203,19 @@ export function SnapshotsSection() {
                         {latestSnapshot.weight}kg
                       </div>
                     )}
+                    {latestSnapshot && (
+                      <Button
+                        variant="secondary"
+                        size="icon-xs"
+                        iconOnly={<Pen />}
+                        className="absolute top-1 left-1"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEditSnapshot(latestSnapshot.id)
+                        }}
+                        title="Edit"
+                      />
+                    )}
                   </div>
                   <div className="text-xs text-center text-muted-foreground">
                     {latestSnapshot
@@ -235,6 +260,19 @@ export function SnapshotsSection() {
                         {previousSnapshot.weight}kg
                       </div>
                     )}
+                    {previousSnapshot && (
+                      <Button
+                        variant="secondary"
+                        size="icon-xs"
+                        iconOnly={<Pen />}
+                        className="absolute top-1 left-1"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEditSnapshot(previousSnapshot.id)
+                        }}
+                        title="Edit"
+                      />
+                    )}
                   </div>
                   <div className="text-xs text-center text-muted-foreground">
                     {previousSnapshot
@@ -251,25 +289,30 @@ export function SnapshotsSection() {
             <Button
               variant="tertiary"
               size="sm"
-              onClick={() => setIsDrawerOpen(true)}
-              iconStart={<Pen />}
-              className="w-full"
-            >
-              Edit
-            </Button>
-            <Button
-              className="w-full"
-              variant="tertiary"
-              size="sm"
               onClick={() => {
                 setPreselectedSnapshot(null)
                 setIsCompareDrawerOpen(true)
               }}
-              disabled={!latestSnapshot && !previousSnapshot}
               iconStart={<Images />}
+              className="w-full"
             >
               Compare
             </Button>
+            <PremiumButtonWrapper
+              hasPremium={hasPremium}
+              tooltipText="Upgrade to add snapshots"
+            >
+              <Button
+                variant="default"
+                size="sm"
+                iconStart={<Plus />}
+                onClick={() => setIsCreateDialogOpen(true)}
+                disabled={!hasPremium}
+                className="w-full"
+              >
+                Add Snapshot
+              </Button>
+            </PremiumButtonWrapper>
           </div>
         </CardFooter>
       </Card>

@@ -155,6 +155,12 @@ export function PostPaymentSuccessModal({
               </DialogDescription>
             </DialogHeader>
 
+            <div className="bg-card-on-card p-4 rounded-lg">
+              <p className="text-sm text-muted-foreground text-center">
+                Start tracking your progress and unlock your full potential.
+              </p>
+            </div>
+
             <CheckinScheduleForm
               formData={formData}
               onFormDataChange={setFormData}

@@ -137,6 +137,7 @@ export function HeatmapBodyView({
             className={cn(
               'mx-auto border border-border grid grid-cols-[1fr_1fr_auto]',
             )}
+            variant="secondary"
           >
             <TabsTrigger value="front">Front</TabsTrigger>
             <TabsTrigger value="back">Back</TabsTrigger>

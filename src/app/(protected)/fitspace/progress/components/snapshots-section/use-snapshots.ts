@@ -95,6 +95,7 @@ export function useSnapshots() {
     return {
       latestSnapshot,
       previousSnapshot,
+      progressLogs,
       isLoading: progressLogsLoading || measurementsLoading,
       error: null,
     }
