@@ -64,9 +64,9 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     // Method 3: Fetch full invoice from Stripe API if subscription not found
     // Webhook payloads sometimes don't include subscription field
     if (!subscriptionId && invoice.id) {
-      const fullInvoice = (await stripe.invoices.retrieve(
-        invoice.id,
-      )) as InvoiceWithSubscription
+      const fullInvoice = (await stripe.invoices.retrieve(invoice.id, {
+        expand: ['subscription', 'lines.data.subscription'],
+      })) as InvoiceWithSubscription
       // #region agent log
       console.info(
         '[DEBUG] Full invoice from Stripe API:',
@@ -75,16 +75,42 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
           hasSubscription: !!fullInvoice.subscription,
           subscriptionValue: fullInvoice.subscription,
           subscriptionType: typeof fullInvoice.subscription,
-          allKeys: Object.keys(fullInvoice).slice(0, 20),
+          subscriptionIsObject:
+            typeof fullInvoice.subscription === 'object' &&
+            fullInvoice.subscription !== null,
+          subscriptionIdFromObject:
+            typeof fullInvoice.subscription === 'object' &&
+            fullInvoice.subscription !== null
+              ? (fullInvoice.subscription as Stripe.Subscription).id
+              : null,
           linesCount: fullInvoice.lines?.data?.length,
           linesSubs: fullInvoice.lines?.data?.map(
-            (l: { subscription?: unknown }) => l.subscription,
+            (l: { subscription?: unknown }) =>
+              typeof l.subscription === 'object' && l.subscription !== null
+                ? (l.subscription as { id: string }).id
+                : l.subscription,
           ),
         }),
       )
       // #endregion
+      // Handle both string and object subscription
       if (fullInvoice.subscription) {
-        subscriptionId = fullInvoice.subscription
+        subscriptionId =
+          typeof fullInvoice.subscription === 'object'
+            ? (fullInvoice.subscription as Stripe.Subscription).id
+            : fullInvoice.subscription
+      }
+      // Also try lines if subscription still not found
+      if (!subscriptionId && fullInvoice.lines?.data?.length > 0) {
+        for (const lineItem of fullInvoice.lines.data) {
+          if (lineItem.subscription) {
+            subscriptionId =
+              typeof lineItem.subscription === 'object'
+                ? (lineItem.subscription as Stripe.Subscription).id
+                : lineItem.subscription
+            break
+          }
+        }
       }
     }
 
