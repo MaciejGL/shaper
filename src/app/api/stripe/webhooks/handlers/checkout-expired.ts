@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { captureServerException } from '@/lib/posthog-server'
 
 /**
  * Handles checkout.session.expired webhook
@@ -91,5 +92,11 @@ export async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
     }
   } catch (error) {
     console.error('Error handling checkout expired:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'checkout-expired',
+      sessionId: session.id,
+    })
+    throw error
   }
 }

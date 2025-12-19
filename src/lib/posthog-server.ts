@@ -31,6 +31,18 @@ export enum ServerEvent {
   // Google Play reporting
   GOOGLE_REPORT_SUCCESS = 'google_report_success',
   GOOGLE_REPORT_SKIPPED = 'google_report_skipped',
+
+  // Subscription lifecycle
+  SUBSCRIPTION_CREATED = 'subscription_created',
+  SUBSCRIPTION_UPDATED = 'subscription_updated',
+  SUBSCRIPTION_CANCELLED = 'subscription_cancelled',
+  SUBSCRIPTION_DELETED = 'subscription_deleted',
+  SUBSCRIPTION_PAUSED = 'subscription_paused',
+  SUBSCRIPTION_RESUMED = 'subscription_resumed',
+
+  // Payment events
+  PAYMENT_SUCCEEDED = 'payment_succeeded',
+  PAYMENT_FAILED = 'payment_failed',
 }
 
 interface CaptureParams {

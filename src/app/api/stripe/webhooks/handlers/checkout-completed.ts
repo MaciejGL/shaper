@@ -6,6 +6,7 @@ import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { User } from '@/lib/getUser'
 import { notifyTrainerOfferPayment } from '@/lib/notifications/push-notification-service'
+import { captureServerException } from '@/lib/posthog-server'
 import {
   STRIPE_LOOKUP_KEYS,
   resolvePriceIdToLookupKey,
@@ -66,6 +67,12 @@ export async function handleCheckoutCompleted(
     }
   } catch (error) {
     console.error('Error handling checkout completed:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'checkout-completed',
+      sessionId: session.id,
+    })
+    throw error
   }
 }
 

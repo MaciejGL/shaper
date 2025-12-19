@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { captureServerException } from '@/lib/posthog-server'
 import { stripe } from '@/lib/stripe/stripe'
 
 /**
@@ -107,6 +108,12 @@ export async function handleDisputeCreated(dispute: Stripe.Dispute) {
     )
   } catch (error) {
     console.error('Error handling dispute created:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'dispute-created',
+      disputeId: dispute.id,
+    })
+    throw error
   }
 }
 

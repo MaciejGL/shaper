@@ -1,5 +1,12 @@
 import Stripe from 'stripe'
 
+import { prisma } from '@/lib/db'
+import {
+  ServerEvent,
+  captureServerEvent,
+  captureServerException,
+} from '@/lib/posthog-server'
+
 /**
  * Handle subscription paused webhook
  *
@@ -10,11 +17,39 @@ import Stripe from 'stripe'
 export async function handleSubscriptionPaused(
   subscription: Stripe.Subscription,
 ) {
-  const resumesAt = subscription.pause_collection?.resumes_at
-    ? new Date(subscription.pause_collection.resumes_at * 1000).toISOString()
-    : 'unknown'
+  try {
+    const resumesAt = subscription.pause_collection?.resumes_at
+      ? new Date(subscription.pause_collection.resumes_at * 1000).toISOString()
+      : 'unknown'
 
-  console.info(
-    `[WEBHOOK] Subscription ${subscription.id} paused, resumes at: ${resumesAt}`,
-  )
+    console.info(
+      `[WEBHOOK] Subscription ${subscription.id} paused, resumes at: ${resumesAt}`,
+    )
+
+    // Find user for tracking
+    const dbSubscription = await prisma.userSubscription.findFirst({
+      where: { stripeSubscriptionId: subscription.id },
+      select: { userId: true, package: { select: { name: true } } },
+    })
+
+    if (dbSubscription) {
+      captureServerEvent({
+        distinctId: dbSubscription.userId,
+        event: ServerEvent.SUBSCRIPTION_PAUSED,
+        properties: {
+          stripeSubscriptionId: subscription.id,
+          packageName: dbSubscription.package?.name,
+          resumesAt,
+        },
+      })
+    }
+  } catch (error) {
+    console.error('Error handling subscription paused:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'subscription-paused',
+      stripeSubscriptionId: subscription.id,
+    })
+    throw error
+  }
 }

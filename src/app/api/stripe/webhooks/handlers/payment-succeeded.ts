@@ -11,6 +11,11 @@ import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { reportTransaction } from '@/lib/external-reporting/report-transaction'
 import { notifyTrainerSubscriptionPayment } from '@/lib/notifications/push-notification-service'
+import {
+  ServerEvent,
+  captureServerEvent,
+  captureServerException,
+} from '@/lib/posthog-server'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 import { createTasksForDelivery } from '@/server/models/service-task/factory'
@@ -306,8 +311,30 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
         }
       }
     }
+
+    // Track payment succeeded event
+    if (subscription) {
+      const isRenewal = invoice.billing_reason !== 'subscription_create'
+      captureServerEvent({
+        distinctId: subscription.userId,
+        event: ServerEvent.PAYMENT_SUCCEEDED,
+        properties: {
+          invoiceId: invoice.id,
+          amount: invoice.amount_paid,
+          currency: invoice.currency,
+          isRenewal,
+          stripeSubscriptionId: subscription.stripeSubscriptionId,
+        },
+      })
+    }
   } catch (error) {
     console.error('Error handling payment succeeded:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'payment-succeeded',
+      invoiceId: invoice.id,
+    })
+    throw error
   }
 }
 

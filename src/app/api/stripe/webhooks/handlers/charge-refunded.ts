@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { reportRefund } from '@/lib/external-reporting/report-refund'
+import { captureServerException } from '@/lib/posthog-server'
 import { stripe } from '@/lib/stripe/stripe'
 
 /**
@@ -131,6 +132,12 @@ export async function handleChargeRefunded(charge: Stripe.Charge) {
     }
   } catch (error) {
     console.error('Error handling charge refunded:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'charge-refunded',
+      chargeId: charge.id,
+    })
+    throw error
   }
 }
 

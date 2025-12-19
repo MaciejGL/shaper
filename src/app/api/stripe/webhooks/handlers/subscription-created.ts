@@ -11,6 +11,11 @@ import { sendEmail } from '@/lib/email/send-mail'
 import { reportTransaction } from '@/lib/external-reporting/report-transaction'
 import { getBaseUrl } from '@/lib/get-base-url'
 import {
+  ServerEvent,
+  captureServerEvent,
+  captureServerException,
+} from '@/lib/posthog-server'
+import {
   STRIPE_LOOKUP_KEYS,
   resolvePriceIdToLookupKey,
 } from '@/lib/stripe/lookup-keys'
@@ -181,6 +186,20 @@ export async function handleSubscriptionCreated(
     // Create support chat for user after successful subscription
     await createSupportChatForUser(user.id)
 
+    // Track subscription created event
+    captureServerEvent({
+      distinctId: user.id,
+      event: ServerEvent.SUBSCRIPTION_CREATED,
+      properties: {
+        packageName: packageTemplate.name,
+        packageId: packageTemplate.id,
+        stripeSubscriptionId: subscription.id,
+        platform: originPlatform,
+        isTrialing: isTrial,
+        lookupKey,
+      },
+    })
+
     // If new subscription is coaching, pause any existing yearly premium
     const isCoaching = lookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING
 
@@ -220,6 +239,12 @@ export async function handleSubscriptionCreated(
     }
   } catch (error) {
     console.error('Error handling subscription created:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'subscription-created',
+      stripeSubscriptionId: subscription.id,
+    })
+    throw error
   }
 }
 

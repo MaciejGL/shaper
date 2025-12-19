@@ -10,6 +10,11 @@ import {
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { isProd } from '@/lib/get-base-url'
+import {
+  ServerEvent,
+  captureServerEvent,
+  captureServerException,
+} from '@/lib/posthog-server'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 
@@ -113,8 +118,25 @@ export async function handleSubscriptionDeleted(
         )
       }
     }
+
+    // Track subscription deleted event
+    captureServerEvent({
+      distinctId: userSubscription.userId,
+      event: ServerEvent.SUBSCRIPTION_DELETED,
+      properties: {
+        stripeSubscriptionId: subscription.id,
+        packageName: userSubscription.package.name,
+        isUpgradeCancellation,
+      },
+    })
   } catch (error) {
     console.error('Error handling subscription deleted:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'subscription-deleted',
+      stripeSubscriptionId: subscription.id,
+    })
+    throw error
   }
 }
 

@@ -4,6 +4,7 @@ import { User, UserProfile, UserSubscription } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { getBaseUrl } from '@/lib/get-base-url'
+import { captureServerException } from '@/lib/posthog-server'
 
 export async function handleTrialWillEnd(subscription: Stripe.Subscription) {
   console.info('\n\n⏰ Trial will end:\n\n', subscription)
@@ -25,6 +26,12 @@ export async function handleTrialWillEnd(subscription: Stripe.Subscription) {
     await sendTrialEndingEmail(userSubscription)
   } catch (error) {
     console.error('Error handling trial will end:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'trial-will-end',
+      stripeSubscriptionId: subscription.id,
+    })
+    throw error
   }
 }
 

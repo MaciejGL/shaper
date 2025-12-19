@@ -10,6 +10,11 @@ import {
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { getBaseUrl } from '@/lib/get-base-url'
+import {
+  ServerEvent,
+  captureServerEvent,
+  captureServerException,
+} from '@/lib/posthog-server'
 import { SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
 
 // Extend Stripe Invoice type to include subscription field that exists in API
@@ -39,10 +44,29 @@ export async function handlePaymentFailed(invoice: InvoiceWithSubscription) {
 
         // Send payment failed email
         await sendPaymentFailedEmail(subscription, newRetryCount)
+
+        // Track payment failed event
+        captureServerEvent({
+          distinctId: subscription.userId,
+          event: ServerEvent.PAYMENT_FAILED,
+          properties: {
+            invoiceId: invoice.id,
+            amount: invoice.amount_due,
+            currency: invoice.currency,
+            retryCount: newRetryCount,
+            stripeSubscriptionId: subscriptionId,
+          },
+        })
       }
     }
   } catch (error) {
     console.error('Error handling payment failed:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'payment-failed',
+      invoiceId: invoice.id,
+    })
+    throw error
   }
 }
 

@@ -10,6 +10,7 @@ import {
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { getBaseUrl } from '@/lib/get-base-url'
+import { captureServerException } from '@/lib/posthog-server'
 
 export async function handleCustomerDeleted(customer: Stripe.Customer) {
   console.info('🗑️ Customer deleted:', customer.id)
@@ -40,6 +41,12 @@ export async function handleCustomerDeleted(customer: Stripe.Customer) {
     )
   } catch (error) {
     console.error('Error handling customer deleted:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'customer-deleted',
+      stripeCustomerId: customer.id,
+    })
+    throw error
   }
 }
 

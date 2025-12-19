@@ -2,6 +2,11 @@ import Stripe from 'stripe'
 
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
+import {
+  captureServerEvent,
+  captureServerException,
+  ServerEvent,
+} from '@/lib/posthog-server'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 
@@ -97,8 +102,28 @@ export async function handleSubscriptionUpdated(
         cancelledButActive ? ' (cancelled but active until end)' : ''
       }`,
     )
+
+    // Track subscription updated event
+    const eventType = cancelledButActive
+      ? ServerEvent.SUBSCRIPTION_CANCELLED
+      : ServerEvent.SUBSCRIPTION_UPDATED
+    captureServerEvent({
+      distinctId: dbSubscription.userId,
+      event: eventType,
+      properties: {
+        stripeSubscriptionId: subscription.id,
+        newStatus: status,
+        cancelledButActive,
+      },
+    })
   } catch (error) {
     console.error('Error handling subscription updated:', error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, undefined, {
+      webhook: 'subscription-updated',
+      stripeSubscriptionId: subscription.id,
+    })
+    throw error
   }
 }
 
