@@ -115,19 +115,6 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       metaPlatform === 'android' || metaPlatform === 'ios' ? metaPlatform : null
     const extToken = stripeSubscription?.metadata?.extToken || null
 
-    console.warn('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][META]', {
-      invoiceId: invoice.id,
-      stripeSubscriptionId: subscription.stripeSubscriptionId,
-      dbSubscriptionId: subscription.id,
-      isInitialPurchase,
-      platform,
-      hasExtToken: !!extToken,
-      hasInitialStripeInvoiceId: !!subscription.initialStripeInvoiceId,
-      subscription: JSON.stringify(subscription),
-      invoice: JSON.stringify(invoice),
-      stripeSubscription: JSON.stringify(stripeSubscription),
-    })
-
     // #region agent log
     console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][META]', {
       invoiceId: invoice.id,
@@ -136,21 +123,44 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       isInitialPurchase,
       platform,
       hasExtToken: !!extToken,
-
       hasInitialStripeInvoiceId: !!subscription.initialStripeInvoiceId,
     })
     // #endregion
 
+    const amountForReporting =
+      typeof invoice.amount_paid === 'number' && invoice.amount_paid > 0
+        ? invoice.amount_paid
+        : typeof invoice.total === 'number'
+          ? invoice.total
+          : typeof invoice.amount_due === 'number'
+            ? invoice.amount_due
+            : 0
+
     // Save Android/iOS origin data for initial purchases
     if (isInitialPurchase && platform) {
-      await prisma.userSubscription.update({
+      const updated = await prisma.userSubscription.update({
         where: { id: subscription.id },
         data: {
           originPlatform: platform,
           externalOfferToken: extToken,
           initialStripeInvoiceId: invoice.id,
         },
+        select: {
+          id: true,
+          originPlatform: true,
+          initialStripeInvoiceId: true,
+          externalOfferToken: true,
+        },
       })
+
+      // #region agent log
+      console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][DB_UPDATED]', {
+        dbSubscriptionId: updated.id,
+        originPlatform: updated.originPlatform,
+        hasExternalOfferToken: !!updated.externalOfferToken,
+        hasInitialStripeInvoiceId: !!updated.initialStripeInvoiceId,
+      })
+      // #endregion
     }
 
     // Get package template for reporting decision
@@ -173,7 +183,7 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
         await reportTransaction({
           userId: subscription.userId,
           stripeTransactionId: invoice.id!,
-          amount: invoice.amount_paid || 0,
+          amount: amountForReporting,
           currency: invoice.currency || 'usd',
           stripeLookupKey:
             packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
@@ -192,7 +202,7 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
           await reportTransaction({
             userId: subscription.userId,
             stripeTransactionId: invoice.id!,
-            amount: invoice.amount_paid || 0,
+            amount: amountForReporting,
             currency: invoice.currency || 'usd',
             stripeLookupKey:
               packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
