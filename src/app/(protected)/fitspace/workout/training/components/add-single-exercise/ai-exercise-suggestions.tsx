@@ -3,8 +3,10 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronRight, SparklesIcon, XIcon } from 'lucide-react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useUser } from '@/context/user-context'
 import type { GQLFitspaceGetExercisesQuery } from '@/generated/graphql-client'
 
 import { SelectableExerciseItem } from './selectable-exercise-item'
@@ -111,6 +113,7 @@ export function AiExerciseSuggestions({
   selectedExerciseIds,
   onToggleExercise,
 }: AiExerciseSuggestionsProps) {
+  const { hasPremium } = useUser()
   const {
     suggestions,
     context,
@@ -135,7 +138,7 @@ export function AiExerciseSuggestions({
 
   return (
     <div>
-      <div className="rounded-full border-none bg-primary/5 px-1 py-1 shadow-md">
+      <div className="rounded-full bg-primary/5 px-1 py-1 shadow-md border border-amber-500">
         <div className="grid grid-cols-[1fr_auto] gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="bg-white/60 dark:bg-black/60 rounded-full p-3">
@@ -146,14 +149,17 @@ export function AiExerciseSuggestions({
             </span>
           </div>
           {showGenerateButton && (
-            <Button
-              variant="variantless"
-              onClick={() => fetchSuggestions({ workoutType })}
-              className="bg-white/60 dark:bg-black/60 dark:hover:bg-black/40 hover:bg-white/40 h-full rounded-full"
-              iconEnd={<ChevronRight className="size-5" />}
-            >
-              Generate
-            </Button>
+            <PremiumButtonWrapper hasPremium={hasPremium} showIndicator={true}>
+              <Button
+                variant="variantless"
+                onClick={() => fetchSuggestions({ workoutType })}
+                className="bg-white/60 dark:bg-black/60 dark:hover:bg-black/40 hover:bg-white/40 h-full rounded-full"
+                iconEnd={<ChevronRight className="size-5" />}
+                disabled={!hasPremium}
+              >
+                Generate
+              </Button>
+            </PremiumButtonWrapper>
           )}
         </div>
       </div>
