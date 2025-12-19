@@ -28,24 +28,49 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     let stripeSubscription: Stripe.Subscription | null = null
     let subscription: UserSubscription | null = null
 
-    // Get customer ID and price ID from invoice
-    const customerId = invoice.customer as string | undefined
-    const firstLineItem = invoice.lines?.data?.[0] as
-      | (Stripe.InvoiceLineItem & { price?: { id: string } })
-      | undefined
-    const invoicePriceId = firstLineItem?.price?.id
+    // Get Stripe customer ID from invoice.
+    // Note: invoice webhook payload often omits invoice.subscription and line-item price fields.
+    const customerId =
+      typeof invoice.customer === 'string'
+        ? invoice.customer
+        : (invoice.customer?.id ?? null)
 
-    // Method 1: Match by price ID (handles upgrades with 2 active subs)
-    if (customerId && invoicePriceId) {
+    // #region agent log
+    console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][INVOICE]', {
+      invoiceId: invoice.id,
+      billingReason: invoice.billing_reason,
+      hasInvoiceSubscription: !!invoice.subscription,
+      hasCustomer: !!customerId,
+    })
+    // #endregion
+
+    // Method 1: Find Stripe subscription by matching latest_invoice == invoice.id.
+    // This is robust for upgrades (multiple subs) and works without expanding invoice lines.
+    if (customerId && invoice.id) {
       const stripeSubscriptions = await stripe.subscriptions.list({
         customer: customerId,
-        status: 'active',
+        status: 'all',
       })
 
       stripeSubscription =
-        stripeSubscriptions.data.find((sub) =>
-          sub.items.data.some((item) => item.price.id === invoicePriceId),
-        ) || null
+        stripeSubscriptions.data.find((sub) => {
+          const latestInvoice =
+            typeof sub.latest_invoice === 'string'
+              ? sub.latest_invoice
+              : sub.latest_invoice?.id
+          return latestInvoice === invoice.id
+        }) || null
+
+      // #region agent log
+      console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][MATCH_BY_LATEST]', {
+        invoiceId: invoice.id,
+        subscriptionsCount: stripeSubscriptions.data.length,
+        matched: !!stripeSubscription,
+        matchedStripeSubscriptionId: stripeSubscription?.id ?? null,
+        metaPlatform: stripeSubscription?.metadata?.platform ?? null,
+        hasExtToken: !!stripeSubscription?.metadata?.extToken,
+      })
+      // #endregion
 
       if (stripeSubscription) {
         subscription = await findSubscriptionById(stripeSubscription.id)
@@ -89,6 +114,32 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     const platform: 'ios' | 'android' | null =
       metaPlatform === 'android' || metaPlatform === 'ios' ? metaPlatform : null
     const extToken = stripeSubscription?.metadata?.extToken || null
+
+    console.warn('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][META]', {
+      invoiceId: invoice.id,
+      stripeSubscriptionId: subscription.stripeSubscriptionId,
+      dbSubscriptionId: subscription.id,
+      isInitialPurchase,
+      platform,
+      hasExtToken: !!extToken,
+      hasInitialStripeInvoiceId: !!subscription.initialStripeInvoiceId,
+      subscription: JSON.stringify(subscription),
+      invoice: JSON.stringify(invoice),
+      stripeSubscription: JSON.stringify(stripeSubscription),
+    })
+
+    // #region agent log
+    console.info('[GOOGLE_REPORTING][PAYMENT_SUCCEEDED][META]', {
+      invoiceId: invoice.id,
+      stripeSubscriptionId: subscription.stripeSubscriptionId,
+      dbSubscriptionId: subscription.id,
+      isInitialPurchase,
+      platform,
+      hasExtToken: !!extToken,
+
+      hasInitialStripeInvoiceId: !!subscription.initialStripeInvoiceId,
+    })
+    // #endregion
 
     // Save Android/iOS origin data for initial purchases
     if (isInitialPurchase && platform) {
