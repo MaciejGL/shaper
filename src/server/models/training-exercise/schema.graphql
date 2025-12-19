@@ -78,6 +78,7 @@ type Mutation {
   ): [TrainingExercise!]!
   addAiExerciseToWorkout(input: AddAiExerciseToWorkoutInput!): TrainingExercise!
   addSingleExerciseToDay(dayId: ID!, exerciseBaseId: ID!): TrainingExercise!
+  addMultipleExercisesToDay(dayId: ID!, exerciseBaseIds: [ID!]!): [TrainingExercise!]!
   removeExerciseFromWorkout(exerciseId: ID!): Boolean!
   clearWorkoutDay(dayId: ID!): Boolean!
   addSet(exerciseId: ID!): ExerciseSet!

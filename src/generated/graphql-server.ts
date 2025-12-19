@@ -1217,6 +1217,7 @@ export type GQLMutation = {
   addFreeWorkoutDay: EntireFieldWrapper<GQLFreeWorkoutDay>;
   addIngredientToMeal: EntireFieldWrapper<GQLMealIngredient>;
   addMealToNutritionPlanDay: EntireFieldWrapper<GQLNutritionPlanMeal>;
+  addMultipleExercisesToDay: EntireFieldWrapper<Array<GQLTrainingExercise>>;
   addNutritionPlanDay: EntireFieldWrapper<GQLNutritionPlanDay>;
   addSet: EntireFieldWrapper<GQLExerciseSet>;
   addSetExerciseForm: EntireFieldWrapper<GQLExerciseSet>;
@@ -1434,6 +1435,12 @@ export type GQLMutationAddIngredientToMealArgs = {
 
 export type GQLMutationAddMealToNutritionPlanDayArgs = {
   input: GQLAddMealToDayInput;
+};
+
+
+export type GQLMutationAddMultipleExercisesToDayArgs = {
+  dayId: Scalars['ID']['input'];
+  exerciseBaseIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -5304,6 +5311,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   addFreeWorkoutDay?: Resolver<GQLResolversTypes['FreeWorkoutDay'], ParentType, ContextType, RequireFields<GQLMutationAddFreeWorkoutDayArgs, 'input'>>;
   addIngredientToMeal?: Resolver<GQLResolversTypes['MealIngredient'], ParentType, ContextType, RequireFields<GQLMutationAddIngredientToMealArgs, 'input'>>;
   addMealToNutritionPlanDay?: Resolver<GQLResolversTypes['NutritionPlanMeal'], ParentType, ContextType, RequireFields<GQLMutationAddMealToNutritionPlanDayArgs, 'input'>>;
+  addMultipleExercisesToDay?: Resolver<Array<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLMutationAddMultipleExercisesToDayArgs, 'dayId' | 'exerciseBaseIds'>>;
   addNutritionPlanDay?: Resolver<GQLResolversTypes['NutritionPlanDay'], ParentType, ContextType, RequireFields<GQLMutationAddNutritionPlanDayArgs, 'input'>>;
   addSet?: Resolver<GQLResolversTypes['ExerciseSet'], ParentType, ContextType, RequireFields<GQLMutationAddSetArgs, 'exerciseId'>>;
   addSetExerciseForm?: Resolver<GQLResolversTypes['ExerciseSet'], ParentType, ContextType, RequireFields<GQLMutationAddSetExerciseFormArgs, 'input'>>;

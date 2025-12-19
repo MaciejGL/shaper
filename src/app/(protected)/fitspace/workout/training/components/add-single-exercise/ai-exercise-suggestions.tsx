@@ -20,7 +20,7 @@ type Exercise = NonNullable<
 interface AiExerciseSuggestionsProps {
   workoutType?: string
   allExercises: Exercise[]
-  selectedExerciseIds: Set<string>
+  selectedExerciseIds: string[]
   onToggleExercise: (exerciseId: string) => void
 }
 
@@ -58,7 +58,7 @@ function SuggestionsResultsContent({
   suggestions: ExerciseSuggestion[]
   allExercises: Exercise[]
   context: string
-  selectedIds: Set<string>
+  selectedIds: string[]
   onToggle: (id: string) => void
   onClose: () => void
 }) {
@@ -108,7 +108,7 @@ function SuggestionsResultsContent({
                 exercise.images as ({ medium?: string | null } | null)[] | null
               }
               videoUrl={exercise.videoUrl}
-              isSelected={selectedIds.has(suggestion.exerciseId)}
+              isSelected={selectedIds.includes(suggestion.exerciseId)}
               onToggle={onToggle}
             />
           )
@@ -136,7 +136,7 @@ export function AiExerciseSuggestions({
     onSuggestionsLoaded: (exerciseIds) => {
       // Auto-select first 2 suggestions
       exerciseIds.forEach((id) => {
-        if (!selectedExerciseIds.has(id)) {
+        if (!selectedExerciseIds.includes(id)) {
           onToggleExercise(id)
         }
       })

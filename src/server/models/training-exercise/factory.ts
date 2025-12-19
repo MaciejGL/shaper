@@ -424,7 +424,7 @@ export const addSingleExerciseToDay = async (
     throw new GraphQLError('Exercise not found')
   }
 
-  // Create training exercise with one set
+  // Create training exercise with 3 sets
   const trainingExercise = await prisma.trainingExercise.create({
     data: {
       baseId: baseExercise.id,
@@ -438,11 +438,23 @@ export const addSingleExerciseToDay = async (
       additionalInstructions: baseExercise.additionalInstructions,
       isExtra: true,
       sets: {
-        create: {
-          order: 1,
-          isExtra: true,
-          reps: null,
-        },
+        create: [
+          {
+            order: 1,
+            isExtra: true,
+            reps: null,
+          },
+          {
+            order: 2,
+            isExtra: true,
+            reps: null,
+          },
+          {
+            order: 3,
+            isExtra: true,
+            reps: null,
+          },
+        ],
       },
     },
     include: {
@@ -457,6 +469,124 @@ export const addSingleExerciseToDay = async (
   })
 
   return new TrainingExercise(trainingExercise, context)
+}
+
+export const addMultipleExercisesToDay = async (
+  dayId: string,
+  exerciseBaseIds: string[],
+  context: GQLContext,
+) => {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  // Find the day and verify access
+  const day = await prisma.trainingDay.findUnique({
+    where: { id: dayId },
+    include: {
+      week: {
+        include: {
+          plan: {
+            select: {
+              assignedToId: true,
+              createdById: true,
+            },
+          },
+        },
+      },
+      exercises: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  })
+
+  if (!day) {
+    throw new GraphQLError('Training day not found')
+  }
+
+  // Verify this is the user's quick workout (created by them and assigned to them)
+  const plan = day.week.plan
+  if (plan.assignedToId !== user.user.id || plan.createdById !== user.user.id) {
+    throw new GraphQLError('Can only add exercises to your own quick workout')
+  }
+
+  // Find all base exercises
+  const baseExercises = await prisma.baseExercise.findMany({
+    where: { id: { in: exerciseBaseIds } },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      additionalInstructions: true,
+      instructions: true,
+      tips: true,
+      type: true,
+      difficulty: true,
+    },
+  })
+
+  if (baseExercises.length !== exerciseBaseIds.length) {
+    throw new GraphQLError('Some exercises not found')
+  }
+
+  // Create a map for quick lookup while preserving order
+  const exerciseMap = new Map(baseExercises.map((ex) => [ex.id, ex]))
+
+  // Create all training exercises in a transaction
+  const createdExercises = await prisma.$transaction(
+    exerciseBaseIds.map((exerciseId, index) => {
+      const baseExercise = exerciseMap.get(exerciseId)
+      if (!baseExercise) {
+        throw new GraphQLError(`Exercise ${exerciseId} not found`)
+      }
+
+      return prisma.trainingExercise.create({
+        data: {
+          baseId: baseExercise.id,
+          dayId: day.id,
+          name: baseExercise.name,
+          order: day.exercises.length + index + 1,
+          description: baseExercise.description,
+          instructions: baseExercise.instructions,
+          tips: baseExercise.tips,
+          difficulty: baseExercise.difficulty,
+          additionalInstructions: baseExercise.additionalInstructions,
+          isExtra: true,
+          sets: {
+            create: [
+              {
+                order: 1,
+                isExtra: true,
+                reps: null,
+              },
+              {
+                order: 2,
+                isExtra: true,
+                reps: null,
+              },
+              {
+                order: 3,
+                isExtra: true,
+                reps: null,
+              },
+            ],
+          },
+        },
+        include: {
+          sets: true,
+        },
+      })
+    }),
+  )
+
+  // Mark day as incomplete since we added new uncompleted exercises
+  await prisma.trainingDay.update({
+    where: { id: day.id },
+    data: { completedAt: null },
+  })
+
+  return createdExercises.map((ex) => new TrainingExercise(ex, context))
 }
 
 export const removeExerciseFromWorkout = async (

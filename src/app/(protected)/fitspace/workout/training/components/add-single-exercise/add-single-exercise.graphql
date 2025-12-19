@@ -1,0 +1,13 @@
+mutation FitspaceAddMultipleExercisesToDay($dayId: ID!, $exerciseBaseIds: [ID!]!) {
+  addMultipleExercisesToDay(dayId: $dayId, exerciseBaseIds: $exerciseBaseIds) {
+    id
+    name
+    baseId
+    sets {
+      id
+      order
+      reps
+    }
+  }
+}
+

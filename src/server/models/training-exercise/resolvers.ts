@@ -7,6 +7,7 @@ import {
   addAiExerciseToWorkout,
   addExercisesToQuickWorkout,
   addExercisesToWorkout,
+  addMultipleExercisesToDay,
   addSet,
   addSetExerciseForm,
   addSingleExerciseToDay,
@@ -60,6 +61,9 @@ export const Mutation: GQLMutationResolvers = {
   },
   addSingleExerciseToDay: async (_, { dayId, exerciseBaseId }, context) => {
     return addSingleExerciseToDay(dayId, exerciseBaseId, context)
+  },
+  addMultipleExercisesToDay: async (_, { dayId, exerciseBaseIds }, context) => {
+    return addMultipleExercisesToDay(dayId, exerciseBaseIds, context)
   },
   updateExerciseForm: async (_, { input }, context) => {
     return updateExerciseForm(input, context)

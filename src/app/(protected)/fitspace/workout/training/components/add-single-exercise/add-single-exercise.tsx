@@ -19,12 +19,7 @@ import {
   CardDescription,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerFooter,
-  DrawerTrigger,
-} from '@/components/ui/drawer'
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import {
   DISPLAY_GROUP_TO_HIGH_LEVEL,
@@ -33,14 +28,16 @@ import {
 } from '@/config/muscles'
 import {
   type GQLFitspaceGetExercisesQuery,
-  useFitspaceAddSingleExerciseToDayMutation,
+  useFitspaceAddMultipleExercisesToDayMutation,
   useFitspaceGetExercisesQuery,
   useFitspaceGetWorkoutDayQuery,
 } from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
 
 import { AiExerciseSuggestions } from './ai-exercise-suggestions'
+import { ReviewExercises } from './review-exercises'
 import { SelectableExerciseItem } from './selectable-exercise-item'
+import { SelectedExercisesFooter } from './selected-exercises-footer'
 import { useWeeklyFocus } from './use-weekly-focus'
 import { WeeklyFocusChips } from './weekly-focus-chips'
 
@@ -75,10 +72,9 @@ export function AddSingleExercise({
     [isControlled, onOpenChange],
   )
 
-  const [selectedExerciseIds, setSelectedExerciseIds] = useState<Set<string>>(
-    new Set(),
-  )
+  const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([])
   const [isBatchAdding, setIsBatchAdding] = useState(false)
+  const [isReviewMode, setIsReviewMode] = useState(false)
 
   const queryClient = useQueryClient()
   const [dayIdFromUrl] = useQueryState('day')
@@ -110,53 +106,92 @@ export function AddSingleExercise({
     return Array.from(exerciseMap.values())
   }, [exercisesData])
 
-  const { mutate: addExercise } = useFitspaceAddSingleExerciseToDayMutation({
-    onSuccess: async () => {
-      await invalidateWorkoutQueries()
-    },
-  })
+  const { mutateAsync: addMultipleExercises } =
+    useFitspaceAddMultipleExercisesToDayMutation()
 
   const handleToggleExercise = useCallback((exerciseId: string) => {
     setSelectedExerciseIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(exerciseId)) {
-        next.delete(exerciseId)
+      const index = prev.indexOf(exerciseId)
+      if (index > -1) {
+        // Remove if already selected
+        return prev.filter((id) => id !== exerciseId)
       } else {
-        next.add(exerciseId)
+        // Add to end if not selected
+        return [...prev, exerciseId]
       }
-      return next
     })
   }, [])
 
+  const handleReorder = useCallback((newOrder: string[]) => {
+    setSelectedExerciseIds(newOrder)
+  }, [])
+
+  const handleRemoveExercise = useCallback((exerciseId: string) => {
+    setSelectedExerciseIds((prev) => prev.filter((id) => id !== exerciseId))
+  }, [])
+
+  const handleClearAll = useCallback(() => {
+    setSelectedExerciseIds([])
+  }, [])
+
+  const handleReviewWorkout = useCallback(() => {
+    if (selectedExerciseIds.length === 0) return
+    setIsReviewMode(true)
+  }, [selectedExerciseIds])
+
+  const handleGoBack = useCallback(() => {
+    setIsReviewMode(false)
+  }, [])
+
   const handleStart = useCallback(async () => {
-    if (selectedExerciseIds.size === 0) return
+    if (selectedExerciseIds.length === 0) return
     setIsBatchAdding(true)
 
-    const exerciseIds = Array.from(selectedExerciseIds)
-    for (const exerciseId of exerciseIds) {
-      await new Promise<void>((resolve) => {
-        addExercise(
-          { dayId, exerciseBaseId: exerciseId },
-          {
-            onSettled: () => resolve(),
-          },
-        )
+    try {
+      // Add all exercises in one batch mutation maintaining order
+      await addMultipleExercises({
+        dayId,
+        exerciseBaseIds: selectedExerciseIds,
       })
+
+      // Invalidate queries once after all exercises are added
+      await invalidateWorkoutQueries()
+
+      setSelectedExerciseIds([])
+      setIsReviewMode(false)
+      setOpen(false)
+    } catch (error) {
+      console.error('Failed to add exercises:', error)
+    } finally {
+      setIsBatchAdding(false)
     }
+  }, [
+    selectedExerciseIds,
+    addMultipleExercises,
+    dayId,
+    setOpen,
+    invalidateWorkoutQueries,
+  ])
 
-    setIsBatchAdding(false)
-    setSelectedExerciseIds(new Set())
-    setOpen(false)
-  }, [selectedExerciseIds, addExercise, dayId, setOpen])
-
-  // Reset selection when drawer closes
+  // Reset selection and review mode when drawer closes
   useEffect(() => {
     if (!open) {
-      setSelectedExerciseIds(new Set())
+      setSelectedExerciseIds([])
+      setIsReviewMode(false)
     }
   }, [open])
 
-  const drawerContent = (
+  const drawerContent = isReviewMode ? (
+    <ReviewExercises
+      selectedExerciseIds={selectedExerciseIds}
+      exercises={allExercises}
+      onReorder={handleReorder}
+      onRemove={handleRemoveExercise}
+      onGoBack={handleGoBack}
+      onStart={handleStart}
+      isAdding={isBatchAdding}
+    />
+  ) : (
     <>
       <ExerciseListWithFilters
         exercises={allExercises}
@@ -166,28 +201,11 @@ export function AddSingleExercise({
         scheduledAt={scheduledAt}
       />
 
-      {selectedExerciseIds.size > 0 && (
-        <DrawerFooter className="border-t">
-          <div className="flex items-center justify-between w-full gap-4">
-            <span className="text-sm text-muted-foreground">
-              {selectedExerciseIds.size} exercise
-              {selectedExerciseIds.size !== 1 ? 's' : ''} selected
-            </span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => setSelectedExerciseIds(new Set())}
-                disabled={isBatchAdding}
-              >
-                Clear all
-              </Button>
-              <Button onClick={handleStart} loading={isBatchAdding}>
-                Start
-              </Button>
-            </div>
-          </div>
-        </DrawerFooter>
-      )}
+      <SelectedExercisesFooter
+        selectedCount={selectedExerciseIds.length}
+        onClearAll={handleClearAll}
+        onReview={handleReviewWorkout}
+      />
     </>
   )
 
@@ -257,7 +275,7 @@ function ExerciseListWithFilters({
   scheduledAt,
 }: {
   exercises: Exercise[]
-  selectedExerciseIds: Set<string>
+  selectedExerciseIds: string[]
   onToggleExercise: (id: string) => void
   isLoading: boolean
   scheduledAt?: string | null
@@ -358,7 +376,7 @@ function ExerciseListWithFilters({
             </div>
           ) : (
             filteredExercises.map((exercise) => {
-              const isSelected = selectedExerciseIds.has(exercise.id)
+              const isSelected = selectedExerciseIds.includes(exercise.id)
 
               const primaryDisplayGroup =
                 exercise.muscleGroups?.[0]?.displayGroup
