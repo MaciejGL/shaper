@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 
 export interface ExerciseSuggestion {
   exerciseId: string
@@ -33,52 +33,25 @@ async function fetchExerciseSuggestions(
   return response.json()
 }
 
-export function useAiSuggestions() {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+interface UseAiSuggestionsParams {
+  onSuggestionsLoaded?: (exerciseIds: string[]) => void
+}
 
+export function useAiSuggestions({
+  onSuggestionsLoaded,
+}: UseAiSuggestionsParams = {}) {
   const mutation = useMutation({
     mutationFn: fetchExerciseSuggestions,
     onSuccess: (data) => {
-      // Pre-select first 2 suggestions
-      const preSelected = new Set(
-        data.suggestions.slice(0, 2).map((s) => s.exerciseId),
-      )
-      setSelectedIds(preSelected)
+      // Auto-select first 2 suggestions
+      const firstTwo = data.suggestions.slice(0, 2).map((s) => s.exerciseId)
+      onSuggestionsLoaded?.(firstTwo)
     },
   })
 
-  const toggleSelection = useCallback((exerciseId: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(exerciseId)) {
-        next.delete(exerciseId)
-      } else {
-        next.add(exerciseId)
-      }
-      return next
-    })
-  }, [])
-
-  const selectAll = useCallback(() => {
-    if (mutation.data?.suggestions) {
-      setSelectedIds(
-        new Set(mutation.data.suggestions.map((s) => s.exerciseId)),
-      )
-    }
-  }, [mutation.data])
-
-  const clearSelection = useCallback(() => {
-    setSelectedIds(new Set())
-  }, [])
-
   const reset = useCallback(() => {
     mutation.reset()
-    setSelectedIds(new Set())
   }, [mutation])
-
-  const selectedExercises =
-    mutation.data?.suggestions.filter((s) => selectedIds.has(s.exerciseId)) ||
-    []
 
   return {
     suggestions: mutation.data?.suggestions || [],
@@ -86,17 +59,7 @@ export function useAiSuggestions() {
     isLoading: mutation.isPending,
     error: mutation.error,
     hasSuggestions: !!mutation.data,
-
-    // Selection state
-    selectedIds,
-    selectedCount: selectedIds.size,
-    selectedExercises,
-
-    // Actions
     fetchSuggestions: mutation.mutate,
-    toggleSelection,
-    selectAll,
-    clearSelection,
     reset,
   }
 }

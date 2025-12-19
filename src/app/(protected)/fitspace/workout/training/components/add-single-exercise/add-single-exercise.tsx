@@ -1,7 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { CheckIcon, PlusIcon, SearchIcon } from 'lucide-react'
+import { PlusIcon, SearchIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import {
   useCallback,
@@ -11,7 +11,6 @@ import {
   useState,
 } from 'react'
 
-import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,15 +20,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import {
   DISPLAY_GROUP_TO_HIGH_LEVEL,
@@ -41,13 +36,11 @@ import {
   useFitspaceAddSingleExerciseToDayMutation,
   useFitspaceGetExercisesQuery,
   useFitspaceGetWorkoutDayQuery,
-  useFitspaceRemoveExerciseFromWorkoutMutation,
 } from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
-import { cn } from '@/lib/utils'
 
 import { AiExerciseSuggestions } from './ai-exercise-suggestions'
-import type { AddedExerciseInfo } from './types'
+import { SelectableExerciseItem } from './selectable-exercise-item'
 import { useWeeklyFocus } from './use-weekly-focus'
 import { WeeklyFocusChips } from './weekly-focus-chips'
 
@@ -74,27 +67,24 @@ export function AddSingleExercise({
 
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
-  const setOpen = isControlled
-    ? (value: boolean) => onOpenChange?.(value)
-    : setInternalOpen
-  const [addingExerciseId, setAddingExerciseId] = useState<string | null>(null)
-  const [removingExerciseId, setRemovingExerciseId] = useState<string | null>(
-    null,
+  const setOpen = useMemo(
+    () =>
+      isControlled
+        ? (value: boolean) => onOpenChange?.(value)
+        : setInternalOpen,
+    [isControlled, onOpenChange],
   )
-  const [addedExercises, setAddedExercises] = useState<
-    Map<string, AddedExerciseInfo>
-  >(new Map())
-  const [exerciseToRemove, setExerciseToRemove] = useState<{
-    baseId: string
-    trainingExerciseId: string
-    hasLogs: boolean
-  } | null>(null)
+
+  const [selectedExerciseIds, setSelectedExerciseIds] = useState<Set<string>>(
+    new Set(),
+  )
+  const [isBatchAdding, setIsBatchAdding] = useState(false)
+
   const queryClient = useQueryClient()
   const [dayIdFromUrl] = useQueryState('day')
 
   const { data: exercisesData, isLoading } = useFitspaceGetExercisesQuery()
 
-  // Helper to invalidate workout queries after mutations
   const invalidateWorkoutQueries = useCallback(async () => {
     await queryInvalidation.workoutAndPlans(queryClient)
     const queryKey = useFitspaceGetWorkoutDayQuery.getKey({
@@ -102,30 +92,6 @@ export function AddSingleExercise({
     })
     await queryClient.refetchQueries({ queryKey })
   }, [queryClient, dayIdFromUrl, dayId])
-
-  // Fetch current workout day to get existing exercises
-  const { data: workoutDayData } = useFitspaceGetWorkoutDayQuery(
-    { dayId },
-    { enabled: !!dayId },
-  )
-
-  // Sync addedExercises with exercises from workout day (source of truth)
-  useEffect(() => {
-    const existingExercises =
-      workoutDayData?.getWorkoutDay?.day?.exercises || []
-
-    const newMap = new Map<string, AddedExerciseInfo>()
-    existingExercises.forEach((ex) => {
-      if (ex.baseId) {
-        newMap.set(ex.baseId, {
-          trainingExerciseId: ex.id,
-          hasLogs: ex.sets.some((set) => set.completedAt != null),
-        })
-      }
-    })
-
-    setAddedExercises(newMap)
-  }, [workoutDayData])
 
   const allExercises = useMemo(() => {
     const publicExercises = exercisesData?.getExercises?.publicExercises || []
@@ -144,168 +110,84 @@ export function AddSingleExercise({
     return Array.from(exerciseMap.values())
   }, [exercisesData])
 
-  const { mutate: addExercise, isPending: isAdding } =
-    useFitspaceAddSingleExerciseToDayMutation({
-      onSuccess: async (data, variables) => {
-        // Track the added exercise with its training exercise ID
-        const trainingExerciseId = data?.addSingleExerciseToDay?.id
-        if (trainingExerciseId) {
-          setAddedExercises(
-            (prev) =>
-              new Map([
-                ...prev,
-                [
-                  variables.exerciseBaseId,
-                  { trainingExerciseId, hasLogs: false },
-                ],
-              ]),
-          )
-        }
+  const { mutate: addExercise } = useFitspaceAddSingleExerciseToDayMutation({
+    onSuccess: async () => {
+      await invalidateWorkoutQueries()
+    },
+  })
 
-        await invalidateWorkoutQueries()
-        setAddingExerciseId(null)
-      },
-      onError: () => {
-        setAddingExerciseId(null)
-      },
-    })
-
-  const { mutate: removeExercise, isPending: isRemoving } =
-    useFitspaceRemoveExerciseFromWorkoutMutation({
-      onSuccess: async (_data, variables) => {
-        // Remove from map by finding the baseId
-        setAddedExercises((prev) => {
-          const newMap = new Map(prev)
-          for (const [baseId, info] of newMap) {
-            if (info.trainingExerciseId === variables.exerciseId) {
-              newMap.delete(baseId)
-              break
-            }
-          }
-          return newMap
-        })
-
-        setExerciseToRemove(null)
-        setRemovingExerciseId(null)
-
-        await invalidateWorkoutQueries()
-      },
-      onError: () => {
-        setRemovingExerciseId(null)
-        setExerciseToRemove(null)
-      },
-    })
-
-  const handleRemoveExercise = useCallback(
-    (baseId: string) => {
-      const info = addedExercises.get(baseId)
-      if (!info) return
-
-      setRemovingExerciseId(baseId)
-
-      if (info.hasLogs) {
-        // Show confirmation dialog
-        setExerciseToRemove({ baseId, ...info })
+  const handleToggleExercise = useCallback((exerciseId: string) => {
+    setSelectedExerciseIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(exerciseId)) {
+        next.delete(exerciseId)
       } else {
-        // Remove directly
-        removeExercise({ exerciseId: info.trainingExerciseId })
+        next.add(exerciseId)
       }
-    },
-    [addedExercises, removeExercise],
-  )
+      return next
+    })
+  }, [])
 
-  const confirmRemove = useCallback(() => {
-    if (exerciseToRemove) {
-      removeExercise({ exerciseId: exerciseToRemove.trainingExerciseId })
-    }
-  }, [exerciseToRemove, removeExercise])
+  const handleStart = useCallback(async () => {
+    if (selectedExerciseIds.size === 0) return
+    setIsBatchAdding(true)
 
-  const handleSelectExercise = useCallback(
-    (exerciseId: string) => {
-      setAddingExerciseId(exerciseId)
-      addExercise({
-        dayId,
-        exerciseBaseId: exerciseId,
+    const exerciseIds = Array.from(selectedExerciseIds)
+    for (const exerciseId of exerciseIds) {
+      await new Promise<void>((resolve) => {
+        addExercise(
+          { dayId, exerciseBaseId: exerciseId },
+          {
+            onSettled: () => resolve(),
+          },
+        )
       })
-    },
-    [addExercise, dayId],
-  )
+    }
 
-  // Handle batch adding exercises from AI suggestions
-  const [isBatchAdding, setIsBatchAdding] = useState(false)
-  const handleAddMultipleExercises = useCallback(
-    async (exerciseIds: string[]) => {
-      if (exerciseIds.length === 0) return
-      setIsBatchAdding(true)
-      
-      // Add exercises sequentially to avoid race conditions
-      for (const exerciseId of exerciseIds) {
-        await new Promise<void>((resolve) => {
-          addExercise(
-            { dayId, exerciseBaseId: exerciseId },
-            {
-              onSettled: () => resolve(),
-            },
-          )
-        })
-      }
-      
-      setIsBatchAdding(false)
-    },
-    [addExercise, dayId],
-  )
+    setIsBatchAdding(false)
+    setSelectedExerciseIds(new Set())
+    setOpen(false)
+  }, [selectedExerciseIds, addExercise, dayId, setOpen])
+
+  // Reset selection when drawer closes
+  useEffect(() => {
+    if (!open) {
+      setSelectedExerciseIds(new Set())
+    }
+  }, [open])
 
   const drawerContent = (
     <>
       <ExerciseListWithFilters
         exercises={allExercises}
-        onSelectExercise={handleSelectExercise}
-        onRemoveExercise={handleRemoveExercise}
-        onAddMultipleExercises={handleAddMultipleExercises}
-        isAdding={isAdding}
-        isRemoving={isRemoving}
-        isBatchAdding={isBatchAdding}
+        selectedExerciseIds={selectedExerciseIds}
+        onToggleExercise={handleToggleExercise}
         isLoading={isLoading}
-        addingExerciseId={addingExerciseId}
-        removingExerciseId={removingExerciseId}
-        addedExercises={addedExercises}
         scheduledAt={scheduledAt}
       />
 
-      <Dialog
-        open={!!exerciseToRemove}
-        onOpenChange={(open: boolean) => {
-          if (!open) {
-            setExerciseToRemove(null)
-            setRemovingExerciseId(null)
-          }
-        }}
-      >
-        <DialogContent dialogTitle="Remove exercise?">
-          <DialogHeader>
-            <DialogTitle>Remove exercise?</DialogTitle>
-            <DialogDescription>
-              This exercise has logged sets. Removing it will delete all your
-              workout data for this exercise.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex-row gap-2">
-            <DialogClose asChild>
-              <Button variant="secondary" className="flex-1">
-                Cancel
+      {selectedExerciseIds.size > 0 && (
+        <DrawerFooter className="border-t">
+          <div className="flex items-center justify-between w-full gap-4">
+            <span className="text-sm text-muted-foreground">
+              {selectedExerciseIds.size} exercise
+              {selectedExerciseIds.size !== 1 ? 's' : ''} selected
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedExerciseIds(new Set())}
+                disabled={isBatchAdding}
+              >
+                Clear all
               </Button>
-            </DialogClose>
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={confirmRemove}
-              loading={isRemoving}
-            >
-              Remove
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <Button onClick={handleStart} loading={isBatchAdding}>
+                Start
+              </Button>
+            </div>
+          </div>
+        </DrawerFooter>
+      )}
     </>
   )
 
@@ -369,29 +251,15 @@ export function AddSingleExercise({
 
 function ExerciseListWithFilters({
   exercises,
-  onSelectExercise,
-  onRemoveExercise,
-  onAddMultipleExercises,
-  isAdding,
-  isRemoving,
-  isBatchAdding,
+  selectedExerciseIds,
+  onToggleExercise,
   isLoading,
-  addingExerciseId,
-  removingExerciseId,
-  addedExercises,
   scheduledAt,
 }: {
   exercises: Exercise[]
-  onSelectExercise: (id: string) => void
-  onRemoveExercise: (baseId: string) => void
-  onAddMultipleExercises: (ids: string[]) => void
-  isAdding: boolean
-  isRemoving: boolean
-  isBatchAdding: boolean
+  selectedExerciseIds: Set<string>
+  onToggleExercise: (id: string) => void
   isLoading: boolean
-  addingExerciseId: string | null
-  removingExerciseId: string | null
-  addedExercises: Map<string, AddedExerciseInfo>
   scheduledAt?: string | null
 }) {
   const [searchQuery, setSearchQuery] = useState('')
@@ -431,25 +299,37 @@ function ExerciseListWithFilters({
 
   return (
     <div className="flex-1 overflow-y-auto px-4 pb-4">
-      <div className="space-y-4">
-        <div className="space-y-1 pt-2">
-          <h2 className="text-lg font-semibold">Build my own workout</h2>
-          <p className="text-sm text-muted-foreground">
-            Choose exercises and sets manually.
-          </p>
+      <div>
+        <div className="flex items-start justify-between gap-3 pt-2">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold">Build your workout</h2>
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                Today
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Pick exercises for today's session.
+            </p>
+          </div>
         </div>
 
-        <AiExerciseSuggestions
-          onAddExercises={onAddMultipleExercises}
-          isAddingExercises={isBatchAdding}
-        />
+        <div className="my-6">
+          <AiExerciseSuggestions
+            allExercises={exercises}
+            selectedExerciseIds={selectedExerciseIds}
+            onToggleExercise={onToggleExercise}
+          />
+        </div>
 
-        <WeeklyFocusChips
-          groupSummaries={groupSummaries}
-          selectedGroup={selectedGroup}
-          onSelectGroup={setSelectedGroup}
-          isLoading={isLoadingProgress}
-        />
+        <div className="my-6">
+          <WeeklyFocusChips
+            groupSummaries={groupSummaries}
+            selectedGroup={selectedGroup}
+            onSelectGroup={setSelectedGroup}
+            isLoading={isLoadingProgress}
+          />
+        </div>
 
         <Input
           id="search-exercises"
@@ -457,23 +337,28 @@ function ExerciseListWithFilters({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           iconStart={<SearchIcon />}
+          className="mb-4"
         />
 
         <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground pt-1">
+            {selectedGroup ? `${selectedGroup} exercises` : 'All exercises'}{' '}
+            {!isLoading && `(${filteredExercises.length})`}
+          </h3>
           {isLoading ? (
             <LoadingSkeleton count={8} />
           ) : filteredExercises.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {searchQuery || selectedGroup
-                ? 'No exercises found'
-                : 'No exercises available'}
+            <div className="text-center py-8 space-y-1">
+              <p className="text-muted-foreground">
+                No exercises match this filter.
+              </p>
+              <p className="text-sm text-muted-foreground/70">
+                Try a different muscle group or clear filters.
+              </p>
             </div>
           ) : (
             filteredExercises.map((exercise) => {
-              const isThisExerciseAdding = addingExerciseId === exercise.id
-              const isThisExerciseRemoving = removingExerciseId === exercise.id
-              const isAnyOperationPending = isAdding || isRemoving
-              const isAlreadyAdded = addedExercises.has(exercise.id)
+              const isSelected = selectedExerciseIds.has(exercise.id)
 
               const primaryDisplayGroup =
                 exercise.muscleGroups?.[0]?.displayGroup
@@ -491,74 +376,20 @@ function ExerciseListWithFilters({
                 : muscleAliases.join(', ')
 
               return (
-                <Card
+                <SelectableExerciseItem
                   key={exercise.id}
-                  variant="secondary"
-                  className={cn(
-                    'p-0',
-                    !isAlreadyAdded &&
-                      'cursor-pointer transition-all hover:scale-[1.01]',
-                  )}
-                  onClick={() =>
-                    !isAnyOperationPending &&
-                    !isAlreadyAdded &&
-                    onSelectExercise(exercise.id)
+                  id={exercise.id}
+                  name={exercise.name}
+                  muscleDisplay={muscleDisplay}
+                  images={
+                    exercise.images as
+                      | ({ medium?: string | null } | null)[]
+                      | null
                   }
-                >
-                  <CardContent className="p-0 pr-2">
-                    <div className="flex items-center gap-3">
-                      {/* Wrapper to prevent click propagation on media preview */}
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <ExerciseMediaPreview
-                          images={exercise.images}
-                          videoUrl={exercise.videoUrl}
-                          className="size-20 shrink-0"
-                          hidePagination={true}
-                          hideVideoOverlay={true}
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base">
-                          {exercise.name}
-                        </CardTitle>
-                        {muscleDisplay && (
-                          <CardDescription className="truncate">
-                            {muscleDisplay}
-                          </CardDescription>
-                        )}
-                      </div>
-                      {isAlreadyAdded ? (
-                        <Button
-                          size="icon-md"
-                          variant="default"
-                          iconOnly={<CheckIcon />}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onRemoveExercise(exercise.id)
-                          }}
-                          disabled={isAnyOperationPending}
-                          loading={isThisExerciseRemoving}
-                        >
-                          Remove
-                        </Button>
-                      ) : (
-                        <Button
-                          size="icon-md"
-                          variant="secondary"
-                          iconOnly={<PlusIcon />}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onSelectExercise(exercise.id)
-                          }}
-                          disabled={isAnyOperationPending}
-                          loading={isThisExerciseAdding}
-                        >
-                          Add
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                  videoUrl={exercise.videoUrl}
+                  isSelected={isSelected}
+                  onToggle={onToggleExercise}
+                />
               )
             })
           )}

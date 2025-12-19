@@ -1,139 +1,128 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { SparklesIcon, XIcon } from 'lucide-react'
+import { ChevronRight, SparklesIcon, XIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
+import { DISPLAY_GROUP_TO_HIGH_LEVEL } from '@/config/muscles'
+import type { HighLevelGroup } from '@/config/muscles'
+import type { GQLFitspaceGetExercisesQuery } from '@/generated/graphql-client'
 
-import { useAiSuggestions, type ExerciseSuggestion } from './use-ai-suggestions'
+import { SelectableExerciseItem } from './selectable-exercise-item'
+import { useAiSuggestions } from './use-ai-suggestions'
+import type { ExerciseSuggestion } from './use-ai-suggestions'
+
+type Exercise = NonNullable<
+  NonNullable<GQLFitspaceGetExercisesQuery['getExercises']>['publicExercises']
+>[number]
 
 interface AiExerciseSuggestionsProps {
   workoutType?: string
-  onAddExercises: (exerciseIds: string[]) => void
-  isAddingExercises?: boolean
+  allExercises: Exercise[]
+  selectedExerciseIds: Set<string>
+  onToggleExercise: (exerciseId: string) => void
 }
 
 function SuggestionsSkeleton() {
   return (
-    <div className="space-y-3 p-4 rounded-xl border bg-card">
+    <div className="space-y-3 pt-3">
       <Skeleton className="h-4 w-48" />
       <div className="space-y-2">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <Skeleton className="size-4 rounded" />
+          <div
+            key={i}
+            className="flex items-center gap-3 p-1 pr-3 rounded-lg border border-border shadow-md"
+          >
+            <Skeleton className="size-20 rounded-md shrink-0" />
             <div className="flex-1 space-y-1">
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-3 w-20" />
             </div>
+            <Skeleton className="size-6 rounded-full shrink-0" />
           </div>
         ))}
       </div>
-      <Skeleton className="h-9 w-full rounded-xl" />
     </div>
   )
 }
 
-function SuggestionItem({
-  suggestion,
-  isSelected,
-  onToggle,
-  disabled,
-}: {
-  suggestion: ExerciseSuggestion
-  isSelected: boolean
-  onToggle: () => void
-  disabled?: boolean
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      disabled={disabled}
-      className={cn(
-        'flex items-center gap-3 p-3 rounded-lg text-left transition-all w-full',
-        'border hover:bg-muted/50 disabled:opacity-50 disabled:pointer-events-none',
-        isSelected ? 'border-primary bg-primary/5' : 'border-border',
-      )}
-    >
-      <Checkbox
-        checked={isSelected}
-        onCheckedChange={onToggle}
-        disabled={disabled}
-        className="pointer-events-none"
-      />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{suggestion.exerciseName}</p>
-        <p className="text-xs text-muted-foreground">{suggestion.muscleGroup}</p>
-      </div>
-    </button>
-  )
-}
-
-function SuggestionsContent({
+function SuggestionsResultsContent({
   suggestions,
+  allExercises,
   context,
   selectedIds,
   onToggle,
-  onAddSelected,
   onClose,
-  selectedCount,
-  isAdding,
 }: {
   suggestions: ExerciseSuggestion[]
+  allExercises: Exercise[]
   context: string
   selectedIds: Set<string>
   onToggle: (id: string) => void
-  onAddSelected: () => void
   onClose: () => void
-  selectedCount: number
-  isAdding?: boolean
 }) {
+  const exercisesMap = new Map(allExercises.map((ex) => [ex.id, ex]))
+
   return (
-    <div className="space-y-3 p-4 rounded-xl border bg-card">
-      <div className="flex items-start justify-between gap-2">
+    <div className="space-y-3 pt-2">
+      <div className="flex items-start justify-between gap-2 px-1 pb-2">
         <p className="text-sm text-muted-foreground">{context}</p>
         <Button
-          variant="ghost"
+          variant="tertiary"
           size="icon-sm"
           iconOnly={<XIcon />}
           onClick={onClose}
-          className="shrink-0 -mt-1 -mr-1"
+          className="shrink-0 -mt-1"
         >
           Close
         </Button>
       </div>
 
       <div className="space-y-2">
-        {suggestions.map(suggestion => (
-          <SuggestionItem
-            key={suggestion.exerciseId}
-            suggestion={suggestion}
-            isSelected={selectedIds.has(suggestion.exerciseId)}
-            onToggle={() => onToggle(suggestion.exerciseId)}
-            disabled={isAdding}
-          />
-        ))}
-      </div>
+        {suggestions.map((suggestion) => {
+          const exercise = exercisesMap.get(suggestion.exerciseId)
+          if (!exercise) return null
 
-      <Button
-        onClick={onAddSelected}
-        disabled={selectedCount === 0 || isAdding}
-        loading={isAdding}
-        className="w-full"
-      >
-        Add {selectedCount} to workout
-      </Button>
+          const primaryDisplayGroup = exercise.muscleGroups?.[0]?.displayGroup
+          const highLevelGroup: HighLevelGroup | null = primaryDisplayGroup
+            ? DISPLAY_GROUP_TO_HIGH_LEVEL[primaryDisplayGroup]
+            : null
+
+          const muscleAliases =
+            exercise.muscleGroups
+              ?.map((mg) => mg.alias)
+              .filter((alias): alias is string => Boolean(alias)) || []
+
+          const muscleDisplay = highLevelGroup
+            ? `${highLevelGroup} · ${muscleAliases.join(', ')}`
+            : muscleAliases.join(', ')
+
+          return (
+            <SelectableExerciseItem
+              key={suggestion.exerciseId}
+              id={suggestion.exerciseId}
+              name={exercise.name}
+              muscleDisplay={muscleDisplay}
+              images={
+                exercise.images as ({ medium?: string | null } | null)[] | null
+              }
+              videoUrl={exercise.videoUrl}
+              isSelected={selectedIds.has(suggestion.exerciseId)}
+              onToggle={onToggle}
+            />
+          )
+        })}
+      </div>
     </div>
   )
 }
 
 export function AiExerciseSuggestions({
   workoutType,
-  onAddExercises,
-  isAddingExercises,
+  allExercises,
+  selectedExerciseIds,
+  onToggleExercise,
 }: AiExerciseSuggestionsProps) {
   const {
     suggestions,
@@ -141,36 +130,46 @@ export function AiExerciseSuggestions({
     isLoading,
     error,
     hasSuggestions,
-    selectedIds,
-    selectedCount,
-    selectedExercises,
     fetchSuggestions,
-    toggleSelection,
     reset,
-  } = useAiSuggestions()
+  } = useAiSuggestions({
+    onSuggestionsLoaded: (exerciseIds) => {
+      // Auto-select first 2 suggestions
+      exerciseIds.forEach((id) => {
+        if (!selectedExerciseIds.has(id)) {
+          onToggleExercise(id)
+        }
+      })
+    },
+  })
 
-  const handleAddSelected = () => {
-    const exerciseIds = selectedExercises.map(e => e.exerciseId)
-    onAddExercises(exerciseIds)
-    // Reset after adding (will be called by parent when done)
-  }
-
-  const showButton = !hasSuggestions && !isLoading && !error
+  const showGenerateButton = !hasSuggestions && !isLoading && !error
   const showResults = hasSuggestions && !isLoading
 
   return (
-    <div className="space-y-3">
-      {showButton && (
-        <Button
-          variant="secondary"
-          className="w-full"
-          onClick={() => fetchSuggestions({ workoutType })}
-          iconStart={<SparklesIcon />}
-        >
-          Suggest exercises
-        </Button>
-      )}
-
+    <div>
+      <div className="rounded-full border-none bg-primary/5 px-1 py-1 shadow-md mb-4">
+        <div className="grid grid-cols-[1fr_auto] gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="bg-white/60 dark:bg-black/60 rounded-full p-3">
+              <SparklesIcon className="size-5 shrink-0 text-amber-500 animate-pulse" />
+            </div>
+            <span className="text-sm font-medium text-foreground truncate">
+              Smart suggestions
+            </span>
+          </div>
+          {showGenerateButton && (
+            <Button
+              variant="variantless"
+              onClick={() => fetchSuggestions({ workoutType })}
+              className="bg-white/60 dark:bg-black/60 dark:hover:bg-black/40 hover:bg-white/40 h-full rounded-full"
+              iconEnd={<ChevronRight className="size-5" />}
+            >
+              Generate
+            </Button>
+          )}
+        </div>
+      </div>
       <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div
@@ -191,15 +190,10 @@ export function AiExerciseSuggestions({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="p-4 rounded-xl border border-destructive/50 bg-destructive/10"
+            className="mt-2 p-3 rounded-lg border border-destructive/50 bg-destructive/10"
           >
             <p className="text-sm text-destructive">{error.message}</p>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-2"
-              onClick={reset}
-            >
+            <Button variant="ghost" size="sm" className="mt-2" onClick={reset}>
               Dismiss
             </Button>
           </motion.div>
@@ -212,16 +206,15 @@ export function AiExerciseSuggestions({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+            className="bg-muted/20 dark:bg-black/20 -mx-4 px-4 pt-4 pb-6 rounded-lg"
           >
-            <SuggestionsContent
+            <SuggestionsResultsContent
               suggestions={suggestions}
+              allExercises={allExercises}
               context={context}
-              selectedIds={selectedIds}
-              onToggle={toggleSelection}
-              onAddSelected={handleAddSelected}
+              selectedIds={selectedExerciseIds}
+              onToggle={onToggleExercise}
               onClose={reset}
-              selectedCount={selectedCount}
-              isAdding={isAddingExercises}
             />
           </motion.div>
         )}
@@ -229,4 +222,3 @@ export function AiExerciseSuggestions({
     </div>
   )
 }
-
