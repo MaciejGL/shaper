@@ -301,6 +301,10 @@ function ExerciseListWithFilters({
     () => new Set(selectedExerciseIds),
     [selectedExerciseIds],
   )
+  const [scrollParent, setScrollParent] = useState<HTMLDivElement | null>(null)
+  const setScrollParentRef = useCallback((el: HTMLDivElement | null) => {
+    if (el) setScrollParent(el)
+  }, [])
 
   const { groupSummaries, isLoading: isLoadingProgress } =
     useWeeklyFocus(scheduledAt)
@@ -381,16 +385,14 @@ function ExerciseListWithFilters({
 
   return (
     <div className="flex-1 min-h-0">
-      {isLoading ? (
-        <div className="h-full overflow-y-auto">
-          {headerContent}
+      <div ref={setScrollParentRef} className="h-full overflow-y-auto">
+        {headerContent}
+
+        {isLoading ? (
           <div className="px-4 pb-4 space-y-2">
             <LoadingSkeleton count={8} />
           </div>
-        </div>
-      ) : filteredExercises.length === 0 ? (
-        <div className="h-full overflow-y-auto">
-          {headerContent}
+        ) : filteredExercises.length === 0 ? (
           <div className="px-4 pb-4">
             <div className="text-center py-8 space-y-1">
               <p className="text-muted-foreground">
@@ -401,39 +403,36 @@ function ExerciseListWithFilters({
               </p>
             </div>
           </div>
-        </div>
-      ) : (
-        <Virtuoso
-          data={filteredExercises}
-          style={{ height: '100%' }}
-          computeItemKey={(_index, exercise) => exercise.id}
-          components={{
-            Header: () => headerContent,
-          }}
-          itemContent={(_index, exercise) => {
-            const isSelected = selectedExerciseIdSet.has(exercise.id)
-            const muscleDisplay = getExerciseMuscleDisplay(exercise)
+        ) : scrollParent ? (
+          <Virtuoso
+            data={filteredExercises}
+            customScrollParent={scrollParent}
+            computeItemKey={(_index, exercise) => exercise.id}
+            itemContent={(_index, exercise) => {
+              const isSelected = selectedExerciseIdSet.has(exercise.id)
+              const muscleDisplay = getExerciseMuscleDisplay(exercise)
 
-            return (
-              <div className="px-4 pb-2">
-                <SelectableExerciseItem
-                  id={exercise.id}
-                  name={exercise.name}
-                  muscleDisplay={muscleDisplay}
-                  images={
-                    exercise.images as
-                      | ({ medium?: string | null } | null)[]
-                      | null
-                  }
-                  videoUrl={exercise.videoUrl}
-                  isSelected={isSelected}
-                  onToggle={onToggleExercise}
-                />
-              </div>
-            )
-          }}
-        />
-      )}
+              return (
+                <div className="px-4 pb-2">
+                  <SelectableExerciseItem
+                    id={exercise.id}
+                    name={exercise.name}
+                    muscleDisplay={muscleDisplay}
+                    images={
+                      exercise.images as
+                        | ({ medium?: string | null } | null)[]
+                        | null
+                    }
+                    videoUrl={exercise.videoUrl}
+                    isSelected={isSelected}
+                    onToggle={onToggleExercise}
+                  />
+                </div>
+              )
+            }}
+          />
+        ) : null}
+      </div>
     </div>
   )
 }
