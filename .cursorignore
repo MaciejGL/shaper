@@ -8,7 +8,6 @@ expo-app/android/build/
 expo-app/android/.gradle/
 dist/
 build/
-*.log
 .pnpm-store/
 .turbo/
 tsconfig.tsbuildinfo
