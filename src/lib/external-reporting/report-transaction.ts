@@ -10,7 +10,11 @@ import {
   getRegionFromTimezone,
 } from '@/config/payment-rules'
 import prisma from '@/lib/db'
-import { ServerEvent, captureServerEvent } from '@/lib/posthog-server'
+import {
+  ServerEvent,
+  captureServerEvent,
+  captureServerException,
+} from '@/lib/posthog-server'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 import { reportToApple } from './apple'
@@ -140,19 +144,12 @@ export async function reportTransaction(
       })
     }
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error'
     console.error('[REPORTING] Failed:', error)
 
-    // Error event
-    captureServerEvent({
-      distinctId: params.userId,
-      event: ServerEvent.GOOGLE_REPORT_ERROR,
-      properties: {
-        transactionType: params.transactionType,
-        transactionId: params.stripeTransactionId,
-        error: errorMessage,
-      },
+    const err = error instanceof Error ? error : new Error(String(error))
+    captureServerException(err, params.userId, {
+      transactionType: params.transactionType,
+      transactionId: params.stripeTransactionId,
     })
   }
 }

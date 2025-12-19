@@ -30,7 +30,6 @@ function getClient(): PostHog | null {
 export enum ServerEvent {
   // Google Play reporting
   GOOGLE_REPORT_SUCCESS = 'google_report_success',
-  GOOGLE_REPORT_ERROR = 'google_report_error',
   GOOGLE_REPORT_SKIPPED = 'google_report_skipped',
 }
 
@@ -58,6 +57,31 @@ export function captureServerEvent({
       ...properties,
       source: 'server',
     },
+  })
+}
+
+/**
+ * Get the PostHog server client instance
+ * Used for instrumentation and direct API access
+ */
+export function getPostHogServer(): PostHog | null {
+  return getClient()
+}
+
+/**
+ * Capture a server-side exception with full stack trace
+ */
+export function captureServerException(
+  error: Error,
+  distinctId?: string,
+  properties?: Record<string, unknown>,
+): void {
+  const posthog = getClient()
+  if (!posthog) return
+
+  posthog.captureException(error, distinctId, {
+    ...properties,
+    source: 'server',
   })
 }
 
