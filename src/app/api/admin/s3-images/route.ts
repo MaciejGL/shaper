@@ -128,4 +128,3 @@ function getImageUrl(key: string): string {
   }
   return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com/${key}`
 }
-
