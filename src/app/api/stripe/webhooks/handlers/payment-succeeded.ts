@@ -28,6 +28,21 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     // Extract subscription ID from invoice
     let subscriptionId: string | null = null
 
+    // #region agent log
+    console.info(
+      '[DEBUG] Webhook invoice payload:',
+      JSON.stringify({
+        invoiceId: invoice.id,
+        hasSubscription: !!invoice.subscription,
+        subscriptionValue: invoice.subscription,
+        linesCount: invoice.lines?.data?.length,
+        linesSubs: invoice.lines?.data?.map(
+          (l: { subscription?: unknown }) => l.subscription,
+        ),
+      }),
+    )
+    // #endregion
+
     // Method 1: Direct subscription field (most common for subscription invoices)
     if (invoice.subscription) {
       subscriptionId = invoice.subscription
@@ -49,11 +64,25 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     // Method 3: Fetch full invoice from Stripe API if subscription not found
     // Webhook payloads sometimes don't include subscription field
     if (!subscriptionId && invoice.id) {
-      console.info(`Fetching full invoice from Stripe API: ${invoice.id}`)
       const fullInvoice = (await stripe.invoices.retrieve(
         invoice.id,
       )) as InvoiceWithSubscription
-      console.info(`Full invoice: ${fullInvoice}`)
+      // #region agent log
+      console.info(
+        '[DEBUG] Full invoice from Stripe API:',
+        JSON.stringify({
+          invoiceId: fullInvoice.id,
+          hasSubscription: !!fullInvoice.subscription,
+          subscriptionValue: fullInvoice.subscription,
+          subscriptionType: typeof fullInvoice.subscription,
+          allKeys: Object.keys(fullInvoice).slice(0, 20),
+          linesCount: fullInvoice.lines?.data?.length,
+          linesSubs: fullInvoice.lines?.data?.map(
+            (l: { subscription?: unknown }) => l.subscription,
+          ),
+        }),
+      )
+      // #endregion
       if (fullInvoice.subscription) {
         subscriptionId = fullInvoice.subscription
       }

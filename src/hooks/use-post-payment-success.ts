@@ -13,8 +13,11 @@ export function usePostPaymentSuccess(userId?: string) {
     searchParams?.get('premium_activated') === 'true'
 
   const [isTimeout, setIsTimeout] = useState(false)
+  const [isConfirmed, setIsConfirmed] = useState(false)
 
-  // Poll every 2 seconds if post-payment and not timed out
+  // Stop polling when confirmed or timed out
+  const shouldPoll = isPostPayment && !isConfirmed && !isTimeout
+
   const { data: subscriptionData, refetch } = useQuery<CurrentSubscription>({
     queryKey: ['current-subscription', userId, 'post-payment'],
     queryFn: async () => {
@@ -27,7 +30,7 @@ export function usePostPaymentSuccess(userId?: string) {
       url.searchParams.set('userId', userId)
 
       const response = await fetch(url.toString(), {
-        signal: AbortSignal.timeout(20000), // 20 second timeout
+        signal: AbortSignal.timeout(20000),
         cache: 'no-store',
       })
       if (!response.ok) {
@@ -36,28 +39,33 @@ export function usePostPaymentSuccess(userId?: string) {
       return response.json()
     },
     enabled: isPostPayment && !!userId,
-    refetchInterval: 1000, // Poll every 1s
+    refetchInterval: shouldPoll ? 1000 : false,
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   })
 
-  // Set timeout after 10 seconds
+  // Set timeout after 20 seconds
   useEffect(() => {
-    if (isPostPayment) {
+    if (isPostPayment && !isConfirmed) {
       const timeout = setTimeout(() => {
         setIsTimeout(true)
       }, 20000)
       return () => clearTimeout(timeout)
     }
-  }, [isPostPayment])
+  }, [isPostPayment, isConfirmed])
 
-  const subscriptionReady = !!subscriptionData?.hasPremiumAccess
+  // Stop polling when subscription is confirmed
+  useEffect(() => {
+    if (subscriptionData?.hasPremiumAccess) {
+      setIsConfirmed(true)
+    }
+  }, [subscriptionData?.hasPremiumAccess])
 
   // Determine state: ready > timeout > polling (default)
   let state: 'polling' | 'timeout' | 'ready' = 'polling'
-  if (subscriptionReady) {
+  if (isConfirmed) {
     state = 'ready'
   } else if (isTimeout) {
     state = 'timeout'
