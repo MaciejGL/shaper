@@ -25,45 +25,51 @@ interface InvoiceWithSubscription extends Stripe.Invoice {
 
 export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
   try {
-    // Get customer ID and price ID from invoice (always available)
-    const customerId = invoice.customer as string
+    let stripeSubscription: Stripe.Subscription | null = null
+    let subscription: UserSubscription | null = null
+
+    // Get customer ID and price ID from invoice
+    const customerId = invoice.customer as string | undefined
     const firstLineItem = invoice.lines?.data?.[0] as
       | (Stripe.InvoiceLineItem & { price?: { id: string } })
       | undefined
     const invoicePriceId = firstLineItem?.price?.id
 
-    if (!customerId || !invoicePriceId) {
-      console.info(
-        `Missing customer or price ID in invoice ${invoice.id} - skipping`,
-      )
-      return
+    // Method 1: Match by price ID (handles upgrades with 2 active subs)
+    if (customerId && invoicePriceId) {
+      const stripeSubscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: 'active',
+      })
+
+      stripeSubscription =
+        stripeSubscriptions.data.find((sub) =>
+          sub.items.data.some((item) => item.price.id === invoicePriceId),
+        ) || null
+
+      if (stripeSubscription) {
+        subscription = await findSubscriptionById(stripeSubscription.id)
+      }
     }
 
-    // Fetch all active subscriptions for this customer from Stripe
-    const stripeSubscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: 'active',
-    })
+    // Method 2: Fallback to direct invoice.subscription field
+    if (!subscription && invoice.subscription) {
+      const subscriptionId =
+        typeof invoice.subscription === 'string'
+          ? invoice.subscription
+          : invoice.subscription
+      subscription = await findSubscriptionById(subscriptionId)
 
-    // Match subscription by price ID (handles upgrade scenario with 2 active subs)
-    const stripeSubscription = stripeSubscriptions.data.find((sub) =>
-      sub.items.data.some((item) => item.price.id === invoicePriceId),
-    )
-
-    if (!stripeSubscription) {
-      console.info(
-        `No matching Stripe subscription for price ${invoicePriceId} - skipping`,
-      )
-      return
+      // Also fetch the Stripe subscription for metadata
+      if (subscription?.stripeSubscriptionId) {
+        stripeSubscription = await stripe.subscriptions.retrieve(
+          subscription.stripeSubscriptionId,
+        )
+      }
     }
-
-    // Find our DB subscription by Stripe subscription ID
-    const subscription = await findSubscriptionById(stripeSubscription.id)
 
     if (!subscription) {
-      console.warn(
-        `Subscription not found in database: ${stripeSubscription.id}`,
-      )
+      console.info(`No subscription found for invoice ${invoice.id} - skipping`)
       return
     }
 
@@ -73,16 +79,16 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     await createRecurringServiceDelivery(subscription, invoice)
 
     console.info(
-      `✅ Payment processed for subscription ${stripeSubscription.id} (invoice: ${invoice.id})`,
+      `✅ Payment processed for subscription ${subscription.stripeSubscriptionId} (invoice: ${invoice.id})`,
     )
 
     const isInitialPurchase = invoice.billing_reason === 'subscription_create'
 
     // Read platform and token from Stripe subscription metadata
-    const metaPlatform = stripeSubscription.metadata?.platform
+    const metaPlatform = stripeSubscription?.metadata?.platform
     const platform: 'ios' | 'android' | null =
       metaPlatform === 'android' || metaPlatform === 'ios' ? metaPlatform : null
-    const extToken = stripeSubscription.metadata?.extToken || null
+    const extToken = stripeSubscription?.metadata?.extToken || null
 
     // Save Android/iOS origin data for initial purchases
     if (isInitialPurchase && platform) {
@@ -162,9 +168,9 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
     }
 
     // If this is a coaching payment, check if user has paused yearly to extend pause
-    if (subscription) {
+    if (subscription?.stripeSubscriptionId) {
       const coachingSub = await prisma.userSubscription.findFirst({
-        where: { stripeSubscriptionId: stripeSubscription.id },
+        where: { stripeSubscriptionId: subscription.stripeSubscriptionId },
         include: { package: true },
       })
 
