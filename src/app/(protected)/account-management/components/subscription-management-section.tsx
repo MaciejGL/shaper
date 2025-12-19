@@ -4,7 +4,6 @@ import { CreditCard, ExternalLink, Lock, Mail } from 'lucide-react'
 import { useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
-import { useMobileApp } from '@/components/mobile-app-bridge'
 import { CoachingServiceTerms } from '@/components/subscription/coaching-service-terms'
 import { PromotionalDiscountBanner } from '@/components/subscription/promotional-discount-banner'
 import { Button } from '@/components/ui/button'
@@ -12,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 import { usePaymentRules } from '@/hooks/use-payment-rules'
+import { useSubscribe } from '@/hooks/use-subscribe'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 import { FreezeSubscriptionSection } from './freeze-subscription-section/freeze-subscription-section'
@@ -20,8 +20,7 @@ import { PremiumPricingSelector } from './premium-pricing-selector'
 export function SubscriptionManagementSection() {
   const { user } = useUser()
   const rules = usePaymentRules()
-  const { isNativeApp, platform, getExternalOfferToken, openExternalCheckout } =
-    useMobileApp()
+  const { subscribe, isSubscribing } = useSubscribe()
   const {
     data: subscriptionData,
     isLoading: isLoadingSubscription,
@@ -32,46 +31,11 @@ export function SubscriptionManagementSection() {
   const hasError = subscriptionError
 
   const [showTermsModal, setShowTermsModal] = useState(false)
-  const [isSubscribing, setIsSubscribing] = useState(false)
   const [isSendingBillingLink, setIsSendingBillingLink] = useState(false)
   const [billingLinkSent, setBillingLinkSent] = useState(false)
 
   const handleSubscribe = async (lookupKey: string) => {
-    if (!user?.id) return
-
-    setIsSubscribing(true)
-
-    try {
-      // For Android in-app, get alternative billing token for Google compliance
-      const { token: extToken, diagnostics: extDiagnostics } =
-        await getExternalOfferToken(lookupKey)
-
-      const response = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          lookupKey,
-          returnUrl: `${window.location.origin}/account-management`,
-          cancelUrl: `${window.location.origin}/account-management`,
-          platform: isNativeApp ? platform : undefined,
-          extToken,
-          extDiagnostics,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session')
-      }
-
-      const { checkoutUrl } = await response.json()
-      openExternalCheckout(checkoutUrl)
-    } catch (error) {
-      console.error('Subscription error:', error)
-      setIsSubscribing(false)
-    }
+    await subscribe(lookupKey)
   }
 
   const handleManageSubscription = async () => {

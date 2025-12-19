@@ -12,6 +12,7 @@ import { sendEmail } from '@/lib/email/send-mail'
 import { reportTransaction } from '@/lib/external-reporting/report-transaction'
 import { notifyTrainerSubscriptionPayment } from '@/lib/notifications/push-notification-service'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
+import { stripe } from '@/lib/stripe/stripe'
 import { createTasksForDelivery } from '@/server/models/service-task/factory'
 
 import { StripeServiceType } from '../../enums'
@@ -68,39 +69,43 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       `✅ Payment processed for subscription ${subscriptionId} (invoice: ${invoice.id})`,
     )
 
+    const isInitialPurchase = invoice.billing_reason === 'subscription_create'
+
+    // Save Android/iOS origin data for initial purchases (before package checks)
+    // This must run independently of package lookup to ensure token is always saved
+    let platform: 'ios' | 'android' | null = null
+    let extToken: string | null = null
+
+    if (isInitialPurchase && subscription.stripeSubscriptionId) {
+      const stripeSub = await stripe.subscriptions.retrieve(
+        subscription.stripeSubscriptionId,
+      )
+      const metaPlatform = stripeSub.metadata?.platform
+
+      if (metaPlatform === 'android' || metaPlatform === 'ios') {
+        platform = metaPlatform
+        extToken = stripeSub.metadata?.extToken || null
+
+        await prisma.userSubscription.update({
+          where: { id: subscription.id },
+          data: {
+            originPlatform: platform,
+            externalOfferToken: extToken,
+            initialStripeInvoiceId: invoice.id,
+          },
+        })
+      }
+    }
+
     // Report to Apple/Google if required for this platform + region
     const packageTemplate = await prisma.packageTemplate.findUnique({
       where: { id: subscription.packageId },
     })
     if (packageTemplate?.stripeLookupKey && subscription.stripeSubscriptionId) {
-      const { stripe } = await import('@/lib/stripe/stripe')
-      const stripeSub = await stripe.subscriptions.retrieve(
-        subscription.stripeSubscriptionId,
-      )
-
-      const isInitialPurchase = invoice.billing_reason === 'subscription_create'
-
       if (isInitialPurchase) {
-        // Initial purchase: store external offer data from Stripe metadata
-        const platform =
-          (stripeSub.metadata?.platform as 'ios' | 'android') || null
-        const extToken = stripeSub.metadata?.extToken || null
-
-        // Save origin data for future renewals
-        if (platform) {
-          await prisma.userSubscription.update({
-            where: { id: subscription.id },
-            data: {
-              originPlatform: platform,
-              externalOfferToken: extToken,
-              initialStripeInvoiceId: invoice.id,
-            },
-          })
-        }
-
         await reportTransaction({
           userId: subscription.userId,
-          stripeTransactionId: invoice.id!, // Use invoice.id for consistent reporting
+          stripeTransactionId: invoice.id!,
           amount: invoice.amount_paid || 0,
           currency: invoice.currency || 'usd',
           stripeLookupKey:
@@ -112,20 +117,20 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       } else {
         // Renewal: use stored origin platform and initial invoice ID
         const storedPlatform = subscription.originPlatform
-        const platform =
+        const renewalPlatform =
           storedPlatform === 'ios' || storedPlatform === 'android'
             ? storedPlatform
             : null
 
         await reportTransaction({
           userId: subscription.userId,
-          stripeTransactionId: invoice.id!, // Use invoice.id for consistent reporting
+          stripeTransactionId: invoice.id!,
           amount: invoice.amount_paid || 0,
           currency: invoice.currency || 'usd',
           stripeLookupKey:
             packageTemplate.stripeLookupKey as (typeof STRIPE_LOOKUP_KEYS)[keyof typeof STRIPE_LOOKUP_KEYS],
           transactionType: 'renewal',
-          platform,
+          platform: renewalPlatform,
           initialExternalTransactionId:
             subscription.initialStripeInvoiceId || undefined,
         })

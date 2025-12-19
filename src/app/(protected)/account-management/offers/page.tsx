@@ -3,10 +3,10 @@
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
-import { useMobileApp } from '@/components/mobile-app-bridge'
 import { CoachingServiceTerms } from '@/components/subscription/coaching-service-terms'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { useSubscribe } from '@/hooks/use-subscribe'
 
 import { PremiumPricingSelector } from '../components/premium-pricing-selector'
 import { ReturnToApp } from '../components/return-to-app'
@@ -15,11 +15,9 @@ export default function OffersPage() {
   const searchParams = useSearchParams()
   const redirectUrl = searchParams.get('redirectUrl')
   const { user } = useUser()
-  const { isNativeApp, platform, getExternalOfferToken, openExternalCheckout } =
-    useMobileApp()
+  const { subscribe, isSubscribing } = useSubscribe()
 
   const [showTermsModal, setShowTermsModal] = useState(false)
-  const [isSubscribing, setIsSubscribing] = useState(false)
 
   const { data: subscriptionData, isLoading: isLoadingSubscription } =
     useCurrentSubscription(user?.id)
@@ -28,57 +26,12 @@ export default function OffersPage() {
   const hasPremium = subscriptionData?.hasPremiumAccess
 
   const handleSubscribe = async (lookupKey: string) => {
-    if (!user?.id) return
-
-    setIsSubscribing(true)
-
-    try {
-      // Debug: Log platform detection
-      console.info('[OFFERS] Subscribe clicked:', {
-        isNativeApp,
-        platform,
-        lookupKey,
-      })
-
-      // For Android in-app, get alternative billing token for Google compliance
-      let extToken: string | null = null
-      let extDiagnostics: Record<string, unknown> | null = null
-      if (isNativeApp && platform === 'android') {
-        const result = await getExternalOfferToken(lookupKey)
-        extToken = result.token
-        extDiagnostics = result.diagnostics
-      }
-
-      const response = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          lookupKey,
-          returnUrl: redirectUrl
-            ? `${window.location.origin}${redirectUrl}`
-            : `${window.location.origin}/fitspace/my-plans`,
-          cancelUrl: `${window.location.origin}/account-management/offers${redirectUrl ? `?redirectUrl=${encodeURIComponent(redirectUrl)}` : ''}`,
-          platform: isNativeApp ? platform : undefined,
-          extToken,
-          extDiagnostics,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session')
-      }
-
-      const { checkoutUrl } = await response.json()
-
-      // Open checkout in Custom Tabs (Android) or Safari (iOS) or redirect (web)
-      openExternalCheckout(checkoutUrl)
-    } catch (error) {
-      console.error('Subscription error:', error)
-      setIsSubscribing(false)
-    }
+    await subscribe(lookupKey, {
+      returnUrl: redirectUrl
+        ? `${window.location.origin}${redirectUrl}`
+        : `${window.location.origin}/fitspace/my-plans`,
+      cancelUrl: `${window.location.origin}/account-management/offers${redirectUrl ? `?redirectUrl=${encodeURIComponent(redirectUrl)}` : ''}`,
+    })
   }
 
   if (isLoading) {

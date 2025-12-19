@@ -15,7 +15,7 @@ import { useAndroidBackButton } from '../hooks/use-android-back-button'
 import { useAuthTokenManagement } from '../hooks/use-auth-token-management'
 import { usePushNotificationSync } from '../hooks/use-push-notification-sync'
 import { useThemeManager } from '../hooks/use-theme-manager'
-import { initExternalOffers } from '../services/external-offers'
+import { initAlternativeBilling } from '../services/alternative-billing'
 
 import { EnhancedWebView } from './enhanced-webview'
 import {
@@ -93,7 +93,7 @@ function HyproAppContent({ authToken }: HyproAppProps) {
   // Initialize External Offers (Android only) and check for initial URL
   useEffect(() => {
     // Initialize External Offers for Google Play compliance
-    initExternalOffers()
+    initAlternativeBilling()
 
     const checkInitialUrl = async () => {
       try {

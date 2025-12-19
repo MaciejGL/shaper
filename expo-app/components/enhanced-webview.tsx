@@ -14,7 +14,7 @@ import { APP_CONFIG } from '../config/app-config'
 import {
   getExternalOfferToken,
   openExternalCheckout,
-} from '../services/external-offers'
+} from '../services/alternative-billing'
 import { shouldLoadUrlInWebView } from '../utils/webview-navigation'
 
 import { OfflineScreen } from './offline-screen'
