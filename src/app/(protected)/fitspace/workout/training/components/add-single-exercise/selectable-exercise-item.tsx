@@ -1,4 +1,4 @@
-import { CheckIcon, GripVertical, XIcon } from 'lucide-react'
+import { CheckIcon, GripIcon, XIcon } from 'lucide-react'
 import type * as React from 'react'
 
 import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
@@ -80,11 +80,11 @@ export function DraggableExerciseItem({
         <button
           type="button"
           aria-label="Reorder exercise"
-          className="shrink-0 touch-none cursor-grab active:cursor-grabbing rounded-sm p-1 -m-1"
+          className="shrink-0 touch-none cursor-grab active:cursor-grabbing rounded-sm p-1 -mr-2"
           onPointerDown={onDragHandlePointerDown}
           disabled={disabled}
         >
-          <GripVertical className="size-5 text-muted-foreground" />
+          <GripIcon className="size-5 text-muted-foreground" />
         </button>
       }
       trailing={

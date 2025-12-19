@@ -10,6 +10,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { Virtuoso } from 'react-virtuoso'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
@@ -296,6 +297,10 @@ function ExerciseListWithFilters({
     null,
   )
   const deferredSearchQuery = useDeferredValue(searchQuery)
+  const selectedExerciseIdSet = useMemo(
+    () => new Set(selectedExerciseIds),
+    [selectedExerciseIds],
+  )
 
   const { groupSummaries, isLoading: isLoadingProgress } =
     useWeeklyFocus(scheduledAt)
@@ -326,57 +331,67 @@ function ExerciseListWithFilters({
     return result
   }, [exercises, selectedGroup, deferredSearchQuery])
 
+  const headerContent = (
+    <div className="px-4 pb-4 pt-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold">Build your workout</h2>
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+              Today
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Pick exercises for today's session.
+          </p>
+        </div>
+      </div>
+
+      <div className="my-6">
+        <AiExerciseSuggestions
+          allExercises={exercises}
+          selectedExerciseIds={selectedExerciseIds}
+          onToggleExercise={onToggleExercise}
+        />
+      </div>
+
+      <div className="my-6">
+        <WeeklyFocusChips
+          groupSummaries={groupSummaries}
+          selectedGroup={selectedGroup}
+          onSelectGroup={setSelectedGroup}
+          isLoading={isLoadingProgress}
+        />
+      </div>
+
+      <Input
+        id="search-exercises"
+        placeholder="Search by exercise or muscle group..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        iconStart={<SearchIcon />}
+      />
+
+      <h3 className="text-sm font-medium text-muted-foreground pt-4">
+        {selectedGroup ? `${selectedGroup} exercises` : 'All exercises'}{' '}
+        {!isLoading && `(${filteredExercises.length})`}
+      </h3>
+    </div>
+  )
+
   return (
-    <div className="flex-1 overflow-y-auto px-4 pb-4">
-      <div>
-        <div className="flex items-start justify-between gap-3 pt-2">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">Build your workout</h2>
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                Today
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Pick exercises for today's session.
-            </p>
+    <div className="flex-1 min-h-0">
+      {isLoading ? (
+        <div className="h-full overflow-y-auto">
+          {headerContent}
+          <div className="px-4 pb-4 space-y-2">
+            <LoadingSkeleton count={8} />
           </div>
         </div>
-
-        <div className="my-6">
-          <AiExerciseSuggestions
-            allExercises={exercises}
-            selectedExerciseIds={selectedExerciseIds}
-            onToggleExercise={onToggleExercise}
-          />
-        </div>
-
-        <div className="my-6">
-          <WeeklyFocusChips
-            groupSummaries={groupSummaries}
-            selectedGroup={selectedGroup}
-            onSelectGroup={setSelectedGroup}
-            isLoading={isLoadingProgress}
-          />
-        </div>
-
-        <Input
-          id="search-exercises"
-          placeholder="Search by exercise or muscle group..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          iconStart={<SearchIcon />}
-          className="mb-4"
-        />
-
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground pt-1">
-            {selectedGroup ? `${selectedGroup} exercises` : 'All exercises'}{' '}
-            {!isLoading && `(${filteredExercises.length})`}
-          </h3>
-          {isLoading ? (
-            <LoadingSkeleton count={8} />
-          ) : filteredExercises.length === 0 ? (
+      ) : filteredExercises.length === 0 ? (
+        <div className="h-full overflow-y-auto">
+          {headerContent}
+          <div className="px-4 pb-4">
             <div className="text-center py-8 space-y-1">
               <p className="text-muted-foreground">
                 No exercises match this filter.
@@ -385,15 +400,23 @@ function ExerciseListWithFilters({
                 Try a different muscle group or clear filters.
               </p>
             </div>
-          ) : (
-            filteredExercises.map((exercise) => {
-              const isSelected = selectedExerciseIds.includes(exercise.id)
+          </div>
+        </div>
+      ) : (
+        <Virtuoso
+          data={filteredExercises}
+          style={{ height: '100%' }}
+          computeItemKey={(_index, exercise) => exercise.id}
+          components={{
+            Header: () => headerContent,
+          }}
+          itemContent={(_index, exercise) => {
+            const isSelected = selectedExerciseIdSet.has(exercise.id)
+            const muscleDisplay = getExerciseMuscleDisplay(exercise)
 
-              const muscleDisplay = getExerciseMuscleDisplay(exercise)
-
-              return (
+            return (
+              <div className="px-4 pb-2">
                 <SelectableExerciseItem
-                  key={exercise.id}
                   id={exercise.id}
                   name={exercise.name}
                   muscleDisplay={muscleDisplay}
@@ -406,11 +429,11 @@ function ExerciseListWithFilters({
                   isSelected={isSelected}
                   onToggle={onToggleExercise}
                 />
-              )
-            })
-          )}
-        </div>
-      </div>
+              </div>
+            )
+          }}
+        />
+      )}
     </div>
   )
 }
