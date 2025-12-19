@@ -78,11 +78,24 @@ export async function reportToGoogle(
     throw new Error(reason)
   }
 
-  await androidPublisher.externaltransactions.createexternaltransaction({
-    parent,
-    externalTransactionId,
-    requestBody,
-  })
+  try {
+    await androidPublisher.externaltransactions.createexternaltransaction({
+      parent,
+      externalTransactionId,
+      requestBody,
+    })
 
-  console.info('[GOOGLE] Transaction reported:', externalTransactionId)
+    console.info('[GOOGLE] Transaction reported:', externalTransactionId)
+  } catch (error) {
+    // Treat "already exists" as success to keep webhook processing idempotent
+    const err = error as { code?: number; message?: string }
+    if (err.code === 409) {
+      console.info(
+        '[GOOGLE] Transaction already exists:',
+        externalTransactionId,
+      )
+      return
+    }
+    throw error
+  }
 }

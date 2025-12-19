@@ -103,6 +103,14 @@ export async function POST(request: NextRequest) {
           console.info(`[WEBHOOK] ✅ invoice.payment_succeeded processed`)
           break
 
+        case STRIPE_WEBHOOK_EVENTS.INVOICE_PAID:
+          // Some Stripe webhook configs use invoice.paid instead of invoice.payment_succeeded.
+          // We treat it as payment succeeded for subscription reporting + Google compliance.
+          console.info(`[WEBHOOK] Processing invoice.paid`)
+          await handlePaymentSucceeded(event.data.object as Stripe.Invoice)
+          console.info(`[WEBHOOK] ✅ invoice.paid processed`)
+          break
+
         case STRIPE_WEBHOOK_EVENTS.PAYMENT_FAILED:
           console.info(`[WEBHOOK] Processing invoice.payment_failed`)
           await handlePaymentFailed(event.data.object)

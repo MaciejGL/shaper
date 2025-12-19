@@ -40,6 +40,7 @@ export const STRIPE_WEBHOOK_EVENTS = {
   // Payment events
   PAYMENT_SUCCEEDED: 'invoice.payment_succeeded',
   PAYMENT_FAILED: 'invoice.payment_failed',
+  INVOICE_PAID: 'invoice.paid',
 
   // One-time purchase events
   CHECKOUT_COMPLETED: 'checkout.session.completed',
