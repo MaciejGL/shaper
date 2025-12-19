@@ -35,13 +35,13 @@ export async function POST(request: NextRequest) {
   const androidPublisher = getAndroidPublisher()
   const parent = `applications/${PACKAGE_NAME}`
 
-  const results: Array<{
+  const results: {
     id: string
     invoiceId: string | null
     verified: boolean
     googleData?: Record<string, unknown>
     error?: string
-  }> = []
+  }[] = []
 
   // Avoid hammering Google API if we have many rows
   const concurrency = 5

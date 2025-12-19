@@ -156,6 +156,7 @@ export function S3ImageBrowserModal({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
+              id="search-input"
               placeholder="Search by filename..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -245,11 +246,11 @@ export function S3ImageBrowserModal({
             onClick={handleConfirm}
             disabled={selectedImages.length === 0}
           >
-            Use {selectedImages.length} Image{selectedImages.length !== 1 && 's'}
+            Use {selectedImages.length} Image
+            {selectedImages.length !== 1 && 's'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
-

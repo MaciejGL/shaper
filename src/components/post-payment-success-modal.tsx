@@ -117,7 +117,7 @@ export function PostPaymentSuccessModal({
 
             <div className="bg-card-on-card p-4 rounded-lg">
               <p className="text-sm text-muted-foreground text-center">
-                Start tracking your progress and unlock your full potential.
+                Start training and unlock your full potential.
               </p>
             </div>
 
@@ -129,7 +129,7 @@ export function PostPaymentSuccessModal({
                 className="w-full"
                 iconStart={<Sparkles />}
               >
-                Return to App
+                Start Training
               </Button>
             </DialogFooter>
           </>
