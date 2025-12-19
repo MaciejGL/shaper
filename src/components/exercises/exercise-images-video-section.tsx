@@ -1,11 +1,14 @@
 'use client'
 
+import { FolderOpen } from 'lucide-react'
 import { useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { MultiImageUpload } from '@/components/ui/multi-image-upload'
 
+import { S3ImageBrowserModal } from './s3-image-browser-modal'
 import { Exercise, ExerciseUpdateHandler } from './types'
 
 interface ExerciseImagesVideoSectionProps {
@@ -18,6 +21,7 @@ export function ExerciseImagesVideoSection({
   onUpdate,
 }: ExerciseImagesVideoSectionProps) {
   const [videoUrl, setVideoUrl] = useState(exercise.videoUrl || '')
+  const [isS3BrowserOpen, setIsS3BrowserOpen] = useState(false)
 
   // Handle video URL update
   const handleVideoUrlChange = (newUrl: string) => {
@@ -31,6 +35,11 @@ export function ExerciseImagesVideoSection({
 
   // Handle temp image uploads - just store URLs
   const handleImagesChange = (imageUrls: string[]) => {
+    onUpdate(exercise.id, 'tempImageUrls', imageUrls)
+  }
+
+  // Handle S3 browser selection
+  const handleS3ImagesSelected = (imageUrls: string[]) => {
     onUpdate(exercise.id, 'tempImageUrls', imageUrls)
   }
 
@@ -52,7 +61,18 @@ export function ExerciseImagesVideoSection({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-xs">Exercise Images</Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-xs">Exercise Images</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsS3BrowserOpen(true)}
+            iconStart={<FolderOpen />}
+            className="h-6 text-xs"
+          >
+            Browse S3
+          </Button>
+        </div>
         <MultiImageUpload
           imageType="exercise"
           currentImageUrls={currentImageUrls}
@@ -60,6 +80,13 @@ export function ExerciseImagesVideoSection({
           maxImages={7}
         />
       </div>
+
+      <S3ImageBrowserModal
+        open={isS3BrowserOpen}
+        onOpenChange={setIsS3BrowserOpen}
+        onConfirm={handleS3ImagesSelected}
+        maxImages={7}
+      />
 
       <Input
         id={`video-url-${exercise.id}`}
