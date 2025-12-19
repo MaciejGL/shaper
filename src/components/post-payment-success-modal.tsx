@@ -1,6 +1,12 @@
 'use client'
 
-import { CheckCircle, Info, Loader2, Sparkles } from 'lucide-react'
+import { Calendar, CheckCircle, Info, Loader2, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+
+import { CheckinScheduleForm } from '@/app/(protected)/fitspace/progress/components/checkin-schedule/schedule-setup-modal'
+import { CheckinScheduleFormData } from '@/app/(protected)/fitspace/progress/components/checkin-schedule/types'
+import { useCheckinScheduleOperations } from '@/app/(protected)/fitspace/progress/components/checkin-schedule/use-checkin-schedule'
+import { GQLCheckinFrequency } from '@/generated/graphql-client'
 
 import { BiggyIcon } from './biggy-icon'
 import { Button } from './ui/button'
@@ -13,6 +19,8 @@ import {
   DialogTitle,
 } from './ui/dialog'
 
+type OnboardingStep = 'checkins' | 'plans'
+
 interface PostPaymentSuccessModalProps {
   open: boolean
   state: 'polling' | 'timeout' | 'ready'
@@ -24,10 +32,42 @@ export function PostPaymentSuccessModal({
   state,
   onRefresh,
 }: PostPaymentSuccessModalProps) {
+  const [step, setStep] = useState<OnboardingStep>('checkins')
+  const [formData, setFormData] = useState<CheckinScheduleFormData>({
+    frequency: GQLCheckinFrequency.Weekly,
+    dayOfWeek: 0,
+    dayOfMonth: 1,
+  })
+
+  const { createSchedule, isCreating } = useCheckinScheduleOperations()
+
   const handleReturnToApp = () => {
-    // Simple window.location works for both native app and web
-    // WebView automatically detects URL changes through onNavigationStateChange
     window.location.href = '/fitspace/workout'
+  }
+
+  const handleBrowsePlans = () => {
+    window.location.href = '/fitspace/explore?tab=premium-plans'
+  }
+
+  const handleSaveAndContinue = () => {
+    createSchedule({
+      input: {
+        frequency: formData.frequency,
+        dayOfWeek:
+          formData.frequency !== GQLCheckinFrequency.Monthly
+            ? formData.dayOfWeek
+            : undefined,
+        dayOfMonth:
+          formData.frequency === GQLCheckinFrequency.Monthly
+            ? formData.dayOfMonth
+            : undefined,
+      },
+    })
+    setStep('plans')
+  }
+
+  const handleSkipCheckins = () => {
+    setStep('plans')
   }
 
   // Prevent closing modal while polling - only allow closing when ready or timeout
@@ -101,8 +141,8 @@ export function PostPaymentSuccessModal({
           </>
         )}
 
-        {/* Success/Ready State */}
-        {state === 'ready' && (
+        {/* Success/Ready State - Step 1: Schedule Check-ins */}
+        {state === 'ready' && step === 'checkins' && (
           <>
             <div className="flex justify-center mb-4">
               <BiggyIcon icon={Sparkles} variant="amber" />
@@ -111,23 +151,75 @@ export function PostPaymentSuccessModal({
             <DialogHeader className="text-center">
               <DialogTitle>Subscription Activated!</DialogTitle>
               <DialogDescription className="pt-2">
-                Welcome to Premium. You now have access to all premium features.
+                Track your progress with regular check-ins.
+              </DialogDescription>
+            </DialogHeader>
+
+            <CheckinScheduleForm
+              formData={formData}
+              onFormDataChange={setFormData}
+              showPreview={true}
+            />
+
+            <DialogFooter className="flex-col gap-2">
+              <Button
+                onClick={handleSaveAndContinue}
+                variant="gradient"
+                size="lg"
+                className="w-full"
+                iconStart={<Calendar />}
+                loading={isCreating}
+              >
+                Save & Continue
+              </Button>
+              <Button
+                onClick={handleSkipCheckins}
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+              >
+                Skip for now
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+
+        {/* Success/Ready State - Step 2: Browse Plans */}
+        {state === 'ready' && step === 'plans' && (
+          <>
+            <div className="flex justify-center mb-4">
+              <BiggyIcon icon={Sparkles} variant="amber" />
+            </div>
+
+            <DialogHeader className="text-center">
+              <DialogTitle>Explore Training Plans</DialogTitle>
+              <DialogDescription className="pt-2">
+                Start with a professionally designed training program.
               </DialogDescription>
             </DialogHeader>
 
             <div className="bg-card-on-card p-4 rounded-lg">
               <p className="text-sm text-muted-foreground text-center">
-                Start training and unlock your full potential.
+                Browse our collection of training plans tailored for different
+                goals and experience levels.
               </p>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex-col gap-2">
               <Button
-                onClick={handleReturnToApp}
+                onClick={handleBrowsePlans}
                 variant="gradient"
                 size="lg"
                 className="w-full"
                 iconStart={<Sparkles />}
+              >
+                Browse Plans
+              </Button>
+              <Button
+                onClick={handleReturnToApp}
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
               >
                 Start Training
               </Button>
