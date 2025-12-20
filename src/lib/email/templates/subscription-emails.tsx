@@ -51,26 +51,87 @@ export function TrialEndingEmail({
         </EmailText>
 
         <EmailCard>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          <table
+            role="presentation"
+            cellPadding={0}
+            cellSpacing={0}
+            border={0}
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+            }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
-              <span>Unlimited training plans</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
-              <span>Premium training plans library</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
-              <span>Advanced tracking and logging</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
-              <span>Exercise videos and instructions</span>
-            </div>
-          </div>
+            <tbody>
+              <tr>
+                <td
+                  style={{
+                    width: '20px',
+                    paddingRight: '12px',
+                    verticalAlign: 'top',
+                    color: '#16a34a',
+                    fontWeight: 'bold',
+                    lineHeight: '20px',
+                  }}
+                >
+                  ✓
+                </td>
+                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
+                  Unlimited training plans
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    width: '20px',
+                    paddingRight: '12px',
+                    verticalAlign: 'top',
+                    color: '#16a34a',
+                    fontWeight: 'bold',
+                    lineHeight: '20px',
+                  }}
+                >
+                  ✓
+                </td>
+                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
+                  Premium training plans library
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    width: '20px',
+                    paddingRight: '12px',
+                    verticalAlign: 'top',
+                    color: '#16a34a',
+                    fontWeight: 'bold',
+                    lineHeight: '20px',
+                  }}
+                >
+                  ✓
+                </td>
+                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
+                  Advanced tracking and logging
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    width: '20px',
+                    paddingRight: '12px',
+                    verticalAlign: 'top',
+                    color: '#16a34a',
+                    fontWeight: 'bold',
+                    lineHeight: '20px',
+                  }}
+                >
+                  ✓
+                </td>
+                <td style={{ lineHeight: '20px' }}>
+                  Exercise videos and instructions
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </EmailCard>
 
         <EmailButton href={upgradeUrl}>Continue with {packageName}</EmailButton>
@@ -295,26 +356,87 @@ export function WelcomeEmail({
         <EmailText>Your premium membership includes:</EmailText>
 
         <EmailCard>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          <table
+            role="presentation"
+            cellPadding={0}
+            cellSpacing={0}
+            border={0}
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+            }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
-              <span>Unlimited training plans</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
-              <span>Premium training plans library</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
-              <span>Advanced tracking and logging</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span>
-              <span>Exercise videos and instructions</span>
-            </div>
-          </div>
+            <tbody>
+              <tr>
+                <td
+                  style={{
+                    width: '20px',
+                    paddingRight: '12px',
+                    verticalAlign: 'top',
+                    color: '#16a34a',
+                    fontWeight: 'bold',
+                    lineHeight: '20px',
+                  }}
+                >
+                  ✓
+                </td>
+                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
+                  Unlimited training plans
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    width: '20px',
+                    paddingRight: '12px',
+                    verticalAlign: 'top',
+                    color: '#16a34a',
+                    fontWeight: 'bold',
+                    lineHeight: '20px',
+                  }}
+                >
+                  ✓
+                </td>
+                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
+                  Premium training plans library
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    width: '20px',
+                    paddingRight: '12px',
+                    verticalAlign: 'top',
+                    color: '#16a34a',
+                    fontWeight: 'bold',
+                    lineHeight: '20px',
+                  }}
+                >
+                  ✓
+                </td>
+                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
+                  Advanced tracking and logging
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    width: '20px',
+                    paddingRight: '12px',
+                    verticalAlign: 'top',
+                    color: '#16a34a',
+                    fontWeight: 'bold',
+                    lineHeight: '20px',
+                  }}
+                >
+                  ✓
+                </td>
+                <td style={{ lineHeight: '20px' }}>
+                  Exercise videos and instructions
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </EmailCard>
 
         <EmailButton href={dashboardUrl}>Start Training Now</EmailButton>
