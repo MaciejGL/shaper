@@ -33,11 +33,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    const userId = session?.user?.id
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session.user.id
     distinctId = userId
     if (debugAi) {
       console.info('[ai-exercise-suggestions]', {
@@ -135,6 +135,8 @@ export async function POST(request: NextRequest) {
       distinctId: userId,
       event: ServerEvent.AI_EXERCISE_SUGGESTIONS_SUCCESS,
       properties: {
+        userId,
+        email: session.user.email,
         debugId,
         workoutType: workoutType ?? null,
         model: ai.debug.model,
