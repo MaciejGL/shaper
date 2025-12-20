@@ -3,7 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
-import { use, useEffect, useMemo, useRef } from 'react'
+import { use, useEffect, useMemo } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { WorkoutProvider } from '@/context/workout-context/workout-context'
@@ -47,7 +47,7 @@ export const WorkoutDay = ({
       }
     | {
         data: null
-        error: string
+        error: string | null
       }
   >
   isQuickWorkout?: boolean
@@ -56,7 +56,6 @@ export const WorkoutDay = ({
   const { data: dayData } = use(dayDataPromise)
   const queryClient = useQueryClient()
   const router = useRouter()
-  const hasSeedCache = useRef(false)
 
   // Normalize data to consistent format
   const serverData = useMemo((): GQLFitspaceGetWorkoutDayQuery | undefined => {
@@ -71,19 +70,12 @@ export const WorkoutDay = ({
 
   const serverDayId = serverData?.getWorkoutDay?.day?.id
 
-  // Seed cache ONCE with server data (synchronously via ref check)
-  if (serverDayId && serverData && !hasSeedCache.current) {
-    const queryKey = useFitspaceGetWorkoutDayQuery.getKey({
-      dayId: serverDayId,
-    })
-    if (!queryClient.getQueryData(queryKey)) {
-      queryClient.setQueryData(queryKey, serverData)
-    }
-    hasSeedCache.current = true
-  }
-
   // The effective dayId: use URL param, or fall back to server data
   const effectiveDayId = dayId ?? serverDayId
+  const initialQueryData =
+    effectiveDayId && serverDayId && effectiveDayId === serverDayId
+      ? serverData
+      : undefined
 
   // Check for rest day
   const navigationData =
@@ -135,6 +127,7 @@ export const WorkoutDay = ({
     { dayId: effectiveDayId ?? '' },
     {
       enabled: !!effectiveDayId && !isRestDay,
+      initialData: initialQueryData,
       staleTime: 5 * 60 * 1000,
       refetchOnMount: false,
       refetchOnWindowFocus: false,

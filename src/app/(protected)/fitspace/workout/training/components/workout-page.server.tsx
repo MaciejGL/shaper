@@ -48,7 +48,7 @@ type WorkoutPageClientNewProps = {
       }
     | {
         data: null
-        error: string
+        error: string | null
       }
   >
   trainingId: string

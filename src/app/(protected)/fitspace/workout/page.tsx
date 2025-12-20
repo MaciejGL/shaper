@@ -90,16 +90,17 @@ export default async function SessionPage({
     return redirect('/fitspace/my-plans')
   }
 
-  // Render the workout page directly instead of redirecting
   const navigationPromise =
     gqlServerFetch<GQLFitspaceGetWorkoutNavigationQuery>(
       FitspaceGetWorkoutNavigationDocument,
       { trainingId },
     )
-  const dayPromise = gqlServerFetch<GQLFitspaceGetWorkoutDayQuery>(
-    FitspaceGetWorkoutDayDocument,
-    { dayId: dayIdParam, planId: trainingId },
-  )
+  const dayPromise = dayIdParam
+    ? gqlServerFetch<GQLFitspaceGetWorkoutDayQuery>(
+        FitspaceGetWorkoutDayDocument,
+        { dayId: dayIdParam, planId: trainingId },
+      )
+    : Promise.resolve({ data: null, error: null })
 
   return (
     <WorkoutPageServer
