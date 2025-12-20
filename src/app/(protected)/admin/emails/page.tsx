@@ -33,8 +33,7 @@ export default function EmailPreviewPage() {
   const html = React.useMemo(() => {
     if (!selectedTemplate) return ''
     try {
-      const Component = selectedTemplate.component
-      return renderToStaticMarkup(<Component {...selectedTemplate.props} />)
+      return renderToStaticMarkup(selectedTemplate.render())
     } catch (error) {
       console.error('Failed to render email template:', error)
       return '<div>Error rendering template</div>'

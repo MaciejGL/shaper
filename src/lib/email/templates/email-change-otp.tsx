@@ -1,6 +1,5 @@
 import {
   EmailAlert,
-  EmailCard,
   EmailContent,
   EmailFooter,
   EmailHeader,
@@ -38,31 +37,36 @@ export const EmailChangeOtp = ({
         To complete this change, please enter the verification code below:
       </EmailText>
 
-      <EmailCard padding="32px">
-        <EmailText
-          size="14px"
-          color="muted"
-          style={{
-            textAlign: 'center',
-            marginBottom: '8px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-          }}
-        >
-          Verification Code
-        </EmailText>
-        <div
-          style={{
-            fontSize: '32px',
-            fontWeight: '700',
-            textAlign: 'center',
-            letterSpacing: '4px',
-            color: '#18181b',
-          }}
-        >
-          {code}
-        </div>
-      </EmailCard>
+      <EmailText
+        size="14px"
+        color="muted"
+        style={{
+          textAlign: 'center',
+          marginBottom: '8px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+        }}
+      >
+        Verification Code
+      </EmailText>
+      <div
+        style={{
+          fontSize: '32px',
+          fontWeight: '500',
+          textAlign: 'center',
+          letterSpacing: '2px',
+          color: '#18181b',
+          backgroundColor: '#f0f0f0',
+          padding: '8px 24px',
+          borderRadius: '12px',
+          marginBottom: '24px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          width: 'fit-content',
+        }}
+      >
+        {code}
+      </div>
 
       <EmailAlert>
         This code expires in 10 minutes for your security. Your current email (

@@ -7,19 +7,16 @@
  * Note: Prices are fetched dynamically from Stripe, not stored here.
  */
 import { FREEZE_CONFIG } from './freeze-config'
+import { PREMIUM_BENEFITS_PRICING, PREMIUM_FEATURES } from './premium-features'
 import { SUBSCRIPTION_CONFIG } from './subscription-config'
 
-// Premium subscription benefits (mobile-friendly but complete)
-export const PREMIUM_BENEFITS = [
-  'Structured training programs for real progress',
-  'Log workouts and track PRs over time',
-  'See weekly volume by muscle group',
-  'Priority access to new features',
-] as const
+// Premium subscription benefits (marketing copy source of truth lives in premium-features.ts)
+export const PREMIUM_BENEFITS = PREMIUM_BENEFITS_PRICING
 
 export const PREMIUM_YEARLY_BENEFITS = [
   ...PREMIUM_BENEFITS,
-  `Pause your subscription for up to ${FREEZE_CONFIG.MAX_DAYS_PER_YEAR} days per year`,
+  PREMIUM_FEATURES.find((f) => f.id === 'subscription_freeze_yearly')!.copy
+    .medium,
 ] as const
 
 // Product descriptions (prices are fetched dynamically from Stripe)

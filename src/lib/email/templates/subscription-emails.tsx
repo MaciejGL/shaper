@@ -1,3 +1,5 @@
+import { PREMIUM_BENEFITS_EMAIL } from '@/config/premium-features'
+
 import {
   EmailAlert,
   EmailButton,
@@ -51,87 +53,7 @@ export function TrialEndingEmail({
         </EmailText>
 
         <EmailCard>
-          <table
-            role="presentation"
-            cellPadding={0}
-            cellSpacing={0}
-            border={0}
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-            }}
-          >
-            <tbody>
-              <tr>
-                <td
-                  style={{
-                    width: '20px',
-                    paddingRight: '12px',
-                    verticalAlign: 'top',
-                    color: '#16a34a',
-                    fontWeight: 'bold',
-                    lineHeight: '20px',
-                  }}
-                >
-                  ✓
-                </td>
-                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
-                  Unlimited training plans
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    width: '20px',
-                    paddingRight: '12px',
-                    verticalAlign: 'top',
-                    color: '#16a34a',
-                    fontWeight: 'bold',
-                    lineHeight: '20px',
-                  }}
-                >
-                  ✓
-                </td>
-                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
-                  Premium training plans library
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    width: '20px',
-                    paddingRight: '12px',
-                    verticalAlign: 'top',
-                    color: '#16a34a',
-                    fontWeight: 'bold',
-                    lineHeight: '20px',
-                  }}
-                >
-                  ✓
-                </td>
-                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
-                  Advanced tracking and logging
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    width: '20px',
-                    paddingRight: '12px',
-                    verticalAlign: 'top',
-                    color: '#16a34a',
-                    fontWeight: 'bold',
-                    lineHeight: '20px',
-                  }}
-                >
-                  ✓
-                </td>
-                <td style={{ lineHeight: '20px' }}>
-                  Exercise videos and instructions
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <PremiumBenefitsTable items={PREMIUM_BENEFITS_EMAIL} />
         </EmailCard>
 
         <EmailButton href={upgradeUrl}>Continue with {packageName}</EmailButton>
@@ -356,87 +278,7 @@ export function WelcomeEmail({
         <EmailText>Your premium membership includes:</EmailText>
 
         <EmailCard>
-          <table
-            role="presentation"
-            cellPadding={0}
-            cellSpacing={0}
-            border={0}
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-            }}
-          >
-            <tbody>
-              <tr>
-                <td
-                  style={{
-                    width: '20px',
-                    paddingRight: '12px',
-                    verticalAlign: 'top',
-                    color: '#16a34a',
-                    fontWeight: 'bold',
-                    lineHeight: '20px',
-                  }}
-                >
-                  ✓
-                </td>
-                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
-                  Unlimited training plans
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    width: '20px',
-                    paddingRight: '12px',
-                    verticalAlign: 'top',
-                    color: '#16a34a',
-                    fontWeight: 'bold',
-                    lineHeight: '20px',
-                  }}
-                >
-                  ✓
-                </td>
-                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
-                  Premium training plans library
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    width: '20px',
-                    paddingRight: '12px',
-                    verticalAlign: 'top',
-                    color: '#16a34a',
-                    fontWeight: 'bold',
-                    lineHeight: '20px',
-                  }}
-                >
-                  ✓
-                </td>
-                <td style={{ paddingBottom: '12px', lineHeight: '20px' }}>
-                  Advanced tracking and logging
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    width: '20px',
-                    paddingRight: '12px',
-                    verticalAlign: 'top',
-                    color: '#16a34a',
-                    fontWeight: 'bold',
-                    lineHeight: '20px',
-                  }}
-                >
-                  ✓
-                </td>
-                <td style={{ lineHeight: '20px' }}>
-                  Exercise videos and instructions
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <PremiumBenefitsTable items={PREMIUM_BENEFITS_EMAIL} />
         </EmailCard>
 
         <EmailButton href={dashboardUrl}>Start Training Now</EmailButton>
@@ -452,6 +294,48 @@ export function WelcomeEmail({
       </EmailContent>
       <EmailFooter companyName="Hypro" />
     </EmailWrapper>
+  )
+}
+
+function PremiumBenefitsTable({ items }: { items: readonly string[] }) {
+  return (
+    <table
+      role="presentation"
+      cellPadding={0}
+      cellSpacing={0}
+      border={0}
+      style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+      }}
+    >
+      <tbody>
+        {items.map((item, idx) => (
+          <tr key={`${idx}-${item}`}>
+            <td
+              style={{
+                width: '20px',
+                paddingRight: '12px',
+                verticalAlign: 'top',
+                color: '#16a34a',
+                fontWeight: 'bold',
+                lineHeight: '20px',
+              }}
+            >
+              ✓
+            </td>
+            <td
+              style={{
+                paddingBottom: idx === items.length - 1 ? undefined : '12px',
+                lineHeight: '20px',
+              }}
+            >
+              {item}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 

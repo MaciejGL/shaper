@@ -1,3 +1,6 @@
+import { PREMIUM_BENEFITS_EMAIL } from '@/config/premium-features'
+import { SUBSCRIPTION_CONFIG } from '@/config/subscription-config'
+
 import {
   EmailButton,
   EmailCard,
@@ -46,21 +49,12 @@ export const NewUserWelcomeEmail = ({
         >
           Want the complete experience? Full access unlocks:
         </EmailText>
-        <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
-          • Progress photos and body measurements
-        </EmailText>
-        <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
-          • Automatic PR detection on your lifts
-        </EmailText>
-        <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
-          • Muscle volume tracking with recommendations
-        </EmailText>
-        <EmailText size="14px" color="muted" style={{ marginBottom: '8px' }}>
-          • Premium training plans built for your goals
-        </EmailText>
-        <EmailText size="14px" color="muted" style={{ marginBottom: '0' }}>
-          • 7-day free trial to try everything
-        </EmailText>
+        <EmailBenefitsTable
+          items={[
+            ...PREMIUM_BENEFITS_EMAIL,
+            `${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day free trial to try everything`,
+          ]}
+        />
       </EmailCard>
 
       <EmailButton href={upgradeUrl}>See Full Access Options</EmailButton>
@@ -74,3 +68,46 @@ export const NewUserWelcomeEmail = ({
     <EmailFooter companyName="Hypro" />
   </EmailWrapper>
 )
+
+function EmailBenefitsTable({ items }: { items: readonly string[] }) {
+  return (
+    <table
+      role="presentation"
+      cellPadding={0}
+      cellSpacing={0}
+      border={0}
+      style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+      }}
+    >
+      <tbody>
+        {items.map((item, idx) => (
+          <tr key={`${idx}-${item}`}>
+            <td
+              style={{
+                width: '14px',
+                paddingRight: '10px',
+                verticalAlign: 'top',
+                color: '#71717a',
+                lineHeight: '20px',
+              }}
+            >
+              •
+            </td>
+            <td
+              style={{
+                paddingBottom: idx === items.length - 1 ? undefined : '8px',
+                color: '#71717a',
+                lineHeight: '20px',
+                fontSize: '14px',
+              }}
+            >
+              {item}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
