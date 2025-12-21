@@ -1,28 +1,17 @@
 'use client'
 
-import { Download } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select'
 import type {
   GQLGetMyNutritionPlanQuery,
   GQLGetMyNutritionPlansQuery,
 } from '@/generated/graphql-client'
-import {
-  downloadPDF,
-  generateFilename,
-  isNativeApp,
-  openPdfInBrowser,
-} from '@/lib/pdf/pdf-generator'
-
-import { NutritionPlanPDF } from './pdf/nutrition-plan-pdf'
 
 interface NutritionPlanSelectorProps {
   onPlanSelect: (planId: string | null) => void
@@ -44,36 +33,6 @@ export function NutritionPlanSelector({
   const [localSelectedPlan, setLocalSelectedPlan] = useState<string | null>(
     null,
   )
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
-
-  const handleExportPDF = async () => {
-    if (!nutritionPlan) return
-
-    // On mobile: open server-generated PDF in system browser
-    // This provides native PDF viewing with download/share options
-    if (isNativeApp()) {
-      openPdfInBrowser(`/api/pdf/nutrition-plan/${nutritionPlan.id}`)
-      return
-    }
-
-    // On web: generate PDF client-side
-    setIsGeneratingPDF(true)
-    try {
-      const filename = generateFilename({
-        prefix: `Nutrition Plan - ${nutritionPlan.name}`,
-        skipTimestamp: true,
-      })
-
-      await downloadPDF(
-        <NutritionPlanPDF nutritionPlan={nutritionPlan} />,
-        filename,
-      )
-    } catch (error) {
-      console.error('Failed to generate PDF:', error)
-    } finally {
-      setIsGeneratingPDF(false)
-    }
-  }
 
   // Sort plans by creation date (newest first)
   const sortedPlans = [...nutritionPlans].sort((a, b) => {
@@ -128,24 +87,37 @@ export function NutritionPlanSelector({
   }
 
   const effectiveSelectedPlan = selectedPlanId || localSelectedPlan
+  const selectedPlanMeta = effectiveSelectedPlan
+    ? sortedPlans.find((p) => p.id === effectiveSelectedPlan) ?? null
+    : null
+
+  const coachName = nutritionPlan?.trainer
+    ? `${nutritionPlan.trainer.firstName} ${nutritionPlan.trainer.lastName}`
+    : null
 
   return (
-    <div className="grid grid-cols-[1fr_auto] items-center gap-2 dark">
+    <div className="dark">
       <Select
         value={effectiveSelectedPlan || ''}
         onValueChange={handlePlanChange}
       >
-        <div className="flex">
-          <SelectTrigger
-            variant="default"
-            className="truncate overflow-hidden bg-blue-200 grow"
-          >
-            <SelectValue
-              placeholder="Select a nutrition plan"
-              className="truncate overflow-hidden"
-            />
-          </SelectTrigger>
-        </div>
+        <SelectTrigger
+          variant="default"
+          size="xl"
+          className="w-full min-w-0 h-auto py-2"
+        >
+          <div className="flex flex-col items-start text-left w-full min-w-0">
+            <span className="text-xs text-muted-foreground">Nutrition plan</span>
+            <span className="text-lg font-semibold leading-snug truncate w-full mt-2">
+              {selectedPlanMeta?.name ?? 'Select a nutrition plan'}
+            </span>
+            {coachName && (
+              <span className="text-sm text-muted-foreground mt-1">
+                Set by {coachName}
+              </span>
+            )}
+          </div>
+        </SelectTrigger>
         <SelectContent>
           {sortedPlans.map((plan) => (
             <SelectItem key={plan.id} value={plan.id}>
@@ -156,17 +128,6 @@ export function NutritionPlanSelector({
           ))}
         </SelectContent>
       </Select>
-      <Button
-        variant="outline"
-        size="icon-lg"
-        iconOnly={<Download className="dark:text-white" />}
-        onClick={handleExportPDF}
-        loading={isGeneratingPDF}
-        disabled={isGeneratingPDF}
-        className="dark"
-      >
-        Export to PDF
-      </Button>
     </div>
   )
 }

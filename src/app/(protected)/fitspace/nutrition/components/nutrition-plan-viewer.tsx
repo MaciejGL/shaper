@@ -1,17 +1,25 @@
 'use client'
 
-import { Salad } from 'lucide-react'
+import { Download, Salad } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Divider } from '@/components/divider'
 import { EmptyStateCard } from '@/components/empty-state-card'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
+import {
+  downloadPDF,
+  generateFilename,
+  isNativeApp,
+  openPdfInBrowser,
+} from '@/lib/pdf/pdf-generator'
 
 import { DayMealsAccordion, DayMealsHeader } from './day-meals-accordion'
-import { ShoppingList } from './shopping-list'
+import { NutritionPlanPDF } from './pdf/nutrition-plan-pdf'
+import { ShoppingListDrawer } from './shopping-list-drawer'
 
 interface NutritionPlanViewerProps {
   nutritionPlan?: GQLGetMyNutritionPlanQuery['nutritionPlan'] | null
@@ -23,8 +31,35 @@ export function NutritionPlanViewer({
   nutritionPlan,
 }: NutritionPlanViewerProps) {
   const [activeDay, setActiveDay] = useState<string>('')
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
   const days = useMemo(() => nutritionPlan?.days || [], [nutritionPlan])
+
+  const handleDownloadPlan = async () => {
+    if (!nutritionPlan) return
+
+    if (isNativeApp()) {
+      openPdfInBrowser(`/api/pdf/nutrition-plan/${nutritionPlan.id}`)
+      return
+    }
+
+    setIsGeneratingPDF(true)
+    try {
+      const filename = generateFilename({
+        prefix: `Nutrition Plan - ${nutritionPlan.name}`,
+        skipTimestamp: true,
+      })
+
+      await downloadPDF(
+        <NutritionPlanPDF nutritionPlan={nutritionPlan} />,
+        filename,
+      )
+    } catch (error) {
+      console.error('Failed to generate PDF:', error)
+    } finally {
+      setIsGeneratingPDF(false)
+    }
+  }
 
   useEffect(() => {
     if (days.length > 0 && !activeDay) {
@@ -74,7 +109,18 @@ export function NutritionPlanViewer({
               <DayMealsAccordion day={day} />
               <Divider className="mb-6" />
 
-              <ShoppingList day={day} planId={nutritionPlan.id} />
+              <Button
+                variant="secondary"
+                className="w-full"
+                iconStart={<Download />}
+                onClick={handleDownloadPlan}
+                loading={isGeneratingPDF}
+                disabled={isGeneratingPDF}
+              >
+                Download plan
+              </Button>
+
+              <ShoppingListDrawer day={day} planId={nutritionPlan.id} />
             </div>
           </TabsContent>
         ))}

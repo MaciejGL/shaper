@@ -4,12 +4,6 @@ import { Minus, Plus } from 'lucide-react'
 import { startTransition, useEffect, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
@@ -35,7 +29,6 @@ interface ShoppingListProps {
 export function ShoppingList({ day, planId }: ShoppingListProps) {
   const { formatIngredient } = useCookingUnits()
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set())
-  const [value, setValue] = useState<string | undefined>(undefined)
   const [portionMultiplier, setPortionMultiplier] = useState(1)
 
   // Create unique storage key for this plan and day
@@ -132,111 +125,102 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
   ).length
 
   return (
-    <Accordion type="single" collapsible value={value} onValueChange={setValue}>
-      <AccordionItem value="shopping-list">
-        <AccordionTrigger variant="default">
-          <div className="text-sm flex items-center justify-between w-full">
-            <p>Shopping List</p>
-            <span className="text-muted-foreground font-normal">
-              {checkedCount}/{aggregatedIngredients.length} items
-            </span>
-          </div>
-        </AccordionTrigger>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          {checkedCount}/{aggregatedIngredients.length} items
+        </p>
 
-        <AccordionContent>
-          <div className="p-4">
-            <div className="space-y-3">
-              {/* Portion multiplier */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 ml-auto">
-                  <Button
-                    variant="secondary"
-                    size="icon-sm"
-                    onClick={decrementPortions}
-                    disabled={portionMultiplier <= 1}
-                    iconOnly={<Minus />}
-                  />
+        <div>
+          <p className="text-sm text-muted-foreground">Portions</p>
 
-                  <AnimateNumber
-                    value={portionMultiplier}
-                    duration={200}
-                    className="text-xl font-bold text-primary"
-                  />
-                  <Button
-                    variant="secondary"
-                    size="icon-sm"
-                    onClick={incrementPortions}
-                    iconOnly={<Plus />}
-                  />
-                </div>
-                {checkedCount > 0 && (
-                  <div className="flex justify-end">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={clearAllChecked}
-                      className="text-xs"
-                    >
-                      Clear All
-                    </Button>
-                  </div>
-                )}
-              </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon-md"
+              onClick={decrementPortions}
+              disabled={portionMultiplier <= 1}
+              iconOnly={<Minus />}
+              aria-label="Decrease portions"
+            >
+              Decrease
+            </Button>
 
-              <div className="space-y-2">
-                {aggregatedIngredients
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((ingredient) => {
-                    const isChecked = checkedItems.has(ingredient.id)
-                    return (
-                      <div
-                        key={ingredient.id}
-                        className={cn(
-                          'grid grid-cols-[24px_1fr_auto_auto] items-end gap-3 p-2 rounded-lg transition-all border',
-                          isChecked
-                            ? 'bg-muted/50 opacity-60'
-                            : 'hover:bg-muted/30',
-                        )}
-                        onClick={() =>
-                          handleItemCheck(ingredient.id, !isChecked)
-                        }
-                      >
-                        <Checkbox
-                          checked={isChecked}
-                          onCheckedChange={(checked) =>
-                            handleItemCheck(ingredient.id, Boolean(checked))
-                          }
-                          className="flex-shrink-0 self-center"
-                        />
-                        <span
-                          className={cn(
-                            'flex-1 grow-[2]',
-                            isChecked
-                              ? 'line-through text-muted-foreground'
-                              : '',
-                          )}
-                        >
-                          {ingredient.name}
-                        </span>
-
-                        <span
-                          className={cn(
-                            'text-sm',
-                            isChecked
-                              ? 'line-through text-muted-foreground'
-                              : 'text-muted-foreground',
-                          )}
-                        >
-                          {ingredient.formattedAmount}
-                        </span>
-                      </div>
-                    )
-                  })}
-              </div>
+            <div className="min-w-6 text-center">
+              <AnimateNumber
+                value={portionMultiplier}
+                duration={200}
+                className="text-xl font-semibold text-foreground"
+              />
             </div>
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon-md"
+              onClick={incrementPortions}
+              iconOnly={<Plus />}
+              aria-label="Increase portions"
+            >
+              Increase
+            </Button>
+
+            {checkedCount > 0 && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={clearAllChecked}
+              >
+                Clear all
+              </Button>
+            )}
           </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {aggregatedIngredients
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((ingredient) => {
+            const isChecked = checkedItems.has(ingredient.id)
+            return (
+              <div
+                key={ingredient.id}
+                className={cn(
+                  'grid grid-cols-[24px_1fr_auto] items-center gap-3 p-3 rounded-xl transition-all border',
+                  isChecked ? 'bg-muted/50 opacity-60' : 'hover:bg-muted/30',
+                )}
+                onClick={() => handleItemCheck(ingredient.id, !isChecked)}
+              >
+                <Checkbox
+                  checked={isChecked}
+                  onCheckedChange={(checked) =>
+                    handleItemCheck(ingredient.id, Boolean(checked))
+                  }
+                  className="flex-shrink-0 self-center"
+                />
+                <span
+                  className={cn(
+                    'text-sm',
+                    isChecked ? 'line-through text-muted-foreground' : '',
+                  )}
+                >
+                  {ingredient.name}
+                </span>
+
+                <span
+                  className={cn(
+                    'text-sm text-muted-foreground',
+                    isChecked ? 'line-through' : '',
+                  )}
+                >
+                  {ingredient.formattedAmount}
+                </span>
+              </div>
+            )
+          })}
+      </div>
+    </div>
   )
 }
