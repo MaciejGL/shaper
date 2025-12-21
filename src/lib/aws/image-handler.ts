@@ -455,13 +455,21 @@ export class ImageHandler {
 
     // Remove protocol and domain to get the file key
     if (cloudFrontDomain && imageUrl.includes(cloudFrontDomain)) {
-      return imageUrl.replace(`https://${cloudFrontDomain}/`, '')
+      let key = imageUrl.replace(`https://${cloudFrontDomain}/`, '')
+      if (key.includes('?')) {
+        key = key.split('?')[0]!
+      }
+      return key
     } else if (imageUrl.includes(s3Domain)) {
-      return imageUrl.replace(`https://${s3Domain}/`, '')
+      let key = imageUrl.replace(`https://${s3Domain}/`, '')
+      if (key.includes('?')) {
+        key = key.split('?')[0]!
+      }
+      return key
     }
 
     // If it's already just a file key, return as is
-    return imageUrl
+    return imageUrl.split('?')[0]!
   }
 
   private static async moveFromTemp(
