@@ -1,9 +1,10 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ChevronsDownIcon, ChevronsUpIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
+import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TRACKED_DISPLAY_GROUPS } from '@/config/muscles'
@@ -153,15 +154,15 @@ function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
             Muscle recovery
           </p>
-          <div className="grid grid-cols-2 gap-2">
-            <AnimatePresence initial={false}>
+          <AnimateChangeInHeight>
+            <motion.div className="grid grid-cols-2 gap-2">
               {visibleRecovery.map((r) => (
                 <motion.div
                   key={r.muscle}
                   layout
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.15 }}
                   className="flex flex-col gap-1.5 border rounded-lg p-3"
                 >
@@ -176,8 +177,8 @@ function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
                   </span>
                 </motion.div>
               ))}
-            </AnimatePresence>
-          </div>
+            </motion.div>
+          </AnimateChangeInHeight>
           {hasMoreRecovery && (
             <div className="flex justify-center mt-2">
               <Button
