@@ -73,7 +73,7 @@ export function MuscleHeatmapSection() {
             <PremiumGate feature="Muscle Heatmap" compact showPartialContent>
               <div>
                 <div className="mb-6 flex justify-between items-end gap-4">
-                  <div className="text-left bg-muted/50 rounded-xl px-3 py-2">
+                  <div className="text-left border rounded-xl px-3 py-2 grow">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                       Total sets
                     </p>

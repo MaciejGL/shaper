@@ -5,6 +5,7 @@ import { ChevronsDownIcon, ChevronsUpIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TRACKED_DISPLAY_GROUPS } from '@/config/muscles'
@@ -130,20 +131,32 @@ function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
       {(analytics.strong.length > 0 || analytics.needsWork.length > 0) && (
         <div className="space-y-2">
           {analytics.strong.length > 0 && (
-            <p className="text-sm">
-              <span className="text-amber-600 dark:text-amber-500 font-medium">
-                Worked hardest:{' '}
-              </span>
-              <span>{analytics.strong.join(', ')}</span>
-            </p>
+            <div className="space-y-1">
+              <p className="text-sm text-amber-600 dark:text-amber-500 font-medium">
+                Worked hardest:
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {analytics.strong.map((m) => (
+                  <Badge key={m} variant="secondary">
+                    {m}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           )}
           {analytics.needsWork.length > 0 && (
-            <p className="text-sm">
-              <span className="text-green-600 dark:text-green-400 font-medium">
-                Needs more volume:{' '}
-              </span>
-              <span>{analytics.needsWork.join(', ')}</span>
-            </p>
+            <div className="space-y-1">
+              <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                Needs more volume:
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {analytics.needsWork.map((m) => (
+                  <Badge key={m} variant="secondary">
+                    {m}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}
