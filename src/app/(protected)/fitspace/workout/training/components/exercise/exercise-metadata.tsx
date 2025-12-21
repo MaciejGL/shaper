@@ -187,6 +187,7 @@ export function ExerciseMetadata({
                       height={384}
                       className="object-cover"
                       priority={isPriority}
+                      fetchPriority={isPriority ? 'high' : 'auto'}
                       sizes="(max-width: 768px) 50vw, 33vw"
                     />
                   </div>

@@ -12,10 +12,11 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   usePostHogUserEnhanced()
 
   useEffect(() => {
-    const init = async () => {
-      await initPostHog()
-    }
-    init()
+    const timeoutId = window.setTimeout(() => {
+      initPostHog()
+    }, 2000)
+
+    return () => window.clearTimeout(timeoutId)
   }, [])
 
   return (
