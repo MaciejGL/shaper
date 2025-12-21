@@ -91,11 +91,13 @@ function DailyBreakdown({ days }: DailyBreakdownProps) {
 interface ActivityHeatmapProps {
   weekOffset: number
   onWeekOffsetChange: (offset: number) => void
+  showTitle?: boolean
 }
 
 export function ActivityHeatmap({
   weekOffset,
   onWeekOffsetChange,
+  showTitle = true,
 }: ActivityHeatmapProps) {
   const {
     weeks,
@@ -121,7 +123,9 @@ export function ActivityHeatmap({
   return (
     <div className="space-y-[20px] pt-6">
       <div className="mb-4 space-y-1">
-        <h3 className="text-sm font-medium text-muted-foreground">Activity</h3>
+        {showTitle && (
+          <h3 className="text-sm font-medium text-muted-foreground">Activity</h3>
+        )}
         {selectedWeekStats && (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <p className="text-xs font-medium text-foreground">

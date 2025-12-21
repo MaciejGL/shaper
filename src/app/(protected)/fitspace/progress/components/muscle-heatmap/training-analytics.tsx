@@ -20,7 +20,7 @@ function RecoveryDots({ percentRecovered }: { percentRecovered: number }) {
         <div
           key={i}
           className={cn(
-            'size-2 rounded-full transition-colors',
+            'size-2.5 rounded-full transition-colors',
             i < recoveredDots ? 'bg-green-500' : 'bg-amber-500',
           )}
         />
@@ -120,6 +120,42 @@ function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
       {/* Crushing it banner */}
       {/* {analytics.status === 'crushing_it' && <CrushingItBanner />} */}
 
+      {/* AI Insight - only shown when there's something notable */}
+      {analytics.insight && (
+        <div className="py-3 px-4 rounded-lg bg-muted/50 border border-border/50">
+          <p className="text-sm text-foreground/90 leading-relaxed">
+            {analytics.insight}
+          </p>
+        </div>
+      )}
+
+      {/* Recovery */}
+      {analytics.recovery.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Muscle recovery
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {analytics.recovery.slice(0, 8).map((r) => (
+              <div
+                key={r.muscle}
+                className="flex flex-col gap-1.5 border rounded-lg p-3"
+              >
+                <span className="text-sm font-medium truncate flex-1">
+                  {r.muscle}
+                </span>
+                <div className="flex items-center gap-3 shrink-0">
+                  <RecoveryDots percentRecovered={r.percentRecovered} />
+                </div>
+                <span className="text-xs font-medium text-left">
+                  <RecoveryLabel percentRecovered={r.percentRecovered} />
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Strong / Needs Work */}
       {(analytics.strong.length > 0 || analytics.needsWork.length > 0) && (
         <div className="space-y-2">
@@ -139,40 +175,6 @@ function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
               <span>{analytics.needsWork.join(', ')}</span>
             </p>
           )}
-        </div>
-      )}
-
-      {/* AI Insight - only shown when there's something notable */}
-      {analytics.insight && (
-        <div className="py-3 px-4 rounded-lg bg-muted/50 border border-border/50">
-          <p className="text-sm text-foreground/90 leading-relaxed">
-            {analytics.insight}
-          </p>
-        </div>
-      )}
-
-      {/* Recovery */}
-      {analytics.recovery.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Muscle recovery
-          </p>
-          <div className="space-y-2">
-            {analytics.recovery.slice(0, 8).map((r) => (
-              <div
-                key={r.muscle}
-                className="flex items-center justify-between gap-3 py-1"
-              >
-                <span className="text-sm truncate flex-1">{r.muscle}</span>
-                <div className="flex items-center gap-3 shrink-0">
-                  <RecoveryDots percentRecovered={r.percentRecovered} />
-                  <span className="text-xs font-medium w-16 text-right">
-                    <RecoveryLabel percentRecovered={r.percentRecovered} />
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       )}
     </div>

@@ -1,6 +1,5 @@
 'use client'
 
-import { TabsContent } from '@radix-ui/react-tabs'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 
@@ -12,13 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 
-import { ActivityHeatmap } from './activity-heatmap'
 import { HeatmapBodyView } from './heatmap-body-view'
 import { HeatmapLegend } from './heatmap-legend'
 import { SelectedMuscleDetails } from './selected-muscle-details'
+import { TrainingAnalytics } from './training-analytics'
 import { useMuscleHeatmap } from './use-muscle-heatmap'
 import { WeekNavigator } from './week-navigator'
 
@@ -57,12 +56,14 @@ export function MuscleHeatmapSection() {
               <span>week streak</span>
             </div>
           )}
-          <CardTitle>Muscle Heatmap</CardTitle>
-          <div className="flex items-center justify-between gap-2">
-            <CardDescription>Weekly sets per muscle.</CardDescription>
+          <CardTitle>Muscle</CardTitle>
+          <div className="flex items-end justify-between gap-1">
+            <CardDescription>
+              Weekly sets per muscle + recovery insights.
+            </CardDescription>
             <TabsList variant="secondary">
-              <TabsTrigger value="heatmap">By Muscle</TabsTrigger>
-              <TabsTrigger value="day">By Day</TabsTrigger>
+              <TabsTrigger value="heatmap">Volume</TabsTrigger>
+              <TabsTrigger value="recovery">Recovery</TabsTrigger>
             </TabsList>
           </div>
         </CardHeader>
@@ -117,17 +118,9 @@ export function MuscleHeatmapSection() {
               </div>
             </PremiumGate>
           </TabsContent>
-          <TabsContent value="day">
-            <PremiumGate feature="Activity Heatmap" compact showPartialContent>
-              <div>
-                {/* Body Heatmap View */}
-
-                {/* Activity Heatmap */}
-                <ActivityHeatmap
-                  weekOffset={weekOffset}
-                  onWeekOffsetChange={setWeekOffset}
-                />
-              </div>
+          <TabsContent value="recovery" className="pt-4">
+            <PremiumGate feature="Muscle Recovery & Focus" compact>
+              <TrainingAnalytics />
             </PremiumGate>
           </TabsContent>
         </CardContent>
