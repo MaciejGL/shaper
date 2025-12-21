@@ -38,42 +38,26 @@ export function useThemeManager() {
     try {
       const colors = THEME_COLORS[theme]
 
-      // Update status bar (works on both iOS and Android)
+      // Update status bar style (icon contrast) - works on both iOS and Android
       StatusBar.setBarStyle(
         colors.statusBarStyle === 'light' ? 'light-content' : 'dark-content',
         true,
       )
 
-      if (Platform.OS === 'android') {
-        StatusBar.setBackgroundColor(colors.statusBarBackground, true)
-      }
-
-      // Update Android navigation bar
+      // Update Android navigation bar button style (icon contrast only)
+      // Background colors are handled by SafeAreaView in edge-to-edge mode
       if (Platform.OS === 'android') {
         try {
-          // Set navigation bar button style (this works with edge-to-edge)
           const buttonStyle = theme === 'dark' ? 'light' : 'dark'
           await NavigationBar.setButtonStyleAsync(buttonStyle)
-
-          // Try to set background color, but don't warn if it fails due to edge-to-edge
-          try {
-            await NavigationBar.setBackgroundColorAsync(
-              colors.navigationBarBackground,
-            )
-          } catch (bgError) {
-            // Silently ignore background color errors in edge-to-edge mode
-            console.log(
-              '📱 Navigation bar background not set (edge-to-edge mode)',
-            )
-          }
         } catch (error) {
-          console.warn('⚠️ Failed to update Android navigation bar:', error)
+          console.warn('Failed to update Android navigation bar style:', error)
         }
       }
 
       setCurrentTheme(theme)
     } catch (error) {
-      console.error('❌ Error updating theme:', error)
+      console.error('Error updating theme:', error)
     }
   }, [])
 

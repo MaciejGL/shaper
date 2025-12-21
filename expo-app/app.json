@@ -2,7 +2,7 @@
   "expo": {
     "name": "Hypro",
     "slug": "hypertro",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "hypro",
@@ -15,6 +15,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "backgroundColor": "#000000",
       "supportsTablet": false,
       "bundleIdentifier": "app.hypertro.mobile",
       "googleServicesFile": "./GoogleService-Info.plist",
@@ -40,7 +41,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#000000"
       },
       "package": "app.hypertro.mobile",
       "googleServicesFile": "./google-services.json",

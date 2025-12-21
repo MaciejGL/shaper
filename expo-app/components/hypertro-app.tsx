@@ -136,10 +136,7 @@ function HyproAppContent({ authToken }: HyproAppProps) {
   return (
     <PushNotificationManager authToken={currentAuthToken}>
       <View style={styles.container}>
-        <StatusBar
-          style={colors.statusBarStyle}
-          backgroundColor={colors.statusBarBackground}
-        />
+        <StatusBar style={colors.statusBarStyle} />
         <SafeAreaView
           style={{ backgroundColor: colors.statusBarBackground }}
           edges={['top']}
