@@ -42,7 +42,6 @@ export function EquipmentFilters({
                   src={equipmentImages[equipmentItem]}
                   width={100}
                   height={100}
-                  priority
                   className="object-contain size-full overflow-hidden"
                 />
               </div>
@@ -87,7 +86,6 @@ export function EquipmentFilters({
               src={equipmentImages[equipmentItem]}
               width={200}
               height={200}
-              priority
               className="object-cover overflow-hidden size-full"
             />
           </div>

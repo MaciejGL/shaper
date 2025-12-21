@@ -70,12 +70,6 @@ export const NavigationWrapper = ({
       const { weekId: defaultWeekId, dayId: defaultDayId } =
         getDefaultSelection(planToUse)
 
-      console.info('🎯 Auto-selecting default day:', {
-        defaultWeekId,
-        defaultDayId,
-        usingFreshData: !!navigationDataQuery?.getWorkoutNavigation?.plan,
-      })
-
       if (defaultWeekId && defaultDayId) {
         startTransition(() => {
           setWeekId(defaultWeekId)

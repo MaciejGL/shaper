@@ -29,10 +29,19 @@ export const UserAvatar = ({
 
   // Determine which image to display (custom image has priority over gender-based avatar)
   const displayImage = imageUrl || (withFallbackAvatar ? fallbackImage : null)
+  const displayImageOptimized =
+    displayImage && displayImage.startsWith('http')
+      ? `/_next/image?url=${encodeURIComponent(displayImage)}&w=192&q=75`
+      : displayImage
 
   return (
     <Avatar className={cn('size-20 aspect-square', className)}>
-      {displayImage && <AvatarImage src={displayImage} />}
+      {displayImageOptimized && (
+        <AvatarImage
+          src={displayImageOptimized}
+          alt={`${firstName} ${lastName}`}
+        />
+      )}
       <AvatarFallback
         className={cn('text-xs text-sidebar-foreground', className)}
       >

@@ -8,6 +8,7 @@ import {
   Replace,
   TrashIcon,
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
@@ -43,11 +44,22 @@ import {
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 
-import { SwapExerciseDrawer } from '../swap-exercise-drawer'
-
-import { ExerciseDetailDrawer } from './exercise-detail-drawer'
-import { ExerciseNotebook } from './exercise-notebook'
 import { ExerciseMetadataProps } from './types'
+
+const SwapExerciseDrawer = dynamic(
+  () => import('../swap-exercise-drawer').then((m) => m.SwapExerciseDrawer),
+  { ssr: false },
+)
+
+const ExerciseDetailDrawer = dynamic(
+  () => import('./exercise-detail-drawer').then((m) => m.ExerciseDetailDrawer),
+  { ssr: false },
+)
+
+const ExerciseNotebook = dynamic(
+  () => import('./exercise-notebook').then((m) => m.ExerciseNotebook),
+  { ssr: false },
+)
 
 export function ExerciseMetadata({
   exercise,
@@ -159,22 +171,28 @@ export function ExerciseMetadata({
           className="max-w-md md:w-[calc(100%+2rem)] bg-black py-2 space-y-3"
         >
           <CarouselContent className="ml-0 pr-2">
-            {exercise.images.map((image) => (
-              <CarouselItem key={image.id} className="basis-1/2 px-0">
-                <div className="relative overflow-hidden aspect-square rounded-md ml-2">
-                  <Image
-                    src={image.url || image.medium || image.thumbnail || ''}
-                    alt={exercise.name}
-                    width={500}
-                    height={500}
-                    className="object-cover"
-                    quality={100}
-                    priority={true}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-              </CarouselItem>
-            ))}
+            {exercise.images.map((image, imageIndex) => {
+              const src = image.medium || image.url
+              if (!src) return null
+
+              const isPriority = exercise.order === 1 && imageIndex < 2
+
+              return (
+                <CarouselItem key={image.id} className="basis-1/2 px-0">
+                  <div className="relative overflow-hidden aspect-square rounded-md ml-2">
+                    <Image
+                      src={src}
+                      alt={exercise.name}
+                      width={384}
+                      height={384}
+                      className="object-cover"
+                      priority={isPriority}
+                      sizes="(max-width: 768px) 50vw, 33vw"
+                    />
+                  </div>
+                </CarouselItem>
+              )
+            })}
             <div className="w-2 shrink-0" />
           </CarouselContent>
 

@@ -2,13 +2,18 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { BarChart, Check, ChevronDown, ChevronsUpDown } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { ProgressCircle } from '@/components/ui/progress-circle'
 import { cn } from '@/lib/utils'
 
-import { WorkoutSummaryDrawer } from './workout-summary-drawer'
+const WorkoutSummaryDrawer = dynamic(
+  () =>
+    import('./workout-summary-drawer').then((m) => m.WorkoutSummaryDrawer),
+  { ssr: false },
+)
 
 interface Exercise {
   id: string

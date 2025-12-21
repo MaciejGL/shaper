@@ -268,7 +268,6 @@ export function QuickWorkoutAiWizard(props: QuickWorkoutAiWizardProps) {
               alt={equipment.label}
               width={200}
               height={200}
-              priority
             />
           ))}
         </div>
