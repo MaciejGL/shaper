@@ -3,9 +3,11 @@
 import { Play } from 'lucide-react'
 import { useState } from 'react'
 
-import { getYouTubeEmbedUrl } from '@/lib/get-youtube-embed-url'
+import { cn } from '@/lib/utils'
 
-import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
+import { buttonVariants } from './ui/button'
+import { Dialog, DialogTrigger } from './ui/dialog'
+import { VideoPreviewContent } from './video-preview'
 
 interface VideoOverlayButtonProps {
   videoUrl: string
@@ -30,21 +32,14 @@ export function VideoOverlayButton({ videoUrl }: VideoOverlayButtonProps) {
           <Play className="size-3 fill-white stroke-white" />
         </button>
       </DialogTrigger>
-      <DialogContent
-        dialogTitle="Exercise Video"
-        className="max-w-screen max-h-screen aspect-video p-0 border-none rounded-md"
-      >
-        <iframe
-          src={getYouTubeEmbedUrl(videoUrl, {
-            autoplay: true,
-            mute: false,
-            minimal: false,
-          })}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-          allowFullScreen
-          className="w-full h-full rounded-md"
-        />
-      </DialogContent>
+      <VideoPreviewContent
+        url={videoUrl}
+        fullScreen
+        classNameCloseButton={cn(
+          buttonVariants({ variant: 'tertiary', size: 'icon-lg' }),
+          'top-2 right-2 absolute',
+        )}
+      />
     </Dialog>
   )
 }
