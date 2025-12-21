@@ -1,6 +1,11 @@
+'use client'
+
+import Image from 'next/image'
+import { useState } from 'react'
+
 import { cn } from '@/lib/utils'
 
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
+import { Avatar, AvatarFallback } from './ui/avatar'
 
 export const UserAvatar = ({
   imageUrl,
@@ -17,6 +22,8 @@ export const UserAvatar = ({
   withFallbackAvatar?: boolean
   className?: string
 }) => {
+  const [isImageError, setIsImageError] = useState(false)
+
   // Determine the gender-based fallback image
   let fallbackImage = null
   if (sex?.toLowerCase() === 'female') {
@@ -29,21 +36,27 @@ export const UserAvatar = ({
 
   // Determine which image to display (custom image has priority over gender-based avatar)
   const displayImage = imageUrl || (withFallbackAvatar ? fallbackImage : null)
-  const displayImageOptimized =
-    displayImage && displayImage.startsWith('http')
-      ? `/_next/image?url=${encodeURIComponent(displayImage)}&w=192&q=75`
-      : displayImage
+  const shouldShowImage = Boolean(displayImage) && !isImageError
 
   return (
     <Avatar className={cn('size-20 aspect-square', className)}>
-      {displayImageOptimized && (
-        <AvatarImage
-          src={displayImageOptimized}
+      {shouldShowImage && displayImage && (
+        <Image
+          src={displayImage}
           alt={`${firstName} ${lastName}`}
+          width={80}
+          height={80}
+          quality={50}
+          className="aspect-square size-full object-cover"
+          onError={() => setIsImageError(true)}
         />
       )}
       <AvatarFallback
-        className={cn('text-xs text-sidebar-foreground', className)}
+        className={cn(
+          'text-xs text-sidebar-foreground',
+          className,
+          shouldShowImage && 'hidden',
+        )}
       >
         {fallbackInitials}
       </AvatarFallback>

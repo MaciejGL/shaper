@@ -10,8 +10,7 @@ import { ProgressCircle } from '@/components/ui/progress-circle'
 import { cn } from '@/lib/utils'
 
 const WorkoutSummaryDrawer = dynamic(
-  () =>
-    import('./workout-summary-drawer').then((m) => m.WorkoutSummaryDrawer),
+  () => import('./workout-summary-drawer').then((m) => m.WorkoutSummaryDrawer),
   { ssr: false },
 )
 
