@@ -293,13 +293,20 @@ export function Exercise({
           onTimerComplete={handleTimerComplete}
         />
       </div>
-      <ExerciseSets
-        exercise={exercise}
-        previousLogs={exercisePreviousLogs?.sets}
-        onSetCompleted={handleSetCompleted}
-        onSetUncompleted={handleSetUncompleted}
-        onSetsLogsChange={handleSetsLogsChange}
-      />
+      <div
+        style={{
+          contentVisibility: 'auto',
+          containIntrinsicSize: '1px 800px',
+        }}
+      >
+        <ExerciseSets
+          exercise={exercise}
+          previousLogs={exercisePreviousLogs?.sets}
+          onSetCompleted={handleSetCompleted}
+          onSetUncompleted={handleSetUncompleted}
+          onSetsLogsChange={handleSetsLogsChange}
+        />
+      </div>
     </div>
   )
 }
