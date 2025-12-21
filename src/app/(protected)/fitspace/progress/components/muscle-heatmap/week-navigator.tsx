@@ -43,18 +43,18 @@ export function WeekNavigator({
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant="ghost"
-        size="icon-lg"
+        variant="tertiary"
+        size="icon-md"
         iconOnly={<ChevronLeft className="!size-5" />}
         onClick={onPrevious}
         aria-label="Previous week"
       />
-      <span className="min-w-[100px] text-center text-sm font-medium flex flex-col items-center justify-center">
-        Week of {formatWeekRange()}
+      <span className="min-w-[80px] text-center text-sm font-medium flex flex-col items-center justify-center">
+        {formatWeekRange()}
       </span>
       <Button
-        variant="ghost"
-        size="icon-lg"
+        variant="tertiary"
+        size="icon-md"
         iconOnly={<ChevronRight className="!size-5" />}
         onClick={onNext}
         disabled={weekOffset === 0}

@@ -29,8 +29,8 @@ export function MuscleHeatmapSection() {
     muscleIntensity,
     muscleProgress,
     streakWeeks,
+    totalSets,
     weekOffset,
-    setWeekOffset,
     isCurrentWeek,
     weekStartDate,
     weekEndDate,
@@ -56,23 +56,31 @@ export function MuscleHeatmapSection() {
               <span>week streak</span>
             </div>
           )}
-          <CardTitle>Muscle</CardTitle>
           <div className="flex items-end justify-between gap-1">
-            <CardDescription>
-              Weekly sets per muscle + recovery insights.
-            </CardDescription>
+            <CardTitle>Muscle</CardTitle>
             <TabsList variant="secondary">
               <TabsTrigger value="heatmap">Volume</TabsTrigger>
               <TabsTrigger value="recovery">Recovery</TabsTrigger>
             </TabsList>
           </div>
+          <CardDescription>
+            Weekly sets per muscle + recovery insights.
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="flex flex-col">
           <TabsContent value="heatmap" className="pt-4 flex flex-col gap-4">
             <PremiumGate feature="Muscle Heatmap" compact showPartialContent>
               <div>
-                <div className="mx-auto mb-6 w-max">
+                <div className="mb-6 flex justify-between items-end gap-4">
+                  <div className="text-left bg-muted/50 rounded-xl px-3 py-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                      Total sets
+                    </p>
+                    <p className="text-2xl font-bold tabular-nums">
+                      {totalSets}
+                    </p>
+                  </div>
                   <WeekNavigator
                     weekStartDate={weekStartDate}
                     weekEndDate={weekEndDate}
