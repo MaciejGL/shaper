@@ -66,15 +66,15 @@ function EmptyState() {
   )
 }
 
-function CrushingItBanner() {
-  return (
-    <div className="py-3 px-4 rounded-lg bg-green-500/10 border border-green-500/20">
-      <p className="text-sm text-green-700 dark:text-green-300 font-medium text-center">
-        You&apos;re crushing it this week!
-      </p>
-    </div>
-  )
-}
+// function CrushingItBanner() {
+//   return (
+//     <div className="py-3 px-4 rounded-lg bg-green-500/10 border border-green-500/20">
+//       <p className="text-sm text-green-700 dark:text-green-300 font-medium text-center">
+//         You&apos;re crushing it this week!
+//       </p>
+//     </div>
+//   )
+// }
 
 function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
   const cappedTrend = Math.max(-200, Math.min(200, analytics.trendPercent))
@@ -118,7 +118,7 @@ function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
       </div>
 
       {/* Crushing it banner */}
-      {analytics.status === 'crushing_it' && <CrushingItBanner />}
+      {/* {analytics.status === 'crushing_it' && <CrushingItBanner />} */}
 
       {/* Strong / Needs Work */}
       {(analytics.strong.length > 0 || analytics.needsWork.length > 0) && (
