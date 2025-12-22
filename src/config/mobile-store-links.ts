@@ -8,5 +8,3 @@ export const MOBILE_STORE_LINKS = {
     url: 'https://play.google.com/store/apps/details?id=app.hypertro.mobile',
   },
 } as const
-
-

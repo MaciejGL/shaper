@@ -3,17 +3,14 @@
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
-import { MOBILE_STORE_LINKS } from '@/config/mobile-store-links'
-
 import { Button } from '@/components/ui/button'
+import { MOBILE_STORE_LINKS } from '@/config/mobile-store-links'
 
 interface MobileAppBannerProps {
   className?: string
 }
 
-export function MobileAppBanner({
-  className,
-}: MobileAppBannerProps) {
+export function MobileAppBanner({ className }: MobileAppBannerProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'other'>(
     'other',
@@ -42,7 +39,8 @@ export function MobileAppBanner({
       isMobile &&
       !isInApp &&
       ((nextDeviceType === 'ios' && MOBILE_STORE_LINKS.ios.isAvailable) ||
-        (nextDeviceType === 'android' && MOBILE_STORE_LINKS.android.isAvailable))
+        (nextDeviceType === 'android' &&
+          MOBILE_STORE_LINKS.android.isAvailable))
 
     setIsVisible(shouldShow)
   }, [])
