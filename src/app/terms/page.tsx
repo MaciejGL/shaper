@@ -336,8 +336,8 @@ export default async function TermsOfServicePage() {
                 <div className="bg-muted/30 p-6 rounded-lg">
                   <ul className="space-y-2 text-muted-foreground text-sm">
                     <li>
-                      Available on iOS App Store and Google Play Store, subject
-                      to respective platform terms
+                      When available, distributed via the iOS App Store and
+                      Google Play Store, subject to respective platform terms
                     </li>
                     <li>
                       App permissions (camera, notifications) are clearly
