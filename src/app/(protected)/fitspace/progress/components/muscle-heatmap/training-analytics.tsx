@@ -61,16 +61,6 @@ function AnalyticsSkeleton() {
   )
 }
 
-function EmptyState() {
-  return (
-    <div className="p-4 rounded-xl border bg-card text-center">
-      <p className="text-sm text-muted-foreground">
-        No workouts logged this week yet. Get moving!
-      </p>
-    </div>
-  )
-}
-
 // function CrushingItBanner() {
 //   return (
 //     <div className="py-3 px-4 rounded-lg bg-green-500/10 border border-green-500/20">
@@ -102,11 +92,6 @@ function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
       return a.hours - b.hours
     })
   }, [analytics.recovery])
-
-  // Empty state
-  if (analytics.status === 'empty') {
-    return <EmptyState />
-  }
 
   const hasMoreRecovery = orderedRecovery.length > SHOW_ALL_RECOVERY_THRESHOLD
   const visibleRecovery = showAllRecovery
