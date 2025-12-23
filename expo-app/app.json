@@ -29,6 +29,8 @@
             }
           }
         },
+        "UIDeviceFamily": [1],
+        "UIRequiredDeviceCapabilities": ["arm64", "telephony"],
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
           {
