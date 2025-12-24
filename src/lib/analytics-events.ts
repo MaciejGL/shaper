@@ -24,7 +24,7 @@ export type AnalyticsEventName =
 // Event Property Types
 // ============================================================================
 
-interface TodayEmptyStateEventProperties {
+type TodayEmptyStateEventProperties = Record<string, unknown> & {
   day_of_week: number
   has_custom_plans: boolean
 }
