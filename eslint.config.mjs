@@ -1,10 +1,11 @@
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
-import { resolve } from 'path'
+import { dirname, resolve } from 'path'
+import { fileURLToPath } from 'url'
 
-// import { fileURLToPath } from 'url'
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
-const project = resolve(process.cwd(), 'tsconfig.json')
+const project = resolve(__dirname, 'tsconfig.json')
 
 // import tailwindcssPlugin from 'eslint-plugin-tailwindcss';
 

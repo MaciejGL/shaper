@@ -78,3 +78,4 @@ export function ShoppingListDrawer({ day, planId }: ShoppingListDrawerProps) {
     </Drawer>
   )
 }
+

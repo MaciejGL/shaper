@@ -22,6 +22,23 @@ export function usePostHogUserEnhanced() {
     }
 
     if (process.env.NODE_ENV !== 'production') {
+      if (status === 'authenticated' && user?.id) {
+        // Determine platform
+        let platform: 'ios' | 'android' | 'web' = 'web'
+        if (isNativeApp) {
+          platform = mobilePlatform === 'ios' ? 'ios' : 'android'
+        }
+
+        // Avoid PII in dev: use internal user id as distinctId, set only minimal props
+        const devDistinctId = `dev:${user.id}`
+        identifyUser(devDistinctId, {
+          userId: user.id,
+          role: user.role,
+          platform,
+        })
+        lastUserIdRef.current = devDistinctId
+        setHasIdentified(true)
+      }
       return
     }
 
