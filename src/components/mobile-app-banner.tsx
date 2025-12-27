@@ -8,9 +8,18 @@ import { MOBILE_STORE_LINKS } from '@/config/mobile-store-links'
 
 interface MobileAppBannerProps {
   className?: string
+  /**
+   * Always show the banner, bypassing device/native app detection.
+   * Useful for pages like account-management where we want to show
+   * download buttons to all web users.
+   */
+  alwaysShow?: boolean
 }
 
-export function MobileAppBanner({ className }: MobileAppBannerProps) {
+export function MobileAppBanner({
+  className,
+  alwaysShow = false,
+}: MobileAppBannerProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'other'>(
     'other',
@@ -35,29 +44,33 @@ export function MobileAppBanner({ className }: MobileAppBannerProps) {
     // Show banner only on mobile devices and not in native app
     const isMobile =
       /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent)
-    const shouldShow =
-      isMobile &&
-      !isInApp &&
-      ((nextDeviceType === 'ios' && MOBILE_STORE_LINKS.ios.isAvailable) ||
-        (nextDeviceType === 'android' &&
-          MOBILE_STORE_LINKS.android.isAvailable))
+    const shouldShow = alwaysShow
+      ? true
+      : isMobile &&
+        !isInApp &&
+        ((nextDeviceType === 'ios' && MOBILE_STORE_LINKS.ios.isAvailable) ||
+          (nextDeviceType === 'android' &&
+            MOBILE_STORE_LINKS.android.isAvailable))
 
     setIsVisible(shouldShow)
-  }, [])
+  }, [alwaysShow])
 
   const openStoreUrl = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
-  const canShowIos = MOBILE_STORE_LINKS.ios.isAvailable
-  const canShowAndroid = MOBILE_STORE_LINKS.android.isAvailable
+  // When alwaysShow is true, bypass isAvailable checks
+  const canShowIos = alwaysShow || MOBILE_STORE_LINKS.ios.isAvailable
+  const canShowAndroid = alwaysShow || MOBILE_STORE_LINKS.android.isAvailable
 
-  const shouldRender =
-    isVisible &&
-    !isNativeApp &&
-    ((deviceType === 'ios' && canShowIos) ||
-      (deviceType === 'android' && canShowAndroid) ||
-      (deviceType === 'other' && (canShowIos || canShowAndroid)))
+  // When alwaysShow is true, skip visibility checks but still hide in native app
+  const shouldRender = alwaysShow
+    ? !isNativeApp
+    : isVisible &&
+      !isNativeApp &&
+      ((deviceType === 'ios' && canShowIos) ||
+        (deviceType === 'android' && canShowAndroid) ||
+        (deviceType === 'other' && (canShowIos || canShowAndroid)))
 
   if (!shouldRender) {
     return null

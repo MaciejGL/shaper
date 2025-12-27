@@ -2,6 +2,8 @@
 
 import { CreditCard, UserRoundCogIcon } from 'lucide-react'
 
+import { MobileAppBanner } from '@/components/mobile-app-banner'
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { PostPaymentSuccessModal } from '@/components/post-payment-success-modal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
@@ -17,6 +19,7 @@ export default function AccountManagementPage() {
   const { user } = useUser()
   const rules = usePaymentRules()
   const { isPostPayment, state, refetch } = usePostPaymentSuccess(user?.id)
+  const { isNativeApp } = useMobileApp()
 
   // In companion mode, don't show "Subscription & Billing" header
   const isCompanionMode = !rules.canShowUpgradeUI && !rules.canLinkToPayment
@@ -35,7 +38,9 @@ export default function AccountManagementPage() {
         <div>
           {/* Header */}
           <div className="mb-8">
-            <ReturnToApp variant="back" redirectUrl="/fitspace/workout" />
+            {isNativeApp ? (
+              <ReturnToApp variant="back" redirectUrl="/fitspace/workout" />
+            ) : null}
             <div className="flex items-center flex-col mb-4 gap-4">
               <div className="size-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex-center shrink-0">
                 <UserRoundCogIcon className="w-6 h-6 text-white" />
@@ -49,6 +54,7 @@ export default function AccountManagementPage() {
                 </p>
               </div>
             </div>
+            <MobileAppBanner alwaysShow className="mx-auto mb-6" />
           </div>
 
           <div className="space-y-8 container-hypertro mx-auto">

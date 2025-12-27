@@ -73,6 +73,7 @@ export const workoutTypeGroups: WorkoutTypeGroup[] = [
   {
     label: 'Split',
     types: [
+      GQLWorkoutType.Split,
       GQLWorkoutType.Back,
       GQLWorkoutType.Arms,
       GQLWorkoutType.Chest,

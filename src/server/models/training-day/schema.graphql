@@ -55,6 +55,7 @@ enum WorkoutType {
   Stretching
 
   # Split
+  Split
   Back
   Arms
   Biceps

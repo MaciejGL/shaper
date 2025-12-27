@@ -2,6 +2,7 @@ import { Main } from '@/components/main'
 import { GQLUserRole } from '@/generated/graphql-server'
 import { getCurrentUser, requireAuth } from '@/lib/getUser'
 
+import { FitspaceNativeGate } from './components/fitspace-native-gate'
 import { MobileNav } from './components/mobile-nav'
 
 export default async function ProtectedLayout({
@@ -15,8 +16,10 @@ export default async function ProtectedLayout({
 
   return (
     <Main user={user}>
-      {children}
-      <MobileNav />
+      <FitspaceNativeGate>
+        {children}
+        <MobileNav />
+      </FitspaceNativeGate>
     </Main>
   )
 }

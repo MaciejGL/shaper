@@ -4116,6 +4116,7 @@ export enum GQLWorkoutType {
   Pull = 'Pull',
   Push = 'Push',
   Quads = 'Quads',
+  Split = 'Split',
   Stretching = 'Stretching',
   Triceps = 'Triceps',
   UpperBody = 'UpperBody'

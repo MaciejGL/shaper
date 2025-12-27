@@ -1,5 +1,6 @@
 'use client'
 
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { useIsMobileDevice } from '@/hooks/use-is-mobile-device'
 
 import { MobileNav } from '../fitspace/components/mobile-nav'
@@ -15,6 +16,9 @@ import { MobileNav } from '../fitspace/components/mobile-nav'
  */
 export function SafeMobileNav() {
   const isMobileDevice = useIsMobileDevice()
+  const { isNativeApp } = useMobileApp()
+
+  if (!isNativeApp) return null
 
   return <MobileNav useDeepLinks={isMobileDevice} />
 }

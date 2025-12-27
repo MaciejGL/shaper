@@ -86,7 +86,8 @@ export const createPlanLoaders = () => ({
       by: ['templateId'],
       where: {
         templateId: { in: planIds as string[] },
-        isTemplate: false, // Only count assigned plans, not templates
+        isTemplate: true, // Only count assigned plans, not templates
+        assignedToId: { not: null }, // Only count plans that are actually assigned to users
       },
       _count: {
         templateId: true,
