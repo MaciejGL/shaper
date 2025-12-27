@@ -54,7 +54,7 @@ export default function AccountManagementPage() {
                 </p>
               </div>
             </div>
-            <MobileAppBanner alwaysShow className="mx-auto mb-6" />
+            <MobileAppBanner alwaysShow className="mx-auto my-12" />
           </div>
 
           <div className="space-y-8 container-hypertro mx-auto">

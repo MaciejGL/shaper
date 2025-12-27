@@ -108,23 +108,23 @@ export function MobileAppBanner({
         )}
 
         {deviceType === 'other' && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-4">
             {canShowIos && (
               <Button
                 onClick={() => openStoreUrl(MOBILE_STORE_LINKS.ios.url)}
-                size="sm"
+                size="xl"
                 iconStart={<AppleIcon />}
               >
-                App Store
+                Download on the App Store
               </Button>
             )}
             {canShowAndroid && (
               <Button
                 onClick={() => openStoreUrl(MOBILE_STORE_LINKS.android.url)}
-                size="sm"
+                size="xl"
                 iconStart={<GooglePlayIcon />}
               >
-                Google Play
+                Download on Google Play
               </Button>
             )}
           </div>
