@@ -43,7 +43,7 @@ export function useSubscribe() {
             options?.returnUrl || `${window.location.origin}/checkout/success`,
           cancelUrl:
             options?.cancelUrl ||
-            `${window.location.origin}/account-management`,
+            `${window.location.origin}/checkout/cancelled`,
           platform: isNativeApp ? platform : undefined,
           extToken,
           extDiagnostics,

@@ -1,15 +1,15 @@
 'use client'
 
-import { CheckCircle, Loader2 } from 'lucide-react'
+import { Loader2, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { BiggyIcon } from '@/components/biggy-icon'
 import { Button } from '@/components/ui/button'
 import { getBaseUrl } from '@/lib/get-base-url'
 
-const TARGET_PATH = 'fitspace/progress?premium_activated=true'
+const TARGET_PATH = 'account-management'
 
-export default function CheckoutSuccessPage() {
+export default function CheckoutCancelledPage() {
   const [showManualButton, setShowManualButton] = useState(false)
 
   useEffect(() => {
@@ -38,16 +38,14 @@ export default function CheckoutSuccessPage() {
     <div className="dark min-h-screen w-screen flex items-center justify-center p-4 bg-background">
       <div className="container-hypertro text-center space-y-6 max-w-sm">
         <div className="flex justify-center">
-          <BiggyIcon icon={CheckCircle} variant="success" size="lg" />
+          <BiggyIcon icon={XCircle} size="lg" />
         </div>
-        <h1 className="text-xl font-bold text-foreground">
-          Payment Successful!
-        </h1>
+        <h1 className="text-xl font-bold text-foreground">Payment Cancelled</h1>
 
         {!showManualButton ? (
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <p>Opening app...</p>
+            <p>Returning to app...</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -55,7 +53,7 @@ export default function CheckoutSuccessPage() {
               Tap below to return to the app
             </p>
             <Button onClick={handleOpenApp} size="lg" className="w-full">
-              Open App
+              Return to App
             </Button>
             <Button
               onClick={handleContinueWeb}
