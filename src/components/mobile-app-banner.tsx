@@ -1,5 +1,6 @@
 'use client'
 
+import { Smartphone } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -59,6 +60,10 @@ export function MobileAppBanner({
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
+  const openApp = () => {
+    window.location.href = 'hypro://fitspace/workout'
+  }
+
   // When alwaysShow is true, bypass isAvailable checks
   const canShowIos = alwaysShow || MOBILE_STORE_LINKS.ios.isAvailable
   const canShowAndroid = alwaysShow || MOBILE_STORE_LINKS.android.isAvailable
@@ -79,34 +84,46 @@ export function MobileAppBanner({
   return (
     <div className={className}>
       <div className="flex flex-col items-center gap-4">
+        {/* Mobile devices: Show Open App button + Download button */}
         {deviceType === 'ios' && canShowIos && (
-          <button
-            type="button"
-            onClick={() => openStoreUrl(MOBILE_STORE_LINKS.ios.url)}
-          >
-            <Image
-              src="/app-store.svg"
-              alt="App Store"
-              width={240}
-              height={80}
-            />
-          </button>
+          <>
+            <Button onClick={openApp} size="xl" iconStart={<Smartphone />}>
+              Open App
+            </Button>
+            <button
+              type="button"
+              onClick={() => openStoreUrl(MOBILE_STORE_LINKS.ios.url)}
+            >
+              <Image
+                src="/app-store.svg"
+                alt="App Store"
+                width={240}
+                height={80}
+              />
+            </button>
+          </>
         )}
 
         {deviceType === 'android' && canShowAndroid && (
-          <button
-            type="button"
-            onClick={() => openStoreUrl(MOBILE_STORE_LINKS.android.url)}
-          >
-            <Image
-              src="/google-play.svg"
-              alt="Google Play"
-              width={240}
-              height={80}
-            />
-          </button>
+          <>
+            <Button onClick={openApp} size="xl" iconStart={<Smartphone />}>
+              Open App
+            </Button>
+            <button
+              type="button"
+              onClick={() => openStoreUrl(MOBILE_STORE_LINKS.android.url)}
+            >
+              <Image
+                src="/google-play.svg"
+                alt="Google Play"
+                width={240}
+                height={80}
+              />
+            </button>
+          </>
         )}
 
+        {/* Desktop: Only show download buttons */}
         {deviceType === 'other' && (
           <div className="flex flex-col gap-4">
             {canShowIos && (
@@ -127,6 +144,13 @@ export function MobileAppBanner({
                 Download on Google Play
               </Button>
             )}
+
+            <p className="text-sm text-muted-foreground text-center">
+              or open app if you already have it installed
+            </p>
+            <Button onClick={openApp} size="xl" iconStart={<Smartphone />}>
+              Open App
+            </Button>
           </div>
         )}
       </div>
