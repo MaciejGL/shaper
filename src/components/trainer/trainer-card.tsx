@@ -100,6 +100,8 @@ export function TrainerCard({
               )}
             </div>
           )}
+          {/* Blend overlay (left transparent → right background) */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-card/90 pointer-events-none" />
         </div>
 
         {/* Right: Content */}
