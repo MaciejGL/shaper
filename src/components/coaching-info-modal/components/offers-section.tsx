@@ -34,9 +34,9 @@ const serviceOffers: ServiceOffer[] = [
       'Premium Coaching experience with ongoing support, plan adjustments, and regular check-ins.',
     features: [
       'Everything from workout + meal plans',
-      'Bi-Weekly video check-ins',
+      'Bi-Weekly check-ins',
       '1x in-person training session a month',
-      `-${DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO}% off for additional 1x in-person training session`,
+      `-${DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO}% off for additional in-person training sessions`,
       'Plan adjustments based on progress',
       'Premium access',
       'Unlimited messaging support',
@@ -106,7 +106,7 @@ export function OffersSection() {
       <div className="grid gap-4">
         {serviceOffers.map((offer) => (
           <Card key={offer.id} className={cn(cardVariant(offer))}>
-            <CardHeader className="pb-3">
+            <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <SectionIcon
@@ -140,10 +140,8 @@ export function OffersSection() {
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0 space-y-3">
-              <p className="text-sm text-muted-foreground">
-                {offer.description}
-              </p>
+            <CardContent className="pt-0 space-y-6">
+              <p className="text-sm">{offer.description}</p>
               <ul className="space-y-1">
                 {offer.features.map((feature, index) => (
                   <li

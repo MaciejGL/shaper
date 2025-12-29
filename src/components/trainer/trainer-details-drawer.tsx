@@ -179,111 +179,101 @@ export function TrainerDetailsDrawer({
       onOpenChange={(open) => !open && onClose()}
       direction={direction}
     >
-      <DrawerContent dialogTitle={`${trainerName} - Trainer Details`}>
+      <DrawerContent
+        dialogTitle={`${trainerName} - Trainer Details`}
+        grabberAbsolute
+      >
         <div className="flex flex-col h-full">
-          <div className="min-h-0 flex-1 overflow-y-auto p-4 space-y-8">
-            {hasRequestedCoaching && (
-              <PendingCoachingRequestBanner trainerName={trainerName} />
-            )}
+          <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0 space-y-8">
+            {/* Header (cover image) */}
+            <div className="-mx-4 overflow-hidden border-y border-border/50 bg-muted/20">
+              <div className="relative h-56 w-full">
+                {trainer.profile?.avatarUrl ? (
+                  <Image
+                    src={trainer.profile.avatarUrl}
+                    alt={trainerName}
+                    fill
+                    className="object-cover object-top"
+                    sizes="100vw"
+                    priority
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted">
+                    {initials ? (
+                      <span className="text-4xl font-bold text-muted-foreground/40">
+                        {initials}
+                      </span>
+                    ) : (
+                      <User className="size-12 text-muted-foreground/40" />
+                    )}
+                  </div>
+                )}
 
-            {/* New Modern Header */}
-            <div className="relative">
-              {/* Background Blob/Gradient */}
-              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+                {/* Readability overlay */}
+                <div className="absolute inset-0 bg-gradient-to-l from-background/95 via-background/35 to-transparent" />
 
-              <div className="flex flex-col gap-6">
-                <div className="flex gap-5">
-                  {/* Large Profile Image */}
-                  <div className="relative shrink-0">
-                    <div className="size-24 rounded-2xl overflow-hidden ring-4 ring-background shadow-xl bg-muted/30 relative">
-                      {trainer.profile?.avatarUrl ? (
-                        <Image
-                          src={trainer.profile.avatarUrl}
-                          alt={trainerName}
-                          fill
-                          className="object-cover"
-                          sizes="96px"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted">
-                          {initials ? (
-                            <span className="text-2xl font-bold text-muted-foreground/50">
-                              {initials}
-                            </span>
-                          ) : (
-                            <User className="size-10 text-muted-foreground/40" />
-                          )}
-                        </div>
-                      )}
-                    </div>
+                {/* Title overlay */}
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <h2 className="text-3xl font-bold leading-tight text-foreground">
+                    {trainerName}
+                  </h2>
+                  <div className="mt-1 text-base text-muted-foreground font-medium">
+                    {trainer.role === 'TRAINER'
+                      ? 'Personal Trainer'
+                      : trainer.role}
                   </div>
 
-                  {/* Name & Role */}
-                  <div className="flex flex-col justify-center gap-1.5 py-1 min-w-0">
-                    <h2 className="text-2xl font-bold leading-tight truncate">
-                      {trainerName}
-                    </h2>
-                    <div className="text-base text-muted-foreground font-medium">
-                      {trainer.role === 'TRAINER'
-                        ? 'Personal Trainer'
-                        : trainer.role}
-                    </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {trainer.profile?.trainerSince && (
+                      <div className="inline-flex items-center gap-2 rounded-full bg-background/70 backdrop-blur px-3 py-1.5 text-sm font-medium border border-border/50">
+                        <Star className="size-4 text-orange-500 fill-orange-500/20 shrink-0" />
+                        <span>
+                          {differenceInYears(
+                            new Date(),
+                            new Date(trainer.profile.trainerSince),
+                          )}{' '}
+                          years experience
+                        </span>
+                      </div>
+                    )}
 
-                    {/* Quick Stats Row */}
-                    <div className="flex items-center gap-4 mt-1">
-                      {trainer.profile?.trainerSince && (
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <Star className="size-4 text-orange-500 fill-orange-500/20 shrink-0" />
-                          <span className="truncate">
-                            {differenceInYears(
-                              new Date(),
-                              new Date(trainer.profile.trainerSince),
-                            )}{' '}
-                            years exp
+                    {trainer.capacity &&
+                      trainer.spotsLeft !== null &&
+                      trainer.spotsLeft !== undefined && (
+                        <div className="inline-flex items-center gap-2 rounded-full bg-background/70 backdrop-blur px-3 py-1.5 text-sm font-medium border border-border/50">
+                          <span className="relative flex size-2 shrink-0">
+                            <span
+                              className={cn(
+                                'animate-ping absolute inline-flex h-full w-full rounded-full opacity-60',
+                                trainer.spotsLeft > 0
+                                  ? 'bg-emerald-400'
+                                  : 'bg-red-400',
+                              )}
+                            />
+                            <span
+                              className={cn(
+                                'relative inline-flex rounded-full size-2',
+                                trainer.spotsLeft > 0
+                                  ? 'bg-emerald-500'
+                                  : 'bg-red-500',
+                              )}
+                            />
+                          </span>
+                          <span className="text-foreground/90">
+                            {trainer.spotsLeft === 0
+                              ? 'Full'
+                              : `${trainer.spotsLeft} spots left`}
                           </span>
                         </div>
                       )}
-                    </div>
                   </div>
                 </div>
-
-                {/* Availability Text */}
-                {trainer.capacity &&
-                  trainer.spotsLeft !== null &&
-                  trainer.spotsLeft !== undefined && (
-                    <div
-                      className={cn(
-                        'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg w-fit text-sm font-medium',
-                        trainer.spotsLeft > 0
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-red-500/10 text-red-600 dark:text-red-400',
-                      )}
-                    >
-                      <span className="relative flex size-2 shrink-0">
-                        <span
-                          className={cn(
-                            'animate-ping absolute inline-flex h-full w-full rounded-full opacity-75',
-                            trainer.spotsLeft > 0
-                              ? 'bg-emerald-400'
-                              : 'bg-red-400',
-                          )}
-                        />
-                        <span
-                          className={cn(
-                            'relative inline-flex rounded-full size-2',
-                            trainer.spotsLeft > 0
-                              ? 'bg-emerald-500'
-                              : 'bg-red-500',
-                          )}
-                        />
-                      </span>
-                      {trainer.spotsLeft === 0
-                        ? 'Currently at full capacity'
-                        : `${trainer.spotsLeft} spots available for coaching`}
-                    </div>
-                  )}
               </div>
             </div>
+
+            {hasRequestedCoaching && (
+              <PendingCoachingRequestBanner trainerName={trainerName} />
+            )}
 
             {showRequestCoaching && !requestSent && (
               <div className="rounded-xl border border-border bg-card-on-card/10 dark:bg-card p-4 space-y-3 shadow-md">
