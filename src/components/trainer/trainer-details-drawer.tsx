@@ -8,17 +8,20 @@ import {
   FlameIcon,
   Mail,
   Sparkles,
+  Star,
+  User,
   XCircle,
 } from 'lucide-react'
+import Image from 'next/image'
 import { useState } from 'react'
 
 import { CoachingInfoModal } from '@/components/coaching-info-modal/coaching-info-modal'
 import { PendingCoachingRequestBanner } from '@/components/pending-coaching-request-banner'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { useUser } from '@/context/user-context'
+import { cn } from '@/lib/utils'
 
 import { SectionIcon } from '../ui/section-icon'
 
@@ -107,46 +110,104 @@ export function TrainerDetailsDrawer({
             <PendingCoachingRequestBanner trainerName={trainerName} />
           )}
 
-          {/* Header */}
-          <div className="flex items-center gap-4">
-            <Avatar className="size-20">
-              {trainer.profile?.avatarUrl && (
-                <AvatarImage src={trainer.profile.avatarUrl} />
-              )}
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
+          {/* New Modern Header */}
+          <div className="relative">
+            {/* Background Blob/Gradient */}
+            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="flex-1 space-y-2">
-              <h2 className="text-xl font-bold">{trainerName}</h2>
-              <div className="flex items-center gap-2">
-                <Badge variant="premium" size="md">
-                  {trainer.role === 'TRAINER'
-                    ? 'Personal Trainer'
-                    : trainer.role}
-                </Badge>
-                {trainer.capacity && trainer.spotsLeft !== null && (
-                  <Badge
-                    variant={trainer.isAtCapacity ? 'destructive' : 'secondary'}
-                  >
-                    {trainer.spotsLeft === 0
-                      ? 'At capacity'
-                      : `${trainer.spotsLeft} ${trainer.spotsLeft === 1 ? 'spot' : 'spots'} left`}
-                  </Badge>
-                )}
+            <div className="flex flex-col gap-6">
+              <div className="flex gap-5">
+                {/* Large Profile Image */}
+                <div className="relative shrink-0">
+                  <div className="size-24 rounded-2xl overflow-hidden ring-4 ring-background shadow-xl bg-muted/30 relative">
+                    {trainer.profile?.avatarUrl ? (
+                      <Image
+                        src={trainer.profile.avatarUrl}
+                        alt={trainerName}
+                        fill
+                        className="object-cover"
+                        sizes="96px"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted">
+                        {initials ? (
+                          <span className="text-2xl font-bold text-muted-foreground/50">
+                            {initials}
+                          </span>
+                        ) : (
+                          <User className="size-10 text-muted-foreground/40" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Name & Role */}
+                <div className="flex flex-col justify-center gap-1.5 py-1">
+                  <h2 className="text-2xl font-bold leading-tight">
+                    {trainerName}
+                  </h2>
+                  <div className="text-base text-muted-foreground font-medium">
+                    {trainer.role === 'TRAINER'
+                      ? 'Personal Trainer'
+                      : trainer.role}
+                  </div>
+
+                  {/* Quick Stats Row */}
+                  <div className="flex items-center gap-4 mt-1">
+                    {trainer.profile?.trainerSince && (
+                      <div className="flex items-center gap-1.5 text-sm font-medium">
+                        <Star className="size-4 text-orange-500 fill-orange-500/20" />
+                        <span>
+                          {differenceInYears(
+                            new Date(),
+                            new Date(trainer.profile.trainerSince),
+                          )}{' '}
+                          years exp
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
+
+              {/* Availability Text (Full width if needed, or keep clean) */}
+              {trainer.capacity &&
+                trainer.spotsLeft !== null &&
+                trainer.spotsLeft !== undefined && (
+                  <div
+                    className={cn(
+                      'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg w-fit text-sm font-medium',
+                      trainer.spotsLeft > 0
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-red-500/10 text-red-600 dark:text-red-400',
+                    )}
+                  >
+                    <span className="relative flex size-2 shrink-0">
+                      <span
+                        className={cn(
+                          'animate-ping absolute inline-flex h-full w-full rounded-full opacity-75',
+                          trainer.spotsLeft > 0
+                            ? 'bg-emerald-400'
+                            : 'bg-red-400',
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          'relative inline-flex rounded-full size-2',
+                          trainer.spotsLeft > 0
+                            ? 'bg-emerald-500'
+                            : 'bg-red-500',
+                        )}
+                      />
+                    </span>
+                    {trainer.spotsLeft === 0
+                      ? 'Currently at full capacity'
+                      : `${trainer.spotsLeft} spots available for coaching`}
+                  </div>
+                )}
             </div>
           </div>
-
-          {/* Experience */}
-          {trainer.profile?.trainerSince && (
-            <div className="space-y-2">
-              <h3 className="font-semibold flex items-center gap-2">
-                <SectionIcon size="sm" icon={FlameIcon} variant="amber" />{' '}
-                {differenceInYears(new Date(), trainer.profile.trainerSince)}{' '}
-                years of experience
-              </h3>
-            </div>
-          )}
 
           {/* Bio */}
           {trainer.profile?.bio && (
