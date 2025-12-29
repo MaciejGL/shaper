@@ -30,6 +30,14 @@ export const IMAGE_CONFIGS = {
     maxSize: 8 * 1024 * 1024, // 8MB for high quality originals
     isPublic: false, // Progress photos are private - served via /api/images/private/
   },
+  trainerCertificate: {
+    maxWidth: 2000, // Keep high resolution for certificates
+    maxHeight: 2000,
+    quality: 0.9,
+    folder: 'trainer-certificates',
+    maxSize: 10 * 1024 * 1024, // 10MB for high quality certificates/PDFs
+    isPublic: true, // Certificates are publicly viewable on trainer profiles
+  },
 } as const
 
 export type ImageType = keyof typeof IMAGE_CONFIGS

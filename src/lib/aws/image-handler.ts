@@ -266,6 +266,8 @@ export class ImageHandler {
         imageType = 'avatar'
       } else if (s3Key.startsWith('exercises/')) {
         imageType = 'exercise'
+      } else if (s3Key.startsWith('trainer-certificates/')) {
+        imageType = 'trainerCertificate'
       } else {
         return {
           success: false,
@@ -306,12 +308,21 @@ export class ImageHandler {
       }
     }
 
-    // Validate content type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    // Validate content type - allow PDF only for trainerCertificate
+    const imageTypes = ['image/jpeg', 'image/png', 'image/webp']
+    const certificateTypes = [...imageTypes, 'application/pdf']
+
+    const allowedTypes =
+      imageType === 'trainerCertificate' ? certificateTypes : imageTypes
+
     if (!allowedTypes.includes(contentType)) {
+      const allowedStr =
+        imageType === 'trainerCertificate'
+          ? 'JPEG, PNG, WebP, or PDF'
+          : 'JPEG, PNG, and WebP'
       return {
         success: false,
-        error: 'Invalid content type. Only JPEG, PNG, and WebP are allowed',
+        error: `Invalid content type. Only ${allowedStr} are allowed`,
       }
     }
 
@@ -338,6 +349,8 @@ export class ImageHandler {
         return `exercises/temp/${userId}/${timestamp}-${sanitizedName}`
       }
     } else if (type === 'progress') {
+      return `${folder}/${userId}/${timestamp}-${sanitizedName}`
+    } else if (type === 'trainerCertificate') {
       return `${folder}/${userId}/${timestamp}-${sanitizedName}`
     }
 

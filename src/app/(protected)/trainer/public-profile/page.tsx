@@ -34,6 +34,8 @@ import { cn } from '@/lib/utils'
 
 import { DashboardHeader } from '../components/dashboard-header'
 
+import { TrainerCertificatesUpload } from './components/trainer-certificates-upload'
+
 export default function PublicProfilePage() {
   const { data: profileData, isLoading } = useProfileQuery()
   const updateProfileMutation = useUpdateProfileMutation()
@@ -47,7 +49,6 @@ export default function PublicProfilePage() {
   const [capacity, setCapacity] = useState<number | null>(null)
 
   const [newSpecialization, setNewSpecialization] = useState('')
-  const [newCredential, setNewCredential] = useState('')
   const [newSuccessStory, setNewSuccessStory] = useState('')
   const [showPreview, setShowPreview] = useState(false)
   const [showExample, setShowExample] = useState(false)
@@ -84,17 +85,6 @@ export default function PublicProfilePage() {
     setSpecializations(specializations.filter((_, i) => i !== index))
   }
 
-  const addCredential = () => {
-    if (newCredential.trim() && !credentials.includes(newCredential.trim())) {
-      setCredentials([...credentials, newCredential.trim()])
-      setNewCredential('')
-    }
-  }
-
-  const removeCredential = (index: number) => {
-    setCredentials(credentials.filter((_, i) => i !== index))
-  }
-
   const addSuccessStory = () => {
     if (
       newSuccessStory.trim() &&
@@ -112,12 +102,12 @@ export default function PublicProfilePage() {
   const handleSave = async () => {
     try {
       // Save profile data and capacity in parallel
+      // Note: credentials are auto-saved by the upload component
       await Promise.all([
         updateProfileMutation.mutateAsync({
           input: {
             bio,
             specialization: specializations,
-            credentials,
             successStories,
             trainerSince: trainerSince?.toISOString(),
           },
@@ -386,37 +376,13 @@ export default function PublicProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <CardDescription>
-              Add your credentials and certifications to your profile.
-              <br />
-              - NASM-CPT(Certified Personal Trainer)
-              <br />- CSCS(Certified Strength and Conditioning Specialist) etc.
+              Upload images or PDFs of your certifications to display on your
+              profile.
             </CardDescription>
-            <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
-              <Input
-                id="new-credential"
-                placeholder="Add credential (e.g., NASM-CPT, CSCS)"
-                value={newCredential}
-                onChange={(e) => setNewCredential(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addCredential()}
-              />
-              <Button onClick={addCredential} size="sm">
-                <PlusIcon className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {credentials.map((credential, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  size="lg"
-                  className="gap-2 cursor-pointer"
-                  onClick={() => removeCredential(index)}
-                >
-                  {credential}
-                  <XIcon className="h-3 w-3 cursor-pointer" />
-                </Badge>
-              ))}
-            </div>
+            <TrainerCertificatesUpload
+              currentUrls={credentials}
+              onUrlsChange={setCredentials}
+            />
           </CardContent>
         </Card>
 
@@ -509,14 +475,7 @@ Ready to surprise yourself with what you can achieve?`,
       'Athletic Performance',
       'Injury Prevention',
     ],
-    credentials: [
-      'NASM-CPT (Certified Personal Trainer)',
-      'CSCS (Certified Strength & Conditioning Specialist)',
-      'Precision Nutrition Level 1',
-      'FMS Level 2 (Functional Movement Screen)',
-      'CPR/AED Certified',
-      'TRX Suspension Training Certified',
-    ],
+    credentials: [],
     successStories: [
       'Busy executive mom: Lost 25 lbs and gained incredible energy while working 60+ hour weeks. She now deadlifts her body weight and says she feels stronger at 42 than she did at 25!',
       'College soccer player: Came back from ACL surgery stronger than ever. Not only returned to varsity play in 6 months, but jumped 8% higher and became team captain.',

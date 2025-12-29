@@ -23,6 +23,7 @@ import { useUser } from '@/context/user-context'
 import { SectionIcon } from '../ui/section-icon'
 
 import { TrainerData } from './trainer-card'
+import { TrainerCertificatesGallery } from './trainer-certificates-gallery'
 
 interface TrainerDetailsDrawerProps {
   trainer: TrainerData | null
@@ -172,7 +173,7 @@ export function TrainerDetailsDrawer({
               </div>
             )}
 
-          {/* Credentials */}
+          {/* Credentials / Certificates */}
           {trainer.profile?.credentials &&
             trainer.profile.credentials.length > 0 && (
               <div>
@@ -182,15 +183,11 @@ export function TrainerDetailsDrawer({
                     icon={BadgeCheckIcon}
                     variant="green"
                   />{' '}
-                  Credentials
+                  Credentials & Certifications
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {trainer.profile.credentials.map((credential, index) => (
-                    <Badge key={index} variant="secondary" size="lg">
-                      {credential}
-                    </Badge>
-                  ))}
-                </div>
+                <TrainerCertificatesGallery
+                  urls={trainer.profile.credentials}
+                />
               </div>
             )}
 
