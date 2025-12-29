@@ -84,11 +84,20 @@ export function useMobileApp() {
   >()
   const initRef = useRef(false)
 
+  // Check NEXT_PUBLIC_PLATFORM env var (for dev/testing)
+  const envPlatform = process.env.NEXT_PUBLIC_PLATFORM as
+    | 'ios'
+    | 'android'
+    | undefined
+  const isEnvNative = envPlatform === 'ios' || envPlatform === 'android'
+
   const derivedIsNativeApp =
+    isEnvNative ||
     isNativeApp ||
     (typeof window !== 'undefined' &&
       (window.isNativeApp === true || !!window.nativeApp))
   const derivedPlatform =
+    envPlatform ||
     platform ||
     (typeof window !== 'undefined' ? window.mobilePlatform : undefined)
 

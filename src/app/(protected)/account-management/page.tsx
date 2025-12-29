@@ -1,10 +1,13 @@
 'use client'
 
-import { CreditCard, UserRoundCogIcon } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { CreditCard, LogOut, UserRoundCogIcon } from 'lucide-react'
+import { signOut } from 'next-auth/react'
 
 import { MobileAppBanner } from '@/components/mobile-app-banner'
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { PostPaymentSuccessModal } from '@/components/post-payment-success-modal'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 import { usePaymentRules } from '@/hooks/use-payment-rules'
@@ -19,10 +22,20 @@ export default function AccountManagementPage() {
   const { user } = useUser()
   const rules = usePaymentRules()
   const { isPostPayment, state, refetch } = usePostPaymentSuccess(user?.id)
-  const { isNativeApp } = useMobileApp()
+  const { isNativeApp, setAuthToken } = useMobileApp()
+  const queryClient = useQueryClient()
 
   // In companion mode, don't show "Subscription & Billing" header
   const isCompanionMode = !rules.canShowUpgradeUI && !rules.canLinkToPayment
+
+  const handleLogout = async () => {
+    if (isNativeApp) {
+      setAuthToken('')
+    }
+    queryClient.clear()
+    await signOut({ callbackUrl: '/login', redirect: false })
+    window.location.replace('/login')
+  }
 
   return (
     <>
@@ -34,7 +47,7 @@ export default function AccountManagementPage() {
       />
 
       {/* Page Content */}
-      <div className="mx-auto bg-gradient-to-br from-background via-background to-muted/30">
+      <div className="dark mx-auto">
         <div>
           {/* Header */}
           <div className="mb-8">
@@ -86,6 +99,18 @@ export default function AccountManagementPage() {
             )}
 
             <AccountSection />
+
+            <div className="pb-12">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleLogout}
+                iconStart={<LogOut />}
+                className="w-full"
+              >
+                Log out
+              </Button>
+            </div>
           </div>
         </div>
       </div>

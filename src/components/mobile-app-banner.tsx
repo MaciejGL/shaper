@@ -1,9 +1,10 @@
 'use client'
 
-import { Smartphone } from 'lucide-react'
+import { ArrowRight, Smartphone } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
 import { MOBILE_STORE_LINKS } from '@/config/mobile-store-links'
 
@@ -21,19 +22,15 @@ export function MobileAppBanner({
   className,
   alwaysShow = false,
 }: MobileAppBannerProps) {
+  const { isNativeApp } = useMobileApp()
   const [isVisible, setIsVisible] = useState(false)
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'other'>(
     'other',
   )
-  const [isNativeApp, setIsNativeApp] = useState(false)
 
   useEffect(() => {
-    // Check if running in native app
+    // Detect device type from user agent (for store links)
     const userAgent = navigator.userAgent.toLowerCase()
-    const isInApp = window.isNativeApp
-    setIsNativeApp(isInApp || false)
-
-    // Detect device type - only for mobile devices
     let nextDeviceType: 'ios' | 'android' | 'other' = 'other'
     if (/iphone|ipad|ipod/.test(userAgent)) {
       nextDeviceType = 'ios'
@@ -42,13 +39,12 @@ export function MobileAppBanner({
     }
     setDeviceType(nextDeviceType)
 
-    // Show banner only on mobile devices and not in native app
+    // Show banner only on mobile devices
     const isMobile =
       /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent)
     const shouldShow = alwaysShow
       ? true
       : isMobile &&
-        !isInApp &&
         ((nextDeviceType === 'ios' && MOBILE_STORE_LINKS.ios.isAvailable) ||
           (nextDeviceType === 'android' &&
             MOBILE_STORE_LINKS.android.isAvailable))
@@ -60,19 +56,17 @@ export function MobileAppBanner({
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
-  const openApp = () => {
-    window.location.href = 'hypro://fitspace/workout'
-  }
+  // Hide if in native app (uses useMobileApp hook - single source of truth)
+  if (isNativeApp) return null
 
   // When alwaysShow is true, bypass isAvailable checks
   const canShowIos = alwaysShow || MOBILE_STORE_LINKS.ios.isAvailable
   const canShowAndroid = alwaysShow || MOBILE_STORE_LINKS.android.isAvailable
 
-  // When alwaysShow is true, skip visibility checks but still hide in native app
+  // When alwaysShow is true, skip visibility checks
   const shouldRender = alwaysShow
-    ? !isNativeApp
+    ? true
     : isVisible &&
-      !isNativeApp &&
       ((deviceType === 'ios' && canShowIos) ||
         (deviceType === 'android' && canShowAndroid) ||
         (deviceType === 'other' && (canShowIos || canShowAndroid)))
@@ -87,9 +81,7 @@ export function MobileAppBanner({
         {/* Mobile devices: Show Open App button + Download button */}
         {deviceType === 'ios' && canShowIos && (
           <>
-            <Button onClick={openApp} size="xl" iconStart={<Smartphone />}>
-              Open App
-            </Button>
+            <OpenAppButton />
             <button
               type="button"
               onClick={() => openStoreUrl(MOBILE_STORE_LINKS.ios.url)}
@@ -106,9 +98,7 @@ export function MobileAppBanner({
 
         {deviceType === 'android' && canShowAndroid && (
           <>
-            <Button onClick={openApp} size="xl" iconStart={<Smartphone />}>
-              Open App
-            </Button>
+            <OpenAppButton />
             <button
               type="button"
               onClick={() => openStoreUrl(MOBILE_STORE_LINKS.android.url)}
@@ -148,13 +138,29 @@ export function MobileAppBanner({
             <p className="text-sm text-muted-foreground text-center">
               or open app if you already have it installed
             </p>
-            <Button onClick={openApp} size="xl" iconStart={<Smartphone />}>
-              Open App
-            </Button>
+            <OpenAppButton />
           </div>
         )}
       </div>
     </div>
+  )
+}
+
+const OpenAppButton = () => {
+  const openApp = () => {
+    window.location.href = 'hypro://fitspace/workout'
+  }
+
+  return (
+    <Button
+      onClick={openApp}
+      size="xl"
+      iconStart={<Smartphone />}
+      iconEnd={<ArrowRight />}
+      className="w-full md:hidden"
+    >
+      Open the app
+    </Button>
   )
 }
 

@@ -15,6 +15,12 @@ export function FitspaceNativeGate({ children }: FitspaceNativeGateProps) {
 
   useEffect(() => {
     const evaluate = () => {
+      const envPlatform = process.env.NEXT_PUBLIC_PLATFORM
+      if (envPlatform === 'android' || envPlatform === 'ios') {
+        setStatus('allowed')
+        return true
+      }
+
       const isNative =
         typeof window !== 'undefined' &&
         (window.isNativeApp === true || !!window.nativeApp)
