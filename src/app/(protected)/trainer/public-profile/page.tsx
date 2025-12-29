@@ -5,8 +5,10 @@ import { CalendarIcon, EyeIcon, PlusIcon, User, XIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { getAvatarUrl } from '@/components/profile/header'
 import { TrainerCard, TrainerData } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
+import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -41,6 +43,7 @@ export default function PublicProfilePage() {
   const updateProfileMutation = useUpdateProfileMutation()
   const updateCapacityMutation = useUpdateTrainerCapacityMutation()
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [bio, setBio] = useState('')
   const [specializations, setSpecializations] = useState<string[]>([])
   const [credentials, setCredentials] = useState<string[]>([])
@@ -57,6 +60,7 @@ export default function PublicProfilePage() {
   useEffect(() => {
     if (profileData?.profile) {
       const profile = profileData.profile
+      setAvatarUrl(profile.avatarUrl || null)
       setBio(profile.bio || '')
       setSpecializations(profile.specialization || [])
       setCredentials(profile.credentials || [])
@@ -99,6 +103,14 @@ export default function PublicProfilePage() {
     setSuccessStories(successStories.filter((_, i) => i !== index))
   }
 
+  const handleAvatarUpload = (imageUrl: string) => {
+    setAvatarUrl(imageUrl)
+  }
+
+  const handleAvatarRemove = () => {
+    setAvatarUrl(null)
+  }
+
   const handleSave = async () => {
     try {
       // Save profile data and capacity in parallel
@@ -106,6 +118,7 @@ export default function PublicProfilePage() {
       await Promise.all([
         updateProfileMutation.mutateAsync({
           input: {
+            avatarUrl,
             bio,
             specialization: specializations,
             successStories,
@@ -161,7 +174,7 @@ export default function PublicProfilePage() {
       firstName: profileData?.profile?.firstName,
       lastName: profileData?.profile?.lastName,
       bio,
-      avatarUrl: profileData?.profile?.avatarUrl,
+      avatarUrl,
       specialization: specializations,
       credentials,
       successStories,
@@ -233,22 +246,25 @@ export default function PublicProfilePage() {
   function renderEditForm() {
     return (
       <>
-        {/* Bio Section */}
+        {/* Profile Picture Section */}
         <Card>
           <CardHeader>
-            <CardTitle>About / Bio</CardTitle>
+            <CardTitle>Profile Picture</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <CardDescription>Add your bio to your profile.</CardDescription>
-            <div>
-              <Textarea
-                label="Bio"
-                id="bio"
-                variant="ghost"
-                placeholder="Example: I'm a personal trainer with 10 years of experience. I specialize in strength training and functional training."
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                rows={4}
+            <CardDescription>
+              Upload a profile picture to display on your public profile.
+            </CardDescription>
+            <div className="flex justify-center">
+              <AvatarUpload
+                currentImageUrl={avatarUrl || undefined}
+                fallbackUrl={
+                  getAvatarUrl(profileData?.profile?.sex) || undefined
+                }
+                onImageUploaded={handleAvatarUpload}
+                onImageRemoved={handleAvatarRemove}
+                alt={`${profileData?.profile?.firstName || ''} ${profileData?.profile?.lastName || ''}`}
+                id="public-profile-avatar"
               />
             </div>
           </CardContent>
@@ -289,6 +305,27 @@ export default function PublicProfilePage() {
                   />
                 </PopoverContent>
               </Popover>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bio Section */}
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle>About / Bio</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <CardDescription>Add your bio to your profile.</CardDescription>
+            <div>
+              <Textarea
+                label="Bio"
+                id="bio"
+                variant="ghost"
+                placeholder="Example: I'm a personal trainer with 10 years of experience. I specialize in strength training and functional training."
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                rows={4}
+              />
             </div>
           </CardContent>
         </Card>
