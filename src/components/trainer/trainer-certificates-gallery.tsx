@@ -48,7 +48,7 @@ export function TrainerCertificatesGallery({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex gap-3 overflow-x-auto -mx-4 mb-8 px-4 py-4 scrollbar-hide snap-x snap-mandatory">
         {urls.map((url, index) => {
           const isPdf = isPdfUrl(url)
 
@@ -56,21 +56,14 @@ export function TrainerCertificatesGallery({
             <button
               key={index}
               onClick={() => handleClick(url)}
-              className="relative aspect-[4/3] rounded-lg overflow-hidden border bg-muted hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary"
+              className="relative w-[160px] shrink-0 aspect-[4/3] rounded-xl overflow-hidden border bg-muted/50 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary snap-center shadow-sm border-border"
             >
               {isPdf ? (
-                <div className="w-full h-full flex flex-col bg-card">
+                <div className="w-full h-full flex flex-col">
                   {/* Icon Area */}
-                  <div className="flex-1 flex-center bg-muted/30 p-2">
-                    <Icon
-                      name="pdf"
-                      size={32}
-                      className="text-muted-foreground/50"
-                    />
-                  </div>
-                  {/* Text Area */}
-                  <div className="h-10 px-2 flex items-center border-t bg-background/50">
-                    <span className="text-[10px] font-medium text-muted-foreground truncate w-full">
+                  <div className="flex-1 flex flex-col items-center justify-center p-4 gap-2">
+                    <Icon name="pdf" size={32} className="text-primary/60" />
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
                       {getFilenameFromUrl(url)}
                     </span>
                   </div>
@@ -81,7 +74,7 @@ export function TrainerCertificatesGallery({
                   alt={`Certificate ${index + 1}`}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 640px) 33vw, 20vw"
+                  sizes="160px"
                 />
               )}
             </button>

@@ -69,7 +69,7 @@ export function TrainerCard({
   return (
     <Card
       className={cn(
-        'p-0 overflow-hidden border-0 shadow-sm bg-card',
+        'p-0 overflow-hidden border border-border shadow-sm bg-card hover:shadow-md',
         onClick
           ? 'cursor-pointer active:scale-[0.98] transition-all duration-200'
           : '',
