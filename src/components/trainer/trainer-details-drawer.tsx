@@ -65,7 +65,7 @@ function ExpandableBio({ bio }: { bio: string }) {
         transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
         className="overflow-hidden relative"
       >
-        <p className="text-sm prose prose-sm leading-relaxed whitespace-pre-wrap bg-card/50 p-4 rounded-xl border border-border/50">
+        <p className="text-sm prose prose-sm leading-relaxed whitespace-pre-wrap bg-card/50  rounded-xl">
           {bio}
         </p>
 
@@ -357,7 +357,7 @@ export function TrainerDetailsDrawer({
                       <Badge
                         key={index}
                         variant="secondary"
-                        size="lg"
+                        size="md"
                         className="px-3 py-1 bg-muted/50 border border-border/50 text-foreground/80 font-normal"
                       >
                         {spec}
