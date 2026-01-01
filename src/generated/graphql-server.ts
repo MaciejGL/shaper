@@ -4131,7 +4131,7 @@ export type ResolverTypeWrapper<T> = Promise<T> | T;
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
 };
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
+export type Resolver<TResult, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
@@ -4168,27 +4168,29 @@ export type SubscriptionObject<TResult, TKey extends string, TParent, TContext, 
   | SubscriptionSubscriberObject<TResult, TKey, TParent, TContext, TArgs>
   | SubscriptionResolverObject<TResult, TParent, TContext, TArgs>;
 
-export type SubscriptionResolver<TResult, TKey extends string, TParent = {}, TContext = {}, TArgs = {}> =
+export type SubscriptionResolver<TResult, TKey extends string, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> =
   | ((...args: any[]) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
   | SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>;
 
-export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
+export type TypeResolveFn<TTypes, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (
   parent: TParent,
   context: TContext,
   info: GraphQLResolveInfo
 ) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
 
-export type IsTypeOfResolverFn<T = {}, TContext = {}> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
+export type IsTypeOfResolverFn<T = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
 
 export type NextResolverFn<T> = () => Promise<T>;
 
-export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs = {}> = (
+export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = (
   next: NextResolverFn<TResult>,
   parent: TParent,
   args: TArgs,
   context: TContext,
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
+
+
 
 
 
@@ -4329,7 +4331,7 @@ export type GQLResolversTypes = {
   MuscleGroupCategory: ResolverTypeWrapper<GQLMuscleGroupCategory>;
   MuscleGroupDistribution: ResolverTypeWrapper<GQLMuscleGroupDistribution>;
   MuscleGroupFrequency: ResolverTypeWrapper<GQLMuscleGroupFrequency>;
-  Mutation: ResolverTypeWrapper<{}>;
+  Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   MyPlansPayload: ResolverTypeWrapper<GQLMyPlansPayload>;
   Note: ResolverTypeWrapper<GQLNote>;
   Notification: ResolverTypeWrapper<GQLNotification>;
@@ -4356,7 +4358,7 @@ export type GQLResolversTypes = {
   PreviousExerciseLog: ResolverTypeWrapper<GQLPreviousExerciseLog>;
   PublicTrainer: ResolverTypeWrapper<GQLPublicTrainer>;
   PushSubscription: ResolverTypeWrapper<GQLPushSubscription>;
-  Query: ResolverTypeWrapper<{}>;
+  Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   QuickWorkoutExerciseInput: GQLQuickWorkoutExerciseInput;
   QuickWorkoutSetInput: GQLQuickWorkoutSetInput;
   RemoveAllExercisesFromDayInput: GQLRemoveAllExercisesFromDayInput;
@@ -4586,7 +4588,7 @@ export type GQLResolversParentTypes = {
   MuscleGroupCategory: GQLMuscleGroupCategory;
   MuscleGroupDistribution: GQLMuscleGroupDistribution;
   MuscleGroupFrequency: GQLMuscleGroupFrequency;
-  Mutation: {};
+  Mutation: Record<PropertyKey, never>;
   MyPlansPayload: GQLMyPlansPayload;
   Note: GQLNote;
   Notification: GQLNotification;
@@ -4612,7 +4614,7 @@ export type GQLResolversParentTypes = {
   PreviousExerciseLog: GQLPreviousExerciseLog;
   PublicTrainer: GQLPublicTrainer;
   PushSubscription: GQLPushSubscription;
-  Query: {};
+  Query: Record<PropertyKey, never>;
   QuickWorkoutExerciseInput: GQLQuickWorkoutExerciseInput;
   QuickWorkoutSetInput: GQLQuickWorkoutSetInput;
   RemoveAllExercisesFromDayInput: GQLRemoveAllExercisesFromDayInput;
@@ -4707,7 +4709,6 @@ export type GQLResolversParentTypes = {
 export type GQLActivityHeatmapDataResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ActivityHeatmapData'] = GQLResolversParentTypes['ActivityHeatmapData']> = {
   activities?: Resolver<Array<GQLResolversTypes['DailyActivity']>, ParentType, ContextType>;
   weekCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAdminUserListItemResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AdminUserListItem'] = GQLResolversParentTypes['AdminUserListItem']> = {
@@ -4724,14 +4725,12 @@ export type GQLAdminUserListItemResolvers<ContextType = GQLContext, ParentType e
   sessionCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   trainer?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAdminUserListResponseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AdminUserListResponse'] = GQLResolversParentTypes['AdminUserListResponse']> = {
   hasMore?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   total?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   users?: Resolver<Array<GQLResolversTypes['AdminUserListItem']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAdminUserStatsResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AdminUserStats'] = GQLResolversParentTypes['AdminUserStats']> = {
@@ -4743,31 +4742,26 @@ export type GQLAdminUserStatsResolvers<ContextType = GQLContext, ParentType exte
   totalTrainers?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalUsers?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   usersWithoutProfiles?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAiExerciseSuggestionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiExerciseSuggestion'] = GQLResolversParentTypes['AiExerciseSuggestion']> = {
   aiMeta?: Resolver<GQLResolversTypes['AiMeta'], ParentType, ContextType>;
   exercise?: Resolver<GQLResolversTypes['BaseExercise'], ParentType, ContextType>;
   sets?: Resolver<Array<Maybe<GQLResolversTypes['SuggestedSets']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAiMetaResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiMeta'] = GQLResolversParentTypes['AiMeta']> = {
   explanation?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAiWorkoutExerciseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiWorkoutExercise'] = GQLResolversParentTypes['AiWorkoutExercise']> = {
   exercise?: Resolver<GQLResolversTypes['BaseExercise'], ParentType, ContextType>;
   order?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   sets?: Resolver<Array<Maybe<GQLResolversTypes['SuggestedSets']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAiWorkoutResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiWorkoutResult'] = GQLResolversParentTypes['AiWorkoutResult']> = {
   variants?: Resolver<Array<GQLResolversTypes['AiWorkoutVariant']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAiWorkoutVariantResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiWorkoutVariant'] = GQLResolversParentTypes['AiWorkoutVariant']> = {
@@ -4776,7 +4770,6 @@ export type GQLAiWorkoutVariantResolvers<ContextType = GQLContext, ParentType ex
   reasoning?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   summary?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   totalDuration?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLBaseExerciseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BaseExercise'] = GQLResolversParentTypes['BaseExercise']> = {
@@ -4801,7 +4794,6 @@ export type GQLBaseExerciseResolvers<ContextType = GQLContext, ParentType extend
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   version?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   videoUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLBaseExerciseSubstituteResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BaseExerciseSubstitute'] = GQLResolversParentTypes['BaseExerciseSubstitute']> = {
@@ -4812,7 +4804,6 @@ export type GQLBaseExerciseSubstituteResolvers<ContextType = GQLContext, ParentT
   reason?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   substitute?: Resolver<GQLResolversTypes['BaseExercise'], ParentType, ContextType>;
   substituteId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLBodyCompositionChangeResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BodyCompositionChange'] = GQLResolversParentTypes['BodyCompositionChange']> = {
@@ -4823,7 +4814,6 @@ export type GQLBodyCompositionChangeResolvers<ContextType = GQLContext, ParentTy
   startWeight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   unit?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weightChange?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLBodyCompositionSnapshotResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BodyCompositionSnapshot'] = GQLResolversParentTypes['BodyCompositionSnapshot']> = {
@@ -4832,7 +4822,6 @@ export type GQLBodyCompositionSnapshotResolvers<ContextType = GQLContext, Parent
   image3Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   loggedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLBodyProgressLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BodyProgressLog'] = GQLResolversParentTypes['BodyProgressLog']> = {
@@ -4845,7 +4834,6 @@ export type GQLBodyProgressLogResolvers<ContextType = GQLContext, ParentType ext
   notes?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   shareWithTrainer?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLCancelCoachingResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CancelCoachingResult'] = GQLResolversParentTypes['CancelCoachingResult']> = {
@@ -4853,7 +4841,6 @@ export type GQLCancelCoachingResultResolvers<ContextType = GQLContext, ParentTyp
   message?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   subscription?: Resolver<Maybe<GQLResolversTypes['UserSubscription']>, ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLChatResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Chat'] = GQLResolversParentTypes['Chat']> = {
@@ -4867,7 +4854,6 @@ export type GQLChatResolvers<ContextType = GQLContext, ParentType extends GQLRes
   trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   unreadCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLChatWithMessagesResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ChatWithMessages'] = GQLResolversParentTypes['ChatWithMessages']> = {
@@ -4882,7 +4868,6 @@ export type GQLChatWithMessagesResolvers<ContextType = GQLContext, ParentType ex
   trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   unreadCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLCheckinCompletionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CheckinCompletion'] = GQLResolversParentTypes['CheckinCompletion']> = {
@@ -4890,7 +4875,6 @@ export type GQLCheckinCompletionResolvers<ContextType = GQLContext, ParentType e
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   measurement?: Resolver<Maybe<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
   progressLog?: Resolver<Maybe<GQLResolversTypes['BodyProgressLog']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLCheckinScheduleResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CheckinSchedule'] = GQLResolversParentTypes['CheckinSchedule']> = {
@@ -4903,7 +4887,6 @@ export type GQLCheckinScheduleResolvers<ContextType = GQLContext, ParentType ext
   isActive?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   nextCheckinDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLCheckinStatusResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CheckinStatus'] = GQLResolversParentTypes['CheckinStatus']> = {
@@ -4912,7 +4895,6 @@ export type GQLCheckinStatusResolvers<ContextType = GQLContext, ParentType exten
   isCheckinDue?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   nextCheckinDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   schedule?: Resolver<Maybe<GQLResolversTypes['CheckinSchedule']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLClientSurveyResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ClientSurvey'] = GQLResolversParentTypes['ClientSurvey']> = {
@@ -4923,7 +4905,6 @@ export type GQLClientSurveyResolvers<ContextType = GQLContext, ParentType extend
   user?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
   userId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   version?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLCoachingRequestResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CoachingRequest'] = GQLResolversParentTypes['CoachingRequest']> = {
@@ -4935,32 +4916,27 @@ export type GQLCoachingRequestResolvers<ContextType = GQLContext, ParentType ext
   sender?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
   status?: Resolver<GQLResolversTypes['CoachingRequestStatus'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLCopyNutritionPlanPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CopyNutritionPlanPayload'] = GQLResolversParentTypes['CopyNutritionPlanPayload']> = {
   nutritionPlan?: Resolver<GQLResolversTypes['NutritionPlan'], ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLCreateNutritionPlanPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CreateNutritionPlanPayload'] = GQLResolversParentTypes['CreateNutritionPlanPayload']> = {
   nutritionPlan?: Resolver<GQLResolversTypes['NutritionPlan'], ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLCreateTrainingPlanPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CreateTrainingPlanPayload'] = GQLResolversParentTypes['CreateTrainingPlanPayload']> = {
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLDailyActivityResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['DailyActivity'] = GQLResolversParentTypes['DailyActivity']> = {
   date?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   dayOfWeek?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLExerciseLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ExerciseLog'] = GQLResolversParentTypes['ExerciseLog']> = {
@@ -4970,7 +4946,6 @@ export type GQLExerciseLogResolvers<ContextType = GQLContext, ParentType extends
   notes?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   performedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLExerciseProgressResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ExerciseProgress'] = GQLResolversParentTypes['ExerciseProgress']> = {
@@ -4980,7 +4955,6 @@ export type GQLExerciseProgressResolvers<ContextType = GQLContext, ParentType ex
   lastPerformed?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   totalSets?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   totalVolumeProgress?: Resolver<Array<GQLResolversTypes['VolumeEntry']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLExerciseSetResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ExerciseSet'] = GQLResolversParentTypes['ExerciseSet']> = {
@@ -4997,7 +4971,6 @@ export type GQLExerciseSetResolvers<ContextType = GQLContext, ParentType extends
   rpe?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLExerciseSetLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ExerciseSetLog'] = GQLResolversParentTypes['ExerciseSetLog']> = {
@@ -5007,7 +4980,6 @@ export type GQLExerciseSetLogResolvers<ContextType = GQLContext, ParentType exte
   rpe?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLFavouriteWorkoutResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FavouriteWorkout'] = GQLResolversParentTypes['FavouriteWorkout']> = {
@@ -5020,7 +4992,6 @@ export type GQLFavouriteWorkoutResolvers<ContextType = GQLContext, ParentType ex
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   title?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLFavouriteWorkoutExerciseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FavouriteWorkoutExercise'] = GQLResolversParentTypes['FavouriteWorkoutExercise']> = {
@@ -5037,7 +5008,6 @@ export type GQLFavouriteWorkoutExerciseResolvers<ContextType = GQLContext, Paren
   restSeconds?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   sets?: Resolver<Array<GQLResolversTypes['FavouriteWorkoutSet']>, ParentType, ContextType>;
   tips?: Resolver<Maybe<Array<GQLResolversTypes['String']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLFavouriteWorkoutFolderResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FavouriteWorkoutFolder'] = GQLResolversParentTypes['FavouriteWorkoutFolder']> = {
@@ -5047,7 +5017,6 @@ export type GQLFavouriteWorkoutFolderResolvers<ContextType = GQLContext, ParentT
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLFavouriteWorkoutSetResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FavouriteWorkoutSet'] = GQLResolversParentTypes['FavouriteWorkoutSet']> = {
@@ -5059,7 +5028,6 @@ export type GQLFavouriteWorkoutSetResolvers<ContextType = GQLContext, ParentType
   reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   rpe?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLFreeWorkoutDayResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FreeWorkoutDay'] = GQLResolversParentTypes['FreeWorkoutDay']> = {
@@ -5072,7 +5040,6 @@ export type GQLFreeWorkoutDayResolvers<ContextType = GQLContext, ParentType exte
   trainingDay?: Resolver<Maybe<GQLResolversTypes['TrainingDay']>, ParentType, ContextType>;
   trainingDayId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLFreezeEligibilityResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FreezeEligibility'] = GQLResolversParentTypes['FreezeEligibility']> = {
@@ -5084,31 +5051,26 @@ export type GQLFreezeEligibilityResolvers<ContextType = GQLContext, ParentType e
   minDays?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   pauseEndsAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   reason?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLFreezeResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FreezeResult'] = GQLResolversParentTypes['FreezeResult']> = {
   message?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   pauseEndsAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLGetExercisesResponseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetExercisesResponse'] = GQLResolversParentTypes['GetExercisesResponse']> = {
   publicExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType>;
   trainerExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLGetWorkoutDayPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetWorkoutDayPayload'] = GQLResolversParentTypes['GetWorkoutDayPayload']> = {
   day?: Resolver<GQLResolversTypes['TrainingDay'], ParentType, ContextType>;
   previousDayLogs?: Resolver<Array<GQLResolversTypes['PreviousExerciseLog']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLGetWorkoutNavigationPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetWorkoutNavigationPayload'] = GQLResolversParentTypes['GetWorkoutNavigationPayload']> = {
   plan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLImageResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Image'] = GQLResolversParentTypes['Image']> = {
@@ -5122,7 +5084,6 @@ export type GQLImageResolvers<ContextType = GQLContext, ParentType extends GQLRe
   thumbnail?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   url?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLIngredientResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Ingredient'] = GQLResolversParentTypes['Ingredient']> = {
@@ -5135,7 +5096,6 @@ export type GQLIngredientResolvers<ContextType = GQLContext, ParentType extends 
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   proteinPer100g?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export interface GQLJsonScalarConfig extends GraphQLScalarTypeConfig<GQLResolversTypes['JSON'], any> {
@@ -5147,14 +5107,12 @@ export type GQLLocationResolvers<ContextType = GQLContext, ParentType extends GQ
   country?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   countryCode?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMacroDistributionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MacroDistribution'] = GQLResolversParentTypes['MacroDistribution']> = {
   carbsPercentage?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   fatPercentage?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   proteinPercentage?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMacroTargetResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MacroTarget'] = GQLResolversParentTypes['MacroTarget']> = {
@@ -5168,7 +5126,6 @@ export type GQLMacroTargetResolvers<ContextType = GQLContext, ParentType extends
   protein?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   trainerId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMacroTotalsResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MacroTotals'] = GQLResolversParentTypes['MacroTotals']> = {
@@ -5176,7 +5133,6 @@ export type GQLMacroTotalsResolvers<ContextType = GQLContext, ParentType extends
   carbs?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   fat?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   protein?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMealResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Meal'] = GQLResolversParentTypes['Meal']> = {
@@ -5195,7 +5151,6 @@ export type GQLMealResolvers<ContextType = GQLContext, ParentType extends GQLRes
   totalMacros?: Resolver<GQLResolversTypes['MacroTotals'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   usageCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMealIngredientResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MealIngredient'] = GQLResolversParentTypes['MealIngredient']> = {
@@ -5205,7 +5160,6 @@ export type GQLMealIngredientResolvers<ContextType = GQLContext, ParentType exte
   ingredient?: Resolver<GQLResolversTypes['Ingredient'], ParentType, ContextType>;
   macros?: Resolver<GQLResolversTypes['MacroTotals'], ParentType, ContextType>;
   order?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMeetingResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Meeting'] = GQLResolversParentTypes['Meeting']> = {
@@ -5230,7 +5184,6 @@ export type GQLMeetingResolvers<ContextType = GQLContext, ParentType extends GQL
   type?: Resolver<GQLResolversTypes['MeetingType'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   virtualMethod?: Resolver<Maybe<GQLResolversTypes['VirtualMethod']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMessageResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Message'] = GQLResolversParentTypes['Message']> = {
@@ -5245,13 +5198,11 @@ export type GQLMessageResolvers<ContextType = GQLContext, ParentType extends GQL
   sender?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
   senderId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMessengerInitialDataResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MessengerInitialData'] = GQLResolversParentTypes['MessengerInitialData']> = {
   chats?: Resolver<Array<GQLResolversTypes['ChatWithMessages']>, ParentType, ContextType>;
   totalUnreadCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMuscleFrequencyResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MuscleFrequency'] = GQLResolversParentTypes['MuscleFrequency']> = {
@@ -5263,7 +5214,6 @@ export type GQLMuscleFrequencyResolvers<ContextType = GQLContext, ParentType ext
   muscleName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   sessionsCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMuscleGroupResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MuscleGroup'] = GQLResolversParentTypes['MuscleGroup']> = {
@@ -5271,7 +5221,6 @@ export type GQLMuscleGroupResolvers<ContextType = GQLContext, ParentType extends
   displayGroup?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMuscleGroupCategoryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MuscleGroupCategory'] = GQLResolversParentTypes['MuscleGroupCategory']> = {
@@ -5279,7 +5228,6 @@ export type GQLMuscleGroupCategoryResolvers<ContextType = GQLContext, ParentType
   muscles?: Resolver<Array<GQLResolversTypes['MuscleGroup']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   slug?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMuscleGroupDistributionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MuscleGroupDistribution'] = GQLResolversParentTypes['MuscleGroupDistribution']> = {
@@ -5289,7 +5237,6 @@ export type GQLMuscleGroupDistributionResolvers<ContextType = GQLContext, Parent
   core?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   legs?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   shoulders?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMuscleGroupFrequencyResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MuscleGroupFrequency'] = GQLResolversParentTypes['MuscleGroupFrequency']> = {
@@ -5298,7 +5245,6 @@ export type GQLMuscleGroupFrequencyResolvers<ContextType = GQLContext, ParentTyp
   lastTrained?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   sessionsCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Mutation'] = GQLResolversParentTypes['Mutation']> = {
@@ -5481,7 +5427,6 @@ export type GQLMyPlansPayloadResolvers<ContextType = GQLContext, ParentType exte
   availablePlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType>;
   completedPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType>;
   quickWorkoutPlan?: Resolver<Maybe<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLNoteResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Note'] = GQLResolversParentTypes['Note']> = {
@@ -5495,7 +5440,6 @@ export type GQLNoteResolvers<ContextType = GQLContext, ParentType extends GQLRes
   shareWithTrainer?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
   text?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLNotificationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Notification'] = GQLResolversParentTypes['Notification']> = {
@@ -5508,7 +5452,6 @@ export type GQLNotificationResolvers<ContextType = GQLContext, ParentType extend
   read?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   relatedItemId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<GQLResolversTypes['NotificationType'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLNotificationPreferencesResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['NotificationPreferences'] = GQLResolversParentTypes['NotificationPreferences']> = {
@@ -5518,7 +5461,6 @@ export type GQLNotificationPreferencesResolvers<ContextType = GQLContext, Parent
   pushNotifications?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   systemNotifications?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   workoutReminders?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLNutritionPlanResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['NutritionPlan'] = GQLResolversParentTypes['NutritionPlan']> = {
@@ -5541,7 +5483,6 @@ export type GQLNutritionPlanResolvers<ContextType = GQLContext, ParentType exten
   totalMealCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   trainer?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLNutritionPlanDayResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['NutritionPlanDay'] = GQLResolversParentTypes['NutritionPlanDay']> = {
@@ -5552,7 +5493,6 @@ export type GQLNutritionPlanDayResolvers<ContextType = GQLContext, ParentType ex
   mealCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   meals?: Resolver<Array<GQLResolversTypes['NutritionPlanMeal']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLNutritionPlanMealResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['NutritionPlanMeal'] = GQLResolversParentTypes['NutritionPlanMeal']> = {
@@ -5562,7 +5502,6 @@ export type GQLNutritionPlanMealResolvers<ContextType = GQLContext, ParentType e
   ingredientOverrides?: Resolver<Array<GQLResolversTypes['NutritionPlanMealIngredient']>, ParentType, ContextType>;
   meal?: Resolver<GQLResolversTypes['Meal'], ParentType, ContextType>;
   orderIndex?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLNutritionPlanMealIngredientResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['NutritionPlanMealIngredient'] = GQLResolversParentTypes['NutritionPlanMealIngredient']> = {
@@ -5570,21 +5509,18 @@ export type GQLNutritionPlanMealIngredientResolvers<ContextType = GQLContext, Pa
   grams?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   mealIngredient?: Resolver<GQLResolversTypes['MealIngredient'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLOneRmEntryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['OneRmEntry'] = GQLResolversParentTypes['OneRmEntry']> = {
   average1RM?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   date?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   detailedLogs?: Resolver<Array<GQLResolversTypes['OneRmLog']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLOneRmLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['OneRmLog'] = GQLResolversParentTypes['OneRmLog']> = {
   estimated1RM?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLOptimizedImageResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['OptimizedImage'] = GQLResolversParentTypes['OptimizedImage']> = {
@@ -5592,14 +5528,12 @@ export type GQLOptimizedImageResolvers<ContextType = GQLContext, ParentType exte
   medium?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   thumbnail?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPackageSummaryItemResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PackageSummaryItem'] = GQLResolversParentTypes['PackageSummaryItem']> = {
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   packageId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   quantity?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPackageTemplateResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PackageTemplate'] = GQLResolversParentTypes['PackageTemplate']> = {
@@ -5615,7 +5549,6 @@ export type GQLPackageTemplateResolvers<ContextType = GQLContext, ParentType ext
   trainer?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPauseCoachingResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PauseCoachingResult'] = GQLResolversParentTypes['PauseCoachingResult']> = {
@@ -5623,7 +5556,6 @@ export type GQLPauseCoachingResultResolvers<ContextType = GQLContext, ParentType
   pausedUntil?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   subscription?: Resolver<Maybe<GQLResolversTypes['UserSubscription']>, ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPerformanceDataResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PerformanceData'] = GQLResolversParentTypes['PerformanceData']> = {
@@ -5631,7 +5563,6 @@ export type GQLPerformanceDataResolvers<ContextType = GQLContext, ParentType ext
   estimated1RM?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPersonalRecordResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PersonalRecord'] = GQLResolversParentTypes['PersonalRecord']> = {
@@ -5640,7 +5571,6 @@ export type GQLPersonalRecordResolvers<ContextType = GQLContext, ParentType exte
   improvement?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   reps?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   weight?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPersonalRecordHistoryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PersonalRecordHistory'] = GQLResolversParentTypes['PersonalRecordHistory']> = {
@@ -5652,7 +5582,6 @@ export type GQLPersonalRecordHistoryResolvers<ContextType = GQLContext, ParentTy
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   reps?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   weight?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPersonalRecordSummaryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PersonalRecordSummary'] = GQLResolversParentTypes['PersonalRecordSummary']> = {
@@ -5663,13 +5592,11 @@ export type GQLPersonalRecordSummaryResolvers<ContextType = GQLContext, ParentTy
   reps?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   weekNumber?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPlanDurationRangeResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PlanDurationRange'] = GQLResolversParentTypes['PlanDurationRange']> = {
   maxDay?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   minDay?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPlanSummaryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PlanSummary'] = GQLResolversParentTypes['PlanSummary']> = {
@@ -5682,14 +5609,12 @@ export type GQLPlanSummaryResolvers<ContextType = GQLContext, ParentType extends
   totalVolumeLifted?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   totalWorkouts?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   workoutsCompleted?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPlanSummaryDurationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PlanSummaryDuration'] = GQLResolversParentTypes['PlanSummaryDuration']> = {
   endDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   startDate?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weeks?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPreviousExerciseLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PreviousExerciseLog'] = GQLResolversParentTypes['PreviousExerciseLog']> = {
@@ -5698,7 +5623,6 @@ export type GQLPreviousExerciseLogResolvers<ContextType = GQLContext, ParentType
   exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   sets?: Resolver<Array<GQLResolversTypes['ExerciseSet']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPublicTrainerResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PublicTrainer'] = GQLResolversParentTypes['PublicTrainer']> = {
@@ -5715,7 +5639,6 @@ export type GQLPublicTrainerResolvers<ContextType = GQLContext, ParentType exten
   spotsLeft?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   successStories?: Resolver<Array<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainerSince?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLPushSubscriptionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PushSubscription'] = GQLResolversParentTypes['PushSubscription']> = {
@@ -5724,7 +5647,6 @@ export type GQLPushSubscriptionResolvers<ContextType = GQLContext, ParentType ex
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   userAgent?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Query'] = GQLResolversParentTypes['Query']> = {
@@ -5844,7 +5766,6 @@ export type GQLResumeCoachingResultResolvers<ContextType = GQLContext, ParentTyp
   message?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   subscription?: Resolver<Maybe<GQLResolversTypes['UserSubscription']>, ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLReviewResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Review'] = GQLResolversParentTypes['Review']> = {
@@ -5858,7 +5779,6 @@ export type GQLReviewResolvers<ContextType = GQLContext, ParentType extends GQLR
   isHidden?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   rating?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLSearchUserResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SearchUserResult'] = GQLResolversParentTypes['SearchUserResult']> = {
@@ -5868,7 +5788,6 @@ export type GQLSearchUserResultResolvers<ContextType = GQLContext, ParentType ex
   image?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLServiceDeliveryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ServiceDelivery'] = GQLResolversParentTypes['ServiceDelivery']> = {
@@ -5893,7 +5812,6 @@ export type GQLServiceDeliveryResolvers<ContextType = GQLContext, ParentType ext
   trainer?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
   trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLServiceTaskResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ServiceTask'] = GQLResolversParentTypes['ServiceTask']> = {
@@ -5912,21 +5830,18 @@ export type GQLServiceTaskResolvers<ContextType = GQLContext, ParentType extends
   templateId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   title?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLSetCompletionResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SetCompletionResult'] = GQLResolversParentTypes['SetCompletionResult']> = {
   improvement?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   isPersonalRecord?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLStartFreeWorkoutResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['StartFreeWorkoutResult'] = GQLResolversParentTypes['StartFreeWorkoutResult']> = {
   dayId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   planId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   weekId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLStrengthProgressionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['StrengthProgression'] = GQLResolversParentTypes['StrengthProgression']> = {
@@ -5937,14 +5852,12 @@ export type GQLStrengthProgressionResolvers<ContextType = GQLContext, ParentType
   improvementPercentage?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   lastPerformance?: Resolver<GQLResolversTypes['PerformanceData'], ParentType, ContextType>;
   totalSessions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLSubMuscleProgressResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SubMuscleProgress'] = GQLResolversParentTypes['SubMuscleProgress']> = {
   alias?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   completedSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLSubscriptionStatsResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SubscriptionStats'] = GQLResolversParentTypes['SubscriptionStats']> = {
@@ -5953,7 +5866,6 @@ export type GQLSubscriptionStatsResolvers<ContextType = GQLContext, ParentType e
   usersWithActiveSubscriptions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   usersWithExpiredSubscriptions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   usersWithoutSubscriptions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLSubstituteResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Substitute'] = GQLResolversParentTypes['Substitute']> = {
@@ -5974,7 +5886,6 @@ export type GQLSubstituteResolvers<ContextType = GQLContext, ParentType extends 
   type?: Resolver<Maybe<GQLResolversTypes['ExerciseType']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   videoUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLSuggestedSetsResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SuggestedSets'] = GQLResolversParentTypes['SuggestedSets']> = {
@@ -5982,7 +5893,6 @@ export type GQLSuggestedSetsResolvers<ContextType = GQLContext, ParentType exten
   minReps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   rpe?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLTeamResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Team'] = GQLResolversParentTypes['Team']> = {
@@ -5997,7 +5907,6 @@ export type GQLTeamResolvers<ContextType = GQLContext, ParentType extends GQLRes
   platformFeePercent?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   stripeConnectedAccountId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLTeamInvitationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TeamInvitation'] = GQLResolversParentTypes['TeamInvitation']> = {
@@ -6007,7 +5916,6 @@ export type GQLTeamInvitationResolvers<ContextType = GQLContext, ParentType exte
   invitedEmail?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   status?: Resolver<GQLResolversTypes['InvitationStatus'], ParentType, ContextType>;
   team?: Resolver<GQLResolversTypes['Team'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLTeamMemberResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TeamMember'] = GQLResolversParentTypes['TeamMember']> = {
@@ -6015,7 +5923,6 @@ export type GQLTeamMemberResolvers<ContextType = GQLContext, ParentType extends 
   joinedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   role?: Resolver<GQLResolversTypes['TeamRole'], ParentType, ContextType>;
   user?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLTrainerOfferResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TrainerOffer'] = GQLResolversParentTypes['TrainerOffer']> = {
@@ -6034,7 +5941,6 @@ export type GQLTrainerOfferResolvers<ContextType = GQLContext, ParentType extend
   trainer?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
   trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLTrainingDayResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TrainingDay'] = GQLResolversParentTypes['TrainingDay']> = {
@@ -6055,7 +5961,6 @@ export type GQLTrainingDayResolvers<ContextType = GQLContext, ParentType extends
   trainingWeekId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   workoutType?: Resolver<Maybe<GQLResolversTypes['WorkoutType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLTrainingExerciseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TrainingExercise'] = GQLResolversParentTypes['TrainingExercise']> = {
@@ -6086,7 +5991,6 @@ export type GQLTrainingExerciseResolvers<ContextType = GQLContext, ParentType ex
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   videoUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   warmupSets?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLTrainingPlanResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TrainingPlan'] = GQLResolversParentTypes['TrainingPlan']> = {
@@ -6130,7 +6034,6 @@ export type GQLTrainingPlanResolvers<ContextType = GQLContext, ParentType extend
   userReview?: Resolver<Maybe<GQLResolversTypes['Review']>, ParentType, ContextType>;
   weekCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   weeks?: Resolver<Array<GQLResolversTypes['TrainingWeek']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLTrainingWeekResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TrainingWeek'] = GQLResolversParentTypes['TrainingWeek']> = {
@@ -6145,14 +6048,12 @@ export type GQLTrainingWeekResolvers<ContextType = GQLContext, ParentType extend
   trainingPlanId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weekNumber?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUndoCancelCoachingResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UndoCancelCoachingResult'] = GQLResolversParentTypes['UndoCancelCoachingResult']> = {
   message?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   subscription?: Resolver<Maybe<GQLResolversTypes['UserSubscription']>, ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUserResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['User'] = GQLResolversParentTypes['User']> = {
@@ -6171,7 +6072,6 @@ export type GQLUserResolvers<ContextType = GQLContext, ParentType extends GQLRes
   trainer?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUserBodyMeasureResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UserBodyMeasure'] = GQLResolversParentTypes['UserBodyMeasure']> = {
@@ -6190,7 +6090,6 @@ export type GQLUserBodyMeasureResolvers<ContextType = GQLContext, ParentType ext
   thighRight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   waist?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UserProfile'] = GQLResolversParentTypes['UserProfile']> = {
@@ -6228,7 +6127,6 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   weekStartsOn?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   weightUnit?: Resolver<GQLResolversTypes['WeightUnit'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUserPublicResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UserPublic'] = GQLResolversParentTypes['UserPublic']> = {
@@ -6251,7 +6149,6 @@ export type GQLUserPublicResolvers<ContextType = GQLContext, ParentType extends 
   sex?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   yearsOfExperience?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUserSessionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UserSession'] = GQLResolversParentTypes['UserSession']> = {
@@ -6260,7 +6157,6 @@ export type GQLUserSessionResolvers<ContextType = GQLContext, ParentType extends
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   otp?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUserSubscriptionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UserSubscription'] = GQLResolversParentTypes['UserSubscription']> = {
@@ -6278,7 +6174,6 @@ export type GQLUserSubscriptionResolvers<ContextType = GQLContext, ParentType ex
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   userId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUserSubscriptionStatusResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UserSubscriptionStatus'] = GQLResolversParentTypes['UserSubscriptionStatus']> = {
@@ -6292,7 +6187,6 @@ export type GQLUserSubscriptionStatusResolvers<ContextType = GQLContext, ParentT
   subscriptionEndDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
   trainingPlanLimit?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUserWithSubscriptionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UserWithSubscription'] = GQLResolversParentTypes['UserWithSubscription']> = {
@@ -6303,20 +6197,17 @@ export type GQLUserWithSubscriptionResolvers<ContextType = GQLContext, ParentTyp
   name?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   role?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   subscription?: Resolver<Maybe<GQLResolversTypes['UserSubscription']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLUsersWithSubscriptionsResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UsersWithSubscriptionsResult'] = GQLResolversParentTypes['UsersWithSubscriptionsResult']> = {
   totalCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   users?: Resolver<Array<GQLResolversTypes['UserWithSubscription']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLVolumeEntryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['VolumeEntry'] = GQLResolversParentTypes['VolumeEntry']> = {
   totalSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalVolume?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   week?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLWeeklyMuscleProgressResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WeeklyMuscleProgress'] = GQLResolversParentTypes['WeeklyMuscleProgress']> = {
@@ -6326,7 +6217,6 @@ export type GQLWeeklyMuscleProgressResolvers<ContextType = GQLContext, ParentTyp
   percentage?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   subMuscles?: Resolver<Array<GQLResolversTypes['SubMuscleProgress']>, ParentType, ContextType>;
   targetSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLWeeklyProgressSummaryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WeeklyProgressSummary'] = GQLResolversParentTypes['WeeklyProgressSummary']> = {
@@ -6335,26 +6225,22 @@ export type GQLWeeklyProgressSummaryResolvers<ContextType = GQLContext, ParentTy
   streakWeeks?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   weekEndDate?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weekStartDate?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLWeightProgressLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WeightProgressLog'] = GQLResolversParentTypes['WeightProgressLog']> = {
   measuredAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weight?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLWorkoutCompletionResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WorkoutCompletionResult'] = GQLResolversParentTypes['WorkoutCompletionResult']> = {
   planCompleted?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   planId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLWorkoutExerciseNotesResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WorkoutExerciseNotes'] = GQLResolversParentTypes['WorkoutExerciseNotes']> = {
   exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   notes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLResolvers<ContextType = GQLContext> = {

@@ -124,11 +124,11 @@
     "zod": "4.3.4"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "5.0.5",
-    "@graphql-codegen/typescript": "4.1.6",
-    "@graphql-codegen/typescript-operations": "4.6.0",
+    "@graphql-codegen/cli": "6.1.0",
+    "@graphql-codegen/typescript": "5.0.7",
+    "@graphql-codegen/typescript-operations": "5.0.7",
     "@graphql-codegen/typescript-react-query": "6.1.1",
-    "@graphql-codegen/typescript-resolvers": "4.5.0",
+    "@graphql-codegen/typescript-resolvers": "5.1.5",
     "@next/bundle-analyzer": "16.1.1",
     "@parcel/watcher": "2.5.1",
     "@tailwindcss/postcss": "4.1.18",
