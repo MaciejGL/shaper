@@ -4,7 +4,7 @@ export const MOBILE_STORE_LINKS = {
     url: 'https://apps.apple.com/app/hypertro',
   },
   android: {
-    isAvailable: false,
+    isAvailable: true,
     url: 'https://play.google.com/store/apps/details?id=app.hypertro.mobile',
   },
 } as const
