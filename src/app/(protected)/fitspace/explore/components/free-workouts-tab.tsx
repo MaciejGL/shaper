@@ -42,19 +42,21 @@ export function FreeWorkoutsTab({
 
   const { mutateAsync: startWorkoutDay, isPending: isStarting } =
     useStartFreeWorkoutDayMutation({
-      onSuccess: async (data) => {
+      onSuccess: (data) => {
         if (!data.startFreeWorkoutDay) return
 
         const { weekId, dayId } = data.startFreeWorkoutDay
 
-        await queryInvalidation.favouriteWorkoutStart(queryClient)
-
-        setIsPreviewOpen(false)
+        // Close drawer and navigate immediately - don't block on query invalidation
+        // setIsPreviewOpen(false)
 
         startTransition(() => {
-          router.push(`/fitspace/workout?week=${weekId}&day=${dayId}`)
           router.refresh()
+          router.push(`/fitspace/workout?week=${weekId}&day=${dayId}`)
         })
+
+        // Invalidate queries in background (no await)
+        queryInvalidation.favouriteWorkoutStart(queryClient)
       },
     })
 
@@ -72,6 +74,10 @@ export function FreeWorkoutsTab({
           trainingDayId,
           replaceExisting: true,
         },
+      })
+      startTransition(() => {
+        router.refresh()
+        router.push(`/fitspace/workout`)
       })
     } catch (error) {
       console.error('Failed to start workout:', error)

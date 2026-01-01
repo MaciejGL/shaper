@@ -1,4 +1,4 @@
-import { Crown, Dumbbell } from 'lucide-react'
+import { Crown, Plus } from 'lucide-react'
 
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
@@ -57,7 +57,7 @@ export function TrainingPlanPreviewFooter({
           onClick={hasPremium ? handleAddPlan : undefined}
           disabled={isLoading || !hasPremium}
           loading={isLoading}
-          iconStart={plan.premium ? <Crown /> : <Dumbbell />}
+          iconStart={!plan.premium ? <Crown /> : <Plus />}
         >
           Add to My Plans
         </Button>

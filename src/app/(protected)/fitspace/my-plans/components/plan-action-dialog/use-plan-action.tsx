@@ -44,30 +44,18 @@ export function usePlanAction() {
     })
   const { mutateAsync: pausePlan, isPending: isPausingPlan } =
     usePausePlanMutation({
-      onSuccess: async () => {
-        await queryInvalidation.planStateChange(queryClient)
-        router.refresh()
-      },
       onError: () => {
         toast.error('Failed to pause plan, please try again.')
       },
     })
   const { mutateAsync: closePlan, isPending: isClosingPlan } =
     useClosePlanMutation({
-      onSuccess: async () => {
-        await queryInvalidation.planStateChange(queryClient)
-        router.refresh()
-      },
       onError: () => {
         toast.error('Failed to close plan, please try again.')
       },
     })
   const { mutateAsync: deletePlan, isPending: isDeletingPlan } =
     useDeletePlanMutation({
-      onSuccess: async () => {
-        await queryInvalidation.planStateChange(queryClient)
-        router.refresh()
-      },
       onError: () => {
         toast.error('Failed to delete plan, please try again.')
       },
@@ -139,18 +127,23 @@ export function usePlanAction() {
       } else if (dialogState.action === 'delete') {
         await deletePlan({ planId: dialogState.plan.id })
       }
-      await revalidatePlanPages()
-      await queryInvalidation.planStateChange(queryClient)
-      router.refresh()
+
+      // Close dialog and navigate immediately - don't block on refetches
+      setDialogState({ isOpen: false, action: null, plan: null })
+
       if (isActivateAction) {
         router.push('/fitspace/workout')
       }
+
+      // Run refetches in background (no await)
+      revalidatePlanPages()
+      queryInvalidation.planStateChange(queryClient)
+      router.refresh()
     } catch (error) {
       console.error('Plan action error:', error)
       // Error handling is done in individual mutation onError callbacks
+      setDialogState({ isOpen: false, action: null, plan: null })
     }
-
-    setDialogState({ isOpen: false, action: null, plan: null })
   }
 
   const handleCloseDialog = () => {
