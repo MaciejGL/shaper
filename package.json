@@ -29,7 +29,7 @@
     "codegen:once": "graphql-codegen --config codegen.ts",
     "seed": "npx prisma db seed",
     "stripe:listen": "stripe listen --forward-to localhost:4000/api/stripe/webhooks",
-    "analyze": "ANALYZE=true npm run build",
+    "analyze": "ANALYZE=true next build --webpack",
     "analyze:dev": "ANALYZE=true npm run dev",
     "hooks:install": "bash scripts/install-git-hooks.sh",
     "prepare": "bash scripts/install-git-hooks.sh",
