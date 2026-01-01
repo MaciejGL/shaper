@@ -1,8 +1,9 @@
 'use client'
 
-import { Share2 } from 'lucide-react'
+import { Share2, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { DatePicker } from '@/components/date-picker'
 import { PrivateImageUpload } from '@/components/private-images/image-upload'
 import { Button } from '@/components/ui/button'
@@ -43,8 +44,15 @@ export function ProgressPhotoForm({
     image3Url: editLog?.image3Url,
   })
 
-  const { createProgressLog, updateProgressLog, isCreating, isUpdating } =
-    useBodyProgressLogs()
+  const {
+    createProgressLog,
+    updateProgressLog,
+    deleteProgressLog,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  } = useBodyProgressLogs()
+  const { openModal } = useConfirmationModalContext()
 
   // Update parent component whenever form data changes
   useEffect(() => {
@@ -98,7 +106,23 @@ export function ProgressPhotoForm({
     }
   }
 
-  const isLoading = isCreating || isUpdating
+  const isLoading = isCreating || isUpdating || isDeleting
+
+  const handleDelete = () => {
+    if (!editLog) return
+
+    openModal({
+      title: 'Delete Progress Log',
+      description:
+        'Are you sure you want to delete this progress log? This action cannot be undone.',
+      confirmText: 'Delete',
+      variant: 'destructive',
+      onConfirm: async () => {
+        await deleteProgressLog(editLog.id)
+        onSuccess?.()
+      },
+    })
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -189,19 +213,33 @@ export function ProgressPhotoForm({
       </Card>
 
       {showSubmitButton && (
-        <Button
-          type="submit"
-          disabled={
-            isLoading ||
-            [formData.image1Url, formData.image2Url, formData.image3Url].every(
-              (url) => !url,
-            )
-          }
-          loading={isLoading}
-          className="w-full"
-        >
-          {submitButtonText}
-        </Button>
+        <div className={editLog ? 'flex gap-2' : ''}>
+          {editLog && (
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isLoading}
+              loading={isDeleting}
+              iconStart={<Trash2 />}
+            >
+              Delete
+            </Button>
+          )}
+          <Button
+            type="submit"
+            disabled={
+              isLoading ||
+              [formData.image1Url, formData.image2Url, formData.image3Url].every(
+                (url) => !url,
+              )
+            }
+            loading={isCreating || isUpdating}
+            className={editLog ? 'flex-1' : 'w-full'}
+          >
+            {submitButtonText}
+          </Button>
+        </div>
       )}
     </form>
   )
