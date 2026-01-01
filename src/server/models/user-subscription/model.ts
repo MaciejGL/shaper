@@ -56,11 +56,11 @@ export default class UserSubscription implements GQLUserSubscription {
   }
 
   get startDate() {
-    return this.data.startDate.toISOString()
+    return this.data.startDate?.toISOString()
   }
 
   get endDate() {
-    return this.data.endDate.toISOString()
+    return this.data.endDate?.toISOString()
   }
 
   get stripeSubscriptionId() {

@@ -411,8 +411,8 @@ function NoTrainerView({
 
   // No trainer and no pending requests - show find trainer
   return (
-    <Card>
-      <CardContent className="p-6 text-center">
+    <Card className="max-w-md mx-auto">
+      <CardContent className="p-6 text-center flex-center flex-col">
         <UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h2 className="text-lg font-semibold mb-2">No Trainer Connected</h2>
         <p className="text-sm text-muted-foreground mb-4">
