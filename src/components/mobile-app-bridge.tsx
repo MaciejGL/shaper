@@ -290,6 +290,18 @@ export function useMobileApp() {
    * Get available capabilities in the mobile app
    */
   const getCapabilities = () => {
+    if (typeof window === 'undefined') {
+      return {
+        canRequestPushPermissions: false,
+        canCheckPushPermissions: false,
+        canDisablePushPermissions: false,
+        canNavigate: false,
+        canUpdateTheme: false,
+        canSetAuthToken: false,
+        canOpenExternalUrl: false,
+        canDownloadFile: false,
+      }
+    }
     const nativeAPI = derivedIsNativeApp ? window.nativeApp : null
     return {
       canRequestPushPermissions: !!nativeAPI?.requestNotificationPermission,
