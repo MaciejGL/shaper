@@ -1197,7 +1197,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           message: `${clientName} has cancelled their coaching relationship with you.`,
           type: GQLNotificationType.CoachingCancelled,
           createdBy: userId,
-          link: '/fitspace/clients',
+          link: '/trainer/clients',
         },
         context,
       )

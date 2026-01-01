@@ -138,7 +138,7 @@ export async function notifyCoachingCancelled(
     [trainerId],
     'Coaching relationship ended',
     `${clientName} has ended their coaching relationship with you.`,
-    '/fitspace/clients',
+    '/trainer/clients',
   )
 }
 
