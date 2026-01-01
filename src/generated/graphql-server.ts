@@ -3963,6 +3963,7 @@ export type GQLUserPublic = {
   image?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   lastName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   phone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   role: EntireFieldWrapper<GQLUserRole>;
   sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -6245,6 +6246,7 @@ export type GQLUserPublicResolvers<ContextType = GQLContext, ParentType extends 
   image?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   lastName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   phone?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
   role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
   sex?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;

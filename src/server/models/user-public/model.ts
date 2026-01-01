@@ -13,6 +13,7 @@ import {
 import { GQLContext } from '@/types/gql-context'
 
 import TrainingPlan from '../training-plan/model'
+import UserProfile from '../user-profile/model'
 
 export default class UserPublic implements GQLUserPublic {
   constructor(
@@ -122,5 +123,9 @@ export default class UserPublic implements GQLUserPublic {
 
   get updatedAt() {
     return this.data.updatedAt.toISOString()
+  }
+
+  get profile() {
+    return this.data.profile ? new UserProfile(this.data.profile) : null
   }
 }

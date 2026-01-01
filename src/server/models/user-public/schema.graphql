@@ -17,6 +17,7 @@ type UserPublic {
   activePlan: TrainingPlan
   averageRating: Float
   yearsOfExperience: Int
+  profile: UserProfile
 }
 
 type Note {

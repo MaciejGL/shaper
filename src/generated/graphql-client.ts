@@ -3961,6 +3961,7 @@ export type GQLUserPublic = {
   image?: Maybe<Scalars['String']['output']>;
   lastName?: Maybe<Scalars['String']['output']>;
   phone?: Maybe<Scalars['String']['output']>;
+  profile?: Maybe<GQLUserProfile>;
   role: GQLUserRole;
   sex?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
@@ -4220,7 +4221,7 @@ export type GQLGetPublicTrainingPlansQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetPublicTrainingPlansQuery = { __typename?: 'Query', getPublicTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, premium: boolean, difficulty?: GQLDifficulty | undefined | null, focusTags: Array<GQLFocusTag>, targetGoals: Array<GQLTargetGoal>, weekCount: number, assignmentCount: number, sessionsPerWeek?: number | undefined | null, avgSessionTime?: number | undefined | null, equipment: Array<string>, heroImageUrl?: string | undefined | null, rating?: number | undefined | null, totalReviews: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }> }> }> }> }> };
+export type GQLGetPublicTrainingPlansQuery = { __typename?: 'Query', getPublicTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, premium: boolean, difficulty?: GQLDifficulty | undefined | null, focusTags: Array<GQLFocusTag>, targetGoals: Array<GQLTargetGoal>, weekCount: number, assignmentCount: number, sessionsPerWeek?: number | undefined | null, avgSessionTime?: number | undefined | null, equipment: Array<string>, heroImageUrl?: string | undefined | null, rating?: number | undefined | null, totalReviews: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, email: string, role: GQLUserRole, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, bio?: string | undefined | null, avatarUrl?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null } | undefined | null } | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }> }> }> }> }> };
 
 export type GQLGetFeaturedTrainersQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -4232,7 +4233,7 @@ export type GQLGetFeaturedTrainersQuery = { __typename?: 'Query', getFeaturedTra
 export type GQLGetFreeWorkoutDaysQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetFreeWorkoutDaysQuery = { __typename?: 'Query', getFreeWorkoutDays: Array<{ __typename?: 'FreeWorkoutDay', id: string, trainingDayId: string, heroImageUrl?: string | undefined | null, trainingDay?: { __typename?: 'TrainingDay', id: string, workoutType?: GQLWorkoutType | undefined | null, exercisesCount: number, timesStarted: number, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null }> }> } | undefined | null, plan?: { __typename?: 'TrainingPlan', id: string, title: string, premium: boolean, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null } | undefined | null }> };
+export type GQLGetFreeWorkoutDaysQuery = { __typename?: 'Query', getFreeWorkoutDays: Array<{ __typename?: 'FreeWorkoutDay', id: string, trainingDayId: string, heroImageUrl?: string | undefined | null, trainingDay?: { __typename?: 'TrainingDay', id: string, workoutType?: GQLWorkoutType | undefined | null, exercisesCount: number, timesStarted: number, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, videoUrl?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null }> }> } | undefined | null, plan?: { __typename?: 'TrainingPlan', id: string, title: string, premium: boolean, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, email: string, role: GQLUserRole, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, bio?: string | undefined | null, avatarUrl?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null } | undefined | null } | undefined | null } | undefined | null }> };
 
 export type GQLStartFreeWorkoutDayMutationVariables = Exact<{
   input: GQLStartFreeWorkoutDayInput;
@@ -6843,6 +6844,18 @@ export const GetPublicTrainingPlansDocument = `
       firstName
       lastName
       image
+      email
+      role
+      profile {
+        firstName
+        lastName
+        bio
+        avatarUrl
+        specialization
+        credentials
+        successStories
+        trainerSince
+      }
     }
     createdAt
     updatedAt
@@ -7021,6 +7034,18 @@ export const GetFreeWorkoutDaysDocument = `
         firstName
         lastName
         image
+        email
+        role
+        profile {
+          firstName
+          lastName
+          bio
+          avatarUrl
+          specialization
+          credentials
+          successStories
+          trainerSince
+        }
       }
     }
   }

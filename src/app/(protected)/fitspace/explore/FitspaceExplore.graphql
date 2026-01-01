@@ -21,6 +21,18 @@ query GetPublicTrainingPlans($limit: Int) {
       firstName
       lastName
       image
+      email
+      role
+      profile {
+        firstName
+        lastName
+        bio
+        avatarUrl
+        specialization
+        credentials
+        successStories
+        trainerSince
+      }
     }
     createdAt
     updatedAt
@@ -111,6 +123,18 @@ query GetFreeWorkoutDays {
         firstName
         lastName
         image
+        email
+        role
+        profile {
+          firstName
+          lastName
+          bio
+          avatarUrl
+          specialization
+          credentials
+          successStories
+          trainerSince
+        }
       }
     }
   }
