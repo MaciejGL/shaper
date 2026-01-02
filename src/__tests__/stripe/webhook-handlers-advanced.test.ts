@@ -260,7 +260,9 @@ describe('Advanced Stripe Webhook Handlers', () => {
         dbSubscription as any,
       )
       // resolvePriceIdToLookupKey returns null (no lookup key found)
-      vi.mocked(mockLookupKeys.resolvePriceIdToLookupKey).mockResolvedValue(null)
+      vi.mocked(mockLookupKeys.resolvePriceIdToLookupKey).mockResolvedValue(
+        null,
+      )
       vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
         {} as any,
       )
@@ -427,7 +429,9 @@ describe('Advanced Stripe Webhook Handlers', () => {
         dbSubscription as any,
       )
       // Simulate: resolvePriceIdToLookupKey returns null
-      vi.mocked(mockLookupKeys.resolvePriceIdToLookupKey).mockResolvedValue(null)
+      vi.mocked(mockLookupKeys.resolvePriceIdToLookupKey).mockResolvedValue(
+        null,
+      )
       vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
         {} as any,
       )
