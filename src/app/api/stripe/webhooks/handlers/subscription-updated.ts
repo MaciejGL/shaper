@@ -3,12 +3,14 @@ import Stripe from 'stripe'
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import {
+  ServerEvent,
   captureServerEvent,
   captureServerException,
-  ServerEvent,
 } from '@/lib/posthog-server'
-import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
-import { stripe } from '@/lib/stripe/stripe'
+import {
+  STRIPE_LOOKUP_KEYS,
+  resolvePriceIdToLookupKey,
+} from '@/lib/stripe/lookup-keys'
 
 export async function handleSubscriptionUpdated(
   subscription: Stripe.Subscription,
@@ -42,20 +44,25 @@ export async function handleSubscriptionUpdated(
       subscription.items.data[0].current_period_end * 1000,
     )
 
-    // Check if price changed (monthly premium → coaching via proration)
-    const newPriceId = subscription.items.data[0]?.price.id
-    const currentPrice = await stripe.prices.list({
-      lookup_keys: [dbSubscription.package.stripeLookupKey || ''],
-      limit: 1,
-    })
+    // Detect plan change using lookup keys (not price IDs) for reliability
+    // This prevents accidental switches during pause_collection or other non-price updates
+    const currentLookupKey = dbSubscription.package.stripeLookupKey
+    const subscriptionItem = subscription.items.data[0]
 
-    const priceDifferent = currentPrice.data[0]?.id !== newPriceId
+    // Get new lookup key: prefer inline lookup_key, fallback to API resolution
+    let newLookupKey: string | null = subscriptionItem?.price.lookup_key || null
+    if (!newLookupKey && subscriptionItem?.price.id) {
+      newLookupKey = await resolvePriceIdToLookupKey(subscriptionItem.price.id)
+    }
 
-    if (priceDifferent && newPriceId) {
-      // Plan was switched! Find new package
-      const newPrice = await stripe.prices.retrieve(newPriceId)
+    // Determine if this is a real plan switch (lookup keys differ AND new key is valid)
+    const isPlanSwitch =
+      newLookupKey && currentLookupKey && newLookupKey !== currentLookupKey
+
+    if (isPlanSwitch) {
+      // Only query with a concrete lookup key - never with undefined
       const newPackage = await prisma.packageTemplate.findFirst({
-        where: { stripeLookupKey: newPrice.lookup_key || undefined },
+        where: { stripeLookupKey: newLookupKey },
       })
 
       if (newPackage) {
@@ -88,10 +95,19 @@ export async function handleSubscriptionUpdated(
         }
 
         return
+      } else {
+        console.warn(
+          `[subscription-updated] Plan switch detected but no package found for lookup key: ${newLookupKey}`,
+        )
       }
+    } else if (!newLookupKey && subscriptionItem?.price.id) {
+      // Stripe Price has no lookup_key - do not attempt to switch packages
+      console.warn(
+        `[subscription-updated] Stripe Price ${subscriptionItem.price.id} has no lookup_key; skipping package switch`,
+      )
     }
 
-    // No plan change, just update status/dates
+    // No plan change (or couldn't resolve new package), just update status/dates
     await prisma.userSubscription.update({
       where: { id: dbSubscription.id },
       data: { status, endDate },

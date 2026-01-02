@@ -9,6 +9,7 @@ import { handleSubscriptionUpdated } from '@/app/api/stripe/webhooks/handlers/su
 const mockPrisma = await import('@/lib/db')
 const mockStripe = await import('@/lib/stripe/stripe')
 const mockSendEmail = await import('@/lib/email/send-mail')
+const mockLookupKeys = await import('@/lib/stripe/lookup-keys')
 
 // Mock the email module
 vi.mock('@/lib/email/send-mail', () => ({
@@ -225,6 +226,218 @@ describe('Advanced Stripe Webhook Handlers', () => {
       await expect(
         handleSubscriptionUpdated(subscription as any),
       ).resolves.not.toThrow()
+    })
+
+    it('should NOT switch packages when Stripe price has no lookup_key', async () => {
+      // Arrange - Price without lookup_key (e.g., during pause_collection update)
+      const subscription = createMockSubscription({
+        status: 'active',
+        items: {
+          data: [
+            {
+              price: {
+                id: 'price_without_lookup_key',
+                // No lookup_key field
+              },
+              current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
+            },
+          ],
+        },
+      })
+
+      const dbSubscription = {
+        id: 'user_sub_123',
+        userId: 'user_123',
+        stripeSubscriptionId: 'sub_test123',
+        package: {
+          id: 'pkg_coaching',
+          name: 'Premium Coaching',
+          stripeLookupKey: 'premium_coaching',
+        },
+      }
+
+      vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
+        dbSubscription as any,
+      )
+      // resolvePriceIdToLookupKey returns null (no lookup key found)
+      vi.mocked(mockLookupKeys.resolvePriceIdToLookupKey).mockResolvedValue(null)
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        {} as any,
+      )
+
+      // Act
+      await handleSubscriptionUpdated(subscription as any)
+
+      // Assert - Should only update status/endDate, NOT packageId
+      expect(mockPrisma.prisma.userSubscription.update).toHaveBeenCalledWith({
+        where: { id: 'user_sub_123' },
+        data: {
+          status: 'ACTIVE',
+          endDate: expect.any(Date),
+        },
+      })
+
+      // Should NOT query for a new package
+      expect(mockPrisma.prisma.packageTemplate.findFirst).not.toHaveBeenCalled()
+    })
+
+    it('should NOT switch packages when lookup_key is the same as current', async () => {
+      // Arrange - Same lookup_key as current package
+      const subscription = createMockSubscription({
+        status: 'active',
+        items: {
+          data: [
+            {
+              price: {
+                id: 'price_coaching',
+                lookup_key: 'premium_coaching',
+              },
+              current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
+            },
+          ],
+        },
+      })
+
+      const dbSubscription = {
+        id: 'user_sub_123',
+        userId: 'user_123',
+        stripeSubscriptionId: 'sub_test123',
+        package: {
+          id: 'pkg_coaching',
+          name: 'Premium Coaching',
+          stripeLookupKey: 'premium_coaching',
+        },
+      }
+
+      vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
+        dbSubscription as any,
+      )
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        {} as any,
+      )
+
+      // Act
+      await handleSubscriptionUpdated(subscription as any)
+
+      // Assert - Should only update status/endDate, NOT packageId
+      expect(mockPrisma.prisma.userSubscription.update).toHaveBeenCalledWith({
+        where: { id: 'user_sub_123' },
+        data: {
+          status: 'ACTIVE',
+          endDate: expect.any(Date),
+        },
+      })
+
+      // Should NOT query for a new package since lookup keys match
+      expect(mockPrisma.prisma.packageTemplate.findFirst).not.toHaveBeenCalled()
+    })
+
+    it('should switch packages when lookup_key genuinely changes', async () => {
+      // Arrange - Different lookup_key (real plan switch)
+      const subscription = createMockSubscription({
+        status: 'active',
+        items: {
+          data: [
+            {
+              price: {
+                id: 'price_coaching',
+                lookup_key: 'premium_coaching',
+              },
+              current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
+            },
+          ],
+        },
+        metadata: { trainerId: 'trainer_456' },
+      })
+
+      const dbSubscription = {
+        id: 'user_sub_123',
+        userId: 'user_123',
+        stripeSubscriptionId: 'sub_test123',
+        package: {
+          id: 'pkg_monthly',
+          name: 'Premium Monthly',
+          stripeLookupKey: 'premium_monthly',
+        },
+      }
+
+      const newCoachingPackage = {
+        id: 'pkg_coaching',
+        name: 'Premium Coaching',
+        stripeLookupKey: 'premium_coaching',
+        trainerId: 'trainer_456',
+      }
+
+      vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
+        dbSubscription as any,
+      )
+      vi.mocked(mockPrisma.prisma.packageTemplate.findFirst).mockResolvedValue(
+        newCoachingPackage as any,
+      )
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        {} as any,
+      )
+      vi.mocked(mockPrisma.prisma.user.update).mockResolvedValue({} as any)
+
+      // Act
+      await handleSubscriptionUpdated(subscription as any)
+
+      // Assert - Should switch to coaching package
+      expect(mockPrisma.prisma.packageTemplate.findFirst).toHaveBeenCalledWith({
+        where: { stripeLookupKey: 'premium_coaching' },
+      })
+      expect(mockPrisma.prisma.userSubscription.update).toHaveBeenCalledWith({
+        where: { id: 'user_sub_123' },
+        data: expect.objectContaining({
+          packageId: 'pkg_coaching',
+          stripeLookupKey: 'premium_coaching',
+        }),
+      })
+    })
+
+    it('should never query packageTemplate with undefined stripeLookupKey', async () => {
+      // Arrange - This tests the specific bug where undefined was passed to Prisma
+      const subscription = createMockSubscription({
+        status: 'active',
+        items: {
+          data: [
+            {
+              price: {
+                id: 'price_unknown',
+                // No lookup_key
+              },
+              current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
+            },
+          ],
+        },
+      })
+
+      const dbSubscription = {
+        id: 'user_sub_123',
+        userId: 'user_123',
+        stripeSubscriptionId: 'sub_test123',
+        package: {
+          id: 'pkg_coaching',
+          name: 'Premium Coaching',
+          stripeLookupKey: 'premium_coaching',
+        },
+      }
+
+      vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
+        dbSubscription as any,
+      )
+      // Simulate: resolvePriceIdToLookupKey returns null
+      vi.mocked(mockLookupKeys.resolvePriceIdToLookupKey).mockResolvedValue(null)
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        {} as any,
+      )
+
+      // Act
+      await handleSubscriptionUpdated(subscription as any)
+
+      // Assert - packageTemplate.findFirst should NEVER be called with undefined
+      // This prevents accidentally selecting "Lifetime Premium" or other packages
+      expect(mockPrisma.prisma.packageTemplate.findFirst).not.toHaveBeenCalled()
     })
   })
 
