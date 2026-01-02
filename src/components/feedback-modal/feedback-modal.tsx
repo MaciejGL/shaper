@@ -37,6 +37,7 @@ interface FeedbackModalProps {
 
 export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   const hasCaptured = useRef(false)
+  const resetTimeoutRef = useRef<number | null>(null)
   const [posthogStatus, setPosthogStatus] = useState<PostHogStatus>('unknown')
 
   const [feedbackType, setFeedbackType] = useState<FeedbackType | ''>('')
@@ -45,9 +46,21 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   useEffect(() => {
+    if (resetTimeoutRef.current) {
+      window.clearTimeout(resetTimeoutRef.current)
+      resetTimeoutRef.current = null
+    }
+
     if (!isOpen) {
       hasCaptured.current = false
       setPosthogStatus('unknown')
+      // Delay reset until after the close animation so content doesn't flicker
+      resetTimeoutRef.current = window.setTimeout(() => {
+        setFeedbackType('')
+        setDetails('')
+        setIsSubmitting(false)
+        setIsSubmitted(false)
+      }, 250)
       return
     }
 
@@ -55,13 +68,6 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       setPosthogStatus(ph ? 'ready' : 'unavailable')
     })
   }, [isOpen])
-
-  const handleClose = () => {
-    setFeedbackType('')
-    setDetails('')
-    setIsSubmitted(false)
-    onClose()
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -101,7 +107,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   const isPostHogUnavailable = posthogStatus === 'unavailable'
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent dialogTitle="Feedback">
         {isSubmitted ? (
           <div className="flex flex-col items-center py-6 text-center">
@@ -112,7 +118,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 time to help us improve.
               </DialogDescription>
             </DialogHeader>
-            <Button onClick={handleClose} className="mt-6">
+            <Button onClick={onClose} className="mt-6">
               Close
             </Button>
           </div>
