@@ -215,3 +215,36 @@ The PostHog provider is automatically included in the app through the providers 
 - PostHog loads asynchronously to avoid blocking the main thread
 - Feature flag checks are cached and updated periodically
 - Session recordings are optimized for minimal performance impact
+
+## In-App Feedback Survey
+
+The app includes a lightweight "Feedback" entry in the profile menu that lets users report bugs, request features, or share opinions. Responses are stored in PostHog Surveys for admin triage.
+
+### How It Works
+
+1. User clicks **Feedback** in the top-nav profile dropdown.
+2. A modal opens with a custom feedback form.
+3. The modal emits a `feedback_opened` event with `from`, `pathname`, and `url` properties.
+4. User fills in the form (feedback type + details).
+5. On submit, the app sends a `survey sent` event to PostHog with survey response data.
+
+### Setting Up the Survey in PostHog
+
+1. In PostHog, go to **Surveys** and click **New survey**.
+2. Add two questions:
+   - **Question 1** (id: `feedback_type`): "What type of feedback is this?" with options `Bug`, `Feature request`, `Opinion`.
+   - **Question 2** (id: `feedback_details`): "Tell us more" (open text).
+3. Set display to **API only** (since we're using a custom form, not the PostHog overlay).
+4. Launch the survey and copy the **Survey ID**.
+5. Update `src/components/feedback-modal/feedback-modal.tsx` and replace the `SURVEY_ID` constant with the actual survey ID.
+
+### Custom Form Implementation
+
+The feedback modal (`src/components/feedback-modal/feedback-modal.tsx`) uses a custom inline form that:
+- Shows a select dropdown for feedback type (Bug, Feature request, Opinion)
+- Shows a textarea for detailed feedback
+- Sends responses directly to PostHog using `posthog.capture('survey sent', {...})`
+
+This approach gives full control over the UI while still tracking responses in PostHog's survey analytics.
+
+Responses will appear in the Surveys section of your PostHog project. You can connect Slack, Zapier, or other integrations to receive notifications when new feedback is submitted.

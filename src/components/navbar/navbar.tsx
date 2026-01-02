@@ -5,6 +5,7 @@ import {
   LogInIcon,
   LogOutIcon,
   MessageSquare,
+  MessageSquareTextIcon,
   Settings,
   Settings2Icon,
   UserRoundCogIcon,
@@ -26,6 +27,7 @@ import { usePaymentRules } from '@/hooks/use-payment-rules'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
+import { FeedbackModal } from '../feedback-modal/feedback-modal'
 import { MessengerModal } from '../messenger-modal/messenger-modal'
 import { useMobileApp } from '../mobile-app-bridge'
 import { ModeToggle } from '../mode-toggle'
@@ -215,6 +217,7 @@ function NavbarUser({ user }: { user?: UserContextType['user'] | null }) {
 function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const isProduction = process.env.NODE_ENV === 'production'
   const [isOpen, setIsOpen] = useState(false)
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
   const queryClient = useQueryClient()
   const { isNativeApp, setAuthToken } = useMobileApp()
 
@@ -229,84 +232,106 @@ function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
     window.location.replace('/login')
   }
 
+  const handleOpenFeedback = () => {
+    setIsOpen(false)
+    setIsFeedbackOpen(true)
+  }
+
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="rounded-full dark"
-          iconOnly={
-            <UserAvatar
-              className="size-8 dark"
-              withFallbackAvatar
-              imageUrl={user?.profile?.avatarUrl}
-              firstName={user?.profile?.firstName ?? ''}
-              lastName={user?.profile?.lastName ?? ''}
-              sex={user?.profile?.sex}
-            />
-          }
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        onCloseAutoFocus={(e) => e.preventDefault()}
-      >
-        <DropdownProvider value={{ closeDropdown: () => setIsOpen(false) }}>
-          <div className="flex items-center gap-2 p-4">
-            <UserAvatar
-              className="size-12"
-              imageUrl={user?.profile?.avatarUrl}
-              firstName={user?.profile?.firstName ?? ''}
-              lastName={user?.profile?.lastName ?? ''}
-              sex={user?.profile?.sex}
-            />
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium">
-                {user?.profile?.firstName} {user?.profile?.lastName}
-              </p>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+    <>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="rounded-full dark"
+            iconOnly={
+              <UserAvatar
+                className="size-8 dark"
+                withFallbackAvatar
+                imageUrl={user?.profile?.avatarUrl}
+                firstName={user?.profile?.firstName ?? ''}
+                lastName={user?.profile?.lastName ?? ''}
+                sex={user?.profile?.sex}
+              />
+            }
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          <DropdownProvider value={{ closeDropdown: () => setIsOpen(false) }}>
+            <div className="flex items-center gap-2 p-4">
+              <UserAvatar
+                className="size-12"
+                imageUrl={user?.profile?.avatarUrl}
+                firstName={user?.profile?.firstName ?? ''}
+                lastName={user?.profile?.lastName ?? ''}
+                sex={user?.profile?.sex}
+              />
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium">
+                  {user?.profile?.firstName} {user?.profile?.lastName}
+                </p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
+              </div>
             </div>
-          </div>
-          <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-          <DropdownMenuItem asChild>
-            <NavLink
-              href={TRAINER_LINKS.profile.href}
-              icon={<UserRoundCogIcon className="size-4" />}
-              label={TRAINER_LINKS.profile.label}
-            />
-          </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <NavLink
+                href={TRAINER_LINKS.profile.href}
+                icon={<UserRoundCogIcon className="size-4" />}
+                label={TRAINER_LINKS.profile.label}
+              />
+            </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <NavLink
+                href="#"
+                onClick={handleOpenFeedback}
+                icon={<MessageSquareTextIcon className="size-4" />}
+                label="Feedback"
+              />
+            </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
-            <NavLink
-              href="#"
-              onClick={handleLogout}
-              icon={<LogOutIcon className="size-4" />}
-              label="Logout"
-            />
-          </DropdownMenuItem>
+            <DropdownMenuSeparator />
 
-          <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <NavLink
+                href="#"
+                onClick={handleLogout}
+                icon={<LogOutIcon className="size-4" />}
+                label="Logout"
+              />
+            </DropdownMenuItem>
 
-          <div className="flex flex-col gap-2 px-4 py-4">
-            <ModeToggle />
-            {!isProduction && (
-              <Suspense>
-                <SwapAccountButton />
-              </Suspense>
-            )}
-          </div>
-        </DropdownProvider>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <DropdownMenuSeparator />
+
+            <div className="flex flex-col gap-2 px-4 py-4">
+              <ModeToggle />
+              {!isProduction && (
+                <Suspense>
+                  <SwapAccountButton />
+                </Suspense>
+              )}
+            </div>
+          </DropdownProvider>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+      />
+    </>
   )
 }
 
 function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const { isNativeApp, setAuthToken } = useMobileApp()
   const [isOpen, setIsOpen] = useState(false)
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
   const isProduction = process.env.NODE_ENV === 'production'
   const queryClient = useQueryClient()
   const rules = usePaymentRules()
@@ -331,92 +356,114 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const handleOpenAccountManagement = () => {
     openAccountManagement('/account-management')
   }
+
+  const handleOpenFeedback = () => {
+    setIsOpen(false)
+    setIsFeedbackOpen(true)
+  }
+
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className="rounded-full"
-          iconOnly={
-            <UserAvatar
-              className="size-9"
-              withFallbackAvatar
-              imageUrl={user?.profile?.avatarUrl}
-              firstName={user?.profile?.firstName ?? ''}
-              lastName={user?.profile?.lastName ?? ''}
-              sex={user?.profile?.sex}
-            />
-          }
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        onCloseAutoFocus={(e) => e.preventDefault()}
-      >
-        <DropdownProvider value={{ closeDropdown: () => setIsOpen(false) }}>
-          <div className="flex items-center gap-2 p-4">
-            <UserAvatar
-              className="size-12"
-              imageUrl={user?.profile?.avatarUrl}
-              firstName={user?.profile?.firstName ?? ''}
-              lastName={user?.profile?.lastName ?? ''}
-              sex={user?.profile?.sex}
-            />
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium">
-                {user?.profile?.firstName} {user?.profile?.lastName}
-              </p>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+    <>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            className="rounded-full"
+            iconOnly={
+              <UserAvatar
+                className="size-9"
+                withFallbackAvatar
+                imageUrl={user?.profile?.avatarUrl}
+                firstName={user?.profile?.firstName ?? ''}
+                lastName={user?.profile?.lastName ?? ''}
+                sex={user?.profile?.sex}
+              />
+            }
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          <DropdownProvider value={{ closeDropdown: () => setIsOpen(false) }}>
+            <div className="flex items-center gap-2 p-4">
+              <UserAvatar
+                className="size-12"
+                imageUrl={user?.profile?.avatarUrl}
+                firstName={user?.profile?.firstName ?? ''}
+                lastName={user?.profile?.lastName ?? ''}
+                sex={user?.profile?.sex}
+              />
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium">
+                  {user?.profile?.firstName} {user?.profile?.lastName}
+                </p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
+              </div>
             </div>
-          </div>
-          <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-          <DropdownMenuItem asChild>
-            <NavLink
-              href={CLIENT_LINKS.profile.href}
-              icon={<UserRoundCogIcon className="size-4" />}
-              label={CLIENT_LINKS.profile.label}
-            />
-          </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <NavLink
+                href={CLIENT_LINKS.profile.href}
+                icon={<UserRoundCogIcon className="size-4" />}
+                label={CLIENT_LINKS.profile.label}
+              />
+            </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
-            <NavLink
-              href={CLIENT_LINKS.settings.href}
-              icon={<Settings2Icon className="size-4" />}
-              label={CLIENT_LINKS.settings.label}
-            />
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <NavLink
-              href="#"
-              icon={<Settings className="size-4" />}
-              label={CLIENT_LINKS.accountManagement.label}
-              onClick={handleOpenAccountManagement}
-            />
-          </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <NavLink
+                href={CLIENT_LINKS.settings.href}
+                icon={<Settings2Icon className="size-4" />}
+                label={CLIENT_LINKS.settings.label}
+              />
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <NavLink
+                href="#"
+                icon={<Settings className="size-4" />}
+                label={CLIENT_LINKS.accountManagement.label}
+                onClick={handleOpenAccountManagement}
+              />
+            </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <NavLink
+                href="#"
+                onClick={handleOpenFeedback}
+                icon={<MessageSquareTextIcon className="size-4" />}
+                label="Feedback"
+              />
+            </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
-            <NavLink
-              href="#"
-              onClick={handleLogout}
-              icon={<LogOutIcon className="size-4" />}
-              label="Logout"
-            />
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <div className="flex flex-col gap-2 px-4 py-4">
-            <ModeToggle />
-            {!isProduction && (
-              <Suspense>
-                <SwapAccountButton />
-              </Suspense>
-            )}
-          </div>
-        </DropdownProvider>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem asChild>
+              <NavLink
+                href="#"
+                onClick={handleLogout}
+                icon={<LogOutIcon className="size-4" />}
+                label="Logout"
+              />
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <div className="flex flex-col gap-2 px-4 py-4">
+              <ModeToggle />
+              {!isProduction && (
+                <Suspense>
+                  <SwapAccountButton />
+                </Suspense>
+              )}
+            </div>
+          </DropdownProvider>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+      />
+    </>
   )
 }
 
