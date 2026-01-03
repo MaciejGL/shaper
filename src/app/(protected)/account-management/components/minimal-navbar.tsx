@@ -36,10 +36,10 @@ export function MinimalAccountNavbar() {
       <div
         className={cn(
           'py-3 px-4 flex justify-between items-center bg-sidebar',
-          'mt-[var(--safe-area-inset-top)]',
+          'mt-(--safe-area-inset-top)',
         )}
       >
-        <div className="flex items-center gap-2">
+        <div className="dark flex items-center gap-2">
           <SimpleLogo size={32} />
         </div>
 
@@ -66,7 +66,9 @@ export function MinimalAccountNavbar() {
                 align="end"
                 onCloseAutoFocus={(e) => e.preventDefault()}
               >
-                <DropdownProvider value={{ closeDropdown: () => setIsOpen(false) }}>
+                <DropdownProvider
+                  value={{ closeDropdown: () => setIsOpen(false) }}
+                >
                   <div className="flex items-center gap-2 p-4">
                     <UserAvatar
                       className="size-12"
@@ -79,7 +81,9 @@ export function MinimalAccountNavbar() {
                       <p className="text-sm font-medium">
                         {user.profile?.firstName} {user.profile?.lastName}
                       </p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
                   <DropdownMenuSeparator />
@@ -108,4 +112,3 @@ export function MinimalAccountNavbar() {
     </div>
   )
 }
-

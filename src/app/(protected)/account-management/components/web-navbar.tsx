@@ -11,9 +11,9 @@ import { MinimalAccountNavbar } from './minimal-navbar'
  * This provides web users with account info and logout functionality.
  */
 export function WebNavbar() {
-  const { isNativeApp } = useMobileApp()
+  const { platform } = useMobileApp()
 
-  if (isNativeApp) return null
+  if (platform !== 'web') return null
 
   return <MinimalAccountNavbar />
 }
