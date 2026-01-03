@@ -4,7 +4,10 @@ import Stripe from 'stripe'
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getBaseUrl } from '@/lib/get-base-url'
-import { COMMISSION_CONFIG } from '@/lib/stripe/config'
+import {
+  COMMISSION_CONFIG,
+  getEffectivePlatformFeePercent,
+} from '@/lib/stripe/config'
 import { buildSupplierName } from '@/lib/stripe/connect-utils'
 import {
   getInvoiceMetadata,
@@ -181,12 +184,14 @@ export async function POST(request: NextRequest) {
         `${getBaseUrl()}/offer/${offerToken}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${getBaseUrl()}/offer/${offerToken}`,
       metadata: sessionMetadata,
-      // Subscription revenue sharing
+      // Subscription revenue sharing (fee includes Stripe processing buffer)
       ...(mode === 'subscription' &&
         payout.connectedAccountId && {
           subscription_data: {
             trial_period_days: undefined,
-            application_fee_percent: payout.platformFeePercent,
+            application_fee_percent: getEffectivePlatformFeePercent(
+              payout.platformFeePercent,
+            ),
             transfer_data: {
               destination: payout.connectedAccountId,
             },

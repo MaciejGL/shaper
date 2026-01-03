@@ -7,6 +7,7 @@ import { sendEmail } from '@/lib/email/send-mail'
 import { User } from '@/lib/getUser'
 import { notifyTrainerOfferPayment } from '@/lib/notifications/push-notification-service'
 import { captureServerException } from '@/lib/posthog-server'
+import { getEffectivePlatformFeePercent } from '@/lib/stripe/config'
 import {
   STRIPE_LOOKUP_KEYS,
   resolvePriceIdToLookupKey,
@@ -545,11 +546,12 @@ async function handleTrainerPayout(
       return
     }
 
-    // Calculate platform fee using team/trainer's custom percentage
+    // Calculate platform fee using team/trainer's custom percentage + Stripe fee buffer
     const chargedAmount = paymentIntent.amount // In smallest currency unit (cents/øre)
-    const platformFee = Math.round(
-      chargedAmount * (payout.platformFeePercent / 100),
+    const effectiveFeePercent = getEffectivePlatformFeePercent(
+      payout.platformFeePercent,
     )
+    const platformFee = Math.round(chargedAmount * (effectiveFeePercent / 100))
     const trainerAmount = chargedAmount - platformFee
 
     // Get the charge ID from the payment intent for application fee tracking
@@ -562,23 +564,23 @@ async function handleTrainerPayout(
       destination: payout.connectedAccountId,
       source_transaction: charge, // Link to original charge for better tracking
       transfer_group: sessionId,
-      description: `Payout to ${payout.displayName} (${100 - payout.platformFeePercent}% of ${chargedAmount / 100} ${paymentIntent.currency.toUpperCase()})`,
+      description: `Payout to ${payout.displayName} (${100 - effectiveFeePercent}% of ${chargedAmount / 100} ${paymentIntent.currency.toUpperCase()})`,
       metadata: {
         trainerId,
         paymentIntentId: paymentIntent.id,
         offerToken: offerToken || '',
-        platformFeePercent: payout.platformFeePercent.toString(),
+        platformFeePercent: effectiveFeePercent.toString(),
+        baseFeePercent: payout.platformFeePercent.toString(),
         platformFeeAmount: platformFee.toString(),
         chargedAmount: chargedAmount.toString(),
         chargedCurrency: paymentIntent.currency.toUpperCase(),
-        // These fields help with reporting and reconciliation
         feeType: 'platform_commission',
         originalCharge: charge,
       },
     })
 
     console.info(
-      `💰 Transfer created: ${trainerAmount / 100} ${paymentIntent.currency.toUpperCase()} → ${payout.displayName} | Platform keeps: ${platformFee / 100} ${paymentIntent.currency.toUpperCase()} (${payout.platformFeePercent}%)`,
+      `💰 Transfer created: ${trainerAmount / 100} ${paymentIntent.currency.toUpperCase()} → ${payout.displayName} | Platform keeps: ${platformFee / 100} ${paymentIntent.currency.toUpperCase()} (${effectiveFeePercent}% incl. Stripe fee buffer)`,
     )
 
     return transfer

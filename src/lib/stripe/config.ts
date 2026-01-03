@@ -67,6 +67,10 @@ export const COMMISSION_CONFIG = {
   PLATFORM_PERCENTAGE: 11, // Platform commission percentage (10% base + 1% operational)
   TRAINER_PERCENTAGE: 89, // Trainer percentage after platform fee
 
+  // Buffer added to platform fee to cover Stripe processing fees (passed to trainers)
+  // Calculated from: Stripe fee (~2.53%) varies by card type/region, rounded up to 2.6pp
+  STRIPE_FEE_BUFFER_PERCENT: 2.6,
+
   // Stripe fee configuration (trainers cover these)
   STRIPE_FEES: {
     // European card rates (for Norway/EU customers)
@@ -91,6 +95,15 @@ export const COMMISSION_CONFIG = {
     PLATFORM_PREMIUM: 0, // No commission on platform subscriptions
   },
 } as const
+
+/**
+ * Calculate effective platform fee percent for trainer services.
+ * Adds Stripe fee buffer to ensure platform nets the base fee after Stripe processing fees.
+ */
+export function getEffectivePlatformFeePercent(baseFeePercent: number): number {
+  const effective = baseFeePercent + COMMISSION_CONFIG.STRIPE_FEE_BUFFER_PERCENT
+  return Math.min(Math.max(effective, 0), 100)
+}
 
 // API Configuration
 export const API_CONFIG = {

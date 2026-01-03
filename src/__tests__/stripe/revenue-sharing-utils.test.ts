@@ -2,6 +2,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  COMMISSION_CONFIG,
+  getEffectivePlatformFeePercent,
+} from '@/lib/stripe/config'
+import {
   type PayoutDestination,
   type RevenueCalculation,
   calculateRevenueSharing,
@@ -474,6 +478,34 @@ describe('Revenue Sharing Utils', () => {
           revenueShareApplied: 'true',
         },
       })
+    })
+  })
+
+  describe('getEffectivePlatformFeePercent', () => {
+    it('should add Stripe fee buffer to base fee percent', () => {
+      const baseFee = 10
+      const result = getEffectivePlatformFeePercent(baseFee)
+      expect(result).toBe(baseFee + COMMISSION_CONFIG.STRIPE_FEE_BUFFER_PERCENT)
+    })
+
+    it('should work with default platform percentage', () => {
+      const result = getEffectivePlatformFeePercent(
+        COMMISSION_CONFIG.PLATFORM_PERCENTAGE,
+      )
+      expect(result).toBe(
+        COMMISSION_CONFIG.PLATFORM_PERCENTAGE +
+          COMMISSION_CONFIG.STRIPE_FEE_BUFFER_PERCENT,
+      )
+    })
+
+    it('should clamp to 100% maximum', () => {
+      const result = getEffectivePlatformFeePercent(99)
+      expect(result).toBe(100)
+    })
+
+    it('should clamp to 0% minimum', () => {
+      const result = getEffectivePlatformFeePercent(-5)
+      expect(result).toBe(0)
     })
   })
 })
