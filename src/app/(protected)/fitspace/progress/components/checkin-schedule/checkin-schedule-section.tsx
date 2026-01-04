@@ -117,7 +117,7 @@ export function CheckinScheduleSection({
                 transition: { duration: 0.3, ease: 'easeInOut' },
               }}
             >
-              <Card className="!border ">
+              <Card className="border!">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -157,7 +157,7 @@ export function CheckinScheduleSection({
                       onClick={handleDismiss}
                       size="sm"
                       variant="ghost"
-                      className="flex-shrink-0"
+                      className="shrink-0"
                     >
                       Dismiss
                     </Button>
@@ -187,8 +187,11 @@ export function CheckinScheduleSection({
     (completion) => completion.measurement || completion.progressLog,
   )
 
-  // Show check-in button only if there's no valid completion for current period
-  const shouldShowCheckinButton = isCheckinDue
+  // Allow starting check-in early if scheduled for tomorrow
+  const isEarlyStartAllowed = nextDate !== null && isTomorrow(nextDate)
+
+  // Show check-in button if due OR if scheduled for tomorrow (early start)
+  const canStartCheckin = isCheckinDue || isEarlyStartAllowed
 
   // Check if user skipped today
   const lastCompletion = schedule.completions[0]
@@ -220,7 +223,7 @@ export function CheckinScheduleSection({
               </p>
             )}
           </div>
-          {shouldShowCheckinButton && !isSkippedToday && (
+          {canStartCheckin && !isSkippedToday && (
             <Button
               onClick={() => setShowCheckinDrawer(true)}
               size="sm"
@@ -243,7 +246,7 @@ export function CheckinScheduleSection({
 
   return (
     <div className="pb-4 px-2 dark">
-      <Card className="gap-2 rounded-2xl !border">
+      <Card className="gap-2 rounded-2xl border!">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -340,7 +343,7 @@ export function CheckinScheduleSection({
             )}
 
           {/* Action Buttons */}
-          {shouldShowCheckinButton && !isSkippedToday && (
+          {canStartCheckin && !isSkippedToday && (
             <div className="flex gap-2">
               <PremiumButtonWrapper
                 hasPremium={hasPremium}
@@ -354,15 +357,17 @@ export function CheckinScheduleSection({
                   Start Check-in
                 </Button>
               </PremiumButtonWrapper>
-              <Button
-                onClick={() => skipCheckin({})}
-                variant="ghost"
-                size="sm"
-                disabled={isSkipping}
-                className="flex-shrink-0"
-              >
-                Skip
-              </Button>
+              {isCheckinDue && (
+                <Button
+                  onClick={() => skipCheckin({})}
+                  variant="ghost"
+                  size="sm"
+                  disabled={isSkipping}
+                  className="shrink-0"
+                >
+                  Skip
+                </Button>
+              )}
             </div>
           )}
 
