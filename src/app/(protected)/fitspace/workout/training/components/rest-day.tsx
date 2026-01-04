@@ -170,12 +170,12 @@ export function RestDay() {
     <div className="text-center p-6 text-muted-foreground flex-center flex-col pt-12 space-y-6">
       <div className="flex-center flex-col">
         <BiggyIcon icon={CoffeeIcon} />
-        <p className="text-lg font-medium mb-2 mt-6 text-foreground">
+        <p className="text-lg font-medium mb-2 mt-2 text-foreground">
           Rest up today
         </p>
       </div>
 
-      <div className="p-4 rounded-xl bg-muted/50 max-w-sm">
+      <div className="p-4 rounded-xl bg-card border border-border max-w-sm">
         <p className="text-sm font-medium text-foreground mb-1">{tip.title}</p>
         <p className="text-sm leading-relaxed">{tip.description}</p>
       </div>

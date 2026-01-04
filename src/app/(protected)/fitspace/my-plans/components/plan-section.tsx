@@ -57,7 +57,7 @@ function SectionHeader({
   )
 
   return (
-    <div className="flex items-center justify-between bg-muted -mx-4 px-4 py-2">
+    <div className="flex items-center justify-between bg-card shadow-md rounded-2xl -mx-2 pl-4 pr-1 py-2">
       {titleLink ? (
         <Link href={titleLink} className="flex items-center gap-2">
           {titleContent}

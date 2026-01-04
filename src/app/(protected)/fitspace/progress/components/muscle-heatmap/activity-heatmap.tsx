@@ -45,7 +45,7 @@ function DailyBreakdown({ days }: DailyBreakdownProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      className="grid w-full grid-cols-7 gap-1 rounded-lg shadow-lg dark:ring-1 dark:ring-muted"
+      className="grid w-full grid-cols-7 gap-1 rounded-lg shadow-md outline outline-border dark:outline-muted"
     >
       {days.map((day, index) => {
         const level = getIntensityLevel(day.totalSets)
@@ -60,7 +60,7 @@ function DailyBreakdown({ days }: DailyBreakdownProps) {
             transition={{ delay: index * 0.02, duration: 0.15 }}
             className={cn(
               'flex flex-col items-center gap-0.5 rounded-lg p-1.5',
-              isTodayCell && 'ring-1 ring-foreground',
+              isTodayCell && 'outline outline-foreground -outline-offset-1',
             )}
           >
             <span className="text-[10px] text-muted-foreground">

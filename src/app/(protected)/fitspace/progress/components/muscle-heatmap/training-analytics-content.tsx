@@ -4,7 +4,7 @@ import { ChevronsDownIcon, ChevronsUpIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
-// import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { TRACKED_DISPLAY_GROUPS } from '@/config/muscles'
 import { cn } from '@/lib/utils'
@@ -56,16 +56,21 @@ export function TrainingAnalyticsContent({
       )} */}
 
       {/* Strong / Needs Work */}
-      {/* {(analytics.strong.length > 0 || analytics.needsWork.length > 0) && (
-        <div className="space-y-2">
+      {(analytics.strong.length > 0 || analytics.needsWork.length > 0) && (
+        <div className="space-y-4">
           {analytics.strong.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-sm text-amber-600 dark:text-amber-500 font-medium">
-                Worked hardest:
+            <div className="space-y-2 rounded-xl p-3 shadow-md outline outline-border dark:outline-muted">
+              <p className="text-sm text-amber-600 dark:text-amber-500 font-semibold">
+                Worked hardest
               </p>
               <div className="flex flex-wrap gap-1">
                 {analytics.strong.map((m) => (
-                  <Badge key={m} variant="secondary">
+                  <Badge
+                    key={m}
+                    variant="secondary"
+                    size="lg"
+                    className="bg-amber-100 dark:bg-amber-900/30"
+                  >
                     {m}
                   </Badge>
                 ))}
@@ -73,13 +78,18 @@ export function TrainingAnalyticsContent({
             </div>
           )}
           {analytics.needsWork.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                Needs more volume:
+            <div className="space-y-2 rounded-xl p-3 shadow-md outline outline-border dark:outline-muted">
+              <p className="text-sm text-green-600 dark:text-green-400 font-semibold">
+                Ready to train more
               </p>
               <div className="flex flex-wrap gap-1">
                 {analytics.needsWork.map((m) => (
-                  <Badge key={m} variant="secondary">
+                  <Badge
+                    key={m}
+                    variant="secondary"
+                    size="lg"
+                    className="bg-green-100 dark:bg-green-900/30"
+                  >
                     {m}
                   </Badge>
                 ))}
@@ -87,12 +97,12 @@ export function TrainingAnalyticsContent({
             </div>
           )}
         </div>
-      )} */}
+      )}
 
       {/* Recovery */}
       {orderedRecovery.length > 0 && (
         <div>
-          <p className="text-lg font-semibold mb-3">Recovery Status</p>
+          <p className="text-base font-medium mb-3">Recovery Status</p>
 
           <AnimateChangeInHeight>
             <div className="rounded-xl border bg-card divide-y divide-border">
@@ -107,11 +117,11 @@ export function TrainingAnalyticsContent({
                     </p>
                   </div>
 
-                  <div className="shrink-0 space-y-1">
-                    <RecoveryDots percentRecovered={r.percentRecovered} />
+                  <div className="shrink-0 flex items-center gap-4">
                     <p className="text-xs font-medium text-right">
                       <RecoveryLabel percentRecovered={r.percentRecovered} />
                     </p>
+                    <RecoveryDots percentRecovered={r.percentRecovered} />
                   </div>
                 </div>
               ))}

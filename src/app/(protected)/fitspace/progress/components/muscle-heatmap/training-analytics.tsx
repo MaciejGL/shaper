@@ -70,5 +70,4 @@ export function TrainingAnalytics() {
     return null
   }
   return <TrainingAnalyticsContent analytics={analytics} />
-  // return <AnalyticsContent analytics={analytics} />
 }

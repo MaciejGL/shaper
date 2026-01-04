@@ -24,6 +24,7 @@ import { WeekNavigator } from './week-navigator'
 export function MuscleHeatmapSection() {
   const { user } = useUser()
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'heatmap' | 'recovery'>('heatmap')
 
   const {
     muscleIntensity,
@@ -48,7 +49,14 @@ export function MuscleHeatmapSection() {
 
   return (
     <Card>
-      <Tabs defaultValue="heatmap">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          if (value === 'heatmap' || value === 'recovery') {
+            setActiveTab(value)
+          }
+        }}
+      >
         <CardHeader className="pb-2">
           {streakWeeks > 0 && isCurrentWeek && (
             <div className="flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-300">
@@ -64,7 +72,9 @@ export function MuscleHeatmapSection() {
             </TabsList>
           </div>
           <CardDescription>
-            Weekly sets per muscle + recovery insights.
+            {activeTab === 'heatmap'
+              ? 'Weekly sets per muscle. Tap a muscle to see details.'
+              : 'Recovery status per muscle based on your recent training.'}
           </CardDescription>
         </CardHeader>
 
@@ -73,7 +83,7 @@ export function MuscleHeatmapSection() {
             <PremiumGate feature="Muscle Heatmap" compact showPartialContent>
               <div>
                 <div className="mb-6 flex justify-between items-end gap-4">
-                  <div className="text-left border rounded-xl px-3 py-2 grow">
+                  <div className="text-left rounded-xl px-3 py-2 grow shadow-md outline outline-border dark:outline-muted">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                       Total sets
                     </p>
