@@ -71,8 +71,11 @@ export function ExerciseWeightInput({
     }
   }
 
-  const handleFocus = () => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(true)
+    if (e.target.value) {
+      requestAnimationFrame(() => e.target.select())
+    }
   }
 
   const handleBlur = () => {

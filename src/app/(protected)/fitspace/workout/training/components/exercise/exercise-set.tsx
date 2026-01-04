@@ -321,6 +321,11 @@ export function ExerciseSet({
               const val = e.target.value.replace(/[^0-9]/g, '')
               onRepsChange(val)
             }}
+            onFocus={(e) => {
+              if (e.target.value) {
+                requestAnimationFrame(() => e.target.select())
+              }
+            }}
             inputMode="numeric"
             variant="secondary"
             placeholder={set.minReps ? `${set.minReps}` : ''}
@@ -421,7 +426,7 @@ function PROverlay({ isAdvancedView, prData, onClose }: PROverlayProps) {
             animate={{ width: '100%' }}
             exit={{ width: 0 }}
             className={cn(
-              'bg-gradient-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/2 dark:to-amber-600/60 backdrop-blur-[5px] rounded-r-lg h-full overflow-hidden',
+              'bg-linear-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/2 dark:to-amber-600/60 backdrop-blur-[5px] rounded-r-lg h-full overflow-hidden',
               'col-span-3',
             )}
           >
