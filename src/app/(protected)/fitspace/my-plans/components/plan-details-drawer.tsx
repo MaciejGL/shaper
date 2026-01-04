@@ -101,7 +101,7 @@ export function PlanDetailsDrawer({
 
             {/* Fallback Header when no image */}
             {!heroImageUrl && (
-              <DrawerHeader className="flex-shrink-0">
+              <DrawerHeader className="shrink-0">
                 <div className="flex items-center justify-between gap-3">
                   <div className="w-full space-y-2">
                     <h3 className="text-lg font-medium">{plan.title}</h3>
@@ -212,7 +212,8 @@ export function PlanDetailsDrawer({
                                 <StatsItem
                                   variant="outline"
                                   label={`Week ${week.weekNumber}`}
-                                  classNameLabel="font-semibold h-"
+                                  classNameLabel="font-semibold"
+                                  className="shadow-md"
                                   value={
                                     <WeekProgressCircle
                                       progress={progress}
@@ -299,7 +300,7 @@ export function PlanDetailsDrawer({
           </div>
 
           {/* Footer */}
-          <DrawerFooter className="border-t flex-shrink-0">
+          <DrawerFooter className="border-t shrink-0">
             <div className="flex items-center justify-between gap-2 w-full">
               <Button
                 variant="destructive"

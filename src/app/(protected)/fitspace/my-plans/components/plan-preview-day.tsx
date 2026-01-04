@@ -1,3 +1,5 @@
+import { CheckCircleIcon } from 'lucide-react'
+
 import { getWorkoutTypeLabel } from '@/app/(protected)/trainer/trainings/creator/components/day-components'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import {
@@ -73,18 +75,23 @@ export function PlanPreviewDay({
               {dayName} {workoutTypeLabel && `• ${workoutTypeLabel}`}
             </span>
             {totalExercises > 0 && !isTemplate && (
-              <span
-                className={cn(
-                  'text-xs',
-                  completedExercises === totalExercises
-                    ? 'text-green-500'
-                    : completedExercises > 0
-                      ? 'text-amber-500'
-                      : 'text-muted-foreground',
-                )}
-              >
-                {completedExercises} / {totalExercises}
-              </span>
+              <div className="flex items-center gap-2">
+                {completedExercises === totalExercises ? (
+                  <CheckCircleIcon className="text-green-500 size-4" />
+                ) : null}
+                <span
+                  className={cn(
+                    'text-xs',
+                    completedExercises === totalExercises
+                      ? 'text-green-500'
+                      : completedExercises > 0
+                        ? 'text-amber-500'
+                        : 'text-muted-foreground',
+                  )}
+                >
+                  {completedExercises} / {totalExercises}
+                </span>
+              </div>
             )}
             {isTemplate && totalExercises > 0 && (
               <span className="text-xs">{totalExercises} exercises</span>
