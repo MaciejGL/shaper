@@ -1,44 +1,10 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { ChevronsDownIcon, ChevronsUpIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
-
-import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TRACKED_DISPLAY_GROUPS } from '@/config/muscles'
-import { cn } from '@/lib/utils'
 
-import type { TrainingAnalytics as TrainingAnalyticsType } from './analytics-types'
+import { TrainingAnalyticsContent } from './training-analytics-content'
 import { useTrainingAnalytics } from './use-training-analytics'
-
-function RecoveryDots({ percentRecovered }: { percentRecovered: number }) {
-  // 5 dots based on percent recovered (0-100%)
-  // Each dot = 20% of recovery
-  const recoveredDots = Math.min(5, Math.floor((percentRecovered / 100) * 5))
-
-  return (
-    <div className="flex gap-1">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          className={cn(
-            'size-2.5 rounded-full transition-colors',
-            i < recoveredDots ? 'bg-green-500' : 'bg-amber-500',
-          )}
-        />
-      ))}
-    </div>
-  )
-}
-
-function RecoveryLabel({ percentRecovered }: { percentRecovered: number }) {
-  if (percentRecovered >= 100)
-    return <span className="text-green-600 dark:text-green-400">Ready</span>
-  return <span className="text-amber-600 dark:text-amber-500">Recovering</span>
-}
 
 function AnalyticsSkeleton() {
   return (
@@ -70,138 +36,6 @@ function AnalyticsSkeleton() {
 //     </div>
 //   )
 // }
-
-const SHOW_ALL_RECOVERY_THRESHOLD = 10
-
-function AnalyticsContent({ analytics }: { analytics: TrainingAnalyticsType }) {
-  const [showAllRecovery, setShowAllRecovery] = useState(false)
-
-  const orderedRecovery = useMemo(() => {
-    const pinned = TRACKED_DISPLAY_GROUPS.slice(0, SHOW_ALL_RECOVERY_THRESHOLD)
-    const pinnedRank = new Map<string, number>(pinned.map((m, i) => [m, i]))
-
-    return [...analytics.recovery].sort((a, b) => {
-      const aRank = pinnedRank.get(a.muscle)
-      const bRank = pinnedRank.get(b.muscle)
-
-      if (aRank != null && bRank != null) return aRank - bRank
-      if (aRank != null) return -1
-      if (bRank != null) return 1
-
-      // For less common groups, keep the most relevant first (recently trained)
-      return a.hours - b.hours
-    })
-  }, [analytics.recovery])
-
-  const hasMoreRecovery = orderedRecovery.length > SHOW_ALL_RECOVERY_THRESHOLD
-  const visibleRecovery = showAllRecovery
-    ? orderedRecovery
-    : orderedRecovery.slice(0, SHOW_ALL_RECOVERY_THRESHOLD)
-
-  return (
-    <div className="space-y-5">
-      {/* Crushing it banner */}
-      {/* {analytics.status === 'crushing_it' && <CrushingItBanner />} */}
-
-      {/* AI Insight - only shown when there's something notable */}
-      {analytics.insight && (
-        <div className="py-3 px-4 rounded-lg bg-muted/50 border border-border/50">
-          <p className="text-sm text-foreground/90 leading-relaxed">
-            {analytics.insight}
-          </p>
-        </div>
-      )}
-
-      {/* Strong / Needs Work */}
-      {(analytics.strong.length > 0 || analytics.needsWork.length > 0) && (
-        <div className="space-y-2">
-          {analytics.strong.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-sm text-amber-600 dark:text-amber-500 font-medium">
-                Worked hardest:
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {analytics.strong.map((m) => (
-                  <Badge key={m} variant="secondary">
-                    {m}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-          {analytics.needsWork.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                Needs more volume:
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {analytics.needsWork.map((m) => (
-                  <Badge key={m} variant="secondary">
-                    {m}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Recovery */}
-      {orderedRecovery.length > 0 && (
-        <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
-            Muscle recovery
-          </p>
-          <AnimateChangeInHeight>
-            <motion.div className="grid grid-cols-2 gap-2">
-              {visibleRecovery.map((r) => (
-                <motion.div
-                  key={r.muscle}
-                  layout
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex flex-col gap-1.5 border rounded-lg p-3"
-                >
-                  <span className="text-sm font-medium truncate flex-1">
-                    {r.muscle}
-                  </span>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <RecoveryDots percentRecovered={r.percentRecovered} />
-                  </div>
-                  <span className="text-xs font-medium text-left">
-                    <RecoveryLabel percentRecovered={r.percentRecovered} />
-                  </span>
-                </motion.div>
-              ))}
-            </motion.div>
-          </AnimateChangeInHeight>
-          {hasMoreRecovery && (
-            <div className="flex justify-center mt-2">
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                iconOnly={
-                  showAllRecovery ? (
-                    <ChevronsUpIcon className="!size-5 text-muted-foreground" />
-                  ) : (
-                    <ChevronsDownIcon className="!size-5 text-muted-foreground" />
-                  )
-                }
-                onClick={() => setShowAllRecovery((v) => !v)}
-              >
-                {showAllRecovery
-                  ? 'Show fewer'
-                  : `Show all (${orderedRecovery.length - SHOW_ALL_RECOVERY_THRESHOLD})`}
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
 
 export function TrainingAnalytics() {
   const { analytics, isLoading, error, refetch, hasPremium } =
@@ -235,6 +69,6 @@ export function TrainingAnalytics() {
   if (!analytics) {
     return null
   }
-
-  return <AnalyticsContent analytics={analytics} />
+  return <TrainingAnalyticsContent analytics={analytics} />
+  // return <AnalyticsContent analytics={analytics} />
 }
