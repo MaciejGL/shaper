@@ -82,9 +82,9 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
             <p>{plan.title}</p>
             <Button
               variant="default"
-              size="icon-md"
+              size="icon-xl"
               className="rounded-full"
-              iconOnly={<ChevronRight className="size-4" />}
+              iconOnly={<ChevronRight className="size-6!" />}
             />
           </CardTitle>
         </div>

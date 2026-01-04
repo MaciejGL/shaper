@@ -280,7 +280,7 @@ export function Exercise({
   }
 
   return (
-    <div className="bg-linear-to-b from-white via-white to-background dark:from-background dark:via-background dark:to-background-subtle pb-12">
+    <div className="bg-linear-to-b from-white via-white to-background dark:from-background dark:via-background dark:to-background-subtle">
       <div id={exercise.id}>
         <ExerciseMetadata
           exercise={exercise}
@@ -298,6 +298,7 @@ export function Exercise({
           contentVisibility: 'auto',
           containIntrinsicSize: '1px 800px',
         }}
+        className="pb-12"
       >
         <ExerciseSets
           exercise={exercise}

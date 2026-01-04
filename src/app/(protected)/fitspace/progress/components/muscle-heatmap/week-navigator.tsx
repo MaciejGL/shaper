@@ -43,7 +43,7 @@ export function WeekNavigator({
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant="tertiary"
+        variant="outline"
         size="icon-md"
         iconOnly={<ChevronLeft className="!size-5" />}
         onClick={onPrevious}
@@ -53,7 +53,7 @@ export function WeekNavigator({
         {formatWeekRange()}
       </span>
       <Button
-        variant="tertiary"
+        variant="outline"
         size="icon-md"
         iconOnly={<ChevronRight className="!size-5" />}
         onClick={onNext}

@@ -160,7 +160,7 @@ export function ExerciseMetadata({
   }, [exercise.id, exercise.type, exercises, isSuperset])
 
   return (
-    <div className="border-t border-border">
+    <div className="border-t border-border rounded-t-2xl overflow-hidden">
       {showImages && exercise.images.length > 0 && (
         <Carousel
           opts={{
@@ -179,7 +179,7 @@ export function ExerciseMetadata({
 
               return (
                 <CarouselItem key={image.id} className="basis-1/2 px-0">
-                  <div className="relative overflow-hidden aspect-square rounded-md ml-2">
+                  <div className="relative overflow-hidden aspect-square rounded-lg ml-2">
                     <Image
                       src={src}
                       alt={exercise.name}
@@ -203,10 +203,10 @@ export function ExerciseMetadata({
         </Carousel>
       )}
       <div className="flex gap-2 items-start mt-4 px-3">
-        <p className="text-2xl font-medium">
-          <span className="text-muted-foreground">{exercise.order}.</span>{' '}
-          {exercise.name}
-        </p>
+        <div className="flex-center h-8 min-w-8 px-2  rounded-full bg-primary text-primary-foreground text-sm font-semibold leading-none shrink-0 tabular-nums">
+          {exercise.order}
+        </div>
+        <p className="text-2xl font-medium">{exercise.name}</p>
       </div>
 
       {exercise.additionalInstructions && (
