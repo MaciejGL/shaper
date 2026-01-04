@@ -49,36 +49,36 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
             quality={100}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/60 to-transparent" />
         </div>
       )}
       <CardContent
         className={cn(
-          'relative flex gap-2 justify-between aspect-[12/6]',
+          'relative flex gap-2 justify-between aspect-12/6',
           status !== PlanStatus.Active && 'items-center',
         )}
       >
         <div className="self-end space-y-2 w-full">
           <div className="flex items-end gap-2 empty:hidden mt-2">
             {status === PlanStatus.Active && (
-              <Badge variant="primary" className="w-fit" size="md">
+              <Badge variant="primary" className="w-fit" size="lg">
                 Active
               </Badge>
             )}
             {isPremiumPlan && (
-              <Badge variant="premium" className="w-fit" size="md">
+              <Badge variant="premium" className="w-fit" size="lg">
                 <Crown className="size-3" />
                 Premium
               </Badge>
             )}
             {trainerName && status === PlanStatus.Template && (
-              <Badge variant="success" className="w-fit" size="md">
+              <Badge variant="success" className="w-fit" size="lg">
                 <User className="size-3" />
                 by {trainerName}
               </Badge>
             )}
           </div>
-          <CardTitle className="text-foreground text-lg grid grid-cols-[1fr_auto] items-end gap-4">
+          <CardTitle className="text-foreground text-2xl grid grid-cols-[1fr_auto] items-end gap-4">
             <p>{plan.title}</p>
             <Button
               variant="default"
@@ -92,8 +92,8 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
           <div className="flex self-start items-center shrink-0 bg-background/90 rounded-full p-1 absolute right-4 top-0">
             <ProgressCircle
               progress={progressPercentage}
-              size={status === PlanStatus.Active ? 40 : 32}
-              strokeWidth={3}
+              size={status === PlanStatus.Active ? 60 : 32}
+              strokeWidth={status === PlanStatus.Active ? 4 : 3}
               showValue={true}
             />
           </div>
