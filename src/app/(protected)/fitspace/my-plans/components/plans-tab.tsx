@@ -148,12 +148,12 @@ function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {!hasActivePlan && <EmptyStatusCard status={PlanStatus.Active} />}
 
       {trainerPlans.length > 0 && (
         <PlanSection
-          title="Perosnal Plans"
+          title="Coaching Plans"
           plans={trainerPlans.map(({ plan }) => plan)}
           onPlanClick={onPlanClick}
           showProgress={false}
@@ -162,7 +162,7 @@ function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
       )}
 
       <PlanSection
-        title="Ready-made Plans"
+        title="Premium Plans"
         plans={readymadePlans.map(({ plan }) => plan)}
         onPlanClick={onPlanClick}
         showProgress={false}
@@ -251,7 +251,7 @@ export function PlansTab({
         />
         <ButtonLink
           href="/fitspace/explore?tab=plans"
-          variant="secondary"
+          variant="default"
           size="lg"
           iconEnd={<ChevronRight />}
           className="w-full mt-6"

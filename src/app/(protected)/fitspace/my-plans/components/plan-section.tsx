@@ -5,6 +5,7 @@ import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { CardContent } from '@/components/ui/card'
@@ -33,6 +34,43 @@ interface PlanSectionProps {
   titleLink?: string
 }
 
+interface SectionHeaderProps {
+  title: string
+  count: number
+  titleLink?: string
+  children?: React.ReactNode
+}
+
+function SectionHeader({
+  title,
+  count,
+  titleLink,
+  children,
+}: SectionHeaderProps) {
+  const titleContent = (
+    <>
+      <h2 className="text-xl font-semibold">{title}</h2>
+      <Badge variant="primary" size="sm" className="rounded-2xl min-w-[22px]">
+        {count}
+      </Badge>
+    </>
+  )
+
+  return (
+    <div className="flex items-center justify-between bg-muted -mx-4 px-4 py-2">
+      {titleLink ? (
+        <Link href={titleLink} className="flex items-center gap-2">
+          {titleContent}
+          <ChevronRight className="h-4 w-4" />
+        </Link>
+      ) : (
+        <div className="flex items-center gap-2">{titleContent}</div>
+      )}
+      {children}
+    </div>
+  )
+}
+
 export function PlanSection({
   title,
   plans,
@@ -56,9 +94,7 @@ export function PlanSection({
 
     return (
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold">{title}</h2>
-        </div>
+        <SectionHeader title={title} count={plans.length} />
         <CardContent className="flex items-center gap-4 py-6">
           <div className="flex-1 min-w-0">
             <h4 className="font-semibold text-sm mb-1">No Template Plans</h4>
@@ -81,20 +117,13 @@ export function PlanSection({
   // Show promo card when no plans but promo is enabled
   if (showPromoCard) {
     return (
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          {titleLink ? (
-            <Link href={titleLink} className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">{title}</h2>{' '}
-              <ChevronRight className="h-4 w-4" />
-            </Link>
-          ) : (
-            <h2 className="text-lg font-semibold">{title}</h2>
-          )}
-        </div>
-        <div className="w-[100%]">
-          <PromoPlanCard />
-        </div>
+      <div className="space-y-4">
+        <SectionHeader
+          title={title}
+          count={plans.length}
+          titleLink={titleLink}
+        />
+        <PromoPlanCard />
       </div>
     )
   }
@@ -102,16 +131,8 @@ export function PlanSection({
   const maxPlans = 6
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        {titleLink ? (
-          <Link href={titleLink} className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold">{title}</h2>{' '}
-            <ChevronRight className="h-4 w-4" />
-          </Link>
-        ) : (
-          <h2 className="text-lg font-semibold">{title}</h2>
-        )}
+    <div className="space-y-4">
+      <SectionHeader title={title} count={plans.length} titleLink={titleLink}>
         {plans.length > 2 && (
           <Button
             variant="link"
@@ -139,7 +160,7 @@ export function PlanSection({
             </AnimatePresence>
           </Button>
         )}
-      </div>
+      </SectionHeader>
 
       <AnimatePresence mode="wait">
         <LayoutGroup id="plan-section" key={`plan-section-`}>
