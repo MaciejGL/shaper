@@ -5,6 +5,7 @@ import { CollapsibleText } from '@/components/collapsible-text'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { RatingStars } from '@/components/rating-stars'
 import { StatsItem } from '@/components/stats-item'
+import { TrainingPlanHeroHeader } from '@/components/training-plan-hero-header'
 import { Badge, BadgeProps } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -18,6 +19,7 @@ import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 
 import { PlanAction, PlanStatus, UnifiedPlan, getPlanStatus } from '../types'
+import { getPlanImage } from '../utils'
 
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'
@@ -70,42 +72,64 @@ export function PlanDetailsDrawer({
     setActiveTab('preview')
   }
 
+  const heroImageUrl = getPlanImage(plan)
+  const createdByName =
+    'createdBy' in plan && plan.createdBy
+      ? `${plan.createdBy.firstName ?? ''} ${plan.createdBy.lastName ?? ''}`.trim() ||
+        null
+      : null
+  const difficulty = plan.difficulty as
+    | 'BEGINNER'
+    | 'INTERMEDIATE'
+    | 'ADVANCED'
+    | 'EXPERT'
+    | null
+
   return (
     <Drawer open={open} onOpenChange={onClose}>
-      <DrawerContent dialogTitle={plan.title}>
+      <DrawerContent dialogTitle={plan.title} grabberAbsolute={!!heroImageUrl}>
         <div className="flex flex-col h-full overflow-hidden">
-          {/* Header */}
-          <DrawerHeader className="flex-shrink-0">
-            <div className="flex items-center justify-between gap-3">
-              <div className="w-full space-y-2">
-                <h3 className="text-lg font-medium">{plan.title}</h3>
-                <div className="flex items-center gap-2 w-full justify-between">
-                  {/* Plan Status and Basic Info */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <PlanStatusBadge status={status} />
-                    {plan.difficulty && (
-                      <Badge variant="outline" className="capitalize">
-                        {plan.difficulty.toLowerCase()}
-                      </Badge>
-                    )}
-                  </div>
-                  {plan.startDate && plan.endDate && plan.active && (
-                    <ButtonLink
-                      href={`/fitspace/workout`}
-                      iconEnd={<ArrowRightIcon />}
-                      size="sm"
-                    >
-                      Go to Plan
-                    </ButtonLink>
-                  )}
-                </div>
-              </div>
-              {/* Go to Plan button in header */}
-            </div>
-          </DrawerHeader>
-
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto" ref={scrollContainerRef}>
+            {/* Hero Header */}
+            <TrainingPlanHeroHeader
+              title={plan.title}
+              imageUrl={heroImageUrl}
+              difficulty={difficulty}
+              createdByName={createdByName}
+            />
+
+            {/* Fallback Header when no image */}
+            {!heroImageUrl && (
+              <DrawerHeader className="flex-shrink-0">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="w-full space-y-2">
+                    <h3 className="text-lg font-medium">{plan.title}</h3>
+                    <div className="flex items-center gap-2 w-full justify-between">
+                      {/* Plan Status and Basic Info */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <PlanStatusBadge status={status} />
+                        {plan.difficulty && (
+                          <Badge variant="outline" className="capitalize">
+                            {plan.difficulty.toLowerCase()}
+                          </Badge>
+                        )}
+                      </div>
+                      {plan.startDate && plan.endDate && plan.active && (
+                        <ButtonLink
+                          href={`/fitspace/workout`}
+                          iconEnd={<ArrowRightIcon />}
+                          size="sm"
+                        >
+                          Go to Plan
+                        </ButtonLink>
+                      )}
+                    </div>
+                  </div>
+                  {/* Go to Plan button in header */}
+                </div>
+              </DrawerHeader>
+            )}
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
