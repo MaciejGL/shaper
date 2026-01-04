@@ -177,7 +177,7 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
           })}
         </div>
       </nav>
-      <div className="h-[4.5rem] mt-4" />
+      {/* <div className="h-[60px]" /> */}
     </>
   )
 }

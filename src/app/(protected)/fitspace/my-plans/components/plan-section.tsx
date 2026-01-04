@@ -155,7 +155,7 @@ export function PlanSection({
                 exit={{ opacity: 0, y: 10 }}
                 transition={{ duration: 0.15 }}
               >
-                {isExpanded ? 'Show Less' : 'See All'}
+                {isExpanded ? 'Show Less' : 'View All'}
               </motion.span>
             </AnimatePresence>
           </Button>

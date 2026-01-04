@@ -280,7 +280,7 @@ export function Exercise({
   }
 
   return (
-    <div className="bg-gradient-to-b from-white via-white to-background dark:from-background-subtle dark:via-background-subtle dark:to-background pb-12">
+    <div className="bg-linear-to-b from-white via-white to-background dark:from-background dark:via-background dark:to-background-subtle pb-12">
       <div id={exercise.id}>
         <ExerciseMetadata
           exercise={exercise}
