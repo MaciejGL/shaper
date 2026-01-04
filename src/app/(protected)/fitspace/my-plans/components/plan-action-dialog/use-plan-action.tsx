@@ -32,6 +32,8 @@ export function usePlanAction() {
     plan: null,
   })
 
+  const [isSyncing, setIsSyncing] = useState(false)
+
   const router = useRouter()
 
   const queryClient = useQueryClient()
@@ -128,25 +130,49 @@ export function usePlanAction() {
         await deletePlan({ planId: dialogState.plan.id })
       }
 
-      // Close dialog and navigate immediately - don't block on refetches
-      setDialogState({ isOpen: false, action: null, plan: null })
-
+      // For activate action, navigate immediately and close dialog
       if (isActivateAction) {
+        setDialogState({ isOpen: false, action: null, plan: null })
         router.push('/fitspace/workout')
+        revalidatePlanPages()
+        queryInvalidation.planStateChange(queryClient)
+        router.refresh()
+        return
       }
 
-      // Run refetches in background (no await)
-      revalidatePlanPages()
-      queryInvalidation.planStateChange(queryClient)
-      router.refresh()
+      // For other actions, wait for refetches before closing dialog
+      setIsSyncing(true)
+      try {
+        await queryInvalidation.planStateChange(queryClient)
+        await queryClient.invalidateQueries({
+          queryKey: ['GetCheckinStatus'],
+          refetchType: 'all',
+        })
+        revalidatePlanPages()
+        router.refresh()
+      } catch (syncError) {
+        console.error('Sync error:', syncError)
+        toast.error('Failed to refresh plan data, please try again.')
+      } finally {
+        setIsSyncing(false)
+        setDialogState({ isOpen: false, action: null, plan: null })
+      }
     } catch (error) {
       console.error('Plan action error:', error)
       // Error handling is done in individual mutation onError callbacks
-      setDialogState({ isOpen: false, action: null, plan: null })
+      // Keep dialog open so user can retry
     }
   }
 
+  const isBusy =
+    isActivatingPlan ||
+    isPausingPlan ||
+    isClosingPlan ||
+    isDeletingPlan ||
+    isSyncing
+
   const handleCloseDialog = () => {
+    if (isBusy) return
     setDialogState({ isOpen: false, action: null, plan: null })
   }
 
@@ -159,5 +185,7 @@ export function usePlanAction() {
     isPausingPlan,
     isClosingPlan,
     isDeletingPlan,
+    isSyncing,
+    isBusy,
   }
 }

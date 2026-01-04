@@ -34,10 +34,7 @@ export default function MyPlansPage() {
     handlePlanAction,
     handleConfirmAction,
     handleCloseDialog,
-    isActivatingPlan,
-    isPausingPlan,
-    isClosingPlan,
-    isDeletingPlan,
+    isBusy,
   } = usePlanAction()
 
   const { data, isLoading: isLoadingPlans } = useFitspaceMyPlansQuery()
@@ -134,9 +131,7 @@ export default function MyPlansPage() {
         action={dialogState.action}
         plan={dialogState.plan}
         onConfirm={handleConfirmAction}
-        isLoading={
-          isActivatingPlan || isPausingPlan || isClosingPlan || isDeletingPlan
-        }
+        isLoading={isBusy}
         hasCheckinSchedule={checkinData?.checkinStatus?.hasSchedule}
       />
     </>
