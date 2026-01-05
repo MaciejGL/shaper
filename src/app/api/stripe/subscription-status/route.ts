@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     // Verify the userId matches the authenticated user
     if (userId !== currentUser.user.id) {
       return NextResponse.json(
-        { error: 'Unauthorized: Cannot access another user\'s subscription' },
+        { error: "Unauthorized: Cannot access another user's subscription" },
         { status: 403 },
       )
     }

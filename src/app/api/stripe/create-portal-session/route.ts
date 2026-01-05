@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Verify the userId matches the authenticated user
     if (userId !== currentUser.user.id) {
       return NextResponse.json(
-        { error: 'Unauthorized: Cannot access another user\'s portal' },
+        { error: "Unauthorized: Cannot access another user's portal" },
         { status: 403 },
       )
     }
