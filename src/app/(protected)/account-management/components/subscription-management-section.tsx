@@ -228,7 +228,7 @@ export function SubscriptionManagementSection() {
       {hasActiveSubscription ? (
         <>
           {/* Current Subscription Status */}
-          <Card className="bg-card-on-card">
+          <Card variant="premium">
             <CardContent className="space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
