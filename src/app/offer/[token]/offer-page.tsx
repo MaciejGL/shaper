@@ -388,7 +388,7 @@ export function OfferPage({
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem
                 value="subscription-info"
-                className="bg-card px-4 rounded-xl"
+                // className="bg-card px-4 rounded-xl"
               >
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-2">
@@ -398,7 +398,7 @@ export function OfferPage({
                     </span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground space-y-3 pt-2">
+                <AccordionContent className="text-sm text-foreground space-y-3 p-4">
                   <p>
                     You currently have an active{' '}
                     <span className="font-medium">
