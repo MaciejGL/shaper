@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getBaseUrl } from '@/lib/get-base-url'
+import { getCurrentUser } from '@/lib/getUser'
 import { SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
 import {
   getInvoiceMetadata,
@@ -16,6 +17,11 @@ import { recordTermsAgreement } from '@/lib/terms-utils'
 
 export async function POST(request: NextRequest) {
   try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const {
       userId,
@@ -39,6 +45,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'User ID and either Package ID or Lookup Key are required' },
         { status: 400 },
+      )
+    }
+
+    // Verify the userId matches the authenticated user
+    if (userId !== currentUser.user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Cannot create checkout for another user' },
+        { status: 403 },
       )
     }
 

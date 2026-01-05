@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
+import { getCurrentUser } from '@/lib/getUser'
 import { stripe } from '@/lib/stripe/stripe'
 import { PackageSummary } from '@/types/trainer-offer'
 
@@ -10,6 +11,10 @@ import { PackageSummary } from '@/types/trainer-offer'
 // Excludes platform_premium subscriptions (those are for direct platform access)
 export async function GET() {
   try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     // Fetch active package templates that can be offered by trainers
     // Only include trainer-specific services, exclude platform premium subscriptions
     const packageTemplates = await prisma.packageTemplate.findMany({

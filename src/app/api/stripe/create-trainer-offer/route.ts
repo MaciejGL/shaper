@@ -10,12 +10,26 @@ import {
   validateCreateOfferInput,
   validatePackages,
 } from '@/lib/create-trainer-offer-utils'
+import { getCurrentUser } from '@/lib/getUser'
 
 // Trainer creates bundle offer with multiple packages and sends web checkout link to client
 export async function POST(request: NextRequest) {
   try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     // Validate and parse request input
     const input = await validateCreateOfferInput(request)
+
+    // Verify the trainerId matches the authenticated user
+    if (input.trainerId !== currentUser.user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Cannot create offers for another trainer' },
+        { status: 403 },
+      )
+    }
 
     // Validate package constraints
     validatePackages(input.packages)

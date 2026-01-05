@@ -3,10 +3,16 @@ import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
 import { getBaseUrl } from '@/lib/get-base-url'
+import { getCurrentUser } from '@/lib/getUser'
 import { stripe } from '@/lib/stripe/stripe'
 
 export async function POST(request: NextRequest) {
   try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { userId, returnUrl } = body
 
@@ -14,6 +20,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'User ID is required' },
         { status: 400 },
+      )
+    }
+
+    // Verify the userId matches the authenticated user
+    if (userId !== currentUser.user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Cannot access another user\'s portal' },
+        { status: 403 },
       )
     }
 

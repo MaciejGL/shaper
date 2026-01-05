@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
+import { getCurrentUser } from '@/lib/getUser'
 import { SUBSCRIPTION_HELPERS } from '@/lib/stripe/config'
 import { DISCOUNT_TYPES } from '@/lib/stripe/discount-config'
 import { getPremiumLookupKeys } from '@/lib/stripe/lookup-keys'
@@ -78,6 +79,11 @@ async function fetchPromotionalDiscount(
 
 export async function GET(request: NextRequest) {
   try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const subscriptionType = searchParams.get('type') // 'coaching' or 'platform'
@@ -87,6 +93,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { error: 'User ID is required' },
         { status: 400 },
+      )
+    }
+
+    // Verify the userId matches the authenticated user
+    if (userId !== currentUser.user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Cannot access another user\'s subscription' },
+        { status: 403 },
       )
     }
 
