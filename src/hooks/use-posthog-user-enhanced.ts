@@ -42,8 +42,8 @@ export function usePostHogUserEnhanced() {
       return
     }
 
-    if (status === 'authenticated' && user?.email) {
-      const userId = user.email
+    if (status === 'authenticated' && user?.id) {
+      const distinctId = user.id
 
       // Determine platform
       let platform: 'ios' | 'android' | 'web' = 'web'
@@ -52,7 +52,7 @@ export function usePostHogUserEnhanced() {
       }
 
       // Only identify if it's a different user or first time
-      if (lastUserIdRef.current !== userId || !hasIdentified) {
+      if (lastUserIdRef.current !== distinctId || !hasIdentified) {
         // Simple user properties - just ID and email
         const userProperties = {
           userId: user.id,
@@ -64,9 +64,9 @@ export function usePostHogUserEnhanced() {
           platform,
         }
 
-        // Identify user with PostHog
-        identifyUser(userId, userProperties)
-        lastUserIdRef.current = userId
+        // Identify user with PostHog using internal user id
+        identifyUser(distinctId, userProperties)
+        lastUserIdRef.current = distinctId
         setHasIdentified(true)
       }
     } else if (status === 'unauthenticated') {

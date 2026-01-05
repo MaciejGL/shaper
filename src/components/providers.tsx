@@ -12,6 +12,7 @@ import { getQueryClient } from '@/lib/get-query-client'
 
 import { ActivityHeartbeat } from './activity-heartbeat'
 import { ConfirmationModalProvider } from './confirmation-modal'
+import { PostHogPageTracker } from './posthog-page-tracker'
 import { SidebarProvider } from './ui/sidebar'
 import { Toaster } from './ui/sonner'
 
@@ -20,6 +21,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <PostHogPageTracker />
       <ProgressProvider
         height="1px"
         color="var(--color-amber-500)"
