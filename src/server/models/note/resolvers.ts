@@ -69,10 +69,22 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    // Find all exercises with the given name in the user's training plans
+    const normalizeExerciseName = (name: string) =>
+      name.trim().toLowerCase().replace(/\s+/g, ' ')
+
+    const requestedName = exerciseName.trim()
+    const requestedNorm = normalizeExerciseName(requestedName)
+
+    if (!requestedNorm) {
+      return []
+    }
+
+    // Find all exercises with the given name in the user's training plans.
+    // We fetch a superset using a case-insensitive contains, then do strict
+    // normalized equality in-memory (handles casing + stray whitespace).
     const exercises = await prisma.trainingExercise.findMany({
       where: {
-        name: exerciseName,
+        name: { contains: requestedName, mode: 'insensitive' },
         day: {
           week: {
             plan: {
@@ -84,19 +96,21 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           },
         },
       },
-      select: { id: true },
+      select: { id: true, name: true },
     })
 
-    const exerciseIds = exercises.map((ex) => ex.id)
+    const matchedExerciseIds = exercises
+      .filter((ex) => normalizeExerciseName(ex.name) === requestedNorm)
+      .map((ex) => ex.id)
 
-    if (exerciseIds.length === 0) {
+    if (matchedExerciseIds.length === 0) {
       return []
     }
 
     // Get all notes for these exercises (excluding replies)
     const notes = await prisma.note.findMany({
       where: {
-        relatedToId: { in: exerciseIds },
+        relatedToId: { in: matchedExerciseIds },
         createdById: user.user.id,
         // Filter out replies by checking if metadata doesn't contain parentNoteId
         // We'll handle this in post-processing since Prisma JSON filtering is complex
@@ -126,10 +140,31 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
+    const normalizeExerciseName = (name: string) =>
+      name.trim().toLowerCase().replace(/\s+/g, ' ')
+
+    const requestedNames = exerciseNames.map((n) => n.trim())
+    const requestedNorms = new Map<string, string[]>()
+    for (let i = 0; i < requestedNames.length; i++) {
+      const originalName = exerciseNames[i]
+      const trimmed = requestedNames[i]
+      const norm = normalizeExerciseName(trimmed)
+      if (!norm) continue
+      requestedNorms.set(norm, [
+        ...(requestedNorms.get(norm) ?? []),
+        originalName,
+      ])
+    }
+
     // OPTIMIZED: Single query to find all exercises by names
     const exercises = await prisma.trainingExercise.findMany({
       where: {
-        name: { in: exerciseNames },
+        OR: requestedNames
+          .map((name) => name.trim())
+          .filter(Boolean)
+          .map((name) => ({
+            name: { contains: name, mode: 'insensitive' as const },
+          })),
         day: {
           week: {
             plan: {
@@ -144,7 +179,21 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       select: { id: true, name: true },
     })
 
-    const exerciseIds = exercises.map((ex) => ex.id)
+    const matchedExercises = exercises.filter((ex) =>
+      requestedNorms.has(normalizeExerciseName(ex.name)),
+    )
+
+    const exerciseIdToRequestedName = new Map<string, string>()
+    for (const ex of matchedExercises) {
+      const norm = normalizeExerciseName(ex.name)
+      const requestedOriginalNames = requestedNorms.get(norm)
+      const requestedName = requestedOriginalNames?.[0]
+      if (requestedName) {
+        exerciseIdToRequestedName.set(ex.id, requestedName)
+      }
+    }
+
+    const exerciseIds = Array.from(exerciseIdToRequestedName.keys())
 
     if (exerciseIds.length === 0) {
       // Return empty results for all requested exercise names
@@ -200,18 +249,18 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       }
     }
 
-    // Group parent notes by exercise name
+    // Group parent notes by requested exercise name (not DB name)
     const notesByExercise = new Map<string, typeof parentNotes>()
 
     for (const note of parentNotes) {
-      // Find the exercise name for this note
-      const exercise = exercises.find((ex) => ex.id === note.relatedToId)
-      if (exercise) {
-        if (!notesByExercise.has(exercise.name)) {
-          notesByExercise.set(exercise.name, [])
-        }
-        notesByExercise.get(exercise.name)!.push(note)
+      const relatedToId = note.relatedToId
+      if (!relatedToId) continue
+      const requestedExerciseName = exerciseIdToRequestedName.get(relatedToId)
+      if (!requestedExerciseName) continue
+      if (!notesByExercise.has(requestedExerciseName)) {
+        notesByExercise.set(requestedExerciseName, [])
       }
+      notesByExercise.get(requestedExerciseName)!.push(note)
     }
 
     // Return results for all requested exercise names (empty array if no notes)

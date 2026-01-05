@@ -29,7 +29,6 @@ export function useWorkoutNotesBatch(
     },
   )
 
-  // Convert batch results into easy-to-use map
   const notesByExercise = useMemo(() => {
     const map = new Map<
       string,

@@ -181,8 +181,6 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
 
     const noteText = newNoteText.trim()
     const shareWithTrainer = newNoteShareWithTrainer
-
-    // Clear form immediately
     setNewNoteText('')
     setNewNoteShareWithTrainer(false)
 
@@ -203,7 +201,6 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
       setNewNoteShareWithTrainer(shareWithTrainer)
     }
 
-    // Always refetch to sync with server
     invalidateQueries()
   }
 
@@ -281,7 +278,7 @@ function CreateNoteForm({
   onCreateNote: () => void
 }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 border-b border-border -mx-4 px-4 pb-4">
       <Textarea
         id="new-note"
         placeholder="Write your exercise note here..."
@@ -397,14 +394,14 @@ function ExerciseNote({
   return (
     <div
       className={cn(
-        'group transition-all duration-200 py-4 border-b border-border last:border-b-0',
+        'group transition-all duration-200 pb-4 border-b border-border last:border-b-0',
         loading && 'opacity-50',
       )}
     >
       <AnimateHeightItem
         id={note.text}
         isFirstRender={false}
-        className="w-full"
+        className="w-full -mx-px px-px pt-px"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
@@ -419,34 +416,33 @@ function ExerciseNote({
                   autoFocus
                 />
 
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="share-edit-note-trainer"
-                    checked={editingShareWithTrainer}
-                    onCheckedChange={onEditingShareWithTrainerChange}
-                  />
-                  <Label
-                    htmlFor="share-edit-note-trainer"
-                    className="text-sm text-muted-foreground"
-                  >
-                    Share with my trainer
-                  </Label>
-                </div>
-
-                <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDeleteNote(note.id)}
-                    loading={isDeletingNote}
-                    className="h-8 px-3 text-destructive hover:text-destructive"
-                    iconStart={<Trash2 className="h-4 w-4" />}
-                  >
-                    Delete
-                  </Button>
-                  <div className="flex gap-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center space-x-2 border border-border pl-2 pr-3 py-1 rounded-full">
+                    <Switch
+                      id="share-edit-note-trainer"
+                      checked={editingShareWithTrainer}
+                      onCheckedChange={onEditingShareWithTrainerChange}
+                    />
+                    <Label
+                      htmlFor="share-edit-note-trainer"
+                      className="text-sm"
+                    >
+                      Share with trainer
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-3">
                     <Button
-                      variant="ghost"
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={() => onDeleteNote(note.id)}
+                      loading={isDeletingNote}
+                      className="h-8 px-3 text-destructive hover:text-destructive"
+                      iconOnly={<Trash2 />}
+                    >
+                      Delete
+                    </Button>
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={onCancelEdit}
                       disabled={isUpdatingNote}
