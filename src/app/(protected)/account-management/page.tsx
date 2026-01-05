@@ -47,7 +47,7 @@ export default function AccountManagementPage() {
       />
 
       {/* Page Content */}
-      <div className="dark mx-auto">
+      <div className="mx-auto">
         <div>
           {/* Header */}
           <div className="mb-8">
@@ -55,7 +55,7 @@ export default function AccountManagementPage() {
               <ReturnToApp variant="back" redirectUrl="/fitspace/workout" />
             ) : null}
             <div className="flex items-center flex-col mb-4 gap-4">
-              <div className="size-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex-center shrink-0">
+              <div className="size-12 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl flex-center shrink-0">
                 <UserRoundCogIcon className="w-6 h-6 text-white" />
               </div>
               <div className="flex flex-col items-center text-center">
@@ -79,7 +79,7 @@ export default function AccountManagementPage() {
               <Card variant="secondary">
                 <CardHeader className="pb-6">
                   <div className="flex items-center space-x-3">
-                    <div className="size-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shrink-0 self-start">
+                    <div className="size-10 bg-linear-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shrink-0 self-start">
                       <CreditCard className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -102,7 +102,7 @@ export default function AccountManagementPage() {
 
             <div className="pb-12">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="lg"
                 onClick={handleLogout}
                 iconStart={<LogOut />}
