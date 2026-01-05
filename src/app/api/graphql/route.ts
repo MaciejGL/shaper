@@ -1,7 +1,8 @@
 import { createYoga } from 'graphql-yoga'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { dbMonitor } from '@/lib/db-monitor'
+import { getCurrentUser } from '@/lib/getUser'
 
 import { createContext } from './create-context'
 import { createSchema } from './schema'
@@ -16,6 +17,7 @@ const yoga = createYoga<{
   schema,
   logging: 'info',
   graphqlEndpoint: '/api/graphql',
+  graphiql: process.env.NODE_ENV !== 'production',
   cors: {
     origin: ['https://hypro.app', 'https://www.hypro.app'],
     credentials: true,
@@ -24,8 +26,22 @@ const yoga = createYoga<{
   fetchAPI: { Request, Response, Headers },
 })
 
+async function requireAuth(): Promise<NextResponse | null> {
+  const user = await getCurrentUser()
+  if (!user) {
+    return NextResponse.json(
+      { errors: [{ message: 'Unauthorized' }] },
+      { status: 401 },
+    )
+  }
+  return null
+}
+
 // Handler wrapper for Next.js API routes with monitoring
 export async function GET(request: NextRequest) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
   const startTime = Date.now()
 
   try {
@@ -47,6 +63,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth()
+  if (authError) return authError
+
   const startTime = Date.now()
   let operationName = 'Unknown'
 
