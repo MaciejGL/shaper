@@ -36,7 +36,7 @@ import {
   useUpdateFreeWorkoutDayMutation,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
-import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
+import { estimateWorkoutTime } from '@/lib/workout/estimate-workout-time'
 import { formatUserCount } from '@/utils/format-user-count'
 
 export function FreeWorkoutDaysAdmin() {

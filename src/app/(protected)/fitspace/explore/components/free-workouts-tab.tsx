@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useStartFreeWorkoutDayMutation } from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
-import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
+import { estimateWorkoutTime } from '@/lib/workout/estimate-workout-time'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 import { formatUserCount } from '@/utils/format-user-count'
 

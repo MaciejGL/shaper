@@ -18,6 +18,10 @@ import {
   User as PrismaUser,
   WorkoutSessionEvent as PrismaWorkoutSessionEvent,
 } from '@/generated/prisma/client'
+import {
+  TIME_PER_SET,
+  WORKOUT_TIME_CONSTANTS,
+} from '@/lib/workout/workout-time-constants'
 import { GQLContext } from '@/types/gql-context'
 
 import Review from '../review/model'
@@ -402,7 +406,8 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   get avgSessionTime() {
-    // Calculate based on: Exercises 45s, rest time, and warmups each 45s + 60s times number of exercises. Calculate for each day in a week 1 and take average
+    const { DEFAULT_REST, EXERCISE_TRANSITION } = WORKOUT_TIME_CONSTANTS
+
     if (!this.data.weeks || this.data.weeks.length === 0) return null
 
     const firstWeek = this.data.weeks[0]
@@ -419,24 +424,24 @@ export default class TrainingPlan implements GQLTrainingPlan {
       const exerciseCount = day.exercises.length
 
       day.exercises.forEach((exercise) => {
-        // Exercise execution time: 45 seconds per set
-        const setCount = exercise.sets?.length || 1
-        const exerciseTime = setCount * 45
+        // Working sets: default to 3 if not loaded (common training volume)
+        const setCount =
+          (exercise.sets?.length || 3) + (exercise.warmupSets ?? 0)
 
-        // Rest time between sets (from exercise.restSeconds)
-        const restTime = exercise.restSeconds || 60 // Default 60s rest
-        const totalRestTime = (setCount - 1) * restTime // Rest between sets only
+        // Per set: execution + equipment overhead (45s + 10s = 55s)
+        const setTime = setCount * TIME_PER_SET
 
-        // Warmup time: 45 seconds (assuming one warmup per exercise)
-        const warmupTime = (exercise.warmupSets ?? 0) > 0 ? 45 : 0
+        // Rest time between sets (use exercise setting or 90s default)
+        const restPerSet = exercise.restSeconds || DEFAULT_REST
+        const totalRestTime = Math.max(0, setCount - 1) * restPerSet
 
-        totalTimeSeconds += exerciseTime + totalRestTime + warmupTime
+        totalTimeSeconds += setTime + totalRestTime
       })
 
-      // Add base time: 60s times number of exercises
-      totalTimeSeconds += exerciseCount * 60
+      // Transition time between exercises: 2 minutes each
+      totalTimeSeconds += exerciseCount * EXERCISE_TRANSITION
 
-      // Convert to minutes and add to day times
+      // Convert to minutes
       dayTimes.push(Math.round(totalTimeSeconds / 60))
     })
 

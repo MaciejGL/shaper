@@ -2,13 +2,14 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Dumbbell, Star, Users } from 'lucide-react'
+import { Calendar, Clock, Dumbbell, Sparkles, Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import {
+  SortOption,
   TrainingPlanFilters,
   focusTagLabels,
 } from '@/components/training-plan/training-plan-filters'
@@ -29,6 +30,7 @@ import { cn } from '@/lib/utils'
 import { formatUserCount } from '@/utils/format-user-count'
 
 import { PublicTrainingPlan } from './explore.client'
+import { PlanFinder } from './plan-finder/plan-finder'
 import { TrainingPlanPreviewContent } from './workout-day-preview/training-plan-preview-content'
 
 interface TrainingPlansTabProps {
@@ -44,10 +46,16 @@ export function TrainingPlansTab({
     GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number] | null
   >(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [isPlanFinderOpen, setIsPlanFinderOpen] = useState(false)
+
+  // Filters
   const [selectedFocusTags, setSelectedFocusTags] = useState<GQLFocusTag[]>([])
-  const [selectedDifficulties, setSelectedDifficulties] = useState<
-    GQLDifficulty[]
-  >([])
+  const [selectedDifficulty, setSelectedDifficulty] =
+    useState<GQLDifficulty | null>(null)
+  const [daysPerWeek, setDaysPerWeek] = useState<number | null>(null)
+  const [sessionMaxMins, setSessionMaxMins] = useState<number>(90) // 90 = "Any"
+  const [sort, setSort] = useState<SortOption>('recommended')
+
   const queryClient = useQueryClient()
   const router = useRouter()
   const rules = usePaymentRules()
@@ -55,6 +63,7 @@ export function TrainingPlansTab({
     errorMessage: 'Failed to open subscription plans',
     openInApp: rules.canLinkToPayment,
   })
+
   // Fetch public training plans
   const { data, isLoading } = useGetPublicTrainingPlansQuery(
     {
@@ -134,17 +143,17 @@ export function TrainingPlansTab({
     )
   }
 
-  const toggleDifficulty = (difficulty: GQLDifficulty) => {
-    setSelectedDifficulties((prev) =>
-      prev.includes(difficulty)
-        ? prev.filter((d) => d !== difficulty)
-        : [...prev, difficulty],
-    )
-  }
-
   const clearAllFilters = () => {
     setSelectedFocusTags([])
-    setSelectedDifficulties([])
+    setSelectedDifficulty(null)
+    setDaysPerWeek(null)
+    setSessionMaxMins(90)
+    setSort('recommended')
+  }
+
+  const handlePlanFinderSelect = (plan: PublicTrainingPlan) => {
+    setSelectedPlan(plan)
+    setIsPreviewOpen(true)
   }
 
   if (isLoading) {
@@ -158,33 +167,112 @@ export function TrainingPlansTab({
   // Get all public plans from the API (includes both free and premium)
   const allPlans = data?.getPublicTrainingPlans || []
 
-  const filteredPlans = allPlans.filter((plan) => {
-    // Filter by difficulty - plan must match ANY selected difficulty (OR logic)
-    if (selectedDifficulties.length > 0) {
-      if (!plan.difficulty || !selectedDifficulties.includes(plan.difficulty)) {
-        return false
+  const availableFocusTags = (() => {
+    const set = new Set<GQLFocusTag>()
+    for (const plan of allPlans) {
+      for (const tag of plan.focusTags ?? []) set.add(tag)
+    }
+
+    const preferredOrder: GQLFocusTag[] = [
+      GQLFocusTag.Strength,
+      GQLFocusTag.MuscleBuilding,
+      GQLFocusTag.WeightLoss,
+      GQLFocusTag.BodyRecomposition,
+      GQLFocusTag.Bodyweight,
+    ]
+
+    const ordered = preferredOrder.filter((t) => set.has(t))
+    const remaining = Array.from(set).filter((t) => !preferredOrder.includes(t))
+    remaining.sort((a, b) =>
+      (focusTagLabels[a] ?? a).localeCompare(focusTagLabels[b] ?? b),
+    )
+
+    return [...ordered, ...remaining]
+  })()
+
+  const filteredPlans = allPlans
+    .filter((plan) => {
+      // Filter by difficulty
+      if (selectedDifficulty) {
+        if (!plan.difficulty || plan.difficulty !== selectedDifficulty) {
+          return false
+        }
       }
-    }
 
-    // Filter by focus tags - plan must have ALL selected tags (AND logic)
-    if (selectedFocusTags.length > 0) {
-      return selectedFocusTags.every((selectedTag) =>
-        plan.focusTags?.includes(selectedTag),
-      )
-    }
+      // Filter by focus tags - match ANY selected tag (OR logic)
+      if (selectedFocusTags.length > 0) {
+        const hasAnyTag = selectedFocusTags.some((selectedTag) =>
+          plan.focusTags?.includes(selectedTag),
+        )
+        if (!hasAnyTag) return false
+      }
 
-    return true
-  })
+      // Filter by days per week
+      if (daysPerWeek) {
+        const days = plan.sessionsPerWeek || 3
+        if (daysPerWeek === 6) {
+          // 6 means "6+" so accept 6 or more
+          if (days < 6) return false
+        } else if (days !== daysPerWeek) {
+          return false
+        }
+      }
+
+      // Filter by session max minutes (slider value, treat as max)
+      if (sessionMaxMins < 90) {
+        const planDuration = plan.avgSessionTime || 45
+        if (planDuration > sessionMaxMins) return false
+      }
+
+      return true
+    })
+    .sort((a, b) => {
+      switch (sort) {
+        case 'recommended':
+        case 'popular':
+          // Recommended uses popularity as fallback
+          return (b.assignmentCount || 0) - (a.assignmentCount || 0)
+        case 'newest':
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+        case 'shortest':
+          return (a.avgSessionTime || 0) - (b.avgSessionTime || 0)
+        default:
+          return 0
+      }
+    })
+
+  const resultsCount = filteredPlans.length
 
   return (
     <div className="space-y-4">
+      <Button
+        variant="secondary"
+        size="lg"
+        className="w-full rounded-full"
+        iconStart={<Sparkles className="h-4 w-4" />}
+        onClick={() => setIsPlanFinderOpen(true)}
+      >
+        Help me choose
+      </Button>
+
       {/* Filter Section */}
       <TrainingPlanFilters
         selectedFocusTags={selectedFocusTags}
-        selectedDifficulties={selectedDifficulties}
+        availableFocusTags={availableFocusTags}
+        selectedDifficulty={selectedDifficulty}
+        daysPerWeek={daysPerWeek}
+        sessionMaxMins={sessionMaxMins}
+        sort={sort}
+        resultsCount={resultsCount}
         onToggleFocusTag={toggleFocusTag}
-        onToggleDifficulty={toggleDifficulty}
+        onSetDifficulty={setSelectedDifficulty}
+        onSetDaysPerWeek={setDaysPerWeek}
+        onSetSessionMaxMins={setSessionMaxMins}
+        onSetSort={setSort}
         onClearAllFilters={clearAllFilters}
+        onOpenPlanFinder={() => setIsPlanFinderOpen(true)}
       />
 
       {/* Results */}
@@ -233,6 +321,22 @@ export function TrainingPlansTab({
         )}
       </div>
 
+      {/* Plan Finder Drawer */}
+      <Drawer
+        open={isPlanFinderOpen}
+        onOpenChange={(open) => !open && setIsPlanFinderOpen(false)}
+      >
+        <DrawerContent dialogTitle="Find your plan" className="h-[85vh]">
+          <div className="p-4 h-full overflow-y-auto">
+            <PlanFinder
+              plans={allPlans}
+              onSelectPlan={handlePlanFinderSelect}
+              onClose={() => setIsPlanFinderOpen(false)}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
+
       {/* Plan Preview Drawer */}
       <Drawer
         open={isPreviewOpen}
@@ -240,7 +344,7 @@ export function TrainingPlansTab({
       >
         <DrawerContent
           dialogTitle={selectedPlan?.title || 'Plan'}
-          grabber={false}
+          grabberAbsolute
         >
           {selectedPlan && (
             <TrainingPlanPreviewContent
@@ -286,61 +390,54 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
     >
       {/* Hero image background */}
       {plan.heroImageUrl && (
-        <div className="absolute -inset-[0.5px] bg-gradient-to-r from-black via-black/60 to-transparent" />
+        <div className="absolute -inset-[0.5px] bg-linear-to-r from-black via-black/60 to-transparent" />
       )}
 
-      <CardHeader className="relative">
+      <CardHeader className="relative pb-2">
         <CardTitle className="text-2xl text-foreground flex items-start justify-between gap-2">
           {plan.title}
         </CardTitle>
+        {/* Metadata Row */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-white/90 mt-1">
+          <span className="flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            {plan.sessionsPerWeek || 3} days/wk
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />~{plan.avgSessionTime || 45} min
+          </span>
+          {formatUserCount(plan.assignmentCount) && (
+            <span className="flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              {formatUserCount(plan.assignmentCount)} started
+            </span>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="relative">
         <div className="space-y-2">
           {/* Focus Tags */}
-          <div className="flex flex-col gap-2">
-            {plan.difficulty ? (
-              <Badge
-                variant={difficultyVariantMap[plan.difficulty]}
-                className="capitalize"
-                size="md"
-              >
-                {plan.difficulty.toLowerCase()}
-              </Badge>
-            ) : null}
-            {plan.focusTags && plan.focusTags.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
-                {plan.focusTags
-                  .slice(0, 2)
-                  .map((tag: GQLFocusTag, index: number) => (
-                    <Badge key={index} variant="secondary" size="md">
-                      {focusTagLabels[tag] || tag}
-                    </Badge>
-                  ))}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="flex items-center justify-between mt-4">
-            <div>{plan.weekCount} weeks</div>
-
-            {/* Assignment count for all plans */}
-            {formatUserCount(plan.assignmentCount) ? (
-              <Badge>
-                <span>{formatUserCount(plan.assignmentCount)}</span>
-                <Users className="h-3 w-3" />
-              </Badge>
-            ) : null}
-
-            {/* Show rating only for premium plans */}
-            {plan.premium && plan.rating ? (
-              <div className="flex items-center gap-1 text-xs text-foreground">
-                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">{plan.rating}</span>
-                <span className="text-muted-foreground">
-                  ({plan.totalReviews})
-                </span>
-              </div>
-            ) : null}
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="flex flex-wrap gap-1">
+              {plan.difficulty ? (
+                <Badge
+                  variant={difficultyVariantMap[plan.difficulty]}
+                  className="capitalize"
+                  size="md"
+                >
+                  {plan.difficulty.toLowerCase()}
+                </Badge>
+              ) : null}
+              {plan.focusTags && plan.focusTags.length > 0
+                ? plan.focusTags
+                    .slice(0, 2)
+                    .map((tag: GQLFocusTag, index: number) => (
+                      <Badge key={index} variant="secondary" size="md">
+                        {focusTagLabels[tag] || tag}
+                      </Badge>
+                    ))
+                : null}
+            </div>
           </div>
         </div>
       </CardContent>

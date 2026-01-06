@@ -13,6 +13,10 @@ import {
   parseAssistantJsonResponse,
 } from '@/lib/open-ai/assistant-utils'
 import { checkPremiumAccess } from '@/lib/subscription/subscription-validator'
+import {
+  TIME_PER_SET,
+  WORKOUT_TIME_CONSTANTS,
+} from '@/lib/workout/workout-time-constants'
 import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'
@@ -324,24 +328,37 @@ function calculateWorkoutDuration(
   exercises: MappedExercise[],
   repFocus: string,
 ): number {
-  const intensityMultiplier = {
+  const { DEFAULT_REST, EXERCISE_TRANSITION } = WORKOUT_TIME_CONSTANTS
+
+  // Intensity multiplier affects rest time
+  const intensityMultiplier: Record<string, number> = {
     STRENGTH: 1.5, // Longer rest between heavy sets
     HYPERTROPHY: 1.2, // Moderate rest
     ENDURANCE: 0.8, // Shorter rest
   }
 
-  const baseTimePerSet = 0.75 // 45 seconds
-  const restTimeBetweenSets =
-    1.5 * intensityMultiplier[repFocus as keyof typeof intensityMultiplier] // 90s adjusted for intensity
+  const restMultiplier = intensityMultiplier[repFocus] ?? 1.0
+  const restPerSet = (DEFAULT_REST * restMultiplier) / 60 // Convert to minutes
 
-  const totalSets = exercises.reduce(
-    (sum, exercise) => sum + (exercise?.sets.length ?? 0),
-    0,
-  )
+  let totalMinutes = 0
 
-  return Math.round(
-    totalSets * baseTimePerSet + (totalSets - 1) * restTimeBetweenSets,
-  )
+  exercises.forEach((exercise) => {
+    if (!exercise) return
+    const setCount = exercise.sets.length
+
+    // Per set: execution + equipment overhead (45s + 10s = 55s)
+    const setTimeMinutes = (setCount * TIME_PER_SET) / 60
+
+    // Rest between sets only (adjusted for intensity)
+    const restTotalMinutes = Math.max(0, setCount - 1) * restPerSet
+
+    totalMinutes += setTimeMinutes + restTotalMinutes
+  })
+
+  // Add transition time between exercises (2 min each)
+  totalMinutes += (exercises.length * EXERCISE_TRANSITION) / 60
+
+  return Math.round(totalMinutes)
 }
 
 /**

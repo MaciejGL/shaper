@@ -38,7 +38,7 @@ import { MultiImageUpload } from '@/components/ui/multi-image-upload'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
-import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
+import { estimateWorkoutTime } from '@/lib/workout/estimate-workout-time'
 import { formatUserCount } from '@/utils/format-user-count'
 
 interface TrainingPlanCreator {

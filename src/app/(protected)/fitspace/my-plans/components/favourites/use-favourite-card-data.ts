@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { ButtonProps } from '@/components/ui/button'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
-import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
+import { estimateWorkoutTime } from '@/lib/workout/estimate-workout-time'
 
 type FavouriteWorkout = NonNullable<
   NonNullable<GQLGetFavouriteWorkoutsQuery>['getFavouriteWorkouts']

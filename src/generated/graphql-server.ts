@@ -862,7 +862,6 @@ export enum GQLFitnessLevel {
 }
 
 export enum GQLFocusTag {
-  BeginnerFriendly = 'BEGINNER_FRIENDLY',
   Bodyweight = 'BODYWEIGHT',
   BodyRecomposition = 'BODY_RECOMPOSITION',
   Cardio = 'CARDIO',

@@ -6,15 +6,15 @@ import { MultiSelectToggle } from './multi-select-toggle'
 
 const FOCUS_TAG_OPTIONS = [
   { value: GQLFocusTag.Strength, label: 'Strength' },
-  { value: GQLFocusTag.Cardio, label: 'Cardio' },
-  // { value: GQLFocusTag.BeginnerFriendly, label: 'Beginner Friendly' },
   { value: GQLFocusTag.BodyRecomposition, label: 'Body Recomposition' },
-  // { value: GQLFocusTag.Powerlifting, label: 'Powerlifting' },
   { value: GQLFocusTag.WeightLoss, label: 'Weight Loss' },
+  { value: GQLFocusTag.MuscleBuilding, label: 'Muscle Building' },
+  // Disabled for now:
+  // { value: GQLFocusTag.Cardio, label: 'Cardio' },
+  // { value: GQLFocusTag.Powerlifting, label: 'Powerlifting' },
   // { value: GQLFocusTag.Endurance, label: 'Endurance' },
   // { value: GQLFocusTag.FunctionalFitness, label: 'Functional Fitness' },
   // { value: GQLFocusTag.Bodyweight, label: 'Bodyweight' },
-  { value: GQLFocusTag.MuscleBuilding, label: 'Muscle Building' },
 ]
 
 interface FocusTagsSelectorProps {

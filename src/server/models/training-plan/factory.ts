@@ -181,6 +181,7 @@ export async function getPublicTrainingPlans(
               include: {
                 exercises: {
                   include: {
+                    sets: true
                     base: true
                   }
                 }
@@ -229,6 +230,7 @@ export async function getPublicTrainingPlans(
             include: {
               exercises: {
                 include: {
+                  sets: true,
                   base: {
                     include: {
                       images: true,

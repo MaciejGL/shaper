@@ -21,7 +21,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PostHogPageTracker />
       <ProgressProvider
         height="1px"
         color="var(--color-amber-500)"
@@ -34,6 +33,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         delay={200}
       >
         <SessionProvider>
+          <PostHogPageTracker />
           <ActivityHeartbeat />
           <NuqsAdapter>
             <NavigationProvider>
