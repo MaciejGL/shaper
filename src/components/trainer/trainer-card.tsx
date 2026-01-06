@@ -68,21 +68,7 @@ export function TrainerCard({
 
   return (
     <Card
-      className={cn(
-        'p-0 overflow-hidden border border-border shadow-sm bg-card hover:shadow-md aspect-video',
-        onClick
-          ? 'cursor-pointer active:scale-[0.98] transition-all duration-200'
-          : '',
-        className,
-      )}
-      style={{
-        backgroundImage: hasBackgroundImage
-          ? `url(${backgroundImageUrl})`
-          : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'top',
-        backgroundRepeat: 'no-repeat',
-      }}
+      className={cn('p-0 aspect-video', className)}
       variant={variant}
       onClick={onClick}
     >
@@ -91,13 +77,13 @@ export function TrainerCard({
           src={backgroundImageUrl}
           alt="Trainer Card Background"
           fill
-          className="object-cover object-top"
+          className="object-cover object-top rounded-2xl"
           sizes="500px"
         />
       )}
       <CardContent className="dark min-h-[150px] relative grid grid-cols-[32%_68%] p-0 h-full">
         <div />
-        <div className="flex flex-col w-full bg-linear-to-r from-black/0 via-black/70 to-black/50 h-full p-4">
+        <div className="flex flex-col w-full bg-linear-to-r from-black/0 via-black/70 to-black/50 h-full p-4 rounded-2xl">
           <Badge variant="primary" className="ml-auto bg-white">
             Expert
           </Badge>

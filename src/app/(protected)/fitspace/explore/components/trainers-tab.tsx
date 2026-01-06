@@ -188,7 +188,6 @@ export function TrainersTab({
             <TrainerCard
               key={trainer.id}
               trainer={trainer}
-              showClientCount={false}
               onClick={() => handleTrainerClick(trainer)}
             />
           ))

@@ -200,10 +200,8 @@ function TrainerView({ trainer }: TrainerViewProps) {
         <div className="dark space-y-6 pb-6 pt-4">
           <TrainerCard
             trainer={trainer}
-            showExperience={true}
-            showClientCount={false}
             variant="secondary"
-            className="rounded-2xl !border"
+            className="rounded-2xl border!"
             onClick={() => setIsDrawerOpen(true)}
           />
 

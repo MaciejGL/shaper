@@ -12,7 +12,6 @@ import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
-import { MultiImageUpload } from '@/components/ui/multi-image-upload'
 import {
   Card,
   CardContent,
@@ -22,6 +21,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { MultiImageUpload } from '@/components/ui/multi-image-upload'
 import {
   Popover,
   PopoverContent,
@@ -229,7 +229,6 @@ export default function PublicProfilePage() {
           <TrainerCard
             trainer={previewData}
             onClick={() => setShowPreview(true)}
-            showClientCount={false}
           />
         </div>
 
@@ -498,7 +497,7 @@ export default function PublicProfilePage() {
                   key={index}
                   className="flex items-start gap-2 p-3 bg-muted rounded-lg"
                 >
-                  <div className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-1 h-1 bg-primary rounded-full mt-2 shrink-0" />
                   <p className="text-sm flex-1">{story}</p>
                   <XIcon
                     className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-destructive"
