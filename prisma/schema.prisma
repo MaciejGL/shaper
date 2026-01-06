@@ -120,8 +120,9 @@ model UserProfile {
   credentials            String[]          @default([])
   specialization         String[]          @default([])
   successStories         String[]          @default([])
-  trainerSince           DateTime?
-  hasCompletedOnboarding Boolean?          @default(false)
+  trainerSince              DateTime?
+  trainerCardBackgroundUrl  String?
+  hasCompletedOnboarding    Boolean?          @default(false)
   checkinReminders       Boolean?          @default(true)
   timezone               String?           @default("UTC")
   blurProgressSnapshots  Boolean?          @default(false)
