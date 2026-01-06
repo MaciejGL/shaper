@@ -13,6 +13,7 @@ query GetMyTrainer {
       lastName
       bio
       avatarUrl
+      trainerCardBackgroundUrl
       specialization
       credentials
       successStories

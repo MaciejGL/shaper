@@ -180,6 +180,19 @@ query FitspaceMyPlans {
         lastName
         image
         sex
+        email
+        role
+        profile {
+          firstName
+          lastName
+          bio
+          avatarUrl
+          trainerCardBackgroundUrl
+          specialization
+          credentials
+          successStories
+          trainerSince
+        }
       }
     }
     completedPlans {
@@ -257,6 +270,19 @@ query FitspaceMyPlans {
         lastName
         image
         sex
+        email
+        role
+        profile {
+          firstName
+          lastName
+          bio
+          avatarUrl
+          trainerCardBackgroundUrl
+          specialization
+          credentials
+          successStories
+          trainerSince
+        }
       }
     }
   }

@@ -1,6 +1,5 @@
 'use client'
 
-import { differenceInYears } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   BadgeCheckIcon,
@@ -10,11 +9,8 @@ import {
   FlameIcon,
   Mail,
   Sparkles,
-  Star,
-  User,
   XCircle,
 } from 'lucide-react'
-import Image from 'next/image'
 import { useState } from 'react'
 
 import { CoachingInfoModal } from '@/components/coaching-info-modal/coaching-info-modal'
@@ -23,9 +19,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer'
 import { useUser } from '@/context/user-context'
-import { cn } from '@/lib/utils'
 
-import { TrainerData } from './trainer-card'
+import { TrainerCard, TrainerData } from './trainer-card'
 import { TrainerCertificatesGallery } from './trainer-certificates-gallery'
 
 interface TrainerDetailsDrawerProps {
@@ -150,10 +145,6 @@ export function TrainerDetailsDrawer({
     `${trainer.profile?.firstName || ''} ${trainer.profile?.lastName || ''}`.trim() ||
     'Trainer'
 
-  const initials =
-    (trainer.profile?.firstName?.charAt(0) || '') +
-    (trainer.profile?.lastName?.charAt(0) || '')
-
   const hasRequestedTrainer = Boolean(user?.trainerId) || hasRequestedCoaching
 
   const canShowPrimaryRequest =
@@ -185,95 +176,13 @@ export function TrainerDetailsDrawer({
       >
         <div className="flex flex-col h-full">
           <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0 space-y-8">
-            {/* Header (cover image) */}
-            <div className="-mx-4 overflow-hidden border-y border-border/50 bg-muted/20">
-              <div className="relative h-56 w-full">
-                {trainer.profile?.trainerCardBackgroundUrl ||
-                trainer.profile?.avatarUrl ? (
-                  <Image
-                    src={
-                      trainer.profile?.trainerCardBackgroundUrl ||
-                      trainer.profile?.avatarUrl ||
-                      ''
-                    }
-                    alt={trainerName}
-                    fill
-                    className="object-cover object-top"
-                    sizes="100vw"
-                    priority
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted">
-                    {initials ? (
-                      <span className="text-4xl font-bold text-muted-foreground/40">
-                        {initials}
-                      </span>
-                    ) : (
-                      <User className="size-12 text-muted-foreground/40" />
-                    )}
-                  </div>
-                )}
-
-                {/* Readability overlay */}
-                <div className="absolute inset-0 bg-gradient-to-l from-background/95 via-background/35 to-transparent" />
-
-                {/* Title overlay */}
-                <div className="absolute inset-x-0 bottom-0 p-4">
-                  <h2 className="text-3xl font-bold leading-tight text-foreground">
-                    {trainerName}
-                  </h2>
-                  <div className="mt-1 text-base text-muted-foreground font-medium">
-                    {trainer.role === 'TRAINER'
-                      ? 'Personal Trainer'
-                      : trainer.role}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {trainer.profile?.trainerSince && (
-                      <div className="inline-flex items-center gap-2 rounded-full bg-background/70 backdrop-blur px-3 py-1.5 text-sm font-medium border border-border/50">
-                        <Star className="size-4 text-orange-500 fill-orange-500/20 shrink-0" />
-                        <span>
-                          {differenceInYears(
-                            new Date(),
-                            new Date(trainer.profile.trainerSince),
-                          )}{' '}
-                          years experience
-                        </span>
-                      </div>
-                    )}
-
-                    {trainer.capacity &&
-                      trainer.spotsLeft !== null &&
-                      trainer.spotsLeft !== undefined && (
-                        <div className="inline-flex items-center gap-2 rounded-full bg-background/70 backdrop-blur px-3 py-1.5 text-sm font-medium border border-border/50">
-                          <span className="relative flex size-2 shrink-0">
-                            <span
-                              className={cn(
-                                'animate-ping absolute inline-flex h-full w-full rounded-full opacity-60',
-                                trainer.spotsLeft > 0
-                                  ? 'bg-emerald-400'
-                                  : 'bg-red-400',
-                              )}
-                            />
-                            <span
-                              className={cn(
-                                'relative inline-flex rounded-full size-2',
-                                trainer.spotsLeft > 0
-                                  ? 'bg-emerald-500'
-                                  : 'bg-red-500',
-                              )}
-                            />
-                          </span>
-                          <span className="text-foreground/90">
-                            {trainer.spotsLeft === 0
-                              ? 'Full'
-                              : `${trainer.spotsLeft} spots left`}
-                          </span>
-                        </div>
-                      )}
-                  </div>
-                </div>
-              </div>
+            {/* Trainer Card Header */}
+            <div className="-mx-4">
+              <TrainerCard
+                trainer={trainer}
+                className="rounded-none border-x-0 border-t-0"
+                hideButton
+              />
             </div>
 
             {hasRequestedCoaching && (

@@ -1,12 +1,12 @@
 'use client'
 
-import { ChevronRight, Star, User } from 'lucide-react'
 import Image from 'next/image'
 
-import { Card, CardProps } from '@/components/ui/card'
+import { Card, CardContent, CardProps } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
 
 export interface TrainerData {
   id: string
@@ -34,27 +34,21 @@ interface TrainerCardProps {
   trainer: TrainerData
   onClick?: () => void
   variant?: CardProps['variant']
-  showExperience?: boolean
-  showClientCount?: boolean // Kept for interface compatibility but not used
   className?: string
+  hideButton?: boolean
 }
 
 export function TrainerCard({
   trainer,
   onClick,
   variant = 'secondary',
-  showExperience = true,
-  // showClientCount = true, // Unused in new design
   className = '',
+  hideButton = false,
 }: TrainerCardProps) {
   const trainerName =
     trainer.name ||
     `${trainer.profile?.firstName || ''} ${trainer.profile?.lastName || ''}`.trim() ||
     'Trainer'
-
-  const initials =
-    (trainer.profile?.firstName?.charAt(0) || '') +
-    (trainer.profile?.lastName?.charAt(0) || '')
 
   const getExperienceText = () => {
     if (!trainer.profile?.trainerSince) return null
@@ -62,144 +56,107 @@ export function TrainerCard({
     const years =
       new Date().getFullYear() -
       new Date(trainer.profile.trainerSince).getFullYear()
-    return years === 0 ? '<1 year' : years === 1 ? '1 year' : `${years} years`
+    return years === 0
+      ? '<1y'
+      : years === 1
+        ? '1 year exp'
+        : `${years} years exp`
   }
 
-  const backgroundImageUrl =
-    trainer.profile?.trainerCardBackgroundUrl || trainer.profile?.avatarUrl
+  const backgroundImageUrl = trainer.profile?.trainerCardBackgroundUrl
   const hasBackgroundImage = !!backgroundImageUrl
 
   return (
     <Card
       className={cn(
-        'p-0 overflow-hidden border border-border shadow-sm bg-card hover:shadow-md',
+        'p-0 overflow-hidden border border-border shadow-sm bg-card hover:shadow-md aspect-video',
         onClick
           ? 'cursor-pointer active:scale-[0.98] transition-all duration-200'
           : '',
         className,
       )}
+      style={{
+        backgroundImage: hasBackgroundImage
+          ? `url(${backgroundImageUrl})`
+          : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'top',
+        backgroundRepeat: 'no-repeat',
+      }}
       variant={variant}
       onClick={onClick}
     >
-      <div className="flex min-h-[160px]">
-        {/* Left: Profile/Promo Image */}
-        <div className="relative w-[130px] shrink-0 bg-muted/30">
-          {hasBackgroundImage ? (
-            <Image
-              src={backgroundImageUrl}
-              alt={trainerName}
-              fill
-              className="object-cover"
-              sizes="130px"
-            />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-muted/50 to-muted">
-              {initials ? (
-                <span className="text-2xl font-bold text-muted-foreground/50">
-                  {initials}
-                </span>
-              ) : (
-                <User className="size-10 text-muted-foreground/40" />
-              )}
-            </div>
-          )}
-          {/* Blend overlay (left transparent → right background) */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-card/90 pointer-events-none" />
-        </div>
-
-        {/* Right: Content */}
-        <div className="flex-1 p-3.5 flex flex-col justify-between min-w-0">
-          <div className="space-y-3">
-            {/* Header: Name & Chevron */}
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-bold text-lg leading-tight text-foreground line-clamp-1">
-                {trainerName}
-              </h3>
-              {onClick && (
-                <ChevronRight className="size-5 text-muted-foreground/50 shrink-0" />
-              )}
-            </div>
-
-            {/* Stats Row - Clean & Minimal */}
-            <div className="flex flex-col gap-1.5 mt-1">
-              {showExperience && trainer.profile?.trainerSince && (
-                <div className="flex items-center gap-2.5 h-5 text-sm text-muted-foreground font-medium">
-                  <div className="flex items-center justify-center w-4 h-4 shrink-0">
-                    <Star className="size-4 text-orange-500 fill-orange-500/20" />
-                  </div>
-                  <span className="leading-none mt-[1px]">
-                    {getExperienceText()} experience
-                  </span>
+      {hasBackgroundImage && (
+        <Image
+          src={backgroundImageUrl}
+          alt="Trainer Card Background"
+          fill
+          className="object-cover object-top"
+          sizes="500px"
+        />
+      )}
+      <CardContent className="dark min-h-[150px] relative grid grid-cols-[32%_68%] p-0 h-full">
+        <div />
+        <div className="flex flex-col w-full bg-linear-to-r from-black/0 via-black/70 to-black/50 h-full p-4">
+          <Badge variant="primary" className="ml-auto bg-white">
+            Expert
+          </Badge>
+          <p className="text-2xl font-bold text-foreground text-shadow-xs text-shadow-black mt-auto">
+            {trainerName}
+          </p>
+          <div className="text-sm text-foreground font-semibold flex flex-wrap gap-1">
+            {trainer.profile?.specialization
+              ?.slice(0, 2)
+              .map((specialization, index, array) => (
+                <div
+                  key={specialization}
+                  className="flex items-center gap-1 text-shadow-xs text-shadow-black"
+                >
+                  <span>{specialization}</span>
+                  {index < array.length - 1 && <span>•</span>}
                 </div>
-              )}
-
-              {/* Availability Indicator */}
-              {trainer.capacity &&
-                trainer.spotsLeft !== null &&
-                trainer.spotsLeft !== undefined && (
-                  <div className="flex items-center gap-2.5 h-5 text-sm font-medium">
-                    <div className="flex items-center justify-center w-4 h-4 shrink-0">
-                      <span className="relative flex size-2.5">
-                        <span
-                          className={cn(
-                            'animate-ping absolute inline-flex h-full w-full rounded-full opacity-75',
-                            trainer.spotsLeft > 0
-                              ? 'bg-emerald-400'
-                              : 'bg-red-400',
-                          )}
-                        />
-                        <span
-                          className={cn(
-                            'relative inline-flex rounded-full size-2.5',
-                            trainer.spotsLeft > 0
-                              ? 'bg-emerald-500'
-                              : 'bg-red-500',
-                          )}
-                        />
-                      </span>
-                    </div>
-                    <span
-                      className={cn(
-                        'leading-none mt-[1px]',
-                        trainer.spotsLeft > 0
-                          ? 'text-emerald-600 dark:text-emerald-500'
-                          : 'text-red-600 dark:text-red-500',
-                      )}
-                    >
-                      {trainer.spotsLeft === 0
-                        ? 'Full capacity'
-                        : `${trainer.spotsLeft} spots left`}
-                    </span>
-                  </div>
-                )}
-            </div>
+              ))}
           </div>
-
-          {/* Specializations - Minimal Scrollable Row */}
-          {trainer.profile?.specialization &&
-            trainer.profile.specialization.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-2">
-                {trainer.profile.specialization.slice(0, 3).map((spec) => (
-                  <Badge
-                    key={spec}
-                    variant="secondary"
-                    className="text-[10px] px-2 py-0.5 h-5 font-normal bg-muted/50 text-muted-foreground hover:bg-muted border-0"
-                  >
-                    {spec}
-                  </Badge>
-                ))}
-                {trainer.profile.specialization.length > 3 && (
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px] px-1.5 py-0.5 h-5 font-normal bg-muted/50 text-muted-foreground border-0"
-                  >
-                    +{trainer.profile.specialization.length - 3}
-                  </Badge>
-                )}
-              </div>
+          <div className="mb-4 mt-3 text-shadow-xs text-shadow-black text-foreground font-semibold text-sm flex items-center gap-2">
+            {trainer.capacity != null && trainer.spotsLeft != null && (
+              <SpotsIndicator spotsLeft={trainer.spotsLeft} />
             )}
+            {trainer.capacity != null &&
+              trainer.spotsLeft != null &&
+              getExperienceText() && <span className="font-normal">•</span>}
+            {getExperienceText() && (
+              <span className="text-amber-500">{getExperienceText()}</span>
+            )}
+          </div>
+          {!hideButton && <Button>View Trainer</Button>}
         </div>
-      </div>
+      </CardContent>
     </Card>
+  )
+}
+
+function SpotsIndicator({ spotsLeft }: { spotsLeft: number }) {
+  const isAvailable = spotsLeft > 0
+
+  return (
+    <div className="flex items-center gap-1.5 text-sm font-medium">
+      <span className="relative flex size-2.5">
+        <span
+          className={cn(
+            'animate-ping absolute inline-flex h-full w-full rounded-full opacity-75',
+            isAvailable ? 'bg-green-400' : 'bg-red-400',
+          )}
+        />
+        <span
+          className={cn(
+            'relative inline-flex rounded-full size-2.5',
+            isAvailable ? 'bg-green-500' : 'bg-red-500',
+          )}
+        />
+      </span>
+      <span className={isAvailable ? 'text-green-500' : 'text-red-500'}>
+        {spotsLeft === 0 ? 'Full capacity' : `${spotsLeft} spots left`}
+      </span>
+    </div>
   )
 }

@@ -28,6 +28,7 @@ query GetPublicTrainingPlans($limit: Int) {
         lastName
         bio
         avatarUrl
+        trainerCardBackgroundUrl
         specialization
         credentials
         successStories
@@ -131,6 +132,7 @@ query GetFreeWorkoutDays {
           lastName
           bio
           avatarUrl
+          trainerCardBackgroundUrl
           specialization
           credentials
           successStories

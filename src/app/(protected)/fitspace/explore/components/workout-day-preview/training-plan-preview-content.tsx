@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 
-import { TrainerData } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
+import { createTrainerDataFromUser } from '@/components/trainer/utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { PlanPreviewTab } from '../plan-preview-tab'
@@ -37,25 +37,7 @@ export function TrainingPlanPreviewContent({
     setIsTrainerDrawerOpen(true)
   }
 
-  const trainerData: TrainerData | null = plan.createdBy
-    ? {
-        id: plan.createdBy.id,
-        name: null,
-        email: plan.createdBy.email ?? '',
-        role: plan.createdBy.role ?? 'TRAINER',
-        profile: {
-          firstName:
-            plan.createdBy.profile?.firstName ?? plan.createdBy.firstName,
-          lastName: plan.createdBy.profile?.lastName ?? plan.createdBy.lastName,
-          avatarUrl: plan.createdBy.profile?.avatarUrl ?? plan.createdBy.image,
-          bio: plan.createdBy.profile?.bio ?? null,
-          specialization: plan.createdBy.profile?.specialization ?? null,
-          credentials: plan.createdBy.profile?.credentials ?? null,
-          successStories: plan.createdBy.profile?.successStories ?? null,
-          trainerSince: plan.createdBy.profile?.trainerSince ?? null,
-        },
-      }
-    : null
+  const trainerData = createTrainerDataFromUser(plan.createdBy)
 
   return (
     <>
