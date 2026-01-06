@@ -1,13 +1,11 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowUpDown,
-  ChevronDown,
   ChevronRight,
   Filter,
   Sparkles,
-  X,
+  XIcon,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -35,7 +33,7 @@ import { cn } from '@/lib/utils'
 
 import { Badge } from '../ui/badge'
 
-export type SortOption = 'recommended' | 'popular' | 'newest' | 'shortest'
+export type SortOption = 'popular' | 'newest' | 'shortest'
 
 export const focusTagLabels: Record<GQLFocusTag, string> = {
   [GQLFocusTag.Strength]: 'Strength',
@@ -50,7 +48,6 @@ export const focusTagLabels: Record<GQLFocusTag, string> = {
 }
 
 const sortLabels: Record<SortOption, string> = {
-  recommended: 'Recommended',
   popular: 'Popular',
   newest: 'Newest',
   shortest: 'Shortest',
@@ -120,23 +117,30 @@ export function TrainingPlanFilters({
   return (
     <div className="space-y-3">
       {/* Filter bar: Filters button + Sort dropdown + Quick focus tags */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {/* Filters button */}
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
           <DrawerTrigger asChild>
             <Button
-              variant="outline"
-              size="md"
+              variant="secondary"
+              size="lg"
               iconStart={<Filter />}
               className={cn(
                 'shrink-0 rounded-full',
-                hasActiveFilters && 'border-primary text-primary bg-primary/5',
+                hasActiveFilters &&
+                  'border-primary text-primary bg-primary/5 pr-0',
               )}
             >
               Filters
               {activeFilterCount > 0 && (
-                <span className="ml-1 bg-primary text-primary-foreground text-[10px] size-4 rounded-full flex-center">
-                  {activeFilterCount}
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onClearAllFilters()
+                  }}
+                  className="mx-px bg-primary text-primary-foreground rounded-full flex items-center justify-center size-[36px] aspect-square"
+                >
+                  <XIcon className="size-4" />
                 </span>
               )}
             </Button>
@@ -348,11 +352,10 @@ export function TrainingPlanFilters({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="outline"
-              size="md"
+              variant="secondary"
+              size="lg"
               className="shrink-0 rounded-full"
               iconStart={<ArrowUpDown />}
-              iconEnd={<ChevronDown />}
             >
               {sortLabels[sort]}
             </Button>
@@ -370,27 +373,6 @@ export function TrainingPlanFilters({
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <AnimatePresence>
-          {hasActiveFilters && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Button
-                variant="outline"
-                size="md"
-                className="shrink-0 rounded-full"
-                iconStart={<X />}
-                onClick={onClearAllFilters}
-              >
-                Clear
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   )

@@ -54,7 +54,7 @@ export function TrainingPlansTab({
     useState<GQLDifficulty | null>(null)
   const [daysPerWeek, setDaysPerWeek] = useState<number | null>(null)
   const [sessionMaxMins, setSessionMaxMins] = useState<number>(90) // 90 = "Any"
-  const [sort, setSort] = useState<SortOption>('recommended')
+  const [sort, setSort] = useState<SortOption>('popular')
 
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -148,7 +148,7 @@ export function TrainingPlansTab({
     setSelectedDifficulty(null)
     setDaysPerWeek(null)
     setSessionMaxMins(90)
-    setSort('recommended')
+    setSort('popular')
   }
 
   const handlePlanFinderSelect = (plan: PublicTrainingPlan) => {
@@ -228,7 +228,6 @@ export function TrainingPlansTab({
     })
     .sort((a, b) => {
       switch (sort) {
-        case 'recommended':
         case 'popular':
           // Recommended uses popularity as fallback
           return (b.assignmentCount || 0) - (a.assignmentCount || 0)
@@ -248,7 +247,7 @@ export function TrainingPlansTab({
   return (
     <div className="space-y-4">
       <Button
-        variant="secondary"
+        variant="default"
         size="lg"
         className="w-full rounded-full"
         iconStart={<Sparkles className="h-4 w-4" />}
