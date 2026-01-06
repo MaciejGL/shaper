@@ -81,6 +81,7 @@ type UserProfile {
   credentials: [String!]!
   successStories: [String!]!
   trainerSince: String
+  trainerCardBackgroundUrl: String
 
   # User Preferences
   weekStartsOn: Int
@@ -169,6 +170,7 @@ input UpdateProfileInput {
   credentials: [String!]
   successStories: [String!]
   trainerSince: String
+  trainerCardBackgroundUrl: String
   weekStartsOn: Int
   weightUnit: WeightUnit
   heightUnit: HeightUnit

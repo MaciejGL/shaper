@@ -12,6 +12,7 @@ import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
+import { MultiImageUpload } from '@/components/ui/multi-image-upload'
 import {
   Card,
   CardContent,
@@ -44,6 +45,9 @@ export default function PublicProfilePage() {
   const updateCapacityMutation = useUpdateTrainerCapacityMutation()
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [trainerCardBackgroundUrl, setTrainerCardBackgroundUrl] = useState<
+    string | null
+  >(null)
   const [bio, setBio] = useState('')
   const [specializations, setSpecializations] = useState<string[]>([])
   const [credentials, setCredentials] = useState<string[]>([])
@@ -61,6 +65,7 @@ export default function PublicProfilePage() {
     if (profileData?.profile) {
       const profile = profileData.profile
       setAvatarUrl(profile.avatarUrl || null)
+      setTrainerCardBackgroundUrl(profile.trainerCardBackgroundUrl || null)
       setBio(profile.bio || '')
       setSpecializations(profile.specialization || [])
       setCredentials(profile.credentials || [])
@@ -119,6 +124,7 @@ export default function PublicProfilePage() {
         updateProfileMutation.mutateAsync({
           input: {
             avatarUrl,
+            trainerCardBackgroundUrl,
             bio,
             specialization: specializations,
             successStories,
@@ -175,6 +181,7 @@ export default function PublicProfilePage() {
       lastName: profileData?.profile?.lastName,
       bio,
       avatarUrl,
+      trainerCardBackgroundUrl,
       specialization: specializations,
       credentials,
       successStories,
@@ -267,6 +274,29 @@ export default function PublicProfilePage() {
                 id="public-profile-avatar"
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Promo Background Image Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Promo Background Image</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <CardDescription>
+              Upload a background image for your profile card. This image will
+              be displayed on your promo card in the Explore section.
+            </CardDescription>
+            <MultiImageUpload
+              imageType="trainerCardBackground"
+              currentImageUrls={
+                trainerCardBackgroundUrl ? [trainerCardBackgroundUrl] : []
+              }
+              onImagesChange={(urls) =>
+                setTrainerCardBackgroundUrl(urls[0] || null)
+              }
+              maxImages={1}
+            />
           </CardContent>
         </Card>
 

@@ -3749,6 +3749,7 @@ export type GQLUpdateProfileInput = {
   theme?: InputMaybe<GQLTheme>;
   timeFormat?: InputMaybe<GQLTimeFormat>;
   timezone?: InputMaybe<Scalars['String']['input']>;
+  trainerCardBackgroundUrl?: InputMaybe<Scalars['String']['input']>;
   trainerSince?: InputMaybe<Scalars['String']['input']>;
   trainingView?: InputMaybe<GQLTrainingView>;
   weekStartsOn?: InputMaybe<Scalars['Int']['input']>;
@@ -3938,6 +3939,7 @@ export type GQLUserProfile = {
   theme: EntireFieldWrapper<GQLTheme>;
   timeFormat: EntireFieldWrapper<GQLTimeFormat>;
   timezone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  trainerCardBackgroundUrl?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainerSince?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainingView: EntireFieldWrapper<GQLTrainingView>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -6120,6 +6122,7 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   theme?: Resolver<GQLResolversTypes['Theme'], ParentType, ContextType>;
   timeFormat?: Resolver<GQLResolversTypes['TimeFormat'], ParentType, ContextType>;
   timezone?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  trainerCardBackgroundUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainerSince?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainingView?: Resolver<GQLResolversTypes['TrainingView'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;

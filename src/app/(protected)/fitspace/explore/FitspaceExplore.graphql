@@ -80,6 +80,7 @@ query GetFeaturedTrainers($limit: Int) {
       credentials
       successStories
       trainerSince
+      trainerCardBackgroundUrl
     }
   }
 }

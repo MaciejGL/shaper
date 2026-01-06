@@ -18,6 +18,7 @@ fragment ProfileFragment on UserProfile {
   credentials
   successStories
   trainerSince
+  trainerCardBackgroundUrl
   createdAt
   updatedAt
   email

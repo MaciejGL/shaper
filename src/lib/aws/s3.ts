@@ -38,6 +38,14 @@ export const IMAGE_CONFIGS = {
     maxSize: 10 * 1024 * 1024, // 10MB for high quality certificates/PDFs
     isPublic: true, // Certificates are publicly viewable on trainer profiles
   },
+  trainerCardBackground: {
+    maxWidth: 2000, // Flexible aspect ratio
+    maxHeight: 2000,
+    quality: 0.85,
+    folder: 'trainer-card-backgrounds',
+    maxSize: 6 * 1024 * 1024, // 6MB
+    isPublic: true, // Publicly viewable on trainer promo cards
+  },
 } as const
 
 export type ImageType = keyof typeof IMAGE_CONFIGS

@@ -188,9 +188,14 @@ export function TrainerDetailsDrawer({
             {/* Header (cover image) */}
             <div className="-mx-4 overflow-hidden border-y border-border/50 bg-muted/20">
               <div className="relative h-56 w-full">
-                {trainer.profile?.avatarUrl ? (
+                {trainer.profile?.trainerCardBackgroundUrl ||
+                trainer.profile?.avatarUrl ? (
                   <Image
-                    src={trainer.profile.avatarUrl}
+                    src={
+                      trainer.profile?.trainerCardBackgroundUrl ||
+                      trainer.profile?.avatarUrl ||
+                      ''
+                    }
                     alt={trainerName}
                     fill
                     className="object-cover object-top"

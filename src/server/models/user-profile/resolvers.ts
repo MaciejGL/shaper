@@ -746,6 +746,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       updateData.trainerSince = rest.trainerSince
         ? new Date(rest.trainerSince)
         : null
+    if (rest.trainerCardBackgroundUrl !== undefined)
+      updateData.trainerCardBackgroundUrl =
+        rest.trainerCardBackgroundUrl || null
 
     // Preference fields
     if (rest.weekStartsOn !== undefined)

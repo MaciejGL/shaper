@@ -268,6 +268,8 @@ export class ImageHandler {
         imageType = 'exercise'
       } else if (s3Key.startsWith('trainer-certificates/')) {
         imageType = 'trainerCertificate'
+      } else if (s3Key.startsWith('trainer-card-backgrounds/')) {
+        imageType = 'trainerCardBackground'
       } else {
         return {
           success: false,
@@ -351,6 +353,8 @@ export class ImageHandler {
     } else if (type === 'progress') {
       return `${folder}/${userId}/${timestamp}-${sanitizedName}`
     } else if (type === 'trainerCertificate') {
+      return `${folder}/${userId}/${timestamp}-${sanitizedName}`
+    } else if (type === 'trainerCardBackground') {
       return `${folder}/${userId}/${timestamp}-${sanitizedName}`
     }
 

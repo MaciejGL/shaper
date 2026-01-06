@@ -22,6 +22,7 @@ export interface TrainerData {
     lastName?: string | null
     bio?: string | null
     avatarUrl?: string | null
+    trainerCardBackgroundUrl?: string | null
     specialization?: string[] | null
     credentials?: string[] | null
     successStories?: string[] | null
@@ -64,7 +65,9 @@ export function TrainerCard({
     return years === 0 ? '<1 year' : years === 1 ? '1 year' : `${years} years`
   }
 
-  const hasAvatar = !!trainer.profile?.avatarUrl
+  const backgroundImageUrl =
+    trainer.profile?.trainerCardBackgroundUrl || trainer.profile?.avatarUrl
+  const hasBackgroundImage = !!backgroundImageUrl
 
   return (
     <Card
@@ -79,11 +82,11 @@ export function TrainerCard({
       onClick={onClick}
     >
       <div className="flex min-h-[160px]">
-        {/* Left: Profile Image */}
+        {/* Left: Profile/Promo Image */}
         <div className="relative w-[130px] shrink-0 bg-muted/30">
-          {hasAvatar ? (
+          {hasBackgroundImage ? (
             <Image
-              src={trainer.profile!.avatarUrl!}
+              src={backgroundImageUrl}
               alt={trainerName}
               fill
               className="object-cover"

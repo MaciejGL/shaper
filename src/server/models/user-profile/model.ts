@@ -174,6 +174,10 @@ export default class UserProfile implements GQLUserProfile {
     return this.data.trainerSince?.toISOString() ?? null
   }
 
+  get trainerCardBackgroundUrl() {
+    return this.data.trainerCardBackgroundUrl || null
+  }
+
   get createdAt() {
     return toISOString(this.data.createdAt) ?? ''
   }
