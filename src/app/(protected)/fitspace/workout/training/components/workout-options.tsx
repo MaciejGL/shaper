@@ -1,6 +1,6 @@
 'use client'
 
-import { Settings2Icon } from 'lucide-react'
+import { ChevronDownIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -36,12 +36,14 @@ export function WorkoutOptionsDropdown() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="tertiary"
-          size="icon-md"
-          iconOnly={<Settings2Icon className="size-4" />}
-        />
+          size="md"
+          iconEnd={<ChevronDownIcon className="size-4" />}
+        >
+          Workout Settings
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Options</DropdownMenuLabel>
+        <DropdownMenuLabel>Workout Settings</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={(e) => {
