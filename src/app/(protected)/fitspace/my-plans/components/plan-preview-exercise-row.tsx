@@ -1,3 +1,5 @@
+'use client'
+
 import Image from 'next/image'
 import { useState } from 'react'
 
@@ -19,9 +21,8 @@ interface Exercise {
     url: string
     order: number
   }[]
-  // Optional fields from other query types (not used by this component)
+  sets?: { id: string }[]
   muscleGroups?: unknown
-  sets?: unknown
   restSeconds?: unknown
   instructions?: unknown
 }
@@ -30,12 +31,14 @@ interface PlanPreviewExerciseRowProps {
   exercise?: Exercise
   isTemplate?: boolean
   isRestDay?: boolean
+  showDetails?: boolean
 }
 
 export function PlanPreviewExerciseRow({
   exercise,
   isRestDay = false,
   isTemplate = false,
+  showDetails = false,
 }: PlanPreviewExerciseRowProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
@@ -140,11 +143,16 @@ export function PlanPreviewExerciseRow({
         )}
       </div>
       <div
-        className={cn('flex flex-col gap-2', hasMultipleImages && 'pb-[14px]')}
+        className={cn('flex flex-col gap-1', hasMultipleImages && 'pb-[14px]')}
       >
         <span className="text-base flex-1">
           {exercise?.name || 'Exercise name'}
         </span>
+        {showDetails && exercise?.sets && exercise.sets.length > 0 && (
+          <span className="text-sm text-muted-foreground">
+            {exercise.sets.length} {exercise.sets.length === 1 ? 'set' : 'sets'}
+          </span>
+        )}
       </div>
     </div>
   )

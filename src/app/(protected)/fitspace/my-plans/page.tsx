@@ -18,6 +18,7 @@ import { PlanCard } from './components/plan-card'
 import { PlanDetailsDrawer } from './components/plan-details-drawer'
 import { PlansTab } from './components/plans-tab'
 import { EnhancedQuickWorkoutTab } from './components/quick-workout-plan-tab/enhanced-quick-workout-tab'
+import { TodayWorkoutCta } from './components/summary/today-workout-cta/today-workout-cta'
 import { PlanTab, getPlanStatus } from './types'
 import { getPlanImage } from './utils'
 
@@ -78,6 +79,14 @@ export default function MyPlansPage() {
       />
 
       <TabsContent value={PlanTab.Plans} className="space-y-4 py-6 px-4">
+        {activePlan?.weeks && activePlan.weeks.length > 0 && (
+          <div className="mb-6">
+            <TodayWorkoutCta
+              weeks={activePlan.weeks}
+              startDate={activePlan.startDate ?? null}
+            />
+          </div>
+        )}
         <PlansTab
           activePlan={activePlan}
           availablePlans={availablePlans}

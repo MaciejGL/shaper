@@ -1,16 +1,32 @@
 import { LoadingSkeleton } from '@/components/loading-skeleton'
-import { useGetPlanSummaryQuery } from '@/generated/graphql-client'
+import {
+  GQLFitspaceMyPlansQuery,
+  useGetPlanSummaryQuery,
+} from '@/generated/graphql-client'
 
 import { BodyComposition } from './summary/body-composition'
 import { JourneyOverview } from './summary/journey-overview'
 import { PersonalRecords } from './summary/personal-records'
 import { StrengthProgress } from './summary/strength-progress'
+import { TodayWorkoutCta } from './summary/today-workout-cta/today-workout-cta'
+
+type ActivePlan = NonNullable<
+  GQLFitspaceMyPlansQuery['getMyPlansOverviewFull']['activePlan']
+>
 
 interface PlanSummaryTabProps {
   planId: string
+  isActive?: boolean
+  weeks?: ActivePlan['weeks']
+  startDate?: string | null
 }
 
-export function PlanSummaryTab({ planId }: PlanSummaryTabProps) {
+export function PlanSummaryTab({
+  planId,
+  isActive,
+  weeks,
+  startDate,
+}: PlanSummaryTabProps) {
   const { data, isLoading, error } = useGetPlanSummaryQuery(
     { planId },
     {
@@ -46,6 +62,9 @@ export function PlanSummaryTab({ planId }: PlanSummaryTabProps) {
 
   return (
     <div className="space-y-12 pb-4">
+      {isActive && weeks && weeks.length > 0 && (
+        <TodayWorkoutCta weeks={weeks} startDate={startDate ?? null} />
+      )}
       <JourneyOverview summary={summary} />
 
       {summary.bodyComposition && <BodyComposition summary={summary} />}

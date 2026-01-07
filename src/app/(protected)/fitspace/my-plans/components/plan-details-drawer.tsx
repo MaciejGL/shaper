@@ -92,6 +92,8 @@ export function PlanDetailsDrawer({
     'createdBy' in plan ? plan.createdBy : null,
   )
 
+  console.log('isActive', isActive)
+  console.log('plan', plan)
   return (
     <>
       <Drawer open={open} onOpenChange={onClose}>
@@ -176,7 +178,12 @@ export function PlanDetailsDrawer({
                 </div>
                 {!isTemplate && (
                   <TabsContent value="summary" className="p-4">
-                    <PlanSummaryTab planId={plan.id} />
+                    <PlanSummaryTab
+                      planId={plan.id}
+                      isActive={isActive}
+                      weeks={'weeks' in plan ? plan.weeks : undefined}
+                      startDate={'startDate' in plan ? plan.startDate : null}
+                    />
                   </TabsContent>
                 )}
 

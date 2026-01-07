@@ -77,7 +77,10 @@ export function TrainerCard({
           src={backgroundImageUrl}
           alt="Trainer Card Background"
           fill
-          className="object-cover object-top rounded-2xl"
+          className={cn(
+            'object-cover object-top rounded-2xl',
+            hideButton && 'rounded-none',
+          )}
           sizes="500px"
         />
       )}
