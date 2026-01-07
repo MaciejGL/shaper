@@ -182,7 +182,6 @@ export function WorkoutSummaryDrawer({
       }
       await markWorkoutAsCompleted({ dayId: dayId! })
       onComplete?.()
-      onOpenChange(false)
       router.push('/fitspace/my-plans')
     } catch (error) {
       console.error(error)
@@ -342,7 +341,7 @@ function Content({
                   },
                 }}
               >
-                <div className="flex justify-between items-center text-sm py-2 px-4 bg-gradient-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/0 dark:to-amber-600/60 rounded-r-lg ">
+                <div className="flex justify-between items-center text-sm py-2 px-4 bg-linear-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/0 dark:to-amber-600/60 rounded-r-lg ">
                   <motion.span
                     key="exercise-name"
                     className="font-medium whitespace-nowrap"
@@ -388,7 +387,7 @@ function Content({
               }}
               transition={{ duration: 0.4 }}
             >
-              <div className="bg-gradient-to-r from-purple-300 to-blue-300 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4">
+              <div className="bg-linear-to-r from-purple-300 to-blue-300 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4">
                 <div className="text-center">
                   <p className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-1">
                     You lifted {toDisplayWeight(totalWeight) || 0} {weightUnit}!

@@ -159,16 +159,23 @@ export function ExerciseMetadata({
     return map.get(exercise.id)
   }, [exercise.id, exercise.type, exercises, isSuperset])
 
+  const hasImagesToShow = showImages && exercise.images.length > 0
+
   return (
-    <div className="border-t border-border rounded-t-2xl overflow-hidden">
-      {showImages && exercise.images.length > 0 && (
+    <div
+      className={cn(
+        'border-t border-border overflow-hidden',
+        hasImagesToShow && 'border-none',
+      )}
+    >
+      {hasImagesToShow && (
         <Carousel
           opts={{
             align: 'center',
             dragFree: true,
             active: exercise.images.length > 2,
           }}
-          className="max-w-md md:w-[calc(100%+2rem)] bg-black py-2 space-y-3"
+          className="max-w-md md:w-[calc(100%+2rem)] bg-black py-2 space-y-3 rounded-2xl"
         >
           <CarouselContent className="ml-0 pr-2">
             {exercise.images.map((image, imageIndex) => {

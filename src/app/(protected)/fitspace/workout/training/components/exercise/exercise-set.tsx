@@ -2,7 +2,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { debounce } from 'lodash'
 import { CheckIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import {
   startTransition,
@@ -13,7 +12,6 @@ import {
   useState,
 } from 'react'
 
-import { revalidatePlanPages } from '@/app/actions/revalidate'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useUserPreferences } from '@/context/user-preferences-context'
@@ -48,7 +46,6 @@ export function ExerciseSet({
   onSetUncompleted,
 }: ExerciseSetProps) {
   const [dayId] = useQueryState('day')
-  const router = useRouter()
   const { preferences } = useUserPreferences()
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
   const hasUserEditedRef = useRef(false)
@@ -134,9 +131,6 @@ export function ExerciseSet({
       onSuccess: async (data, variables) => {
         await queryClient.invalidateQueries({ queryKey: ['navigation'] })
 
-        await revalidatePlanPages()
-        router.refresh()
-
         // Check if it's a PR and trigger overlay
         if (data?.markSetAsCompleted?.isPersonalRecord && variables.completed) {
           const improvement = data.markSetAsCompleted.improvement || 0
@@ -165,9 +159,6 @@ export function ExerciseSet({
         console.error('Failed to mark set as completed:', error, variables)
 
         await queryClient.invalidateQueries({ queryKey: ['navigation'] })
-
-        await revalidatePlanPages()
-        router.refresh()
 
         queryClient.invalidateQueries({
           queryKey: useFitspaceGetWorkoutDayQuery.getKey({
