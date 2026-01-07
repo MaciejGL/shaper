@@ -1,7 +1,7 @@
 'use client'
 
 import { useQueryState } from 'nuqs'
-import { startTransition, use, useEffect } from 'react'
+import { startTransition, use, useEffect, useMemo, useState } from 'react'
 
 import {
   GQLFitspaceGetQuickWorkoutNavigationQuery,
@@ -10,7 +10,13 @@ import {
 } from '@/generated/graphql-client'
 
 import { Navigation } from './navigation'
-import { getDefaultSelection } from './navigation-utils'
+import {
+  findTrainerPlanWeek,
+  getDefaultSelection,
+  isQuickWorkout,
+} from './navigation-utils'
+import { OverduePlanDialog } from './overdue-plan-dialog/overdue-plan-dialog'
+import { useOverduePlanDismissal } from './overdue-plan-dialog/use-overdue-plan-dismissal'
 
 type NavigationData =
   | GQLFitspaceGetWorkoutNavigationQuery
@@ -82,5 +88,42 @@ export const NavigationWrapper = ({
   const finalPlan =
     navigationDataQuery?.getWorkoutNavigation?.plan ?? initialPlan
 
-  return <Navigation plan={finalPlan} />
+  // Check if plan is overdue (past end date, not completed, not a quick workout)
+  const isPlanOverdue = useMemo(() => {
+    if (!finalPlan) return false
+    if (isQuickWorkout(finalPlan)) return false
+    if (finalPlan.completedAt) return false
+
+    const { isPastPlanEnd } = findTrainerPlanWeek(
+      finalPlan.weeks,
+      finalPlan.startDate,
+      new Date(),
+    )
+    return isPastPlanEnd
+  }, [finalPlan])
+
+  const { isDismissed, dismiss } = useOverduePlanDismissal(finalPlan?.id)
+  const [dialogOpen, setDialogOpen] = useState(true)
+
+  // Show dialog when plan is overdue and not dismissed
+  useEffect(() => {
+    if (isPlanOverdue && !isDismissed) {
+      setDialogOpen(true)
+    }
+  }, [isPlanOverdue, isDismissed])
+
+  return (
+    <>
+      <Navigation plan={finalPlan} />
+      {finalPlan && !isPlanOverdue && (
+        <OverduePlanDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          planId={finalPlan.id}
+          weeks={finalPlan.weeks}
+          onDismiss={dismiss}
+        />
+      )}
+    </>
+  )
 }

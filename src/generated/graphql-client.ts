@@ -4793,7 +4793,7 @@ export type GQLFitspaceSwapExerciseMutation = { __typename?: 'Mutation', swapExe
 export type GQLFitspaceGetQuickWorkoutNavigationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceGetQuickWorkoutNavigationQuery = { __typename?: 'Query', getQuickWorkoutNavigation?: { __typename?: 'GetWorkoutNavigationPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercisesCount: number }> }> } } | undefined | null };
+export type GQLFitspaceGetQuickWorkoutNavigationQuery = { __typename?: 'Query', getQuickWorkoutNavigation?: { __typename?: 'GetWorkoutNavigationPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, startDate?: string | undefined | null, completedAt?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercisesCount: number }> }> } } | undefined | null };
 
 export type GQLFitspaceGetQuickWorkoutDayQueryVariables = Exact<{
   dayId?: InputMaybe<Scalars['ID']['input']>;
@@ -10910,6 +10910,7 @@ export const FitspaceGetQuickWorkoutNavigationDocument = `
       id
       title
       startDate
+      completedAt
       weeks {
         id
         weekNumber
