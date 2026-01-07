@@ -103,7 +103,7 @@ export const NavigationWrapper = ({
   }, [finalPlan])
 
   const { isDismissed, dismiss } = useOverduePlanDismissal(finalPlan?.id)
-  const [dialogOpen, setDialogOpen] = useState(true)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   // Show dialog when plan is overdue and not dismissed
   useEffect(() => {
@@ -115,7 +115,7 @@ export const NavigationWrapper = ({
   return (
     <>
       <Navigation plan={finalPlan} />
-      {finalPlan && !isPlanOverdue && (
+      {finalPlan && isPlanOverdue && (
         <OverduePlanDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
