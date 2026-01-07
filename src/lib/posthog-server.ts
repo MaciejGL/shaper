@@ -28,6 +28,9 @@ function getClient(): PostHog | null {
  * Server-side event names
  */
 export enum ServerEvent {
+  // Download page
+  APP_DOWNLOAD_PAGE_VISIT = 'app_download_page_visit',
+
   // Google Play reporting
   GOOGLE_REPORT_SUCCESS = 'google_report_success',
   GOOGLE_REPORT_SKIPPED = 'google_report_skipped',

@@ -16,11 +16,17 @@ interface MobileAppBannerProps {
    * download buttons to all web users.
    */
   alwaysShow?: boolean
+  /**
+   * Hide the open app button.
+   * Useful for pages like download where we want to show only the download buttons.
+   */
+  hideOpenAppButton?: boolean
 }
 
 export function MobileAppBanner({
   className,
   alwaysShow = false,
+  hideOpenAppButton = false,
 }: MobileAppBannerProps) {
   const { isNativeApp } = useMobileApp()
   const [isVisible, setIsVisible] = useState(false)
@@ -135,10 +141,14 @@ export function MobileAppBanner({
               </Button>
             )}
 
-            <p className="text-sm text-muted-foreground text-center">
-              or open app if you already have it installed
-            </p>
-            <OpenAppButton />
+            {!hideOpenAppButton && (
+              <>
+                <p className="text-sm text-muted-foreground text-center">
+                  or open app if you already have it installed
+                </p>
+                <OpenAppButton />
+              </>
+            )}
           </div>
         )}
       </div>
