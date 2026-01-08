@@ -13,6 +13,7 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
+import { ImageHandler } from '@/lib/aws/image-handler'
 import { invalidateUserBasicCache } from '@/lib/cache/user-cache'
 import { prisma } from '@/lib/db'
 import { invalidateUserCache } from '@/lib/getUser'
@@ -794,6 +795,25 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     if (rest.blurProgressSnapshots !== undefined)
       updateData.blurProgressSnapshots = rest.blurProgressSnapshots
 
+    // Collect images to delete from S3 after successful DB update
+    const imagesToDelete: string[] = []
+
+    // If trainerCardBackgroundUrl is being updated, check for old image to delete
+    if (rest.trainerCardBackgroundUrl !== undefined) {
+      const existingProfile = await prisma.userProfile.findUnique({
+        where: { userId: user.id },
+        select: { trainerCardBackgroundUrl: true },
+      })
+
+      // If old image exists and is different from new one, mark for deletion
+      if (
+        existingProfile?.trainerCardBackgroundUrl &&
+        existingProfile.trainerCardBackgroundUrl !== rest.trainerCardBackgroundUrl
+      ) {
+        imagesToDelete.push(existingProfile.trainerCardBackgroundUrl)
+      }
+    }
+
     // If email update was requested and User exists, update it separately
     if (user && email) {
       const emailToUpdate = email.trim()
@@ -818,6 +838,16 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         user: true,
       },
     })
+
+    // Delete old images from S3 after successful DB update
+    if (imagesToDelete.length > 0) {
+      try {
+        await ImageHandler.delete({ images: imagesToDelete })
+      } catch (error) {
+        console.error('Failed to delete old trainer card background from S3:', error)
+        // Don't throw - DB update was successful
+      }
+    }
 
     // Invalidate caches so navbar/UI gets fresh data immediately
     if (user?.email) {
