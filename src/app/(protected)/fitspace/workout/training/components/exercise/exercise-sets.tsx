@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutDayQuery,
+  GQLFitspaceGetWorkoutNavigationQuery,
   GQLFitspaceRemoveSetMutation,
   GQLTrainingView,
   useFitspaceAddSetMutation,
@@ -189,19 +190,30 @@ export function ExerciseSets({
           },
         )
 
-        // Also invalidate navigation to update day progress
-        invalidateQuery({
-          queryKey: ['navigation'],
-        })
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
-        })
-        invalidateQuery({
-          queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-        })
-        revalidatePlanPages().then(() => {
-          router.refresh()
-        })
+        // Update navigation cache to reflect exercise is now incomplete (has uncompleted set)
+        // NOTE: Do NOT call router.refresh() here - it causes stale server data to overwrite
+        // our correct cache update, making the new set disappear momentarily
+        queryClient.setQueryData(
+          ['navigation'],
+          (old: GQLFitspaceGetWorkoutNavigationQuery | undefined) => {
+            if (!old?.getWorkoutNavigation?.plan) return old
+            return {
+              ...old,
+              getWorkoutNavigation: {
+                ...old.getWorkoutNavigation,
+                plan: {
+                  ...old.getWorkoutNavigation.plan,
+                  weeks: old.getWorkoutNavigation.plan.weeks.map((week) => ({
+                    ...week,
+                    days: week.days.map((day) =>
+                      day.id === dayId ? { ...day, completedAt: null } : day,
+                    ),
+                  })),
+                },
+              },
+            }
+          },
+        )
       },
     })
 
@@ -316,12 +328,12 @@ export function ExerciseSets({
 
       {/* Sets Rows */}
       <div className="space-y-2">
-        {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
-          const previousWeightLog = getPreviousSetValue(set.order, 'weight')
-          const previousRepsLog = getPreviousSetValue(set.order, 'reps')
+        <AnimatePresence initial={!isFirstRender} mode="popLayout">
+          {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
+            const previousWeightLog = getPreviousSetValue(set.order, 'weight')
+            const previousRepsLog = getPreviousSetValue(set.order, 'reps')
 
-          return (
-            <AnimatePresence key={set.id} mode="wait" initial={!isFirstRender}>
+            return (
               <ExerciseSet
                 key={set.id}
                 set={set}
@@ -336,9 +348,9 @@ export function ExerciseSets({
                 }
                 onSetUncompleted={handleSetUncompleted}
               />
-            </AnimatePresence>
-          )
-        })}
+            )
+          })}
+        </AnimatePresence>
       </div>
 
       {/* Actions */}
