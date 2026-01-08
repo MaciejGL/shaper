@@ -244,7 +244,7 @@ function UnderlineTabList<T extends string>({
             key={option.value}
             onClick={() => onClick(option.value)}
             className={cn(
-              'relative px-3 py-2 text-base font-medium transition-colors flex-1 ',
+              'relative px-3 py-2 text-base font-normal transition-colors flex-1 ',
               isActive ? 'text-foreground' : 'text-muted-foreground',
               classNameTrigger,
             )}

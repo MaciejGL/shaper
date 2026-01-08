@@ -1,7 +1,8 @@
 'use client'
 
-import { Minus, Plus } from 'lucide-react'
+import { Copy, Minus, Plus } from 'lucide-react'
 import { startTransition, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { Divider } from '@/components/divider'
@@ -139,6 +140,28 @@ export function ShoppingList({
     setPortionMultiplier((prev) => Math.max(1, prev - 1))
   }
 
+  const copyToClipboard = () => {
+    const sortedIngredients = aggregatedIngredients.sort((a, b) =>
+      a.name.localeCompare(b.name),
+    )
+
+    const title = `Shopping List (${aggregatedIngredients.length} items)`
+    const portions =
+      portionMultiplier > 1 ? `\nPortions: ${portionMultiplier}x` : ''
+
+    const items = sortedIngredients
+      .map((item) => {
+        const checkMark = checkedItems.has(item.id) ? '[x]' : '[ ]'
+        return `${checkMark} ${item.name} - ${item.formattedAmount}`
+      })
+      .join('\n')
+
+    const text = `${title}${portions}\n\n${items}`
+
+    navigator.clipboard.writeText(text)
+    toast.success('Shopping list copied to clipboard')
+  }
+
   if (days.length === 0) {
     return null
   }
@@ -175,7 +198,19 @@ export function ShoppingList({
           </p>
 
           <div>
+            {/* Add Copy to Clipboard button - copy nicely formatted shopping list to clipboard */}
             <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={copyToClipboard}
+                iconStart={<Copy />}
+                className="mr-2 self-end"
+              >
+                Copy to Clipboard
+              </Button>
+
               <Button
                 type="button"
                 variant="secondary"

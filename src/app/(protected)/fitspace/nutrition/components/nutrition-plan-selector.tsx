@@ -105,7 +105,7 @@ export function NutritionPlanSelector({
         <SelectTrigger
           variant="default"
           size="xl"
-          className="w-full min-w-0 h-auto py-2 flex items-center gap-4 border-2"
+          className="w-full min-w-0 h-auto py-2 grid grid-cols-[auto_1fr_auto] gap-4 border-2"
           classNameIcon="size-6!"
         >
           <Utensils className="size-6! text-amber-500" />

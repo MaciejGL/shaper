@@ -93,21 +93,17 @@ export function NutritionPlanViewer({
 
       <Button
         variant="secondary"
-        className="w-full justify-start py-3 h-auto gap-4"
+        className="w-full grid grid-cols-[auto_1fr_auto] justify-start py-3 h-auto gap-4"
         iconStart={<Icon name="pdf" />}
         iconEnd={<Download className="size-4" />}
         onClick={handleDownloadPlan}
         loading={isGeneratingPDF}
         disabled={isGeneratingPDF}
       >
-        <span className="flex-1 text-left">{nutritionPlan.name}.pdf</span>
+        <span className="flex-1 text-left truncate">
+          {nutritionPlan.name}.pdf
+        </span>
       </Button>
-
-      {nutritionPlan?.description && (
-        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-          {nutritionPlan.description}
-        </p>
-      )}
     </div>
   )
 }
