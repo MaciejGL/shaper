@@ -1,14 +1,14 @@
 'use client'
 
 import { Download, Salad } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { Divider } from '@/components/divider'
 import { EmptyStateCard } from '@/components/empty-state-card'
+import { Icon } from '@/components/icons/icon'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import {
   downloadPDF,
@@ -17,23 +17,26 @@ import {
   openPdfInBrowser,
 } from '@/lib/pdf/pdf-generator'
 
-import { DayMealsAccordion, DayMealsHeader } from './day-meals-accordion'
+import { MealList } from './meal-list'
 import { NutritionPlanPDF } from './pdf/nutrition-plan-pdf'
 import { ShoppingListDrawer } from './shopping-list-drawer'
 
+type PlanDay = NonNullable<
+  GQLGetMyNutritionPlanQuery['nutritionPlan']
+>['days'][number]
+
 interface NutritionPlanViewerProps {
   nutritionPlan?: GQLGetMyNutritionPlanQuery['nutritionPlan'] | null
+  activeDay: PlanDay | null
   isLoading: boolean
 }
 
 export function NutritionPlanViewer({
   isLoading,
   nutritionPlan,
+  activeDay,
 }: NutritionPlanViewerProps) {
-  const [activeDay, setActiveDay] = useState<string>('')
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
-
-  const days = useMemo(() => nutritionPlan?.days || [], [nutritionPlan])
 
   const handleDownloadPlan = async () => {
     if (!nutritionPlan) return
@@ -61,17 +64,11 @@ export function NutritionPlanViewer({
     }
   }
 
-  useEffect(() => {
-    if (days.length > 0 && !activeDay) {
-      setActiveDay(days[0].dayNumber.toString())
-    }
-  }, [days, activeDay])
-
-  if (isLoading || (days.length > 0 && !activeDay)) {
+  if (isLoading) {
     return <NutritionPlanViewerLoading />
   }
 
-  if (!nutritionPlan || days.length === 0) {
+  if (!nutritionPlan || !activeDay) {
     return (
       <div className="p-4">
         <EmptyStateCard
@@ -83,51 +80,31 @@ export function NutritionPlanViewer({
   }
 
   return (
-    <div className="space-y-4">
-      <Tabs value={activeDay} onValueChange={setActiveDay}>
-        <div className="flex items-center gap-2 max-w-screen overflow-x-auto hide-scrollbar mb-4 shadow-lg dark:shadow-neutral-950">
-          <PrimaryTabList
-            size="lg"
-            options={days.map((day) => ({
-              label: day.name,
-              value: day.dayNumber.toString(),
-            }))}
-            onClick={setActiveDay}
-            active={activeDay}
-            className="text-sm"
-            classNameButton="text-sm px-3 grow"
-          />
-        </div>
+    <div className="space-y-4 px-4">
+      <MealList meals={activeDay.meals} />
 
-        {days.map((day) => (
-          <TabsContent
-            key={day.id}
-            value={day.dayNumber.toString()}
-            className="px-4"
-          >
-            <div className="space-y-6">
-              <DayMealsAccordion day={day} />
-              <Divider className="mb-6" />
+      <Divider className="mt-6" />
 
-              <Button
-                variant="secondary"
-                className="w-full"
-                iconStart={<Download />}
-                onClick={handleDownloadPlan}
-                loading={isGeneratingPDF}
-                disabled={isGeneratingPDF}
-              >
-                Download plan
-              </Button>
+      <ShoppingListDrawer
+        days={nutritionPlan.days}
+        activeDay={activeDay}
+        planId={nutritionPlan.id}
+      />
 
-              <ShoppingListDrawer day={day} planId={nutritionPlan.id} />
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+      <Button
+        variant="secondary"
+        className="w-full justify-start py-3 h-auto gap-4"
+        iconStart={<Icon name="pdf" />}
+        iconEnd={<Download className="size-4" />}
+        onClick={handleDownloadPlan}
+        loading={isGeneratingPDF}
+        disabled={isGeneratingPDF}
+      >
+        <span className="flex-1 text-left">{nutritionPlan.name}.pdf</span>
+      </Button>
 
       {nutritionPlan?.description && (
-        <p className="text-sm text-muted-foreground mt-4 px-4 whitespace-pre-wrap">
+        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
           {nutritionPlan.description}
         </p>
       )}
@@ -137,14 +114,13 @@ export function NutritionPlanViewer({
 
 function NutritionPlanViewerLoading() {
   return (
-    <Tabs value="0">
-      <Skeleton className="h-[46px] w-full rounded-[14px] mb-4" />
-      <TabsContent value="0" className="px-4">
-        <DayMealsHeader loading />
-        <div className="space-y-2">
-          <LoadingSkeleton variant="sm" count={3} cardVariant="tertiary" />
-        </div>
-      </TabsContent>
-    </Tabs>
+    <div className="px-4 space-y-4">
+      <div className="space-y-2">
+        <LoadingSkeleton variant="sm" count={3} cardVariant="tertiary" />
+      </div>
+      <Skeleton className="h-px w-full" />
+      <Skeleton className="h-16 w-full rounded-xl" />
+      <Skeleton className="h-10 w-full rounded-xl" />
+    </div>
   )
 }

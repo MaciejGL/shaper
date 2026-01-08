@@ -211,4 +211,64 @@ function PrimaryTabList<T extends string>({
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, PrimaryTabList }
+function UnderlineTabList<T extends string>({
+  options,
+  onClick,
+  active,
+  className,
+  classNameTrigger,
+}: {
+  options: {
+    label: string
+    value: T
+  }[]
+  onClick: (value: T) => void
+  active: T
+  className?: string
+  classNameTrigger?: string
+}) {
+  const uniqueId = React.useId()
+
+  return (
+    <div
+      className={cn(
+        'flex min-w-full w-max border-b-4 border-white/20',
+        className,
+      )}
+    >
+      {options.map((option) => {
+        const isActive = active === option.value
+
+        return (
+          <button
+            key={option.value}
+            onClick={() => onClick(option.value)}
+            className={cn(
+              'relative px-3 py-2 text-base font-medium transition-colors flex-1 ',
+              isActive ? 'text-foreground' : 'text-muted-foreground',
+              classNameTrigger,
+            )}
+          >
+            <p className="w-full min-w-max text-center">{option.label}</p>
+            {isActive && (
+              <motion.div
+                layoutId={`underlineTab-${uniqueId}`}
+                className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 h-1 w-full bg-amber-500 rounded-full"
+                transition={{ type: 'spring', duration: 0.4, bounce: 0.15 }}
+              />
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+export {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  PrimaryTabList,
+  UnderlineTabList,
+}

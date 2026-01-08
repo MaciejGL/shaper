@@ -2,13 +2,12 @@
 
 import { ArrowRight, Salad } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { ComingSoonCard } from '@/components/coming-soon-card'
 import { EmptyStateCard } from '@/components/empty-state-card'
 import { ExtendHeader } from '@/components/extend-header'
-import { MacroCard } from '@/components/macro-card/macro-card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useUser } from '@/context/user-context'
@@ -19,6 +18,8 @@ import {
 } from '@/generated/graphql-client'
 import { useTrainerServiceAccess } from '@/hooks/use-trainer-service-access'
 
+import { DaySelector } from './components/day-selector'
+import { MacroSummaryCard } from './components/macro-summary-card'
 import { NutritionPlanSelector } from './components/nutrition-plan-selector'
 import { NutritionPlanViewer } from './components/nutrition-plan-viewer'
 
@@ -30,20 +31,44 @@ export default function NutritionPage() {
     isTrainerServiceEnabled,
     isLoading: isAccessLoading,
   } = useTrainerServiceAccess()
+
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
-  const { data, isLoading } = useGetMyMacroTargetsQuery()
+  const [activeDay, setActiveDay] = useState<string>('')
+
+  const { data: macroData, isLoading: isMacroLoading } =
+    useGetMyMacroTargetsQuery()
   const { data: nutritionPlansData, isLoading: isNutritionPlansLoading } =
     useGetMyNutritionPlansQuery()
-  const macroTargets = data?.getMyMacroTargets
 
   const { data: nutritionPlanData, isLoading: isNutritionPlanLoading } =
     useGetMyNutritionPlanQuery(
       { id: selectedPlanId! },
       {
         enabled: !!selectedPlanId,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 5 * 60 * 1000,
       },
     )
+
+  const macroTargets = macroData?.getMyMacroTargets
+  const nutritionPlan = nutritionPlanData?.nutritionPlan
+  const days = useMemo(() => nutritionPlan?.days || [], [nutritionPlan])
+
+  const selectedDay = useMemo(() => {
+    if (!activeDay || days.length === 0) return null
+    return days.find((d) => d.dayNumber.toString() === activeDay) ?? null
+  }, [days, activeDay])
+
+  useEffect(() => {
+    if (days.length > 0 && !activeDay) {
+      setActiveDay(days[0].dayNumber.toString())
+    }
+  }, [days, activeDay])
+
+  useEffect(() => {
+    if (selectedPlanId) {
+      setActiveDay('')
+    }
+  }, [selectedPlanId])
 
   const handlePlanSelect = (planId: string | null) => {
     setSelectedPlanId(planId)
@@ -65,12 +90,11 @@ export default function NutritionPage() {
     macroTargets?.fat
 
   const isLoadingAll =
-    isLoading ||
+    isMacroLoading ||
     isNutritionPlansLoading ||
     isNutritionPlanLoading ||
     isAccessLoading
 
-  // Show Coming Soon if no trainer relationship and service disabled
   if (!isLoadingAll && !canAccessTrainerFeatures) {
     return (
       <div className="pt-4 px-4">
@@ -89,47 +113,7 @@ export default function NutritionPage() {
     <ExtendHeader
       classNameHeader="w-full"
       headerChildren={
-        <div className="dark space-y-6 pt-4 pb-4 w-full">
-          <div className="grid grid-cols-4">
-            {(isLoading || macroTargets?.calories) && (
-              <MacroCard
-                label="Calories"
-                value={macroTargets?.calories || '0000'}
-                className="text-sidebar-foreground"
-                isLoading={isLoading}
-              />
-            )}
-
-            {(isLoading || macroTargets?.protein) && (
-              <MacroCard
-                label="Protein"
-                value={macroTargets?.protein || '000'}
-                unit="g"
-                className="text-blue-500"
-                isLoading={isLoading}
-              />
-            )}
-
-            {(isLoading || macroTargets?.carbs) && (
-              <MacroCard
-                label="Carbs"
-                value={macroTargets?.carbs || '000'}
-                unit="g"
-                className="text-green-500"
-                isLoading={isLoading}
-              />
-            )}
-
-            {(isLoading || macroTargets?.fat) && (
-              <MacroCard
-                label="Fat"
-                value={macroTargets?.fat || '000'}
-                unit="g"
-                className="text-yellow-500"
-                isLoading={isLoading}
-              />
-            )}
-          </div>
+        <div className="dark space-y-4 pt-4 w-full">
           {!isLoadingAll ? (
             <NutritionPlanSelector
               onPlanSelect={handlePlanSelect}
@@ -139,15 +123,26 @@ export default function NutritionPage() {
               nutritionPlan={nutritionPlanData?.nutritionPlan}
             />
           ) : (
-            <Skeleton className="h-[40px]" />
+            <Skeleton className="h-[72px] rounded-2xl" />
+          )}
+
+          {days.length > 0 && (
+            <DaySelector
+              days={days}
+              activeDay={activeDay}
+              onDayChange={setActiveDay}
+            />
+          )}
+          {isNutritionPlanLoading && selectedPlanId && (
+            <Skeleton className="h-10 w-full rounded-xl" />
           )}
         </div>
       }
-      classNameContent="pt-0 px-0"
+      classNameContent="pt-4 px-0 rounded-t-none"
     >
       <div className="container-hypertro mx-auto space-y-4">
         {showEmptyState && (
-          <div className="p-4">
+          <div className="px-4">
             <EmptyStateCard
               title="Macro targets not set"
               description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
@@ -163,10 +158,22 @@ export default function NutritionPage() {
           </div>
         )}
 
+        {(hasMacroTargets || isMacroLoading) && (
+          <div className="px-4">
+            <MacroSummaryCard
+              macroTargets={macroTargets}
+              isLoading={isMacroLoading}
+            />
+          </div>
+        )}
+
         {(selectedPlanId || isNutritionPlanLoading) && (
           <NutritionPlanViewer
-            isLoading={isNutritionPlanLoading}
-            nutritionPlan={nutritionPlanData?.nutritionPlan}
+            isLoading={
+              isNutritionPlanLoading || (days.length > 0 && !activeDay)
+            }
+            nutritionPlan={nutritionPlan}
+            activeDay={selectedDay}
           />
         )}
       </div>

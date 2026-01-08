@@ -1,5 +1,6 @@
 'use client'
 
+import { Utensils } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import {
@@ -88,7 +89,7 @@ export function NutritionPlanSelector({
 
   const effectiveSelectedPlan = selectedPlanId || localSelectedPlan
   const selectedPlanMeta = effectiveSelectedPlan
-    ? sortedPlans.find((p) => p.id === effectiveSelectedPlan) ?? null
+    ? (sortedPlans.find((p) => p.id === effectiveSelectedPlan) ?? null)
     : null
 
   const coachName = nutritionPlan?.trainer
@@ -104,15 +105,16 @@ export function NutritionPlanSelector({
         <SelectTrigger
           variant="default"
           size="xl"
-          className="w-full min-w-0 h-auto py-2"
+          className="w-full min-w-0 h-auto py-2 flex items-center gap-4 border-2"
+          classNameIcon="size-6!"
         >
+          <Utensils className="size-6! text-amber-500" />
           <div className="flex flex-col items-start text-left w-full min-w-0">
-            <span className="text-xs text-muted-foreground">Nutrition plan</span>
             <span className="text-lg font-semibold leading-snug truncate w-full mt-2">
               {selectedPlanMeta?.name ?? 'Select a nutrition plan'}
             </span>
             {coachName && (
-              <span className="text-sm text-muted-foreground mt-1">
+              <span className="text-sm text-muted-foreground">
                 Set by {coachName}
               </span>
             )}

@@ -1,9 +1,8 @@
 'use client'
 
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, ShoppingCartIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Drawer, SimpleDrawerContent } from '@/components/ui/drawer'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
@@ -15,7 +14,8 @@ type PlanDay = NonNullable<
 >['days'][number]
 
 interface ShoppingListDrawerProps {
-  day: PlanDay
+  days: PlanDay[]
+  activeDay: PlanDay
   planId: string
 }
 
@@ -29,9 +29,13 @@ function getShoppingItemCount(day: PlanDay): number {
   return ids.size
 }
 
-export function ShoppingListDrawer({ day, planId }: ShoppingListDrawerProps) {
+export function ShoppingListDrawer({
+  days,
+  activeDay,
+  planId,
+}: ShoppingListDrawerProps) {
   const [open, setOpen] = useState(false)
-  const itemsCount = useMemo(() => getShoppingItemCount(day), [day])
+  const itemsCount = useMemo(() => getShoppingItemCount(activeDay), [activeDay])
 
   if (itemsCount === 0) return null
 
@@ -45,37 +49,28 @@ export function ShoppingListDrawer({ day, planId }: ShoppingListDrawerProps) {
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') setOpen(true)
         }}
+        className="shadow-xs"
       >
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="space-y-1">
-              <p className="text-base font-semibold">Shopping list</p>
-              <p className="text-sm text-muted-foreground">
-                {itemsCount} items for this day
+        <CardContent>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <ShoppingCartIcon className="size-6" />
+              <p className="text-base font-medium">
+                Open shopping list ({itemsCount})
               </p>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xl"
-              iconOnly={<ChevronRight />}
-              aria-label="Open shopping list"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                setOpen(true)
-              }}
-            >
-              Open
-            </Button>
+            <ChevronRight className="size-6!" />
           </div>
         </CardContent>
       </Card>
 
       <SimpleDrawerContent title="Shopping list">
-        <ShoppingList day={day} planId={planId} />
+        <ShoppingList
+          days={days}
+          planId={planId}
+          initialSelectedDayId={activeDay.id}
+        />
       </SimpleDrawerContent>
     </Drawer>
   )
 }
-

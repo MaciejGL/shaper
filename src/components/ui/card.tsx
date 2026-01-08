@@ -10,7 +10,10 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        secondary: 'bg-card border-border',
+        secondary: cn(
+          'bg-card border-border',
+          'dark:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] dark:from-neutral-100 dark:via-neutral-300 dark:to-neutral-400',
+        ),
         tertiary: 'bg-card-on-card border-border',
         highlighted: cn(
           ' bg-linear-to-tr dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-800 from-neutral-100 via-neutral-300 to-neutral-400 border-none',
@@ -24,6 +27,18 @@ const cardVariants = cva(
     },
   },
 )
+
+{
+  /* <div className="min-h-screen w-full relative">
+  <div
+    className="absolute inset-0 z-0"
+    style={{
+      background:
+        "radial-gradient(circle at top, #1c1c1c, #000000)",
+    }}
+  />
+</div> */
+}
 
 export type CardProps = React.ComponentProps<'div'> & {
   variant?: VariantProps<typeof cardVariants>['variant']
