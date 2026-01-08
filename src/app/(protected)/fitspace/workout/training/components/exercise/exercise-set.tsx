@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutDayQuery,
+  GQLFitspaceGetWorkoutNavigationQuery,
   GQLFitspaceMarkSetAsCompletedMutation,
   GQLTrainingView,
   useFitspaceGetWorkoutDayQuery,
@@ -129,7 +130,45 @@ export function ExerciseSet({
         return updateFn(oldData)
       },
       onSuccess: async (data, variables) => {
-        await queryClient.invalidateQueries({ queryKey: ['navigation'] })
+        // Update navigation cache with new day completion status based on updated workout day data
+        const workoutDayData =
+          queryClient.getQueryData<GQLFitspaceGetWorkoutDayQuery>(
+            useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
+          )
+        const allExercisesCompleted =
+          workoutDayData?.getWorkoutDay?.day?.exercises?.every(
+            (ex) => ex.substitutedBy?.completedAt ?? ex.completedAt,
+          )
+        const dayCompletedAt = allExercisesCompleted
+          ? new Date().toISOString()
+          : null
+
+        queryClient.setQueryData(
+          ['navigation'],
+          (old: GQLFitspaceGetWorkoutNavigationQuery | undefined) => {
+            if (!old?.getWorkoutNavigation?.plan) return old
+            return {
+              ...old,
+              getWorkoutNavigation: {
+                ...old.getWorkoutNavigation,
+                plan: {
+                  ...old.getWorkoutNavigation.plan,
+                  weeks: old.getWorkoutNavigation.plan.weeks.map((week) => ({
+                    ...week,
+                    days: week.days.map((day) =>
+                      day.id === dayId
+                        ? { ...day, completedAt: dayCompletedAt }
+                        : day,
+                    ),
+                  })),
+                },
+              },
+            }
+          },
+        )
+
+        // NOTE: DO NOT invalidate navigation here - it would refetch with stale server data
+        // and overwrite our optimistic update. The navigation will refresh naturally when needed.
 
         // Check if it's a PR and trigger overlay
         if (data?.markSetAsCompleted?.isPersonalRecord && variables.completed) {
@@ -158,13 +197,14 @@ export function ExerciseSet({
       onError: async (error, variables) => {
         console.error('Failed to mark set as completed:', error, variables)
 
-        await queryClient.invalidateQueries({ queryKey: ['navigation'] })
-
-        queryClient.invalidateQueries({
+        // Re-sync both caches with server on error
+        await queryClient.invalidateQueries({
           queryKey: useFitspaceGetWorkoutDayQuery.getKey({
             dayId: dayId ?? '',
           }),
         })
+        // Only invalidate navigation AFTER workout day is refreshed to get correct state
+        await queryClient.invalidateQueries({ queryKey: ['navigation'] })
       },
     })
 

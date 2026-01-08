@@ -93,9 +93,9 @@ export function Exercises({
   // Prepare mini-map data
   const miniMapExercises = exercises.map((ex) => ({
     id: ex.id,
-    name: ex.name,
+    name: ex.substitutedBy?.name ?? ex.name,
     order: ex.order,
-    completedAt: ex.completedAt ?? null,
+    completedAt: ex.substitutedBy?.completedAt ?? ex.completedAt ?? null,
   }))
 
   // Main workout view
