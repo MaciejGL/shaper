@@ -42,11 +42,11 @@ export default class AdminUserListItem implements GQLAdminUserListItem {
   }
 
   get createdAt() {
-    return this.data.createdAt.toISOString()
+    return this.data.createdAt?.toISOString()
   }
 
   get updatedAt() {
-    return this.data.updatedAt.toISOString()
+    return this.data.updatedAt?.toISOString()
   }
 
   get lastLoginAt() {

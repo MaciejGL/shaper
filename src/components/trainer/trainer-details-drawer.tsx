@@ -3,9 +3,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   BadgeCheckIcon,
+  BicepsFlexed,
   BookOpenCheck,
-  ChevronDown,
-  ChevronUp,
   FlameIcon,
   Mail,
   Sparkles,
@@ -19,6 +18,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerFooter } from '@/components/ui/drawer'
 import { useUser } from '@/context/user-context'
+import { parseSimpleMarkdown } from '@/utils/simple-markdown'
 
 import { TrainerCard, TrainerData } from './trainer-card'
 import { TrainerCertificatesGallery } from './trainer-certificates-gallery'
@@ -40,15 +40,17 @@ interface TrainerDetailsDrawerProps {
 }
 
 function ExpandableBio({ bio }: { bio: string }) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  // const [isExpanded, setIsExpanded] = useState(false)
   // Simple heuristic: if bio is longer than ~200 chars, truncate it
   const shouldTruncate = bio.length > 300
 
+  const renderedBio = parseSimpleMarkdown(bio)
+
   if (!shouldTruncate) {
     return (
-      <p className="text-sm prose prose-sm leading-relaxed whitespace-pre-wrap bg-card/50 p-4 rounded-xl border border-border/50">
-        {bio}
-      </p>
+      <div className="text-sm prose prose-sm leading-relaxed bg-card/50 p-4 rounded-xl border border-border/50">
+        {renderedBio}
+      </div>
     )
   }
 
@@ -56,29 +58,29 @@ function ExpandableBio({ bio }: { bio: string }) {
     <div className="relative group">
       <motion.div
         initial={false}
-        animate={{ height: isExpanded ? 'auto' : 160 }}
+        // animate={{ height: isExpanded ? 'auto' : 160 }}
         transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
         className="overflow-hidden relative"
       >
-        <p className="text-sm prose prose-sm leading-relaxed whitespace-pre-wrap bg-card/50  rounded-xl">
-          {bio}
-        </p>
+        <div className="text-sm prose prose-sm leading-relaxed bg-card/50 rounded-xl">
+          {renderedBio}
+        </div>
 
         {/* Subtle Fade for non-expanded state */}
         <AnimatePresence>
-          {!isExpanded && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-card via-card/80 to-transparent rounded-b-xl pointer-events-none"
-            />
-          )}
+          {/* {!isExpanded && ( */}
+          {/* <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-card via-card/80 to-transparent pointer-events-none"
+          /> */}
+          {/* )} */}
         </AnimatePresence>
       </motion.div>
 
       {/* Natural Text Link Button */}
-      <motion.button
+      {/* <motion.button
         layout
         onClick={() => setIsExpanded(!isExpanded)}
         className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors mt-2 flex items-center gap-1 mx-auto"
@@ -92,7 +94,7 @@ function ExpandableBio({ bio }: { bio: string }) {
             Read more <ChevronDown className="size-3" />
           </>
         )}
-      </motion.button>
+      </motion.button> */}
     </div>
   )
 }
@@ -174,7 +176,7 @@ export function TrainerDetailsDrawer({
         dialogTitle={`${trainerName} - Trainer Details`}
         grabberAbsolute
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full pb-10">
           <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0 space-y-8">
             {/* Trainer Card Header */}
             <div className="-mx-4">
@@ -192,8 +194,8 @@ export function TrainerDetailsDrawer({
             {showRequestCoaching && !requestSent && (
               <div className="rounded-xl border border-border bg-card-on-card/10 dark:bg-card p-4 space-y-3 shadow-md">
                 <div className="space-y-1">
-                  <h3 className="font-semibold text-base">Coaching</h3>
-                  {!hasRequestedTrainer && (
+                  <h3 className="font-semibold text-lg">Coaching</h3>
+                  {hasRequestedTrainer && (
                     <p className="text-sm text-muted-foreground">
                       {trainer.isAtCapacity ? (
                         <>
@@ -202,8 +204,8 @@ export function TrainerDetailsDrawer({
                         </>
                       ) : (
                         <>
-                          Send a coaching request to {trainerName}. They’ll
-                          contact you to discuss your goals and options.
+                          Send a coaching request to {trainerName}. You'll be
+                          contacted to discuss your goals and options.
                         </>
                       )}
                     </p>
@@ -211,6 +213,19 @@ export function TrainerDetailsDrawer({
                 </div>
 
                 <div className="flex flex-col gap-2">
+                  {/* Request Coaching CTA after bio */}
+                  {canShowPrimaryRequest && !trainer.isAtCapacity && (
+                    <Button
+                      onClick={handleRequestCoaching}
+                      disabled={isRequestingCoaching}
+                      className="w-full"
+                      size="lg"
+                      loading={isRequestingCoaching}
+                      iconStart={<BicepsFlexed />}
+                    >
+                      Request Coaching
+                    </Button>
+                  )}
                   {showCompleteSurvey && onCompleteSurvey && (
                     <Button
                       onClick={onCompleteSurvey}
@@ -274,6 +289,20 @@ export function TrainerDetailsDrawer({
             {/* Bio */}
             {trainer.profile?.bio && (
               <ExpandableBio bio={trainer.profile.bio} />
+            )}
+
+            {/* Request Coaching CTA after bio */}
+            {canShowPrimaryRequest && !trainer.isAtCapacity && (
+              <Button
+                onClick={handleRequestCoaching}
+                disabled={isRequestingCoaching}
+                className="w-full"
+                size="lg"
+                loading={isRequestingCoaching}
+                iconStart={<BicepsFlexed />}
+              >
+                Request Coaching
+              </Button>
             )}
 
             {/* Credentials / Certificates */}

@@ -93,19 +93,34 @@ export function TrainerCard({
           <p className="text-2xl font-bold text-foreground text-shadow-xs text-shadow-black mt-auto">
             {trainerName}
           </p>
-          <div className="text-sm text-foreground font-semibold flex flex-wrap gap-1">
-            {trainer.profile?.specialization
-              ?.slice(0, 2)
-              .map((specialization, index, array) => (
-                <div
-                  key={specialization}
-                  className="flex items-center gap-1 text-shadow-xs text-shadow-black"
-                >
-                  <span>{specialization}</span>
-                  {index < array.length - 1 && <span>•</span>}
-                </div>
-              ))}
-          </div>
+          {(() => {
+            const specializations =
+              trainer.profile?.specialization?.slice(0, 2) ?? []
+            const hasLongSpecialization = specializations.some(
+              (s) => s.length > 15,
+            )
+
+            return (
+              <div
+                className={cn(
+                  'text-sm text-foreground font-semibold flex gap-1',
+                  hasLongSpecialization ? 'flex-col' : 'flex-wrap',
+                )}
+              >
+                {specializations.map((specialization, index, array) => (
+                  <div
+                    key={specialization}
+                    className="flex items-center gap-1 text-shadow-xs text-shadow-black"
+                  >
+                    <span>{specialization}</span>
+                    {!hasLongSpecialization && index < array.length - 1 && (
+                      <span>•</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
           <div className="mb-4 mt-3 text-shadow-xs text-shadow-black text-foreground font-semibold text-sm flex items-center gap-2">
             {trainer.capacity != null && trainer.spotsLeft != null && (
               <SpotsIndicator spotsLeft={trainer.spotsLeft} />
