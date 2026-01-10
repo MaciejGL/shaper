@@ -18,7 +18,7 @@ export const ExtendHeader = ({
       {headerChildren && (
         <div
           className={cn(
-            'max-w-md h-max mx-auto w-full shadow-xl rounded-b-[18px] relative',
+            'max-w-lg h-max mx-auto w-full shadow-xl rounded-b-[18px] relative',
             classNameHeaderWrapper,
           )}
         >

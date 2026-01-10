@@ -2,7 +2,7 @@
 
 import { ArrowRight, Salad } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { ComingSoonCard } from '@/components/coming-soon-card'
@@ -53,16 +53,22 @@ export default function NutritionPage() {
   const nutritionPlan = nutritionPlanData?.nutritionPlan
   const days = useMemo(() => nutritionPlan?.days || [], [nutritionPlan])
 
-  const selectedDay = useMemo(() => {
-    if (!activeDay || days.length === 0) return null
-    return days.find((d) => d.dayNumber.toString() === activeDay) ?? null
-  }, [days, activeDay])
+  const effectiveActiveDay = useMemo(() => {
+    if (days.length === 0) return ''
 
-  useEffect(() => {
-    if (days.length > 0 && !activeDay) {
-      setActiveDay(days[0].dayNumber.toString())
+    if (activeDay && days.some((d) => d.dayNumber.toString() === activeDay)) {
+      return activeDay
     }
-  }, [days, activeDay])
+
+    return days[0]?.dayNumber.toString() ?? ''
+  }, [activeDay, days])
+
+  const selectedDay = useMemo(() => {
+    if (!effectiveActiveDay || days.length === 0) return null
+    return (
+      days.find((d) => d.dayNumber.toString() === effectiveActiveDay) ?? null
+    )
+  }, [days, effectiveActiveDay])
 
   useEffect(() => {
     if (selectedPlanId) {
@@ -70,9 +76,9 @@ export default function NutritionPage() {
     }
   }, [selectedPlanId])
 
-  const handlePlanSelect = (planId: string | null) => {
+  const handlePlanSelect = useCallback((planId: string | null) => {
     setSelectedPlanId(planId)
-  }
+  }, [])
 
   const handleFindTrainer = () => {
     if (!isTrainerServiceEnabled) {
@@ -111,7 +117,7 @@ export default function NutritionPage() {
 
   return (
     <ExtendHeader
-      classNameHeader="w-full"
+      classNameHeaderWrapper="w-full"
       headerChildren={
         <div className="dark space-y-4 pt-4 w-full">
           {!isLoadingAll ? (
@@ -129,7 +135,7 @@ export default function NutritionPage() {
           {days.length > 0 && (
             <DaySelector
               days={days}
-              activeDay={activeDay}
+              activeDay={effectiveActiveDay}
               onDayChange={setActiveDay}
             />
           )}
@@ -140,7 +146,7 @@ export default function NutritionPage() {
       }
       classNameContent="pt-4 px-0 rounded-t-none"
     >
-      <div className="container-hypertro mx-auto space-y-4">
+      <div className="space-y-4">
         {showEmptyState && (
           <div className="px-4">
             <EmptyStateCard
@@ -170,7 +176,7 @@ export default function NutritionPage() {
         {(selectedPlanId || isNutritionPlanLoading) && (
           <NutritionPlanViewer
             isLoading={
-              isNutritionPlanLoading || (days.length > 0 && !activeDay)
+              isNutritionPlanLoading || (days.length > 0 && !effectiveActiveDay)
             }
             nutritionPlan={nutritionPlan}
             activeDay={selectedDay}

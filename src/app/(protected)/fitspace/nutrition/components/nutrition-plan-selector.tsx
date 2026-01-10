@@ -1,7 +1,7 @@
 'use client'
 
 import { Utensils } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import {
   Select,
@@ -35,15 +35,22 @@ export function NutritionPlanSelector({
     null,
   )
 
-  // Sort plans by creation date (newest first)
-  const sortedPlans = [...nutritionPlans].sort((a, b) => {
-    const dateA = new Date(a.createdAt).getTime()
-    const dateB = new Date(b.createdAt).getTime()
-    return dateB - dateA
-  })
+  const sortedPlans = useMemo(() => {
+    // Sort plans by creation date (newest first)
+    return [...nutritionPlans].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime()
+      const dateB = new Date(b.createdAt).getTime()
+      return dateB - dateA
+    })
+  }, [nutritionPlans])
 
   useEffect(() => {
     if (sortedPlans.length === 0) return
+
+    if (selectedPlanId) {
+      setLocalSelectedPlan(selectedPlanId)
+      return
+    }
 
     const storedPlanId = localStorage.getItem(STORAGE_KEY)
 
@@ -55,7 +62,7 @@ export function NutritionPlanSelector({
 
     setLocalSelectedPlan(defaultPlanId)
     onPlanSelect(defaultPlanId)
-  }, [sortedPlans, onPlanSelect])
+  }, [onPlanSelect, selectedPlanId, sortedPlans])
 
   const handlePlanChange = (planId: string) => {
     setLocalSelectedPlan(planId)
