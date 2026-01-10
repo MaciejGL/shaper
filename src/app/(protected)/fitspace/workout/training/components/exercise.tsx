@@ -99,7 +99,6 @@ export function Exercise({
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries({ queryKey: ['navigation'] })
-        router.refresh()
       },
       onError: async () => {
         await Promise.all([
