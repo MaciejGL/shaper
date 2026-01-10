@@ -4,12 +4,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
+import { useUser } from '@/context/user-context'
 import {
   GQLFitnessLevel,
   GQLGoal,
@@ -87,14 +88,35 @@ export function OnboardingModal({
 }: OnboardingModalProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { user } = useUser()
   const [currentStep, setCurrentStep] = useState<Step>('welcome')
   const [path, setPath] = useState<OnboardingPath>(null)
 
   // Use stable initial state reference to prevent Fast Refresh resets
   const [data, setData] = useState<OnboardingData>(INITIAL_ONBOARDING_DATA)
+  const hasHydratedFromProfileRef = useRef(false)
   const [trainingChoice, setTrainingChoice] = useState<
     'custom' | 'plans' | 'trainer'
   >('custom')
+
+  useEffect(() => {
+    if (!open) {
+      hasHydratedFromProfileRef.current = false
+      return
+    }
+
+    if (hasHydratedFromProfileRef.current) return
+    if (!user?.profile) return
+
+    hasHydratedFromProfileRef.current = true
+
+    setData((prev) => ({
+      ...prev,
+      firstName: prev.firstName || user.profile?.firstName || '',
+      lastName: prev.lastName || user.profile?.lastName || '',
+      avatarUrl: prev.avatarUrl || user.profile?.avatarUrl || '',
+    }))
+  }, [open, user?.profile])
 
   const updateProfile = useUpdateProfileMutation({
     onError: (error) => {

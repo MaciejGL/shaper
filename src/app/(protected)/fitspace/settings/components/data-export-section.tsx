@@ -38,7 +38,7 @@ export function DataExportSection() {
     <div className="space-y-4">
       <div className="flex items-center justify-between p-4 rounded-lg border">
         <div className="flex items-center gap-3">
-          <div className="size-8 bg-indigo-100 dark:bg-indigo-800 rounded-lg flex items-center justify-center">
+          <div className="size-8 bg-indigo-100 dark:bg-indigo-800 rounded-lg flex items-center justify-center shrink-0">
             <Download className="size-4" />
           </div>
           <div>
