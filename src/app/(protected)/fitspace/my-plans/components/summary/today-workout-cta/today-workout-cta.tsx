@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, Calendar, Clock, Moon, Sparkles } from 'lucide-react'
+import { ArrowRight, Calendar, Moon, Sparkles } from 'lucide-react'
 import { useMemo } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -17,9 +17,9 @@ import {
 import { estimateWorkoutTime } from '@/lib/workout/estimate-workout-time'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
-import { ExercisesList } from './exercises-list'
 import type { TodayWorkoutCtaProps } from './types'
 import { DAY_NAMES, findTodaysWorkout } from './utils'
+import { WorkoutStatsTiles } from './workout-stats-tiles'
 
 export function TodayWorkoutCta({ weeks, startDate }: TodayWorkoutCtaProps) {
   const { day, nextWorkoutDay } = useMemo(
@@ -86,16 +86,14 @@ export function TodayWorkoutCta({ weeks, startDate }: TodayWorkoutCtaProps) {
           <CardAction>
             <Badge variant="success">Completed</Badge>
           </CardAction>
-          {estimatedDuration && (
-            <CardDescription className="flex items-center gap-1.5">
-              <Clock className="size-3.5" />
-              {estimatedDuration} min
-            </CardDescription>
-          )}
         </CardHeader>
         {day.exercises?.length > 0 && (
           <CardContent>
-            <ExercisesList exercises={day.exercises} showDetails />
+            <WorkoutStatsTiles
+              variant="default"
+              exercises={day.exercises}
+              estimatedDuration={estimatedDuration}
+            />
           </CardContent>
         )}
         <CardFooter>
@@ -121,18 +119,14 @@ export function TodayWorkoutCta({ weeks, startDate }: TodayWorkoutCtaProps) {
             <Calendar className="size-5 text-primary" />
             Today's Workout
           </CardTitle>
-          {estimatedDuration && (
-            <CardAction>
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Clock className="size-4" />
-                {estimatedDuration} min
-              </div>
-            </CardAction>
-          )}
         </CardHeader>
         {day.exercises?.length > 0 && (
           <CardContent>
-            <ExercisesList exercises={day.exercises} showDetails />
+            <WorkoutStatsTiles
+              variant="premium"
+              exercises={day.exercises}
+              estimatedDuration={estimatedDuration}
+            />
           </CardContent>
         )}
         <CardFooter>

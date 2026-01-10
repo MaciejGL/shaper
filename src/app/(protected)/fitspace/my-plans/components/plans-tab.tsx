@@ -1,7 +1,6 @@
-import { ChevronRight, Dumbbell } from 'lucide-react'
+import { ArrowRight, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 
-import { BiggyIcon } from '@/components/biggy-icon'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -276,17 +275,15 @@ function EmptyPlansState() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardContent className="flex-center flex-col gap-4 py-12">
-          <BiggyIcon icon={Dumbbell} />
-          <h3 className="font-semibold">No Training Plans</h3>
+        <CardContent className="flex-center flex-col gap-2">
+          <h3 className="font-semibold text-lg">Get Your First Plan</h3>
           <p className="text-muted-foreground text-center max-w-md">
-            You don't have any training plans yet. Start one of your available
-            plans or find a new one
+            Start one of your available plans or find a new one
           </p>
           <ButtonLink
             href="/fitspace/explore?tab=plans"
-            size="sm"
-            iconEnd={<ChevronRight />}
+            iconEnd={<ArrowRight />}
+            className="w-full"
           >
             Find Plan
           </ButtonLink>
@@ -294,7 +291,7 @@ function EmptyPlansState() {
       </Card>
 
       <TrainerDiscoveryCta
-        variant="compact"
+        variant="banner"
         title="Need Help Getting Started?"
         subtitle="Connect with a trainer for personalized guidance"
       />

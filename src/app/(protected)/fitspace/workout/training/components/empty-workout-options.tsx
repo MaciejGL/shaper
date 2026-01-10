@@ -1,6 +1,5 @@
 'use client'
 
-import { formatDate } from 'date-fns'
 import { motion } from 'framer-motion'
 import {
   BookmarkIcon,
@@ -46,10 +45,6 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
   const favouriteWorkouts = favouritesData?.getFavouriteWorkouts ?? []
   const hasCustomPlans = favouriteWorkouts.length > 0
 
-  const dayLabel = day.scheduledAt
-    ? formatDate(new Date(day.scheduledAt), 'EEE d')
-    : ''
-
   const eventProperties = {
     day_of_week: day.dayOfWeek,
     has_custom_plans: hasCustomPlans,
@@ -84,9 +79,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
     <>
       <div className="space-y-4 pt-6">
         <p className="text-xl font-medium text-center">Today's workout</p>
-        <p className="text-sm text-muted-foreground text-center">
-          No workout planned for {dayLabel} yet.
-        </p>
+
         <p className="text-sm text-muted-foreground text-center">
           Choose how you want to train today.
         </p>
@@ -109,7 +102,6 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
           {/* Card 1: Start a training plan (Recommended) */}
           <motion.div variants={cardVariants}>
             <Card
-              variant="premium"
               className="cursor-pointer transition-all hover:scale-[1.01]"
               onClick={handleStartPlanClick}
             >

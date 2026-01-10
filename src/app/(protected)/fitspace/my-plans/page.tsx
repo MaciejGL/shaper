@@ -12,6 +12,7 @@ import {
   useGetCheckinStatusQuery,
 } from '@/generated/graphql-client'
 
+import { NoActivePlanHeaderCard } from './components/no-active-plan-header-card/no-active-plan-header-card'
 import { PlanActionDialog } from './components/plan-action-dialog/plan-action-dialog'
 import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
 import { PlanCard } from './components/plan-card'
@@ -44,8 +45,20 @@ export default function MyPlansPage() {
   const availablePlans = data?.getMyPlansOverviewFull?.availablePlans
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
 
+  const hasPlans =
+    (availablePlans?.length ?? 0) > 0 || (completedPlans?.length ?? 0) > 0
+
   const handleActivePlanClick = () => {
     setIsActivePlanDrawerOpen(true)
+  }
+
+  const handleBrowsePlans = () => {
+    setTab(PlanTab.Plans)
+    window.setTimeout(() => {
+      document
+        .getElementById('my-plans-content')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 0)
   }
 
   const handleActivePlanAction = (
@@ -80,7 +93,11 @@ export default function MyPlansPage() {
         />
       </div>
 
-      <TabsContent value={PlanTab.Plans} className="space-y-4 py-6 px-4">
+      <TabsContent
+        id="my-plans-content"
+        value={PlanTab.Plans}
+        className="space-y-4 py-6 px-4"
+      >
         {activePlan?.weeks && activePlan.weeks.length > 0 && (
           <div className="mb-6">
             <TodayWorkoutCta
@@ -118,10 +135,16 @@ export default function MyPlansPage() {
               imageUrl={getPlanImage(activePlan)}
             />
           ) : isLoadingPlans ? (
-            <div className="dark space-y-6 pb-6 pt-4 px-4">
+            <div className="dark">
               <LoadingSkeleton count={1} variant="md" className="h-[120px]" />
             </div>
-          ) : null
+          ) : (
+            <div className="dark">
+              <NoActivePlanHeaderCard
+                onBrowsePlans={hasPlans ? handleBrowsePlans : undefined}
+              />
+            </div>
+          )
         }
       >
         {tabsContent}

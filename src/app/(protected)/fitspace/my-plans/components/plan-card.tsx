@@ -54,7 +54,7 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
       )}
       <CardContent
         className={cn(
-          'relative flex gap-2 justify-between aspect-12/6',
+          'relative flex gap-2 justify-between aspect-12/5',
           status !== PlanStatus.Active && 'items-center',
         )}
       >
