@@ -23,7 +23,15 @@ export function usePaymentRules(): PaymentRule {
   const { user } = useUser()
   const { isNativeApp, platform } = useMobileApp()
 
-  const region = getRegionFromTimezone(user?.profile?.timezone)
+  // Use browser timezone directly for immediate client-side detection
+  // Falls back to server profile timezone during SSR
+  const browserTimezone =
+    typeof window !== 'undefined'
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone
+      : null
+  const region = getRegionFromTimezone(
+    browserTimezone ?? user?.profile?.timezone,
+  )
 
   // Determine device platform
   let devicePlatform: Platform = 'web'
