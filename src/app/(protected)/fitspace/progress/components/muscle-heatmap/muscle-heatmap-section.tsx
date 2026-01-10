@@ -30,6 +30,7 @@ export function MuscleHeatmapSection() {
     muscleIntensity,
     muscleProgress,
     streakWeeks,
+    overallPercentage,
     totalSets,
     weekOffset,
     isCurrentWeek,
@@ -46,6 +47,10 @@ export function MuscleHeatmapSection() {
   if (!user) {
     return null
   }
+
+  const formattedScore = Number.isInteger(overallPercentage)
+    ? `${overallPercentage}`
+    : overallPercentage.toFixed(1)
 
   return (
     <Card>
@@ -82,22 +87,34 @@ export function MuscleHeatmapSection() {
           <TabsContent value="heatmap" className="pt-4 flex flex-col gap-4">
             <PremiumGate feature="Muscle Heatmap" compact showPartialContent>
               <div>
-                <div className="mb-6 flex justify-between items-end gap-4">
-                  <div className="text-left rounded-xl px-3 py-2 grow shadow-md outline outline-border dark:outline-muted">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                      Total sets
-                    </p>
-                    <p className="text-2xl font-bold tabular-nums">
-                      {totalSets}
-                    </p>
+                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="grid grid-cols-2 gap-3 sm:flex-1 sm:min-w-0">
+                    <div className="text-left rounded-xl px-3 py-2 shadow-md outline outline-border dark:outline-muted">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                        Total sets
+                      </p>
+                      <p className="text-2xl font-bold tabular-nums">
+                        {totalSets}
+                      </p>
+                    </div>
+                    <div className="text-left rounded-xl px-3 py-2 shadow-md outline outline-border dark:outline-muted">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                        Score
+                      </p>
+                      <p className="text-2xl font-bold tabular-nums">
+                        {formattedScore}%
+                      </p>
+                    </div>
                   </div>
-                  <WeekNavigator
-                    weekStartDate={weekStartDate}
-                    weekEndDate={weekEndDate}
-                    weekOffset={weekOffset}
-                    onPrevious={goToPreviousWeek}
-                    onNext={goToNextWeek}
-                  />
+                  <div className="self-end sm:self-auto">
+                    <WeekNavigator
+                      weekStartDate={weekStartDate}
+                      weekEndDate={weekEndDate}
+                      weekOffset={weekOffset}
+                      onPrevious={goToPreviousWeek}
+                      onNext={goToNextWeek}
+                    />
+                  </div>
                 </div>
                 <div className="mb-10">
                   <HeatmapBodyView
