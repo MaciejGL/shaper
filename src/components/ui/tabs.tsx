@@ -159,7 +159,7 @@ function PrimaryTabList<T extends string>({
   return (
     <div
       className={cn(
-        'rounded-[18px] bg-card/95 dark:bg-background/95 border border-zinc-400/60 dark:border-zinc-800 p-[2px] min-w-max w-full shadow-lg dark:shadow-neutral-950',
+        'rounded-[18px] bg-card dark:bg-background border border-zinc-400/60 dark:border-zinc-800 p-px min-w-max w-full shadow-lg dark:shadow-neutral-950',
         classNameWrapper,
       )}
     >
@@ -174,10 +174,10 @@ function PrimaryTabList<T extends string>({
             iconStart={
               <span
                 className={cn(
-                  'relative z-[1] transition-colors duration-500',
+                  'relative z-1 transition-colors duration-500',
                   active === option.value
                     ? 'text-primary-foreground dark:text-primary'
-                    : 'text-primary/80',
+                    : 'text-primary',
                 )}
               >
                 {option.icon}

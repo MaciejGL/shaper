@@ -71,7 +71,8 @@ export function WorkoutPageServer({
           />
         </Suspense>
       }
-      classNameHeader="pt-2 px-2"
+      classNameHeaderContent="pt-2 px-2"
+      classNameHeaderWrapper="mb-4"
       classNameContent="px-0 pt-0"
     >
       <Suspense fallback={<SkeletonExercises />}>

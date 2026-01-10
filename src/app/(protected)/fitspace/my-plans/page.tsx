@@ -63,20 +63,22 @@ export default function MyPlansPage() {
       onValueChange={(value) => setTab(value as PlanTab)}
       className="gap-0"
     >
-      <PrimaryTabList
-        options={[
-          { label: 'Premade Plans', value: PlanTab.Plans },
-          {
-            label: 'Create Plans',
-            value: PlanTab.QuickWorkout,
-            icon: <Plus className="relative" />,
-          },
-        ]}
-        onClick={setTab}
-        active={tab ?? PlanTab.Plans}
-        size="lg"
-        className="grid grid-cols-2"
-      />
+      <div className="-mt-6 relative z-10 px-4">
+        <PrimaryTabList
+          options={[
+            { label: 'Premade Plans', value: PlanTab.Plans },
+            {
+              label: 'Create Plans',
+              value: PlanTab.QuickWorkout,
+              icon: <Plus className="relative" />,
+            },
+          ]}
+          onClick={setTab}
+          active={tab ?? PlanTab.Plans}
+          size="lg"
+          className="grid grid-cols-2"
+        />
+      </div>
 
       <TabsContent value={PlanTab.Plans} className="space-y-4 py-6 px-4">
         {activePlan?.weeks && activePlan.weeks.length > 0 && (
@@ -106,7 +108,7 @@ export default function MyPlansPage() {
     <>
       <ExtendHeader
         classNameContent="px-0 pt-0 relative"
-        classNameHeader="p-0"
+        classNameHeaderContent="p-4 pb-12"
         headerChildren={
           activePlan ? (
             <PlanCard

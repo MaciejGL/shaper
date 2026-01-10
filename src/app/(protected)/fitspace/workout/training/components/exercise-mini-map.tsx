@@ -432,9 +432,9 @@ export function WorkoutOverviewPill({
 
   return (
     <>
-      <div ref={ref} className="relative h-[56px] z-35">
+      <div ref={ref} className="relative h-[56px] z-35 mb-4">
         {!isExpanded && (
-          <div className="relative w-full">
+          <div className="relative w-full px-2">
             <SmartPillContent
               progressPercentage={progressPercentage}
               completedCount={completedCount}
@@ -446,9 +446,7 @@ export function WorkoutOverviewPill({
               onShowSummary={() => setShowSummary(true)}
               isStaticOverview={true}
               layoutId="overview-pill"
-              className={cn(
-                'rounded-none h-[56px] border-0 bg-white dark:bg-background-subtle shadow-none',
-              )}
+              className={cn('h-[56px] ')}
             />
           </div>
         )}

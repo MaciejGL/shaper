@@ -36,7 +36,7 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
   return (
     <Card
       onClick={() => onClick(plan)}
-      className="dark cursor-pointer border-none transition-all overflow-hidden group relative bg-card gap-2 -mb-6 pb-14"
+      className="dark cursor-pointer border-none transition-all overflow-hidden group relative bg-card gap-2 shadow-sm shadow-black"
       // variant={status === PlanStatus.Active ? 'premium' : 'tertiary'}
     >
       {imageUrl && (
@@ -45,11 +45,11 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
             src={imageUrl}
             alt={plan.title}
             fill
-            className="object-cover"
+            className="object-cover object-[center_20%]"
             quality={100}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-black via-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/60 to-transparent" />
         </div>
       )}
       <CardContent
