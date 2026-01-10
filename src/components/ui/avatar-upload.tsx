@@ -222,7 +222,7 @@ export function AvatarUpload({
                       <Button
                         onClick={handleRemoveImage}
                         size="icon-md"
-                        variant="outline"
+                        variant="destructive"
                         className="transition-opacity shadow-lg rounded-full dark:bg-input"
                         title="Remove avatar"
                         iconOnly={<Trash2 />}

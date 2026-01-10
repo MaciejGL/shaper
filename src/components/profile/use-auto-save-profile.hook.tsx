@@ -62,6 +62,23 @@ export function useAutoSaveProfile() {
     },
   })
 
+  // Avatar update mutation (separate to avoid interfering with debounced saves)
+  const { mutateAsync: updateAvatarMutation } = useUpdateProfileMutation({
+    onSuccess: () => {
+      invalidateQueries({ queryKey: useProfileQuery.getKey({}) })
+      invalidateQueries({ queryKey: useUserBasicQuery.getKey({}) })
+    },
+    onError: () => {
+      // Rollback local state on error
+      if (serverProfile) {
+        setLocalProfile((prev) =>
+          prev ? { ...prev, avatarUrl: serverProfile.avatarUrl } : prev,
+        )
+      }
+      toast.error('Failed to update avatar')
+    },
+  })
+
   // Create debounced save function once and keep it stable
   useEffect(() => {
     debouncedSaveRef.current = debounce(async () => {
@@ -142,9 +159,22 @@ export function useAutoSaveProfile() {
     [localProfile, debouncedSave],
   )
 
+  // Handle avatar changes - update local state immediately, then save
+  const handleAvatarChange = useCallback(
+    async (avatarUrl: string) => {
+      // Update local state immediately for instant UI feedback
+      setLocalProfile((prev) => (prev ? { ...prev, avatarUrl } : prev))
+
+      // Save to backend
+      await updateAvatarMutation({ input: { avatarUrl } })
+    },
+    [updateAvatarMutation],
+  )
+
   return {
     profile: localProfile,
     handleAutoSave: handleChange,
+    handleAvatarChange,
     isProfileLoaded: !!serverProfile,
   }
 }

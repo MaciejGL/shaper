@@ -9,11 +9,9 @@ import { Header } from '@/components/profile/header'
 import { PersonalInfo } from '@/components/profile/personal-info'
 import { PhysicalStats } from '@/components/profile/physical-stats'
 import { useAutoSaveProfile } from '@/components/profile/use-auto-save-profile.hook'
-import { useProfile } from '@/components/profile/use-profile.hook'
 
 export default function ProfilePage() {
-  const { profile, handleAutoSave } = useAutoSaveProfile()
-  const { handleAvatarChange } = useProfile()
+  const { profile, handleAutoSave, handleAvatarChange } = useAutoSaveProfile()
 
   if (!profile) {
     return (
