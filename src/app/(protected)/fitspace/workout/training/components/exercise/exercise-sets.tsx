@@ -315,6 +315,7 @@ export function ExerciseSets({
     (exercise.substitutedBy?.sets?.some((set) => set.isExtra) ||
       exercise.sets.some((set) => set.isExtra)) &&
     exercise.sets.length > 1
+
   return (
     <div className="flex flex-col mx-2 overflow-hidden bg-card rounded-2xl pt-2 shadow-xl dark:shadow-zinc-950  border border-border">
       {/* Table Header */}
@@ -367,7 +368,7 @@ export function ExerciseSets({
             Remove Set
           </Button>
         )}
-        {hasExtraSets && <div className="h-full w-[1px] bg-border" />}
+        {hasExtraSets && <div className="h-full w-px bg-border" />}
         <Button
           variant="ghost"
           size="lg"

@@ -1,10 +1,12 @@
 import { GQLFitspaceGetWorkoutDayQuery } from '@/generated/graphql-client'
 
-type WorkoutExercise = NonNullable<
+export type WorkoutExercise = NonNullable<
   GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
 >['day']['exercises'][number]
 
-type PreviousDayLogs = NonNullable<
+export type ExerciseSet = WorkoutExercise['sets'][number]
+
+export type PreviousDayLogs = NonNullable<
   GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
 >['previousDayLogs']
 
