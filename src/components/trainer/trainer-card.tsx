@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { Card, CardContent, CardProps } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
-import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 
 export interface TrainerData {
@@ -84,9 +83,13 @@ export function TrainerCard({
       <CardContent className="dark min-h-[150px] relative grid grid-cols-[32%_68%] p-0 h-full">
         <div />
         <div className="flex flex-col w-full bg-linear-to-r from-black/0 via-black/70 to-black/50 h-full p-4 rounded-2xl">
-          <Badge variant="primary" className="absolute top-2 right-2 bg-white">
-            Expert
-          </Badge>
+          <div
+            className={cn(
+              'absolute top-0 right-0 bg-white/10 backdrop-blur-sm text-amber-400 font-semibold text-xs py-1.5 px-4 rounded-bl-2xl rounded-tr-2xl',
+            )}
+          >
+            EXPERT
+          </div>
           <p className="text-2xl font-bold text-foreground text-shadow-xs text-shadow-black mt-auto">
             {trainerName}
           </p>

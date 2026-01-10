@@ -197,7 +197,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
     <ExtendHeader
       classNameContent="px-0 pt-0"
       headerChildren={
-        <div className="dark space-y-6 pb-6 pt-4">
+        <div className="dark space-y-6 pb-12 pt-4">
           <TrainerCard
             trainer={trainer}
             variant="secondary"
@@ -218,9 +218,9 @@ function TrainerView({ trainer }: TrainerViewProps) {
         </div>
       }
     >
-      <div className="space-y-6 ">
+      <div className="space-y-6">
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
-          <div className="grid items-center mb-2 gap-2">
+          <div className="grid items-center mb-2 gap-2 -mt-6 relative px-3">
             <PrimaryTabList
               options={[
                 { label: 'From Trainer', value: Tab.FromTrainer },

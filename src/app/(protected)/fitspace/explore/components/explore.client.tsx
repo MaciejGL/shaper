@@ -101,13 +101,17 @@ export function ExploreClient({
   }
 
   return (
-    <ExtendHeader headerChildren={null} classNameContent="px-0 pt-0">
+    <ExtendHeader
+      headerChildren={<div />}
+      classNameHeaderContent="pb-8"
+      classNameContent="px-0 pt-0"
+    >
       <Tabs
         defaultValue={Tab.FreeWorkouts}
         value={params.tab}
         className="w-full"
       >
-        <div className="mb-2">
+        <div className="mb-2 -mt-6 relative px-3">
           <PrimaryTabList
             options={[
               { label: 'Free', value: Tab.FreeWorkouts },
