@@ -79,7 +79,6 @@ export function useSetLogUpdate({
   const debouncedUpdate = useMemo(
     () =>
       debounce(async (repsValue: string, weightValue: string) => {
-        if (!hasUserEditedRef.current) return
         await updateSetLog({
           input: {
             setId,
@@ -92,6 +91,11 @@ export function useSetLogUpdate({
   )
 
   useEffect(() => {
+    if (!hasUserEditedRef.current) {
+      debouncedUpdate.cancel()
+      return
+    }
+
     debouncedUpdate(reps, weight)
     return () => debouncedUpdate.cancel()
   }, [reps, weight, debouncedUpdate])
