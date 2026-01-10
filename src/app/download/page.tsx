@@ -16,6 +16,32 @@ function detectDevice(userAgent: string): DeviceType {
   return 'desktop'
 }
 
+function shouldTrackDownloadVisit(headersList: Headers, userAgent: string) {
+  const ua = userAgent.toLowerCase()
+
+  // Skip bots and link previews
+  if (
+    /(bot|spider|crawl|slackbot|discordbot|twitterbot|facebookexternalhit|whatsapp|telegram|linkedinbot|applebot)/i.test(
+      ua,
+    )
+  ) {
+    return false
+  }
+
+  // Skip prefetch requests
+  const purpose = headersList.get('purpose')?.toLowerCase()
+  const secPurpose = headersList.get('sec-purpose')?.toLowerCase()
+  if (purpose === 'prefetch' || secPurpose === 'prefetch') return false
+  if (headersList.get('next-router-prefetch')) return false
+  if (headersList.get('x-middleware-prefetch')) return false
+
+  // Skip non-navigation fetches when the browser tells us this isn't a navigation
+  const secFetchMode = headersList.get('sec-fetch-mode')?.toLowerCase()
+  if (secFetchMode && secFetchMode !== 'navigate') return false
+
+  return true
+}
+
 function trackDownloadVisit({
   ref,
   referer,
@@ -55,39 +81,46 @@ export default async function DownloadPage({
   const referer = headersList.get('referer') ?? null
 
   const device = detectDevice(userAgent)
+  const shouldTrack = shouldTrackDownloadVisit(headersList, userAgent)
 
   // iOS -> App Store
   if (device === 'ios') {
-    trackDownloadVisit({
-      ref,
-      referer,
-      device,
-      userAgent,
-      redirectedTo: 'app_store',
-    })
+    if (shouldTrack) {
+      trackDownloadVisit({
+        ref,
+        referer,
+        device,
+        userAgent,
+        redirectedTo: 'app_store',
+      })
+    }
     redirect(MOBILE_STORE_LINKS.ios.url)
   }
 
   // Android -> Google Play
   if (device === 'android') {
+    if (shouldTrack) {
+      trackDownloadVisit({
+        ref,
+        referer,
+        device,
+        userAgent,
+        redirectedTo: 'google_play',
+      })
+    }
+    redirect(MOBILE_STORE_LINKS.android.url)
+  }
+
+  // Desktop/unknown - track and show fallback UI
+  if (shouldTrack) {
     trackDownloadVisit({
       ref,
       referer,
       device,
       userAgent,
-      redirectedTo: 'google_play',
+      redirectedTo: null,
     })
-    redirect(MOBILE_STORE_LINKS.android.url)
   }
-
-  // Desktop/unknown - track and show fallback UI
-  trackDownloadVisit({
-    ref,
-    referer,
-    device,
-    userAgent,
-    redirectedTo: null,
-  })
 
   return (
     <div className="dark flex min-h-screen w-screen flex-col items-center justify-center bg-background px-6">

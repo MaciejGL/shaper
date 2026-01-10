@@ -146,7 +146,7 @@ export function WorkoutPageSkeleton() {
   return (
     <ExtendHeader
       headerChildren={<SkeletonNavigation />}
-      classNameHeader="pt-2 px-4"
+      classNameHeaderContent="pt-2 px-2"
       classNameContent="p-0"
     >
       <SkeletonExercises />
