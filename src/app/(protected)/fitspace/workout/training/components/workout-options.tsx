@@ -39,11 +39,11 @@ export function WorkoutOptionsDropdown() {
           size="md"
           iconEnd={<ChevronDownIcon className="size-4" />}
         >
-          Workout Settings
+          Settings
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Workout Settings</DropdownMenuLabel>
+        <DropdownMenuLabel>Settings</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={(e) => {
