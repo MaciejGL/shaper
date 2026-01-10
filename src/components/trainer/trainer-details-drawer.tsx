@@ -6,7 +6,6 @@ import {
   BicepsFlexed,
   BookOpenCheck,
   FlameIcon,
-  Mail,
   Sparkles,
   XCircle,
 } from 'lucide-react'
@@ -162,9 +161,8 @@ export function TrainerDetailsDrawer({
     !!onWithdrawRequest
 
   const showStickyFooter =
-    showRequestCoaching &&
     !requestSent &&
-    (canShowPrimaryRequest || canShowWithdraw)
+    (showRequestCoaching || showCompleteSurvey || showRetakeAssessment)
 
   return (
     <Drawer
@@ -176,8 +174,8 @@ export function TrainerDetailsDrawer({
         dialogTitle={`${trainerName} - Trainer Details`}
         grabberAbsolute
       >
-        <div className="flex flex-col h-full pb-10">
-          <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0 space-y-8">
+        <div className="flex flex-col h-full">
+          <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0 pb-20 space-y-8">
             {/* Trainer Card Header */}
             <div className="-mx-4">
               <TrainerCard
@@ -192,73 +190,24 @@ export function TrainerDetailsDrawer({
             )}
 
             {showRequestCoaching && !requestSent && (
-              <div className="rounded-xl border border-border bg-card-on-card/10 dark:bg-card p-4 space-y-3 shadow-md">
+              <div className="rounded-xl border border-border bg-card-on-card/10 dark:bg-card p-4 shadow-md">
                 <div className="space-y-1">
                   <h3 className="font-semibold text-lg">Coaching</h3>
-                  {hasRequestedTrainer && (
-                    <p className="text-sm text-muted-foreground">
-                      {trainer.isAtCapacity ? (
-                        <>
-                          {trainerName} is currently at full capacity and not
-                          accepting new clients.
-                        </>
-                      ) : (
-                        <>
-                          Send a coaching request to {trainerName}. You'll be
-                          contacted to discuss your goals and options.
-                        </>
-                      )}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  {/* Request Coaching CTA after bio */}
-                  {canShowPrimaryRequest && !trainer.isAtCapacity && (
-                    <Button
-                      onClick={handleRequestCoaching}
-                      disabled={isRequestingCoaching}
-                      className="w-full"
-                      size="lg"
-                      loading={isRequestingCoaching}
-                      iconStart={<BicepsFlexed />}
-                    >
-                      Request Coaching
-                    </Button>
-                  )}
-                  {showCompleteSurvey && onCompleteSurvey && (
-                    <Button
-                      onClick={onCompleteSurvey}
-                      className="w-full"
-                      size="md"
-                      variant="default"
-                      iconStart={<Sparkles />}
-                    >
-                      Complete Fitness Assessment
-                    </Button>
-                  )}
-
-                  {showRetakeAssessment && onRetakeAssessment && (
-                    <Button
-                      onClick={onRetakeAssessment}
-                      className="w-full"
-                      size="md"
-                      variant="outline"
-                      iconStart={<Sparkles />}
-                    >
-                      Retake Assessment
-                    </Button>
-                  )}
-
-                  <Button
-                    onClick={() => setShowCoachingInfo(true)}
-                    variant="outline"
-                    // size="variantless"
-                    className="w-full justify-center text-sm"
-                    iconStart={<BookOpenCheck />}
-                  >
-                    Learn How Coaching Works
-                  </Button>
+                  <p className="text-sm leading-relaxed">
+                    {trainer.isAtCapacity ? (
+                      <>
+                        {trainerName} is currently at full capacity and not
+                        accepting new clients.
+                      </>
+                    ) : (
+                      <>
+                        Send a request and {trainerName} will reach out for a{' '}
+                        <span className="font-semibold">free assessment</span>{' '}
+                        to understand your goals. Based on your needs, you'll
+                        receive a personalized coaching offer.
+                      </>
+                    )}
+                  </p>
                 </div>
               </div>
             )}
@@ -289,20 +238,6 @@ export function TrainerDetailsDrawer({
             {/* Bio */}
             {trainer.profile?.bio && (
               <ExpandableBio bio={trainer.profile.bio} />
-            )}
-
-            {/* Request Coaching CTA after bio */}
-            {canShowPrimaryRequest && !trainer.isAtCapacity && (
-              <Button
-                onClick={handleRequestCoaching}
-                disabled={isRequestingCoaching}
-                className="w-full"
-                size="lg"
-                loading={isRequestingCoaching}
-                iconStart={<BicepsFlexed />}
-              >
-                Request Coaching
-              </Button>
             )}
 
             {/* Credentials / Certificates */}
@@ -343,7 +278,7 @@ export function TrainerDetailsDrawer({
           </div>
 
           {showStickyFooter && (
-            <DrawerFooter className="border-t bg-card/95 backdrop-blur-sm pb-4 pt-3">
+            <DrawerFooter className="border-t border-border">
               {canShowWithdraw ? (
                 <Button
                   onClick={onWithdrawRequest}
@@ -356,20 +291,57 @@ export function TrainerDetailsDrawer({
                 >
                   Withdraw Request
                 </Button>
-              ) : (
+              ) : canShowPrimaryRequest && !trainer.isAtCapacity ? (
                 <Button
                   onClick={handleRequestCoaching}
-                  disabled={isRequestingCoaching || !!trainer.isAtCapacity}
+                  disabled={isRequestingCoaching}
+                  className="w-full"
+                  size="lg"
+                  loading={isRequestingCoaching}
+                  iconStart={<BicepsFlexed />}
+                >
+                  Request Coaching
+                </Button>
+              ) : trainer.isAtCapacity ? (
+                <Button
+                  disabled
                   className="w-full"
                   size="md"
-                  loading={isRequestingCoaching}
-                  iconStart={trainer.isAtCapacity ? <FlameIcon /> : <Mail />}
+                  iconStart={<FlameIcon />}
                 >
-                  {trainer.isAtCapacity
-                    ? 'Trainer at Capacity'
-                    : 'Request Coaching'}
+                  Trainer at Capacity
                 </Button>
-              )}
+              ) : null}
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowCoachingInfo(true)}
+                  variant="outline"
+                  size="md"
+                >
+                  More Info
+                </Button>
+                {showCompleteSurvey && onCompleteSurvey && (
+                  <Button
+                    onClick={onCompleteSurvey}
+                    className="flex-1"
+                    size="md"
+                    variant="outline"
+                  >
+                    Start Assessment
+                  </Button>
+                )}
+                {showRetakeAssessment && onRetakeAssessment && (
+                  <Button
+                    onClick={onRetakeAssessment}
+                    className="flex-1"
+                    size="md"
+                    variant="outline"
+                  >
+                    Retake Assessment
+                  </Button>
+                )}
+              </div>
             </DrawerFooter>
           )}
         </div>
