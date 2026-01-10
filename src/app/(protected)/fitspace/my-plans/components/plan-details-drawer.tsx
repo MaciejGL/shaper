@@ -92,8 +92,6 @@ export function PlanDetailsDrawer({
     'createdBy' in plan ? plan.createdBy : null,
   )
 
-  console.log('isActive', isActive)
-  console.log('plan', plan)
   return (
     <>
       <Drawer open={open} onOpenChange={onClose}>
