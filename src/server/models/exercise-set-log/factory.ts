@@ -560,7 +560,30 @@ const saveExercisePR = async (
 
   const currentBest = currentBestPRs[0]?.maxEstimated1RM || 0
 
+  // First time logging this exercise - save as baseline PR
   if (currentBest <= 0) {
+    if (existingDayPR) {
+      await prisma.personalRecord.update({
+        where: { id: existingDayPR.id },
+        data: {
+          estimated1RM: best1RM,
+          weight: bestWeight,
+          reps: bestReps,
+          achievedAt: new Date(),
+        },
+      })
+    } else {
+      await prisma.personalRecord.create({
+        data: {
+          userId,
+          baseExerciseId,
+          dayId,
+          estimated1RM: best1RM,
+          weight: bestWeight,
+          reps: bestReps,
+        },
+      })
+    }
     return
   }
 

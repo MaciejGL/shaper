@@ -56,11 +56,7 @@ export function TrainerCard({
     const years =
       new Date().getFullYear() -
       new Date(trainer.profile.trainerSince).getFullYear()
-    return years === 0
-      ? '<1y'
-      : years === 1
-        ? '1 year exp'
-        : `${years} years exp`
+    return years === 0 ? '<1y' : years === 1 ? '1y exp' : `${years}y exp`
   }
 
   const backgroundImageUrl = trainer.profile?.trainerCardBackgroundUrl
@@ -68,7 +64,7 @@ export function TrainerCard({
 
   return (
     <Card
-      className={cn('p-0 aspect-video', className)}
+      className={cn('p-0 aspect-video relative', className)}
       variant={variant}
       onClick={onClick}
     >
@@ -84,10 +80,11 @@ export function TrainerCard({
           sizes="500px"
         />
       )}
+
       <CardContent className="dark min-h-[150px] relative grid grid-cols-[32%_68%] p-0 h-full">
         <div />
         <div className="flex flex-col w-full bg-linear-to-r from-black/0 via-black/70 to-black/50 h-full p-4 rounded-2xl">
-          <Badge variant="primary" className="ml-auto bg-white">
+          <Badge variant="primary" className="absolute top-2 right-2 bg-white">
             Expert
           </Badge>
           <p className="text-2xl font-bold text-foreground text-shadow-xs text-shadow-black mt-auto">
@@ -96,29 +93,19 @@ export function TrainerCard({
           {(() => {
             const specializations =
               trainer.profile?.specialization?.slice(0, 2) ?? []
-            const hasLongSpecialization = specializations.some(
-              (s) => s.length > 15,
-            )
 
             return (
-              <div
-                className={cn(
-                  'text-sm text-foreground font-semibold flex gap-1',
-                  hasLongSpecialization ? 'flex-col' : 'flex-wrap',
-                )}
-              >
-                {specializations.map((specialization, index, array) => (
-                  <div
-                    key={specialization}
-                    className="flex items-center gap-1 text-shadow-xs text-shadow-black"
+              <p className="text-sm text-foreground font-semibold">
+                {specializations.map((specialization, index) => (
+                  <span
+                    key={`${specialization}-${index}`}
+                    className="text-shadow-xs text-shadow-black"
                   >
-                    <span>{specialization}</span>
-                    {!hasLongSpecialization && index < array.length - 1 && (
-                      <span>•</span>
-                    )}
-                  </div>
+                    {index > 0 ? '\u00A0•\u00A0' : null}
+                    {specialization}
+                  </span>
                 ))}
-              </div>
+              </p>
             )
           })()}
           <div className="mb-4 mt-3 text-shadow-xs text-shadow-black text-foreground font-semibold text-sm flex items-center gap-2">

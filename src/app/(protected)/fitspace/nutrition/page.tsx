@@ -117,7 +117,8 @@ export default function NutritionPage() {
 
   return (
     <ExtendHeader
-      classNameHeaderWrapper="w-full"
+      classNameHeaderWrapper="w-full rounded-b-none"
+      classNameHeaderContent="rounded-b-none"
       headerChildren={
         <div className="dark space-y-4 pt-4 w-full">
           {!isLoadingAll ? (

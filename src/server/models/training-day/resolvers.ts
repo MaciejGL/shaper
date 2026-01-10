@@ -56,8 +56,15 @@ const detectWorkoutPRs = async (dayId: string, userId: string) => {
       excludeDayId: dayId,
     })
 
-    // Skip if no previous best (first time logging)
+    // First time logging this exercise - show as baseline PR
     if (prevBest <= 0) {
+      newPRs.push({
+        exerciseName: current.exercisename,
+        estimated1RM: current.max1rm,
+        weight: current.maxweight,
+        reps: current.maxreps,
+        improvement: 0,
+      })
       continue
     }
 
