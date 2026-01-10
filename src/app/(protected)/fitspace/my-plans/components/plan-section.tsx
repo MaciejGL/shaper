@@ -165,7 +165,7 @@ export function PlanSection({
       <AnimatePresence mode="wait">
         <LayoutGroup id="plan-section" key={`plan-section-`}>
           {!isExpanded ? (
-            <div>
+            <div className="overflow-x-hidden -mx-4 px-4">
               <Carousel
                 opts={{
                   align: 'start',
