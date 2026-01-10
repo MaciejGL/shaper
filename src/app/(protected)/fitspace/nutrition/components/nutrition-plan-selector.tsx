@@ -65,7 +65,7 @@ export function NutritionPlanSelector({
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 my-4">
         <div className="h-auto bg-card rounded-2xl">
           <p className="opacity-0 p-4 masked-placeholder-text">
             Loading nutrition plans...
@@ -77,7 +77,7 @@ export function NutritionPlanSelector({
 
   if (sortedPlans.length === 0) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 my-4">
         <div className="h-auto bg-muted/30 rounded-2xl flex items-center p-4">
           <span className="text-sm text-muted-foreground">
             Your trainer has not shared any nutrition plans with you yet

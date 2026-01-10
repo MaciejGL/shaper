@@ -123,7 +123,7 @@ export default function NutritionPage() {
               nutritionPlan={nutritionPlanData?.nutritionPlan}
             />
           ) : (
-            <Skeleton className="h-[72px] rounded-2xl" />
+            <Skeleton className="h-[72px] rounded-2xl mb-4" />
           )}
 
           {days.length > 0 && (
@@ -134,7 +134,7 @@ export default function NutritionPage() {
             />
           )}
           {isNutritionPlanLoading && selectedPlanId && (
-            <Skeleton className="h-10 w-full rounded-xl" />
+            <Skeleton className="h-10 w-full rounded-xl mb-4" />
           )}
         </div>
       }
@@ -144,7 +144,7 @@ export default function NutritionPage() {
         {showEmptyState && (
           <div className="px-4">
             <EmptyStateCard
-              title="Macro targets not set"
+              title="Request Macro Targets and Nutrition Plan"
               description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
               icon={Salad}
               cta={
