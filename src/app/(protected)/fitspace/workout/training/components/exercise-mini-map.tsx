@@ -48,7 +48,7 @@ function ExpandedExerciseListItem({
           : 'bg-card/90 hover:bg-card/98 border-white/5',
       )}
     >
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         {isCompleted ? (
           <div className="size-6 rounded-full bg-green-600 dark:bg-green-500 flex-center shadow-lg shadow-green-500/20">
             <Check className="size-4 text-white" />
@@ -301,11 +301,11 @@ export function WorkoutSmartPill({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[38] bg-gradient-to-t from-black/60 via-black/70 to-transparent pointer-events-none backdrop-blur-xs"
+              className="fixed inset-0 z-38 bg-linear-to-t from-black/60 via-black/70 to-transparent pointer-events-none backdrop-blur-xs"
             />
             {/* Clickable area to close */}
             <div
-              className="fixed inset-0 z-[39]"
+              className="fixed inset-0 z-39"
               onClick={() => setIsExpanded(false)}
             />
           </>
@@ -319,7 +319,7 @@ export function WorkoutSmartPill({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed bottom-18 left-0 z-[40] flex justify-center pointer-events-none"
+            className="fixed bottom-18 left-0 z-40 flex justify-center pointer-events-none"
           >
             <SmartPillContent
               progressPercentage={progressPercentage}
@@ -344,7 +344,7 @@ export function WorkoutSmartPill({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-32 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+            className="fixed bottom-32 left-4 right-4 z-45 max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
           >
             {exercises.map((exercise, i) => (
               <motion.div
@@ -432,7 +432,7 @@ export function WorkoutOverviewPill({
 
   return (
     <>
-      <div ref={ref} className="relative h-[56px] z-[35]">
+      <div ref={ref} className="relative h-[56px] z-35">
         {!isExpanded && (
           <div className="relative w-full">
             <SmartPillContent
@@ -463,16 +463,16 @@ export function WorkoutOverviewPill({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[38] bg-gradient-to-b from-black/60 via-black/70 to-transparent pointer-events-none backdrop-blur-xs"
+              className="fixed inset-0 z-38 bg-linear-to-b from-black/60 via-black/70 to-transparent pointer-events-none backdrop-blur-xs"
             />
             {/* Clickable area to close */}
             <div
-              className="fixed inset-0 z-[39]"
+              className="fixed inset-0 z-39"
               onClick={() => setIsExpanded(false)}
             />
 
             {/* The Expanded Pill - Rendered at root level for correct stacking */}
-            <div className="fixed top-2 left-0 right-0 px-2 z-[45] pointer-events-none flex justify-center">
+            <div className="fixed top-2 left-0 right-0 px-2 z-45 pointer-events-none flex justify-center">
               <SmartPillContent
                 progressPercentage={progressPercentage}
                 completedCount={completedCount}
@@ -493,7 +493,7 @@ export function WorkoutOverviewPill({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="fixed top-18 left-4 right-4 z-[45] max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+              className="fixed top-18 left-4 right-4 z-45 max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
             >
               {exercises.map((exercise, i) => (
                 <motion.div
