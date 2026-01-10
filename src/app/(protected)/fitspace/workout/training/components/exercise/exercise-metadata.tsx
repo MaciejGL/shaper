@@ -165,7 +165,7 @@ export function ExerciseMetadata({
     <div
       className={cn(
         'border-t border-border overflow-hidden',
-        hasImagesToShow && 'border-none',
+        hasImagesToShow && 'border-none px-0',
       )}
     >
       {hasImagesToShow && (
@@ -175,9 +175,9 @@ export function ExerciseMetadata({
             dragFree: true,
             active: exercise.images.length > 2,
           }}
-          className="max-w-md md:w-[calc(100%+2rem)] bg-black py-2 space-y-3 rounded-2xl"
+          className="max-w-md md:w-[calc(100%+2rem)] bg-black py-1 space-y-3 shadow-md"
         >
-          <CarouselContent className="ml-0 pr-2">
+          <CarouselContent className="ml-0 pr-1">
             {exercise.images.map((image, imageIndex) => {
               const src = image.medium || image.url
               if (!src) return null
@@ -186,7 +186,7 @@ export function ExerciseMetadata({
 
               return (
                 <CarouselItem key={image.id} className="basis-1/2 px-0">
-                  <div className="relative overflow-hidden aspect-square rounded-lg ml-2">
+                  <div className="relative overflow-hidden aspect-square rounded-lg ml-1">
                     <Image
                       src={src}
                       alt={exercise.name}

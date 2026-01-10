@@ -100,7 +100,7 @@
 }
 
 .dark {
-  --background: oklch(0.18 0.006 285.885);
+  --background: oklch(0.19 0.006 285.885);
   /* --background: oklch(0.19 0.006 285.885); */
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.223 0.006 286.033);
@@ -138,7 +138,7 @@
 
   /* Custom colors */
 
-  --background-subtle: oklch(0.16 0.006 285.885);
+  --background-subtle: oklch(0.20 0.006 285.885);
   --shadow-neuro-dark:
     1px 1px 2px #0e0e0e, -0.5px -0.5px 0.5px rgb(255 255 255 / 12%);
   --shadow-neuro-dark-inset:
