@@ -4,7 +4,7 @@ import { AnimatedLogoText } from '@/components/animated-logo'
 
 export function HomepageFooter() {
   return (
-    <footer className="bg-card">
+    <footer className="dark bg-card">
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
@@ -12,8 +12,8 @@ export function HomepageFooter() {
           <div className="space-y-4">
             <AnimatedLogoText className="text-2xl text-foreground" />
             <p className="text-muted-foreground text-sm max-w-sm">
-              Your personal fitness coach. Professional training guidance in
-              your pocket.
+              Structured workouts and simple tracking, backed by elite personal
+              trainers.
             </p>
           </div>
 

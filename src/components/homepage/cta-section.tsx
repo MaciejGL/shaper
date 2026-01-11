@@ -17,10 +17,11 @@ export function CtaSection() {
           className="text-center bg-card rounded-2xl p-8 md:p-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-foreground">
-            Time to Make Some Gains?
+            Start Your Next Workout
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Jump in and start crushing your workouts with us
+            Structured plans, fast logging, and coaching that keeps you on
+            track.
           </p>
           <ButtonLink
             href="/login"
@@ -30,7 +31,7 @@ export function CtaSection() {
               analyticsEvents.authLandingCtaClick({ cta: 'cta_section' })
             }}
           >
-            Let's Go
+            Start Training
           </ButtonLink>
         </motion.div>
       </div>

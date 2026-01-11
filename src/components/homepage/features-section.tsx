@@ -3,6 +3,8 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 
+import { cn } from '@/lib/utils'
+
 interface Feature {
   title: string
   description: string
@@ -12,87 +14,87 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    title: 'Track Every Rep',
+    title: 'Structured Workouts',
     description:
-      'Log workouts in real-time with intuitive tracking. Sets, reps, weight, and RPE - all at your fingertips',
-    imagePath: '/homepage/workout-tracking.png',
-    imageAlt:
-      'Workout tracking interface showing exercise list and set logging',
+      'Stop guessing what to do. Follow structured workouts built around progressive overload. Log sets, reps and weight in seconds with an interface designed for serious lifters.',
+    imagePath: '/homepage/workout.png',
+    imageAlt: 'Workout view showing a structured training session',
   },
   {
-    title: 'Watch Your Progress',
+    title: 'IFBB Pro Personal Trainers',
     description:
-      'Visualize your strength gains, consistency, and body transformation with detailed analytics',
-    imagePath: '/homepage/progress-analytics.png',
-    imageAlt: 'Progress analytics dashboard with charts and workout heatmap',
+      'Train with IFBB Pro coaches and experienced personal trainers. Get plans that match your goal and training level, and message your coach directly for form checks and advice.',
+    imagePath: '/homepage/trainers.png',
+    imageAlt: 'Personal trainers and coaching support for structured workouts',
   },
-  // {
-  //   title: 'Follow Expert Plans',
-  //   description:
-  //     'Get personalized training programs from professional coaches, updated based on your progress',
-  //   imagePath: '/homepage/training-plans.png',
-  //   imageAlt: 'Training plan view with weekly schedule and exercises',
-  // },
-  // {
-  //   title: 'Stay Connected',
-  //   description:
-  //     'Message your trainer anytime for form checks, adjustments, and motivation',
-  //   imagePath: '/homepage/trainer-messages.png',
-  //   imageAlt: 'Messaging interface with trainer conversation',
-  // },
+  {
+    title: 'Smart Guidance',
+    description:
+      'Track your activity and muscle volume over time. Every exercise comes with video demos, step-by-step instructions, and pro tips to help you nail your form and maximize gains.',
+    imagePath: '/homepage/guidence.png',
+    imageAlt:
+      'Exercise guidance showing video instructions, muscle tracking, and training tips',
+  },
 ]
 
 export function FeaturesSection() {
   return (
-    <section className="py-24 px-4 bg-card/50">
+    <section id="features" className="py-24 px-4 bg-background">
       <div className="container mx-auto max-w-7xl">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-foreground">
-            Everything You Need to Succeed
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Professional tools that make fitness tracking effortless and
-            effective
-          </p>
-        </motion.div>
-
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
+        <div className="flex flex-col gap-24 lg:gap-32">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="flex flex-col"
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8 }}
+              className={cn(
+                'grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center',
+                index % 2 === 1 && 'lg:grid-flow-dense',
+              )}
             >
+              {/* Text Content */}
+              <div
+                className={cn(
+                  'flex flex-col gap-6 text-center lg:text-left',
+                  index % 2 === 1 && 'lg:col-start-2',
+                )}
+              >
+                <div className="inline-flex items-center justify-center lg:justify-start gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                    0{index + 1}
+                  </span>
+                  <span className="text-sm font-medium text-primary uppercase tracking-wider">
+                    {feature.title}
+                  </span>
+                </div>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
+                  {feature.title === 'Structured Workouts'
+                    ? 'Track Progress, Not Just Workouts'
+                    : feature.title === 'IFBB Pro Personal Trainers'
+                      ? 'Expert Coaching in Your Pocket'
+                      : 'Every Rep, Perfected'}
+                </h2>
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-md mx-auto lg:mx-0">
+                  {feature.description}
+                </p>
+              </div>
+
               {/* Feature Image */}
-              <div className="relative aspect-[9/17] w-full max-w-sm mx-auto mb-6 rounded-2xl overflow-hidden">
+              <div
+                className={cn(
+                  'relative aspect-4/5 w-full max-w-xl mx-auto',
+                  index % 2 === 1 && 'lg:col-start-1',
+                )}
+              >
                 <Image
                   src={feature.imagePath}
                   alt={feature.imageAlt}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
-              </div>
-
-              {/* Feature Content */}
-              <div className="text-center">
-                <h3 className="text-2xl font-semibold mb-3 text-foreground">
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </p>
               </div>
             </motion.div>
           ))}

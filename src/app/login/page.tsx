@@ -49,11 +49,15 @@ export default async function RequestOtpPage({
   }
 
   return (
-    <div className="flex flex-col items-center h-full bg-zinc-950 px-4 pb-12">
+    <div className="flex flex-col items-center h-full bg-background px-4 pb-12">
       <Link href="/" className="py-14">
         <div className="flex flex-col items-center gap-2">
-          <AnimatedLogo size={80} infinite={false} forceColor="text-white" />
-          <AnimatedLogoText className="text-xl text-white" />
+          <AnimatedLogo
+            size={80}
+            infinite={false}
+            forceColor="text-foreground"
+          />
+          <AnimatedLogoText className="text-xl text-foreground" />
         </div>
       </Link>
       <div className="flex flex-col gap-4 w-full max-w-md">
@@ -61,13 +65,19 @@ export default async function RequestOtpPage({
           <EmailChangeSuccess />
         </Suspense>
         <LoginCard />
-        <p className="text-center text-xs text-zinc-500 px-4">
+        <p className="text-center text-xs text-muted-foreground px-4">
           By continuing, you agree to our{' '}
-          <Link href="/terms" className="text-zinc-400 underline hover:text-white">
+          <Link
+            href="/terms"
+            className="text-muted-foreground underline hover:text-foreground"
+          >
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link href="/privacy" className="text-zinc-400 underline hover:text-white">
+          <Link
+            href="/privacy"
+            className="text-muted-foreground underline hover:text-foreground"
+          >
             Privacy Policy
           </Link>
         </p>
