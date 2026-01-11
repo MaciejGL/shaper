@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 
 import { ButtonLink } from '@/components/ui/button-link'
+import { analyticsEvents } from '@/lib/analytics-events'
 
 export function CtaSection() {
   return (
@@ -25,6 +26,9 @@ export function CtaSection() {
             href="/login"
             size="xl"
             className="w-full sm:w-auto text-lg px-12"
+            onClick={() => {
+              analyticsEvents.authLandingCtaClick({ cta: 'cta_section' })
+            }}
           >
             Let's Go
           </ButtonLink>

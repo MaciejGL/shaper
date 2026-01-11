@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider, { GoogleProfile } from 'next-auth/providers/google'
 
 import { prisma } from '@/lib/db'
+import { captureServerEvent, captureServerException, ServerEvent } from '@/lib/posthog-server'
 import { UserFull } from '@/types/UserWithSession'
 
 import { createUserLoaders } from '../loaders/user.loader'
@@ -43,29 +44,53 @@ export const authOptions = {
       name: 'OTP',
       credentials: { email: {}, otp: {} },
       async authorize(credentials) {
-        const { email, otp } = credentials ?? {}
-        if (!email || !otp) return null
+        try {
+          const { email, otp } = credentials ?? {}
+          if (!email || !otp) return null
 
-        const loaders = createUserLoaders()
-        const user = await loaders.authSession.load(email)
+          const loaders = createUserLoaders()
+          const user = await loaders.authSession.load(email)
 
-        if (!user || user.sessions.length === 0) return null
+          if (!user || user.sessions.length === 0) return null
 
-        const session = user.sessions[0] // Most recent session (ordered by 'desc')
+          const session = user.sessions[0] // Most recent session (ordered by 'desc')
 
-        if (session.otp !== otp) {
-          return null // Invalid OTP
-        }
+          if (session.otp !== otp) {
+            captureServerEvent({
+              distinctId: user.id,
+              event: ServerEvent.AUTH_OTP_VERIFY_ERROR,
+              properties: { reason: 'invalid_otp' },
+            })
+            return null // Invalid OTP
+          }
 
-        if (new Date(session.expiresAt) < new Date()) {
-          // Clean up expired session
+          if (new Date(session.expiresAt) < new Date()) {
+            // Clean up expired session
+            await prisma.userSession.delete({ where: { id: session.id } })
+            captureServerEvent({
+              distinctId: user.id,
+              event: ServerEvent.AUTH_OTP_VERIFY_ERROR,
+              properties: { reason: 'expired' },
+            })
+            return null // Session expired
+          }
+
           await prisma.userSession.delete({ where: { id: session.id } })
-          return null // Session expired
+
+          captureServerEvent({
+            distinctId: user.id,
+            event: ServerEvent.AUTH_OTP_VERIFY_SUCCESS,
+          })
+
+          return user as UserFull
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error('OTP authorize error')
+          captureServerException(err, undefined, {
+            provider: 'otp',
+            reason: 'authorize_error',
+          })
+          return null
         }
-
-        await prisma.userSession.delete({ where: { id: session.id } })
-
-        return user as UserFull
       },
     }),
     CredentialsProvider({

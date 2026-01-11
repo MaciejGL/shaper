@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 
 import { ButtonLink } from '@/components/ui/button-link'
+import { analyticsEvents } from '@/lib/analytics-events'
 
 export function HeroSection() {
   return (
@@ -41,7 +42,14 @@ export function HeroSection() {
               Track workouts, follow personalized plans, and achieve your goals
               with top-tier trainers
             </p>
-            <ButtonLink href="/login" size="xl" className="w-full sm:w-auto">
+            <ButtonLink
+              href="/login"
+              size="xl"
+              className="w-full sm:w-auto"
+              onClick={() => {
+                analyticsEvents.authLandingCtaClick({ cta: 'hero' })
+              }}
+            >
               Start Training Free
             </ButtonLink>
           </motion.div>

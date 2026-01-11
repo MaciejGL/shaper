@@ -15,6 +15,13 @@ export const ANALYTICS_EVENTS = {
   TODAY_EMPTY_QUICK_WORKOUT_TAP: 'today_empty_quick_workout_tap',
   TODAY_EMPTY_BUILD_OWN_TAP: 'today_empty_build_own_tap',
   TODAY_EMPTY_MY_PLANS_TAP: 'today_empty_my_plans_tap',
+
+  // Auth / signup funnel
+  AUTH_LANDING_CTA_CLICK: 'auth_landing_cta_click',
+  AUTH_OAUTH_CLICK: 'auth_oauth_click',
+  AUTH_OTP_REQUEST_ERROR: 'auth_otp_request_error',
+  AUTH_OTP_VERIFY_SUCCESS: 'auth_otp_verify_success',
+  AUTH_OTP_VERIFY_ERROR: 'auth_otp_verify_error',
 } as const
 
 export type AnalyticsEventName =
@@ -27,6 +34,26 @@ export type AnalyticsEventName =
 type TodayEmptyStateEventProperties = Record<string, unknown> & {
   day_of_week: number
   has_custom_plans: boolean
+}
+
+type AuthLandingCta = 'hero' | 'cta_section'
+type AuthOauthProvider = 'google' | 'apple'
+
+type AuthLandingCtaClickProperties = Record<string, unknown> & {
+  cta: AuthLandingCta
+}
+
+type AuthOauthClickProperties = Record<string, unknown> & {
+  provider: AuthOauthProvider
+}
+
+type AuthOtpRequestErrorProperties = Record<string, unknown> & {
+  email_domain: string | null
+  reason: 'network' | 'validation' | 'unknown'
+}
+
+type AuthOtpVerifyErrorProperties = Record<string, unknown> & {
+  reason: 'invalid_otp' | 'expired' | 'no_session' | 'missing_credentials'
 }
 
 // ============================================================================
@@ -60,5 +87,25 @@ export const analyticsEvents = {
    */
   todayEmptyMyPlansTap: (properties: TodayEmptyStateEventProperties) => {
     captureEvent(ANALYTICS_EVENTS.TODAY_EMPTY_MY_PLANS_TAP, properties)
+  },
+
+  authLandingCtaClick: (properties: AuthLandingCtaClickProperties) => {
+    captureEvent(ANALYTICS_EVENTS.AUTH_LANDING_CTA_CLICK, properties)
+  },
+
+  authOauthClick: (properties: AuthOauthClickProperties) => {
+    captureEvent(ANALYTICS_EVENTS.AUTH_OAUTH_CLICK, properties)
+  },
+
+  authOtpRequestError: (properties: AuthOtpRequestErrorProperties) => {
+    captureEvent(ANALYTICS_EVENTS.AUTH_OTP_REQUEST_ERROR, properties)
+  },
+
+  authOtpVerifySuccess: () => {
+    captureEvent(ANALYTICS_EVENTS.AUTH_OTP_VERIFY_SUCCESS)
+  },
+
+  authOtpVerifyError: (properties: AuthOtpVerifyErrorProperties) => {
+    captureEvent(ANALYTICS_EVENTS.AUTH_OTP_VERIFY_ERROR, properties)
   },
 }

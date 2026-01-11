@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { analyticsEvents } from '@/lib/analytics-events'
 
 interface AppleLoginButtonProps {
   className?: string
@@ -18,6 +19,7 @@ export const AppleLoginButton = ({
 
   const handleAppleLogin = async () => {
     try {
+      analyticsEvents.authOauthClick({ provider: 'apple' })
       setIsLoading(true)
       await signIn('apple', {
         callbackUrl: `${window.location.origin}/fitspace/workout`,

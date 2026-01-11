@@ -1,6 +1,7 @@
 import { signIn } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
 
+import { analyticsEvents } from '@/lib/analytics-events'
 import { emailValidation } from '@/utils/validation'
 
 export const useLoginForm = () => {
@@ -34,7 +35,15 @@ export const useLoginForm = () => {
   }, [leftTime])
 
   const handleSendOtp = async () => {
-    if (!emailValidation(email)) return
+    const emailDomain = email.split('@')[1]?.trim().toLowerCase() || null
+
+    if (!emailValidation(email)) {
+      analyticsEvents.authOtpRequestError({
+        email_domain: emailDomain,
+        reason: 'validation',
+      })
+      return
+    }
 
     setIsResending(true)
     setOtp('')
@@ -47,6 +56,10 @@ export const useLoginForm = () => {
       setLeftTime(30)
       setShowOtp(true)
     } catch (error) {
+      analyticsEvents.authOtpRequestError({
+        email_domain: emailDomain,
+        reason: 'network',
+      })
       setErrorMessage('Failed to send OTP')
       console.error(error)
     } finally {

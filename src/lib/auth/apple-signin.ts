@@ -11,6 +11,7 @@ import { Account, Profile } from 'next-auth'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
+import { captureServerEvent, ServerEvent } from '@/lib/posthog-server'
 
 import {
   type AppleProfile,
@@ -105,6 +106,12 @@ export async function handleAppleSignIn(
             },
           },
         },
+      })
+
+      captureServerEvent({
+        distinctId: newUser.id,
+        event: ServerEvent.AUTH_SIGNUP_USER_CREATED,
+        properties: { method: 'apple' },
       })
 
       console.info(

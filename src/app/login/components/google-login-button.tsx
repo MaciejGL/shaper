@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
+import { analyticsEvents } from '@/lib/analytics-events'
 import { openSystemBrowser } from '@/lib/open-system-browser'
 
 interface GoogleLoginButtonProps {
@@ -21,6 +22,7 @@ export const GoogleLoginButton = ({
 
   const handleGoogleLogin = async () => {
     try {
+      analyticsEvents.authOauthClick({ provider: 'google' })
       setIsLoading(true)
 
       if (isNativeApp) {

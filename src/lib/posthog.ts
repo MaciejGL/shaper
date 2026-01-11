@@ -83,7 +83,12 @@ export function captureEvent(
   const posthog = getPostHogInstance()
   if (posthog) {
     posthog.capture(eventName, properties)
+    return
   }
+
+  void initPostHog().then((ph) => {
+    ph?.capture(eventName, properties)
+  })
 }
 
 export function identifyUser(

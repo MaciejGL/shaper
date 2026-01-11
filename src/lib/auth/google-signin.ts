@@ -11,6 +11,7 @@ import { Account, Profile } from 'next-auth'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
+import { captureServerEvent, ServerEvent } from '@/lib/posthog-server'
 
 import {
   type GoogleProfile,
@@ -138,6 +139,12 @@ export async function handleGoogleSignIn(
             },
           },
         },
+      })
+
+      captureServerEvent({
+        distinctId: newUser.id,
+        event: ServerEvent.AUTH_SIGNUP_USER_CREATED,
+        properties: { method: 'google' },
       })
 
       console.info(

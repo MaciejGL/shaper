@@ -50,6 +50,12 @@ export enum ServerEvent {
   // AI
   AI_EXERCISE_SUGGESTIONS_SUCCESS = 'ai_exercise_suggestions_success',
   AI_EXERCISE_SUGGESTIONS_ERROR = 'ai_exercise_suggestions_error',
+
+  // Auth / signup funnel
+  AUTH_OTP_REQUEST_ERROR = 'auth_otp_request_error',
+  AUTH_OTP_VERIFY_SUCCESS = 'auth_otp_verify_success',
+  AUTH_OTP_VERIFY_ERROR = 'auth_otp_verify_error',
+  AUTH_SIGNUP_USER_CREATED = 'auth_signup_user_created',
 }
 
 interface CaptureParams {
