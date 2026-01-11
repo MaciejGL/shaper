@@ -37,7 +37,7 @@ import { WeeklyProgressEmail } from './templates/weekly-progress-email'
 import { WinbackEmail } from './templates/winback-email'
 import { WorkoutMilestoneEmail } from './templates/workout-milestone-email'
 
-const NO_REPLY_EMAIL = 'noreply@hypro.app'
+const NO_REPLY_EMAIL = 'support@hypro.app'
 const NO_REPLY_NAME = 'Hypro'
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hypro.app'
 
