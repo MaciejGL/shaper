@@ -93,6 +93,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "./plugins/withRequiredTelephony",
       "expo-router",
       [
         "expo-notifications",
