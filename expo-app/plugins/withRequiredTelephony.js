@@ -24,4 +24,3 @@ function withRequiredTelephony(config) {
 }
 
 module.exports = withRequiredTelephony
-
