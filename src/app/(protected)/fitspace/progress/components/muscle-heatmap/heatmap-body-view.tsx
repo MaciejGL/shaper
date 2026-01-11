@@ -1,6 +1,5 @@
 'use client'
 
-import { RotateCcwIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { Progress } from '@/components/ui/progress'
@@ -127,6 +126,7 @@ export function HeatmapBodyView({
             )}
           />
         </TabsContent>
+
         <div
           className={cn(
             'mx-auto flex flex-col items-center',
@@ -134,16 +134,11 @@ export function HeatmapBodyView({
           )}
         >
           <TabsList
-            className={cn(
-              'mx-auto border border-border grid grid-cols-[1fr_1fr_auto]',
-            )}
             variant="secondary"
+            className="mx-auto border border-border grid grid-cols-2 w-fit"
           >
             <TabsTrigger value="front">Front</TabsTrigger>
             <TabsTrigger value="back">Back</TabsTrigger>
-            <TabsTrigger value="swap" disabled className="disabled:opacity-100">
-              <RotateCcwIcon className="size-3 text-muted-foreground" />
-            </TabsTrigger>
           </TabsList>
         </div>
       </Tabs>
