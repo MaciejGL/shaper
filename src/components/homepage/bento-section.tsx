@@ -27,19 +27,12 @@ export function BentoSection() {
         </motion.div>
 
         {/* Bento Video - extends to the right edge */}
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative w-full"
-          key="homepage-bento"
-        >
+        <div className="relative w-full">
           <CloudinaryVideoPlayer
             publicId="homepage-bento"
             autoplayMode="on-scroll"
           />
-        </motion.div>
+        </div>
       </div>
     </section>
   )

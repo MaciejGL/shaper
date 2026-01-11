@@ -16,10 +16,10 @@ export function HomepageClient() {
 
       <main>
         <HeroSection />
+        <MobileAppBanner className="py-14" />
         <BentoSection />
         <FeaturesSection />
         <VideoShowcase />
-        <MobileAppBanner className="py-14" />
         <CtaSection />
       </main>
 
