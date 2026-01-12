@@ -157,7 +157,7 @@ export function AiExerciseSuggestions({
                 iconEnd={<ChevronRight className="size-5" />}
                 disabled={!hasPremium}
               >
-                Generate
+                Get
               </Button>
             </PremiumButtonWrapper>
           )}

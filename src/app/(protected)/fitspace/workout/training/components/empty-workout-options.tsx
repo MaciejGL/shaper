@@ -11,7 +11,6 @@ import {
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -114,13 +113,8 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                     className="mr-3"
                   />
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <Badge variant="premium" size="xs">
-                        Recommended
-                      </Badge>
-                    </div>
                     <CardTitle className="text-lg">
-                      Start a training plan
+                      Our training plans
                     </CardTitle>
                     <CardDescription>
                       Follow a structured program over weeks.
@@ -153,9 +147,11 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                     className="mr-3"
                   />
                   <div className="flex-1">
-                    <CardTitle className="text-lg">Quick workout</CardTitle>
+                    <CardTitle className="text-lg">
+                      Single workout session
+                    </CardTitle>
                     <CardDescription>
-                      Use a ready-made workout for today.
+                      Use a ready-made workout session to train today.
                     </CardDescription>
                   </div>
                   <Button
@@ -186,10 +182,10 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                   />
                   <div className="flex-1">
                     <CardTitle className="text-lg">
-                      Build my own workout
+                      Custom workout session
                     </CardTitle>
                     <CardDescription>
-                      Choose exercises and sets manually.
+                      Choose your own exercises and sets.
                     </CardDescription>
                   </div>
                   <Button

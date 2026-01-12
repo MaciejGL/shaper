@@ -359,7 +359,7 @@ function ExerciseListWithFilters({
         />
       </div>
 
-      <div className="my-6">
+      <div className="mt-6">
         <WeeklyFocusChips
           groupSummaries={groupSummaries}
           selectedGroup={selectedGroup}
@@ -368,13 +368,17 @@ function ExerciseListWithFilters({
         />
       </div>
 
-      <Input
-        id="search-exercises"
-        placeholder="Search by exercise or muscle group..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        iconStart={<SearchIcon />}
-      />
+      <div className="pt-6">
+        <Input
+          id="search-exercises"
+          placeholder="Search exercises name or muscle group..."
+          value={searchQuery}
+          variant="secondary"
+          size="lg"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          iconStart={<SearchIcon />}
+        />
+      </div>
 
       <h3 className="text-sm font-medium text-muted-foreground pt-4">
         {selectedGroup ? `${selectedGroup} exercises` : 'All exercises'}{' '}

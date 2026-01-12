@@ -1904,6 +1904,53 @@ export async function getWorkoutNavigation(
     return null
   }
 
+  if (
+    defaultPlan.title === 'Quick Workout' &&
+    defaultPlan.createdById === user.user.id &&
+    defaultPlan.assignedToId === user.user.id
+  ) {
+    await ensureQuickWorkoutWeeks(defaultPlan.id, 4)
+
+    const refreshedPlan = await prisma.trainingPlan.findUnique({
+      where: {
+        id: trainingId,
+        assignedToId: user.user.id,
+        createdById: user.user.id,
+      },
+      include: {
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              select: {
+                id: true,
+                dayOfWeek: true,
+                isRestDay: true,
+                completedAt: true,
+                scheduledAt: true,
+                exercises: {
+                  select: {
+                    id: true,
+                    completedAt: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (refreshedPlan) {
+      return { plan: new TrainingPlan(refreshedPlan, context) }
+    }
+  }
+
   // For self-created plans, allow access regardless of start date
   if (
     defaultPlan.assignedToId === user.user.id &&
@@ -2473,6 +2520,9 @@ export async function getQuickWorkoutNavigation(context: GQLContext) {
     where: {
       assignedToId: user.user.id,
       createdById: user.user.id,
+      title: 'Quick Workout',
+      active: false,
+      isTemplate: false,
     },
     select: { id: true },
   })
@@ -2541,6 +2591,9 @@ export async function getQuickWorkoutDay(
     where: {
       assignedToId: user.user.id,
       createdById: user.user.id,
+      title: 'Quick Workout',
+      active: false,
+      isTemplate: false,
     },
     select: { id: true },
   })
