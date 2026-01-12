@@ -97,7 +97,9 @@ export function EmailLogsTab() {
       setHasMore(Boolean(data.has_more))
     } catch (error) {
       console.error('Failed to fetch email logs:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to fetch emails')
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to fetch emails',
+      )
     } finally {
       setIsLoading(false)
     }
@@ -136,12 +138,17 @@ export function EmailLogsTab() {
   const handleResend = async (emailId: string) => {
     try {
       setResending((prev) => new Set(prev).add(emailId))
-      const response = await fetch(`/api/admin/resend/emails/${emailId}/resend`, {
-        method: 'POST',
-      })
-      const data = (await response.json().catch(() => null)) as
-        | { success?: boolean; resentId?: string | null; error?: string }
-        | null
+      const response = await fetch(
+        `/api/admin/resend/emails/${emailId}/resend`,
+        {
+          method: 'POST',
+        },
+      )
+      const data = (await response.json().catch(() => null)) as {
+        success?: boolean
+        resentId?: string | null
+        error?: string
+      } | null
 
       if (!response.ok) {
         throw new Error(data?.error || 'Failed to resend email')
@@ -166,6 +173,7 @@ export function EmailLogsTab() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="w-full md:w-[360px]">
             <Input
+              id="search-input"
               value={q}
               onChange={(e) => {
                 setQ(e.target.value)
@@ -252,7 +260,9 @@ export function EmailLogsTab() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">{email.to.join(', ')}</TableCell>
+                  <TableCell className="text-sm">
+                    {email.to.join(', ')}
+                  </TableCell>
                   <TableCell className="text-sm">
                     <div className="space-y-1">
                       <div className="font-medium">{email.subject}</div>
@@ -349,4 +359,3 @@ function renderStatusBadge(status: string) {
 
   return <Badge variant="outline">{normalized || 'unknown'}</Badge>
 }
-

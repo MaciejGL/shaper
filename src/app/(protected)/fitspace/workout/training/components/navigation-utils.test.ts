@@ -15,11 +15,12 @@ import { NavigationDay, NavigationPlan, NavigationWeek } from './workout-day'
 
 describe('navigation-utils', () => {
   describe('isQuickWorkout', () => {
-    it('returns true when weeks have scheduledAt', () => {
+    it('returns true when isQuickWorkout is true', () => {
       const plan: NavigationPlan = {
         id: '1',
         startDate: null,
         title: 'Quick Workout',
+        isQuickWorkout: true,
         weeks: [
           {
             id: 'w1',
@@ -33,11 +34,12 @@ describe('navigation-utils', () => {
       expect(isQuickWorkout(plan)).toBe(true)
     })
 
-    it('returns false when weeks have no scheduledAt', () => {
+    it('returns false when isQuickWorkout is false', () => {
       const plan: NavigationPlan = {
         id: '1',
         startDate: '2025-01-01T00:00:00Z',
         title: 'Quick Workout',
+        isQuickWorkout: false,
         weeks: [
           {
             id: 'w1',
@@ -326,6 +328,7 @@ describe('navigation-utils', () => {
         id: '1',
         startDate: null,
         title: 'Quick Workout',
+        isQuickWorkout: true,
         weeks: [],
       }
 
@@ -338,6 +341,7 @@ describe('navigation-utils', () => {
         id: '1',
         startDate: null,
         title: 'Quick Workout',
+        isQuickWorkout: true,
         weeks: [
           {
             id: 'w40',
@@ -408,6 +412,7 @@ describe('navigation-utils', () => {
         id: '1',
         startDate: '2025-10-01T00:00:00Z', // Oct 1, 2025
         title: 'Quick Workout',
+        isQuickWorkout: false,
         weeks: [
           {
             id: 'w1',

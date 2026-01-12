@@ -59,7 +59,8 @@ export function OverdueWorkoutBanner({
       <AlertCircle className="size-4 shrink-0" />
       <p className="text-xs flex-1">
         {overdueInfo.count} workout{overdueInfo.count !== 1 ? 's' : ''} overdue.
-        Shift your schedule in Settings, or mark days as complete.
+        You can shift your scheduled weeks in Settings, or mark days as
+        complete.
       </p>
       <button
         type="button"
