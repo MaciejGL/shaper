@@ -118,6 +118,14 @@ const LazyExternalOffersTab = dynamic(
   },
 )
 
+const LazyEmailLogsTab = dynamic(
+  () => import('./email-logs-tab').then((mod) => ({ default: mod.EmailLogsTab })),
+  {
+    loading: () => <AdminTabSkeleton />,
+    ssr: false,
+  },
+)
+
 export {
   LazyUsersTab,
   LazyTrainersTab,
@@ -128,4 +136,5 @@ export {
   LazyTrainingPlansTab,
   LazyFreeWorkoutDaysAdmin,
   LazyExternalOffersTab,
+  LazyEmailLogsTab,
 }

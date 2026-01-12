@@ -8,6 +8,7 @@ import {
   Dumbbell,
   Flame,
   Globe,
+  Mail,
   UserCheck,
   Users,
 } from 'lucide-react'
@@ -18,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import {
   LazyAwsTab as AwsTab,
+  LazyEmailLogsTab as EmailLogsTab,
   LazyExercisesTab as ExercisesTab,
   LazyExternalOffersTab as ExternalOffersTab,
   LazyFreeWorkoutDaysAdmin as FreeWorkoutDaysAdmin,
@@ -42,6 +44,7 @@ export default function AdminPage() {
       | 'stripe'
       | 'external'
       | 'aws'
+      | 'email-logs'
     >([
       'users',
       'trainers',
@@ -52,6 +55,7 @@ export default function AdminPage() {
       'stripe',
       'external',
       'aws',
+      'email-logs',
     ])
       .withDefault('users')
       .withOptions({ clearOnDefault: true }),
@@ -77,43 +81,50 @@ export default function AdminPage() {
           )
         }
       >
-        <TabsList>
-          <TabsTrigger value="users">
+        <TabsList
+          variant="secondary"
+          className="w-full flex-wrap h-auto justify-start gap-1"
+        >
+          <TabsTrigger value="users" className="flex-none">
             <Users className="h-4 w-4" />
             User Management
           </TabsTrigger>
-          <TabsTrigger value="trainers">
+          <TabsTrigger value="trainers" className="flex-none">
             <UserCheck className="h-4 w-4" />
             Trainers
           </TabsTrigger>
-          <TabsTrigger value="plans">
+          <TabsTrigger value="plans" className="flex-none">
             <Calendar className="h-4 w-4" />
             Training Plans
           </TabsTrigger>
-          <TabsTrigger value="free-workouts">
+          <TabsTrigger value="free-workouts" className="flex-none">
             <Flame className="h-4 w-4" />
             Free Workouts
           </TabsTrigger>
-          <TabsTrigger value="stripe">
+          <TabsTrigger value="stripe" className="flex-none">
             <CreditCard className="h-4 w-4" />
             Stripe
           </TabsTrigger>
-          <TabsTrigger value="exercises">
+          <TabsTrigger value="exercises" className="flex-none">
             <Dumbbell className="h-4 w-4" />
             Exercise Management
           </TabsTrigger>
 
-          <TabsTrigger value="push">
+          <TabsTrigger value="push" className="flex-none">
             <Bell className="h-4 w-4" />
             Push Notifications
           </TabsTrigger>
-          <TabsTrigger value="external">
+          <TabsTrigger value="external" className="flex-none">
             <Globe className="h-4 w-4" />
             External Offers
           </TabsTrigger>
-          <TabsTrigger value="aws">
+          <TabsTrigger value="aws" className="flex-none">
             <Cloud className="h-4 w-4" />
             AWS Storage
+          </TabsTrigger>
+          <TabsTrigger value="email-logs" className="flex-none">
+            <Mail className="h-4 w-4" />
+            Email Logs
           </TabsTrigger>
         </TabsList>
 
@@ -151,6 +162,10 @@ export default function AdminPage() {
 
         <TabsContent value="aws" className="mt-6">
           <AwsTab />
+        </TabsContent>
+
+        <TabsContent value="email-logs" className="mt-6">
+          <EmailLogsTab />
         </TabsContent>
       </Tabs>
     </div>
