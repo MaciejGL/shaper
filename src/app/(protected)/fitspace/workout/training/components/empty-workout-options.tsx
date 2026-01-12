@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -122,8 +123,8 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                   </div>
                   <Button
                     variant="link"
-                    size="icon-sm"
-                    iconOnly={<ChevronRight />}
+                    size="icon-xs"
+                    iconOnly={<ChevronRight className="size-6!" />}
                   >
                     Browse
                   </Button>
@@ -147,8 +148,12 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                     className="mr-3"
                   />
                   <div className="flex-1">
-                    <CardTitle className="text-lg">
+                    <div className="flex items-center gap-2 mb-0.5"></div>
+                    <CardTitle className="text-lg flex items-center">
                       Single workout session
+                      <Badge variant="primary" size="xs" className="ml-2">
+                        Free
+                      </Badge>
                     </CardTitle>
                     <CardDescription>
                       Use a ready-made workout session to train today.
@@ -156,8 +161,8 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                   </div>
                   <Button
                     variant="link"
-                    size="icon-sm"
-                    iconOnly={<ChevronRight />}
+                    size="icon-xs"
+                    iconOnly={<ChevronRight className="size-6!" />}
                   >
                     Browse
                   </Button>
@@ -190,8 +195,8 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                   </div>
                   <Button
                     variant="link"
-                    size="icon-sm"
-                    iconOnly={<ChevronRight />}
+                    size="icon-xs"
+                    iconOnly={<ChevronRight className="size-6!" />}
                   >
                     Start
                   </Button>
