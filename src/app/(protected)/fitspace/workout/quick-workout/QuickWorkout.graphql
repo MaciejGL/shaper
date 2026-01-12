@@ -6,6 +6,7 @@ query FitspaceGetQuickWorkoutNavigation {
       title
       startDate
       completedAt
+      isQuickWorkout
       weeks {
         id
         weekNumber

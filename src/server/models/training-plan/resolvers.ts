@@ -60,6 +60,7 @@ import {
   removeExerciseFromDay,
   removeSetFromExercise,
   removeTrainingWeek,
+  shiftTrainingSchedule,
   updateExerciseSet,
   updateTrainingDayData,
   updateTrainingExercise,
@@ -292,5 +293,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     })
 
     return true
+  },
+
+  shiftTrainingSchedule: (_, { input }, context) => {
+    return shiftTrainingSchedule(input, context)
   },
 }

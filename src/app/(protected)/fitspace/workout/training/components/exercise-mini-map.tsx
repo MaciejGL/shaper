@@ -432,7 +432,7 @@ export function WorkoutOverviewPill({
 
   return (
     <>
-      <div ref={ref} className="relative h-[56px] z-35 mb-4">
+      <div ref={ref} className="relative h-[48px] z-35 mb-4">
         {!isExpanded && (
           <div className="relative w-full px-2">
             <SmartPillContent
@@ -446,7 +446,7 @@ export function WorkoutOverviewPill({
               onShowSummary={() => setShowSummary(true)}
               isStaticOverview={true}
               layoutId="overview-pill"
-              className={cn('h-[56px] ')}
+              className={cn('h-[48px]')}
             />
           </div>
         )}

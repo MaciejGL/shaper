@@ -128,6 +128,7 @@ export function UserPreferencesProvider({
     weightUnit: profile?.weightUnit ?? DEFAULT_PREFERENCES.weightUnit,
     theme: profile?.theme ?? DEFAULT_PREFERENCES.theme,
     timeFormat: profile?.timeFormat ?? DEFAULT_PREFERENCES.timeFormat,
+    timezone: profile?.timezone ?? DEFAULT_PREFERENCES.timezone,
     trainingView: profile?.trainingView ?? DEFAULT_PREFERENCES.trainingView,
     notifications:
       profile?.notificationPreferences ?? DEFAULT_PREFERENCES.notifications,
@@ -182,6 +183,7 @@ export function UserPreferencesProvider({
         heightUnit,
         theme,
         timeFormat,
+        timezone: profile.timezone ?? 'UTC',
         trainingView: profile.trainingView,
         notifications: {
           workoutReminders:

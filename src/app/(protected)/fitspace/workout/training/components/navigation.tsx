@@ -12,15 +12,22 @@ import { useWorkoutPrefetch } from '../hooks/use-workout-prefetch'
 
 import { CalendarWeekSelector } from './calendar-week-selector'
 import { getDefaultSelection } from './navigation-utils'
+import { OverdueWorkoutBanner } from './overdue-workout-banner'
 import { PlanCompletionDialog } from './plan-completion-dialog/plan-completion-dialog'
 import { NavigationDay, NavigationPlan } from './workout-day'
 import { WorkoutOptionsDropdown } from './workout-options'
 
 interface NavigationProps {
   plan?: NavigationPlan | null
+  trainingId?: string
+  isQuickWorkout?: boolean
 }
 
-export function Navigation({ plan }: NavigationProps) {
+export function Navigation({
+  plan,
+  trainingId,
+  isQuickWorkout,
+}: NavigationProps) {
   const [isPlanCompleted, setIsPlanCompleted] = useState(false)
   const onComplete = () => {
     setIsPlanCompleted(false)
@@ -39,7 +46,12 @@ export function Navigation({ plan }: NavigationProps) {
   return (
     <div id="workout-navigation" className="pb-2">
       <div className="max-w-sm mx-auto dark">
-        <WeekSelector plan={plan} />
+        <OverdueWorkoutBanner plan={plan} isQuickWorkout={isQuickWorkout} />
+        <WeekSelector
+          plan={plan}
+          trainingId={trainingId}
+          isQuickWorkout={isQuickWorkout}
+        />
         <DaySelector plan={plan} />
         {isPlanCompleted && (
           <PlanCompletionDialog
@@ -139,7 +151,15 @@ function DaySelector({ plan }: { plan: NavigationPlan }) {
   )
 }
 
-function WeekSelector({ plan }: { plan: NavigationPlan }) {
+function WeekSelector({
+  plan,
+  trainingId,
+  isQuickWorkout,
+}: {
+  plan: NavigationPlan
+  trainingId?: string
+  isQuickWorkout?: boolean
+}) {
   const { weekId: defaultWeekId, dayId: defaultDayId } = useMemo(
     () => getDefaultSelection(plan),
     [plan],
@@ -183,14 +203,18 @@ function WeekSelector({ plan }: { plan: NavigationPlan }) {
   if (!activeWeek) return null
 
   return (
-    <div className="flex justify-between">
+    <div className="flex justify-between [&>div]:empty:hidden">
       <CalendarWeekSelector
         plan={plan}
         activeWeekId={effectiveWeekId}
         activeDayId={effectiveDayId}
         onWeekDaySelect={handleWeekDaySelect}
       />
-      <WorkoutOptionsDropdown />
+      <WorkoutOptionsDropdown
+        plan={plan}
+        trainingId={trainingId}
+        isQuickWorkout={isQuickWorkout}
+      />
     </div>
   )
 }

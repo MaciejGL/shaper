@@ -1329,6 +1329,7 @@ export type GQLMutation = {
   sendMessage: GQLMessage;
   setMacroTargets: GQLMacroTarget;
   shareNutritionPlanWithClient: GQLNutritionPlan;
+  shiftTrainingSchedule: Scalars['Boolean']['output'];
   skipCheckin: GQLCheckinCompletion;
   startFreeWorkoutDay: GQLStartFreeWorkoutResult;
   startWorkoutFromFavourite: Scalars['ID']['output'];
@@ -1998,6 +1999,11 @@ export type GQLMutationSetMacroTargetsArgs = {
 
 export type GQLMutationShareNutritionPlanWithClientArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationShiftTrainingScheduleArgs = {
+  input: GQLShiftTrainingScheduleInput;
 };
 
 
@@ -3195,6 +3201,12 @@ export type GQLSetMacroTargetsInput = {
   protein?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLShiftTrainingScheduleInput = {
+  fromWeekId: Scalars['ID']['input'];
+  planId: Scalars['ID']['input'];
+  startDate?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type GQLStartFreeWorkoutDayInput = {
   dayId?: InputMaybe<Scalars['ID']['input']>;
   replaceExisting?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3481,6 +3493,7 @@ export type GQLTrainingPlan = {
   isDemo: Scalars['Boolean']['output'];
   isDraft: Scalars['Boolean']['output'];
   isPublic: Scalars['Boolean']['output'];
+  isQuickWorkout: Scalars['Boolean']['output'];
   isTemplate: Scalars['Boolean']['output'];
   lastSessionActivity?: Maybe<Scalars['String']['output']>;
   nextSession?: Maybe<Scalars['String']['output']>;
@@ -4698,7 +4711,7 @@ export type GQLFitspaceGetWorkoutNavigationQueryVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGetWorkoutNavigationQuery = { __typename?: 'Query', getWorkoutNavigation?: { __typename?: 'GetWorkoutNavigationPayload', plan: { __typename?: 'TrainingPlan', id: string, startDate?: string | undefined | null, completedAt?: string | undefined | null, title: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercisesCount: number }> }> } } | undefined | null };
+export type GQLFitspaceGetWorkoutNavigationQuery = { __typename?: 'Query', getWorkoutNavigation?: { __typename?: 'GetWorkoutNavigationPayload', plan: { __typename?: 'TrainingPlan', id: string, startDate?: string | undefined | null, completedAt?: string | undefined | null, title: string, isQuickWorkout: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercisesCount: number }> }> } } | undefined | null };
 
 export type GQLFitspaceGetAiExerciseSuggestionsMutationVariables = Exact<{
   dayId: Scalars['ID']['input'];
@@ -4790,10 +4803,17 @@ export type GQLFitspaceSwapExerciseMutationVariables = Exact<{
 
 export type GQLFitspaceSwapExerciseMutation = { __typename?: 'Mutation', swapExercise: { __typename?: 'Substitute', id: string } };
 
+export type GQLFitspaceShiftTrainingScheduleMutationVariables = Exact<{
+  input: GQLShiftTrainingScheduleInput;
+}>;
+
+
+export type GQLFitspaceShiftTrainingScheduleMutation = { __typename?: 'Mutation', shiftTrainingSchedule: boolean };
+
 export type GQLFitspaceGetQuickWorkoutNavigationQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceGetQuickWorkoutNavigationQuery = { __typename?: 'Query', getQuickWorkoutNavigation?: { __typename?: 'GetWorkoutNavigationPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, startDate?: string | undefined | null, completedAt?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercisesCount: number }> }> } } | undefined | null };
+export type GQLFitspaceGetQuickWorkoutNavigationQuery = { __typename?: 'Query', getQuickWorkoutNavigation?: { __typename?: 'GetWorkoutNavigationPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, startDate?: string | undefined | null, completedAt?: string | undefined | null, isQuickWorkout: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercisesCount: number }> }> } } | undefined | null };
 
 export type GQLFitspaceGetQuickWorkoutDayQueryVariables = Exact<{
   dayId?: InputMaybe<Scalars['ID']['input']>;
@@ -10502,6 +10522,7 @@ export const FitspaceGetWorkoutNavigationDocument = `
       startDate
       completedAt
       title
+      isQuickWorkout
       weeks {
         id
         weekNumber
@@ -10903,6 +10924,30 @@ useFitspaceSwapExerciseMutation.getKey = () => ['FitspaceSwapExercise'];
 
 useFitspaceSwapExerciseMutation.fetcher = (variables: GQLFitspaceSwapExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceSwapExerciseMutation, GQLFitspaceSwapExerciseMutationVariables>(FitspaceSwapExerciseDocument, variables, options);
 
+export const FitspaceShiftTrainingScheduleDocument = `
+    mutation FitspaceShiftTrainingSchedule($input: ShiftTrainingScheduleInput!) {
+  shiftTrainingSchedule(input: $input)
+}
+    `;
+
+export const useFitspaceShiftTrainingScheduleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceShiftTrainingScheduleMutation, TError, GQLFitspaceShiftTrainingScheduleMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceShiftTrainingScheduleMutation, TError, GQLFitspaceShiftTrainingScheduleMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceShiftTrainingSchedule'],
+    mutationFn: (variables?: GQLFitspaceShiftTrainingScheduleMutationVariables) => fetchData<GQLFitspaceShiftTrainingScheduleMutation, GQLFitspaceShiftTrainingScheduleMutationVariables>(FitspaceShiftTrainingScheduleDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceShiftTrainingScheduleMutation.getKey = () => ['FitspaceShiftTrainingSchedule'];
+
+
+useFitspaceShiftTrainingScheduleMutation.fetcher = (variables: GQLFitspaceShiftTrainingScheduleMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceShiftTrainingScheduleMutation, GQLFitspaceShiftTrainingScheduleMutationVariables>(FitspaceShiftTrainingScheduleDocument, variables, options);
+
 export const FitspaceGetQuickWorkoutNavigationDocument = `
     query FitspaceGetQuickWorkoutNavigation {
   getQuickWorkoutNavigation {
@@ -10911,6 +10956,7 @@ export const FitspaceGetQuickWorkoutNavigationDocument = `
       title
       startDate
       completedAt
+      isQuickWorkout
       weeks {
         id
         weekNumber

@@ -4,7 +4,7 @@ import { NavigationDay, NavigationPlan, NavigationWeek } from './workout-day'
  * Checks if a plan is a Quick Workout (uses scheduledAt on weeks)
  */
 export function isQuickWorkout(plan: NavigationPlan): boolean {
-  return plan.weeks.some((week) => week.scheduledAt !== null)
+  return plan.isQuickWorkout
 }
 
 /**

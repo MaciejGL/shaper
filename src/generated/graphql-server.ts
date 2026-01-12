@@ -1331,6 +1331,7 @@ export type GQLMutation = {
   sendMessage: EntireFieldWrapper<GQLMessage>;
   setMacroTargets: EntireFieldWrapper<GQLMacroTarget>;
   shareNutritionPlanWithClient: EntireFieldWrapper<GQLNutritionPlan>;
+  shiftTrainingSchedule: EntireFieldWrapper<Scalars['Boolean']['output']>;
   skipCheckin: EntireFieldWrapper<GQLCheckinCompletion>;
   startFreeWorkoutDay: EntireFieldWrapper<GQLStartFreeWorkoutResult>;
   startWorkoutFromFavourite: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -2000,6 +2001,11 @@ export type GQLMutationSetMacroTargetsArgs = {
 
 export type GQLMutationShareNutritionPlanWithClientArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationShiftTrainingScheduleArgs = {
+  input: GQLShiftTrainingScheduleInput;
 };
 
 
@@ -3197,6 +3203,12 @@ export type GQLSetMacroTargetsInput = {
   protein?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLShiftTrainingScheduleInput = {
+  fromWeekId: Scalars['ID']['input'];
+  planId: Scalars['ID']['input'];
+  startDate?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type GQLStartFreeWorkoutDayInput = {
   dayId?: InputMaybe<Scalars['ID']['input']>;
   replaceExisting?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3483,6 +3495,7 @@ export type GQLTrainingPlan = {
   isDemo: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isDraft: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isPublic: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  isQuickWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isTemplate: EntireFieldWrapper<Scalars['Boolean']['output']>;
   lastSessionActivity?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   nextSession?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -4380,6 +4393,7 @@ export type GQLResolversTypes = {
   ServiceType: GQLServiceType;
   SetCompletionResult: ResolverTypeWrapper<GQLSetCompletionResult>;
   SetMacroTargetsInput: GQLSetMacroTargetsInput;
+  ShiftTrainingScheduleInput: GQLShiftTrainingScheduleInput;
   StartFreeWorkoutDayInput: GQLStartFreeWorkoutDayInput;
   StartFreeWorkoutResult: ResolverTypeWrapper<GQLStartFreeWorkoutResult>;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
@@ -4634,6 +4648,7 @@ export type GQLResolversParentTypes = {
   ServiceTask: GQLServiceTask;
   SetCompletionResult: GQLSetCompletionResult;
   SetMacroTargetsInput: GQLSetMacroTargetsInput;
+  ShiftTrainingScheduleInput: GQLShiftTrainingScheduleInput;
   StartFreeWorkoutDayInput: GQLStartFreeWorkoutDayInput;
   StartFreeWorkoutResult: GQLStartFreeWorkoutResult;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
@@ -5375,6 +5390,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   sendMessage?: Resolver<GQLResolversTypes['Message'], ParentType, ContextType, RequireFields<GQLMutationSendMessageArgs, 'input'>>;
   setMacroTargets?: Resolver<GQLResolversTypes['MacroTarget'], ParentType, ContextType, RequireFields<GQLMutationSetMacroTargetsArgs, 'input'>>;
   shareNutritionPlanWithClient?: Resolver<GQLResolversTypes['NutritionPlan'], ParentType, ContextType, RequireFields<GQLMutationShareNutritionPlanWithClientArgs, 'id'>>;
+  shiftTrainingSchedule?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationShiftTrainingScheduleArgs, 'input'>>;
   skipCheckin?: Resolver<GQLResolversTypes['CheckinCompletion'], ParentType, ContextType>;
   startFreeWorkoutDay?: Resolver<GQLResolversTypes['StartFreeWorkoutResult'], ParentType, ContextType, RequireFields<GQLMutationStartFreeWorkoutDayArgs, 'input'>>;
   startWorkoutFromFavourite?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationStartWorkoutFromFavouriteArgs, 'input'>>;
@@ -6016,6 +6032,7 @@ export type GQLTrainingPlanResolvers<ContextType = GQLContext, ParentType extend
   isDemo?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isDraft?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isPublic?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  isQuickWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isTemplate?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   lastSessionActivity?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   nextSession?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;

@@ -112,9 +112,15 @@ export const NavigationWrapper = ({
     }
   }, [isPlanOverdue, isDismissed])
 
+  const isQuickWorkoutPlan = finalPlan ? isQuickWorkout(finalPlan) : false
+
   return (
     <>
-      <Navigation plan={finalPlan} />
+      <Navigation
+        plan={finalPlan}
+        trainingId={trainingId}
+        isQuickWorkout={isQuickWorkoutPlan}
+      />
       {finalPlan && isPlanOverdue && (
         <OverduePlanDialog
           open={dialogOpen}

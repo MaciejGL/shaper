@@ -18,7 +18,11 @@ import {
   GQLMutationUpdateTrainingWeekDetailsArgs,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
-import { getUTCWeekStart } from '@/lib/server-date-utils'
+import {
+  getTodayUTC,
+  getUTCWeekStart,
+  parseUTCDate,
+} from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
 import TrainingPlan from './model'
@@ -1368,4 +1372,128 @@ export async function getQuickWorkoutPlan(context: GQLContext) {
 
   // @ts-expect-error - Selective query result is compatible with TrainingPlan model
   return new TrainingPlan(quickWorkoutPlan, context)
+}
+
+/**
+ * Shift the training schedule forward in time (week-based)
+ * Moves the selected week and all following weeks to start on the target date.
+ * Each week maintains its 7-day structure with days calculated as week.scheduledAt + dayOfWeek.
+ */
+export async function shiftTrainingSchedule(
+  input: { planId: string; fromWeekId: string; startDate?: string | null },
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  const profile = await prisma.userProfile.findUnique({
+    where: { userId: user.user.id },
+    select: { timezone: true },
+  })
+  const timezone = profile?.timezone ?? 'UTC'
+
+  // Load the plan with all weeks
+  const plan = await prisma.trainingPlan.findUnique({
+    where: { id: input.planId },
+    select: {
+      id: true,
+      assignedToId: true,
+      completedAt: true,
+      weeks: {
+        orderBy: { weekNumber: 'asc' },
+        select: {
+          id: true,
+          weekNumber: true,
+          scheduledAt: true,
+          days: {
+            select: {
+              id: true,
+              dayOfWeek: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!plan) {
+    throw new GraphQLError('Training plan not found')
+  }
+
+  // Authorization: only the assigned user can shift their schedule
+  if (plan.assignedToId !== user.user.id) {
+    throw new GraphQLError('You can only shift your own training schedule')
+  }
+
+  // Don't allow shifting completed plans
+  if (plan.completedAt) {
+    throw new GraphQLError('Cannot shift schedule of a completed plan')
+  }
+
+  // Find the selected week
+  const fromWeek = plan.weeks.find((week) => week.id === input.fromWeekId)
+  if (!fromWeek) {
+    throw new GraphQLError('Selected week not found in this plan')
+  }
+
+  if (!fromWeek.scheduledAt) {
+    throw new GraphQLError('Selected week has no scheduled date')
+  }
+
+  // Get all weeks to shift (selected week and all following)
+  const weeksToShift = plan.weeks.filter(
+    (week) => week.weekNumber >= fromWeek.weekNumber,
+  )
+
+  if (weeksToShift.length === 0) {
+    throw new GraphQLError('No weeks to shift')
+  }
+
+  // Calculate target start date
+  const startDateString = input.startDate ? input.startDate.slice(0, 10) : null
+  const targetStartDate = startDateString
+    ? parseUTCDate(startDateString, timezone)
+    : getTodayUTC(timezone)
+
+  // Calculate the offset in days between current week start and target date
+  const currentWeekStart = new Date(fromWeek.scheduledAt)
+  const offsetMs = targetStartDate.getTime() - currentWeekStart.getTime()
+  const offsetDays = Math.round(offsetMs / (1000 * 60 * 60 * 24))
+
+  // If no change needed, return early
+  if (offsetDays === 0) {
+    return true
+  }
+
+  // Execute updates in a transaction
+  await prisma.$transaction(
+    async (tx) => {
+      for (const week of weeksToShift) {
+        if (!week.scheduledAt) continue
+
+        // Calculate new week start date by adding offset
+        const newWeekStart = addDays(new Date(week.scheduledAt), offsetDays)
+
+        // Update the week's scheduledAt
+        await tx.trainingWeek.update({
+          where: { id: week.id },
+          data: { scheduledAt: newWeekStart },
+        })
+
+        // Update each day's scheduledAt based on new week start + dayOfWeek
+        for (const day of week.days) {
+          const newDayScheduledAt = addDays(newWeekStart, day.dayOfWeek)
+          await tx.trainingDay.update({
+            where: { id: day.id },
+            data: { scheduledAt: newDayScheduledAt },
+          })
+        }
+      }
+    },
+    { timeout: 15000, maxWait: 15000 },
+  )
+
+  return true
 }

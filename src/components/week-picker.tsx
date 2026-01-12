@@ -20,6 +20,7 @@ interface WeekPickerProps {
   className?: string
   placeholder?: string
   defaultValue?: Date | 'current-week'
+  minDate?: Date
 }
 
 export function WeekPicker({
@@ -28,6 +29,7 @@ export function WeekPicker({
   className,
   placeholder = 'Select week',
   defaultValue,
+  minDate,
 }: WeekPickerProps) {
   const { preferences } = useUserPreferences()
   const [isOpen, setIsOpen] = useState(false)
@@ -97,13 +99,14 @@ export function WeekPicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-max p-0" align="start">
         <Calendar
           mode="single"
           showWeekNumber
           weekStartsOn={preferences.weekStartsOn}
           selected={value}
           onSelect={handleDateSelect}
+          disabled={minDate ? { before: minDate } : undefined}
           initialFocus
           className="mx-auto"
         />

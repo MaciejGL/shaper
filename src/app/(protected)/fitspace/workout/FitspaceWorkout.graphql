@@ -205,6 +205,7 @@ query FitspaceGetWorkoutNavigation($trainingId: ID!) {
       startDate
       completedAt
       title
+      isQuickWorkout
       weeks {
         id
         weekNumber
@@ -328,4 +329,8 @@ mutation FitspaceSwapExercise($exerciseId: ID!, $substituteId: ID!) {
   swapExercise(exerciseId: $exerciseId, substituteId: $substituteId) {
     id
   }
+}
+
+mutation FitspaceShiftTrainingSchedule($input: ShiftTrainingScheduleInput!) {
+  shiftTrainingSchedule(input: $input)
 }

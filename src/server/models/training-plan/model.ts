@@ -85,6 +85,10 @@ export default class TrainingPlan implements GQLTrainingPlan {
     return this.data.isDraft
   }
 
+  get isQuickWorkout() {
+    return this.data.assignedToId === this.data.createdById
+  }
+
   get active() {
     return this.data.active
   }

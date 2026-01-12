@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
-import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { cn } from '@/lib/utils'
 
@@ -171,60 +171,56 @@ export function CalendarWeekSelector({
   }
 
   return (
-    <>
-      <Button
-        variant="tertiary"
-        size="md"
-        onClick={() => setOpen(true)}
-        className=""
-        iconStart={<CalendarIcon />}
-        iconEnd={
-          activeWeek?.completedAt ? (
-            <CheckCircle className="text-green-500 size-3.5" />
-          ) : null
-        }
-      >
-        {formatWeekDisplay()}
-      </Button>
-
-      <Drawer open={open} onOpenChange={setOpen} direction="top">
-        <DrawerContent
-          dialogTitle="Select Week & Day"
-          className="h-max data-[vaul-drawer-direction=top]:border-b-0 overflow-hidden "
+    <Drawer open={open} onOpenChange={setOpen} direction="top">
+      <DrawerTrigger asChild>
+        <Button
+          variant="tertiary"
+          size="md"
+          onClick={() => setOpen(true)}
+          iconStart={<CalendarIcon />}
+          iconEnd={
+            activeWeek?.completedAt ? (
+              <CheckCircle className="text-green-500 size-3.5" />
+            ) : null
+          }
         >
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleDateSelect}
-            disabled={(date) => {
-              const dateKey = formatDateKey(date)
-              return !dayStatusMap.has(dateKey)
-            }}
-            weekStartsOn={preferences.weekStartsOn}
-            captionLayout="label"
-            modifiers={{
-              completed: completedDates,
-              pending: pendingDates,
-              restDay: restDayDates,
-              empty: emptyDates,
-              today: new Date(),
-            }}
-            modifiersClassNames={{
-              completed:
-                'bg-green-300 dark:bg-green-700 font-semibold hover:bg-green-500 rounded-xl',
-              pending:
-                'bg-amber-200 dark:bg-amber-500/50 font-medium hover:bg-yellow-400 rounded-xl',
-              restDay: cn('rounded-xl opacity-75 bg-card-on-card'),
-              empty: 'rounded-xl bg-card-on-card',
-              today: cn(
-                'outline-primary outline-offset-1 outline-2 rounded-xl',
-              ),
-              outside: 'opacity-50',
-            }}
-            className="w-full aspect-square max-w-sm mx-auto [&_button]:!rounded-xl [&_*]:font-medium [&_[data-selected=true]_button]:bg-primary  bg-transparent"
-          />
-        </DrawerContent>
-      </Drawer>
-    </>
+          {formatWeekDisplay()}
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent
+        dialogTitle="Select Week & Day"
+        className="h-max data-[vaul-drawer-direction=top]:border-b-0 overflow-hidden "
+      >
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={handleDateSelect}
+          disabled={(date) => {
+            const dateKey = formatDateKey(date)
+            return !dayStatusMap.has(dateKey)
+          }}
+          weekStartsOn={preferences.weekStartsOn}
+          captionLayout="label"
+          modifiers={{
+            completed: completedDates,
+            pending: pendingDates,
+            restDay: restDayDates,
+            empty: emptyDates,
+            today: new Date(),
+          }}
+          modifiersClassNames={{
+            completed:
+              'bg-green-300 dark:bg-green-700 font-semibold hover:bg-green-500 rounded-xl',
+            pending:
+              'bg-amber-200 dark:bg-amber-500/50 font-medium hover:bg-yellow-400 rounded-xl',
+            restDay: cn('rounded-xl opacity-75 bg-card-on-card'),
+            empty: 'rounded-xl bg-card-on-card',
+            today: cn('outline-primary outline-offset-1 outline-2 rounded-xl'),
+            outside: 'opacity-50',
+          }}
+          className="w-full aspect-square max-w-sm mx-auto [&_button]:rounded-xl! **:font-medium [&_[data-selected=true]_button]:bg-primary bg-transparent"
+        />
+      </DrawerContent>
+    </Drawer>
   )
 }

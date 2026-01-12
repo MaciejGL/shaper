@@ -10,5 +10,3 @@ export interface FeaturedTrainerCardProps {
   onClick?: () => void
   onCTAClick?: () => void
 }
-
-
