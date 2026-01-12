@@ -14,6 +14,15 @@ const cardVariants = cva(
           'bg-card border-border',
           'dark:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] dark:from-neutral-100 dark:via-neutral-300 dark:to-neutral-400',
         ),
+        glass: cn(
+          'bg-card border-border',
+          'overflow-hidden isolate',
+          'bg-card/20 border-border/50 backdrop-blur-md backdrop-saturate-150',
+          'before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none',
+          'before:bg-gradient-to-br before:from-foreground/25 before:via-transparent before:to-transparent before:opacity-70',
+          'after:absolute after:inset-0 after:rounded-[inherit] after:pointer-events-none',
+          'after:bg-gradient-to-tl after:from-foreground/12 after:via-transparent after:to-transparent after:opacity-60',
+        ),
         tertiary: 'bg-card-on-card border-border',
         highlighted: cn(
           ' bg-linear-to-tr dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-800 from-neutral-100 via-neutral-300 to-neutral-400 border-none',

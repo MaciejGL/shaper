@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -49,9 +49,7 @@ export function CloudinaryVideoPlayer({
   sourceOptions,
   hideOverlayUi = true,
 }: CloudinaryVideoPlayerProps) {
-  // useId() is stable between server render and client hydration, avoiding mismatch warnings.
-  const reactId = useId()
-  const videoId = `cld-player-${reactId.replace(/:/g, '-')}-${toSafeDomId(publicId)}`
+  const videoId = `cld-player-${toSafeDomId(publicId)}`
   const playerRef = useRef<unknown>(null)
   const playerVideoIdRef = useRef<string | null>(null)
 

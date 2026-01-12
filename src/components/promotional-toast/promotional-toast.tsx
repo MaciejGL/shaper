@@ -25,7 +25,7 @@ export function PromotionalToast({
   }
 
   return (
-    <Card className="w-full max-w-md shadow-2xl" variant="secondary">
+    <Card variant="glass" className="w-full max-w-md">
       <CardHeader className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1">
           <SectionIcon
@@ -34,10 +34,10 @@ export function PromotionalToast({
             variant={config.iconVariant}
           />
           <div className="flex-1 space-y-1">
-            <h3 className="font-semibold text-base text-foreground">
+            <h3 className="font-semibold text-xl text-foreground">
               {config.title}
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base font-medium text-foreground">
               {config.getSubtitle(data)}
             </p>
           </div>
@@ -53,7 +53,7 @@ export function PromotionalToast({
 
       <CardFooter className="flex gap-2">
         <Button
-          variant="tertiary"
+          variant="outline"
           size="sm"
           onClick={onDismiss}
           className="flex-1"
