@@ -38,7 +38,7 @@ export type SortOption = 'popular' | 'newest' | 'shortest'
 export const focusTagLabels: Record<GQLFocusTag, string> = {
   [GQLFocusTag.Strength]: 'Strength',
   [GQLFocusTag.Cardio]: 'Cardio',
-  [GQLFocusTag.BodyRecomposition]: 'Body Recomposition',
+  [GQLFocusTag.BodyRecomposition]: 'Body Recomp',
   [GQLFocusTag.Powerlifting]: 'Powerlifting',
   [GQLFocusTag.WeightLoss]: 'Weight Loss',
   [GQLFocusTag.Endurance]: 'Endurance',
@@ -123,8 +123,8 @@ export function TrainingPlanFilters({
           <DrawerTrigger asChild>
             <Button
               variant="secondary"
-              size="lg"
-              iconStart={<Filter />}
+              size="icon-md"
+              iconOnly={<Filter />}
               className={cn(
                 'shrink-0 rounded-full',
                 hasActiveFilters &&
@@ -353,7 +353,7 @@ export function TrainingPlanFilters({
           <DropdownMenuTrigger asChild>
             <Button
               variant="secondary"
-              size="lg"
+              size="md"
               className="shrink-0 rounded-full"
               iconStart={<ArrowUpDown />}
             >

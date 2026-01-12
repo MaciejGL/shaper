@@ -2,7 +2,14 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Calendar, Clock, Dumbbell, Sparkles, Users } from 'lucide-react'
+import {
+  Calendar,
+  Clock,
+  Dumbbell,
+  Layers,
+  Sparkles,
+  Users,
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -38,6 +45,67 @@ interface TrainingPlansTabProps {
   initialPlanId?: string | null
 }
 
+type QuickPlanBadgeId =
+  | 'first_time'
+  | 'beginner'
+  | 'intermediate'
+  | 'expert'
+  | 'fbw'
+  | 'upper_lower'
+
+type QuickPlanBadge =
+  | {
+      id: QuickPlanBadgeId
+      label: string
+      type: 'difficulty'
+      difficulty: GQLDifficulty
+    }
+  | {
+      id: QuickPlanBadgeId
+      label: string
+      type: 'title'
+      keywords: readonly string[]
+    }
+
+const quickPlanBadges: readonly QuickPlanBadge[] = [
+  {
+    id: 'first_time',
+    label: 'First time',
+    type: 'title',
+    keywords: ['kickstarter', 'first time', 'starter'],
+  },
+  {
+    id: 'beginner',
+    label: 'Beginner',
+    type: 'difficulty',
+    difficulty: GQLDifficulty.Beginner,
+  },
+  {
+    id: 'intermediate',
+    label: 'Intermediate',
+    type: 'difficulty',
+    difficulty: GQLDifficulty.Intermediate,
+  },
+  {
+    id: 'expert',
+    label: 'Expert',
+    type: 'difficulty',
+    difficulty: GQLDifficulty.Expert,
+  },
+  {
+    id: 'fbw',
+    label: 'FBW',
+    type: 'title',
+    keywords: ['full body', 'full-body', 'fbw', 'fullbody'],
+  },
+  {
+    id: 'upper_lower',
+    label: 'Upper/Lower',
+    type: 'title',
+    keywords: ['upper/lower', 'upper lower', 'upper-lower'],
+  },
+] as const
+
 export function TrainingPlansTab({
   initialPlans = [],
   initialPlanId,
@@ -55,6 +123,9 @@ export function TrainingPlansTab({
   const [daysPerWeek, setDaysPerWeek] = useState<number | null>(null)
   const [sessionMaxMins, setSessionMaxMins] = useState<number>(90) // 90 = "Any"
   const [sort, setSort] = useState<SortOption>('popular')
+  const [selectedQuickBadges, setSelectedQuickBadges] = useState<
+    QuickPlanBadgeId[]
+  >([])
 
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -143,12 +214,59 @@ export function TrainingPlansTab({
     )
   }
 
+  const toggleQuickBadge = (badgeId: QuickPlanBadgeId) => {
+    setSelectedQuickBadges((prev) => {
+      const next = prev.includes(badgeId)
+        ? prev.filter((id) => id !== badgeId)
+        : [...prev, badgeId]
+
+      const selectedDifficulties = new Set(
+        next
+          .map((id) => quickPlanBadges.find((b) => b.id === id))
+          .filter((b) => b?.type === 'difficulty')
+          .map(
+            (b) =>
+              (b as Extract<QuickPlanBadge, { type: 'difficulty' }>).difficulty,
+          ),
+      )
+
+      if (selectedDifficulties.size === 1) {
+        setSelectedDifficulty(Array.from(selectedDifficulties)[0] ?? null)
+      } else if (selectedDifficulties.size > 1) {
+        setSelectedDifficulty(null)
+      } else {
+        setSelectedDifficulty(null)
+      }
+
+      return next
+    })
+  }
+
+  const handleSetDifficultyFromFilters = (difficulty: GQLDifficulty | null) => {
+    setSelectedDifficulty(difficulty)
+
+    setSelectedQuickBadges((prev) => {
+      const next = prev.filter((id) => {
+        const badge = quickPlanBadges.find((b) => b.id === id)
+        return badge?.type !== 'difficulty'
+      })
+
+      if (difficulty === GQLDifficulty.Beginner) return [...next, 'beginner']
+      if (difficulty === GQLDifficulty.Intermediate)
+        return [...next, 'intermediate']
+      if (difficulty === GQLDifficulty.Expert) return [...next, 'expert']
+
+      return next
+    })
+  }
+
   const clearAllFilters = () => {
     setSelectedFocusTags([])
     setSelectedDifficulty(null)
     setDaysPerWeek(null)
     setSessionMaxMins(90)
     setSort('popular')
+    setSelectedQuickBadges([])
   }
 
   const handlePlanFinderSelect = (plan: PublicTrainingPlan) => {
@@ -199,6 +317,39 @@ export function TrainingPlansTab({
         }
       }
 
+      // Quick badges
+      if (selectedQuickBadges.length > 0) {
+        const selectedBadges = selectedQuickBadges
+          .map((id) => quickPlanBadges.find((b) => b.id === id))
+          .filter(Boolean) as QuickPlanBadge[]
+
+        const selectedDifficulties = new Set(
+          selectedBadges
+            .filter((b) => b.type === 'difficulty')
+            .map((b) => b.difficulty),
+        )
+
+        const selectedTitleBadges = selectedBadges.filter(
+          (b) => b.type === 'title',
+        )
+
+        if (selectedDifficulties.size > 0) {
+          if (!plan.difficulty || !selectedDifficulties.has(plan.difficulty)) {
+            return false
+          }
+        }
+
+        if (selectedTitleBadges.length > 0) {
+          const normalizedTitle = normalizeForKeywordMatch(plan.title)
+          const matchesAny = selectedTitleBadges.some((b) =>
+            b.keywords.some((k) =>
+              normalizedTitle.includes(normalizeForKeywordMatch(k)),
+            ),
+          )
+          if (!matchesAny) return false
+        }
+      }
+
       // Filter by focus tags - match ANY selected tag (OR logic)
       if (selectedFocusTags.length > 0) {
         const hasAnyTag = selectedFocusTags.some((selectedTag) =>
@@ -245,34 +396,60 @@ export function TrainingPlansTab({
   const resultsCount = filteredPlans.length
 
   return (
-    <div className="space-y-4">
-      <Button
-        variant="default"
-        size="lg"
-        className="w-full rounded-full"
-        iconStart={<Sparkles className="h-4 w-4" />}
-        onClick={() => setIsPlanFinderOpen(true)}
-      >
-        Help me choose
-      </Button>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="default"
+          size="md"
+          className="rounded-full flex-1 mr-2"
+          iconStart={<Sparkles className="h-4 w-4" />}
+          onClick={() => setIsPlanFinderOpen(true)}
+        >
+          Help me choose
+        </Button>
 
-      {/* Filter Section */}
-      <TrainingPlanFilters
-        selectedFocusTags={selectedFocusTags}
-        availableFocusTags={availableFocusTags}
-        selectedDifficulty={selectedDifficulty}
-        daysPerWeek={daysPerWeek}
-        sessionMaxMins={sessionMaxMins}
-        sort={sort}
-        resultsCount={resultsCount}
-        onToggleFocusTag={toggleFocusTag}
-        onSetDifficulty={setSelectedDifficulty}
-        onSetDaysPerWeek={setDaysPerWeek}
-        onSetSessionMaxMins={setSessionMaxMins}
-        onSetSort={setSort}
-        onClearAllFilters={clearAllFilters}
-        onOpenPlanFinder={() => setIsPlanFinderOpen(true)}
-      />
+        {/* Filter Section */}
+        <TrainingPlanFilters
+          selectedFocusTags={selectedFocusTags}
+          availableFocusTags={availableFocusTags}
+          selectedDifficulty={selectedDifficulty}
+          daysPerWeek={daysPerWeek}
+          sessionMaxMins={sessionMaxMins}
+          sort={sort}
+          resultsCount={resultsCount}
+          onToggleFocusTag={toggleFocusTag}
+          onSetDifficulty={handleSetDifficultyFromFilters}
+          onSetDaysPerWeek={setDaysPerWeek}
+          onSetSessionMaxMins={setSessionMaxMins}
+          onSetSort={setSort}
+          onClearAllFilters={clearAllFilters}
+          onOpenPlanFinder={() => setIsPlanFinderOpen(true)}
+        />
+      </div>
+      <div className="overflow-x-auto hide-scrollbar -mx-4 max-w-screen bg-card py-2 border">
+        <div className="flex gap-2 px-4 py-1 w-max">
+          {quickPlanBadges.map((badge) => {
+            const selected = selectedQuickBadges.includes(badge.id)
+            return (
+              <Badge
+                key={badge.id}
+                asChild
+                size="lg"
+                variant={selected ? 'primary' : 'outline'}
+                className="rounded-full"
+              >
+                <button
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => toggleQuickBadge(badge.id)}
+                >
+                  {badge.label}
+                </button>
+              </Badge>
+            )
+          })}
+        </div>
+      </div>
 
       {/* Results */}
       <div className="space-y-4">
@@ -365,6 +542,14 @@ interface TrainingPlanCardProps {
   isPremium: boolean
 }
 
+function normalizeForKeywordMatch(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
+}
+
 const difficultyVariantMap = {
   BEGINNER: 'beginner',
   INTERMEDIATE: 'intermediate',
@@ -373,6 +558,11 @@ const difficultyVariantMap = {
 } as const
 
 function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
+  const is10MinutesPlan = plan.title.toLowerCase().includes('10-minutes')
+  const avgSessionMinutes = is10MinutesPlan
+    ? 10
+    : Math.ceil((plan.avgSessionTime ?? 45) / 5) * 5
+  const weekCount = plan.weekCount ?? plan.weeks?.length
   return (
     <Card
       className={cn(
@@ -397,36 +587,36 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
           {plan.title}
         </CardTitle>
         {/* Metadata Row */}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-white/90 mt-1">
-          <span className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            {plan.sessionsPerWeek || 3} days/wk
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />~{plan.avgSessionTime || 45} min
-          </span>
-          {formatUserCount(plan.assignmentCount) && (
-            <span className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {formatUserCount(plan.assignmentCount)} started
-            </span>
-          )}
+        <div className="flex flex-col gap-y-2 text-sm font-medium text-white/90 mt-1">
+          <p className="flex items-center gap-1">
+            <Calendar className="size-4" />
+            {plan.sessionsPerWeek || 3} days/week
+          </p>
+          {weekCount ? (
+            <p className="flex items-center gap-1">
+              <Layers className="size-4" />
+              {weekCount} {weekCount === 1 ? 'week' : 'weeks'}
+            </p>
+          ) : null}
+          <p className="flex items-center gap-1">
+            <Clock className="size-4" />~{avgSessionMinutes} min
+          </p>
         </div>
       </CardHeader>
       <CardContent className="relative">
         <div className="space-y-2">
           {/* Focus Tags */}
           <div className="flex flex-col gap-2 mt-2">
+            {plan.difficulty ? (
+              <Badge
+                variant={difficultyVariantMap[plan.difficulty]}
+                className="capitalize"
+                size="md"
+              >
+                {plan.difficulty.toLowerCase()}
+              </Badge>
+            ) : null}
             <div className="flex flex-wrap gap-1">
-              {plan.difficulty ? (
-                <Badge
-                  variant={difficultyVariantMap[plan.difficulty]}
-                  className="capitalize"
-                  size="md"
-                >
-                  {plan.difficulty.toLowerCase()}
-                </Badge>
-              ) : null}
               {plan.focusTags && plan.focusTags.length > 0
                 ? plan.focusTags
                     .slice(0, 2)
@@ -436,6 +626,12 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
                       </Badge>
                     ))
                 : null}
+              {formatUserCount(plan.assignmentCount) && (
+                <Badge variant="primary" size="md" className="ml-auto">
+                  <Users className="h-3 w-3" />
+                  {formatUserCount(plan.assignmentCount)}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
