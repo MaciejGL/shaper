@@ -1,10 +1,10 @@
 'use client'
 
-import imageCompression from 'browser-image-compression'
 import { Plus, X } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
 
 import { IMAGE_CONFIGS, type ImageType } from '@/lib/aws/s3'
+import { getImageMimeTypeFromFile } from '@/lib/get-image-mime-type'
 import { cn } from '@/lib/utils'
 
 import { Button } from './button'
@@ -64,8 +64,8 @@ export function MultiImageUpload({
 
       try {
         // Validate file
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-        if (!allowedTypes.includes(file.type)) {
+        const contentType = getImageMimeTypeFromFile(file)
+        if (!contentType) {
           throw new Error('Only JPEG, PNG, and WebP images are allowed')
         }
 
@@ -75,18 +75,11 @@ export function MultiImageUpload({
           )
         }
 
-        // Compress image
+        // Upload original file (no resizing/compression)
         setUploadStates((prev) => ({
           ...prev,
           [slotIndex]: { uploading: true, progress: 20, error: null },
         }))
-
-        const compressedFile = await imageCompression(file, {
-          maxWidthOrHeight: Math.max(config.maxWidth, config.maxHeight),
-          useWebWorker: true,
-          fileType: file.type,
-          initialQuality: config.quality,
-        })
 
         // Get presigned URL
         setUploadStates((prev) => ({
@@ -99,7 +92,7 @@ export function MultiImageUpload({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             fileName: file.name,
-            contentType: compressedFile.type,
+            contentType,
             imageType,
             // No relatedId = always uploads to temp
           }),
@@ -120,9 +113,9 @@ export function MultiImageUpload({
 
         const uploadResponse = await fetch(presignedUrl, {
           method: 'PUT',
-          body: compressedFile,
+          body: file,
           headers: {
-            'Content-Type': compressedFile.type,
+            'Content-Type': contentType,
           },
         })
 
@@ -391,7 +384,8 @@ export function MultiImageUpload({
                   : 'Drag & drop or click to browse'}
               </p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                Up to {maxImages} images • Max {config.maxSize / (1024 * 1024)}MB each • {currentImageUrls.length}/{maxImages} uploaded
+                Up to {maxImages} images • Max {config.maxSize / (1024 * 1024)}
+                MB each • {currentImageUrls.length}/{maxImages} uploaded
               </p>
             </div>
           </div>

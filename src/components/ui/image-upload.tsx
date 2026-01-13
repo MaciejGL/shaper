@@ -1,10 +1,10 @@
 'use client'
 
-import imageCompression from 'browser-image-compression'
 import { AlertCircle, Camera, Upload, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
 import { IMAGE_CONFIGS, type ImageType } from '@/lib/aws/s3'
+import { getImageMimeTypeFromFile } from '@/lib/get-image-mime-type'
 
 import { Button } from './button'
 import { Progress } from './progress'
@@ -62,8 +62,8 @@ export function ImageUpload({
 
       try {
         // Validate file
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-        if (!allowedTypes.includes(file.type)) {
+        const contentType = getImageMimeTypeFromFile(file)
+        if (!contentType) {
           throw new Error('Only JPEG, PNG, and WebP images are allowed')
         }
 
@@ -73,14 +73,8 @@ export function ImageUpload({
           )
         }
 
-        // Compress image
+        // Upload original file (no resizing/compression)
         setUploadState((prev) => ({ ...prev, progress: 20 }))
-        const compressedFile = await imageCompression(file, {
-          maxWidthOrHeight: Math.max(config.maxWidth, config.maxHeight),
-          useWebWorker: true,
-          fileType: file.type,
-          initialQuality: config.quality,
-        })
 
         // Get presigned URL
         setUploadState((prev) => ({ ...prev, progress: 40 }))
@@ -89,7 +83,7 @@ export function ImageUpload({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             fileName: file.name,
-            contentType: compressedFile.type,
+            contentType,
             imageType,
             relatedId,
           }),
@@ -106,9 +100,9 @@ export function ImageUpload({
         setUploadState((prev) => ({ ...prev, progress: 70 }))
         const uploadResponse = await fetch(presignedUrl, {
           method: 'PUT',
-          body: compressedFile,
+          body: file,
           headers: {
-            'Content-Type': compressedFile.type,
+            'Content-Type': contentType,
           },
         })
 
