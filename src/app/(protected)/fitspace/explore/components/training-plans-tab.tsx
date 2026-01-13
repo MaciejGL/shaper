@@ -34,6 +34,7 @@ import {
 } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
 import { usePaymentRules } from '@/hooks/use-payment-rules'
+import { isProd } from '@/lib/get-base-url'
 import { cn } from '@/lib/utils'
 import { formatUserCount } from '@/utils/format-user-count'
 
@@ -633,7 +634,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
                       </Badge>
                     ))
                 : null}
-              {formatUserCount(plan.assignmentCount) && (
+              {formatUserCount(plan.assignmentCount) && !isProd && (
                 <Badge variant="primary" size="md-lg" className="ml-auto">
                   <Users className="h-3 w-3" />
                   {formatUserCount(plan.assignmentCount)}

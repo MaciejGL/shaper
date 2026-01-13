@@ -15,6 +15,7 @@ import {
   GQLDifficulty,
   useStartFreeWorkoutDayMutation,
 } from '@/generated/graphql-client'
+import { isProd } from '@/lib/get-base-url'
 import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 import { estimateWorkoutTime } from '@/lib/workout/estimate-workout-time'
@@ -251,7 +252,7 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
                 {day.plan.difficulty.toLowerCase()}
               </Badge>
             )}
-            {timesStarted > 0 && (
+            {timesStarted > 0 && !isProd && (
               <Badge className="flex items-center gap-1 ml-auto" size="md-lg">
                 <Users className="h-3 w-3" />
                 <span>{formatUserCount(timesStarted)}</span>

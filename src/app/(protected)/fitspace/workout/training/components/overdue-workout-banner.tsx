@@ -25,25 +25,39 @@ export function OverdueWorkoutBanner({
 
     const today = startOfDay(new Date())
 
-    // Find incomplete workout days that are in the past
-    let overdueCount = 0
+    // Find current week (where today falls in range)
+    let currentWeekIndex = -1
+    for (let i = 0; i < plan.weeks.length; i++) {
+      const week = plan.weeks[i]
+      const scheduledDays = week.days.filter((d) => d.scheduledAt)
+      if (scheduledDays.length === 0) continue
 
-    for (const week of plan.weeks) {
-      for (const day of week.days) {
-        if (day.isRestDay) continue
-        if (day.completedAt) continue
-        if (!day.scheduledAt) continue
+      const firstDayDate = startOfDay(new Date(scheduledDays[0].scheduledAt!))
+      const lastDayDate = startOfDay(
+        new Date(scheduledDays[scheduledDays.length - 1].scheduledAt!),
+      )
 
-        const scheduledDate = startOfDay(new Date(day.scheduledAt))
-        if (scheduledDate < today) {
-          overdueCount++
-        }
+      if (today >= firstDayDate && today <= lastDayDate) {
+        currentWeekIndex = i
+        break
       }
     }
 
-    if (overdueCount === 0) return null
+    // No current week found or it's the first week - no previous week to check
+    if (currentWeekIndex <= 0) return null
 
-    return { count: overdueCount }
+    // Check only the immediately previous week
+    const previousWeek = plan.weeks[currentWeekIndex - 1]
+    const unfinishedCount = previousWeek.days.filter(
+      (d) => !d.isRestDay && !d.completedAt && d.scheduledAt,
+    ).length
+
+    // Show banner only if previous week has 3+ unfinished
+    if (unfinishedCount >= 3) {
+      return { count: unfinishedCount }
+    }
+
+    return null
   }, [plan, isQuickWorkout])
 
   if (!overdueInfo || isDismissed) return null
