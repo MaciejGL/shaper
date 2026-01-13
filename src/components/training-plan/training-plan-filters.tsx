@@ -123,7 +123,7 @@ export function TrainingPlanFilters({
           <DrawerTrigger asChild>
             <Button
               variant="secondary"
-              size="icon-md"
+              size="icon-lg"
               iconOnly={<Filter />}
               className={cn(
                 'shrink-0 rounded-full',
@@ -353,7 +353,7 @@ export function TrainingPlanFilters({
           <DropdownMenuTrigger asChild>
             <Button
               variant="secondary"
-              size="md"
+              size="lg"
               className="shrink-0 rounded-full"
               iconStart={<ArrowUpDown />}
             >

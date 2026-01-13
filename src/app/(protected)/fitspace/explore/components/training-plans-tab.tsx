@@ -397,10 +397,10 @@ export function TrainingPlansTab({
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-2">
         <Button
           variant="default"
-          size="md"
+          size="lg"
           className="rounded-full flex-1 mr-2"
           iconStart={<Sparkles className="h-4 w-4" />}
           onClick={() => setIsPlanFinderOpen(true)}
@@ -426,7 +426,8 @@ export function TrainingPlansTab({
           onOpenPlanFinder={() => setIsPlanFinderOpen(true)}
         />
       </div>
-      <div className="overflow-x-auto hide-scrollbar -mx-4 max-w-screen bg-card py-2 mt-2 border">
+
+      <div className="overflow-x-auto hide-scrollbar -mx-4 max-w-screen py-2">
         <div className="flex gap-2 px-4 py-1 w-max">
           {quickPlanBadges.map((badge) => {
             const selected = selectedQuickBadges.includes(badge.id)
@@ -435,13 +436,14 @@ export function TrainingPlansTab({
                 key={badge.id}
                 asChild
                 size="lg"
-                variant={selected ? 'primary' : 'outline'}
-                className="rounded-full"
+                variant={selected ? 'primary' : 'secondary'}
+                className="rounded-full p-0 border border-neutral-300 dark:border-neutral-700"
               >
                 <button
                   type="button"
                   aria-pressed={selected}
                   onClick={() => toggleQuickBadge(badge.id)}
+                  className="px-3 py-2"
                 >
                   {badge.label}
                 </button>
