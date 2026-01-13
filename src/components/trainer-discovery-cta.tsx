@@ -1,16 +1,16 @@
 'use client'
 
-import { ChevronRight, Sparkles, Users } from 'lucide-react'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 import { cn } from '@/lib/utils'
 
 import { Badge } from './ui/badge'
-import { Card } from './ui/card'
 
 interface TrainerDiscoveryCtaProps {
   className?: string
-  variant?: 'card' | 'banner' | 'compact'
+  // Kept for backward compatibility, but we only have one design now
+  variant?: string
   title?: string
   subtitle?: string
   showBadge?: boolean
@@ -19,115 +19,58 @@ interface TrainerDiscoveryCtaProps {
 
 export function TrainerDiscoveryCta({
   className,
-  variant = 'card',
   title,
   subtitle,
   showBadge = true,
   onClick,
 }: TrainerDiscoveryCtaProps) {
-  const defaultTitles = {
-    card: 'Ready to Level Up?',
-    banner: 'Get Personal Coaching',
-    compact: 'Find a Trainer',
-  }
+  const defaultTitle = 'Elevate Your Training'
+  const defaultSubtitle = 'Get matched with a certified expert for your goals'
 
-  const defaultSubtitles = {
-    card: 'Connect with expert trainers for personalized guidance and faster results',
-    banner: 'Work with certified trainers who understand your goals',
-    compact: 'Get expert guidance',
-  }
+  const finalTitle = title || defaultTitle
+  const finalSubtitle = subtitle || defaultSubtitle
 
-  const finalTitle = title || defaultTitles[variant]
-  const finalSubtitle = subtitle || defaultSubtitles[variant]
-
-  if (variant === 'compact') {
-    return (
-      <Link
-        href="/fitspace/explore?tab=trainers"
-        onClick={onClick}
-        className={cn(
-          'flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/30 transition-colors',
-          className,
-        )}
-      >
-        <Users className="h-4 w-4 text-primary" />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-primary">{finalTitle}</p>
-          <p className="text-xs text-muted-foreground truncate">
-            {finalSubtitle}
-          </p>
-        </div>
-        <ChevronRight className="h-4 w-4 text-primary" />
-      </Link>
-    )
-  }
-
-  if (variant === 'banner') {
-    return (
-      <Link
-        href="/fitspace/explore?tab=trainers"
-        onClick={onClick}
-        className={className}
-      >
-        <Card
-          variant="premium"
-          className="w-full flex flex-row items-center justify-between p-4"
-        >
-          <div className="flex items-center gap-3 text-black">
-            <div className="text-left">
-              <div className="text-base font-semibold leading-tight flex items-center gap-2">
-                {finalTitle}
-                {showBadge && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-white/20 text-black text-xs"
-                  >
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    New
-                  </Badge>
-                )}
-              </div>
-              <div className="text-xs leading-tight">{finalSubtitle}</div>
-            </div>
-          </div>
-          <ChevronRight className="size-5" color="black" />
-        </Card>
-      </Link>
-    )
-  }
-
-  // Default card variant
   return (
     <Link
       href="/fitspace/explore?tab=trainers"
       onClick={onClick}
-      className={className}
+      className={cn('group block', className)}
     >
-      <Card className="p-6 text-center hover:shadow-md transition-shadow">
-        <div className="space-y-3">
-          <div className="mx-auto w-12 h-12 bg-gradient-to-r from-primary to-primary/80 rounded-full flex items-center justify-center">
-            <Users className="h-6 w-6 text-primary-foreground" />
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-center gap-2">
-              <h3 className="text-lg font-semibold">{finalTitle}</h3>
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-2xl border border-primary/20 p-5',
+          'bg-linear-to-br from-primary/10 to-white via-white dark:via-background dark:to-background shadow-xl',
+          'hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5',
+        )}
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-2 flex-1 min-w-0">
+            <div className="flex items-center gap-2">
               {showBadge && (
-                <Badge variant="secondary" className="text-xs">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  Featured
+                <Badge
+                  variant="secondary"
+                  className="bg-primary/10 text-primary border-primary/20"
+                >
+                  <Sparkles className="mr-1 h-3 w-3" />
+                  Level Up
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">{finalSubtitle}</p>
+            <div>
+              <h3 className="font-bold text-lg leading-tight mb-1">
+                {finalTitle}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-snug">
+                {finalSubtitle}
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center justify-center gap-1 text-primary text-sm font-medium">
-            <span>Explore Trainers</span>
-            <ChevronRight className="h-4 w-4" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20 group-hover:translate-x-1 transition-transform">
+            <ArrowRight className="h-5 w-5" />
           </div>
         </div>
-      </Card>
+      </div>
     </Link>
   )
 }
