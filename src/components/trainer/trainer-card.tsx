@@ -1,5 +1,6 @@
 'use client'
 
+import { ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 
 import { Card, CardContent, CardProps } from '@/components/ui/card'
@@ -125,7 +126,7 @@ export function TrainerCard({
               </p>
             )
           })()}
-          <div className="mb-4 mt-3 text-shadow-xs text-shadow-black text-foreground font-semibold text-sm flex items-center gap-2">
+          <div className="mt-3 text-shadow-xs text-shadow-black text-foreground font-semibold text-sm flex items-center gap-2">
             {trainer.capacity != null && trainer.spotsLeft != null && (
               <SpotsIndicator spotsLeft={trainer.spotsLeft} />
             )}
@@ -135,8 +136,17 @@ export function TrainerCard({
             {getExperienceText() && (
               <span className="text-amber-500">{getExperienceText()}</span>
             )}
+            {!hideButton && (
+              <Button
+                variant="default"
+                size="icon-md"
+                iconOnly={<ChevronRight />}
+                className="rounded-full ml-auto bg-primary/20 backdrop-blur-sm text-foreground"
+              >
+                View Trainer
+              </Button>
+            )}
           </div>
-          {!hideButton && <Button>View Trainer</Button>}
         </div>
       </CardContent>
     </Card>

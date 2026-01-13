@@ -132,27 +132,24 @@ export function FreeWorkoutsTab({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-0 -mx-4">
-        <AnimatePresence mode="popLayout" initial={false}>
-          {freeWorkoutDays.map((day) => (
-            <motion.div
-              key={day.id}
-              layout
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <FreeWorkoutDayCard
-                day={day}
-                onClick={() => handleCardClick(day.id)}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-
+    <div className="space-y-0 -mx-4">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {freeWorkoutDays.map((day) => (
+          <motion.div
+            key={day.id}
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FreeWorkoutDayCard
+              day={day}
+              onClick={() => handleCardClick(day.id)}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
       <UnifiedPreviewDrawer
         initialView={
           selectedWorkout ? { type: 'workout', data: selectedWorkout } : null
