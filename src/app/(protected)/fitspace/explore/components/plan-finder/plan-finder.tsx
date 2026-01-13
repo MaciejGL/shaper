@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react'
+import Image from 'next/image'
 import { useState } from 'react'
 
 import { Loader } from '@/components/loader'
@@ -146,14 +147,17 @@ export function PlanFinder({ plans, onSelectPlan, onClose }: PlanFinderProps) {
               className="border-primary/50 overflow-hidden cursor-pointer hover:border-primary transition-colors"
               onClick={() => onSelectPlan(topMatch.plan)}
             >
-              <div
-                className="h-44 bg-cover bg-center relative"
-                style={{
-                  backgroundImage: topMatch.plan.heroImageUrl
-                    ? `url(${topMatch.plan.heroImageUrl})`
-                    : undefined,
-                }}
-              >
+              <div className="h-44 relative">
+                {topMatch.plan.heroImageUrl ? (
+                  <Image
+                    src={topMatch.plan.heroImageUrl}
+                    alt={`${topMatch.plan.title} cover`}
+                    fill
+                    className="object-cover"
+                    quality={100}
+                    sizes="100vw"
+                  />
+                ) : null}
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-3 left-4 right-4">
                   <h3 className="text-xl font-bold text-white">
@@ -214,14 +218,18 @@ export function PlanFinder({ plans, onSelectPlan, onClose }: PlanFinderProps) {
                   className="flex items-center p-4 cursor-pointer hover:bg-accent/50 transition-colors"
                   onClick={() => onSelectPlan(match.plan)}
                 >
-                  <div
-                    className="h-32 aspect-5/4 bg-cover bg-center rounded-md mr-4 shrink-0"
-                    style={{
-                      backgroundImage: match.plan.heroImageUrl
-                        ? `url(${match.plan.heroImageUrl})`
-                        : undefined,
-                    }}
-                  />
+                  <div className="h-32 aspect-5/4 rounded-md mr-4 shrink-0 overflow-hidden relative">
+                    {match.plan.heroImageUrl ? (
+                      <Image
+                        src={match.plan.heroImageUrl}
+                        alt={`${match.plan.title} cover`}
+                        fill
+                        className="object-cover"
+                        quality={100}
+                        sizes="160px"
+                      />
+                    ) : null}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-center">
                       {match.plan.title}

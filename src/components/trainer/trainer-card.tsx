@@ -83,6 +83,8 @@ export function TrainerCard({
             hideButton && 'rounded-none',
             classNameImage,
           )}
+          quality={100}
+          sizes="100vw"
         />
       )}
 

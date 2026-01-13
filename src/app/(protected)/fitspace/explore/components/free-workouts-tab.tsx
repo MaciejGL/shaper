@@ -2,7 +2,8 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Dumbbell, Users } from 'lucide-react'
+import { Clock, Dumbbell, Users } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -197,10 +198,17 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
         'bg-cover bg-center',
       )}
       onClick={onClick}
-      style={{
-        backgroundImage: day.heroImageUrl ? `url(${day.heroImageUrl})` : 'none',
-      }}
     >
+      {day.heroImageUrl ? (
+        <Image
+          src={day.heroImageUrl}
+          alt={`${formatWorkoutType(workoutType) || 'Workout'} cover`}
+          fill
+          className="object-cover"
+          quality={100}
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+      ) : null}
       {day.heroImageUrl && (
         <div className="absolute -inset-[0.5px] bg-linear-to-r from-black via-black/60 to-transparent" />
       )}
@@ -215,7 +223,25 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
               from <span className="text-foreground">{planTitle}</span>
             </p>
           </div>
-          <div className="flex items-center gap-2 empty:hidden">
+        </div>
+      </CardHeader>
+      <CardContent className="relative dark">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm text-foreground">
+            <p className="flex items-center gap-1">
+              <Dumbbell className="size-4" />
+              {exerciseCount} exercises
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between text-xs">
+            {estimatedDuration && (
+              <p className="flex items-center gap-1">
+                <Clock className="size-4" />~{estimatedDuration} min
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-2 empty:hidden">
             {day.plan?.difficulty && (
               <Badge
                 variant={difficultyVariantMap[day.plan.difficulty]}
@@ -226,25 +252,10 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
               </Badge>
             )}
             {timesStarted > 0 && (
-              <Badge className="flex items-center gap-1" size="md-lg">
+              <Badge className="flex items-center gap-1 ml-auto" size="md-lg">
                 <Users className="h-3 w-3" />
                 <span>{formatUserCount(timesStarted)}</span>
               </Badge>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="relative dark">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-sm text-foreground">
-            <span>{exerciseCount} exercises</span>
-          </div>
-
-          <div className="flex items-center justify-between text-xs">
-            {estimatedDuration && (
-              <div className="flex items-center gap-2 text-sm text-foreground">
-                <span>{estimatedDuration} mins workout</span>
-              </div>
             )}
           </div>
         </div>

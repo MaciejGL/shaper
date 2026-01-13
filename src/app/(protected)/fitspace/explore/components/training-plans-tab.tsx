@@ -10,6 +10,7 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -573,13 +574,17 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
         'bg-cover bg-center',
       )}
       onClick={onClick}
-      style={{
-        backgroundImage: plan.heroImageUrl
-          ? `url(${plan.heroImageUrl})`
-          : 'none',
-      }}
     >
-      {/* Hero image background */}
+      {plan.heroImageUrl ? (
+        <Image
+          src={plan.heroImageUrl}
+          alt={`${plan.title} cover`}
+          fill
+          className="object-cover"
+          quality={100}
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+      ) : null}
       {plan.heroImageUrl && (
         <div className="absolute -inset-[0.5px] bg-linear-to-r from-black via-black/60 to-transparent" />
       )}
