@@ -10,7 +10,10 @@ import { toast } from 'sonner'
 import { BiggyIcon } from '@/components/biggy-icon'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useStartFreeWorkoutDayMutation } from '@/generated/graphql-client'
+import {
+  GQLDifficulty,
+  useStartFreeWorkoutDayMutation,
+} from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 import { estimateWorkoutTime } from '@/lib/workout/estimate-workout-time'
@@ -27,6 +30,15 @@ interface FreeWorkoutsTabProps {
   isAssigning: boolean
   availablePlans: PublicTrainingPlan[]
 }
+
+const difficultyVariantMap = {
+  BEGINNER: 'beginner',
+  INTERMEDIATE: 'intermediate',
+  ADVANCED: 'advanced',
+  EXPERT: 'expert',
+} satisfies Partial<
+  Record<GQLDifficulty, 'beginner' | 'intermediate' | 'advanced' | 'expert'>
+>
 
 export function FreeWorkoutsTab({
   initialWorkouts,
@@ -119,7 +131,7 @@ export function FreeWorkoutsTab({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-4">
+      <div className="space-y-0 -mx-4">
         <AnimatePresence mode="popLayout" initial={false}>
           {freeWorkoutDays.map((day) => (
             <motion.div
@@ -181,7 +193,7 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
     <Card
       className={cn(
         'cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark',
-        'shadow-lg shadow-neutral-400 dark:shadow-neutral-950 dark:border dark:border-border',
+        'rounded-none shadow-none border-y-2 border-x-0',
         'bg-cover bg-center',
       )}
       onClick={onClick}
@@ -190,7 +202,7 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
       }}
     >
       {day.heroImageUrl && (
-        <div className="absolute -inset-[0.5px] bg-gradient-to-r from-black via-black/60 to-transparent" />
+        <div className="absolute -inset-[0.5px] bg-linear-to-r from-black via-black/60 to-transparent" />
       )}
 
       <CardHeader className="relative dark">
@@ -199,9 +211,26 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
             <CardTitle className="text-2xl text-foreground">
               {formatWorkoutType(workoutType) || 'Workout'}
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">{planTitle}</span>
+            <p className="text-sm text-muted-foreground font-medium">
+              from <span className="text-foreground">{planTitle}</span>
             </p>
+          </div>
+          <div className="flex items-center gap-2 empty:hidden">
+            {day.plan?.difficulty && (
+              <Badge
+                variant={difficultyVariantMap[day.plan.difficulty]}
+                className="capitalize"
+                size="md-lg"
+              >
+                {day.plan.difficulty.toLowerCase()}
+              </Badge>
+            )}
+            {timesStarted > 0 && (
+              <Badge className="flex items-center gap-1" size="md-lg">
+                <Users className="h-3 w-3" />
+                <span>{formatUserCount(timesStarted)}</span>
+              </Badge>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -216,12 +245,6 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
               <div className="flex items-center gap-2 text-sm text-foreground">
                 <span>{estimatedDuration} mins workout</span>
               </div>
-            )}
-            {timesStarted > 0 && (
-              <Badge className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                <span>{formatUserCount(timesStarted)}</span>
-              </Badge>
             )}
           </div>
         </div>

@@ -396,7 +396,7 @@ export function TrainingPlansTab({
   const resultsCount = filteredPlans.length
 
   return (
-    <div className="space-y-2">
+    <div>
       <div className="flex items-center justify-between">
         <Button
           variant="default"
@@ -426,7 +426,7 @@ export function TrainingPlansTab({
           onOpenPlanFinder={() => setIsPlanFinderOpen(true)}
         />
       </div>
-      <div className="overflow-x-auto hide-scrollbar -mx-4 max-w-screen bg-card py-2 border">
+      <div className="overflow-x-auto hide-scrollbar -mx-4 max-w-screen bg-card py-2 mt-2 border">
         <div className="flex gap-2 px-4 py-1 w-max">
           {quickPlanBadges.map((badge) => {
             const selected = selectedQuickBadges.includes(badge.id)
@@ -452,7 +452,7 @@ export function TrainingPlansTab({
       </div>
 
       {/* Results */}
-      <div className="space-y-4">
+      <div className="space-y-0 -mx-4">
         {isLoading ? (
           <LoadingSkeleton count={3} variant="lg" />
         ) : filteredPlans.length === 0 ? (
@@ -567,7 +567,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
     <Card
       className={cn(
         'cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark',
-        'shadow-lg shadow-neutral-400 dark:shadow-neutral-950 dark:border dark:border-border',
+        'rounded-none shadow-none border-y-2 border-x-0',
         'bg-cover bg-center',
       )}
       onClick={onClick}
@@ -611,7 +611,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
               <Badge
                 variant={difficultyVariantMap[plan.difficulty]}
                 className="capitalize"
-                size="md"
+                size="md-lg"
               >
                 {plan.difficulty.toLowerCase()}
               </Badge>
@@ -621,13 +621,13 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
                 ? plan.focusTags
                     .slice(0, 2)
                     .map((tag: GQLFocusTag, index: number) => (
-                      <Badge key={index} variant="secondary" size="md">
+                      <Badge key={index} variant="secondary" size="md-lg">
                         {focusTagLabels[tag] || tag}
                       </Badge>
                     ))
                 : null}
               {formatUserCount(plan.assignmentCount) && (
-                <Badge variant="primary" size="md" className="ml-auto">
+                <Badge variant="primary" size="md-lg" className="ml-auto">
                   <Users className="h-3 w-3" />
                   {formatUserCount(plan.assignmentCount)}
                 </Badge>

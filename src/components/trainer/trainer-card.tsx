@@ -34,7 +34,10 @@ interface TrainerCardProps {
   onClick?: () => void
   variant?: CardProps['variant']
   className?: string
+  classNameImage?: string
   hideButton?: boolean
+  classNameOverlay?: string
+  classNameBadge?: string
 }
 
 export function TrainerCard({
@@ -43,6 +46,9 @@ export function TrainerCard({
   variant = 'secondary',
   className = '',
   hideButton = false,
+  classNameImage,
+  classNameOverlay,
+  classNameBadge,
 }: TrainerCardProps) {
   const trainerName =
     trainer.name ||
@@ -75,17 +81,23 @@ export function TrainerCard({
           className={cn(
             'object-cover object-top rounded-2xl',
             hideButton && 'rounded-none',
+            classNameImage,
           )}
-          sizes="500px"
         />
       )}
 
-      <CardContent className="dark min-h-[150px] relative grid grid-cols-[32%_68%] p-0 h-full">
+      <CardContent className="dark min-h-[150px] relative grid grid-cols-[32%_68%] p-0 h-full overflow-hidden">
         <div />
-        <div className="flex flex-col w-full bg-linear-to-r from-black/0 via-black/70 to-black/50 h-full p-4 rounded-2xl">
+        <div
+          className={cn(
+            'flex flex-col w-full bg-linear-to-r from-black/0 via-black/70 to-black/50 h-full p-4 rounded-2xl',
+            classNameOverlay,
+          )}
+        >
           <div
             className={cn(
               'absolute top-0 right-0 bg-white/10 backdrop-blur-sm text-amber-400 font-semibold text-xs py-1.5 px-4 rounded-bl-2xl rounded-tr-2xl',
+              classNameBadge,
             )}
           >
             EXPERT

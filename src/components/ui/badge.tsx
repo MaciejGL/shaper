@@ -54,6 +54,7 @@ const badgeVariants = cva(
         xs: cn(' text-xs px-[6px] py-[1px] [&>svg]:size-3'),
         sm: cn('text-xs px-1.5 py-0.5 [&>svg]:size-3'),
         md: 'text-xs px-2 py-0.5 [&>svg]:size-3',
+        'md-lg': 'text-sm px-2 py-1 [&>svg]:size-4',
         lg: 'text-sm px-3 py-1 [&>svg]:size-4',
       },
     },

@@ -18,6 +18,7 @@ import {
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
 import { useTrainerServiceAccess } from '@/hooks/use-trainer-service-access'
+import { cn } from '@/lib/utils'
 
 import { FeaturedTrainer } from './explore.client'
 
@@ -173,7 +174,7 @@ export function TrainersTab({
 
   return (
     <>
-      <div className="space-y-3">
+      <div className={cn(trainers.length > 0 && '-mx-4')}>
         {trainers.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center">
@@ -189,6 +190,10 @@ export function TrainersTab({
               key={trainer.id}
               trainer={trainer}
               onClick={() => handleTrainerClick(trainer)}
+              className="rounded-none shadow-none border-y-2 border-sidebar border-x-0"
+              classNameImage="rounded-none"
+              classNameOverlay="rounded-none"
+              classNameBadge="rounded-tr-none"
             />
           ))
         )}
