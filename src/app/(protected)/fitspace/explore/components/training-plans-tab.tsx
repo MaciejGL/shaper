@@ -429,8 +429,11 @@ export function TrainingPlansTab({
         />
       </div>
 
-      <div className="overflow-x-auto hide-scrollbar -mx-4 max-w-screen py-2">
-        <div className="flex gap-2 px-4 py-1 w-max">
+      <div
+        className="overflow-x-auto hide-scrollbar -mx-4 max-w-screen overscroll-x-contain touch-pan-x snap-x snap-proximity"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        <div className="flex gap-2 px-4 py-3 w-max">
           {quickPlanBadges.map((badge) => {
             const selected = selectedQuickBadges.includes(badge.id)
             return (
@@ -445,7 +448,7 @@ export function TrainingPlansTab({
                   type="button"
                   aria-pressed={selected}
                   onClick={() => toggleQuickBadge(badge.id)}
-                  className="px-3 py-2"
+                  className="px-3 py-2 snap-center"
                 >
                   {badge.label}
                 </button>
