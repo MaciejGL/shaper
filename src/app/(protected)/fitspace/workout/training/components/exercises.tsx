@@ -134,7 +134,7 @@ export function Exercises({
             />
           ))}
           {isQuickWorkout && day.id && (
-            <div className="grid grid-cols-2 gap-2 pb-4 px-4">
+            <div className="grid grid-cols-2 gap-2 pb-4 px-4 mb-16">
               <div className="col-span-full">
                 <AddSingleExercise dayId={day.id} variant="button" />
               </div>
