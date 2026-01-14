@@ -41,30 +41,9 @@ async function fetchExerciseSuggestions(
   return response.json()
 }
 
-interface UseAiSuggestionsParams {
-  onSuggestionsLoaded?: (exerciseIds: string[]) => void
-}
-
-export function useAiSuggestions({
-  onSuggestionsLoaded,
-}: UseAiSuggestionsParams = {}) {
+export function useAiSuggestions() {
   const mutation = useMutation({
     mutationFn: fetchExerciseSuggestions,
-    onSuccess: (data) => {
-      const compoundIds = data.suggestions
-        .filter(
-          (s) =>
-            s.role === 'primary_compound' || s.role === 'secondary_compound',
-        )
-        .map((s) => s.exerciseId)
-
-      const idsToSelect =
-        compoundIds.length >= 2
-          ? compoundIds.slice(0, 2)
-          : data.suggestions.slice(0, 2).map((s) => s.exerciseId)
-
-      onSuggestionsLoaded?.(idsToSelect)
-    },
   })
 
   const reset = useCallback(() => {

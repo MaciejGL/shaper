@@ -122,16 +122,7 @@ export function AiExerciseSuggestions({
     hasSuggestions,
     fetchSuggestions,
     reset,
-  } = useAiSuggestions({
-    onSuggestionsLoaded: (exerciseIds) => {
-      // Auto-select first 2 suggestions
-      exerciseIds.forEach((id) => {
-        if (!selectedExerciseIds.includes(id)) {
-          onToggleExercise(id)
-        }
-      })
-    },
-  })
+  } = useAiSuggestions()
 
   const showGenerateButton = !hasSuggestions && !isLoading && !error
   const showResults = hasSuggestions && !isLoading
