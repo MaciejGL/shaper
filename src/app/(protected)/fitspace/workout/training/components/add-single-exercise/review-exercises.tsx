@@ -14,9 +14,8 @@ import { Textarea } from '@/components/ui/textarea'
 import type { GQLFitspaceGetExercisesQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
-import { DraggableExerciseItem } from './selectable-exercise-item'
-
 // import { getExerciseMuscleDisplay } from './utils'
+import { DraggableExerciseItem } from './selectable-exercise-item'
 
 type Exercise = NonNullable<
   NonNullable<GQLFitspaceGetExercisesQuery['getExercises']>['publicExercises']
@@ -235,6 +234,7 @@ function ReorderableExerciseItem({
           videoUrl={exercise.videoUrl}
           disabled={isAdding}
           onRemove={onRemove}
+          detailExercise={exercise}
           belowContent={
             <div className="mt-2 flex justify-start items-baseline gap-2">
               <p className="text-sm text-muted-foreground">Sets</p>

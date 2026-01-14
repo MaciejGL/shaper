@@ -5,6 +5,8 @@ import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+import { ExerciseDetailDrawer } from '../exercise/exercise-detail-drawer'
+
 interface BaseExerciseItemProps {
   id: string
   name: string
@@ -15,6 +17,7 @@ interface BaseExerciseItemProps {
   isSelected?: boolean
   onClick?: () => void
   leading?: React.ReactNode
+  detailExercise?: React.ComponentProps<typeof ExerciseDetailDrawer>['exercise']
   belowContent?: React.ReactNode
   trailing?: React.ReactNode
 }
@@ -28,6 +31,8 @@ interface SelectableExerciseItemProps {
   isSelected: boolean
   onToggle: (id: string) => void
   disabled?: boolean
+  extraTrailing?: React.ReactNode
+  detailExercise?: React.ComponentProps<typeof ExerciseDetailDrawer>['exercise']
 }
 
 interface DraggableExerciseItemProps {
@@ -40,27 +45,33 @@ interface DraggableExerciseItemProps {
   onRemove: (id: string) => void
   disabled?: boolean
   extraTrailing?: React.ReactNode
+  detailExercise?: React.ComponentProps<typeof ExerciseDetailDrawer>['exercise']
   belowContent?: React.ReactNode
 }
 
 export function SelectableExerciseItem(props: SelectableExerciseItemProps) {
-  const { id, isSelected, onToggle, ...rest } = props
+  const { id, isSelected, onToggle, extraTrailing, detailExercise, ...rest } =
+    props
 
   return (
     <BaseExerciseItem
       id={id}
       isSelected={isSelected}
       onClick={() => onToggle(id)}
+      detailExercise={detailExercise}
       trailing={
-        <div
-          className={cn(
-            'shrink-0 size-6 rounded-full flex-center transition-all',
-            isSelected
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground/30',
-          )}
-        >
-          <CheckIcon className="size-4" />
+        <div className="flex items-center gap-2 shrink-0">
+          {extraTrailing}
+          <div
+            className={cn(
+              'shrink-0 size-6 rounded-full flex-center transition-all',
+              isSelected
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground/30',
+            )}
+          >
+            <CheckIcon className="size-4" />
+          </div>
         </div>
       }
       {...rest}
@@ -74,6 +85,7 @@ export function DraggableExerciseItem({
   onRemove,
   disabled,
   extraTrailing,
+  detailExercise,
   belowContent,
   ...rest
 }: DraggableExerciseItemProps) {
@@ -81,6 +93,7 @@ export function DraggableExerciseItem({
     <BaseExerciseItem
       id={id}
       disabled={disabled}
+      detailExercise={detailExercise}
       leading={
         <button
           type="button"
@@ -125,6 +138,7 @@ function BaseExerciseItem({
   onClick,
   disabled,
   leading,
+  detailExercise,
   belowContent,
   trailing,
 }: BaseExerciseItemProps) {
@@ -141,14 +155,35 @@ function BaseExerciseItem({
     >
       {leading}
       {(images || videoUrl) && (
-        <div onClick={(e) => e.stopPropagation()}>
-          <ExerciseMediaPreview
-            images={images}
-            videoUrl={videoUrl}
-            className="size-20 shrink-0 rounded-md"
-            hidePagination={true}
-            hideVideoOverlay={true}
-          />
+        <div
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          {detailExercise ? (
+            <ExerciseDetailDrawer
+              exercise={detailExercise}
+              trigger={
+                <div>
+                  <ExerciseMediaPreview
+                    images={images}
+                    videoUrl={videoUrl}
+                    className="size-20 shrink-0 rounded-md"
+                    hidePagination={true}
+                    hideVideoOverlay={true}
+                    disableImageToggle={true}
+                  />
+                </div>
+              }
+            />
+          ) : (
+            <ExerciseMediaPreview
+              images={images}
+              videoUrl={videoUrl}
+              className="size-20 shrink-0 rounded-md"
+              hidePagination={true}
+              hideVideoOverlay={true}
+            />
+          )}
         </div>
       )}
       <div className="flex-1 min-w-0">

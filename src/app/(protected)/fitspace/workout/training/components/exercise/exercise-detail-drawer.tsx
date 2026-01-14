@@ -2,6 +2,7 @@
 
 import { BookIcon, ImageIcon, Lightbulb, VideoIcon, XIcon } from 'lucide-react'
 import Image from 'next/image'
+import type { ReactElement } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,15 +18,27 @@ import { SectionIcon } from '@/components/ui/section-icon'
 import { YouTubePlayer } from '@/components/youtube-player'
 import { cn } from '@/lib/utils'
 
-import { WorkoutExercise } from '../workout-day'
-
 interface ExerciseDetailDrawerProps {
-  exercise: WorkoutExercise
+  exercise: ExerciseDetailDrawerExercise
+  trigger?: ReactElement
 }
 
-export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
+type ExerciseDetailDrawerExercise = {
+  name: string
+  videoUrl?: string | null
+  images?: { url?: string | null }[] | null
+  muscleGroups?: { id: string; displayGroup: string }[] | null
+  instructions?: string[] | null
+  tips?: string[] | null
+  description?: string | null
+}
+
+export function ExerciseDetailDrawer({
+  exercise,
+  trigger,
+}: ExerciseDetailDrawerProps) {
   const videoUrl = exercise.videoUrl
-  const images = exercise.images
+  const images = exercise.images ?? []
   const instructions = exercise.instructions
   const tips = exercise.tips
   const description = exercise.description
@@ -42,7 +55,11 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
   return (
     <Drawer direction="right" disablePreventScroll>
       <DrawerTrigger asChild>
-        <Button variant="secondary" size="icon-md" iconOnly={getIcon()} />
+        {trigger ? (
+          trigger
+        ) : (
+          <Button variant="secondary" size="icon-md" iconOnly={getIcon()} />
+        )}
       </DrawerTrigger>
       <DrawerContent
         dialogTitle="Exercise Metadata"

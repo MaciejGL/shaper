@@ -29,8 +29,8 @@ import {
 } from '@/config/muscles'
 import {
   type GQLFitspaceGetExercisesQuery,
-  useFitspaceAddSetMutation,
   useFitspaceAddMultipleExercisesToDayMutation,
+  useFitspaceAddSetMutation,
   useFitspaceGetExercisesQuery,
   useFitspaceGetWorkoutDayQuery,
   useFitspaceRemoveSetMutation,
@@ -82,9 +82,9 @@ export function AddSingleExercise({
   )
 
   const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([])
-  const [setCounts, setSetCounts] = useState<Record<string, number | undefined>>(
-    {},
-  )
+  const [setCounts, setSetCounts] = useState<
+    Record<string, number | undefined>
+  >({})
   const [saveAsFavourite, setSaveAsFavourite] = useState(false)
   const [favouriteTitle, setFavouriteTitle] = useState('')
   const [favouriteDescription, setFavouriteDescription] = useState('')
@@ -207,29 +207,34 @@ export function AddSingleExercise({
 
       if (saveAsFavourite && favouriteTitle.trim()) {
         try {
-          const favouriteExercises = selectedExerciseIds.map((exerciseId, idx) => {
-            const ex = exercisesMap.get(exerciseId)
-            const desiredSetCount = getDesiredSetCount(exerciseId)
-            return {
-              name: ex?.name ?? 'Exercise',
-              order: idx + 1,
-              baseId: exerciseId,
-              restSeconds: null,
-              description: ex?.description ?? null,
-              additionalInstructions: ex?.additionalInstructions ?? null,
-              instructions: ex?.instructions ?? [],
-              tips: ex?.tips ?? [],
-              difficulty: ex?.difficulty ?? null,
-              sets: Array.from({ length: desiredSetCount }, (_v, setIndex) => ({
-                order: setIndex + 1,
-                reps: null,
-                minReps: null,
-                maxReps: null,
-                weight: null,
-                rpe: null,
-              })),
-            }
-          })
+          const favouriteExercises = selectedExerciseIds.map(
+            (exerciseId, idx) => {
+              const ex = exercisesMap.get(exerciseId)
+              const desiredSetCount = getDesiredSetCount(exerciseId)
+              return {
+                name: ex?.name ?? 'Exercise',
+                order: idx + 1,
+                baseId: exerciseId,
+                restSeconds: null,
+                description: ex?.description ?? null,
+                additionalInstructions: null,
+                instructions: ex?.instructions ?? [],
+                tips: ex?.tips ?? [],
+                difficulty: ex?.difficulty ?? null,
+                sets: Array.from(
+                  { length: desiredSetCount },
+                  (_v, setIndex) => ({
+                    order: setIndex + 1,
+                    reps: null,
+                    minReps: null,
+                    maxReps: null,
+                    weight: null,
+                    rpe: null,
+                  }),
+                ),
+              }
+            },
+          )
 
           await createFavourite({
             input: {
@@ -253,26 +258,28 @@ export function AddSingleExercise({
 
       // Reconcile desired set counts per created exercise
       try {
-        for (const created of createdExercises.addMultipleExercisesToDay ?? []) {
+        for (const created of createdExercises.addMultipleExercisesToDay ??
+          []) {
           const baseId = created.baseId
           if (!baseId) continue
           const desiredSetCount = getDesiredSetCount(baseId)
 
-          const trackedSets = [...(created.sets ?? [])]
-          const currentCount = trackedSets.length
+          const currentSets = [...(created.sets ?? [])].sort(
+            (a, b) => a.order - b.order,
+          )
+          const currentCount = currentSets.length
 
           if (desiredSetCount > currentCount) {
             for (let i = 0; i < desiredSetCount - currentCount; i++) {
-              const res = await addSet({ exerciseId: created.id })
-              if (res.addSet) {
-                trackedSets.push(res.addSet)
-              }
+              await addSet({ exerciseId: created.id })
             }
           } else if (desiredSetCount < currentCount) {
-            for (let i = 0; i < currentCount - desiredSetCount; i++) {
-              const last = trackedSets.pop()
-              if (!last) break
-              await removeSet({ setId: last.id })
+            const toRemove = currentSets
+              .slice(desiredSetCount)
+              .reverse()
+              .map((s) => s.id)
+            for (const setId of toRemove) {
+              await removeSet({ setId })
             }
           }
         }
@@ -579,6 +586,7 @@ function ExerciseListWithFilters({
                     videoUrl={exercise.videoUrl}
                     isSelected={isSelected}
                     onToggle={onToggleExercise}
+                    detailExercise={exercise}
                   />
                 </div>
               )

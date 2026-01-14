@@ -99,6 +99,7 @@ function SuggestionsResultsContent({
               videoUrl={exercise.videoUrl}
               isSelected={selectedIds.includes(suggestion.exerciseId)}
               onToggle={onToggle}
+              detailExercise={exercise}
             />
           )
         })}

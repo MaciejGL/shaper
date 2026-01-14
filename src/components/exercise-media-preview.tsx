@@ -15,6 +15,7 @@ interface ExerciseMediaPreviewProps {
   className?: string
   hidePagination?: boolean
   hideVideoOverlay?: boolean
+  disableImageToggle?: boolean
 }
 
 export function ExerciseMediaPreview({
@@ -24,6 +25,7 @@ export function ExerciseMediaPreview({
   className,
   hidePagination = false,
   hideVideoOverlay = false,
+  disableImageToggle = false,
 }: ExerciseMediaPreviewProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
@@ -45,11 +47,13 @@ export function ExerciseMediaPreview({
   return (
     <div className="flex flex-col gap-2">
       <div
-        onClick={hasMultipleImages ? handleImageClick : undefined}
+        onClick={
+          hasMultipleImages && !disableImageToggle ? handleImageClick : undefined
+        }
         className={cn(
           'relative overflow-hidden rounded-xl bg-muted',
           className || 'size-32',
-          hasMultipleImages && 'cursor-pointer',
+          hasMultipleImages && !disableImageToggle && 'cursor-pointer',
         )}
       >
         {validImages.length > 0 ? (
