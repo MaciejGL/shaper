@@ -32,7 +32,7 @@ export function CancellationInfo() {
             </li>
             <li>
               <strong>Premium Coaching:</strong> Discuss duration with your
-              coach. He will prepare a suitable package for you.
+              coach. They will prepare a suitable package for you.
             </li>
             <li>
               <strong>In-person sessions:</strong> Cancel at least 24 hours

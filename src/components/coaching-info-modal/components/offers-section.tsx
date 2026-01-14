@@ -29,17 +29,17 @@ interface ServiceOffer {
 const serviceOffers: ServiceOffer[] = [
   {
     id: 'premium-coaching',
-    title: 'Premium Coaching Package',
+    title: 'Trainer Coaching Package',
     description:
-      'Premium Coaching experience with ongoing support, plan adjustments, and regular check-ins.',
+      'Ongoing coaching support with regular check-ins and trainer-led plan updates.',
     features: [
-      'Everything from workout + meal plans',
+      'Trainer-created workout + nutrition plan updates',
       'Bi-Weekly check-ins',
       '1x in-person training session a month',
       `-${DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO}% off for additional in-person training sessions`,
       'Plan adjustments based on progress',
       'Premium access',
-      'Unlimited messaging support',
+      'Ongoing support between sessions',
     ],
     icon: Calendar,
     badge: 'Best Value',
@@ -47,23 +47,21 @@ const serviceOffers: ServiceOffer[] = [
   },
   {
     id: 'workout-plan',
-    title: 'Custom Workout Plan',
+    title: 'Assessment + Custom Training Plan',
     description:
-      'Personalized training program designed specifically for your goals, experience level, and available equipment.',
-    features: ['Initial fitness assessment', '4-week custom workout program'],
+      'A trainer-led assessment and a personalized training plan based on your goals, experience level, and available equipment.',
+    features: ['Trainer assessment', '4-week training plan'],
     icon: Notebook,
     variant: 'green',
   },
   {
     id: 'nutrition-plan',
-    title: 'Nutrition Plan',
+    title: 'Assessment + Nutrition Guidance',
     description:
-      'Customized meal plan with recipes, shopping lists, and macro guidelines to support your fitness goals.',
+      'A trainer-led nutrition assessment and personalized guidance to support your goals.',
     features: [
-      'Detailed nutrition assessment',
-      '7 day meal plan with recipes',
-      'Shopping list',
-      'Macro and calorie guidelines',
+      'Trainer nutrition assessment',
+      'Meal structure and macro guidance',
       'Dietary preferences accommodated',
     ],
     icon: Utensils,

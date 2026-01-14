@@ -6,25 +6,25 @@ import { cn } from '@/lib/utils'
 const journeySteps = [
   {
     step: 1,
-    title: 'Chat with your trainer',
+    title: 'Schedule a free assessment',
     description:
-      'Free consultation to discuss your goals and find the perfect fit.',
+      'Meet your trainer in person or via phone/video outside the app to discuss your goals.',
     image: '/coaching-info/person-filling-out-form-on-phone.jpg',
     badge: 'Free & Easy',
   },
   {
     step: 2,
-    title: 'Receive your custom offer',
+    title: 'Receive a trainer service offer',
     description:
-      'Get a personalized coaching package with pricing tailored to your needs.',
+      "Your trainer prepares an offer based on your assessment. You'll get a notification when it’s ready.",
     image: '/coaching-info/trainer-creating-workout-plan-on-computer.jpg',
     badge: 'Custom Pricing',
   },
   {
     step: 3,
-    title: 'Start your journey',
+    title: 'Review and pay securely',
     description:
-      'Accept the offer and your trainer will create your personalized workout plans.',
+      'Review the offer in the app and complete payment in secure checkout.',
     image: '/coaching-info/person-making-secure-payment-on-phone.jpg',
     badge: 'Secure Payment',
   },
@@ -32,7 +32,7 @@ const journeySteps = [
     step: 4,
     title: 'Train with ongoing support',
     description:
-      'Follow your plan, track progress, and get continuous adjustments from your trainer.',
+      'Continue sessions outside the app. Plans and updates are delivered here as part of the service.',
     image: '/coaching-info/person-working-out-with-trainer-guidance.jpg',
     badge: 'Always There',
   },

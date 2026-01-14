@@ -203,8 +203,10 @@ export function TrainerDetailsDrawer({
                       <>
                         Send a request and {trainerName} will reach out for a{' '}
                         <span className="font-semibold">free assessment</span>{' '}
-                        to understand your goals. Based on your needs, you'll
-                        receive a personalized coaching offer.
+                        to understand your goals. Your assessment happens in
+                        person or via phone/video outside the app. After that,
+                        you'll receive a trainer service offer here and can pay
+                        only if you accept it.
                       </>
                     )}
                   </p>
