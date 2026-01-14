@@ -9,7 +9,9 @@ type ExerciseLike = {
   muscleGroups?: MuscleGroupLike[] | null
 }
 
-export function getExerciseMuscleDisplay(exercise: ExerciseLike): string | undefined {
+export function getExerciseMuscleDisplay(
+  exercise: ExerciseLike,
+): string | undefined {
   const primaryDisplayGroup = exercise.muscleGroups?.[0]?.displayGroup
   const highLevelGroup = primaryDisplayGroup
     ? DISPLAY_GROUP_TO_HIGH_LEVEL[primaryDisplayGroup]
@@ -29,5 +31,3 @@ export function getExerciseMuscleDisplay(exercise: ExerciseLike): string | undef
 
   return undefined
 }
-
-

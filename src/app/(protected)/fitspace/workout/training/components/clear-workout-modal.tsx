@@ -47,7 +47,7 @@ export function ClearWorkoutModal({
   return (
     <>
       <Button
-        variant="outline"
+        variant="secondary"
         size="md"
         onClick={() => setOpen(true)}
         iconStart={<Trash2 />}

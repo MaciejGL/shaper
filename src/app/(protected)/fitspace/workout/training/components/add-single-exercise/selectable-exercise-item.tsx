@@ -15,6 +15,7 @@ interface BaseExerciseItemProps {
   isSelected?: boolean
   onClick?: () => void
   leading?: React.ReactNode
+  belowContent?: React.ReactNode
   trailing?: React.ReactNode
 }
 
@@ -38,6 +39,8 @@ interface DraggableExerciseItemProps {
   onDragHandlePointerDown: (e: React.PointerEvent<HTMLButtonElement>) => void
   onRemove: (id: string) => void
   disabled?: boolean
+  extraTrailing?: React.ReactNode
+  belowContent?: React.ReactNode
 }
 
 export function SelectableExerciseItem(props: SelectableExerciseItemProps) {
@@ -70,6 +73,8 @@ export function DraggableExerciseItem({
   onDragHandlePointerDown,
   onRemove,
   disabled,
+  extraTrailing,
+  belowContent,
   ...rest
 }: DraggableExerciseItemProps) {
   return (
@@ -88,20 +93,24 @@ export function DraggableExerciseItem({
         </button>
       }
       trailing={
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          iconOnly={<XIcon />}
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove(id)
-          }}
-          disabled={disabled}
-          className="shrink-0"
-        >
-          Remove
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          {extraTrailing}
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            iconOnly={<XIcon />}
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove(id)
+            }}
+            disabled={disabled}
+            className="shrink-0"
+          >
+            Remove
+          </Button>
+        </div>
       }
+      belowContent={belowContent}
       {...rest}
     />
   )
@@ -116,6 +125,7 @@ function BaseExerciseItem({
   onClick,
   disabled,
   leading,
+  belowContent,
   trailing,
 }: BaseExerciseItemProps) {
   return (
@@ -142,12 +152,13 @@ function BaseExerciseItem({
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium truncate">{name}</h4>
+        <h4 className="text-sm font-semibold truncate">{name}</h4>
         {muscleDisplay && (
           <p className="text-xs text-muted-foreground truncate mt-0.5">
             {muscleDisplay}
           </p>
         )}
+        {belowContent}
       </div>
       {trailing}
     </div>

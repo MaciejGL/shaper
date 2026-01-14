@@ -11,6 +11,7 @@ import {
   useState,
 } from 'react'
 import { Virtuoso } from 'react-virtuoso'
+import { toast } from 'sonner'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
@@ -28,10 +29,13 @@ import {
 } from '@/config/muscles'
 import {
   type GQLFitspaceGetExercisesQuery,
+  useFitspaceAddSetMutation,
   useFitspaceAddMultipleExercisesToDayMutation,
   useFitspaceGetExercisesQuery,
   useFitspaceGetWorkoutDayQuery,
+  useFitspaceRemoveSetMutation,
 } from '@/generated/graphql-client'
+import { useCreateFavouriteWorkout } from '@/hooks/use-favourite-workouts'
 import { queryInvalidation } from '@/lib/query-invalidation'
 
 import { AiExerciseSuggestions } from './ai-exercise-suggestions'
@@ -45,6 +49,10 @@ import { WeeklyFocusChips } from './weekly-focus-chips'
 type Exercise = NonNullable<
   NonNullable<GQLFitspaceGetExercisesQuery['getExercises']>['publicExercises']
 >[number]
+
+const DEFAULT_SET_COUNT = 3
+const MIN_SET_COUNT = 1
+const MAX_SET_COUNT = 8
 
 interface AddSingleExerciseProps {
   dayId: string
@@ -74,6 +82,12 @@ export function AddSingleExercise({
   )
 
   const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([])
+  const [setCounts, setSetCounts] = useState<Record<string, number | undefined>>(
+    {},
+  )
+  const [saveAsFavourite, setSaveAsFavourite] = useState(false)
+  const [favouriteTitle, setFavouriteTitle] = useState('')
+  const [favouriteDescription, setFavouriteDescription] = useState('')
   const [isBatchAdding, setIsBatchAdding] = useState(false)
   const [isReviewMode, setIsReviewMode] = useState(false)
   const [isReorderDragging, setIsReorderDragging] = useState(false)
@@ -111,16 +125,39 @@ export function AddSingleExercise({
   const { mutateAsync: addMultipleExercises } =
     useFitspaceAddMultipleExercisesToDayMutation()
 
+  const { mutateAsync: addSet } = useFitspaceAddSetMutation()
+  const { mutateAsync: removeSet } = useFitspaceRemoveSetMutation()
+
+  const { mutateAsync: createFavourite } = useCreateFavouriteWorkout()
+
+  const clampSetCount = useCallback(
+    (count: number) => Math.max(MIN_SET_COUNT, Math.min(MAX_SET_COUNT, count)),
+    [],
+  )
+
+  const getDesiredSetCount = useCallback(
+    (exerciseId: string) =>
+      clampSetCount(setCounts[exerciseId] ?? DEFAULT_SET_COUNT),
+    [clampSetCount, setCounts],
+  )
+
   const handleToggleExercise = useCallback((exerciseId: string) => {
     setSelectedExerciseIds((prev) => {
-      const index = prev.indexOf(exerciseId)
-      if (index > -1) {
-        // Remove if already selected
-        return prev.filter((id) => id !== exerciseId)
-      } else {
-        // Add to end if not selected
-        return [...prev, exerciseId]
-      }
+      const isSelected = prev.includes(exerciseId)
+
+      setSetCounts((prevCounts) => {
+        const next = { ...prevCounts }
+        if (isSelected) {
+          delete next[exerciseId]
+        } else if (next[exerciseId] === undefined) {
+          next[exerciseId] = DEFAULT_SET_COUNT
+        }
+        return next
+      })
+
+      return isSelected
+        ? prev.filter((id) => id !== exerciseId)
+        : [...prev, exerciseId]
     })
   }, [])
 
@@ -130,10 +167,16 @@ export function AddSingleExercise({
 
   const handleRemoveExercise = useCallback((exerciseId: string) => {
     setSelectedExerciseIds((prev) => prev.filter((id) => id !== exerciseId))
+    setSetCounts((prev) => {
+      const next = { ...prev }
+      delete next[exerciseId]
+      return next
+    })
   }, [])
 
   const handleClearAll = useCallback(() => {
     setSelectedExerciseIds([])
+    setSetCounts({})
   }, [])
 
   const handleReviewWorkout = useCallback(() => {
@@ -145,21 +188,107 @@ export function AddSingleExercise({
     setIsReviewMode(false)
   }, [])
 
+  const handleSetCountChange = useCallback(
+    (exerciseId: string, nextCount: number) => {
+      setSetCounts((prev) => ({
+        ...prev,
+        [exerciseId]: clampSetCount(nextCount),
+      }))
+    },
+    [clampSetCount],
+  )
+
   const handleStart = useCallback(async () => {
     if (selectedExerciseIds.length === 0) return
     setIsBatchAdding(true)
 
     try {
+      const exercisesMap = new Map(allExercises.map((ex) => [ex.id, ex]))
+
+      if (saveAsFavourite && favouriteTitle.trim()) {
+        try {
+          const favouriteExercises = selectedExerciseIds.map((exerciseId, idx) => {
+            const ex = exercisesMap.get(exerciseId)
+            const desiredSetCount = getDesiredSetCount(exerciseId)
+            return {
+              name: ex?.name ?? 'Exercise',
+              order: idx + 1,
+              baseId: exerciseId,
+              restSeconds: null,
+              description: ex?.description ?? null,
+              additionalInstructions: ex?.additionalInstructions ?? null,
+              instructions: ex?.instructions ?? [],
+              tips: ex?.tips ?? [],
+              difficulty: ex?.difficulty ?? null,
+              sets: Array.from({ length: desiredSetCount }, (_v, setIndex) => ({
+                order: setIndex + 1,
+                reps: null,
+                minReps: null,
+                maxReps: null,
+                weight: null,
+                rpe: null,
+              })),
+            }
+          })
+
+          await createFavourite({
+            input: {
+              title: favouriteTitle.trim(),
+              description: favouriteDescription.trim() || null,
+              folderId: null,
+              exercises: favouriteExercises,
+            },
+          })
+        } catch (error) {
+          console.error('Failed to save favourite workout:', error)
+          toast.error('Failed to save favourite workout. Starting anyway.')
+        }
+      }
+
       // Add all exercises in one batch mutation maintaining order
-      await addMultipleExercises({
+      const createdExercises = await addMultipleExercises({
         dayId,
         exerciseBaseIds: selectedExerciseIds,
       })
+
+      // Reconcile desired set counts per created exercise
+      try {
+        for (const created of createdExercises.addMultipleExercisesToDay ?? []) {
+          const baseId = created.baseId
+          if (!baseId) continue
+          const desiredSetCount = getDesiredSetCount(baseId)
+
+          const trackedSets = [...(created.sets ?? [])]
+          const currentCount = trackedSets.length
+
+          if (desiredSetCount > currentCount) {
+            for (let i = 0; i < desiredSetCount - currentCount; i++) {
+              const res = await addSet({ exerciseId: created.id })
+              if (res.addSet) {
+                trackedSets.push(res.addSet)
+              }
+            }
+          } else if (desiredSetCount < currentCount) {
+            for (let i = 0; i < currentCount - desiredSetCount; i++) {
+              const last = trackedSets.pop()
+              if (!last) break
+              await removeSet({ setId: last.id })
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to apply set counts:', error)
+        toast.error('Failed to apply set counts. Starting anyway.')
+      }
 
       // Invalidate queries once after all exercises are added
       await invalidateWorkoutQueries()
 
       setSelectedExerciseIds([])
+      setSetCounts({})
+      setSaveAsFavourite(false)
+      setFavouriteTitle('')
+      setFavouriteDescription('')
       setIsReviewMode(false)
       setOpen(false)
     } catch (error) {
@@ -169,16 +298,28 @@ export function AddSingleExercise({
     }
   }, [
     selectedExerciseIds,
+    allExercises,
     addMultipleExercises,
+    addSet,
+    removeSet,
     dayId,
     setOpen,
     invalidateWorkoutQueries,
+    saveAsFavourite,
+    favouriteTitle,
+    favouriteDescription,
+    createFavourite,
+    getDesiredSetCount,
   ])
 
   // Reset selection and review mode when drawer closes
   useEffect(() => {
     if (!open) {
       setSelectedExerciseIds([])
+      setSetCounts({})
+      setSaveAsFavourite(false)
+      setFavouriteTitle('')
+      setFavouriteDescription('')
       setIsReviewMode(false)
       setIsReorderDragging(false)
     }
@@ -190,6 +331,14 @@ export function AddSingleExercise({
       exercises={allExercises}
       onReorder={handleReorder}
       onRemove={handleRemoveExercise}
+      setCounts={setCounts}
+      onSetCountChange={handleSetCountChange}
+      saveAsFavourite={saveAsFavourite}
+      onSaveAsFavouriteChange={setSaveAsFavourite}
+      favouriteTitle={favouriteTitle}
+      onFavouriteTitleChange={setFavouriteTitle}
+      favouriteDescription={favouriteDescription}
+      onFavouriteDescriptionChange={setFavouriteDescription}
       onGoBack={handleGoBack}
       onStart={handleStart}
       isAdding={isBatchAdding}
