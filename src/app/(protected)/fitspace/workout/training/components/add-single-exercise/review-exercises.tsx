@@ -85,7 +85,7 @@ export function ReviewExercises({
         <div className="px-4 pb-4 pt-2 space-y-4">
           <div className="flex items-center gap-3">
             <Button
-              variant="ghost"
+              variant="tertiary"
               size="icon-sm"
               iconOnly={<ArrowLeft />}
               onClick={onGoBack}
