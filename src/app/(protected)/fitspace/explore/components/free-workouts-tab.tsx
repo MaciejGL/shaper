@@ -15,12 +15,11 @@ import {
   GQLDifficulty,
   useStartFreeWorkoutDayMutation,
 } from '@/generated/graphql-client'
-import { isProd } from '@/lib/get-base-url'
 import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 import { estimateWorkoutTime } from '@/lib/workout/estimate-workout-time'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
-import { formatUserCount } from '@/utils/format-user-count'
+import { formatUserCount, getFakeUserCount } from '@/utils/format-user-count'
 
 import { FreeWorkoutDay, PublicTrainingPlan } from './explore.client'
 import { UnifiedPreviewDrawer } from './workout-day-preview/unified-preview-drawer'
@@ -74,7 +73,9 @@ export function FreeWorkoutsTab({
       },
     })
 
-  const freeWorkoutDays = initialWorkouts
+  const freeWorkoutDays = [...initialWorkouts].sort(
+    (a, b) => getFakeUserCount(b.id) - getFakeUserCount(a.id),
+  )
 
   const handleCardClick = (dayId: string) => {
     setSelectedDayId(dayId)
@@ -180,7 +181,6 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
   const workoutType = day.trainingDay?.workoutType
   const planTitle = day.plan?.title || 'Training Plan'
   const exerciseCount = day.trainingDay?.exercisesCount || 0
-  const timesStarted = day.trainingDay?.timesStarted || 0
 
   // Calculate estimated duration from exercises
   const estimatedDuration = useMemo(() => {
@@ -249,12 +249,10 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
                 {day.plan.difficulty.toLowerCase()}
               </Badge>
             )}
-            {timesStarted > 0 && !isProd && (
-              <Badge className="flex items-center gap-1 ml-auto" size="md-lg">
-                <Users className="h-3 w-3" />
-                <span>{formatUserCount(timesStarted)}</span>
-              </Badge>
-            )}
+            <Badge className="flex items-center gap-1 ml-auto" size="md-lg">
+              <Users className="h-3 w-3" />
+              <span>{formatUserCount(getFakeUserCount(day.id))}</span>
+            </Badge>
           </div>
         </div>
       </CardContent>

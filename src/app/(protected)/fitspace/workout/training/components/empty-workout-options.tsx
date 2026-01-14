@@ -78,11 +78,13 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
   return (
     <>
       <div className="space-y-4 pt-6">
-        <p className="text-xl font-medium text-center">Today's workout</p>
+        <div className="space-y-2 mb-6">
+          <p className="text-xl font-medium text-center">Today's workout</p>
 
-        <p className="text-sm text-muted-foreground text-center">
-          Choose how you want to train today.
-        </p>
+          <p className="text-sm text-muted-foreground text-center">
+            Choose how you want to train today.
+          </p>
+        </div>
 
         <motion.div
           key={`empty-workout-options-${day.id}`}

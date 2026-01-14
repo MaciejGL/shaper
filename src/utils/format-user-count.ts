@@ -1,3 +1,12 @@
+export function getFakeUserCount(id: string): number {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash << 5) - hash + id.charCodeAt(i)
+    hash |= 0
+  }
+  return 47 + Math.abs(hash % 300)
+}
+
 export function formatUserCount(count: number): string | null {
   // Don't show if 0 users
   if (count === 0) {

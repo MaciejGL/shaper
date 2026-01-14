@@ -140,7 +140,7 @@ export function SnapshotsSection() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="text-sm font-medium text-center">Latest</div>
-                  <div className="aspect-[3/4] bg-muted/20 rounded-lg flex items-center justify-center">
+                  <div className="aspect-3/4 bg-muted/20 rounded-lg flex items-center justify-center">
                     <div className="text-center text-muted-foreground">
                       <Camera className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <p className="text-xs">Loading...</p>
@@ -151,7 +151,7 @@ export function SnapshotsSection() {
                   <div className="text-sm font-medium text-center">
                     Previous
                   </div>
-                  <div className="aspect-[3/4] bg-muted/20 rounded-lg flex items-center justify-center">
+                  <div className="aspect-3/4 bg-muted/20 rounded-lg flex items-center justify-center">
                     <div className="text-center text-muted-foreground">
                       <Camera className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <p className="text-xs">Loading...</p>
@@ -163,7 +163,7 @@ export function SnapshotsSection() {
               <div className="text-center py-8 text-muted-foreground">
                 <Camera className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="text-sm">No progress snapshots yet</p>
-                <p className="text-xs">
+                <p className="text-xs mt-1">
                   Add your first progress photos to start tracking
                 </p>
               </div>
@@ -173,7 +173,7 @@ export function SnapshotsSection() {
                 <div className="space-y-2">
                   <div className="text-sm font-medium text-center">Latest</div>
                   <div
-                    className="aspect-[3/4] bg-muted/20 rounded-md flex items-center justify-center relative overflow-hidden cursor-pointer hover:bg-muted/30 transition-colors"
+                    className="aspect-3/4 bg-muted/20 rounded-md flex items-center justify-center relative overflow-hidden cursor-pointer hover:bg-muted/30 transition-colors"
                     onClick={() =>
                       latestSnapshot && handleSnapshotClick(latestSnapshot)
                     }
@@ -230,7 +230,7 @@ export function SnapshotsSection() {
                     Previous
                   </div>
                   <div
-                    className="aspect-[3/4] bg-card-on-card rounded-md flex items-center justify-center relative overflow-hidden cursor-pointer hover:bg-muted/30 transition-colors"
+                    className="aspect-3/4 bg-card-on-card rounded-md flex items-center justify-center relative overflow-hidden cursor-pointer hover:bg-muted/30 transition-colors"
                     onClick={() =>
                       previousSnapshot && handleSnapshotClick(previousSnapshot)
                     }

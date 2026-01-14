@@ -9,6 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from '@/components/ui/select'
+import { useUser } from '@/context/user-context'
 import type {
   GQLGetMyNutritionPlanQuery,
   GQLGetMyNutritionPlansQuery,
@@ -34,6 +35,7 @@ export function NutritionPlanSelector({
   const [localSelectedPlan, setLocalSelectedPlan] = useState<string | null>(
     null,
   )
+  const { user } = useUser()
 
   const sortedPlans = useMemo(() => {
     // Sort plans by creation date (newest first)
@@ -82,7 +84,7 @@ export function NutritionPlanSelector({
     )
   }
 
-  if (sortedPlans.length === 0) {
+  if (sortedPlans.length === 0 && user?.trainerId) {
     return (
       <div className="space-y-2 my-4">
         <div className="h-auto bg-muted/30 rounded-2xl flex items-center p-4">
@@ -92,6 +94,10 @@ export function NutritionPlanSelector({
         </div>
       </div>
     )
+  }
+
+  if (sortedPlans.length === 0 && !user?.trainerId) {
+    return null
   }
 
   const effectiveSelectedPlan = selectedPlanId || localSelectedPlan

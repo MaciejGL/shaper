@@ -2,20 +2,14 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  Calendar,
-  Clock,
-  Dumbbell,
-  Layers,
-  Sparkles,
-  Users,
-} from 'lucide-react'
+import { Calendar, Clock, Dumbbell, Layers, Users } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { startTransition, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import {
   SortOption,
   TrainingPlanFilters,
@@ -34,9 +28,8 @@ import {
 } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
 import { usePaymentRules } from '@/hooks/use-payment-rules'
-import { isProd } from '@/lib/get-base-url'
 import { cn } from '@/lib/utils'
-import { formatUserCount } from '@/utils/format-user-count'
+import { formatUserCount, getFakeUserCount } from '@/utils/format-user-count'
 
 import { PublicTrainingPlan } from './explore.client'
 import { PlanFinder } from './plan-finder/plan-finder'
@@ -54,6 +47,8 @@ type QuickPlanBadgeId =
   | 'expert'
   | 'fbw'
   | 'upper_lower'
+  | 'ppl'
+  | 'split'
 
 type QuickPlanBadge =
   | {
@@ -105,6 +100,18 @@ const quickPlanBadges: readonly QuickPlanBadge[] = [
     label: 'Upper/Lower',
     type: 'title',
     keywords: ['upper/lower', 'upper lower', 'upper-lower'],
+  },
+  {
+    id: 'ppl',
+    label: 'PPL',
+    type: 'title',
+    keywords: ['ppl', 'push pull legs', 'push/pull/legs', 'push-pull-legs'],
+  },
+  {
+    id: 'split',
+    label: 'Split',
+    type: 'title',
+    keywords: ['split', 'body split', 'bro split'],
   },
 ] as const
 
@@ -382,8 +389,8 @@ export function TrainingPlansTab({
     .sort((a, b) => {
       switch (sort) {
         case 'popular':
-          // Recommended uses popularity as fallback
-          return (b.assignmentCount || 0) - (a.assignmentCount || 0)
+          // Temporarily using fake counts for sorting
+          return getFakeUserCount(b.id) - getFakeUserCount(a.id)
         case 'newest':
           return (
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -399,41 +406,39 @@ export function TrainingPlansTab({
 
   return (
     <div>
-      <div className="flex items-center justify-between mt-2">
-        <Button
-          variant="default"
-          size="lg"
-          className="rounded-full flex-1 mr-2"
-          iconStart={<Sparkles className="h-4 w-4" />}
+      <div className="flex items-center mb-6 mt-2">
+        <TrainerDiscoveryCta
+          variant="banner"
+          title="Find Your Plan"
+          subtitle="Filter by your goals, experience level, days and time available"
+          showBadge={false}
+          className="w-full"
           onClick={() => setIsPlanFinderOpen(true)}
-        >
-          Help me choose
-        </Button>
-
-        {/* Filter Section */}
-        <TrainingPlanFilters
-          selectedFocusTags={selectedFocusTags}
-          availableFocusTags={availableFocusTags}
-          selectedDifficulty={selectedDifficulty}
-          daysPerWeek={daysPerWeek}
-          sessionMaxMins={sessionMaxMins}
-          sort={sort}
-          resultsCount={resultsCount}
-          onToggleFocusTag={toggleFocusTag}
-          onSetDifficulty={handleSetDifficultyFromFilters}
-          onSetDaysPerWeek={setDaysPerWeek}
-          onSetSessionMaxMins={setSessionMaxMins}
-          onSetSort={setSort}
-          onClearAllFilters={clearAllFilters}
-          onOpenPlanFinder={() => setIsPlanFinderOpen(true)}
         />
       </div>
 
       <div
-        className="overflow-x-auto hide-scrollbar -mx-4 max-w-screen overscroll-x-contain touch-pan-x snap-x snap-proximity"
+        className="overflow-x-auto hide-scrollbar -mx-4 max-w-screen overscroll-x-contain touch-pan-x bg-card"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-        <div className="flex gap-2 px-4 py-3 w-max">
+        <div className="flex gap-2 pl-4 pr-4 py-3 w-max">
+          {/* Filter Section */}
+          <TrainingPlanFilters
+            selectedFocusTags={selectedFocusTags}
+            availableFocusTags={availableFocusTags}
+            selectedDifficulty={selectedDifficulty}
+            daysPerWeek={daysPerWeek}
+            sessionMaxMins={sessionMaxMins}
+            sort={sort}
+            resultsCount={resultsCount}
+            onToggleFocusTag={toggleFocusTag}
+            onSetDifficulty={handleSetDifficultyFromFilters}
+            onSetDaysPerWeek={setDaysPerWeek}
+            onSetSessionMaxMins={setSessionMaxMins}
+            onSetSort={setSort}
+            onClearAllFilters={clearAllFilters}
+            onOpenPlanFinder={() => setIsPlanFinderOpen(true)}
+          />
           {quickPlanBadges.map((badge) => {
             const selected = selectedQuickBadges.includes(badge.id)
             return (
@@ -448,7 +453,7 @@ export function TrainingPlansTab({
                   type="button"
                   aria-pressed={selected}
                   onClick={() => toggleQuickBadge(badge.id)}
-                  className="px-3 py-2 snap-center"
+                  className="px-3 py-2"
                 >
                   {badge.label}
                 </button>
@@ -570,6 +575,9 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
     ? 10
     : Math.ceil((plan.avgSessionTime ?? 45) / 5) * 5
   const weekCount = plan.weekCount ?? plan.weeks?.length
+
+  const heroImageUrl =
+    plan.heroImageUrl || '/images/training-plan-placeholder.png'
   return (
     <Card
       className={cn(
@@ -579,9 +587,9 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
       )}
       onClick={onClick}
     >
-      {plan.heroImageUrl ? (
+      {heroImageUrl ? (
         <Image
-          src={plan.heroImageUrl}
+          src={heroImageUrl}
           alt={`${plan.title} cover`}
           fill
           className="object-cover"
@@ -589,7 +597,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
           sizes="(max-width: 768px) 100vw, 50vw"
         />
       ) : null}
-      {plan.heroImageUrl && (
+      {heroImageUrl && (
         <div className="absolute -inset-[0.5px] bg-linear-to-r from-black via-black/60 to-transparent" />
       )}
 
@@ -637,12 +645,10 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
                       </Badge>
                     ))
                 : null}
-              {formatUserCount(plan.assignmentCount) && !isProd && (
-                <Badge variant="primary" size="md-lg" className="ml-auto">
-                  <Users className="h-3 w-3" />
-                  {formatUserCount(plan.assignmentCount)}
-                </Badge>
-              )}
+              <Badge variant="primary" size="md-lg" className="ml-auto">
+                <Users className="h-3 w-3" />
+                {formatUserCount(getFakeUserCount(plan.id))}
+              </Badge>
             </div>
           </div>
         </div>

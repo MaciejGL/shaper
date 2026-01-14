@@ -15,6 +15,7 @@ interface TrainerDiscoveryCtaProps {
   subtitle?: string
   showBadge?: boolean
   onClick?: () => void
+  href?: string
 }
 
 export function TrainerDiscoveryCta({
@@ -23,6 +24,7 @@ export function TrainerDiscoveryCta({
   subtitle,
   showBadge = true,
   onClick,
+  href = '#',
 }: TrainerDiscoveryCtaProps) {
   const defaultTitle = 'Elevate Your Training'
   const defaultSubtitle = 'Get matched with a certified expert for your goals'
@@ -30,9 +32,11 @@ export function TrainerDiscoveryCta({
   const finalTitle = title || defaultTitle
   const finalSubtitle = subtitle || defaultSubtitle
 
+  const Wrapper = onClick ? 'div' : Link
+
   return (
-    <Link
-      href="/fitspace/explore?tab=trainers"
+    <Wrapper
+      href={href}
       onClick={onClick}
       className={cn(
         'group block relative rounded-2xl p-px overflow-hidden',
@@ -63,14 +67,14 @@ export function TrainerDiscoveryCta({
       >
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-2 flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              {showBadge && (
+            {showBadge && (
+              <div className="flex items-center gap-2">
                 <Badge variant="premium">
                   <Sparkles className="mr-1 h-3 w-3" />
                   Level Up
                 </Badge>
-              )}
-            </div>
+              </div>
+            )}
             <div>
               <h3 className="font-bold text-lg leading-tight mb-1">
                 {finalTitle}
@@ -86,6 +90,6 @@ export function TrainerDiscoveryCta({
           </div>
         </div>
       </div>
-    </Link>
+    </Wrapper>
   )
 }

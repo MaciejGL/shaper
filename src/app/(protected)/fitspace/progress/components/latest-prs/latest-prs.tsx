@@ -29,14 +29,16 @@ export function LatestPRs() {
             <Trophy className="h-5 w-5 text-amber-500" />
             Latest PRs
           </CardTitle>
-          <Button
-            variant="tertiary"
-            size="sm"
-            onClick={() => setIsDrawerOpen(true)}
-            iconEnd={<ChevronRight className="h-4 w-4" />}
-          >
-            View All
-          </Button>
+          {recentPRs.length > 0 && (
+            <Button
+              variant="tertiary"
+              size="sm"
+              onClick={() => setIsDrawerOpen(true)}
+              iconEnd={<ChevronRight className="h-4 w-4" />}
+            >
+              View All
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -44,7 +46,7 @@ export function LatestPRs() {
               <p className="text-sm">Loading PRs...</p>
             </div>
           ) : recentPRs.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-4 text-muted-foreground">
               <Trophy className="h-8 w-8 mx-auto mb-2 opacity-30" />
               <p className="text-sm">No personal records yet</p>
               <p className="text-xs mt-1">

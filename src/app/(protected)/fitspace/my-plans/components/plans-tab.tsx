@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
@@ -274,26 +274,19 @@ export function PlansTab({
 function EmptyPlansState() {
   return (
     <div className="space-y-4">
-      <Card>
-        <CardContent className="flex-center flex-col gap-2">
-          <h3 className="font-semibold text-lg">Get Your First Plan</h3>
-          <p className="text-muted-foreground text-center max-w-md">
-            Start one of your available plans or find a new one
-          </p>
-          <ButtonLink
-            href="/fitspace/explore?tab=plans"
-            iconEnd={<ArrowRight />}
-            className="w-full"
-          >
-            Find Plan
-          </ButtonLink>
-        </CardContent>
-      </Card>
+      <TrainerDiscoveryCta
+        variant="banner"
+        title="Get Your First Plan"
+        subtitle="Check out our featured plans"
+        href="/fitspace/explore?tab=premium-plans"
+        showBadge={false}
+      />
 
       <TrainerDiscoveryCta
         variant="banner"
-        title="Need Help Getting Started?"
-        subtitle="Connect with a trainer for personalized guidance"
+        title="Need Help From a Trainer?"
+        subtitle="Reach out to a trainer for personalized guidance"
+        href="/fitspace/explore?tab=trainers"
       />
     </div>
   )

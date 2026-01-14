@@ -151,8 +151,8 @@ export default function NutritionPage() {
         {showEmptyState && (
           <div className="px-4">
             <EmptyStateCard
-              title="Request Macro Targets and Nutrition Plan"
-              description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
+              title="Macro Targets and Nutrition Plan"
+              description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'Reach out to a trainer to get your personalized macro targets'}`}
               icon={Salad}
               cta={
                 !user?.trainerId && (
