@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
+import { BaseExerciseItem } from '@/app/(protected)/fitspace/workout/training/components/add-single-exercise/selectable-exercise-item'
 import { AnimateNumber } from '@/components/animate-number'
 import {
   Accordion,
@@ -36,7 +37,7 @@ import {
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { CardContent, CardHeader } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -361,6 +362,13 @@ function SortableExerciseItem({
   onRemoveSet,
   onRemoveExercise,
 }: SortableExerciseItemProps) {
+  const previewImages =
+    exercise.base?.images?.map((img) => ({
+      medium: img.medium ?? img.url ?? img.thumbnail ?? null,
+    })) ?? null
+  const videoUrl = exercise.base?.videoUrl ?? null
+  const detailExercise = exercise.base ?? undefined
+
   const {
     attributes,
     listeners,
@@ -379,78 +387,78 @@ function SortableExerciseItem({
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="grid grid-cols-[auto_1fr] items-center gap-1 w-full"
-    >
-      <button
-        {...attributes}
-        {...listeners}
-        className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shrink-0 touch-none"
-      >
-        <Grip className="size-4" />
-      </button>
-      <Card variant="tertiary" className="flex-1 p-2 gap-2">
-        <CardHeader className="flex items-center justify-between p-0">
-          <p className="justify-start whitespace-normal font-medium font-base">
-            <span className="text-sm text-muted-foreground w-4 shrink-0">
-              {index + 1}.
-            </span>{' '}
-            {exercise.name}
-          </p>
+    <div ref={setNodeRef} style={style} className="w-full">
+      <BaseExerciseItem
+        id={exercise.id}
+        name={`${index + 1}. ${exercise.name}`}
+        images={previewImages}
+        videoUrl={videoUrl}
+        detailExercise={detailExercise}
+        leading={
+          <button
+            type="button"
+            aria-label="Reorder exercise"
+            className="shrink-0 touch-none cursor-grab active:cursor-grabbing rounded-sm p-1 -mr-2"
+            {...attributes}
+            {...listeners}
+          >
+            <Grip className="size-4 text-muted-foreground" />
+          </button>
+        }
+        trailing={
           <Button
-            size="icon-xs"
             variant="ghost"
-            className="opacity-40 hover:opacity-100"
+            size="icon-sm"
             iconOnly={<X />}
             onClick={(e) => {
               e.stopPropagation()
               onRemoveExercise(exercise.id)
             }}
+            className="shrink-0"
           >
-            Remove exercise
+            Remove
           </Button>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="flex items-center gap-0.5 shrink-0">
-            <div className="grid grid-cols-[1fr_auto] justify-between items-center gap-4 w-full">
-              <p className="text-sm">Sets</p>
-              <div className="grid grid-cols-3 items-center gap-0.5 bg-card rounded-xl p-0.5">
-                <Button
-                  size="icon-sm"
-                  variant="tertiary"
-                  className="rounded-xl"
-                  iconOnly={<MinusIcon />}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onRemoveSet(exercise.id)
-                  }}
-                >
-                  Remove set
-                </Button>
-                <AnimateNumber
-                  value={exercise.sets.length}
-                  duration={300}
-                  className="text-center text-lg font-medium"
-                />
-                <Button
-                  size="icon-sm"
-                  className="rounded-xl"
-                  variant="tertiary"
-                  iconOnly={<PlusIcon />}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onAddSet(exercise.id)
-                  }}
-                >
-                  Add set
-                </Button>
-              </div>
+        }
+        belowContent={
+          <div className="mt-2 flex justify-start items-baseline gap-2">
+            <p className="text-sm text-muted-foreground">Sets</p>
+            <div
+              className="grid grid-cols-3 items-center gap-0.5 bg-card rounded-xl p-0.5"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <Button
+                size="icon-sm"
+                variant="tertiary"
+                className="rounded-xl"
+                iconOnly={<MinusIcon />}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRemoveSet(exercise.id)
+                }}
+              >
+                Remove set
+              </Button>
+              <AnimateNumber
+                value={exercise.sets.length}
+                duration={300}
+                className="text-center text-lg font-medium"
+              />
+              <Button
+                size="icon-sm"
+                className="rounded-xl"
+                variant="tertiary"
+                iconOnly={<PlusIcon />}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onAddSet(exercise.id)
+                }}
+              >
+                Add set
+              </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        }
+      />
     </div>
   )
 }

@@ -10,6 +10,7 @@ interface WeeklyFocusChipsProps {
   selectedGroup: HighLevelGroup | null
   onSelectGroup: (group: HighLevelGroup | null) => void
   isLoading?: boolean
+  showVolume?: boolean
 }
 
 export function WeeklyFocusChips({
@@ -17,6 +18,7 @@ export function WeeklyFocusChips({
   selectedGroup,
   onSelectGroup,
   isLoading,
+  showVolume = true,
 }: WeeklyFocusChipsProps) {
   const selectedSummary = groupSummaries.find(
     (s) => s.groupId === selectedGroup,
@@ -26,15 +28,23 @@ export function WeeklyFocusChips({
     <div className="space-y-2">
       <p className="text-xs text-muted-foreground transition-all h-4">
         {selectedSummary ? (
-          <>
+          showVolume ? (
+            <>
+              <span className="font-medium text-foreground">
+                {selectedSummary.label}
+              </span>{' '}
+              · {selectedSummary.setsDone} / {selectedSummary.setsGoal} sets
+              this week
+            </>
+          ) : (
             <span className="font-medium text-foreground">
               {selectedSummary.label}
-            </span>{' '}
-            · {selectedSummary.setsDone} / {selectedSummary.setsGoal} sets this
-            week
-          </>
-        ) : (
+            </span>
+          )
+        ) : showVolume ? (
           'Weekly focus · Tap a muscle to filter'
+        ) : (
+          'Tap a muscle to filter'
         )}
       </p>
 
@@ -53,6 +63,7 @@ export function WeeklyFocusChips({
               isSelected={selectedGroup === summary.groupId}
               onClick={() => onSelectGroup(summary.groupId)}
               disabled={isLoading}
+              showVolume={showVolume}
             />
           ))}
         </div>
@@ -80,7 +91,7 @@ function FilterChip({ label, isSelected, onClick, disabled }: FilterChipProps) {
         'disabled:opacity-50 disabled:pointer-events-none',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         isSelected
-          ? 'border-primary bg-primary text-primary-foreground'
+          ? 'border-primary text-foreground'
           : 'border-border bg-card hover:bg-muted/50 text-foreground',
       )}
     >
@@ -94,6 +105,7 @@ interface MuscleChipProps {
   isSelected: boolean
   onClick: () => void
   disabled?: boolean
+  showVolume: boolean
 }
 
 function MuscleChip({
@@ -101,11 +113,12 @@ function MuscleChip({
   isSelected,
   onClick,
   disabled,
+  showVolume,
 }: MuscleChipProps) {
   const progress =
-    summary.setsGoal > 0 ? summary.setsDone / summary.setsGoal : 0
+    showVolume && summary.setsGoal > 0 ? summary.setsDone / summary.setsGoal : 0
   const progressPercent = Math.min(progress * 100, 100)
-  const progressColor = getProgressColor(progressPercent)
+  const progressClassName = getProgressColorClass(progressPercent)
 
   return (
     <button
@@ -122,11 +135,13 @@ function MuscleChip({
           : 'outline-border bg-card hover:bg-muted/50 text-foreground',
       )}
     >
-      <ProgressRing
-        progress={progressPercent}
-        color={progressColor}
-        size={14}
-      />
+      {showVolume ? (
+        <ProgressRing
+          progress={progressPercent}
+          className={progressClassName}
+          size={14}
+        />
+      ) : null}
       <span>{summary.label}</span>
     </button>
   )
@@ -134,11 +149,11 @@ function MuscleChip({
 
 interface ProgressRingProps {
   progress: number
-  color: string
+  className: string
   size?: number
 }
 
-function ProgressRing({ progress, color, size = 14 }: ProgressRingProps) {
+function ProgressRing({ progress, className, size = 14 }: ProgressRingProps) {
   const strokeWidth = 2
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
@@ -158,28 +173,28 @@ function ProgressRing({ progress, color, size = 14 }: ProgressRingProps) {
         fill="none"
         stroke="currentColor"
         strokeWidth={strokeWidth}
-        className="opacity-20"
+        className="text-muted-foreground/20"
       />
       <circle
         cx={size / 2}
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke={color}
+        stroke="currentColor"
         strokeWidth={strokeWidth}
         strokeDasharray={circumference}
         strokeDashoffset={strokeDashoffset}
         strokeLinecap="round"
-        className="transition-all duration-300"
+        className={cn('transition-all duration-300', className)}
       />
     </svg>
   )
 }
 
-function getProgressColor(progressPercent: number): string {
-  if (progressPercent >= 100) return 'rgb(253, 105, 0)' // green-500 - completed
-  if (progressPercent >= 75) return 'rgb(249, 115, 22)' // orange-500
-  if (progressPercent >= 50) return 'rgb(251, 146, 60)' // orange-400
-  if (progressPercent > 0) return 'rgb(253, 186, 116)' // orange-300
-  return 'rgb(163, 163, 163)' // neutral-400
+function getProgressColorClass(progressPercent: number): string {
+  if (progressPercent >= 100) return 'text-primary'
+  if (progressPercent >= 75) return 'text-primary/85'
+  if (progressPercent >= 50) return 'text-primary/70'
+  if (progressPercent > 0) return 'text-primary/55'
+  return 'text-muted-foreground/50'
 }

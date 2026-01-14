@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 
 import { ExerciseDetailDrawer } from '../exercise/exercise-detail-drawer'
 
-interface BaseExerciseItemProps {
+export interface BaseExerciseItemProps {
   id: string
   name: string
   muscleDisplay?: string
@@ -129,7 +129,7 @@ export function DraggableExerciseItem({
   )
 }
 
-function BaseExerciseItem({
+export function BaseExerciseItem({
   name,
   muscleDisplay,
   images,

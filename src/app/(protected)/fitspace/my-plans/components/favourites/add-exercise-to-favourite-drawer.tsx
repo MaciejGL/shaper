@@ -1,19 +1,10 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { PlusIcon, SearchIcon } from 'lucide-react'
-import { useCallback, useDeferredValue, useMemo, useState } from 'react'
-import { Virtuoso } from 'react-virtuoso'
+import { useCallback, useMemo, useState } from 'react'
 
-import { LoadingSkeleton } from '@/components/loading-skeleton'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from '@/components/ui/card'
+import { ExerciseListWithFilters } from '@/app/(protected)/fitspace/workout/training/components/add-single-exercise/exercise-list-with-filters'
+import { SelectableExerciseItem } from '@/app/(protected)/fitspace/workout/training/components/add-single-exercise/selectable-exercise-item'
 import {
   Drawer,
   DrawerContent,
@@ -21,13 +12,13 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import { Input } from '@/components/ui/input'
 import {
   type GQLFitspaceGetExercisesQuery,
   useFitspaceGetExercisesQuery,
   useGetFavouriteWorkoutQuery,
 } from '@/generated/graphql-client'
 import { useUpdateFavouriteWorkout } from '@/hooks/use-favourite-workouts'
+import { cn } from '@/lib/utils'
 
 type Exercise = NonNullable<
   NonNullable<GQLFitspaceGetExercisesQuery['getExercises']>['publicExercises']
@@ -44,7 +35,9 @@ export function AddExerciseToFavouriteDrawer({
   onClose,
   favouriteId,
 }: AddExerciseToFavouriteDrawerProps) {
-  const [addingExerciseId, setAddingExerciseId] = useState<string | null>(null)
+  const [mutatingExerciseId, setMutatingExerciseId] = useState<string | null>(
+    null,
+  )
   const queryClient = useQueryClient()
 
   const { data: exercisesData, isLoading } = useFitspaceGetExercisesQuery()
@@ -89,60 +82,68 @@ export function AddExerciseToFavouriteDrawer({
     favouriteData?.getFavouriteWorkout?.exercises?.length || 0
   const canAddMore = currentExerciseCount < MAX_EXERCISES
 
-  const handleSelectExercise = useCallback(
+  const selectedExerciseIds = useMemo(
+    () => Array.from(addedExerciseIds),
+    [addedExerciseIds],
+  )
+
+  const handleToggleExercise = useCallback(
     async (exerciseId: string, exerciseName: string) => {
       const currentExercises =
         favouriteData?.getFavouriteWorkout?.exercises || []
 
-      // Check limit
-      if (currentExercises.length >= MAX_EXERCISES) {
-        console.warn('Maximum exercise limit reached')
-        return
-      }
-
-      setAddingExerciseId(exerciseId)
+      const isAlreadyAdded = currentExercises.some(
+        (ex) => ex.baseId === exerciseId,
+      )
+      setMutatingExerciseId(exerciseId)
 
       try {
-        const maxOrder =
-          currentExercises.length > 0
-            ? Math.max(...currentExercises.map((ex) => ex.order))
-            : 0
+        if (!isAlreadyAdded && currentExercises.length >= MAX_EXERCISES) return
 
-        // Add new exercise to existing ones
-        const exercises = [
-          ...currentExercises.map((ex) => ({
-            name: ex.name,
-            order: ex.order,
-            baseId: ex.baseId || undefined,
-            restSeconds: ex.restSeconds || null,
-            instructions: ex.instructions || [],
-            sets: ex.sets.map((set) => ({
-              order: set.order,
-              reps: set.reps || null,
-              minReps: set.minReps || null,
-              maxReps: set.maxReps || null,
-              weight: set.weight || null,
-              rpe: set.rpe || null,
-            })),
-          })),
-          {
-            name: exerciseName,
-            order: maxOrder + 1,
-            baseId: exerciseId,
-            restSeconds: null,
-            instructions: null,
-            sets: [
+        const nextExercises = isAlreadyAdded
+          ? currentExercises.filter((ex) => ex.baseId !== exerciseId)
+          : [
+              ...currentExercises,
               {
-                order: 1,
-                reps: null,
-                minReps: null,
-                maxReps: null,
-                weight: null,
-                rpe: null,
+                id: 'temp',
+                name: exerciseName,
+                order:
+                  currentExercises.length > 0
+                    ? Math.max(...currentExercises.map((ex) => ex.order)) + 1
+                    : 1,
+                baseId: exerciseId,
+                favouriteWorkoutId: favouriteId,
+                restSeconds: null,
+                instructions: [],
+                sets: [
+                  {
+                    id: 'temp',
+                    order: 1,
+                    reps: null,
+                    minReps: null,
+                    maxReps: null,
+                    weight: null,
+                    rpe: null,
+                  },
+                ],
               },
-            ],
-          },
-        ]
+            ]
+
+        const exercises = nextExercises.map((ex) => ({
+          name: ex.name,
+          order: ex.order,
+          baseId: ex.baseId || undefined,
+          restSeconds: ex.restSeconds || null,
+          instructions: ex.instructions || [],
+          sets: ex.sets.map((set) => ({
+            order: set.order,
+            reps: set.reps || null,
+            minReps: set.minReps || null,
+            maxReps: set.maxReps || null,
+            weight: set.weight || null,
+            rpe: set.rpe || null,
+          })),
+        }))
 
         await updateFavourite({
           input: {
@@ -158,12 +159,10 @@ export function AddExerciseToFavouriteDrawer({
         await queryClient.invalidateQueries({
           queryKey: ['GetFavouriteWorkout', { id: favouriteId }],
         })
-
-        setAddingExerciseId(null)
-        // Don't close drawer - let user add more exercises
       } catch (error) {
-        console.error('Failed to add exercise:', error)
-        setAddingExerciseId(null)
+        console.error('Failed to toggle exercise:', error)
+      } finally {
+        setMutatingExerciseId(null)
       }
     },
     [favouriteId, favouriteData, updateFavourite, queryClient],
@@ -180,153 +179,78 @@ export function AddExerciseToFavouriteDrawer({
               : `Maximum limit reached (${MAX_EXERCISES} exercises)`}
           </DrawerDescription>
         </DrawerHeader>
-        <ExerciseList
+        <ExerciseListWithFilters
+          title={false}
           exercises={allExercises}
-          onSelectExercise={handleSelectExercise}
-          isAdding={isAdding}
+          selectedExerciseIds={selectedExerciseIds}
+          onToggleExercise={(exerciseId) => {
+            const exercise = allExercises.find((ex) => ex.id === exerciseId)
+            if (!exercise) return
+            void handleToggleExercise(exerciseId, exercise.name)
+          }}
           isLoading={isLoading}
-          addingExerciseId={addingExerciseId}
-          addedExerciseIds={addedExerciseIds}
-          canAddMore={canAddMore}
+          subtitle=""
+          muscleFilterMode="simple"
+          renderItem={(exercise, isSelected) => (
+            <SelectableExerciseRow
+              exercise={exercise as Exercise}
+              isSelected={isSelected}
+              isAdding={isAdding}
+              mutatingExerciseId={mutatingExerciseId}
+              addedExerciseIds={addedExerciseIds}
+              canAddMore={canAddMore}
+              onToggle={(id, name) => void handleToggleExercise(id, name)}
+            />
+          )}
         />
       </DrawerContent>
     </Drawer>
   )
 }
 
-function ExerciseList({
-  exercises,
-  onSelectExercise,
+function SelectableExerciseRow({
+  exercise,
+  isSelected,
   isAdding,
-  isLoading,
-  addingExerciseId,
+  mutatingExerciseId,
   addedExerciseIds,
   canAddMore,
+  onToggle,
 }: {
-  exercises: Exercise[]
-  onSelectExercise: (id: string, name: string) => void
+  exercise: Exercise
+  isSelected: boolean
   isAdding: boolean
-  isLoading: boolean
-  addingExerciseId: string | null
+  mutatingExerciseId: string | null
   addedExerciseIds: Set<string>
   canAddMore: boolean
+  onToggle: (id: string, name: string) => void
 }) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const deferredSearchQuery = useDeferredValue(searchQuery)
-
-  const filteredExercises = useMemo(() => {
-    if (!deferredSearchQuery.trim()) return exercises
-
-    const query = deferredSearchQuery.toLowerCase()
-    return exercises.filter((exercise) => {
-      const nameMatch = exercise.name.toLowerCase().includes(query)
-      const muscleGroupMatch = exercise.muscleGroups?.some((mg) =>
-        mg.alias?.toLowerCase().includes(query),
-      )
-
-      return nameMatch || muscleGroupMatch
-    })
-  }, [exercises, deferredSearchQuery])
+  const isThisExerciseMutating = mutatingExerciseId === exercise.id
+  const isAlreadyAdded = addedExerciseIds.has(exercise.id)
+  const isDisabled =
+    isAdding || isThisExerciseMutating || (!canAddMore && !isAlreadyAdded)
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-4 pb-3 pt-1 flex-shrink-0">
-        <Input
-          id="search-exercises"
-          placeholder="Search by name or muscle group..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          iconStart={<SearchIcon />}
-        />
-      </div>
-
-      <div className="flex-1 min-h-0">
-        {isLoading && (
-          <div className="px-4 pb-4 space-y-2">
-            <LoadingSkeleton count={8} variant="sm" cardVariant="tertiary" />
-          </div>
-        )}
-        {!isLoading && filteredExercises.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            {searchQuery ? 'No exercises found' : 'No exercises available'}
-          </div>
-        )}
-        {!isLoading && filteredExercises.length > 0 && (
-          <Virtuoso
-            data={filteredExercises}
-            style={{ height: '100%' }}
-            itemContent={(_index, exercise) => {
-              const isThisExerciseAdding = addingExerciseId === exercise.id
-              const isAnyExerciseAdding = isAdding
-              const isAlreadyAdded = addedExerciseIds.has(exercise.id)
-              const isDisabled = !canAddMore || isAlreadyAdded
-
-              return (
-                <Card
-                  className={
-                    isDisabled
-                      ? 'opacity-60 cursor-not-allowed'
-                      : 'cursor-pointer transition-all hover:scale-[1.01]'
-                  }
-                  onClick={() =>
-                    !isAnyExerciseAdding &&
-                    !isDisabled &&
-                    onSelectExercise(exercise.id, exercise.name)
-                  }
-                >
-                  <CardContent>
-                    <div className="flex items-center">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <CardTitle className="text-base">
-                            {exercise.name}
-                          </CardTitle>
-                          {isAlreadyAdded && (
-                            <Badge variant="secondary" size="sm">
-                              Added
-                            </Badge>
-                          )}
-                        </div>
-                        {exercise.muscleGroups &&
-                          exercise.muscleGroups.length > 0 && (
-                            <CardDescription>
-                              {exercise.muscleGroups
-                                .map((mg) => mg.alias)
-                                .filter((alias): alias is string =>
-                                  Boolean(alias),
-                                )
-                                .join(', ')}
-                            </CardDescription>
-                          )}
-                      </div>
-                      <Button
-                        size="icon-md"
-                        variant="ghost"
-                        iconOnly={<PlusIcon />}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          if (!isDisabled) {
-                            onSelectExercise(exercise.id, exercise.name)
-                          }
-                        }}
-                        disabled={isAnyExerciseAdding || isDisabled}
-                        loading={isThisExerciseAdding}
-                      >
-                        Add
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            }}
-            components={{
-              List: (props) => (
-                <div {...props} className="px-4 pb-4 space-y-2" />
-              ),
-            }}
-          />
-        )}
-      </div>
+    <div className={cn(isDisabled && 'pointer-events-none')}>
+      <SelectableExerciseItem
+        id={exercise.id}
+        name={exercise.name}
+        muscleDisplay={exercise.muscleGroups
+          ?.map((mg) => mg.alias)
+          .filter((alias): alias is string => Boolean(alias))
+          .join(', ')}
+        images={exercise.images as ({ medium?: string | null } | null)[] | null}
+        videoUrl={exercise.videoUrl}
+        isSelected={isSelected}
+        onToggle={(id) => onToggle(id, exercise.name)}
+        disabled={isDisabled}
+        detailExercise={exercise}
+      />
+      {isThisExerciseMutating ? (
+        <div className="sr-only" aria-live="polite">
+          Updating {exercise.name}
+        </div>
+      ) : null}
     </div>
   )
 }
