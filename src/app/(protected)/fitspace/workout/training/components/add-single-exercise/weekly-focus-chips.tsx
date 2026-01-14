@@ -177,7 +177,7 @@ function ProgressRing({ progress, color, size = 14 }: ProgressRingProps) {
 }
 
 function getProgressColor(progressPercent: number): string {
-  if (progressPercent >= 100) return 'rgb(34, 197, 94)' // green-500 - completed
+  if (progressPercent >= 100) return 'rgb(253, 105, 0)' // green-500 - completed
   if (progressPercent >= 75) return 'rgb(249, 115, 22)' // orange-500
   if (progressPercent >= 50) return 'rgb(251, 146, 60)' // orange-400
   if (progressPercent > 0) return 'rgb(253, 186, 116)' // orange-300
