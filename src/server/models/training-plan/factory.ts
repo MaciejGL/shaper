@@ -1398,6 +1398,27 @@ export async function activatePlan(
       -firstUnfinishedWeekIndex,
     )
 
+    const proposedStartsCount = fullPlan.weeks.reduce<Record<string, number>>(
+      (acc, week) => {
+        const weekIndex = week.weekNumber - 1
+        const desired = addWeeks(planStartDate, weekIndex)
+        const proposed =
+          week.completedAt && week.scheduledAt ? week.scheduledAt : desired
+        const key = proposed.toISOString()
+        acc[key] = (acc[key] ?? 0) + 1
+        return acc
+      },
+      {},
+    )
+    const proposedDuplicateCount = Object.values(proposedStartsCount).filter(
+      (c) => c > 1,
+    ).length
+    const hasMissingCompletedScheduledAt = fullPlan.weeks.some(
+      (w) => !!w.completedAt && !w.scheduledAt,
+    )
+    const shouldRescheduleAllWeeks =
+      proposedDuplicateCount > 0 || hasMissingCompletedScheduledAt
+
     const operations = [
       // Deactivate other plans
       prisma.trainingPlan.updateMany({
@@ -1420,9 +1441,10 @@ export async function activatePlan(
         prisma.trainingWeek.updateMany({
           where: { id: week.id },
           data: {
-            scheduledAt: week.completedAt
-              ? week.scheduledAt // Keep completed weeks at their original schedule
-              : addWeeks(planStartDate, weekIndex), // Reschedule unfinished weeks with proper 7-day spacing
+            scheduledAt:
+              !shouldRescheduleAllWeeks && week.completedAt
+                ? week.scheduledAt // Keep completed weeks at their original schedule (only when safe)
+                : addWeeks(planStartDate, weekIndex), // Otherwise reschedule everything with proper spacing
           },
         }),
       ),
@@ -1438,14 +1460,15 @@ export async function activatePlan(
             where: { id: day.id },
             data: {
               dayOfWeek: translatedDayOfWeek, // Update to user-preference-relative dayOfWeek
-              scheduledAt: week.completedAt
-                ? day.scheduledAt // Keep completed days at their original schedule
-                : calculateTrainingDayScheduledDate(
-                    planStartDate,
-                    weekIndex,
-                    translatedDayOfWeek, // Use translated dayOfWeek for scheduling
-                    weekStartsOn,
-                  ), // Reschedule unfinished days with proper alignment based on user preference
+              scheduledAt:
+                !shouldRescheduleAllWeeks && week.completedAt
+                  ? day.scheduledAt // Keep completed days at their original schedule (only when safe)
+                  : calculateTrainingDayScheduledDate(
+                      planStartDate,
+                      weekIndex,
+                      translatedDayOfWeek, // Use translated dayOfWeek for scheduling
+                      weekStartsOn,
+                    ), // Otherwise reschedule everything with proper alignment
             },
           })
         }),

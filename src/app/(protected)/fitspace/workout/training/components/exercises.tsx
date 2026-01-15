@@ -3,6 +3,7 @@
 import { LayoutGroup } from 'framer-motion'
 import React, { useState } from 'react'
 
+import { MarkDayAsCompletedButton } from '@/app/(protected)/fitspace/workout/training/components/mark-day-as-completed-button'
 import { buttonVariants } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useUserPreferences } from '@/context/user-preferences-context'
@@ -19,7 +20,6 @@ import { ClearWorkoutModal } from './clear-workout-modal'
 import { EmptyWorkoutOptions } from './empty-workout-options'
 import { Exercise } from './exercise'
 import { WorkoutOverviewPill, WorkoutSmartPill } from './exercise-mini-map'
-import { MarkDayAsCompletedButton } from '@/app/(protected)/fitspace/workout/training/components/mark-day-as-completed-button'
 import { RestDay } from './rest-day'
 
 interface ExercisesProps {
@@ -81,7 +81,13 @@ export function Exercises({
 
   // Early returns for special states
   if (day.isRestDay) {
-    return <RestDay />
+    return (
+      <div>
+        <div className="px-2 py-3 bg-sidebar mb-4 w-full shadow-xl rounded-b-[18px] dark" />
+
+        <RestDay />
+      </div>
+    )
   }
 
   if (isEmptyWorkout) {
@@ -182,6 +188,7 @@ function WorkoutSettings({
 }) {
   const { preferences, setTrainingView } = useUserPreferences()
   const isAdvanced = preferences.trainingView === GQLTrainingView.Advanced
+
   if (!isQuickWorkout)
     return (
       <div className="flex w-full gap-2">
