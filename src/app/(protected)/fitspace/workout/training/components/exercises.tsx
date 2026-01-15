@@ -19,6 +19,7 @@ import { ClearWorkoutModal } from './clear-workout-modal'
 import { EmptyWorkoutOptions } from './empty-workout-options'
 import { Exercise } from './exercise'
 import { WorkoutOverviewPill, WorkoutSmartPill } from './exercise-mini-map'
+import { MarkDayAsCompletedButton } from '@/app/(protected)/fitspace/workout/training/components/mark-day-as-completed-button'
 import { RestDay } from './rest-day'
 
 interface ExercisesProps {
@@ -188,6 +189,7 @@ function WorkoutSettings({
           isAdvanced={isAdvanced}
           setTrainingView={setTrainingView}
         />
+        <MarkDayAsCompletedButton day={day} />
       </div>
     )
 
