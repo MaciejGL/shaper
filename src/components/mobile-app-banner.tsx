@@ -21,12 +21,23 @@ interface MobileAppBannerProps {
    * Useful for pages like download where we want to show only the download buttons.
    */
   hideOpenAppButton?: boolean
+  /**
+   * Controls where the open app button should render relative to download CTAs on mobile.
+   * Defaults to current behavior to avoid changing existing pages.
+   */
+  openAppPlacement?: 'aboveDownload' | 'belowDownload'
+  /**
+   * Optional helper text displayed above the open app button (mobile only).
+   */
+  openAppHelperText?: string
 }
 
 export function MobileAppBanner({
   className,
   alwaysShow = false,
   hideOpenAppButton = false,
+  openAppPlacement = 'aboveDownload',
+  openAppHelperText,
 }: MobileAppBannerProps) {
   const { isNativeApp } = useMobileApp()
   const [isVisible, setIsVisible] = useState(false)
@@ -87,7 +98,9 @@ export function MobileAppBanner({
         {/* Mobile devices: Show Open App button + Download button */}
         {deviceType === 'ios' && canShowIos && (
           <>
-            <OpenAppButton />
+            {!hideOpenAppButton && openAppPlacement === 'aboveDownload' && (
+              <OpenAppButton />
+            )}
             <button
               type="button"
               onClick={() => openStoreUrl(MOBILE_STORE_LINKS.ios.url)}
@@ -99,12 +112,24 @@ export function MobileAppBanner({
                 height={80}
               />
             </button>
+            {!hideOpenAppButton && openAppPlacement === 'belowDownload' && (
+              <>
+                {openAppHelperText ? (
+                  <p className="text-sm text-muted-foreground text-center">
+                    {openAppHelperText}
+                  </p>
+                ) : null}
+                <OpenAppButton />
+              </>
+            )}
           </>
         )}
 
         {deviceType === 'android' && canShowAndroid && (
           <>
-            <OpenAppButton />
+            {!hideOpenAppButton && openAppPlacement === 'aboveDownload' && (
+              <OpenAppButton />
+            )}
             <button
               type="button"
               onClick={() => openStoreUrl(MOBILE_STORE_LINKS.android.url)}
@@ -116,6 +141,16 @@ export function MobileAppBanner({
                 height={80}
               />
             </button>
+            {!hideOpenAppButton && openAppPlacement === 'belowDownload' && (
+              <>
+                {openAppHelperText ? (
+                  <p className="text-sm text-muted-foreground text-center">
+                    {openAppHelperText}
+                  </p>
+                ) : null}
+                <OpenAppButton />
+              </>
+            )}
           </>
         )}
 
