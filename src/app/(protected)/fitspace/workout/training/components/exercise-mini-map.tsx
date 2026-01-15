@@ -72,17 +72,14 @@ function ExpandedExerciseListItem({
           : 'bg-card/90 hover:bg-card/98 border-white/5',
       )}
     >
-      {(exercise.images?.length || exercise.videoUrl) && (
-        <ExerciseMediaPreview
-          images={exercise.images}
-          videoUrl={exercise.videoUrl}
-          alt={exercise.name}
-          className="size-32 shrink-0 rounded-md"
-          hidePagination={true}
-          hideVideoOverlay={true}
-          disableImageToggle={true}
-        />
-      )}
+      <ExerciseMediaPreview
+        images={exercise.images}
+        videoUrl={exercise.videoUrl}
+        alt={exercise.name}
+        className={cn('size-32 shrink-0 rounded-md')}
+        classNamePlaceholder={cn(isCurrent && 'bg-primary/10')}
+        hidePagination={true}
+      />
 
       <div className="flex flex-col justify-center flex-1 py-1 min-w-0 gap-1.5 h-32">
         {/* Top Line: Badge/Order */}

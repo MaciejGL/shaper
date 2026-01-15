@@ -81,18 +81,12 @@ export function Exercises({
 
   // Early returns for special states
   if (day.isRestDay) {
-    return (
-      <div>
-        <div className="px-2 py-3 bg-sidebar mb-4 w-full shadow-xl rounded-b-[18px] dark" />
-
-        <RestDay />
-      </div>
-    )
+    return <RestDay />
   }
 
   if (isEmptyWorkout) {
     return (
-      <div className="px-4 ">
+      <div className="px-4">
         {isQuickWorkout ? (
           <EmptyWorkoutOptions day={day} />
         ) : (
@@ -145,7 +139,8 @@ export function Exercises({
             </p>
           </div>
         )} */}
-        <div className="px-2 py-3 bg-sidebar mb-4 w-full shadow-xl rounded-b-[18px] dark border-t border-border">
+        <div className="px-2 pt-4 pb-3 -mt-4 bg-sidebar mb-4 w-full shadow-xl rounded-b-[18px] dark border-t border-border">
+          <div className="h-px bg-border mb-3" />
           <WorkoutSettings day={day} isQuickWorkout={isQuickWorkout} />
         </div>
         {/* Overview Pill (static at top) */}

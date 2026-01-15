@@ -16,6 +16,7 @@ interface ExerciseMediaPreviewProps {
   hidePagination?: boolean
   hideVideoOverlay?: boolean
   disableImageToggle?: boolean
+  classNamePlaceholder?: string
 }
 
 export function ExerciseMediaPreview({
@@ -26,6 +27,7 @@ export function ExerciseMediaPreview({
   hidePagination = false,
   hideVideoOverlay = false,
   disableImageToggle = false,
+  classNamePlaceholder,
 }: ExerciseMediaPreviewProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
@@ -83,7 +85,7 @@ export function ExerciseMediaPreview({
             )}
           </>
         ) : (
-          <ImagePlaceholder />
+          <ImagePlaceholder className={classNamePlaceholder} />
         )}
       </div>
 
@@ -108,9 +110,14 @@ export function ExerciseMediaPreview({
   )
 }
 
-function ImagePlaceholder() {
+function ImagePlaceholder({ className = '' }: { className?: string }) {
   return (
-    <div className="absolute inset-0 flex-center flex-col bg-muted">
+    <div
+      className={cn(
+        'absolute inset-0 flex-center flex-col bg-muted',
+        className,
+      )}
+    >
       <Dumbbell className="size-5 text-muted-foreground" />
     </div>
   )

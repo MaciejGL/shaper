@@ -44,7 +44,7 @@ export function Navigation({
   if (!plan) return null
 
   return (
-    <div id="workout-navigation" className="pb-2">
+    <div id="workout-navigation" className="pb-3">
       <div className="max-w-sm mx-auto dark">
         <OverdueWorkoutBanner plan={plan} isQuickWorkout={isQuickWorkout} />
         <WeekSelector
