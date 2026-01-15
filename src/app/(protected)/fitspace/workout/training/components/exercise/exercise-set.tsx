@@ -91,6 +91,7 @@ export function ExerciseSet({
     : null
 
   const displayReps = formatDisplayReps(set)
+  const displayRepsSimple = reps || displayReps || '-'
   const displayWeight = formatDisplayWeight({
     weight,
     targetDisplayWeight,
@@ -171,7 +172,9 @@ export function ExerciseSet({
             className="text-center h-8 focus-visible:ring-0 text-sm w-full"
           />
         ) : (
-          <div className="text-center text-sm font-medium">{displayReps}</div>
+          <div className="text-center text-sm font-medium">
+            {displayRepsSimple}
+          </div>
         )}
 
         {/* Weight Input / Text */}
