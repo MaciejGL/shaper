@@ -235,7 +235,7 @@ function SmartPillContent({
             onClick={onShowSummary}
             className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
           >
-            <BarChart className="size-3.5" />
+            <BarChart className="size-3.5 text-green-500" />
             <span>Summary</span>
           </button>
         </div>
