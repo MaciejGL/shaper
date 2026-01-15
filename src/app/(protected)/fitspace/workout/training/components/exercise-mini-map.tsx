@@ -1,11 +1,18 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { BarChart, Check, ChevronDown, ChevronsUpDown } from 'lucide-react'
+import {
+  BarChart,
+  Check,
+  ChevronDown,
+  ChevronsUpDown,
+  DumbbellIcon,
+} from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
+import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
 import { ProgressCircle } from '@/components/ui/progress-circle'
 import { cn } from '@/lib/utils'
 
@@ -19,6 +26,8 @@ interface Exercise {
   name: string
   order: number
   completedAt: string | null
+  images?: ({ medium?: string | null } | null)[] | null
+  videoUrl?: string | null
 }
 
 interface SharedProps {
@@ -36,41 +45,79 @@ function ExpandedExerciseListItem({
   isCurrent: boolean
   onClick: () => void
 }) {
+  const ref = useRef<HTMLButtonElement>(null)
   const isCompleted = !!exercise.completedAt
+
+  useEffect(() => {
+    if (isCurrent && ref.current) {
+      // Small delay to ensure container is rendered and layout is stable
+      const timer = setTimeout(() => {
+        ref.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [isCurrent])
 
   return (
     <button
+      ref={ref}
       onClick={onClick}
       className={cn(
-        'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all shadow-sm backdrop-blur-md border',
+        'w-full flex gap-4 p-2 rounded-xl text-left transition-all shadow-sm backdrop-blur-md border overflow-hidden group',
         isCurrent
           ? 'bg-secondary/50 border-secondary/90 dark:bg-secondary dark:border-primary/50'
           : 'bg-card/90 hover:bg-card/98 border-white/5',
       )}
     >
-      <div className="shrink-0">
-        {isCompleted ? (
-          <div className="size-6 rounded-full bg-green-600 dark:bg-green-500 flex-center shadow-lg shadow-green-500/20">
-            <Check className="size-4 text-white" />
-          </div>
-        ) : (
-          <div
+      {(exercise.images?.length || exercise.videoUrl) && (
+        <ExerciseMediaPreview
+          images={exercise.images}
+          videoUrl={exercise.videoUrl}
+          alt={exercise.name}
+          className="size-32 shrink-0 rounded-md"
+          hidePagination={true}
+          hideVideoOverlay={true}
+          disableImageToggle={true}
+        />
+      )}
+
+      <div className="flex flex-col justify-center flex-1 py-1 min-w-0 gap-1.5 h-32">
+        {/* Top Line: Badge/Order */}
+        <div className="flex items-center gap-2">
+          {isCompleted ? (
+            <div className="flex-center size-5 rounded-full bg-green-500/20 text-green-500">
+              <Check className="size-3" />
+            </div>
+          ) : (
+            <div
+              className={cn(
+                'flex-center size-6 rounded-full',
+                isCurrent
+                  ? 'bg-primary/10 text-primary'
+                  : 'bg-muted-foreground/10 text-muted-foreground',
+              )}
+            >
+              <DumbbellIcon className="size-3" />
+            </div>
+          )}
+          <span
             className={cn(
-              'size-6 rounded-full flex-center font-bold text-sm shadow-inner',
-              isCurrent
-                ? 'bg-primary text-primary-foreground shadow-primary/25'
-                : 'bg-muted text-muted-foreground',
+              'text-xs font-medium uppercase tracking-wider',
+              isCompleted ? 'text-green-500' : 'text-muted-foreground',
             )}
           >
-            {exercise.order}
-          </div>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
+            {isCompleted ? 'Completed' : `Exercise ${exercise.order}`}
+          </span>
+        </div>
+
+        {/* Main Line: Name */}
         <p
           className={cn(
-            'font-medium text-sm',
-            isCurrent ? 'text-foreground font-semibold' : 'text-foreground/80',
+            'font-semibold text-base leading-tight line-clamp-2',
+            isCurrent ? 'text-foreground' : 'text-foreground/80',
           )}
         >
           {exercise.name}
@@ -344,7 +391,7 @@ export function WorkoutSmartPill({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-32 left-4 right-4 z-45 max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+            className="fixed bottom-32 left-4 right-4 z-45 max-h-[calc(100dvh-9rem)] overflow-y-auto hide-scrollbar flex flex-col gap-2 pb-4"
           >
             {exercises.map((exercise, i) => (
               <motion.div
@@ -434,7 +481,7 @@ export function WorkoutOverviewPill({
     <>
       <div ref={ref} className="relative h-[48px] z-35 mb-4">
         {!isExpanded && (
-          <div className="relative w-full px-2">
+          <div className="relative w-full">
             <SmartPillContent
               progressPercentage={progressPercentage}
               completedCount={completedCount}
@@ -491,7 +538,7 @@ export function WorkoutOverviewPill({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="fixed top-18 left-4 right-4 z-45 max-h-[80dvh] overflow-y-auto no-scrollbar flex flex-col gap-2 pb-4"
+              className="fixed top-18 left-4 right-4 z-45 max-h-[calc(100dvh-9rem)] overflow-y-auto hide-scrollbar flex flex-col gap-2 pb-4"
             >
               {exercises.map((exercise, i) => (
                 <motion.div

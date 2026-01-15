@@ -1,6 +1,6 @@
 'use client'
 
-import { BookmarkCheckIcon, BookmarkIcon } from 'lucide-react'
+import { Bookmark, BookmarkCheckIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -119,16 +119,16 @@ export function AddToFavouritesButton({ day }: AddToFavouritesButtonProps) {
         <DrawerTrigger asChild>
           <Button
             variant="secondary"
-            iconStart={<BookmarkIcon />}
+            iconStart={<Bookmark className="size-4" />}
             onClick={() => setOpen(true)}
-            className="w-full"
+            className="rounded-full shadow-lg"
           >
-            Add to Favourites
+            Save
           </Button>
         </DrawerTrigger>
         <DrawerContent
           dialogTitle="Save as Favourite Workout"
-          className="max-h-[85vh]D"
+          className="max-h-max!"
         >
           <DrawerHeader>
             <DrawerTitle>Save as Favourite Workout</DrawerTitle>

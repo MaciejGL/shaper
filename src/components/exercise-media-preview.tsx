@@ -34,7 +34,9 @@ export function ExerciseMediaPreview({
   )
   const hasMultipleImages = validImages.length > 1
 
-  const handleImageClick = () => {
+  const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation()
+    e.preventDefault()
     if (hasMultipleImages) {
       setCurrentImageIndex((prev) => (prev + 1) % validImages.length)
     }
@@ -48,7 +50,9 @@ export function ExerciseMediaPreview({
     <div className="flex flex-col gap-2">
       <div
         onClick={
-          hasMultipleImages && !disableImageToggle ? handleImageClick : undefined
+          hasMultipleImages && !disableImageToggle
+            ? handleImageClick
+            : undefined
         }
         className={cn(
           'relative overflow-hidden rounded-xl bg-muted',

@@ -1,6 +1,6 @@
 'use client'
 
-import { Trash2 } from 'lucide-react'
+import { ListX } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -50,10 +50,10 @@ export function ClearWorkoutModal({
         variant="secondary"
         size="md"
         onClick={() => setOpen(true)}
-        iconStart={<Trash2 />}
-        className="w-full"
+        iconStart={<ListX />}
+        className="rounded-full shadow-lg"
       >
-        Clear Workout
+        Clear
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

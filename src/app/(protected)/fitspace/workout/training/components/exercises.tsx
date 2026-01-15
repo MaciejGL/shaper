@@ -3,8 +3,15 @@
 import { LayoutGroup } from 'framer-motion'
 import React, { useState } from 'react'
 
-import { GQLFitspaceGetWorkoutDayQuery } from '@/generated/graphql-client'
+import { buttonVariants } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { useUserPreferences } from '@/context/user-preferences-context'
+import {
+  GQLFitspaceGetWorkoutDayQuery,
+  GQLTrainingView,
+} from '@/generated/graphql-client'
 import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
+import { cn } from '@/lib/utils'
 
 import { AddSingleExercise } from './add-single-exercise'
 import { AddToFavouritesButton } from './add-to-favourites-button'
@@ -91,12 +98,27 @@ export function Exercises({
   }
 
   // Prepare mini-map data
-  const miniMapExercises = exercises.map((ex) => ({
-    id: ex.id,
-    name: ex.substitutedBy?.name ?? ex.name,
-    order: ex.order,
-    completedAt: ex.substitutedBy?.completedAt ?? ex.completedAt ?? null,
-  }))
+  const miniMapExercises = exercises.map((ex) => {
+    const name = ex.substitutedBy?.name ?? ex.name
+    const completedAt = ex.substitutedBy?.completedAt ?? ex.completedAt ?? null
+    const videoUrl = ex.substitutedBy?.videoUrl ?? ex.videoUrl ?? null
+
+    const imagesSource: ({
+      medium?: string | null
+      url?: string | null
+    } | null)[] = ex.images ?? []
+
+    return {
+      id: ex.id,
+      name,
+      order: ex.order,
+      completedAt,
+      images: imagesSource.map((img) => ({
+        medium: img?.medium ?? img?.url ?? null,
+      })),
+      videoUrl,
+    }
+  })
 
   // Main workout view
   return (
@@ -116,13 +138,19 @@ export function Exercises({
             </p>
           </div>
         )} */}
+        <div className="px-2 py-3 bg-sidebar mb-4 w-full shadow-xl rounded-b-[18px] dark border-t border-border">
+          <WorkoutSettings day={day} isQuickWorkout={isQuickWorkout} />
+        </div>
         {/* Overview Pill (static at top) */}
+
         {hasExercises && (
-          <WorkoutOverviewPill
-            exercises={miniMapExercises}
-            startedAt={day.startedAt}
-            onInViewChange={setIsOverviewVisible}
-          />
+          <div className="px-2">
+            <WorkoutOverviewPill
+              exercises={miniMapExercises}
+              startedAt={day.startedAt}
+              onInViewChange={setIsOverviewVisible}
+            />
+          </div>
         )}
         <div>
           {exercises.map((exercise) => (
@@ -134,16 +162,71 @@ export function Exercises({
             />
           ))}
           {isQuickWorkout && day.id && (
-            <div className="grid grid-cols-2 gap-2 pb-4 px-4 mb-16">
-              <div className="col-span-full">
-                <AddSingleExercise dayId={day.id} variant="button" />
-              </div>
-              <ClearWorkoutModal dayId={day.id} />
-              <AddToFavouritesButton day={day} />
+            <div className="pb-4 px-4 mb-16">
+              <AddSingleExercise dayId={day.id} variant="button" />
             </div>
           )}
         </div>
       </div>
     </LayoutGroup>
+  )
+}
+
+function WorkoutSettings({
+  day,
+  isQuickWorkout,
+}: {
+  day: NonNullable<GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']>['day']
+  isQuickWorkout: boolean
+}) {
+  const { preferences, setTrainingView } = useUserPreferences()
+  const isAdvanced = preferences.trainingView === GQLTrainingView.Advanced
+  if (!isQuickWorkout)
+    return (
+      <div className="flex w-full gap-2">
+        <ToggleLoggingMode
+          isAdvanced={isAdvanced}
+          setTrainingView={setTrainingView}
+        />
+      </div>
+    )
+
+  return (
+    <div className="flex w-full gap-2">
+      <ToggleLoggingMode
+        isAdvanced={isAdvanced}
+        setTrainingView={setTrainingView}
+      />
+      <AddToFavouritesButton day={day} />
+      <ClearWorkoutModal dayId={day.id} />
+    </div>
+  )
+}
+
+function ToggleLoggingMode({
+  isAdvanced,
+  setTrainingView,
+}: {
+  isAdvanced: boolean
+  setTrainingView: (view: GQLTrainingView) => void
+}) {
+  return (
+    <div
+      className={cn(
+        buttonVariants({
+          variant: 'secondary',
+          size: 'md',
+        }),
+        'rounded-full shadow-lg flex-1',
+      )}
+      onClick={() =>
+        setTrainingView(
+          isAdvanced ? GQLTrainingView.Simple : GQLTrainingView.Advanced,
+        )
+      }
+    >
+      <span className="text-sm text-foreground">Logging Mode</span>
+      <Switch checked={isAdvanced} />
+    </div>
   )
 }
