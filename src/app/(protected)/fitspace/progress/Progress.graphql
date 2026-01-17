@@ -60,5 +60,13 @@ query GetExerciseProgress($userId: ID!, $exerciseId: ID!) {
         reps
       }
     }
+    totalVolumeProgress {
+      week
+      totalVolume
+      totalSets
+    }
+    averageRpe
+    totalSets
+    lastPerformed
   }
 }

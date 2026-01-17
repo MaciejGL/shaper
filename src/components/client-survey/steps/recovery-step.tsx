@@ -1,5 +1,8 @@
+import { AnimatePresence, motion } from 'framer-motion'
+
 import { RadioButtons } from '@/components/radio-buttons'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 import { ClientSurveyData } from '../types'
 
@@ -53,6 +56,33 @@ export function RecoveryStep({ data, onChange }: RecoveryStepProps) {
               { value: 'no-sleep', label: 'No' },
             ]}
           />
+          <AnimatePresence mode="wait">
+            {data.hasSleepIssues && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Textarea
+                    id="sleep-issues-details"
+                    placeholder="Tell us more (optional) — e.g., trouble falling asleep, frequent waking..."
+                    value={data.sleepIssuesDetails || ''}
+                    onChange={(e) =>
+                      onChange({ sleepIssuesDetails: e.target.value })
+                    }
+                    rows={3}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="space-y-3">

@@ -36,6 +36,7 @@ export interface ClientSurveyData {
   // Recovery & Sleep
   sleepHours: string
   hasSleepIssues: boolean
+  sleepIssuesDetails?: string
 
   // Blood Tests
   hasRecentBloodTests: boolean
@@ -67,6 +68,7 @@ export const INITIAL_SURVEY_DATA: ClientSurveyData = {
   supplements: [],
   sleepHours: '',
   hasSleepIssues: false,
+  sleepIssuesDetails: '',
   hasRecentBloodTests: false,
   biggestChallenge: '',
   additionalInfo: '',

@@ -126,6 +126,7 @@ export async function upsertClientSurvey({
       otherSupplement: data.otherSupplement || '',
       sleepHours: data.sleepHours || '',
       hasSleepIssues: data.hasSleepIssues || false,
+      sleepIssuesDetails: data.sleepIssuesDetails || '',
       hasRecentBloodTests: data.hasRecentBloodTests || false,
       biggestChallenge: data.biggestChallenge || '',
       otherChallenge: data.otherChallenge || '',

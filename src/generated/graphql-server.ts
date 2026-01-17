@@ -419,6 +419,7 @@ export type GQLClientSurveyDataInput = {
   primaryGoal?: InputMaybe<Scalars['String']['input']>;
   secondaryGoal?: InputMaybe<Scalars['String']['input']>;
   sleepHours?: InputMaybe<Scalars['String']['input']>;
+  sleepIssuesDetails?: InputMaybe<Scalars['String']['input']>;
   supplements?: InputMaybe<Array<Scalars['String']['input']>>;
   tracksNutrition?: InputMaybe<Scalars['String']['input']>;
   trainingDuration?: InputMaybe<Scalars['String']['input']>;

@@ -2,6 +2,7 @@
 
 import {
   ArrowLeftRight,
+  BarChart3,
   CheckIcon,
   GaugeIcon,
   MoreHorizontalIcon,
@@ -58,6 +59,14 @@ const ExerciseDetailDrawer = dynamic(
 
 const ExerciseNotebook = dynamic(
   () => import('./exercise-notebook').then((m) => m.ExerciseNotebook),
+  { ssr: false },
+)
+
+const ExerciseStatsDrawer = dynamic(
+  () =>
+    import('./exercise-stats-drawer/exercise-stats-drawer').then(
+      (m) => m.ExerciseStatsDrawer,
+    ),
   { ssr: false },
 )
 
@@ -160,6 +169,7 @@ export function ExerciseMetadata({
   }, [exercise.id, exercise.type, exercises, isSuperset])
 
   const hasImagesToShow = showImages && exercise.images.length > 0
+  const currentExercise = exercise.substitutedBy || exercise
 
   return (
     <div
@@ -306,6 +316,19 @@ export function ExerciseMetadata({
           <div className="flex gap-2 ml-auto">
             <ExerciseDetailDrawer exercise={exercise} />
             <ExerciseNotebook exercise={exercise} />
+            {currentExercise.baseId ? (
+              <ExerciseStatsDrawer
+                baseExerciseId={currentExercise.baseId}
+                exerciseName={currentExercise.name}
+                trigger={
+                  <Button
+                    variant="secondary"
+                    size="icon-md"
+                    iconOnly={<BarChart3 />}
+                  />
+                }
+              />
+            ) : null}
             <DropdownMenu
               open={isDropdownOpen}
               onOpenChange={setIsDropdownOpen}

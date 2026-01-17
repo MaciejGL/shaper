@@ -181,6 +181,14 @@ export function ClientAssessment({ clientId }: ClientAssessmentProps) {
       question: 'Sleep quality issues',
       answer: survey.hasSleepIssues ? 'Yes' : 'No',
     },
+    ...(survey.hasSleepIssues && survey.sleepIssuesDetails
+      ? [
+          {
+            question: 'Sleep issues details',
+            answer: survey.sleepIssuesDetails,
+          },
+        ]
+      : []),
     {
       question: 'Recent blood work for vitamins/minerals',
       answer: survey.hasRecentBloodTests ? 'Yes' : 'No',

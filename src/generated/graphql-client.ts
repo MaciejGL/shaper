@@ -417,6 +417,7 @@ export type GQLClientSurveyDataInput = {
   primaryGoal?: InputMaybe<Scalars['String']['input']>;
   secondaryGoal?: InputMaybe<Scalars['String']['input']>;
   sleepHours?: InputMaybe<Scalars['String']['input']>;
+  sleepIssuesDetails?: InputMaybe<Scalars['String']['input']>;
   supplements?: InputMaybe<Array<Scalars['String']['input']>>;
   tracksNutrition?: InputMaybe<Scalars['String']['input']>;
   trainingDuration?: InputMaybe<Scalars['String']['input']>;
@@ -4572,7 +4573,7 @@ export type GQLGetExerciseProgressQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetExerciseProgressQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', baseExercise?: { __typename?: 'BaseExercise', id: string, name: string } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }> }> };
+export type GQLGetExerciseProgressQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
 
 export type GQLGetUserBodyProgressLogsQueryVariables = Exact<{
   userProfileId: Scalars['String']['input'];
@@ -9623,6 +9624,14 @@ export const GetExerciseProgressDocument = `
         reps
       }
     }
+    totalVolumeProgress {
+      week
+      totalVolume
+      totalSets
+    }
+    averageRpe
+    totalSets
+    lastPerformed
   }
 }
     `;
