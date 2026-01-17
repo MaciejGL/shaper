@@ -4,6 +4,36 @@ import { NextRequest, NextResponse } from 'next/server'
 import { consumeHandoffCode } from '@/lib/auth/handoff-store'
 import prisma from '@/lib/db'
 
+function createExchangeHtmlResponse(redirectTo: string): NextResponse {
+  const escapedRedirectTo = JSON.stringify(redirectTo)
+  const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content="0; url=${redirectTo}" />
+    <title>Signing in…</title>
+  </head>
+  <body>
+    <script>
+      window.location.replace(${escapedRedirectTo});
+    </script>
+    <noscript>
+      <p>Continue:</p>
+      <a href="${redirectTo}">${redirectTo}</a>
+    </noscript>
+  </body>
+</html>`
+
+  return new NextResponse(html, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+    },
+  })
+}
+
 /**
  * Mobile OAuth Exchange Endpoint
  *
@@ -79,14 +109,10 @@ export async function GET(request: NextRequest) {
       maxAge: 365 * 24 * 60 * 60, // 365 days (same as NextAuth default)
     })
 
-    // Redirect to the final destination with session cookie
     // Add success=true to show loading overlay during session establishment
     const redirectUrl = new URL(next, request.nextUrl.origin)
     redirectUrl.searchParams.set('success', 'true')
-    const response = NextResponse.redirect(redirectUrl)
-
-    // Prevent caching of this endpoint
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+    const response = createExchangeHtmlResponse(redirectUrl.toString())
 
     // Set NextAuth session token cookie
     const cookieName =
