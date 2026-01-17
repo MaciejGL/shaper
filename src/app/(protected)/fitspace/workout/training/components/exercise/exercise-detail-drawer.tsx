@@ -47,9 +47,10 @@ export function ExerciseDetailDrawer({
     return null
 
   const getIcon = () => {
-    if (videoUrl) return <VideoIcon />
-    if (images.length) return <ImageIcon />
-    if (instructions?.length || tips?.length || description) return <BookIcon />
+    if (videoUrl) return <VideoIcon className="text-amber-500!" />
+    if (images.length) return <ImageIcon className="text-amber-500!" />
+    if (instructions?.length || tips?.length || description)
+      return <BookIcon className="text-amber-500!" />
   }
 
   return (
@@ -94,7 +95,7 @@ export function ExerciseDetailDrawer({
               {images.map((image, index) => (
                 <div
                   key={index}
-                  className="relative aspect-[4/5] overflow-hidden shadow-xs"
+                  className="relative aspect-4/5 overflow-hidden shadow-xs"
                 >
                   <Image
                     src={image.url || '/placeholder.svg'}
@@ -154,7 +155,7 @@ export function ExerciseDetailDrawer({
                   {images.map((image, index) => (
                     <div
                       key={index}
-                      className="relative aspect-[4/5] overflow-hidden shadow-xs rounded-md"
+                      className="relative aspect-4/5 overflow-hidden shadow-xs rounded-md"
                     >
                       <Image
                         src={image.url || '/placeholder.svg'}

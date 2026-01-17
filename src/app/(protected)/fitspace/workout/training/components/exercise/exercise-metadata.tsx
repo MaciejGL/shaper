@@ -2,7 +2,7 @@
 
 import {
   ArrowLeftRight,
-  BarChart3,
+  BarChart4,
   CheckIcon,
   GaugeIcon,
   MoreHorizontalIcon,
@@ -315,7 +315,6 @@ export function ExerciseMetadata({
           )}
           <div className="flex gap-2 ml-auto">
             <ExerciseDetailDrawer exercise={exercise} />
-            <ExerciseNotebook exercise={exercise} />
             {currentExercise.baseId ? (
               <ExerciseStatsDrawer
                 baseExerciseId={currentExercise.baseId}
@@ -324,11 +323,12 @@ export function ExerciseMetadata({
                   <Button
                     variant="secondary"
                     size="icon-md"
-                    iconOnly={<BarChart3 />}
+                    iconOnly={<BarChart4 className="text-blue-500!" />}
                   />
                 }
               />
             ) : null}
+            <ExerciseNotebook exercise={exercise} />
             <DropdownMenu
               open={isDropdownOpen}
               onOpenChange={setIsDropdownOpen}

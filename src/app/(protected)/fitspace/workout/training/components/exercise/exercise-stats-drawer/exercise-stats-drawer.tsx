@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3 } from 'lucide-react'
+import { BarChart4 } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { useId, useState } from 'react'
 
@@ -65,7 +65,7 @@ export function ExerciseStatsDrawer({
         {trigger ? (
           trigger
         ) : (
-          <Button variant="secondary" size="icon-md" iconOnly={<BarChart3 />} />
+          <Button variant="secondary" size="icon-md" iconOnly={<BarChart4 />} />
         )}
       </DrawerTrigger>
 
