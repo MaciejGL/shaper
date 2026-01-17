@@ -193,7 +193,6 @@ export function ExerciseStatsDrawer({
     exercise,
     timePeriod,
     toDisplayWeight,
-    weightUnit,
   })
 
   const chartConfig = {

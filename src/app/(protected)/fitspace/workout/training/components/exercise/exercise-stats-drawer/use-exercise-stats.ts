@@ -16,7 +16,6 @@ export function useExerciseStats({
   exercise,
   timePeriod,
   toDisplayWeight,
-  weightUnit,
 }: {
   exercise:
     | {
@@ -39,7 +38,6 @@ export function useExerciseStats({
     | undefined
   timePeriod: TimePeriod
   toDisplayWeight: (weightKg: number | null | undefined) => number | null
-  weightUnit: 'kg' | 'lbs'
 }): {
   currentOneRM: number
   oneRmChangePercent: number
@@ -47,7 +45,12 @@ export function useExerciseStats({
 
   lastWeekVolume: number
   weekOverWeekChangePercent: number
-  volumeSeries: { label: string; volume: number; sets: number; timestamp: number }[]
+  volumeSeries: {
+    label: string
+    volume: number
+    sets: number
+    timestamp: number
+  }[]
 
   latestOneRMKg: number | null
   repMaxSuggestions: {
@@ -143,4 +146,3 @@ export function useExerciseStats({
     lastPerformedLabel,
   }
 }
-
