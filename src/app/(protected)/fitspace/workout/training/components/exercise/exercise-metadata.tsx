@@ -238,11 +238,7 @@ export function ExerciseMetadata({
       <div className="px-3 empty:hidden mt-12 mb-3">
         <div className="flex flex-wrap gap-2 mb-3 empty:hidden">
           {supersetInfo && (
-            <Badge
-              variant="secondary"
-              size="lg"
-              className="bg-card dark:bg-card-on-card shadow-xs"
-            >
+            <Badge variant="secondary" size="lg" className="">
               <ArrowLeftRight
                 className={cn(
                   'mr-1',
@@ -260,7 +256,7 @@ export function ExerciseMetadata({
                 <Badge
                   variant="secondary"
                   size="lg"
-                  className="cursor-pointer h-full bg-card dark:bg-card-on-card shadow-xs"
+                  className="cursor-pointer h-full"
                 >
                   <GaugeIcon className="text-green-500" />
                   Tempo {exercise.tempo}
