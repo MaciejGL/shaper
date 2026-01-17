@@ -73,6 +73,7 @@ const ExerciseStatsDrawer = dynamic(
 export function ExerciseMetadata({
   exercise,
   exercises,
+  previousLogs,
   handleMarkAsCompleted,
   isCompleted,
   handleRemoveExercise,
@@ -170,6 +171,7 @@ export function ExerciseMetadata({
 
   const hasImagesToShow = showImages && exercise.images.length > 0
   const currentExercise = exercise.substitutedBy || exercise
+  const exerciseSets = currentExercise.sets
 
   return (
     <div
@@ -319,6 +321,12 @@ export function ExerciseMetadata({
               <ExerciseStatsDrawer
                 baseExerciseId={currentExercise.baseId}
                 exerciseName={currentExercise.name}
+                sets={exerciseSets.map((s) => ({
+                  order: s.order,
+                  minReps: s.minReps ?? null,
+                  maxReps: s.maxReps ?? null,
+                }))}
+                previousLogs={previousLogs ?? null}
                 trigger={
                   <Button
                     variant="secondary"

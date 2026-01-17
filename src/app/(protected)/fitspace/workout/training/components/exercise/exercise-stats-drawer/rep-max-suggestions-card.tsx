@@ -1,7 +1,7 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { CardContent, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { cn, formatNumber } from '@/lib/utils'
 
@@ -31,10 +31,10 @@ export function RepMaxSuggestionsCard({
   }[]
 }) {
   return (
-    <Card variant="secondary" className="p-0 overflow-hidden shadow-none">
+    <div className="-mx-4">
       <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium">Rep-max suggestions</p>
+          <p className="text-lg font-medium">Rep-max suggestions</p>
           <p className="text-xs text-muted-foreground tabular-nums">
             {latestOneRMKg ? 'NSCA Load Chart' : 'No 1RM data'}
           </p>
@@ -46,7 +46,7 @@ export function RepMaxSuggestionsCard({
         ) : null}
       </CardHeader>
 
-      <CardContent className="pb-4 px-0">
+      <CardContent className="pb-4 px-0 mt-6">
         {suggestions.length === 0 ? (
           <div className="text-sm text-muted-foreground py-4 px-4">
             Log a session to see suggestions.
@@ -56,7 +56,7 @@ export function RepMaxSuggestionsCard({
             {suggestions.map((row) => {
               const conf = CONFIDENCE_CONFIG[row.confidence]
               return (
-                <div key={row.reps} className="py-2.5 px-4">
+                <div key={row.reps} className="py-4 px-4">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium tabular-nums w-14">
@@ -94,6 +94,6 @@ export function RepMaxSuggestionsCard({
           </div>
         )}
       </CardContent>
-    </Card>
+    </div>
   )
 }

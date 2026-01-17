@@ -54,6 +54,7 @@ export interface ExerciseSetProps {
 export interface ExerciseMetadataProps {
   exercise: WorkoutExercise
   exercises?: WorkoutExercise[]
+  previousLogs?: PreviousDayLogs[number]['sets'][number][] | null
   handleMarkAsCompleted: (checked: boolean) => void
   isCompleted: boolean
   handleRemoveExercise: () => void

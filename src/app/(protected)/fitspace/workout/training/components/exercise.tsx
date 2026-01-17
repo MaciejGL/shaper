@@ -284,6 +284,7 @@ export function Exercise({
         <ExerciseMetadata
           exercise={exercise}
           exercises={exercises}
+          previousLogs={exercisePreviousLogs?.sets}
           handleMarkAsCompleted={handleMarkAsCompleted}
           isCompleted={isExerciseCompleted}
           handleRemoveExercise={handleRemoveExercise}
