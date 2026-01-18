@@ -163,7 +163,7 @@ export function OverduePlanDialog({
           <Link href="/fitspace/my-plans" className="text-primary underline">
             plans page
           </Link>
-          .
+          or "Activate" a new based on your plan templates.
         </p>
 
         <DialogFooter className="pt-4">
