@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ChatLoadingState } from './chat-loading-state'
 import { Message } from './message'
-import { TypingIndicator } from './typing-indicator'
 import type { MessagesAreaProps } from './types'
+import { TypingIndicator } from './typing-indicator'
 import { shouldGroupWithPrevious } from './utils'
 
 const SCROLL_THRESHOLD = 300 // Don't auto-scroll if user scrolled up more than this
