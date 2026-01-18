@@ -14,6 +14,7 @@ import { MessageInput } from './message-input'
 import { MessagesArea } from './messages-area'
 import { MobileChatHeader } from './mobile-chat-header'
 import type { MessengerModalProps } from './types'
+import { useRealtimeChat } from './use-realtime-chat'
 import { getUserDisplayName } from './utils'
 
 type MobileView = 'list' | 'chat'
@@ -60,6 +61,13 @@ export function MessengerModal({
   // Get partner display info
   const partnerName = partner ? getUserDisplayName(partner) : 'User'
   const partnerAvatar = partner?.image || undefined
+
+  const { isPartnerTyping, notifyTypingActivity } = useRealtimeChat({
+    enabled: isOpen,
+    chatId: chat?.id,
+    messagesPerChat: 30,
+    currentUserId,
+  })
 
   // Mark messages as read when modal opens
   useEffect(() => {
@@ -203,6 +211,10 @@ export function MessengerModal({
                   hasNextPage={hasNextPage}
                   currentUserId={currentUserId}
                   partnerName={partnerName}
+                  typingIndicator={{
+                    isTyping: isPartnerTyping,
+                    label: `${partnerName} is typing...`,
+                  }}
                   editingMessageId={editingMessageId}
                   editContent={editContent}
                   shouldScrollToBottom={shouldScrollToBottom}
@@ -217,7 +229,10 @@ export function MessengerModal({
 
               <MessageInput
                 value={newMessage}
-                onChange={setNewMessage}
+                onChange={(value) => {
+                  setNewMessage(value)
+                  notifyTypingActivity(value)
+                }}
                 onSend={handleSendMessage}
                 disabled={isSending}
                 allowFocus={allowInputFocus}
@@ -254,6 +269,10 @@ export function MessengerModal({
                 hasNextPage={hasNextPage}
                 currentUserId={currentUserId}
                 partnerName={partnerName}
+                typingIndicator={{
+                  isTyping: isPartnerTyping,
+                  label: `${partnerName} is typing...`,
+                }}
                 editingMessageId={editingMessageId}
                 editContent={editContent}
                 shouldScrollToBottom={shouldScrollToBottom}
@@ -268,7 +287,10 @@ export function MessengerModal({
 
             <MessageInput
               value={newMessage}
-              onChange={setNewMessage}
+              onChange={(value) => {
+                setNewMessage(value)
+                notifyTypingActivity(value)
+              }}
               onSend={handleSendMessage}
               disabled={isSending}
               allowFocus={allowInputFocus}

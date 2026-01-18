@@ -37,7 +37,7 @@ export function useMessengerData(
         enabled: isOpen,
         staleTime: 2000, // 2 seconds - keep data fresh for quick updates
         refetchOnWindowFocus: true, // Refetch when user returns to tab
-        refetchInterval: isOpen ? 3000 : false, // 3 seconds - much faster polling
+        refetchInterval: false, // Realtime handles updates; avoid polling
         refetchIntervalInBackground: false, // Don't poll when tab is inactive
       },
     )
@@ -125,11 +125,11 @@ export function useMessengerData(
         array.findIndex((m) => m.id === message.id) === index,
     )
 
-    // Sort by creation time (oldest first for display)
-    return uniqueMessages.sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    )
+    // Sort by creation time (oldest first for display).
+    // We avoid Date parsing here because Supabase realtime payload timestamps may
+    // omit timezone (e.g. `2026-01-18T16:21:25.231`), which is parsed
+    // inconsistently across browsers.
+    return uniqueMessages.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
   }, [selectedChat?.messages, additionalMessagesData?.pages])
 
   // Get partner information

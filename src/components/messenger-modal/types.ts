@@ -55,6 +55,7 @@ export interface MessagesAreaProps {
   hasNextPage?: boolean
   currentUserId?: string
   partnerName: string
+  typingIndicator?: { isTyping: boolean; label: string }
   editingMessageId?: string | null
   editContent: string
   shouldScrollToBottom?: boolean

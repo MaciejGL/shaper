@@ -9,6 +9,9 @@ import { sendPushForNotification } from '@/lib/notifications/push-integration'
 import Message from '@/server/models/message/model'
 import { GQLContext } from '@/types/gql-context'
 
+// Note: Realtime is handled by a Postgres trigger on the Message table
+// that uses realtime.broadcast_changes() - no manual publishing needed
+
 export async function getChatMessages(
   { chatId, skip = 0, take = 50 }: GQLQueryGetChatMessagesArgs,
   context: GQLContext,
@@ -97,6 +100,9 @@ export async function sendMessage(
     where: { id: input.chatId },
     data: { updatedAt: new Date() },
   })
+
+  // Realtime broadcast is handled automatically by the Postgres trigger
+  // on the Message table (see docs/supabase-realtime-policies.sql)
 
   // Send push notification to the other person
   const recipientId =

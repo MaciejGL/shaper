@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ChatLoadingState } from './chat-loading-state'
 import { Message } from './message'
+import { TypingIndicator } from './typing-indicator'
 import type { MessagesAreaProps } from './types'
 import { shouldGroupWithPrevious } from './utils'
 
@@ -15,6 +16,7 @@ export function MessagesArea({
   hasNextPage,
   currentUserId,
   partnerName,
+  typingIndicator,
   editingMessageId,
   editContent,
   shouldScrollToBottom,
@@ -29,6 +31,7 @@ export function MessagesArea({
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const previousScrollHeight = useRef<number>(0)
   const currentChatId = useRef<string | null>(null)
+  const wasTypingRef = useRef(false)
   const [initialMessageIds, setInitialMessageIds] = useState<Set<string>>(
     new Set(),
   )
@@ -98,6 +101,18 @@ export function MessagesArea({
     isNearBottom,
     messages,
   ])
+
+  // Scroll typing indicator into view if user is already near the bottom
+  useEffect(() => {
+    const isTyping = Boolean(typingIndicator?.isTyping)
+    const wasTyping = wasTypingRef.current
+    wasTypingRef.current = isTyping
+
+    if (!isTyping || wasTyping) return
+    if (!isNearBottom()) return
+
+    scrollToBottom(false)
+  }, [isNearBottom, scrollToBottom, typingIndicator?.isTyping])
 
   // Handle infinite scroll for older messages
   const handleScroll = useCallback(() => {
@@ -197,6 +212,12 @@ export function MessagesArea({
           />
         )
       })}
+      {typingIndicator?.isTyping ? (
+        <TypingIndicator
+          isTyping={typingIndicator.isTyping}
+          label={typingIndicator.label}
+        />
+      ) : null}
       <div ref={messagesEndRef} />
     </div>
   )
