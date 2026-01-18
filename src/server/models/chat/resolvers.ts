@@ -5,8 +5,8 @@ import {
 import { GQLContext } from '@/types/gql-context'
 
 import {
-  getMessengerInitialData,
   createSupportChat,
+  getMessengerInitialData,
   getMyChats,
   getOrCreateChat,
   getTotalUnreadCount,
@@ -21,11 +21,13 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   getTotalUnreadCount: (_, __, context) => getTotalUnreadCount(context),
   getMessengerInitialData: (_, { messagesPerChat }, context) =>
     getMessengerInitialData({ messagesPerChat }, context),
-  searchUsersForChat: (_, { query }, context) => searchUsersForChat({ query }, context),
+  searchUsersForChat: (_, { query }, context) =>
+    searchUsersForChat({ query }, context),
 }
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {
   markMessagesAsRead: (_, { input }, context) =>
     markMessagesAsRead(input, context),
-  createSupportChat: (_, { userId }, context) => createSupportChat({ userId }, context),
+  createSupportChat: (_, { userId }, context) =>
+    createSupportChat({ userId }, context),
 }

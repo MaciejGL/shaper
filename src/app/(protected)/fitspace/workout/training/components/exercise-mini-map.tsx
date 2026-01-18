@@ -363,7 +363,7 @@ export function WorkoutSmartPill({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed bottom-18 left-0 z-40 flex justify-center pointer-events-none"
+            className="fixed bottom-[calc(72px+var(--safe-area-inset-bottom))] left-0 z-40 flex justify-center pointer-events-none"
           >
             <SmartPillContent
               progressPercentage={progressPercentage}

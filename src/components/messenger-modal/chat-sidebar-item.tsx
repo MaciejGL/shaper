@@ -110,4 +110,3 @@ export function ChatSidebarItem({
     </button>
   )
 }
-
