@@ -29,11 +29,13 @@ function StatCard({
   label,
   loading,
   delay = 0,
+  className,
 }: {
   value: number
   label: string
   loading: boolean
   delay?: number
+  className?: string
 }) {
   return (
     <motion.div
@@ -41,6 +43,7 @@ function StatCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.45, delay }}
+      className={className}
     >
       <Card
         variant="glass"
@@ -85,34 +88,37 @@ export function UserStatsSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-          <div className="col-span-full mx-auto w-1/2">
-            <StatCard
-              value={data?.avgPRs ?? 0}
-              label="Personal Records"
-              loading={false}
-              delay={0.05}
-            />
-          </div>
+        <div className="grid grid-cols-2 gap-4 md:flex md:flex-wrap md:justify-center xl:grid xl:grid-cols-5">
           <StatCard
+            className="max-md:col-span-full max-md:mx-auto max-md:w-1/2 md:w-[calc((100%-2rem)/3)] xl:w-full"
+            value={data?.avgPRs ?? 0}
+            label="Personal Records"
+            loading={false}
+            delay={0.05}
+          />
+          <StatCard
+            className="md:w-[calc((100%-2rem)/3)] xl:w-full"
             value={data?.avgWorkouts ?? 0}
             label="Workouts"
             loading={false}
             delay={0.1}
           />
           <StatCard
+            className="md:w-[calc((100%-2rem)/3)] xl:w-full"
             value={data?.avgExercises ?? 0}
             label="Exercises"
             loading={false}
             delay={0.15}
           />
           <StatCard
+            className="md:w-[calc((100%-2rem)/3)] xl:w-full"
             value={data?.avgSets ?? 0}
             label="Sets"
             loading={false}
             delay={0.2}
           />
           <StatCard
+            className="md:w-[calc((100%-2rem)/3)] xl:w-full"
             value={data?.avgReps ?? 0}
             label="Reps"
             loading={false}
