@@ -14,6 +14,8 @@ const badgeVariants = cva(
         secondary: cn(
           'border-transparent bg-card-on-card dark:bg-muted text-secondary-foreground [a&]:hover:bg-muted-foreground/20',
         ),
+        glass:
+          'rounded-full border-border bg-background/60 px-3 py-1 text-foreground backdrop-blur-md dark:bg-primary/10',
 
         success:
           'border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 [a&]:hover:bg-green-200 dark:[a&]:hover:bg-green-800',
@@ -48,10 +50,8 @@ const badgeVariants = cva(
           'border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 [a&]:hover:bg-red-200 dark:[a&]:hover:bg-red-800',
       },
       size: {
-        '2xs': cn(
-          'text-[10px] px-[3px] py-[1px] rounded-[3px] [&>svg]:size-2.5',
-        ),
-        xs: cn(' text-xs px-[6px] py-[1px] [&>svg]:size-3'),
+        '2xs': cn('text-[10px] px-[3px] py-px rounded-[3px] [&>svg]:size-2.5'),
+        xs: cn(' text-xs px-[6px] py-px [&>svg]:size-3'),
         sm: cn('text-xs px-1.5 py-0.5 [&>svg]:size-3'),
         md: 'text-xs px-2 py-0.5 [&>svg]:size-3',
         'md-lg': 'text-sm px-2 py-1 [&>svg]:size-4',

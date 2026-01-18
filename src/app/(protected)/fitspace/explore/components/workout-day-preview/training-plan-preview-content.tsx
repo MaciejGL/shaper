@@ -74,7 +74,10 @@ export function TrainingPlanPreviewContent({
               </TabsContent>
 
               <TabsContent value="preview" className="">
-                <PlanPreviewTab weeks={weeksData?.weeks || null} />
+                <PlanPreviewTab
+                  weeks={weeksData?.weeks || null}
+                  avgSessionTime={plan.avgSessionTime ?? null}
+                />
               </TabsContent>
             </Tabs>
           </div>

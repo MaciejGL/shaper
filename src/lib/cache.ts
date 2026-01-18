@@ -28,6 +28,9 @@ const keys = {
   user: {
     trainingPlans: (userId: string) => `user:${userId}:training-plans`,
   },
+  platform: {
+    statsHistorical: (dayKey: string) => `platform:stats:historical:${dayKey}`,
+  },
   exercises: {
     public: () => 'exercises:public',
     publicFiltered: (hash: string) => `exercises:public:${hash}`,

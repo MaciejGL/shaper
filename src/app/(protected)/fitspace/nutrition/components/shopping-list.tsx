@@ -172,7 +172,7 @@ export function ShoppingList({
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-6 px-6 no-scrollbar">
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-6 px-6 hide-scrollbar">
         {days
           .sort((a, b) => a.dayNumber - b.dayNumber)
           .map((day) => {

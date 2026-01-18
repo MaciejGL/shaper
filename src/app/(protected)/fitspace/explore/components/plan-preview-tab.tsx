@@ -1,6 +1,9 @@
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 import { sortDaysForDisplay } from '@/lib/date-utils'
@@ -15,10 +18,27 @@ type PlanWeeks = NonNullable<
 
 interface PlanPreviewTabProps {
   weeks?: PlanWeeks | null
+  avgSessionTime?: number | null
 }
 
-export function PlanPreviewTab({ weeks }: PlanPreviewTabProps) {
+export function PlanPreviewTab({ weeks, avgSessionTime }: PlanPreviewTabProps) {
   const { preferences } = useUserPreferences()
+
+  // Sort weeks by weekNumber
+  const sortedWeeks = [...(weeks || [])].sort(
+    (a, b) => a.weekNumber - b.weekNumber,
+  )
+
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (sortedWeeks.length > 0) return sortedWeeks[0].id
+    return ''
+  })
+
+  useEffect(() => {
+    if (!activeTab && sortedWeeks.length > 0) {
+      setActiveTab(sortedWeeks[0].id)
+    }
+  }, [activeTab, sortedWeeks])
 
   if (!weeks || weeks.length === 0) {
     return (
@@ -30,11 +50,22 @@ export function PlanPreviewTab({ weeks }: PlanPreviewTabProps) {
     )
   }
 
-  // Sort weeks by weekNumber
-  const sortedWeeks = [...weeks].sort((a, b) => a.weekNumber - b.weekNumber)
-
   return (
-    <div className="space-y-8">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar pb-2">
+        <TabsList className="w-max justify-start h-auto bg-transparent gap-2 p-0 pr-6">
+          {sortedWeeks.map((week) => (
+            <TabsTrigger
+              key={week.id}
+              value={week.id}
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none rounded-full px-4 py-2 h-auto border border-border bg-card/50 min-w-max"
+            >
+              Week {week.weekNumber}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
+
       {sortedWeeks.map((week) => {
         const sortedDays = sortDaysForDisplay(
           week.days || [],
@@ -42,17 +73,24 @@ export function PlanPreviewTab({ weeks }: PlanPreviewTabProps) {
         )
 
         return (
-          <div key={week.id} className="space-y-3">
-            <h3 className="text-lg font-semibold">Week {week.weekNumber}</h3>
+          <TabsContent
+            key={week.id}
+            value={week.id}
+            className="mt-2 space-y-3 outline-none"
+          >
             <div className="grid gap-2">
               {sortedDays.map((day) => (
-                <DayCard key={day.id} day={day} />
+                <DayCard
+                  key={day.id}
+                  day={day}
+                  avgSessionTime={avgSessionTime}
+                />
               ))}
             </div>
-          </div>
+          </TabsContent>
         )
       })}
-    </div>
+    </Tabs>
   )
 }
 
@@ -60,50 +98,59 @@ type Day = NonNullable<PlanWeeks[number]['days']>[number]
 
 interface DayCardProps {
   day: Day
+  avgSessionTime?: number | null
 }
 
-function DayCard({ day }: DayCardProps) {
-  const firstExercise = day.exercises?.[1]
-  // firstExercise?.images?.[0]?.thumbnail ||firstExercise?.images?.[0]?.medium ||
+function DayCard({ day, avgSessionTime }: DayCardProps) {
+  const firstExercise = day.exercises?.[0]
   const firstImage = getDayImage(day)
+  const exerciseCount = day.exercises?.length ?? 0
+  const showDuration = !!avgSessionTime && !day.isRestDay
+
   return (
     <Card
-      variant="tertiary"
+      variant="glass"
       className={cn(
-        'aspect-[18/8] overflow-hidden relative border-none p-0 bg-neutral-900',
-        day.isRestDay && 'aspect-[18/5]',
+        'flex-row gap-0 overflow-hidden border-none p-0',
+        day.isRestDay ? 'h-24' : 'h-34',
       )}
     >
-      <CardContent className="flex p-0 h-full items-center">
-        {firstImage && (
-          <div className="w-1/2 h-full">
+      <CardContent className="flex h-full w-full gap-0 p-0">
+        <div className="relative h-full w-[42%] shrink-0">
+          {firstImage ? (
             <Image
               src={firstImage}
               alt={firstExercise?.name || 'Exercise'}
-              width={300}
-              height={300}
+              fill
+              sizes="180px"
               className={cn(
-                'object-cover size-full',
-                day.isRestDay && 'grayscale opacity-50',
+                'object-cover',
+                day.isRestDay && 'grayscale opacity-60',
               )}
-              quality={100}
+              quality={90}
             />
+          ) : null}
+        </div>
+
+        <div className="flex h-full flex-1 flex-col justify-between bg-card px-3 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="glass">Day {day.dayOfWeek + 1}</Badge>
+            {!day.isRestDay ? (
+              <Badge variant="glass">{exerciseCount} exercises</Badge>
+            ) : (
+              <Badge variant="glass">Recovery</Badge>
+            )}
           </div>
-        )}
-        <div className="flex-center grow">
-          <div className="relative z-10 text-center px-4 py-2 rounded-2xl backdrop-blur-sm">
-            <p
-              className={cn(
-                'text-2xl font-medium text-white drop-shadow-lg line-clamp-2',
-                day.isRestDay &&
-                  'text-muted/80 dark:text-muted-foreground font-normal text-lg',
-              )}
-            >
+
+          <div>
+            <p className="text-lg font-semibold leading-tight text-foreground line-clamp-1">
               {day.isRestDay ? 'Rest' : formatWorkoutType(day.workoutType)}
             </p>
-            <p className="text-sm text-muted-foreground">
-              Day {day.dayOfWeek + 1}
-            </p>
+            {!day.isRestDay && showDuration ? (
+              <p className="mt-1 text-xs font-medium text-muted-foreground">
+                Est. {avgSessionTime} min
+              </p>
+            ) : null}
           </div>
         </div>
       </CardContent>

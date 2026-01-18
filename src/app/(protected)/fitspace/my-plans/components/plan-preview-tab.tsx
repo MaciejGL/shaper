@@ -1,14 +1,11 @@
-import { RefObject, useEffect, useRef, useState } from 'react'
+import { RefObject, useEffect, useState } from 'react'
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
+import { Accordion } from '@/components/ui/accordion'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLFitspaceMyPlansQuery } from '@/generated/graphql-client'
 import { sortDaysForDisplay } from '@/lib/date-utils'
+import { cn } from '@/lib/utils'
 
 import { PlanPreviewDay } from './plan-preview-day'
 import { WeekProgressCircle } from './week-progress-circle'
@@ -34,47 +31,35 @@ export function PlanPreviewTab({
   selectedWeekId = null,
   onAccordionChange,
   canViewDays = false,
-  scrollRef,
 }: PlanPreviewTabProps) {
   const { preferences } = useUserPreferences()
-  const weekRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const [accordionValue, setAccordionValue] = useState<string[]>([])
+  // Sort weeks by weekNumber
+  const sortedWeeks = [...(weeks || [])].sort(
+    (a, b) => a.weekNumber - b.weekNumber,
+  )
 
-  // When selectedWeekId changes from external source, update accordion
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (selectedWeekId) return selectedWeekId
+    if (sortedWeeks.length > 0) return sortedWeeks[0].id
+    return ''
+  })
+
+  // When selectedWeekId changes from external source, update active tab
   useEffect(() => {
     if (selectedWeekId) {
-      setAccordionValue([`week-${selectedWeekId}`])
-
-      // Scroll to the selected week
-      setTimeout(() => {
-        const element = weekRefs.current[selectedWeekId]
-        if (element) {
-          if (scrollRef?.current) {
-            const container = scrollRef.current
-            const elementRect = element.getBoundingClientRect()
-            const containerRect = container.getBoundingClientRect()
-            const relativeTop = elementRect.top - containerRect.top
-            const targetScroll = container.scrollTop + relativeTop - 16 // 16px padding
-
-            container.scrollTo({
-              top: targetScroll,
-              behavior: 'smooth',
-            })
-          } else {
-            element.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start',
-            })
-          }
-        }
-      }, 150) // Small delay to ensure accordion is open
-
-      // Notify parent that we've handled the selection
+      setActiveTab(selectedWeekId)
       if (onAccordionChange) {
         onAccordionChange()
       }
     }
-  }, [selectedWeekId, onAccordionChange, scrollRef])
+  }, [selectedWeekId, onAccordionChange])
+
+  // Ensure we have an active tab if data loads later
+  useEffect(() => {
+    if (!activeTab && sortedWeeks.length > 0) {
+      setActiveTab(sortedWeeks[0].id)
+    }
+  }, [activeTab, sortedWeeks])
 
   if (!weeks || weeks.length === 0) {
     return (
@@ -86,17 +71,55 @@ export function PlanPreviewTab({
     )
   }
 
-  // Sort weeks by weekNumber
-  const sortedWeeks = [...weeks].sort((a, b) => a.weekNumber - b.weekNumber)
-
   return (
-    <Accordion
-      type="multiple"
-      className="w-full space-y-2"
-      data-vaul-no-drag
-      value={accordionValue}
-      onValueChange={setAccordionValue}
-    >
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <div className="w-full overflow-x-auto hide-scrollbar pb-2">
+        <TabsList className="w-full justify-start h-auto bg-transparent gap-2 p-0">
+          {sortedWeeks.map((week) => {
+            // Calculate progress for the week
+            const totalExercises = week.days.reduce(
+              (sum, day) => sum + (day.exercises?.length || 0),
+              0,
+            )
+            const completedExercises = week.days.reduce(
+              (sum, day) =>
+                sum +
+                (day.exercises?.filter((ex) => !!ex.completedAt).length || 0),
+              0,
+            )
+            const progress =
+              totalExercises > 0
+                ? (completedExercises / totalExercises) * 100
+                : 0
+
+            return (
+              <TabsTrigger
+                key={week.id}
+                value={week.id}
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none rounded-full px-4 py-2 h-auto border border-border bg-card/50 min-w-max"
+              >
+                <div className="flex items-center gap-2">
+                  <span>Week {week.weekNumber}</span>
+                  {!isTemplate && totalExercises > 0 && (
+                    <WeekProgressCircle
+                      progress={progress}
+                      size={16}
+                      strokeWidth={2}
+                      className={cn(
+                        'm-0',
+                        activeTab === week.id
+                          ? 'text-primary-foreground'
+                          : 'text-primary',
+                      )}
+                    />
+                  )}
+                </div>
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
+      </div>
+
       {sortedWeeks.map((week) => {
         // Sort days according to user's week start preference
         const sortedDays = sortDaysForDisplay(
@@ -104,54 +127,25 @@ export function PlanPreviewTab({
           preferences.weekStartsOn,
         )
 
-        // Calculate progress for the week
-        const totalExercises = week.days.reduce(
-          (sum, day) => sum + (day.exercises?.length || 0),
-          0,
-        )
-        const completedExercises = week.days.reduce(
-          (sum, day) =>
-            sum + (day.exercises?.filter((ex) => !!ex.completedAt).length || 0),
-          0,
-        )
-        const progress =
-          totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0
-
         return (
-          <AccordionItem
+          <TabsContent
             key={week.id}
-            value={`week-${week.id}`}
-            ref={(el) => {
-              weekRefs.current[week.id] = el
-            }}
+            value={week.id}
+            className="mt-2 outline-none"
           >
-            <AccordionTrigger className="text-base font-semibold hover:no-underline">
-              <div className="flex items-center gap-2">
-                Week {week.weekNumber}
-                {!isTemplate && totalExercises > 0 && (
-                  <WeekProgressCircle
-                    progress={progress}
-                    size={20}
-                    strokeWidth={1.5}
-                  />
-                )}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <Accordion type="multiple" className="space-y-2 p-2">
-                {sortedDays.map((day) => (
-                  <PlanPreviewDay
-                    key={day.id}
-                    day={day}
-                    isTemplate={isTemplate}
-                    canViewDays={canViewDays}
-                  />
-                ))}
-              </Accordion>
-            </AccordionContent>
-          </AccordionItem>
+            <Accordion type="multiple" className="space-y-2">
+              {sortedDays.map((day) => (
+                <PlanPreviewDay
+                  key={day.id}
+                  day={day}
+                  isTemplate={isTemplate}
+                  canViewDays={canViewDays}
+                />
+              ))}
+            </Accordion>
+          </TabsContent>
         )
       })}
-    </Accordion>
+    </Tabs>
   )
 }
