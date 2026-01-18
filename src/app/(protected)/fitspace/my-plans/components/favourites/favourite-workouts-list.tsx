@@ -2,12 +2,14 @@
 
 import {
   ArrowLeft,
+  Check,
   Dumbbell,
   FolderPlus,
   MoreHorizontal,
   Pencil,
   Plus,
   Trash2,
+  X,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -21,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
 import { useUser } from '@/context/user-context'
 import {
   GQLGetFavouriteWorkoutFoldersQuery,
@@ -83,6 +86,11 @@ export function FavouriteWorkoutsList({
     id: string
     name: string
   } | null>(null)
+  const [isRenamingFolder, setIsRenamingFolder] = useState(false)
+  const [draftFolderName, setDraftFolderName] = useState('')
+  const [folderNameOverride, setFolderNameOverride] = useState<string | null>(
+    null,
+  )
 
   if (loading) {
     return (
@@ -135,6 +143,45 @@ export function FavouriteWorkoutsList({
     if (confirm('Are you sure you want to delete this folder?')) {
       await folderOperations.deleteFolder(folderId)
       onBackToRoot()
+    }
+  }
+
+  const handleStartFolderRename = () => {
+    if (!currentFolder) return
+    setIsRenamingFolder(true)
+    setDraftFolderName(folderNameOverride ?? currentFolder.name)
+  }
+
+  const handleCancelFolderRename = () => {
+    setIsRenamingFolder(false)
+    setDraftFolderName('')
+    setFolderNameOverride(null)
+  }
+
+  const handleSaveFolderRename = async () => {
+    if (!currentFolder) return
+    const nextName = draftFolderName.trim()
+    if (!nextName) {
+      handleCancelFolderRename()
+      return
+    }
+
+    if (nextName === (folderNameOverride ?? currentFolder.name)) {
+      setIsRenamingFolder(false)
+      return
+    }
+
+    setFolderNameOverride(nextName)
+    setIsRenamingFolder(false)
+    try {
+      await folderOperations.updateFolder({
+        id: currentFolder.id,
+        name: nextName,
+      })
+      onRefetch()
+    } catch (error) {
+      console.error('Failed to rename folder:', error)
+      setFolderNameOverride(null)
     }
   }
 
@@ -228,7 +275,55 @@ export function FavouriteWorkoutsList({
       {/* Folder Title (if inside folder) */}
       {currentFolder && (
         <div className="animate-in fade-in slide-in-from-left-4 duration-300">
-          <h2 className="text-2xl font-bold mb-1">{currentFolder.name}</h2>
+          <div className="flex items-center gap-2 mb-1">
+            {isRenamingFolder ? (
+              <div className="flex items-center gap-1 w-full min-w-0">
+                <Input
+                  id={`favourite-folder-${currentFolder.id}-name`}
+                  value={draftFolderName}
+                  onChange={(e) => setDraftFolderName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') void handleSaveFolderRename()
+                    if (e.key === 'Escape') handleCancelFolderRename()
+                  }}
+                  onBlur={() => void handleSaveFolderRename()}
+                  autoFocus
+                  maxLength={100}
+                  className="h-9 text-2xl font-bold"
+                  aria-label="Folder name"
+                />
+                <Button
+                  size="icon-sm"
+                  variant="outline"
+                  iconOnly={<Check />}
+                  aria-label="Save folder name"
+                  onClick={() => void handleSaveFolderRename()}
+                />
+                <Button
+                  size="icon-sm"
+                  variant="outline"
+                  iconOnly={<X />}
+                  aria-label="Cancel folder rename"
+                  onClick={handleCancelFolderRename}
+                />
+              </div>
+            ) : (
+              <>
+                <h2
+                  className="text-2xl font-bold truncate cursor-text"
+                  onClick={handleStartFolderRename}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleStartFolderRename()
+                  }}
+                  aria-label="Rename folder"
+                >
+                  {folderNameOverride ?? currentFolder.name}
+                </h2>
+              </>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
             {favouriteWorkouts.length}{' '}
             {favouriteWorkouts.length === 1 ? 'workout' : 'workouts'}

@@ -14,18 +14,19 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
+  Check,
   ChevronRight,
   Clock,
   FolderInput,
   Grip,
   MinusIcon,
-  MoreHorizontal,
+  Pen,
   Pencil,
   PlusIcon,
   Trash2,
   X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { BaseExerciseItem } from '@/app/(protected)/fitspace/workout/training/components/add-single-exercise/selectable-exercise-item'
 import { AnimateNumber } from '@/components/animate-number'
@@ -44,6 +45,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
 import {
   Tooltip,
   TooltipContent,
@@ -53,7 +55,11 @@ import {
   GQLGetFavouriteWorkoutFoldersQuery,
   GQLGetFavouriteWorkoutsQuery,
 } from '@/generated/graphql-client'
-import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
+import {
+  WorkoutStatusAnalysis,
+  useUpdateFavouriteWorkout,
+} from '@/hooks/use-favourite-workouts'
+import { scrollToElement } from '@/lib/utils/scroll-to'
 
 import { AddExerciseToFavouriteDrawer } from './add-exercise-to-favourite-drawer'
 import { EditFavouriteMetadataDrawer } from './edit-favourite-metadata-drawer'
@@ -85,9 +91,24 @@ export function FavouriteWorkoutCard({
   isLoading,
   folders = [],
 }: FavouriteWorkoutCardProps) {
+  const itemDomId = `favourite-workout-${favourite.id}`
   const [showAddExercise, setShowAddExercise] = useState(false)
   const [showEditMetadata, setShowEditMetadata] = useState(false)
   const [showMoveToFolder, setShowMoveToFolder] = useState(false)
+  const [openValue, setOpenValue] = useState<string>('')
+
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [draftTitle, setDraftTitle] = useState(favourite.title)
+  const [titleOverride, setTitleOverride] = useState<string | null>(null)
+
+  const { mutateAsync: updateFavourite, isPending: isUpdatingTitle } =
+    useUpdateFavouriteWorkout()
+
+  useEffect(() => {
+    if (isRenaming) return
+    setDraftTitle(favourite.title)
+    setTitleOverride(null)
+  }, [favourite.title, isRenaming])
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -117,16 +138,145 @@ export function FavouriteWorkoutCard({
   const hasMuscleGroups = uniqueMuscleGroups.length > 0
   const hasExercises = favourite.exercises.length > 0
   const showBadges = hasMuscleGroups || hasExercises
+  const displayTitle = titleOverride ?? favourite.title
+
+  const stopAccordionToggle = (e: {
+    preventDefault: () => void
+    stopPropagation: () => void
+  }) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleStartRename = (e: {
+    preventDefault: () => void
+    stopPropagation: () => void
+  }) => {
+    stopAccordionToggle(e)
+    setIsRenaming(true)
+    setDraftTitle(displayTitle)
+  }
+
+  const handleCancelRename = (e?: {
+    preventDefault: () => void
+    stopPropagation: () => void
+  }) => {
+    if (e) stopAccordionToggle(e)
+    setIsRenaming(false)
+    setDraftTitle(displayTitle)
+  }
+
+  const handleSaveRename = async (e?: {
+    preventDefault: () => void
+    stopPropagation: () => void
+  }) => {
+    if (e) stopAccordionToggle(e)
+    const nextTitle = draftTitle.trim()
+    if (!nextTitle) {
+      handleCancelRename()
+      return
+    }
+
+    if (nextTitle === displayTitle) {
+      setIsRenaming(false)
+      return
+    }
+
+    setTitleOverride(nextTitle)
+    setIsRenaming(false)
+
+    try {
+      await updateFavourite({
+        input: {
+          id: favourite.id,
+          title: nextTitle,
+        },
+      })
+      onRefetch()
+    } catch (error) {
+      console.error('Failed to rename favourite workout:', error)
+      setTitleOverride(null)
+    }
+  }
 
   return (
     <>
-      <Accordion type="single" collapsible>
-        <AccordionItem value={favourite.id}>
-          <AccordionTrigger variant="default">
+      <Accordion
+        type="single"
+        collapsible
+        value={openValue}
+        onValueChange={(value) => {
+          setOpenValue(value)
+          if (value === favourite.id) {
+            void scrollToElement(itemDomId, {
+              offset: 80,
+              delay: 150,
+              behavior: 'smooth',
+            })
+          }
+        }}
+      >
+        <AccordionItem value={favourite.id} id={itemDomId} className="relative">
+          {isRenaming && (
+            <div
+              className="absolute left-4 right-14 top-3 z-10"
+              onPointerDown={stopAccordionToggle}
+              onClick={stopAccordionToggle}
+            >
+              <div className="flex items-center gap-1 w-full min-w-0">
+                <Input
+                  id={`${itemDomId}-rename-title`}
+                  value={draftTitle}
+                  onChange={(e) => setDraftTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    e.stopPropagation()
+                    if (e.key === 'Enter') void handleSaveRename()
+                    if (e.key === 'Escape') handleCancelRename()
+                  }}
+                  onKeyUp={(e) => e.stopPropagation()}
+                  onBlur={() => void handleSaveRename()}
+                  autoFocus
+                  maxLength={100}
+                  className="h-8"
+                  aria-label="Custom day title"
+                  disabled={isUpdatingTitle}
+                />
+                <Button
+                  size="icon-sm"
+                  variant="outline"
+                  iconOnly={<Check />}
+                  aria-label="Save title"
+                  disabled={isUpdatingTitle}
+                  onClick={() => void handleSaveRename()}
+                />
+                <Button
+                  size="icon-sm"
+                  variant="outline"
+                  iconOnly={<X />}
+                  aria-label="Cancel rename"
+                  disabled={isUpdatingTitle}
+                  onClick={handleCancelRename}
+                />
+              </div>
+            </div>
+          )}
+
+          <AccordionTrigger
+            variant="default"
+            disabled={isRenaming}
+            className={isRenaming ? 'disabled:opacity-100' : undefined}
+          >
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-medium truncate">
-                  {favourite.title}
+              <div
+                className={`flex items-center gap-2 ${isRenaming ? 'opacity-0' : ''}`}
+              >
+                <h3
+                  className="text-base font-medium truncate cursor-text"
+                  onPointerDown={stopAccordionToggle}
+                  onClick={handleStartRename}
+                  aria-label="Rename custom day"
+                >
+                  {displayTitle}
                 </h3>
               </div>
               {showBadges && (
@@ -204,11 +354,9 @@ export function FavouriteWorkoutCard({
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        iconOnly={<MoreHorizontal />}
-                      />
+                      <Button variant="outline" size="sm" iconStart={<Pen />}>
+                        Edit
+                      </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
