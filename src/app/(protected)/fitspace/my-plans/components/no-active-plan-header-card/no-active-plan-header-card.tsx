@@ -1,4 +1,5 @@
-import { ArrowDown, ArrowRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -11,41 +12,65 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
+import type { AvailablePlan } from '../../types'
+import { SelectPlanDrawer } from '../select-plan-drawer/select-plan-drawer'
+
 interface NoActivePlanHeaderCardProps {
-  onBrowsePlans?: () => void
+  availablePlans: AvailablePlan[]
+  onSelectPlan: (plan: AvailablePlan) => void
 }
 
 export function NoActivePlanHeaderCard({
-  onBrowsePlans,
+  availablePlans,
+  onSelectPlan,
 }: NoActivePlanHeaderCardProps) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+
+  const canSelectPlan = availablePlans.length > 0
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>No active plan</CardTitle>
-        <CardDescription>
-          Start one of your plans below, or explore new programs tailored to
-          your goals.
-        </CardDescription>
-      </CardHeader>
-      <CardContent />
-      <CardFooter className="gap-2">
-        {onBrowsePlans && (
-          <Button
-            onClick={onBrowsePlans}
-            iconEnd={<ArrowDown />}
-            variant="outline"
-          >
-            My Plans
-          </Button>
-        )}
-        <ButtonLink
-          href="/fitspace/explore?tab=plans"
-          iconEnd={<ArrowRight />}
-          className="flex-1"
-        >
-          {onBrowsePlans ? 'Explore New' : 'Find the Right Plan'}
-        </ButtonLink>
-      </CardFooter>
-    </Card>
+    <>
+      <Card variant="glass" className="shadow-md shadow-black">
+        <CardHeader>
+          <CardTitle>No active plan</CardTitle>
+          <CardDescription>
+            Pick a plan to start, or explore new programs tailored to your
+            goals.
+          </CardDescription>
+        </CardHeader>
+        <CardContent />
+        <CardFooter className="gap-2">
+          {canSelectPlan ? (
+            <Button
+              onClick={() => setIsDrawerOpen(true)}
+              iconEnd={<ChevronRight />}
+              className="w-full"
+              size="lg"
+            >
+              Select plan to activate
+            </Button>
+          ) : (
+            <ButtonLink
+              href="/fitspace/explore?tab=plans"
+              iconEnd={<ChevronRight />}
+              className="flex-1"
+              size="lg"
+            >
+              Find the Right Plan
+            </ButtonLink>
+          )}
+        </CardFooter>
+      </Card>
+
+      <SelectPlanDrawer
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        plans={availablePlans}
+        onSelectPlan={(plan) => {
+          onSelectPlan(plan)
+          setIsDrawerOpen(false)
+        }}
+      />
+    </>
   )
 }

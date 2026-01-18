@@ -45,20 +45,8 @@ export default function MyPlansPage() {
   const availablePlans = data?.getMyPlansOverviewFull?.availablePlans
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
 
-  const hasPlans =
-    (availablePlans?.length ?? 0) > 0 || (completedPlans?.length ?? 0) > 0
-
   const handleActivePlanClick = () => {
     setIsActivePlanDrawerOpen(true)
-  }
-
-  const handleBrowsePlans = () => {
-    setTab(PlanTab.Plans)
-    window.setTimeout(() => {
-      document
-        .getElementById('my-plans-content')
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 0)
   }
 
   const handleActivePlanAction = (
@@ -141,7 +129,8 @@ export default function MyPlansPage() {
           ) : (
             <div className="dark">
               <NoActivePlanHeaderCard
-                onBrowsePlans={hasPlans ? handleBrowsePlans : undefined}
+                availablePlans={availablePlans ?? []}
+                onSelectPlan={(plan) => handlePlanAction('activate', plan)}
               />
             </div>
           )

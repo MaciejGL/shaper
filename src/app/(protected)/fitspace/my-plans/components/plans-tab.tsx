@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import { ButtonLink } from '@/components/ui/button-link'
-import { Card, CardContent } from '@/components/ui/card'
+// import { Card, CardContent } from '@/components/ui/card'
 import { GQLTrainingPlan } from '@/generated/graphql-client'
 
 import {
@@ -73,57 +73,57 @@ function sortPlans(
 }
 
 // Compact empty state card for list sections
-interface EmptyStatusCardProps {
-  status: PlanStatus.Active | PlanStatus.Template
-}
+// interface EmptyStatusCardProps {
+//   status: PlanStatus.Active | PlanStatus.Template
+// }
 
-function EmptyStatusCard({ status }: EmptyStatusCardProps) {
-  if (status === PlanStatus.Active) {
-    return (
-      <Card>
-        <CardContent className="flex items-center gap-4">
-          <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-base mb-1">Activate Plan</h4>
-            <p className="text-sm text-muted-foreground">
-              Select one of plans from your personal plans or explore our
-              ready-made programs
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
+// function EmptyStatusCard({ status }: EmptyStatusCardProps) {
+//   if (status === PlanStatus.Active) {
+//     return (
+//       <Card>
+//         <CardContent className="flex items-center gap-4">
+//           <div className="flex-1 min-w-0">
+//             <h4 className="font-semibold text-base mb-1">Activate Plan</h4>
+//             <p className="text-sm text-muted-foreground">
+//               Select one of plans from your personal plans or explore our
+//               ready-made programs
+//             </p>
+//           </div>
+//         </CardContent>
+//       </Card>
+//     )
+//   }
 
-  // Template status
-  return (
-    <div className="space-y-3">
-      <CardContent className="flex items-center gap-4 py-6">
-        <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm mb-1">No Plans Yet</h4>
-          <p className="text-sm text-muted-foreground">
-            Get plans from your trainer or explore our ready-made programs
-          </p>
-        </div>
-        <ButtonLink
-          href="/fitspace/explore?tab=plans"
-          size="sm"
-          iconEnd={<ChevronRight />}
-        >
-          Explore
-        </ButtonLink>
-      </CardContent>
-    </div>
-  )
-}
+//   // Template status
+//   return (
+//     <div className="space-y-3">
+//       <CardContent className="flex items-center gap-4 py-6">
+//         <div className="flex-1 min-w-0">
+//           <h4 className="font-semibold text-sm mb-1">No Plans Yet</h4>
+//           <p className="text-sm text-muted-foreground">
+//             Get plans from your trainer or explore our ready-made programs
+//           </p>
+//         </div>
+//         <ButtonLink
+//           href="/fitspace/explore?tab=plans"
+//           size="sm"
+//           iconEnd={<ChevronRight />}
+//         >
+//           Explore
+//         </ButtonLink>
+//       </CardContent>
+//     </div>
+//   )
+// }
 
 // Plans list component with status dividers
 interface PlansListProps {
   plans: { plan: NonNullable<UnifiedPlan>; isActive: boolean }[]
   onPlanClick: (plan: UnifiedPlan) => void
-  hasActivePlan: boolean
+  // hasActivePlan: boolean
 }
 
-function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
+function PlansList({ plans, onPlanClick }: PlansListProps) {
   const templatePlans = plans.filter(
     ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Template,
   )
@@ -148,7 +148,7 @@ function PlansList({ plans, onPlanClick, hasActivePlan }: PlansListProps) {
 
   return (
     <div className="space-y-10">
-      {!hasActivePlan && <EmptyStatusCard status={PlanStatus.Active} />}
+      {/* {!hasActivePlan && <EmptyStatusCard status={PlanStatus.Active} />} */}
 
       {trainerPlans.length > 0 && (
         <PlanSection
@@ -246,7 +246,7 @@ export function PlansTab({
         <PlansList
           plans={sortedPlans}
           onPlanClick={handlePlanClick}
-          hasActivePlan={!!activePlan}
+          // hasActivePlan={!!activePlan}
         />
         <ButtonLink
           href="/fitspace/explore?tab=plans"
