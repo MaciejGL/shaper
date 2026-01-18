@@ -321,9 +321,18 @@ export function OnboardingModal({
     setData((prev) => ({ ...prev, ...updates }))
   }, [])
 
-  const handleTrainingChoiceChange = useCallback((value: string) => {
-    setTrainingChoice(value as 'custom' | 'plans' | 'trainer')
-  }, [])
+  const handleTrainingChoiceChange = useCallback(
+    (value: string) => {
+      const nextChoice =
+        value === 'custom' || value === 'plans' || value === 'trainer'
+          ? value
+          : 'custom'
+
+      setTrainingChoice(nextChoice)
+      handleTrainingChoice(nextChoice)
+    },
+    [handleTrainingChoice],
+  )
 
   const handleQuickWorkoutChoice = useCallback(
     (choice: 'custom' | 'plans') => {

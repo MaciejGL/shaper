@@ -17,20 +17,20 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { BiggyIcon } from '@/components/biggy-icon'
 import { StatsItem } from '@/components/stats-item'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import { Separator } from '@/components/ui/separator'
 import { useUser } from '@/context/user-context'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
@@ -454,29 +454,103 @@ function Content({
               <CheckCheck className=" text-green-600" />
             </Badge>
           </div>
-          <div className="space-y-2 border border-border dark:bg-card-on-card rounded-2xl py-2">
-            <div>
-              {exercises.map((exercise) => (
-                <Fragment key={exercise.id}>
-                  <div className="flex items-center justify-between py-1.5 px-4">
-                    <div>
-                      <p className="text-sm font-medium">{exercise.name}</p>
-                      <p className="text-xs text-muted-foreground pt-0.5">
-                        {exercise.sets?.filter((set) => set.completedAt)
-                          .length || 0}{' '}
-                        / {exercise.sets?.length || 0} sets
+          <div className="space-y-3 border-none bg-transparent">
+            {exercises.map((exercise) => {
+              const prRecord = personalRecords?.find(
+                (pr) =>
+                  pr.exerciseName.toLowerCase() === exercise.name.toLowerCase(),
+              )
+
+              // Calculate best set (max weight)
+              const bestSet = exercise.sets
+                .filter((s) => s.completedAt && s.log?.weight && s.log?.reps)
+                .reduce(
+                  (best, current) => {
+                    const weight = current.log?.weight ?? 0
+                    const reps = current.log?.reps ?? 0
+                    // Let's use max weight for now
+                    if (weight > best.weight) {
+                      return { weight, reps }
+                    }
+                    return best
+                  },
+                  { weight: 0, reps: 0 },
+                )
+
+              return (
+                <Card
+                  key={exercise.id}
+                  className="relative overflow-hidden flex flex-col py-3 px-4 shadow-md"
+                >
+                  {/* PR Gradient Background if PR */}
+                  {prRecord && (
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none" />
+                  )}
+
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0 pr-2">
+                      <p className="text-base font-medium truncate leading-tight">
+                        {exercise.name}
                       </p>
                     </div>
                     {exercise.completedAt ? (
-                      <CheckIcon className="h-4 w-4 text-green-500" />
+                      <div className="flex-center size-6 rounded-full bg-green-500/10 text-green-500 shrink-0">
+                        <CheckIcon className="size-3.5" />
+                      </div>
                     ) : (
-                      <CheckIcon className="h-4 w-4 text-muted-foreground/20" />
+                      <div className="flex-center size-6 rounded-full bg-muted/20 text-muted-foreground/30 shrink-0">
+                        <CheckIcon className="size-3.5" />
+                      </div>
                     )}
                   </div>
-                  <Separator className="last:hidden bg-black/5 dark:bg-border/70" />
-                </Fragment>
-              ))}
-            </div>
+
+                  <div className="flex items-baseline justify-between grow gap-4">
+                    <div className="flex justify-between items-baseline gap-1 grow">
+                      {bestSet.weight > 0 ? (
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-sm font-medium text-muted-foreground">
+                            Top set
+                          </span>
+                          <span className="text-lg font-bold tabular-nums tracking-tight">
+                            {toDisplayWeight(bestSet.weight)?.toFixed(1)}
+                            <span className="text-sm font-medium text-muted-foreground ml-0.5">
+                              {weightUnit}
+                            </span>
+                          </span>
+                          <span className="text-sm font-medium text-muted-foreground">
+                            × {bestSet.reps}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground italic">
+                          No sets logged
+                        </span>
+                      )}
+
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>
+                          {exercise.sets?.filter((set) => set.completedAt)
+                            .length || 0}{' '}
+                          / {exercise.sets?.length || 0} sets
+                        </span>
+                      </div>
+                    </div>
+
+                    {prRecord && (
+                      <Badge
+                        variant="premium"
+                        className="pl-1.5 pr-2 py-0.5 h-auto"
+                      >
+                        <TrophyIcon className="size-3 mr-1" />
+                        <span className="font-semibold">
+                          PR +{prRecord.improvement.toFixed(1)}%
+                        </span>
+                      </Badge>
+                    )}
+                  </div>
+                </Card>
+              )
+            })}
           </div>
         </div>
       )}
