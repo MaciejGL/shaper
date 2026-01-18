@@ -1,13 +1,15 @@
 'use client'
 
-import { formatDistanceToNow } from 'date-fns'
-import { MessageSquare, X } from 'lucide-react'
-import { useEffect } from 'react'
+import { MessageSquare, MessageSquarePlus, Search, X } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { UserAvatar } from '@/components/user-avatar'
+import { Input } from '@/components/ui/input'
+import { SUPPORT_ACCOUNT_ID } from '@/lib/support-account'
 import { cn } from '@/lib/utils'
 
+import { ChatSidebarItem } from './chat-sidebar-item'
+import { SupportNewChatDialog } from './support-new-chat-dialog'
 import { getUserDisplayName } from './utils'
 
 export interface ChatSidebarProps {
@@ -49,6 +51,9 @@ export function ChatSidebar({
   chats = [],
   isLoading = false,
 }: ChatSidebarProps) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isNewChatOpen, setIsNewChatOpen] = useState(false)
+
   const handleChatClick = (chat: (typeof chats)[0]) => {
     const partnerId =
       currentUserId === chat.trainerId ? chat.clientId : chat.trainerId
@@ -56,6 +61,23 @@ export function ChatSidebar({
     // Save to localStorage for future auto-selection
     localStorage.setItem('lastSelectedPartnerId', partnerId)
   }
+
+  const filteredChats = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return chats
+
+    return chats.filter((chat) => {
+      const partner =
+        currentUserId === chat.trainerId ? chat.client : chat.trainer
+
+      const name = getUserDisplayName(partner).toLowerCase()
+      const email = partner.email.toLowerCase()
+
+      return name.includes(query) || email.includes(query)
+    })
+  }, [chats, currentUserId, searchQuery])
+
+  const isSupport = currentUserId === SUPPORT_ACCOUNT_ID
 
   // Auto-select chat when no partner is selected
   useEffect(() => {
@@ -104,6 +126,14 @@ export function ChatSidebar({
 
   return (
     <>
+      {isSupport && (
+        <SupportNewChatDialog
+          open={isNewChatOpen}
+          onOpenChange={setIsNewChatOpen}
+          onChatSelect={onChatSelect}
+        />
+      )}
+
       {/* Mobile overlay */}
       <div
         className={cn(
@@ -123,17 +153,38 @@ export function ChatSidebar({
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4">
-          <h2 className="text-lg font-semibold">Messages</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="lg:hidden"
-            iconOnly={<X />}
-          />
-        </div>
+        <div className="shadow-lg">
+          <div className="flex items-center justify-between p-4 ">
+            <h2 className="text-lg font-semibold">Messages</h2>
+            <div className="flex items-center gap-1">
+              {isSupport && (
+                <Button
+                  variant="secondary"
+                  size="icon-sm"
+                  onClick={() => setIsNewChatOpen(true)}
+                  iconOnly={<MessageSquarePlus />}
+                />
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="lg:hidden"
+                iconOnly={<X />}
+              />
+            </div>
+          </div>
 
+          <div className="px-4 pb-3">
+            <Input
+              id="chat-search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search conversations"
+              iconStart={<Search />}
+            />
+          </div>
+        </div>
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
@@ -148,16 +199,18 @@ export function ChatSidebar({
                 </div>
               ))}
             </div>
-          ) : chats.length === 0 ? (
+          ) : filteredChats.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 text-center p-4">
               <MessageSquare className="size-8 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
-                No conversations yet
+                {searchQuery.trim()
+                  ? 'No matching conversations'
+                  : 'No conversations yet'}
               </p>
             </div>
           ) : (
             <div className="p-2">
-              {chats.map((chat) => {
+              {filteredChats.map((chat) => {
                 const partner =
                   currentUserId === chat.trainerId ? chat.client : chat.trainer
                 const partnerId =
@@ -168,68 +221,14 @@ export function ChatSidebar({
                 const hasUnread = chat.unreadCount > 0
 
                 return (
-                  <button
+                  <ChatSidebarItem
                     key={chat.id}
+                    chat={chat}
+                    partner={partner}
+                    isActive={isActive}
+                    isPartnerUnread={hasUnread}
                     onClick={() => handleChatClick(chat)}
-                    className={cn(
-                      'w-full p-3 text-left rounded-lg transition-colors hover:bg-muted/50 overflow-hidden cursor-pointer',
-                      isActive && 'bg-card-on-card',
-                    )}
-                  >
-                    <div className="flex gap-3 min-w-0">
-                      <div className="relative flex-shrink-0">
-                        <UserAvatar
-                          withFallbackAvatar
-                          firstName={partner.firstName || ''}
-                          lastName={partner.lastName || ''}
-                          imageUrl={partner.image || undefined}
-                          className="size-10"
-                        />
-                        {hasUnread && (
-                          <div className="absolute -top-1 -right-1 size-3 bg-primary rounded-full" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1 min-w-0">
-                          <p
-                            className={cn(
-                              'text-sm truncate flex-1 min-w-0',
-                              hasUnread ? 'font-semibold' : 'font-medium',
-                            )}
-                          >
-                            {getUserDisplayName(partner)}
-                          </p>
-                          {chat.lastMessage && (
-                            <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                              {formatDistanceToNow(
-                                new Date(chat.lastMessage.createdAt),
-                                {
-                                  addSuffix: false,
-                                },
-                              )}
-                            </span>
-                          )}
-                        </div>
-                        {chat.lastMessage && (
-                          <p
-                            className={cn(
-                              'text-xs text-muted-foreground truncate min-w-0',
-                              hasUnread && 'font-medium text-foreground',
-                            )}
-                          >
-                            {chat.lastMessage.content}
-                          </p>
-                        )}
-                        {hasUnread && (
-                          <div className="flex items-center justify-between mt-1">
-                            <span className="text-xs font-medium text-primary">
-                              {chat.unreadCount} unread
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </button>
+                  />
                 )
               })}
             </div>

@@ -1,10 +1,22 @@
 import { prisma } from '@/lib/db'
+import { SUPPORT_ACCOUNT_ID } from '@/lib/support-account'
+import { createSupportChatForUser } from '@/lib/support-chat'
 import { GQLContext } from '@/types/gql-context'
 
 import Message from '../message/model'
 import UserPublic from '../user-public/model'
 
 import Chat from './model'
+
+function assertIsSupport(context: GQLContext) {
+  const userId = context.user?.user.id
+  if (!userId) {
+    throw new Error('Authentication required')
+  }
+  if (userId !== SUPPORT_ACCOUNT_ID) {
+    throw new Error('Access denied')
+  }
+}
 
 export async function getOrCreateChat(
   { partnerId }: { partnerId: string },
@@ -368,4 +380,118 @@ export async function getMessengerInitialData(
     chats: sortedChats,
     totalUnreadCount,
   }
+}
+
+export async function searchUsersForChat(
+  { query }: { query: string },
+  context: GQLContext,
+) {
+  assertIsSupport(context)
+
+  const q = query.trim()
+  if (!q) return []
+
+  const parts = q.split(/\s+/).filter(Boolean)
+
+  const baseOr = [
+    { email: { contains: q, mode: 'insensitive' as const } },
+    { name: { contains: q, mode: 'insensitive' as const } },
+    {
+      profile: {
+        is: { firstName: { contains: q, mode: 'insensitive' as const } },
+      },
+    },
+    {
+      profile: {
+        is: { lastName: { contains: q, mode: 'insensitive' as const } },
+      },
+    },
+  ]
+
+  const nameSplitOr =
+    parts.length >= 2
+      ? [
+          {
+            profile: {
+              is: {
+                firstName: { contains: parts[0], mode: 'insensitive' as const },
+                lastName: { contains: parts[1], mode: 'insensitive' as const },
+              },
+            },
+          },
+          {
+            profile: {
+              is: {
+                firstName: { contains: parts[1], mode: 'insensitive' as const },
+                lastName: { contains: parts[0], mode: 'insensitive' as const },
+              },
+            },
+          },
+        ]
+      : []
+
+  const users = await prisma.user.findMany({
+    where: {
+      id: { not: SUPPORT_ACCOUNT_ID },
+      OR: [...baseOr, ...nameSplitOr],
+    },
+    include: { profile: true },
+    take: 20,
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return users.map((user) => new UserPublic(user, context))
+}
+
+export async function createSupportChat(
+  { userId }: { userId: string },
+  context: GQLContext,
+) {
+  assertIsSupport(context)
+
+  if (userId === SUPPORT_ACCOUNT_ID) {
+    throw new Error('Invalid user')
+  }
+
+  await createSupportChatForUser(userId)
+
+  const chat = await prisma.chat.findUniqueOrThrow({
+    where: {
+      trainerId_clientId: {
+        trainerId: SUPPORT_ACCOUNT_ID,
+        clientId: userId,
+      },
+    },
+    include: {
+      trainer: {
+        include: {
+          profile: true,
+        },
+      },
+      client: {
+        include: {
+          profile: true,
+        },
+      },
+      messages: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+        include: {
+          sender: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  context.loaders.chat.chatByParticipants.prime(
+    `${SUPPORT_ACCOUNT_ID}:${userId}`,
+    chat,
+  )
+  context.loaders.chat.chatBasic.prime(chat.id, chat)
+
+  return new Chat(chat, context)
 }

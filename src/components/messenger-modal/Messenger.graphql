@@ -148,6 +148,16 @@ query GetMessengerInitialData($messagesPerChat: Int) {
   }
 }
 
+query SearchUsersForChat($query: String!) {
+  searchUsersForChat(query: $query) {
+    id
+    email
+    firstName
+    lastName
+    image
+  }
+}
+
 mutation SendMessage($input: SendMessageInput!) {
   sendMessage(input: $input) {
     id
@@ -186,6 +196,36 @@ mutation EditMessage($input: EditMessageInput!) {
       lastName
       image
     }
+  }
+}
+
+mutation CreateSupportChat($userId: ID!) {
+  createSupportChat(userId: $userId) {
+    id
+    trainerId
+    clientId
+    trainer {
+      id
+      firstName
+      lastName
+      email
+      image
+    }
+    client {
+      id
+      firstName
+      lastName
+      email
+      image
+    }
+    unreadCount
+    lastMessage {
+      id
+      content
+      createdAt
+    }
+    createdAt
+    updatedAt
   }
 }
 

@@ -159,7 +159,7 @@ export function MessagesArea({
   return (
     <div
       ref={messagesContainerRef}
-      className="h-full overflow-y-auto px-4 py-2 space-y-1 hide-scrollbar"
+      className="h-full overflow-y-auto px-4 py-6 space-y-1 hide-scrollbar"
     >
       {/* Loading indicator for fetching older messages */}
       {isFetchingNextPage && (

@@ -1257,6 +1257,7 @@ export type GQLMutation = {
   createPushSubscription: GQLPushSubscription;
   createQuickWorkout: GQLTrainingPlan;
   createReview: Scalars['Boolean']['output'];
+  createSupportChat: GQLChat;
   createTeam: GQLTeam;
   createTrainerNoteForClient: GQLNote;
   createTrainingPlan: GQLCreateTrainingPlanPayload;
@@ -1640,6 +1641,11 @@ export type GQLMutationCreateQuickWorkoutArgs = {
 
 export type GQLMutationCreateReviewArgs = {
   input: GQLCreateReviewInput;
+};
+
+
+export type GQLMutationCreateSupportChatArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -2635,6 +2641,7 @@ export type GQLQuery = {
   recentIngredients: Array<GQLIngredient>;
   searchIngredients: Array<GQLIngredient>;
   searchUsers: Array<GQLSearchUserResult>;
+  searchUsersForChat: Array<GQLUserPublic>;
   sentTeamInvitations: Array<GQLTeamInvitation>;
   team?: Maybe<GQLTeam>;
   teamInvitations: Array<GQLTeamInvitation>;
@@ -2981,6 +2988,11 @@ export type GQLQuerySearchIngredientsArgs = {
 export type GQLQuerySearchUsersArgs = {
   email: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQuerySearchUsersForChatArgs = {
+  query: Scalars['String']['input'];
 };
 
 
@@ -5910,6 +5922,13 @@ export type GQLGetMessengerInitialDataQueryVariables = Exact<{
 
 export type GQLGetMessengerInitialDataQuery = { __typename?: 'Query', getMessengerInitialData: { __typename?: 'MessengerInitialData', totalUnreadCount: number, chats: Array<{ __typename?: 'ChatWithMessages', id: string, trainerId: string, clientId: string, hasMoreMessages: boolean, unreadCount: number, createdAt: string, updatedAt: string, trainer: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, image?: string | undefined | null }, client: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, image?: string | undefined | null }, messages: Array<{ __typename?: 'Message', id: string, chatId: string, content: string, imageUrl?: string | undefined | null, isEdited: boolean, isDeleted: boolean, readAt?: string | undefined | null, createdAt: string, updatedAt: string, sender: { __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } }>, lastMessage?: { __typename?: 'Message', id: string, content: string, createdAt: string, sender: { __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } } | undefined | null }> } };
 
+export type GQLSearchUsersForChatQueryVariables = Exact<{
+  query: Scalars['String']['input'];
+}>;
+
+
+export type GQLSearchUsersForChatQuery = { __typename?: 'Query', searchUsersForChat: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null }> };
+
 export type GQLSendMessageMutationVariables = Exact<{
   input: GQLSendMessageInput;
 }>;
@@ -5923,6 +5942,13 @@ export type GQLEditMessageMutationVariables = Exact<{
 
 
 export type GQLEditMessageMutation = { __typename?: 'Mutation', editMessage: { __typename?: 'Message', id: string, chatId: string, content: string, imageUrl?: string | undefined | null, isEdited: boolean, isDeleted: boolean, readAt?: string | undefined | null, createdAt: string, updatedAt: string, sender: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } } };
+
+export type GQLCreateSupportChatMutationVariables = Exact<{
+  userId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLCreateSupportChatMutation = { __typename?: 'Mutation', createSupportChat: { __typename?: 'Chat', id: string, trainerId: string, clientId: string, unreadCount: number, createdAt: string, updatedAt: string, trainer: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, image?: string | undefined | null }, client: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, image?: string | undefined | null }, lastMessage?: { __typename?: 'Message', id: string, content: string, createdAt: string } | undefined | null } };
 
 export type GQLDeleteMessageMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18299,6 +18325,60 @@ useInfiniteGetMessengerInitialDataQuery.getKey = (variables?: GQLGetMessengerIni
 
 useGetMessengerInitialDataQuery.fetcher = (variables?: GQLGetMessengerInitialDataQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMessengerInitialDataQuery, GQLGetMessengerInitialDataQueryVariables>(GetMessengerInitialDataDocument, variables, options);
 
+export const SearchUsersForChatDocument = `
+    query SearchUsersForChat($query: String!) {
+  searchUsersForChat(query: $query) {
+    id
+    email
+    firstName
+    lastName
+    image
+  }
+}
+    `;
+
+export const useSearchUsersForChatQuery = <
+      TData = GQLSearchUsersForChatQuery,
+      TError = unknown
+    >(
+      variables: GQLSearchUsersForChatQueryVariables,
+      options?: Omit<UseQueryOptions<GQLSearchUsersForChatQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLSearchUsersForChatQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLSearchUsersForChatQuery, TError, TData>(
+      {
+    queryKey: ['SearchUsersForChat', variables],
+    queryFn: fetchData<GQLSearchUsersForChatQuery, GQLSearchUsersForChatQueryVariables>(SearchUsersForChatDocument, variables),
+    ...options
+  }
+    )};
+
+useSearchUsersForChatQuery.getKey = (variables: GQLSearchUsersForChatQueryVariables) => ['SearchUsersForChat', variables];
+
+export const useInfiniteSearchUsersForChatQuery = <
+      TData = InfiniteData<GQLSearchUsersForChatQuery>,
+      TError = unknown
+    >(
+      variables: GQLSearchUsersForChatQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLSearchUsersForChatQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLSearchUsersForChatQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLSearchUsersForChatQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['SearchUsersForChat.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLSearchUsersForChatQuery, GQLSearchUsersForChatQueryVariables>(SearchUsersForChatDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteSearchUsersForChatQuery.getKey = (variables: GQLSearchUsersForChatQueryVariables) => ['SearchUsersForChat.infinite', variables];
+
+
+useSearchUsersForChatQuery.fetcher = (variables: GQLSearchUsersForChatQueryVariables, options?: RequestInit['headers']) => fetchData<GQLSearchUsersForChatQuery, GQLSearchUsersForChatQueryVariables>(SearchUsersForChatDocument, variables, options);
+
 export const SendMessageDocument = `
     mutation SendMessage($input: SendMessageInput!) {
   sendMessage(input: $input) {
@@ -18378,6 +18458,56 @@ useEditMessageMutation.getKey = () => ['EditMessage'];
 
 
 useEditMessageMutation.fetcher = (variables: GQLEditMessageMutationVariables, options?: RequestInit['headers']) => fetchData<GQLEditMessageMutation, GQLEditMessageMutationVariables>(EditMessageDocument, variables, options);
+
+export const CreateSupportChatDocument = `
+    mutation CreateSupportChat($userId: ID!) {
+  createSupportChat(userId: $userId) {
+    id
+    trainerId
+    clientId
+    trainer {
+      id
+      firstName
+      lastName
+      email
+      image
+    }
+    client {
+      id
+      firstName
+      lastName
+      email
+      image
+    }
+    unreadCount
+    lastMessage {
+      id
+      content
+      createdAt
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useCreateSupportChatMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateSupportChatMutation, TError, GQLCreateSupportChatMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateSupportChatMutation, TError, GQLCreateSupportChatMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateSupportChat'],
+    mutationFn: (variables?: GQLCreateSupportChatMutationVariables) => fetchData<GQLCreateSupportChatMutation, GQLCreateSupportChatMutationVariables>(CreateSupportChatDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateSupportChatMutation.getKey = () => ['CreateSupportChat'];
+
+
+useCreateSupportChatMutation.fetcher = (variables: GQLCreateSupportChatMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateSupportChatMutation, GQLCreateSupportChatMutationVariables>(CreateSupportChatDocument, variables, options);
 
 export const DeleteMessageDocument = `
     mutation DeleteMessage($id: ID!) {

@@ -18,6 +18,7 @@ import {
   notifyCoachingRequestRejected,
 } from '@/lib/notifications/push-notification-service'
 import { clearCachePattern } from '@/lib/redis'
+import { createSupportChatForUser } from '@/lib/support-chat'
 import { UserWithSession } from '@/types/UserWithSession'
 import { GQLContext } from '@/types/gql-context'
 
@@ -385,6 +386,8 @@ export async function acceptCoachingRequest({
       // Clear any user subscription-related caches so UI can reflect access immediately.
       clearCachePattern(`user:${clientId}:subscription*`),
     ])
+
+    await createSupportChatForUser(clientId)
 
     return new CoachingRequest(coachingRequest, context)
   } catch (error) {

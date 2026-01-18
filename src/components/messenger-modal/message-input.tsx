@@ -1,16 +1,16 @@
-import { Send, Smile } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { SendHorizonal } from 'lucide-react'
+import { useRef } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu'
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuTrigger,
+// } from '../ui/dropdown-menu'
 
-import { EmojiPicker } from './emoji-picker'
+// import { EmojiPicker } from './emoji-picker'
 import { checkForEmojiConversion } from './emoji-utils'
 import type { MessageInputProps } from './types'
 
@@ -21,7 +21,7 @@ export function MessageInput({
   disabled = false,
   allowFocus = true,
 }: MessageInputProps) {
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  // const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -58,30 +58,30 @@ export function MessageInput({
     }
   }
 
-  const handleEmojiSelect = (emoji: string) => {
-    const textarea = textareaRef.current
-    if (textarea) {
-      const start = textarea.selectionStart
-      const end = textarea.selectionEnd
-      const newValue = value.slice(0, start) + emoji + value.slice(end)
-      onChange(newValue)
+  // const handleEmojiSelect = (emoji: string) => {
+  //   const textarea = textareaRef.current
+  //   if (textarea) {
+  //     const start = textarea.selectionStart
+  //     const end = textarea.selectionEnd
+  //     const newValue = value.slice(0, start) + emoji + value.slice(end)
+  //     onChange(newValue)
 
-      // Restore cursor position after emoji
-      setTimeout(() => {
-        const newPosition = start + emoji.length
-        textarea.setSelectionRange(newPosition, newPosition)
-        textarea.focus()
-      }, 0)
-    } else {
-      onChange(value + emoji)
-    }
-    setShowEmojiPicker(false)
-  }
+  //     // Restore cursor position after emoji
+  //     setTimeout(() => {
+  //       const newPosition = start + emoji.length
+  //       textarea.setSelectionRange(newPosition, newPosition)
+  //       textarea.focus()
+  //     }, 0)
+  //   } else {
+  //     onChange(value + emoji)
+  //   }
+  //   setShowEmojiPicker(false)
+  // }
 
   return (
     <div className="relative">
       {/* Main input area */}
-      <div className="grid grid-cols-[1fr_auto_auto] gap-2 w-full items-center px-4 py-3">
+      <div className="grid grid-cols-[1fr_auto] gap-1 w-full items-center px-4 py-3">
         <Textarea
           ref={textareaRef}
           id="message-input"
@@ -89,30 +89,30 @@ export function MessageInput({
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Aa"
-          className="flex-1 py-2.5 min-h-0 resize-none rounded-2xl max-h-24 focus-visible:ring-0 compact-scrollbar"
+          className="flex-1 py-2.5 min-h-0 resize-none rounded-4xl max-h-24 focus-visible:ring-0 compact-scrollbar"
           autoComplete="off"
           variant="ghost"
           autoFocus={false}
           tabIndex={allowFocus ? 0 : -1}
         />
-        <DropdownMenu open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+        {/* <DropdownMenu open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon-lg"
-              className="rounded-lg"
-              iconOnly={<Smile />}
+              className="rounded-full"
+              iconOnly={<Smile className="size-5!" />}
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent className="p-0">
             <EmojiPicker onEmojiSelect={handleEmojiSelect} insideDropdown />
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
         <Button
           onClick={!disabled && value.trim() ? onSend : undefined}
-          iconOnly={<Send />}
+          iconOnly={<SendHorizonal className="size-5!" />}
           size="icon-lg"
-          className="rounded-lg"
+          className="rounded-full"
         >
           <span className="sr-only">Send message</span>
         </Button>

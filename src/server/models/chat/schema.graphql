@@ -35,6 +35,7 @@ type Query {
   getMyChats: [Chat!]!
   getTotalUnreadCount: Int!
   getMessengerInitialData(messagesPerChat: Int): MessengerInitialData!
+  searchUsersForChat(query: String!): [UserPublic!]!
 }
 
 input MarkMessagesAsReadInput {
@@ -43,4 +44,5 @@ input MarkMessagesAsReadInput {
 
 type Mutation {
   markMessagesAsRead(input: MarkMessagesAsReadInput!): Boolean!
+  createSupportChat(userId: ID!): Chat!
 }

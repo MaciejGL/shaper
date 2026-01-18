@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/db'
-
-const SUPPORT_ACCOUNT_ID = '17ea53fe-036c-4b89-997f-a631a92657c0'
+import { SUPPORT_ACCOUNT_ID } from '@/lib/support-account'
 
 export async function createSupportChatForUser(userId: string): Promise<void> {
   // Skip support account itself

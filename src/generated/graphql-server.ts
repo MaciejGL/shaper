@@ -1259,6 +1259,7 @@ export type GQLMutation = {
   createPushSubscription: EntireFieldWrapper<GQLPushSubscription>;
   createQuickWorkout: EntireFieldWrapper<GQLTrainingPlan>;
   createReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  createSupportChat: EntireFieldWrapper<GQLChat>;
   createTeam: EntireFieldWrapper<GQLTeam>;
   createTrainerNoteForClient: EntireFieldWrapper<GQLNote>;
   createTrainingPlan: EntireFieldWrapper<GQLCreateTrainingPlanPayload>;
@@ -1642,6 +1643,11 @@ export type GQLMutationCreateQuickWorkoutArgs = {
 
 export type GQLMutationCreateReviewArgs = {
   input: GQLCreateReviewInput;
+};
+
+
+export type GQLMutationCreateSupportChatArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -2637,6 +2643,7 @@ export type GQLQuery = {
   recentIngredients: EntireFieldWrapper<Array<GQLIngredient>>;
   searchIngredients: EntireFieldWrapper<Array<GQLIngredient>>;
   searchUsers: EntireFieldWrapper<Array<GQLSearchUserResult>>;
+  searchUsersForChat: EntireFieldWrapper<Array<GQLUserPublic>>;
   sentTeamInvitations: EntireFieldWrapper<Array<GQLTeamInvitation>>;
   team?: EntireFieldWrapper<Maybe<GQLTeam>>;
   teamInvitations: EntireFieldWrapper<Array<GQLTeamInvitation>>;
@@ -2983,6 +2990,11 @@ export type GQLQuerySearchIngredientsArgs = {
 export type GQLQuerySearchUsersArgs = {
   email: Scalars['String']['input'];
   limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQuerySearchUsersForChatArgs = {
+  query: Scalars['String']['input'];
 };
 
 
@@ -5318,6 +5330,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   createPushSubscription?: Resolver<GQLResolversTypes['PushSubscription'], ParentType, ContextType, RequireFields<GQLMutationCreatePushSubscriptionArgs, 'input'>>;
   createQuickWorkout?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLMutationCreateQuickWorkoutArgs, 'input'>>;
   createReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateReviewArgs, 'input'>>;
+  createSupportChat?: Resolver<GQLResolversTypes['Chat'], ParentType, ContextType, RequireFields<GQLMutationCreateSupportChatArgs, 'userId'>>;
   createTeam?: Resolver<GQLResolversTypes['Team'], ParentType, ContextType, RequireFields<GQLMutationCreateTeamArgs, 'input'>>;
   createTrainerNoteForClient?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainerNoteForClientArgs, 'input'>>;
   createTrainingPlan?: Resolver<GQLResolversTypes['CreateTrainingPlanPayload'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainingPlanArgs, 'input'>>;
@@ -5765,6 +5778,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   recentIngredients?: Resolver<Array<GQLResolversTypes['Ingredient']>, ParentType, ContextType, Partial<GQLQueryRecentIngredientsArgs>>;
   searchIngredients?: Resolver<Array<GQLResolversTypes['Ingredient']>, ParentType, ContextType, RequireFields<GQLQuerySearchIngredientsArgs, 'query'>>;
   searchUsers?: Resolver<Array<GQLResolversTypes['SearchUserResult']>, ParentType, ContextType, RequireFields<GQLQuerySearchUsersArgs, 'email'>>;
+  searchUsersForChat?: Resolver<Array<GQLResolversTypes['UserPublic']>, ParentType, ContextType, RequireFields<GQLQuerySearchUsersForChatArgs, 'query'>>;
   sentTeamInvitations?: Resolver<Array<GQLResolversTypes['TeamInvitation']>, ParentType, ContextType>;
   team?: Resolver<Maybe<GQLResolversTypes['Team']>, ParentType, ContextType, RequireFields<GQLQueryTeamArgs, 'id'>>;
   teamInvitations?: Resolver<Array<GQLResolversTypes['TeamInvitation']>, ParentType, ContextType>;

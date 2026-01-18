@@ -1,24 +1,22 @@
 'use client'
 
-import { ChevronDown, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { UserAvatar } from '@/components/user-avatar'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useUser } from '@/context/user-context'
 
+import { ChatListPage } from './chat-list-page'
 import { ChatSidebar } from './chat-sidebar'
 import { useMessengerData } from './data'
 import { MessageInput } from './message-input'
 import { MessagesArea } from './messages-area'
+import { MobileChatHeader } from './mobile-chat-header'
 import type { MessengerModalProps } from './types'
 import { getUserDisplayName } from './utils'
+
+type MobileView = 'list' | 'chat'
 
 export function MessengerModal({
   isOpen,
@@ -30,8 +28,10 @@ export function MessengerModal({
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editContent, setEditContent] = useState('')
   const [allowInputFocus, setAllowInputFocus] = useState(false)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(true)
+  const [mobileView, setMobileView] = useState<MobileView>('list')
+  const hasInitializedLayoutRef = useRef(false)
 
   const { user } = useUser()
 
@@ -70,6 +70,8 @@ export function MessengerModal({
     // Reset when modal closes
     if (!isOpen) {
       resetReadStatus()
+      hasInitializedLayoutRef.current = false
+      setMobileView('list')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, chat?.id]) // Only depend on primitive values to prevent infinite rerenders
@@ -85,25 +87,27 @@ export function MessengerModal({
     }
   }, [isOpen])
 
-  // Manage sidebar visibility based on screen size
+  // Determine layout (mobile vs desktop) for the modal session
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        // lg breakpoint
-        setIsSidebarOpen(true)
-      } else {
-        setIsSidebarOpen(false)
-      }
+      setIsDesktop(window.innerWidth >= 1024)
     }
 
-    // Set initial state
-    if (isOpen) {
+    if (isOpen && !hasInitializedLayoutRef.current) {
       handleResize()
+      hasInitializedLayoutRef.current = true
     }
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [isOpen])
+
+  // Always start on the chat list on mobile when opening
+  useEffect(() => {
+    if (!isOpen) return
+    if (isDesktop) return
+    setMobileView('list')
+  }, [isOpen, isDesktop])
 
   // Message handlers
   const handleSendMessage = () => {
@@ -146,101 +150,131 @@ export function MessengerModal({
 
     if (selectedChatForPartner) {
       selectChat(selectedChatForPartner.id)
+      if (!isDesktop) {
+        setMobileView('chat')
+      }
     }
 
     if (onPartnerChange) {
       onPartnerChange(newPartnerId)
     }
-    setIsSidebarOpen(false) // Close sidebar on mobile after selection
   }
 
-  const handleSidebarToggle = () => {
-    setIsSidebarOpen(!isSidebarOpen)
-  }
+  const handleMobileBack = () => setMobileView('list')
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         dialogTitle={`Message ${partnerName}`}
         fullScreen={true}
-        className="lg:max-w-[1200px] h-dvh lg:h-[80vh] lg:rounded-2xl grid grid-cols-1 lg:grid-cols-[auto_1fr] !p-0 gap-0"
+        className="lg:max-w-[1200px] h-dvh lg:h-[80vh] lg:rounded-2xl p-0!"
         withCloseButton={false}
       >
-        {/* Chat Sidebar */}
-        <ChatSidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          currentPartnerId={currentPartnerId}
-          onChatSelect={handleChatSelect}
-          currentUserId={user?.id}
-          chats={allChats}
-          isLoading={isLoading}
-        />
+        {isDesktop ? (
+          <div className="h-full grid grid-cols-[auto_1fr] gap-0">
+            <ChatSidebar
+              isOpen={true}
+              onClose={() => {}}
+              currentPartnerId={currentPartnerId}
+              onChatSelect={handleChatSelect}
+              currentUserId={user?.id}
+              chats={allChats}
+              isLoading={isLoading}
+            />
 
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-          {/* Header */}
-          <DialogHeader className="pr-4 py-3">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSidebarToggle}
-                className="lg:hidden"
-                iconEnd={<ChevronDown className="size-4" />}
-              >
-                <UserAvatar
-                  withFallbackAvatar
-                  firstName={partner?.firstName || ''}
-                  lastName={partner?.lastName || ''}
-                  imageUrl={partnerAvatar}
-                  className="size-8"
-                />
-                <div className={isLoading ? 'masked-placeholder-text' : ''}>
-                  <DialogTitle className="text-base font-medium">
-                    {partnerName}
-                  </DialogTitle>
+            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+              <div className="flex items-center gap-3 pr-4 py-3">
+                <div className="text-base font-medium truncate">
+                  {partnerName}
                 </div>
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={onClose}
-                iconOnly={<X />}
-                className="ml-auto"
+                <Button
+                  variant="ghost"
+                  onClick={onClose}
+                  iconOnly={<X />}
+                  className="ml-auto"
+                />
+              </div>
+
+              <div className="flex-1 min-h-0">
+                <MessagesArea
+                  messages={messages}
+                  isLoading={isLoading}
+                  isFetchingNextPage={isFetchingNextPage}
+                  hasNextPage={hasNextPage}
+                  currentUserId={currentUserId}
+                  partnerName={partnerName}
+                  editingMessageId={editingMessageId}
+                  editContent={editContent}
+                  shouldScrollToBottom={shouldScrollToBottom}
+                  onEditMessage={handleEditMessage}
+                  onDeleteMessage={handleDeleteMessage}
+                  onEditContentChange={setEditContent}
+                  onSaveEdit={handleSaveEdit}
+                  onCancelEdit={handleCancelEdit}
+                  onLoadMoreMessages={loadMoreMessages}
+                />
+              </div>
+
+              <MessageInput
+                value={newMessage}
+                onChange={setNewMessage}
+                onSend={handleSendMessage}
+                disabled={isSending}
+                allowFocus={allowInputFocus}
               />
             </div>
-          </DialogHeader>
+          </div>
+        ) : mobileView === 'list' ? (
+          <ChatListPage
+            chats={allChats}
+            currentUserId={user?.id}
+            currentPartnerId={currentPartnerId}
+            isLoading={isLoading}
+            onChatSelect={handleChatSelect}
+            onClose={onClose}
+          />
+        ) : (
+          <div className="flex flex-col h-full overflow-hidden bg-background">
+            <div className="shadow-lg">
+              <MobileChatHeader
+                partnerName={partnerName}
+                partnerAvatar={partnerAvatar}
+                partner={partner}
+                isLoading={isLoading}
+                onBack={handleMobileBack}
+                onClose={onClose}
+              />
+            </div>
 
-          {/* Messages Area */}
-          <div className="flex-1 min-h-0">
-            <MessagesArea
-              messages={messages}
-              isLoading={isLoading}
-              isFetchingNextPage={isFetchingNextPage}
-              hasNextPage={hasNextPage}
-              currentUserId={currentUserId}
-              partnerName={partnerName}
-              editingMessageId={editingMessageId}
-              editContent={editContent}
-              shouldScrollToBottom={shouldScrollToBottom}
-              onEditMessage={handleEditMessage}
-              onDeleteMessage={handleDeleteMessage}
-              onEditContentChange={setEditContent}
-              onSaveEdit={handleSaveEdit}
-              onCancelEdit={handleCancelEdit}
-              onLoadMoreMessages={loadMoreMessages}
+            <div className="flex-1 min-h-0">
+              <MessagesArea
+                messages={messages}
+                isLoading={isLoading}
+                isFetchingNextPage={isFetchingNextPage}
+                hasNextPage={hasNextPage}
+                currentUserId={currentUserId}
+                partnerName={partnerName}
+                editingMessageId={editingMessageId}
+                editContent={editContent}
+                shouldScrollToBottom={shouldScrollToBottom}
+                onEditMessage={handleEditMessage}
+                onDeleteMessage={handleDeleteMessage}
+                onEditContentChange={setEditContent}
+                onSaveEdit={handleSaveEdit}
+                onCancelEdit={handleCancelEdit}
+                onLoadMoreMessages={loadMoreMessages}
+              />
+            </div>
+
+            <MessageInput
+              value={newMessage}
+              onChange={setNewMessage}
+              onSend={handleSendMessage}
+              disabled={isSending}
+              allowFocus={allowInputFocus}
             />
           </div>
-
-          {/* Message Input */}
-          <MessageInput
-            value={newMessage}
-            onChange={setNewMessage}
-            onSend={handleSendMessage}
-            disabled={isSending}
-            allowFocus={allowInputFocus}
-          />
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   )

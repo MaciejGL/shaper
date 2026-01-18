@@ -1,0 +1,1 @@
+export const SUPPORT_ACCOUNT_ID = '17ea53fe-036c-4b89-997f-a631a92657c0'
