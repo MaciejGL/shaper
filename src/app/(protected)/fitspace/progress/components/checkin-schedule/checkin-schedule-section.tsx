@@ -43,6 +43,9 @@ function formatNextCheckinDate(date: Date): string {
   if (isTomorrow(date)) {
     return 'tomorrow'
   }
+  if (isToday(date)) {
+    return 'today'
+  }
   return formatRelativeTime(date)
 }
 
@@ -246,7 +249,10 @@ export function CheckinScheduleSection({
 
   return (
     <div className="pb-4 px-2 dark">
-      <Card className="gap-2 rounded-2xl border!">
+      <Card
+        variant="glass"
+        className="shadow-md shadow-black gap-2 rounded-2xl border!"
+      >
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">

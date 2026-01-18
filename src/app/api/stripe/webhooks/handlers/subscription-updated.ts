@@ -12,8 +12,12 @@ import {
   resolvePriceIdToLookupKey,
 } from '@/lib/stripe/lookup-keys'
 
+type StripeSubscriptionWithPeriod = Stripe.Subscription & {
+  current_period_end?: number | null
+}
+
 export async function handleSubscriptionUpdated(
-  subscription: Stripe.Subscription,
+  subscription: StripeSubscriptionWithPeriod,
 ) {
   try {
     const dbSubscription = await prisma.userSubscription.findFirst({
@@ -40,9 +44,15 @@ export async function handleSubscriptionUpdated(
         ? SubscriptionStatus.CANCELLED_ACTIVE
         : mapStripeStatusToSubscriptionStatus(subscription.status)
 
-    const endDate = new Date(
-      subscription.items.data[0].current_period_end * 1000,
-    )
+    const currentPeriodEnd = subscription.current_period_end
+    const endDate = currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null
+    const endDateUpdate = endDate ? { endDate } : {}
+
+    if (!endDate) {
+      console.warn(
+        `[subscription-updated] Missing current_period_end for ${subscription.id}; updating status without endDate`,
+      )
+    }
 
     // Detect plan change using lookup keys (not price IDs) for reliability
     // This prevents accidental switches during pause_collection or other non-price updates
@@ -77,7 +87,7 @@ export async function handleSubscriptionUpdated(
             stripeLookupKey: newPackage.stripeLookupKey,
             trainerId: newPackage.trainerId || subscription.metadata?.trainerId,
             status,
-            endDate,
+            ...endDateUpdate,
           },
         })
 
@@ -110,7 +120,7 @@ export async function handleSubscriptionUpdated(
     // No plan change (or couldn't resolve new package), just update status/dates
     await prisma.userSubscription.update({
       where: { id: dbSubscription.id },
-      data: { status, endDate },
+      data: { status, ...endDateUpdate },
     })
 
     console.info(

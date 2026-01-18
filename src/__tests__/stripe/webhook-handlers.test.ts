@@ -59,6 +59,7 @@ const createMockSubscription = (overrides: any = {}) => ({
     ],
   },
   trial_end: null,
+  current_period_start: Math.floor(Date.now() / 1000),
   current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30, // 30 days
   metadata: {
     userId: 'user_123',

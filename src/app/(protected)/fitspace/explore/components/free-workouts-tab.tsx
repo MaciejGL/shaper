@@ -133,7 +133,7 @@ export function FreeWorkoutsTab({
   }
 
   return (
-    <div className="space-y-0 -mx-4">
+    <div className="space-y-1 -mx-4">
       <AnimatePresence mode="popLayout" initial={false}>
         {freeWorkoutDays.map((day) => (
           <motion.div
@@ -192,7 +192,7 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
     <Card
       className={cn(
         'cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark',
-        'rounded-none shadow-none border-y-2 border-x-0',
+        'rounded-none shadow-none border-y-0 border-x-0',
         'bg-cover bg-center',
       )}
       onClick={onClick}

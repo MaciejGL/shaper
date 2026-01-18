@@ -464,7 +464,7 @@ export function TrainingPlansTab({
       </div>
 
       {/* Results */}
-      <div className="space-y-0 -mx-4">
+      <div className="space-y-1 -mx-4">
         {isLoading ? (
           <LoadingSkeleton count={3} variant="lg" />
         ) : filteredPlans.length === 0 ? (
@@ -582,7 +582,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
     <Card
       className={cn(
         'cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark',
-        'rounded-none shadow-none border-y-2 border-x-0',
+        'rounded-none shadow-none border-y-0 border-x-0',
         'bg-cover bg-center',
       )}
       onClick={onClick}

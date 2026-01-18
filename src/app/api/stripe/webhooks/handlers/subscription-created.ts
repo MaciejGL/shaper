@@ -27,19 +27,30 @@ import {
   findUserByStripeCustomerId,
 } from '../utils/shared'
 
+type StripeSubscriptionWithPeriod = Stripe.Subscription & {
+  current_period_start?: number | null
+  current_period_end?: number | null
+}
+
 export async function handleSubscriptionCreated(
-  subscription: Stripe.Subscription,
+  subscription: StripeSubscriptionWithPeriod,
 ) {
   try {
     const customerId = subscription.customer as string
     const priceId = subscription.items.data[0]?.price.id
     // Use Stripe's subscription data directly - trust their calculations
-    const startDate = new Date(
-      subscription.items.data[0].current_period_start * 1000,
-    )
-    const endDate = new Date(
-      subscription.items.data[0].current_period_end * 1000,
-    )
+    const currentPeriodStart = subscription.current_period_start
+    const currentPeriodEnd = subscription.current_period_end
+
+    if (!currentPeriodStart || !currentPeriodEnd) {
+      console.error(
+        `[subscription-created] Missing current period for subscription ${subscription.id}`,
+      )
+      return
+    }
+
+    const startDate = new Date(currentPeriodStart * 1000)
+    const endDate = new Date(currentPeriodEnd * 1000)
 
     const { isTrial, trialStart, trialEnd } = extractTrialInfo(subscription)
 

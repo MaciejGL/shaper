@@ -174,7 +174,7 @@ export function TrainersTab({
 
   return (
     <>
-      <div className={cn(trainers.length > 0 && '-mx-4')}>
+      <div className={cn(trainers.length > 0 && 'space-y-1 -mx-4')}>
         {trainers.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center">
@@ -190,7 +190,7 @@ export function TrainersTab({
               key={trainer.id}
               trainer={trainer}
               onClick={() => handleTrainerClick(trainer)}
-              className="rounded-none shadow-none border-y-2 border-sidebar border-x-0"
+              className="rounded-none shadow-none border-y-0 border-sidebar border-x-0"
               classNameImage="rounded-none"
               classNameOverlay="rounded-none"
               classNameBadge="rounded-tr-none"

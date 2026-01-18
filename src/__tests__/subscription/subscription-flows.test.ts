@@ -48,6 +48,7 @@ const createMockSubscription = (overrides: any = {}) => ({
       },
     ],
   },
+  current_period_start: Math.floor(Date.now() / 1000),
   current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
   metadata: {},
   pause_collection: null,

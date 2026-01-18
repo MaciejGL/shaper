@@ -28,9 +28,13 @@ interface InvoiceWithSubscription extends Stripe.Invoice {
   payment_intent?: string | Stripe.PaymentIntent | null
 }
 
+type StripeSubscriptionWithPeriod = Stripe.Subscription & {
+  current_period_end?: number | null
+}
+
 export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
   try {
-    let stripeSubscription: Stripe.Subscription | null = null
+    let stripeSubscription: StripeSubscriptionWithPeriod | null = null
     let subscription: UserSubscription | null = null
 
     // Get Stripe customer ID from invoice.
@@ -103,7 +107,7 @@ export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
       return
     }
 
-    await updateSubscriptionAfterPayment(subscription, invoice)
+    await updateSubscriptionAfterPayment(subscription, invoice, stripeSubscription)
 
     // Create new service delivery for COACHING_COMPLETE subscriptions
     await createRecurringServiceDelivery(subscription, invoice)
@@ -346,6 +350,7 @@ async function findSubscriptionById(stripeSubscriptionId: string) {
 async function updateSubscriptionAfterPayment(
   subscription: UserSubscription,
   invoice: Stripe.Invoice,
+  stripeSubscription: StripeSubscriptionWithPeriod | null,
 ) {
   // Prepare update data
   const updateData: Prisma.UserSubscriptionUpdateInput = {
@@ -365,12 +370,16 @@ async function updateSubscriptionAfterPayment(
   const invoicePeriodStart = invoice.period_start
   const isInitialSetupInvoice = invoicePeriodEnd === invoicePeriodStart
 
-  if (
-    !subscription.isTrialActive &&
-    invoicePeriodEnd &&
-    !isInitialSetupInvoice
-  ) {
-    updateData.endDate = new Date(invoicePeriodEnd * 1000)
+  const stripePeriodEnd = stripeSubscription?.current_period_end
+
+  if (!subscription.isTrialActive) {
+    // Prefer Stripe subscription's current_period_end (source of truth for renewals)
+    if (stripePeriodEnd) {
+      updateData.endDate = new Date(stripePeriodEnd * 1000)
+    } else if (invoicePeriodEnd && !isInitialSetupInvoice) {
+      // Fallback: invoice period end (can be misleading for setup/proration invoices)
+      updateData.endDate = new Date(invoicePeriodEnd * 1000)
+    }
   }
 
   await prisma.userSubscription.update({

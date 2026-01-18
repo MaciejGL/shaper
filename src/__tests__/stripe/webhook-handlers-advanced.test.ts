@@ -29,10 +29,11 @@ const createMockSubscription = (overrides: any = {}) => ({
         price: {
           id: 'price_test123',
         },
-        current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30, // 30 days
       },
     ],
   },
+  current_period_start: Math.floor(Date.now() / 1000),
+  current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30, // 30 days
   metadata: {
     userId: 'user_123',
     packageId: 'pkg_123',
