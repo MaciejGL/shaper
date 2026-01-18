@@ -381,6 +381,9 @@ export async function acceptCoachingRequest({
       invalidateClientAccessCache(clientId),
       // Invalidate getMyTrainer cache for the client - pattern match all keys
       clearCachePattern(`my-trainer:user-id:${clientId}:*`),
+      // Subscription/premium state is derived from subscription status query on the client.
+      // Clear any user subscription-related caches so UI can reflect access immediately.
+      clearCachePattern(`user:${clientId}:subscription*`),
     ])
 
     return new CoachingRequest(coachingRequest, context)

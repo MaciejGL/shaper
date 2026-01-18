@@ -10,6 +10,7 @@ import { addMonths } from 'date-fns'
 import Stripe from 'stripe'
 
 import { SUBSCRIPTION_LIMITS } from '@/config/subscription-limits'
+import { GQLCoachingRequestStatus } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import {
   getPremiumLookupKeys,
@@ -32,9 +33,14 @@ export class SubscriptionValidator {
    * 2. Active Complete Coaching Combo (includes premium access)
    */
   async hasPremiumAccess(userId: string): Promise<boolean> {
-    const validSubscriptions = await this.getValidSubscriptions(userId)
+    const [validSubscriptions, hasActiveCoachingRequest] = await Promise.all([
+      this.getValidSubscriptions(userId),
+      this.hasActiveCoachingRequest(userId),
+    ])
 
-    return this.evaluatePremiumLogic(validSubscriptions)
+    return (
+      this.evaluatePremiumLogic(validSubscriptions) || hasActiveCoachingRequest
+    )
   }
 
   /**
@@ -95,6 +101,30 @@ export class SubscriptionValidator {
     }
 
     return false
+  }
+
+  private async hasActiveCoachingRequest(userId: string): Promise<boolean> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { trainerId: true },
+    })
+
+    if (!user?.trainerId) {
+      return false
+    }
+
+    const latestRequest = await prisma.coachingRequest.findFirst({
+      where: {
+        OR: [
+          { senderId: userId, recipientId: user.trainerId },
+          { senderId: user.trainerId, recipientId: userId },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { status: true },
+    })
+
+    return latestRequest?.status === GQLCoachingRequestStatus.Accepted
   }
 
   /**
@@ -234,9 +264,13 @@ export class SubscriptionValidator {
   async getUserSubscriptionStatus(
     userId: string,
   ): Promise<UserSubscriptionStatusData> {
-    const validSubscriptions = await this.getValidSubscriptions(userId)
+    const [validSubscriptions, hasActiveCoachingRequest] = await Promise.all([
+      this.getValidSubscriptions(userId),
+      this.hasActiveCoachingRequest(userId),
+    ])
 
-    const hasPremium = this.evaluatePremiumLogic(validSubscriptions)
+    const hasPremium =
+      this.evaluatePremiumLogic(validSubscriptions) || hasActiveCoachingRequest
 
     // Find trainer subscription
     const trainerSubscription = validSubscriptions.find(
