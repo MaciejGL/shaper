@@ -60,6 +60,7 @@ export default function ProgressPage() {
       />
       <ExtendHeader
         headerChildren={showInHeader ? <CheckinScheduleSection /> : null}
+        classNameHeaderContent={showInHeader ? 'py-4' : ''}
       >
         <div className="space-y-6">
           <ActivityByDaySection />
