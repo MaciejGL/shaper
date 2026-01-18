@@ -152,7 +152,7 @@ export const WorkoutDay = ({
 
   return (
     <WorkoutProvider exercises={currentDay?.exercises ?? []}>
-      <div className={cn('pb-4')}>
+      <div className={cn('pb-12')}>
         {isLoading ? (
           <div className="px-4 pt-4 space-y-6">
             <LoadingSkeleton variant="light" count={3} />

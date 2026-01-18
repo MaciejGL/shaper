@@ -87,6 +87,7 @@ export function WorkoutSummaryDrawer({
   )
 
   const workoutDuration = secondsToMinutes(data?.getWorkoutInfo?.duration ?? 0)
+  const shouldShowDurationAndCalories = workoutDuration >= 15
 
   // Calculate total sets and reps
   const totalSets =
@@ -210,6 +211,7 @@ export function WorkoutSummaryDrawer({
               totalWeight={totalWeight}
               completedExercises={completedExercises}
               exercises={exercises}
+              shouldShowDurationAndCalories={shouldShowDurationAndCalories}
               personalRecords={
                 data.getWorkoutInfo?.personalRecords || undefined
               }
@@ -272,6 +274,7 @@ function Content({
   totalWeight,
   completedExercises,
   exercises,
+  shouldShowDurationAndCalories,
   personalRecords,
 }: {
   displayedDuration: number
@@ -283,6 +286,7 @@ function Content({
   totalWeight: number
   completedExercises: WorkoutExercise[]
   exercises: WorkoutExercise[]
+  shouldShowDurationAndCalories: boolean
   personalRecords?: {
     exerciseName: string
     estimated1RM: number
@@ -409,20 +413,24 @@ function Content({
       )}
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
-          <StatsItem
-            value={displayedDuration}
-            label="Duration (min)"
-            icon={<ClockIcon className="h-4 w-4 text-yellow-600" />}
-          />
-          <StatsItem
-            value={
-              <div className="flex items-center gap-2">
-                <AnimateNumber value={displayedCalories.moderate} />
-              </div>
-            }
-            label="Calories burned"
-            icon={<FlameIcon className="h-4 w-4 text-amber-600" />}
-          />
+          {shouldShowDurationAndCalories ? (
+            <>
+              <StatsItem
+                value={displayedDuration}
+                label="Duration (min)"
+                icon={<ClockIcon className="h-4 w-4 text-yellow-600" />}
+              />
+              <StatsItem
+                value={
+                  <div className="flex items-center gap-2">
+                    <AnimateNumber value={displayedCalories.moderate} />
+                  </div>
+                }
+                label="Calories burned"
+                icon={<FlameIcon className="h-4 w-4 text-amber-600" />}
+              />
+            </>
+          ) : null}
           <StatsItem
             value={displayedSets}
             label="Sets completed"
