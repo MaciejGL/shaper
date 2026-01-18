@@ -24,7 +24,7 @@ export const WorkoutMilestoneEmail = ({
   exerciseCount,
   topExercises,
 }: WorkoutMilestoneEmailProps) => (
-  <EmailWrapper previewText="Nice work on workout #3 - here's what we tracked">
+  <EmailWrapper previewText="Nice work on workout #3 - here's your progress">
     <EmailHeader brandName="Hypro" />
     <EmailContent>
       <EmailHeading as="h1">
