@@ -36,7 +36,7 @@ export function PackageCard({
   disabled = false,
 }: PackageCardProps) {
   return (
-    <Card variant={isSelected ? 'premium' : 'tertiary'}>
+    <Card variant={isSelected ? 'premium' : 'secondary'}>
       <CardHeader className="flex items-start gap-2">
         <Checkbox
           id={`package-${pkg.id}`}
