@@ -270,7 +270,7 @@ export function useIngredientEditing({
 
       // Apply optimistic update and schedule debounced API call
       const grams = parseFloat(sanitizedValue)
-      if (!isNaN(grams) && grams > 0) {
+      if (!isNaN(grams) && grams >= 0) {
         // Store latest grams for stale check
         latestGramsRef.current[ingredientId] = grams
 
@@ -298,7 +298,7 @@ export function useIngredientEditing({
   const formatIngredientValue = useCallback(
     (ingredientId: string, value: string) => {
       const parsed = parseFloat(value)
-      if (!isNaN(parsed) && parsed > 0) {
+      if (!isNaN(parsed) && parsed >= 0) {
         const formatted = Math.round(parsed * 10) / 10 // Round to 1 decimal
         setIngredientGrams((prev) => ({
           ...prev,

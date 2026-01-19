@@ -127,7 +127,7 @@ export class MealFactory {
       data: {
         mealId: options.mealId,
         ingredientId: options.ingredientId,
-        grams: options.grams || 100,
+        grams: options.grams ?? 100,
         orderIndex,
       },
       include: {
@@ -320,8 +320,8 @@ export function validateMeal(input: GQLCreateMealInput): ValidationResult {
 export function validateMealIngredient(grams: number): ValidationResult {
   const errors: string[] = []
 
-  if (grams <= 0) {
-    errors.push('Ingredient grams must be greater than 0')
+  if (grams < 0) {
+    errors.push('Ingredient grams must be at least 0')
   }
 
   if (grams > 10000) {

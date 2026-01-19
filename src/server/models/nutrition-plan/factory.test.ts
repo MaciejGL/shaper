@@ -36,16 +36,7 @@ describe('updateNutritionPlanMealIngredient', () => {
         -5,
         mockTrainerId,
       ),
-    ).rejects.toThrow('Grams must be greater than 0')
-
-    await expect(
-      updateNutritionPlanMealIngredient(
-        mockPlanMealId,
-        mockMealIngredientId,
-        0,
-        mockTrainerId,
-      ),
-    ).rejects.toThrow('Grams must be greater than 0')
+    ).rejects.toThrow('Grams must be at least 0')
   })
 
   it('should validate trainer access permissions', async () => {
@@ -69,6 +60,46 @@ describe('updateNutritionPlanMealIngredient', () => {
       ),
     ).rejects.toThrow(
       'Access denied: You can only modify nutrition plans you created',
+    )
+  })
+
+  it('should allow setting grams to 0', async () => {
+    const mockPlanMeal = {
+      nutritionPlanDay: {
+        nutritionPlan: {
+          trainerId: mockTrainerId,
+        },
+      },
+      meal: {
+        ingredients: [{ id: mockMealIngredientId }],
+      },
+    }
+
+    mockPrisma.nutritionPlanMeal.findUnique.mockResolvedValue(mockPlanMeal)
+    mockPrisma.nutritionPlanMealIngredient.upsert.mockResolvedValue({
+      id: 'override123',
+      grams: 0,
+      createdAt: new Date(),
+      mealIngredient: {
+        id: mockMealIngredientId,
+        ingredient: { name: 'Test Ingredient' },
+      },
+    })
+
+    await expect(
+      updateNutritionPlanMealIngredient(
+        mockPlanMealId,
+        mockMealIngredientId,
+        0,
+        mockTrainerId,
+      ),
+    ).resolves.toBeDefined()
+
+    expect(mockPrisma.nutritionPlanMealIngredient.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: { grams: 0 },
+        create: expect.objectContaining({ grams: 0 }),
+      }),
     )
   })
 

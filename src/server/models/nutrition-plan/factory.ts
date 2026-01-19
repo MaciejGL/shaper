@@ -1023,8 +1023,8 @@ export async function updateNutritionPlanMealIngredient(
   }
 > {
   // Validate grams
-  if (grams <= 0) {
-    throw new GraphQLError('Grams must be greater than 0')
+  if (grams < 0) {
+    throw new GraphQLError('Grams must be at least 0')
   }
 
   // Check access through plan
