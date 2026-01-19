@@ -72,6 +72,9 @@ export function useRealtimeChat({
 
   const handleNewMessage = useCallback(
     (message: BroadcastMessage) => {
+      // Avoid duplicates: own messages are already handled by optimistic updates.
+      if (message.senderId === currentUserId) return
+
       const old =
         queryClient.getQueryData<GQLGetMessengerInitialDataQuery>(
           messengerQueryKey,
