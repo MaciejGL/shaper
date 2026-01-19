@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { getBaseUrl } from '@/lib/get-base-url'
 import { sendPushForNotification } from '@/lib/notifications/push-integration'
+import { TRAINER_CUSTOM_DISCOUNT_LIMITS } from '@/lib/stripe/discount-config'
 import { CreateOfferPackageInput, PackageSummary } from '@/types/trainer-offer'
 
 /**
@@ -67,12 +68,22 @@ export function validatePackages(packages: CreateOfferPackageInput[]): void {
         )
       }
 
-      if (pkg.discountPercent < 1 || pkg.discountPercent > 50) {
-        throw new Error('Discount percentage must be between 1 and 50')
+      if (
+        pkg.discountPercent < TRAINER_CUSTOM_DISCOUNT_LIMITS.minPercent ||
+        pkg.discountPercent > TRAINER_CUSTOM_DISCOUNT_LIMITS.maxPercent
+      ) {
+        throw new Error(
+          `Discount percentage must be between ${TRAINER_CUSTOM_DISCOUNT_LIMITS.minPercent} and ${TRAINER_CUSTOM_DISCOUNT_LIMITS.maxPercent}`,
+        )
       }
 
-      if (pkg.discountMonths < 1 || pkg.discountMonths > 12) {
-        throw new Error('Discount duration must be between 1 and 12 months')
+      if (
+        pkg.discountMonths < TRAINER_CUSTOM_DISCOUNT_LIMITS.minMonths ||
+        pkg.discountMonths > TRAINER_CUSTOM_DISCOUNT_LIMITS.maxMonths
+      ) {
+        throw new Error(
+          `Discount duration must be between ${TRAINER_CUSTOM_DISCOUNT_LIMITS.minMonths} and ${TRAINER_CUSTOM_DISCOUNT_LIMITS.maxMonths} months`,
+        )
       }
     }
   }

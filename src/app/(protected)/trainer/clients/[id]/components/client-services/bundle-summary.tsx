@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { TRAINER_CUSTOM_DISCOUNT_LIMITS } from '@/lib/stripe/discount-config'
 import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 import { BundleSummaryProps, SelectedPackageItem } from './types'
@@ -230,7 +231,10 @@ function CoachingDiscountConfig({
       return // Don't update on invalid input
     }
     // Clamp to valid range
-    const clampedPercent = Math.max(1, Math.min(50, percent))
+    const clampedPercent = Math.max(
+      TRAINER_CUSTOM_DISCOUNT_LIMITS.minPercent,
+      Math.min(TRAINER_CUSTOM_DISCOUNT_LIMITS.maxPercent, percent),
+    )
     onUpdateDiscount(item.packageId, clampedPercent, item.discountMonths || 3)
   }
 
@@ -271,8 +275,8 @@ function CoachingDiscountConfig({
                 <Input
                   id={`discount-percent-${item.packageId}`}
                   type="number"
-                  min={1}
-                  max={50}
+                  min={TRAINER_CUSTOM_DISCOUNT_LIMITS.minPercent}
+                  max={TRAINER_CUSTOM_DISCOUNT_LIMITS.maxPercent}
                   value={item.discountPercent || 25}
                   onChange={(e) => handlePercentChange(e.target.value)}
                   className="pr-8"

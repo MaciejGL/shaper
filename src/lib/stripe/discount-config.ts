@@ -18,6 +18,13 @@ export const DISCOUNT_CONFIG = {
   MEAL_TRAINING_BUNDLE: 20,
 } as const
 
+export const TRAINER_CUSTOM_DISCOUNT_LIMITS = {
+  minPercent: 1,
+  maxPercent: 90,
+  minMonths: 1,
+  maxMonths: 12,
+} as const
+
 /**
  * Discount metadata types for Stripe coupons
  */
