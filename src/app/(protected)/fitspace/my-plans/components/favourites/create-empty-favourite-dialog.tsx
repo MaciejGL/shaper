@@ -83,7 +83,6 @@ export function CreateEmptyFavouriteDialog({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={100}
-              autoFocus
             />
           </div>
 
@@ -117,4 +116,3 @@ export function CreateEmptyFavouriteDialog({
     </Dialog>
   )
 }
-

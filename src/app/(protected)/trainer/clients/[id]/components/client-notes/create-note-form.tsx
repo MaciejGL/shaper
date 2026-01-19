@@ -45,7 +45,6 @@ export function CreateNoteForm({
           className="min-h-[120px]"
           value={newNoteText}
           onChange={(e) => onNewNoteTextChange(e.target.value)}
-          autoFocus
         />
 
         <div className="flex items-center justify-between mt-3 pt-3">

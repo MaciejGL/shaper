@@ -16,7 +16,6 @@ function InputOTP({
   return (
     <OTPInput
       data-slot="input-otp"
-      autoFocus
       containerClassName={cn(
         'flex items-center gap-1 has-disabled:opacity-50',
         containerClassName,

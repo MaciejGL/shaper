@@ -262,7 +262,6 @@ export function ExerciseTable({
                             value={editingName}
                             onChange={(e) => setEditingName(e.target.value)}
                             className="h-8 text-sm w-max"
-                            autoFocus
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 handleNameSave(exercise.id)

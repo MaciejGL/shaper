@@ -31,9 +31,9 @@ import {
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 
 import { CreateEmptyFavouriteDialog } from './create-empty-favourite-dialog'
+import { DeleteFolderDialog } from './delete-folder-dialog'
 import { FavouriteWorkoutCard } from './favourite-workout-card'
 import { FolderCard } from './folder-card'
-import { DeleteFolderDialog } from './delete-folder-dialog'
 import { ManageFolderDialog } from './manage-folder-dialog'
 
 interface FavouriteWorkoutsListProps {
@@ -319,7 +319,6 @@ export function FavouriteWorkoutsList({
                     if (e.key === 'Escape') handleCancelFolderRename()
                   }}
                   onBlur={() => void handleSaveFolderRename()}
-                  autoFocus
                   maxLength={100}
                   className="h-9 text-2xl font-bold"
                   aria-label="Folder name"
@@ -392,7 +391,7 @@ export function FavouriteWorkoutsList({
             {(favouriteWorkouts.length > 0 ||
               (!isRoot && folders.length === 0)) && (
               <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
-                {isRoot  && (
+                {isRoot && (
                   <h3 className="text-sm font-medium text-muted-foreground mt-6 mb-2">
                     Uncategorized Training Days
                   </h3>
@@ -470,17 +469,18 @@ function EmptyFavouritesState({
   hasReachedFolderLimit: boolean
   handleCreateFolder: () => void
 }) {
-
-
   return (
     <Card>
       <CardContent className="flex flex-col items-center justify-center text-center py-6">
         <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
           <Dumbbell className="w-6 h-6 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold mb-2">Create your first training day</h3>
+        <h3 className="text-lg font-semibold mb-2">
+          Create your first training day
+        </h3>
         <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-          Create your first training with days, exercises and sets. Reusable for your next workouts.
+          Create your first training with days, exercises and sets. Reusable for
+          your next workouts.
         </p>
         <div className="flex gap-2">
           <PremiumButtonWrapper

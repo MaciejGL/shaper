@@ -18,7 +18,6 @@ interface EmojiMartPickerProps {
   skin?: 1 | 2 | 3 | 4 | 5 | 6
   emojiButtonSize?: number
   emojiSize?: number
-  autoFocus?: boolean
   navPosition?: 'top' | 'bottom' | 'none'
   noCountryFlags?: boolean
   skinTonePosition?: 'preview' | 'search' | 'none'
@@ -96,7 +95,6 @@ export function EmojiPicker({
         skin={1}
         emojiButtonSize={32}
         emojiSize={18}
-        autoFocus={false}
         navPosition="top"
         skinTonePosition="none"
         onClickOutside={insideDropdown ? undefined : onClose}

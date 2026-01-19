@@ -286,7 +286,6 @@ function CreateNoteForm({
         variant="ghost"
         onChange={(e) => onNewNoteTextChange(e.target.value)}
         className="min-h-[100px] resize-none"
-        autoFocus
       />
 
       <div className="flex items-center justify-between ">
@@ -413,7 +412,6 @@ function ExerciseNote({
                   value={editingText}
                   onChange={(e) => onEditingTextChange(e.target.value)}
                   className="min-h-[100px] resize-none"
-                  autoFocus
                 />
 
                 <div className="flex items-center justify-between gap-3">

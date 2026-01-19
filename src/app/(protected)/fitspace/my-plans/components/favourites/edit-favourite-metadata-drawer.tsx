@@ -95,7 +95,6 @@ export function EditFavouriteMetadataDrawer({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={100}
-              autoFocus
             />
           </div>
 

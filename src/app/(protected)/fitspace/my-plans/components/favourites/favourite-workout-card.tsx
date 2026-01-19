@@ -59,6 +59,7 @@ import {
   WorkoutStatusAnalysis,
   useUpdateFavouriteWorkout,
 } from '@/hooks/use-favourite-workouts'
+import { cn } from '@/lib/utils'
 import { scrollToElement } from '@/lib/utils/scroll-to'
 
 import { AddExerciseToFavouriteDrawer } from './add-exercise-to-favourite-drawer'
@@ -66,7 +67,6 @@ import { EditFavouriteMetadataDrawer } from './edit-favourite-metadata-drawer'
 import { MoveToFolderDrawer } from './move-to-folder-drawer'
 import { useFavouriteCardData } from './use-favourite-card-data'
 import { useFavouriteCardMutations } from './use-favourite-card-mutations'
-import { cn } from '@/lib/utils'
 
 interface FavouriteWorkoutCardProps {
   favourite: NonNullable<
@@ -235,7 +235,6 @@ export function FavouriteWorkoutCard({
                   }}
                   onKeyUp={(e) => e.stopPropagation()}
                   onBlur={() => void handleSaveRename()}
-                  autoFocus
                   maxLength={100}
                   className="h-8"
                   aria-label="Custom day title"
@@ -310,9 +309,8 @@ export function FavouriteWorkoutCard({
           <AccordionContent className="p-0">
             <div className="p-3">
               <CardHeader className="space-y-2 p-0">
-             
                 <div className="flex justify-between items-start gap-2">
-                <DropdownMenu>
+                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm" iconStart={<Pen />}>
                         Edit
@@ -384,8 +382,6 @@ export function FavouriteWorkoutCard({
                       )}
                     </div>
                   )}
-
-            
                 </div>
 
                 {favourite.description ? (
@@ -394,22 +390,28 @@ export function FavouriteWorkoutCard({
                   </p>
                 ) : null}
 
-                {(!isEmpty && totalSets > 0 || estimatedTime > 0) && <div className="flex gap-1 flex-wrap">
-                  {totalSets > 0 && (
-                    <Badge variant="secondary">{totalSets} sets</Badge>
-                  )}
-                  {estimatedTime > 0 && (
-                    <Badge variant="secondary">
-                      <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
-                    </Badge>
-                  )}
-                </div>}
+                {((!isEmpty && totalSets > 0) || estimatedTime > 0) && (
+                  <div className="flex gap-1 flex-wrap">
+                    {totalSets > 0 && (
+                      <Badge variant="secondary">{totalSets} sets</Badge>
+                    )}
+                    {estimatedTime > 0 && (
+                      <Badge variant="secondary">
+                        <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
+                      </Badge>
+                    )}
+                  </div>
+                )}
               </CardHeader>
 
               <CardContent className="pt-0 space-y-4 p-0 mt-2">
                 {isEmpty ? (
-                  <Button variant="default" size="lg" iconStart={<PlusIcon />} onClick={() => setShowAddExercise(true)}
-                  className="w-full"
+                  <Button
+                    variant="default"
+                    size="lg"
+                    iconStart={<PlusIcon />}
+                    onClick={() => setShowAddExercise(true)}
+                    className="w-full"
                   >
                     Add First Exercise
                   </Button>
@@ -434,7 +436,7 @@ export function FavouriteWorkoutCard({
                                 onAddSet={handleAddSet}
                                 onRemoveSet={handleRemoveSet}
                                 onRemoveExercise={handleRemoveExercise}
-                                classNameImage='size-20'
+                                classNameImage="size-20"
                               />
                             ))}
                             <Button

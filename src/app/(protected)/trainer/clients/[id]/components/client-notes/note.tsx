@@ -56,7 +56,6 @@ export function Note({
                   variant="ghost"
                   value={editingText}
                   onChange={(e) => onEditingTextChange(e.target.value)}
-                  autoFocus
                 />
 
                 <AnimatedContainer isVisible={true} id="edit-note-actions">
@@ -109,7 +108,7 @@ export function Note({
                 <div className="p-3">
                   <p
                     className={cn(
-                      'text-sm break-words whitespace-pre-wrap leading-relaxed',
+                      'text-sm wrap-break-word whitespace-pre-wrap leading-relaxed',
                     )}
                   >
                     {note.text}

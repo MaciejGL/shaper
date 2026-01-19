@@ -92,7 +92,6 @@ export function MessageInput({
           className="flex-1 py-2.5 min-h-0 resize-none rounded-4xl max-h-24 focus-visible:ring-0 compact-scrollbar"
           autoComplete="off"
           variant="ghost"
-          autoFocus={false}
           tabIndex={allowFocus ? 0 : -1}
         />
         {/* <DropdownMenu open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>

@@ -92,7 +92,6 @@ export function ManageFolderDialog({
               value={folderName}
               onChange={(e) => setFolderName(e.target.value)}
               placeholder="e.g., Leg Days, Upper Body"
-              autoFocus
             />
           </div>
 

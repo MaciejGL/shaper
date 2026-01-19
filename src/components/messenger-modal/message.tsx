@@ -106,7 +106,6 @@ export function Message({
               }}
               placeholder="Edit your message... (Ctrl+Enter to save, Esc to cancel)"
               className="min-h-max resize-none"
-              autoFocus
             />
             <div className="grid grid-cols-[1fr_auto_auto] gap-1">
               <Button
@@ -131,7 +130,7 @@ export function Message({
         ) : (
           <div
             className={cn(
-              'rounded-xl px-3 py-2 bg-gradient-to-br',
+              'rounded-xl px-3 py-2 bg-linear-to-br',
               isOwnMessage
                 ? 'from-amber-400/30 to-amber-400/50 dark:from-amber-500/60 dark:to-amber-500/50'
                 : 'from-primary/5 to-primary/10',
