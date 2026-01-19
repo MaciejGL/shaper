@@ -131,7 +131,7 @@ export function MealCard({
       <div className="flex gap-2 items-start">
         {isDraggable && dragControls && (
           <div
-            className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation select-none pt-[22px]"
+            className="shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation select-none pt-[22px]"
             onPointerDown={handleDragStart}
             style={{
               touchAction: 'none', // Completely disable touch actions on drag handle
@@ -142,16 +142,13 @@ export function MealCard({
           </div>
         )}
         <Accordion type="single" collapsible className="flex-1">
-          <AccordionItem
-            value="meal-details"
-            className="outline rounded-lg px-4 bg-card dark:outline-none"
-          >
+          <AccordionItem value="meal-details">
             <AccordionTrigger className="hover:no-underline">
               <MealCardHeader meal={meal} macros={macros} />
             </AccordionTrigger>
 
             <AccordionContent>
-              <div className="space-y-6">
+              <div className="space-y-6 p-4">
                 {/* Meal description */}
                 {meal.description && (
                   <p className="text-sm text-muted-foreground leading-relaxed">
