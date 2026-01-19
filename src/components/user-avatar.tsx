@@ -46,7 +46,7 @@ export const UserAvatar = ({
           alt={`${firstName} ${lastName}`}
           width={80}
           height={80}
-          quality={50}
+          quality={70}
           className="aspect-square size-full object-cover"
           onError={() => setIsImageError(true)}
         />
