@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
-import { CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Carousel,
   CarouselContent,
@@ -57,7 +57,7 @@ function SectionHeader({
   )
 
   return (
-    <div className="flex items-center justify-between bg-card shadow-md rounded-2xl -mx-2 pl-4 pr-1 py-2">
+    <div className="flex items-center justify-between">
       {titleLink ? (
         <Link href={titleLink} className="flex items-center gap-2">
           {titleContent}
@@ -93,9 +93,11 @@ export function PlanSection({
       : 'Explore ready-made workout plans to get started'
 
     return (
-      <div className="space-y-3">
-        <SectionHeader title={title} count={plans.length} />
-        <CardContent className="flex items-center gap-4 py-6">
+      <Card variant="glass" className="">
+        <div className="px-4">
+          <SectionHeader title={title} count={plans.length} />
+        </div>
+        <CardContent className="flex items-end gap-4 py-6">
           <div className="flex-1 min-w-0">
             <h4 className="font-semibold text-sm mb-1">No Template Plans</h4>
             <p className="text-sm text-muted-foreground">
@@ -110,7 +112,7 @@ export function PlanSection({
             Explore
           </ButtonLink>
         </CardContent>
-      </div>
+      </Card>
     )
   }
 
@@ -131,7 +133,7 @@ export function PlanSection({
   const maxPlans = 6
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-card -mx-4 px-4 py-4">
       <SectionHeader title={title} count={plans.length} titleLink={titleLink}>
         {plans.length > 2 && (
           <Button

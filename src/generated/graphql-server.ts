@@ -862,6 +862,18 @@ export enum GQLFitnessLevel {
   Intermediate = 'INTERMEDIATE'
 }
 
+export type GQLFitspaceCreateCustomExerciseInput = {
+  equipment?: InputMaybe<GQLEquipment>;
+  muscleGroupIds: Array<Scalars['ID']['input']>;
+  name: Scalars['String']['input'];
+};
+
+export type GQLFitspaceUpdateCustomExerciseInput = {
+  equipment?: InputMaybe<GQLEquipment>;
+  muscleGroupIds: Array<Scalars['ID']['input']>;
+  name: Scalars['String']['input'];
+};
+
 export enum GQLFocusTag {
   Bodyweight = 'BODYWEIGHT',
   BodyRecomposition = 'BODY_RECOMPOSITION',
@@ -920,6 +932,7 @@ export type GQLGetExercisesResponse = {
   __typename?: 'GetExercisesResponse';
   publicExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
   trainerExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
+  userExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
 };
 
 export type GQLGetWorkoutDayPayload = {
@@ -1285,6 +1298,9 @@ export type GQLMutation = {
   duplicateTrainingPlan: EntireFieldWrapper<Scalars['ID']['output']>;
   duplicateTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
   editMessage: EntireFieldWrapper<GQLMessage>;
+  fitspaceCreateCustomExercise: EntireFieldWrapper<GQLBaseExercise>;
+  fitspaceDeleteCustomExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  fitspaceUpdateCustomExercise: EntireFieldWrapper<GQLBaseExercise>;
   generateAiWorkout: EntireFieldWrapper<GQLAiWorkoutResult>;
   getAiExerciseSuggestions: EntireFieldWrapper<Array<GQLAiExerciseSuggestion>>;
   giveLifetimePremium: EntireFieldWrapper<GQLUserSubscription>;
@@ -1764,6 +1780,22 @@ export type GQLMutationDuplicateTrainingWeekArgs = {
 
 export type GQLMutationEditMessageArgs = {
   input: GQLEditMessageInput;
+};
+
+
+export type GQLMutationFitspaceCreateCustomExerciseArgs = {
+  input: GQLFitspaceCreateCustomExerciseInput;
+};
+
+
+export type GQLMutationFitspaceDeleteCustomExerciseArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationFitspaceUpdateCustomExerciseArgs = {
+  id: Scalars['ID']['input'];
+  input: GQLFitspaceUpdateCustomExerciseInput;
 };
 
 
@@ -4317,6 +4349,8 @@ export type GQLResolversTypes = {
   FavouriteWorkoutFolder: ResolverTypeWrapper<GQLFavouriteWorkoutFolder>;
   FavouriteWorkoutSet: ResolverTypeWrapper<GQLFavouriteWorkoutSet>;
   FitnessLevel: GQLFitnessLevel;
+  FitspaceCreateCustomExerciseInput: GQLFitspaceCreateCustomExerciseInput;
+  FitspaceUpdateCustomExerciseInput: GQLFitspaceUpdateCustomExerciseInput;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   FocusTag: GQLFocusTag;
   FreeWorkoutDay: ResolverTypeWrapper<GQLFreeWorkoutDay>;
@@ -4584,6 +4618,8 @@ export type GQLResolversParentTypes = {
   FavouriteWorkoutExercise: GQLFavouriteWorkoutExercise;
   FavouriteWorkoutFolder: GQLFavouriteWorkoutFolder;
   FavouriteWorkoutSet: GQLFavouriteWorkoutSet;
+  FitspaceCreateCustomExerciseInput: GQLFitspaceCreateCustomExerciseInput;
+  FitspaceUpdateCustomExerciseInput: GQLFitspaceUpdateCustomExerciseInput;
   Float: Scalars['Float']['output'];
   FreeWorkoutDay: GQLFreeWorkoutDay;
   FreezeEligibility: GQLFreezeEligibility;
@@ -5091,6 +5127,7 @@ export type GQLFreezeResultResolvers<ContextType = GQLContext, ParentType extend
 export type GQLGetExercisesResponseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetExercisesResponse'] = GQLResolversParentTypes['GetExercisesResponse']> = {
   publicExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType>;
   trainerExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType>;
+  userExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType>;
 };
 
 export type GQLGetWorkoutDayPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetWorkoutDayPayload'] = GQLResolversParentTypes['GetWorkoutDayPayload']> = {
@@ -5356,6 +5393,9 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   duplicateTrainingPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingPlanArgs, 'id'>>;
   duplicateTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingWeekArgs, 'input'>>;
   editMessage?: Resolver<GQLResolversTypes['Message'], ParentType, ContextType, RequireFields<GQLMutationEditMessageArgs, 'input'>>;
+  fitspaceCreateCustomExercise?: Resolver<GQLResolversTypes['BaseExercise'], ParentType, ContextType, RequireFields<GQLMutationFitspaceCreateCustomExerciseArgs, 'input'>>;
+  fitspaceDeleteCustomExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceDeleteCustomExerciseArgs, 'id'>>;
+  fitspaceUpdateCustomExercise?: Resolver<GQLResolversTypes['BaseExercise'], ParentType, ContextType, RequireFields<GQLMutationFitspaceUpdateCustomExerciseArgs, 'id' | 'input'>>;
   generateAiWorkout?: Resolver<GQLResolversTypes['AiWorkoutResult'], ParentType, ContextType, RequireFields<GQLMutationGenerateAiWorkoutArgs, 'input'>>;
   getAiExerciseSuggestions?: Resolver<Array<GQLResolversTypes['AiExerciseSuggestion']>, ParentType, ContextType, RequireFields<GQLMutationGetAiExerciseSuggestionsArgs, 'dayId'>>;
   giveLifetimePremium?: Resolver<GQLResolversTypes['UserSubscription'], ParentType, ContextType, RequireFields<GQLMutationGiveLifetimePremiumArgs, 'userId'>>;

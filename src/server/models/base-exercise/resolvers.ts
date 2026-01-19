@@ -79,7 +79,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    const [publicExercises, trainerExercises] = await Promise.all([
+    const [publicExercises, trainerExercises, userExercises] = await Promise.all([
       // Use cached public exercises (no filtering needed here)
       getPublicExercises(),
 
@@ -97,6 +97,23 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             secondaryMuscleGroups: true,
           },
         }),
+
+      // User's own exercises (private library)
+      prisma.baseExercise.findMany({
+        where: {
+          createdBy: {
+            id: user.user.id,
+          },
+        },
+        orderBy: {
+          name: 'asc',
+        },
+        include: {
+          images: true,
+          muscleGroups: true,
+          secondaryMuscleGroups: true,
+        },
+      }),
     ])
 
     return {
@@ -108,6 +125,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             (exercise) => new BaseExercise(exercise, context),
           )
         : [],
+      userExercises: userExercises.map((exercise) => new BaseExercise(exercise, context)),
     }
   },
   exercise: async (_, { id }, context) => {

@@ -48,6 +48,7 @@ export function AddExerciseToFavouriteDrawer({
   const allExercises = useMemo(() => {
     const publicExercises = exercisesData?.getExercises?.publicExercises || []
     const trainerExercises = exercisesData?.getExercises?.trainerExercises || []
+    const userExercises = exercisesData?.getExercises?.userExercises || []
 
     // Deduplicate exercises by ID
     const exerciseMap = new Map<string, Exercise>()
@@ -57,6 +58,10 @@ export function AddExerciseToFavouriteDrawer({
     })
 
     trainerExercises.forEach((exercise) => {
+      exerciseMap.set(exercise.id, exercise)
+    })
+
+    userExercises.forEach((exercise) => {
       exerciseMap.set(exercise.id, exercise)
     })
 
@@ -189,6 +194,7 @@ export function AddExerciseToFavouriteDrawer({
             void handleToggleExercise(exerciseId, exercise.name)
           }}
           isLoading={isLoading}
+          categories={exercisesData?.muscleGroupCategories}
           subtitle=""
           muscleFilterMode="simple"
           renderItem={(exercise, isSelected) => (

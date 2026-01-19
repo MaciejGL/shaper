@@ -1,16 +1,36 @@
 'use client'
 
-import { SearchIcon } from 'lucide-react'
+import { PlusIcon, SearchIcon } from 'lucide-react'
 import { useCallback, useDeferredValue, useMemo, useState } from 'react'
 import { Virtuoso } from 'react-virtuoso'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
+import { Button, buttonVariants } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import {
   HIGH_LEVEL_TO_DISPLAY_GROUPS,
   type HighLevelGroup,
 } from '@/config/muscles'
+import { useUser } from '@/context/user-context'
+import type { GQLEquipment } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
+
+import { translateEquipment } from '@/utils/translate-equipment'
+import {
+  CustomExerciseDialog,
+} from '../custom-exercise-dialog/custom-exercise-dialog'
+import type { MuscleGroupCategories } from '../custom-exercise-dialog/types'
+import { useCustomExerciseMutations } from '../custom-exercise-dialog/use-custom-exercise-mutations'
 
 import { SelectableExerciseItem } from './selectable-exercise-item'
 import type { ExerciseListExercise } from './types'
@@ -25,6 +45,7 @@ interface ExerciseListWithFiltersProps {
   selectedExerciseIds: string[]
   onToggleExercise: (id: string) => void
   isLoading: boolean
+  categories?: MuscleGroupCategories
 
   title?: string | false
   subtitle?: string
@@ -50,6 +71,7 @@ export function ExerciseListWithFilters({
   selectedExerciseIds,
   onToggleExercise,
   isLoading,
+  categories,
   title = 'Build your workout',
   subtitle = "Pick exercises for today's session.",
   tagLabel,
@@ -59,11 +81,16 @@ export function ExerciseListWithFilters({
   showWeeklyFocusVolume = true,
   renderItem,
 }: ExerciseListWithFiltersProps) {
+  const { hasPremium, user } = useUser()
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery)
   const selectedExerciseIdSet = useMemo(
     () => new Set(selectedExerciseIds),
     [selectedExerciseIds],
+  )
+  const [onlyMyExercises, setOnlyMyExercises] = useState(false)
+  const [selectedEquipment, setSelectedEquipment] = useState<GQLEquipment | null>(
+    null,
   )
   const [selectedGroup, setSelectedGroup] = useState<HighLevelGroup | null>(
     null,
@@ -73,8 +100,28 @@ export function ExerciseListWithFilters({
     if (el) setScrollParent(el)
   }, [])
 
+  const availableEquipment = useMemo(() => {
+    const present = new Set<GQLEquipment>()
+    exercises.forEach((exercise) => {
+      if (exercise.equipment) present.add(exercise.equipment)
+    })
+    return Array.from(present).sort((a, b) =>
+      translateEquipment(a).localeCompare(translateEquipment(b)),
+    )
+  }, [exercises])
+
   const filteredExercises = useMemo(() => {
     let result = exercises
+
+    if (onlyMyExercises && user?.id) {
+      result = result.filter((exercise) => exercise.createdBy?.id === user.id)
+    }
+
+    if (selectedEquipment) {
+      result = result.filter(
+        (exercise) => exercise.equipment === selectedEquipment,
+      )
+    }
 
     if (selectedGroup) {
       const displayGroups = HIGH_LEVEL_TO_DISPLAY_GROUPS[selectedGroup]
@@ -97,16 +144,34 @@ export function ExerciseListWithFilters({
     }
 
     return result
-  }, [exercises, selectedGroup, deferredSearchQuery])
+  }, [
+    exercises,
+    selectedGroup,
+    deferredSearchQuery,
+    onlyMyExercises,
+    user,
+    selectedEquipment,
+  ])
+
+  const [customExerciseDialogOpen, setCustomExerciseDialogOpen] =
+    useState(false)
+  const [editingExercise, setEditingExercise] =
+    useState<ExerciseListExercise | null>(null)
+  const [deleteExercise, setDeleteExercise] =
+    useState<ExerciseListExercise | null>(null)
 
   const defaultRenderItem = useCallback(
     (exercise: ExerciseListExercise, isSelected: boolean) => {
       const muscleDisplay = getExerciseMuscleDisplay(exercise)
+      const equipmentDisplay = exercise.equipment
+        ? translateEquipment(exercise.equipment)
+        : undefined
       return (
         <SelectableExerciseItem
           id={exercise.id}
           name={exercise.name}
           muscleDisplay={muscleDisplay}
+          equipmentDisplay={equipmentDisplay}
           images={
             exercise.images as ({ medium?: string | null } | null)[] | null
           }
@@ -114,6 +179,8 @@ export function ExerciseListWithFilters({
           isSelected={isSelected}
           onToggle={onToggleExercise}
           detailExercise={exercise}
+         
+        
         />
       )
     },
@@ -122,10 +189,119 @@ export function ExerciseListWithFilters({
 
   const itemRenderer = renderItem ?? defaultRenderItem
 
+  const { remove: removeCustomExercise, isDeleting } = useCustomExerciseMutations(
+    {
+      categories,
+      userId: user?.id,
+    },
+  )
+
   const headerContent = (
-    <div className="px-4 pb-4 pt-2">
-      {title !== false && (
-        <div className="flex items-start justify-between gap-3">
+    <div className="pb-3">
+   
+
+
+      {suggestions ? <div className="mt-6 mb-2 px-3">{suggestions}</div> : null}
+      <div className="p-3 bg-background/50 dark:bg-background">
+      {!showWeeklyFocusVolume && <div className="flex items-center justify-between gap-4 mb-4">
+        <div
+          className={cn(
+            buttonVariants({
+              variant: 'secondary',
+              size: 'sm',
+            }),
+            'px-3 justify-between',
+          )}
+          onClick={() => setOnlyMyExercises((prev) => !prev)}
+        >
+          <span className="text-sm text-foreground">My exercises</span>
+          <Switch checked={onlyMyExercises} />
+        </div>
+
+        <PremiumButtonWrapper
+          hasPremium={hasPremium}
+          tooltipText="Premium feature - upgrade to create custom exercises"
+        >
+          <Button
+            size="sm"
+            variant="secondary"
+            iconStart={<PlusIcon />}
+            onClick={() => setCustomExerciseDialogOpen(true)}
+            disabled={!hasPremium}
+            className='flex-1'
+          >
+            Create exercise
+          </Button>
+        </PremiumButtonWrapper>
+      </div>}
+   
+
+
+<p className="text-xs text-muted-foreground transition-all h-4">Equipment</p>
+      {availableEquipment.length > 1 ? (
+        <div className="mt-2">
+          <EquipmentFilterChips
+            equipment={availableEquipment}
+            selectedEquipment={selectedEquipment}
+            onSelectEquipment={setSelectedEquipment}
+          />
+        </div>
+      ) : null}
+
+{muscleFilterMode === 'weeklyFocus' && weeklyFocus ? (
+          <div className="mt-3">
+          <WeeklyFocusChips
+            groupSummaries={weeklyFocus.groupSummaries}
+            selectedGroup={selectedGroup}
+            onSelectGroup={setSelectedGroup}
+            isLoading={weeklyFocus.isLoading}
+            showVolume={showWeeklyFocusVolume}
+          />
+          </div>
+      ) : null}
+
+      {muscleFilterMode === 'simple' ? (
+        <div className="mt-3">
+          <p className="text-xs text-muted-foreground transition-all h-4">Muscle group</p>
+        <div className="mt-2">
+          <SimpleMuscleFilterChips
+            selectedGroup={selectedGroup}
+            onSelectGroup={setSelectedGroup}
+          />
+        </div>
+        </div>
+      ) : null}
+     
+
+      <div
+        className={cn(
+          suggestions || muscleFilterMode !== 'none' ? 'pt-3 -mx-1' : 'pt-2',
+        )}
+      >
+        <Input
+          id="search-exercises"
+          placeholder="Search exercises name or muscle group..."
+          value={searchQuery}
+          variant="secondary"
+          size="xl"
+          className='rounded-2xl'
+          onChange={(e) => setSearchQuery(e.target.value)}
+          iconStart={<SearchIcon />}
+        />
+      </div>
+      </div>
+
+      <h3 className="text-sm font-medium text-muted-foreground pt-4 px-3">
+        {selectedGroup ? `${selectedGroup} exercises` : 'All exercises'}{' '}
+        {!isLoading && `(${filteredExercises.length})`}
+      </h3>
+    </div>
+  )
+
+  return (
+    <div className="flex-1 min-h-0">
+         {title !== false && (
+        <div className="flex items-start justify-between gap-3 px-3 pb-2">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">{title}</h2>
@@ -141,71 +317,43 @@ export function ExerciseListWithFilters({
           </div>
         </div>
       )}
-
-      {suggestions ? <div className="my-6">{suggestions}</div> : null}
-
-      {muscleFilterMode === 'weeklyFocus' && weeklyFocus ? (
-        <div className="mt-6">
-          <WeeklyFocusChips
-            groupSummaries={weeklyFocus.groupSummaries}
-            selectedGroup={selectedGroup}
-            onSelectGroup={setSelectedGroup}
-            isLoading={weeklyFocus.isLoading}
-            showVolume={showWeeklyFocusVolume}
-          />
-        </div>
-      ) : null}
-
-      {muscleFilterMode === 'simple' ? (
-        <div className="mt-6">
-          <SimpleMuscleFilterChips
-            selectedGroup={selectedGroup}
-            onSelectGroup={setSelectedGroup}
-          />
-        </div>
-      ) : null}
-
-      <div
-        className={cn(
-          suggestions || muscleFilterMode !== 'none' ? 'pt-6' : 'pt-2',
-        )}
-      >
-        <Input
-          id="search-exercises"
-          placeholder="Search exercises name or muscle group..."
-          value={searchQuery}
-          variant="secondary"
-          size="lg"
-          onChange={(e) => setSearchQuery(e.target.value)}
-          iconStart={<SearchIcon />}
-        />
-      </div>
-
-      <h3 className="text-sm font-medium text-muted-foreground pt-4">
-        {selectedGroup ? `${selectedGroup} exercises` : 'All exercises'}{' '}
-        {!isLoading && `(${filteredExercises.length})`}
-      </h3>
-    </div>
-  )
-
-  return (
-    <div className="flex-1 min-h-0">
       <div ref={setScrollParentRef} className="h-full overflow-y-auto">
         {headerContent}
 
         {isLoading ? (
-          <div className="px-4 pb-4 space-y-2">
+          <div className="p-3 space-y-2">
             <LoadingSkeleton count={8} />
           </div>
         ) : filteredExercises.length === 0 ? (
-          <div className="px-4 pb-4">
+          <div className="p-3">
             <div className="text-center py-8 space-y-1">
               <p className="text-muted-foreground">
-                No exercises match this filter.
+                {searchQuery.trim()
+                  ? `No results for "${searchQuery.trim()}".`
+                  : 'No exercises match this filter.'}
               </p>
               <p className="text-sm text-muted-foreground/70">
-                Try a different muscle group or clear filters.
+                {searchQuery.trim()
+                  ? 'You can create a custom exercise with this name.'
+                  : 'Try a different muscle group or clear filters.'}
               </p>
+              {searchQuery.trim() ? (
+                <div className="pt-4 flex justify-center">
+                  <PremiumButtonWrapper
+                    hasPremium={hasPremium}
+                    tooltipText="Premium feature - upgrade to create custom exercises"
+                  >
+                    <Button
+                      variant="secondary"
+                      iconStart={<PlusIcon />}
+                      onClick={() => setCustomExerciseDialogOpen(true)}
+                      disabled={!hasPremium}
+                    >
+                      Create exercise
+                    </Button>
+                  </PremiumButtonWrapper>
+                </div>
+              ) : null}
             </div>
           </div>
         ) : scrollParent ? (
@@ -216,13 +364,62 @@ export function ExerciseListWithFilters({
             itemContent={(_index, exercise) => {
               const isSelected = selectedExerciseIdSet.has(exercise.id)
               return (
-                <div className="px-4 pb-2">
+                <div className="px-3 py-1.5">
                   {itemRenderer(exercise, isSelected)}
                 </div>
               )
             }}
           />
         ) : null}
+
+        <CustomExerciseDialog
+          open={customExerciseDialogOpen}
+          onOpenChange={(nextOpen) => {
+            setCustomExerciseDialogOpen(nextOpen)
+            if (!nextOpen) setEditingExercise(null)
+          }}
+          categories={categories}
+          initialName={searchQuery.trim() ? searchQuery.trim() : undefined}
+          exercise={editingExercise ?? undefined}
+        />
+
+        <Dialog
+          open={Boolean(deleteExercise)}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) setDeleteExercise(null)
+          }}
+        >
+          <DialogContent dialogTitle="Delete exercise">
+            <DialogHeader>
+              <DialogTitle>Delete exercise</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{deleteExercise?.name}"? This
+                action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex-row gap-2 justify-end">
+              <Button
+                variant="secondary"
+                onClick={() => setDeleteExercise(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                loading={isDeleting}
+                disabled={!deleteExercise || isDeleting}
+                onClick={async () => {
+                  if (!deleteExercise) return
+                  await removeCustomExercise({ id: deleteExercise.id })
+                  setDeleteExercise(null)
+                }}
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
@@ -240,13 +437,13 @@ function SimpleMuscleFilterChips({
   const options = Object.keys(HIGH_LEVEL_TO_DISPLAY_GROUPS) as HighLevelGroup[]
 
   return (
-    <div className="-mx-4 pl-4 pr-12 overflow-x-auto hide-scrollbar bg-muted/50 shadow-xs">
+    <div className="-mx-4 pl-4 pr-12 overflow-x-auto hide-scrollbar bg-muted shadow-xs">
       <div className="flex gap-2 py-1.5 min-w-max">
         <button
           type="button"
           onClick={() => onSelectGroup(null)}
           className={cn(
-            'shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-all',
+            'shrink-0 px-3 py-2 rounded-full text-sm font-medium transition-all',
             'border whitespace-nowrap',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             selectedGroup === null
@@ -254,7 +451,7 @@ function SimpleMuscleFilterChips({
               : 'border-border bg-card hover:bg-muted/50 text-foreground',
           )}
         >
-          All
+          All muscles
         </button>
         {options.map((group) => (
           <button
@@ -271,6 +468,56 @@ function SimpleMuscleFilterChips({
             )}
           >
             {group}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+interface EquipmentFilterChipsProps {
+  equipment: GQLEquipment[]
+  selectedEquipment: GQLEquipment | null
+  onSelectEquipment: (equipment: GQLEquipment | null) => void
+}
+
+function EquipmentFilterChips({
+  equipment,
+  selectedEquipment,
+  onSelectEquipment,
+}: EquipmentFilterChipsProps) {
+  return (
+    <div className="-mx-4 pl-4 pr-12 overflow-x-auto hide-scrollbar bg-muted shadow-xs">
+      <div className="flex gap-2 py-1.5 min-w-max">
+        <button
+          type="button"
+          onClick={() => onSelectEquipment(null)}
+          className={cn(
+            'shrink-0 px-3 py-2 rounded-full text-sm font-medium transition-all',
+            'border whitespace-nowrap',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            selectedEquipment === null
+              ? 'border-primary text-foreground'
+              : 'border-border bg-card hover:bg-muted/50 text-foreground',
+          )}
+        >
+          All
+        </button>
+        {equipment.map((equipmentItem) => (
+          <button
+            key={equipmentItem}
+            type="button"
+            onClick={() => onSelectEquipment(equipmentItem)}
+            className={cn(
+              'shrink-0 px-3 py-2 rounded-full text-sm font-medium transition-all',
+              'border whitespace-nowrap',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              selectedEquipment === equipmentItem
+                ? 'border-primary text-foreground'
+                : 'border-border bg-card hover:bg-muted/50 text-foreground',
+            )}
+          >
+            {translateEquipment(equipmentItem)}
           </button>
         ))}
       </div>

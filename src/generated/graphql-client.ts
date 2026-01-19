@@ -860,6 +860,18 @@ export enum GQLFitnessLevel {
   Intermediate = 'INTERMEDIATE'
 }
 
+export type GQLFitspaceCreateCustomExerciseInput = {
+  equipment?: InputMaybe<GQLEquipment>;
+  muscleGroupIds: Array<Scalars['ID']['input']>;
+  name: Scalars['String']['input'];
+};
+
+export type GQLFitspaceUpdateCustomExerciseInput = {
+  equipment?: InputMaybe<GQLEquipment>;
+  muscleGroupIds: Array<Scalars['ID']['input']>;
+  name: Scalars['String']['input'];
+};
+
 export enum GQLFocusTag {
   Bodyweight = 'BODYWEIGHT',
   BodyRecomposition = 'BODY_RECOMPOSITION',
@@ -918,6 +930,7 @@ export type GQLGetExercisesResponse = {
   __typename?: 'GetExercisesResponse';
   publicExercises: Array<GQLBaseExercise>;
   trainerExercises: Array<GQLBaseExercise>;
+  userExercises: Array<GQLBaseExercise>;
 };
 
 export type GQLGetWorkoutDayPayload = {
@@ -1283,6 +1296,9 @@ export type GQLMutation = {
   duplicateTrainingPlan: Scalars['ID']['output'];
   duplicateTrainingWeek: Scalars['ID']['output'];
   editMessage: GQLMessage;
+  fitspaceCreateCustomExercise: GQLBaseExercise;
+  fitspaceDeleteCustomExercise: Scalars['Boolean']['output'];
+  fitspaceUpdateCustomExercise: GQLBaseExercise;
   generateAiWorkout: GQLAiWorkoutResult;
   getAiExerciseSuggestions: Array<GQLAiExerciseSuggestion>;
   giveLifetimePremium: GQLUserSubscription;
@@ -1762,6 +1778,22 @@ export type GQLMutationDuplicateTrainingWeekArgs = {
 
 export type GQLMutationEditMessageArgs = {
   input: GQLEditMessageInput;
+};
+
+
+export type GQLMutationFitspaceCreateCustomExerciseArgs = {
+  input: GQLFitspaceCreateCustomExerciseInput;
+};
+
+
+export type GQLMutationFitspaceDeleteCustomExerciseArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationFitspaceUpdateCustomExerciseArgs = {
+  id: Scalars['ID']['input'];
+  input: GQLFitspaceUpdateCustomExerciseInput;
 };
 
 
@@ -4672,7 +4704,7 @@ export type GQLDeleteUserAccountMutationVariables = Exact<{ [key: string]: never
 
 export type GQLDeleteUserAccountMutation = { __typename?: 'Mutation', deleteUserAccount: boolean };
 
-export type GQLBaseExerciseDataFragment = { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> };
+export type GQLBaseExerciseDataFragment = { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string } | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> };
 
 export type GQLWorkoutSetDataFragment = { __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null };
 
@@ -4695,7 +4727,29 @@ export type GQLFitspaceGetActivePlanIdQuery = { __typename?: 'Query', getActiveP
 export type GQLFitspaceGetExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceGetExercisesQuery = { __typename?: 'Query', getExercises: { __typename?: 'GetExercisesResponse', publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> }>, trainerExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> }> }, muscleGroupCategories: Array<{ __typename?: 'MuscleGroupCategory', id: string, name: string, slug: string, muscles: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> }> };
+export type GQLFitspaceGetExercisesQuery = { __typename?: 'Query', getExercises: { __typename?: 'GetExercisesResponse', publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string } | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> }>, trainerExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string } | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> }>, userExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string } | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> }> }, muscleGroupCategories: Array<{ __typename?: 'MuscleGroupCategory', id: string, name: string, slug: string, muscles: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> }> };
+
+export type GQLFitspaceCreateCustomExerciseMutationVariables = Exact<{
+  input: GQLFitspaceCreateCustomExerciseInput;
+}>;
+
+
+export type GQLFitspaceCreateCustomExerciseMutation = { __typename?: 'Mutation', fitspaceCreateCustomExercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string } | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> } };
+
+export type GQLFitspaceUpdateCustomExerciseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: GQLFitspaceUpdateCustomExerciseInput;
+}>;
+
+
+export type GQLFitspaceUpdateCustomExerciseMutation = { __typename?: 'Mutation', fitspaceUpdateCustomExercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, instructions: Array<string>, tips: Array<string>, difficulty?: string | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string } | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, displayGroup: string }> } };
+
+export type GQLFitspaceDeleteCustomExerciseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceDeleteCustomExerciseMutation = { __typename?: 'Mutation', fitspaceDeleteCustomExercise: boolean };
 
 export type GQLFitspaceGetWorkoutInfoQueryVariables = Exact<{
   dayId: Scalars['ID']['input'];
@@ -6014,6 +6068,9 @@ export const BaseExerciseDataFragmentDoc = `
   videoUrl
   equipment
   isPublic
+  createdBy {
+    id
+  }
   instructions
   tips
   difficulty
@@ -10324,6 +10381,9 @@ export const FitspaceGetExercisesDocument = `
     trainerExercises {
       ...BaseExerciseData
     }
+    userExercises {
+      ...BaseExerciseData
+    }
   }
   muscleGroupCategories {
     id
@@ -10379,6 +10439,82 @@ useInfiniteFitspaceGetExercisesQuery.getKey = (variables?: GQLFitspaceGetExercis
 
 
 useFitspaceGetExercisesQuery.fetcher = (variables?: GQLFitspaceGetExercisesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetExercisesQuery, GQLFitspaceGetExercisesQueryVariables>(FitspaceGetExercisesDocument, variables, options);
+
+export const FitspaceCreateCustomExerciseDocument = `
+    mutation FitspaceCreateCustomExercise($input: FitspaceCreateCustomExerciseInput!) {
+  fitspaceCreateCustomExercise(input: $input) {
+    ...BaseExerciseData
+  }
+}
+    ${BaseExerciseDataFragmentDoc}`;
+
+export const useFitspaceCreateCustomExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceCreateCustomExerciseMutation, TError, GQLFitspaceCreateCustomExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceCreateCustomExerciseMutation, TError, GQLFitspaceCreateCustomExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceCreateCustomExercise'],
+    mutationFn: (variables?: GQLFitspaceCreateCustomExerciseMutationVariables) => fetchData<GQLFitspaceCreateCustomExerciseMutation, GQLFitspaceCreateCustomExerciseMutationVariables>(FitspaceCreateCustomExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceCreateCustomExerciseMutation.getKey = () => ['FitspaceCreateCustomExercise'];
+
+
+useFitspaceCreateCustomExerciseMutation.fetcher = (variables: GQLFitspaceCreateCustomExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceCreateCustomExerciseMutation, GQLFitspaceCreateCustomExerciseMutationVariables>(FitspaceCreateCustomExerciseDocument, variables, options);
+
+export const FitspaceUpdateCustomExerciseDocument = `
+    mutation FitspaceUpdateCustomExercise($id: ID!, $input: FitspaceUpdateCustomExerciseInput!) {
+  fitspaceUpdateCustomExercise(id: $id, input: $input) {
+    ...BaseExerciseData
+  }
+}
+    ${BaseExerciseDataFragmentDoc}`;
+
+export const useFitspaceUpdateCustomExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceUpdateCustomExerciseMutation, TError, GQLFitspaceUpdateCustomExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceUpdateCustomExerciseMutation, TError, GQLFitspaceUpdateCustomExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceUpdateCustomExercise'],
+    mutationFn: (variables?: GQLFitspaceUpdateCustomExerciseMutationVariables) => fetchData<GQLFitspaceUpdateCustomExerciseMutation, GQLFitspaceUpdateCustomExerciseMutationVariables>(FitspaceUpdateCustomExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceUpdateCustomExerciseMutation.getKey = () => ['FitspaceUpdateCustomExercise'];
+
+
+useFitspaceUpdateCustomExerciseMutation.fetcher = (variables: GQLFitspaceUpdateCustomExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceUpdateCustomExerciseMutation, GQLFitspaceUpdateCustomExerciseMutationVariables>(FitspaceUpdateCustomExerciseDocument, variables, options);
+
+export const FitspaceDeleteCustomExerciseDocument = `
+    mutation FitspaceDeleteCustomExercise($id: ID!) {
+  fitspaceDeleteCustomExercise(id: $id)
+}
+    `;
+
+export const useFitspaceDeleteCustomExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceDeleteCustomExerciseMutation, TError, GQLFitspaceDeleteCustomExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceDeleteCustomExerciseMutation, TError, GQLFitspaceDeleteCustomExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceDeleteCustomExercise'],
+    mutationFn: (variables?: GQLFitspaceDeleteCustomExerciseMutationVariables) => fetchData<GQLFitspaceDeleteCustomExerciseMutation, GQLFitspaceDeleteCustomExerciseMutationVariables>(FitspaceDeleteCustomExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceDeleteCustomExerciseMutation.getKey = () => ['FitspaceDeleteCustomExercise'];
+
+
+useFitspaceDeleteCustomExerciseMutation.fetcher = (variables: GQLFitspaceDeleteCustomExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDeleteCustomExerciseMutation, GQLFitspaceDeleteCustomExerciseMutationVariables>(FitspaceDeleteCustomExerciseDocument, variables, options);
 
 export const FitspaceGetWorkoutInfoDocument = `
     query FitspaceGetWorkoutInfo($dayId: ID!) {

@@ -66,6 +66,7 @@ input ExerciseWhereInput {
 type GetExercisesResponse {
   publicExercises: [BaseExercise!]!
   trainerExercises: [BaseExercise!]!
+  userExercises: [BaseExercise!]!
 }
 
 type Query {

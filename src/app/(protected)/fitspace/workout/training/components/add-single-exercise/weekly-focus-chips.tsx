@@ -48,7 +48,7 @@ export function WeeklyFocusChips({
         )}
       </p>
 
-      <div className="-mx-4 pl-4 pr-12 overflow-x-auto hide-scrollbar bg-muted/50 shadow-xs">
+      <div className="-mx-4 pl-4 pr-12 overflow-x-auto hide-scrollbar bg-muted shadow-xs">
         <div className="flex gap-2 py-1.5 min-w-max">
           <FilterChip
             label="All"

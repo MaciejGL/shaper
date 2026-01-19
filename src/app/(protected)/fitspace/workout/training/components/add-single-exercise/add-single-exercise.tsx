@@ -95,6 +95,7 @@ export function AddSingleExercise({
   const allExercises = useMemo(() => {
     const publicExercises = exercisesData?.getExercises?.publicExercises || []
     const trainerExercises = exercisesData?.getExercises?.trainerExercises || []
+    const userExercises = exercisesData?.getExercises?.userExercises || []
 
     const exerciseMap = new Map<string, Exercise>()
 
@@ -103,6 +104,10 @@ export function AddSingleExercise({
     })
 
     trainerExercises.forEach((exercise) => {
+      exerciseMap.set(exercise.id, exercise)
+    })
+
+    userExercises.forEach((exercise) => {
       exerciseMap.set(exercise.id, exercise)
     })
 
@@ -345,6 +350,7 @@ export function AddSingleExercise({
         selectedExerciseIds={selectedExerciseIds}
         onToggleExercise={handleToggleExercise}
         isLoading={isLoading}
+        categories={exercisesData?.muscleGroupCategories}
         tagLabel="Today"
         suggestions={
           <AiExerciseSuggestions

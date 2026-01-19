@@ -63,10 +63,10 @@ import { scrollToElement } from '@/lib/utils/scroll-to'
 
 import { AddExerciseToFavouriteDrawer } from './add-exercise-to-favourite-drawer'
 import { EditFavouriteMetadataDrawer } from './edit-favourite-metadata-drawer'
-import { EmptyFavouriteOptions } from './empty-favourite-options'
 import { MoveToFolderDrawer } from './move-to-folder-drawer'
 import { useFavouriteCardData } from './use-favourite-card-data'
 import { useFavouriteCardMutations } from './use-favourite-card-mutations'
+import { cn } from '@/lib/utils'
 
 interface FavouriteWorkoutCardProps {
   favourite: NonNullable<
@@ -264,7 +264,7 @@ export function FavouriteWorkoutCard({
           <AccordionTrigger
             variant="default"
             disabled={isRenaming}
-            className={isRenaming ? 'disabled:opacity-100' : undefined}
+            className={cn(isRenaming ? 'disabled:opacity-100' : undefined)}
           >
             <div className="flex-1 min-w-0">
               <div
@@ -307,52 +307,12 @@ export function FavouriteWorkoutCard({
             </div>
           </AccordionTrigger>
 
-          <AccordionContent>
-            <div className="pt-4">
-              <CardHeader className="space-y-2 pb-4">
-                {favourite.description ? (
-                  <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
-                    {favourite.description}
-                  </p>
-                ) : null}
-                <div className="flex justify-between items-start gap-2 mb-6">
-                  {!isEmpty && (
-                    <div className="w-full">
-                      {buttonProps.disabled && buttonProps.subtext ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="w-full">
-                              <Button
-                                className="w-full"
-                                size="sm"
-                                variant={buttonProps.variant}
-                                disabled={buttonProps.disabled}
-                                loading={buttonProps.loading}
-                                iconEnd={<ChevronRight />}
-                              >
-                                {buttonProps.text}
-                              </Button>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>{buttonProps.subtext}</TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <Button
-                          className="w-full"
-                          onClick={onStart}
-                          size="sm"
-                          variant={buttonProps.variant}
-                          disabled={buttonProps.disabled}
-                          loading={buttonProps.loading}
-                          iconEnd={<ChevronRight />}
-                        >
-                          {buttonProps.text}
-                        </Button>
-                      )}
-                    </div>
-                  )}
-
-                  <DropdownMenu>
+          <AccordionContent className="p-0">
+            <div className="p-3">
+              <CardHeader className="space-y-2 p-0">
+             
+                <div className="flex justify-between items-start gap-2">
+                <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm" iconStart={<Pen />}>
                         Edit
@@ -389,9 +349,52 @@ export function FavouriteWorkoutCard({
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  {!isEmpty && (
+                    <div className="w-full">
+                      {buttonProps.disabled && buttonProps.subtext ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="w-full">
+                              <Button
+                                className="w-full"
+                                size="sm"
+                                variant={buttonProps.variant}
+                                disabled={buttonProps.disabled}
+                                loading={buttonProps.loading}
+                                iconEnd={<ChevronRight />}
+                              >
+                                {buttonProps.text}
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>{buttonProps.subtext}</TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <Button
+                          className="w-full"
+                          onClick={onStart}
+                          size="sm"
+                          variant={buttonProps.variant}
+                          disabled={buttonProps.disabled}
+                          loading={buttonProps.loading}
+                          iconEnd={<ChevronRight />}
+                        >
+                          {buttonProps.text}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+            
                 </div>
 
-                <div className="flex gap-1 flex-wrap">
+                {favourite.description ? (
+                  <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
+                    {favourite.description}
+                  </p>
+                ) : null}
+
+                {(!isEmpty && totalSets > 0 || estimatedTime > 0) && <div className="flex gap-1 flex-wrap">
                   {totalSets > 0 && (
                     <Badge variant="secondary">{totalSets} sets</Badge>
                   )}
@@ -400,14 +403,16 @@ export function FavouriteWorkoutCard({
                       <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
                     </Badge>
                   )}
-                </div>
+                </div>}
               </CardHeader>
 
-              <CardContent className="pt-0 space-y-4">
+              <CardContent className="pt-0 space-y-4 p-0 mt-2">
                 {isEmpty ? (
-                  <EmptyFavouriteOptions
-                    onOpenAddExercise={() => setShowAddExercise(true)}
-                  />
+                  <Button variant="default" size="lg" iconStart={<PlusIcon />} onClick={() => setShowAddExercise(true)}
+                  className="w-full"
+                  >
+                    Add First Exercise
+                  </Button>
                 ) : (
                   <>
                     {/* Exercise Preview */}
@@ -422,19 +427,19 @@ export function FavouriteWorkoutCard({
                           strategy={verticalListSortingStrategy}
                         >
                           <div className="text-sm flex flex-col gap-1">
-                            {favourite.exercises.map((exercise, index) => (
+                            {favourite.exercises.map((exercise) => (
                               <SortableExerciseItem
                                 key={exercise.id}
                                 exercise={exercise}
-                                index={index}
                                 onAddSet={handleAddSet}
                                 onRemoveSet={handleRemoveSet}
                                 onRemoveExercise={handleRemoveExercise}
+                                classNameImage='size-20'
                               />
                             ))}
                             <Button
                               size="md"
-                              variant="outline"
+                              variant="default"
                               iconStart={<PlusIcon />}
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -497,18 +502,18 @@ interface SortableExerciseItemProps {
   exercise: NonNullable<
     NonNullable<GQLGetFavouriteWorkoutsQuery>['getFavouriteWorkouts']
   >[number]['exercises'][number]
-  index: number
   onAddSet: (id: string) => void
   onRemoveSet: (id: string) => void
   onRemoveExercise: (id: string) => void
+  classNameImage?: string
 }
 
 function SortableExerciseItem({
   exercise,
-  index,
   onAddSet,
   onRemoveSet,
   onRemoveExercise,
+  classNameImage,
 }: SortableExerciseItemProps) {
   const previewImages =
     exercise.base?.images?.map((img) => ({
@@ -538,9 +543,11 @@ function SortableExerciseItem({
     <div ref={setNodeRef} style={style} className="w-full">
       <BaseExerciseItem
         id={exercise.id}
-        name={`${index + 1}. ${exercise.name}`}
+        name={exercise.name}
         images={previewImages}
         videoUrl={videoUrl}
+        className={cn('shadow-sm border-border py-2 relative')}
+        classNameImage={classNameImage}
         detailExercise={detailExercise}
         leading={
           <button
@@ -550,7 +557,7 @@ function SortableExerciseItem({
             {...attributes}
             {...listeners}
           >
-            <Grip className="size-4 text-muted-foreground" />
+            <Grip className="size-3 text-muted-foreground" />
           </button>
         }
         trailing={
@@ -562,7 +569,7 @@ function SortableExerciseItem({
               e.stopPropagation()
               onRemoveExercise(exercise.id)
             }}
-            className="shrink-0"
+            className="shrink-0 absolute right-2 top-1/2 -translate-y-1/2"
           >
             Remove
           </Button>

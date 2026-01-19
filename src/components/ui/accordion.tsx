@@ -31,8 +31,8 @@ const accordionTriggerVariants = cva(
   {
     variants: {
       variant: {
-        default: cn('bg-card rounded-xl border'),
-        outline: 'border border-input rounded-xl',
+        default: cn('bg-card rounded-2xl border'),
+        outline: 'border border-input rounded-2xl',
         minimal: 'border-b px-0',
       },
     },
@@ -55,7 +55,7 @@ function AccordionTrigger({
         {...props}
       >
         {children}
-        <ChevronDownIcon className="text-muted-foreground pointer-events-none size-5 shrink-0 translate-y-0.5 transition-transform duration-200" />
+        <ChevronDownIcon className="text-muted-foreground pointer-events-none size-5 shrink-0 translate-y-0.5 transition-transform duration-200 self-center" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   )

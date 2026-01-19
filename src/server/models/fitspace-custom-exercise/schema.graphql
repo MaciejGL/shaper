@@ -1,0 +1,21 @@
+input FitspaceCreateCustomExerciseInput {
+  name: String!
+  muscleGroupIds: [ID!]!
+  equipment: Equipment
+}
+
+input FitspaceUpdateCustomExerciseInput {
+  name: String!
+  muscleGroupIds: [ID!]!
+  equipment: Equipment
+}
+
+extend type Mutation {
+  fitspaceCreateCustomExercise(input: FitspaceCreateCustomExerciseInput!): BaseExercise!
+  fitspaceUpdateCustomExercise(
+    id: ID!
+    input: FitspaceUpdateCustomExerciseInput!
+  ): BaseExercise!
+  fitspaceDeleteCustomExercise(id: ID!): Boolean!
+}
+

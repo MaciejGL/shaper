@@ -11,11 +11,11 @@ import {
   useFavouriteWorkouts,
 } from '@/hooks/use-favourite-workouts'
 
-import { DeleteFavouriteDialog } from '../favourites/delete-favourite-dialog'
-import { FavouriteWorkoutsList } from '../favourites/favourite-workouts-list'
-import { ReplacementConfirmationDialog } from '../favourites/replacement-confirmation-dialog'
+import { DeleteFavouriteDialog } from './favourites/delete-favourite-dialog'
+import { FavouriteWorkoutsList } from './favourites/favourite-workouts-list'
+import { ReplacementConfirmationDialog } from './favourites/replacement-confirmation-dialog'
 
-export function EnhancedQuickWorkoutTab() {
+export function CustomPlansTab() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [favouriteToDelete, setFavouriteToDelete] =
     useState<GQLFavouriteWorkout | null>(null)
@@ -26,7 +26,6 @@ export function EnhancedQuickWorkoutTab() {
   const [isStarting, setIsStarting] = useState(false)
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
 
-  // Favourite workouts hooks
   const {
     data: favouriteWorkouts,
     isLoading: isLoadingFavourites,
@@ -37,7 +36,6 @@ export function EnhancedQuickWorkoutTab() {
   const favouriteOperations = useFavouriteWorkoutOperations()
   const folderOperations = useFavouriteWorkoutFolderOperations()
 
-  // Workout status analysis
   const workoutStatus = useFavouriteWorkoutStatus()
 
   const startWorkout = async (favouriteId: string) => {
@@ -47,37 +45,27 @@ export function EnhancedQuickWorkoutTab() {
         favouriteWorkoutId: favouriteId,
         replaceExisting: true,
       })
-
-      // Show success message (could be a toast notification)
     } catch (error) {
       console.error('Failed to start workout from favourite:', error)
-      // Handle error (could show error toast)
     } finally {
       setIsStarting(false)
     }
   }
 
   const handleStartFromFavourite = async (favouriteId: string) => {
-    // Check workout status before proceeding
-    if (!workoutStatus.canStart) {
-      // If user has active plan with workout today, don't allow starting
-      return
-    }
+    if (!workoutStatus.canStart) return
 
     if (workoutStatus.needsConfirmation) {
-      // Show confirmation dialog for replacement
       setPendingFavouriteId(favouriteId)
       setReplacementDialogOpen(true)
       return
     }
 
-    // Direct start if no confirmation needed
     await startWorkout(favouriteId)
   }
 
   const handleConfirmReplacement = async () => {
     if (!pendingFavouriteId) return
-
     await startWorkout(pendingFavouriteId)
     setReplacementDialogOpen(false)
     setPendingFavouriteId(null)
@@ -89,14 +77,13 @@ export function EnhancedQuickWorkoutTab() {
   }
 
   const handleDeleteFavourite = (favouriteId: string) => {
-    // Find the favourite to delete
     const favourite = favouriteWorkouts?.getFavouriteWorkouts.find(
       (f) => f.id === favouriteId,
     )
-    if (favourite) {
-      setFavouriteToDelete(favourite as GQLFavouriteWorkout)
-      setDeleteDialogOpen(true)
-    }
+    if (!favourite) return
+
+    setFavouriteToDelete(favourite as GQLFavouriteWorkout)
+    setDeleteDialogOpen(true)
   }
 
   const handleConfirmDelete = async () => {
@@ -134,8 +121,17 @@ export function EnhancedQuickWorkoutTab() {
     null) as (typeof foldersList)[number] | null
 
   return (
-    <div className="space-y-6">
+    <>
+     
+     <div className="space-y-0.5 mb-6">
+            <div className="text-2xl font-semibold">Custom plans</div>
+            <div className="text-sm text-muted-foreground">
+              Create plans templates to use in your training.
+            </div>
+          </div>
+
       <FavouriteWorkoutsList
+        hideTitle={true}
         favouriteWorkouts={filteredWorkouts}
         folders={foldersList}
         currentFolder={currentFolder}
@@ -167,6 +163,7 @@ export function EnhancedQuickWorkoutTab() {
         isStarting={favouriteOperations.isStarting}
         message={workoutStatus.message}
       />
-    </div>
+    </>
   )
 }
+

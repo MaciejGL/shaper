@@ -5,6 +5,9 @@ fragment BaseExerciseData on BaseExercise {
   videoUrl
   equipment
   isPublic
+  createdBy {
+    id
+  }
   instructions
   tips
   difficulty
@@ -149,6 +152,9 @@ query FitspaceGetExercises {
     trainerExercises {
       ...BaseExerciseData
     }
+    userExercises {
+      ...BaseExerciseData
+    }
   }
   muscleGroupCategories {
     id
@@ -160,6 +166,25 @@ query FitspaceGetExercises {
       displayGroup
     }
   }
+}
+
+mutation FitspaceCreateCustomExercise($input: FitspaceCreateCustomExerciseInput!) {
+  fitspaceCreateCustomExercise(input: $input) {
+    ...BaseExerciseData
+  }
+}
+
+mutation FitspaceUpdateCustomExercise(
+  $id: ID!
+  $input: FitspaceUpdateCustomExerciseInput!
+) {
+  fitspaceUpdateCustomExercise(id: $id, input: $input) {
+    ...BaseExerciseData
+  }
+}
+
+mutation FitspaceDeleteCustomExercise($id: ID!) {
+  fitspaceDeleteCustomExercise(id: $id)
 }
 
 query FitspaceGetWorkoutInfo($dayId: ID!) {

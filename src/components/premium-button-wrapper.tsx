@@ -2,11 +2,9 @@
 
 import { Crown } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { cloneElement, isValidElement } from 'react'
 
 import { useOpenUrl } from '@/hooks/use-open-url'
 import { usePaymentRules } from '@/hooks/use-payment-rules'
-import { cn } from '@/lib/utils'
 
 import { BiggyIcon } from './biggy-icon'
 import { Button } from './ui/button'
@@ -62,30 +60,13 @@ export function PremiumButtonWrapper({
     )
   }
 
-  // Clone the button element and add relative class + crown badge
-  const buttonWithBadge = isValidElement<{
-    className?: string
-    children?: React.ReactNode
-  }>(children)
-    ? cloneElement(children, {
-        ...children.props,
-        className: cn(children.props.className, 'relative'),
-        children: (
-          <>
-            {children.props.children}
-            <div className="absolute -top-1 -right-1 bg-black rounded-full p-1.5">
-              <Crown className="text-amber-400 !size-3" />
-            </div>
-          </>
-        ),
-      })
-    : children
+
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         {/* Wrap in span to make tooltip work with disabled buttons */}
-        {buttonWithBadge}
+        {children}
       </TooltipTrigger>
       <TooltipContent className="flex flex-col items-center gap-2 p-4">
         <BiggyIcon icon={Crown} variant="amber" size="xs" />

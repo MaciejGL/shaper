@@ -1,6 +1,5 @@
 'use client'
 
-import { Plus } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
@@ -18,15 +17,21 @@ import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
 import { PlanCard } from './components/plan-card'
 import { PlanDetailsDrawer } from './components/plan-details-drawer'
 import { PlansTab } from './components/plans-tab'
-import { EnhancedQuickWorkoutTab } from './components/quick-workout-plan-tab/enhanced-quick-workout-tab'
-import { TodayWorkoutCta } from './components/summary/today-workout-cta/today-workout-cta'
+import { CustomPlansTab } from './components/custom-plans-tab'
+import { ExercisesTab } from './components/exercises-tab'
+// import { TodayWorkoutCta } from './components/summary/today-workout-cta/today-workout-cta'
 import { PlanTab, getPlanStatus } from './types'
 import { getPlanImage } from './utils'
+import { cn } from '@/lib/utils'
 
 export default function MyPlansPage() {
   const [tab, setTab] = useQueryState<PlanTab>(
     'tab',
-    parseAsStringEnum<PlanTab>([PlanTab.Plans, PlanTab.QuickWorkout]),
+    parseAsStringEnum<PlanTab>([
+      PlanTab.AssignedPlans,
+      PlanTab.CustomPlans,
+      PlanTab.Exercises,
+    ]),
   )
 
   const [isActivePlanDrawerOpen, setIsActivePlanDrawerOpen] = useState(false)
@@ -59,41 +64,45 @@ export default function MyPlansPage() {
 
   const tabsContent = (
     <Tabs
-      value={tab ?? PlanTab.Plans}
-      defaultValue={PlanTab.Plans}
+      value={tab ?? PlanTab.AssignedPlans}
+      defaultValue={PlanTab.AssignedPlans}
       onValueChange={(value) => setTab(value as PlanTab)}
       className="gap-0"
     >
-      <div className="-mt-6 relative z-10 px-4">
+      <div className="-mt-6 relative z-10 max-w-screen px-3">
         <PrimaryTabList
           options={[
-            { label: 'Premade Plans', value: PlanTab.Plans },
-            {
-              label: 'Create Plans',
-              value: PlanTab.QuickWorkout,
-              icon: <Plus className="relative" />,
-            },
+            { label: 'Assigned', value: PlanTab.AssignedPlans },
+            { label: 'Custom', value: PlanTab.CustomPlans },
+            { label: 'Exercises', value: PlanTab.Exercises },
           ]}
           onClick={setTab}
-          active={tab ?? PlanTab.Plans}
+          active={tab ?? PlanTab.AssignedPlans}
           size="lg"
-          className="grid grid-cols-2"
+          className="grid grid-cols-[auto_auto_auto] max-w-full"
+          classNameButton={cn('px-2 [min-width:370px]:px-3 gap-0')}
         />
       </div>
 
       <TabsContent
         id="my-plans-content"
-        value={PlanTab.Plans}
+        value={PlanTab.AssignedPlans}
         className="space-y-4 py-6 px-4"
       >
-        {activePlan?.weeks && activePlan.weeks.length > 0 && (
+        <div className="space-y-0.5 mb-6">
+            <div className="text-2xl font-semibold">Assigned plans</div>
+            <div className="text-sm text-muted-foreground">
+              Plans you have been assigned to by your trainer or from our library.
+            </div>
+          </div>
+        {/* {activePlan?.weeks && activePlan.weeks.length > 0 && (
           <div className="mb-6">
             <TodayWorkoutCta
               weeks={activePlan.weeks}
               startDate={activePlan.startDate ?? null}
             />
           </div>
-        )}
+        )} */}
         <PlansTab
           activePlan={activePlan}
           availablePlans={availablePlans}
@@ -103,8 +112,12 @@ export default function MyPlansPage() {
         />
       </TabsContent>
 
-      <TabsContent value={PlanTab.QuickWorkout} className="space-y-4 py-6 px-4">
-        <EnhancedQuickWorkoutTab />
+      <TabsContent value={PlanTab.CustomPlans} className="space-y-4 py-6 px-4">
+        <CustomPlansTab />
+      </TabsContent>
+
+      <TabsContent value={PlanTab.Exercises} className="space-y-4 py-6 px-4">
+        <ExercisesTab />
       </TabsContent>
     </Tabs>
   )

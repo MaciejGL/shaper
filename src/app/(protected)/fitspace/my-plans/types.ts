@@ -11,8 +11,9 @@ export type QuickWorkoutPlan =
   GQLFitspaceMyPlansQuery['getMyPlansOverviewFull']['quickWorkoutPlan']
 
 export enum PlanTab {
-  QuickWorkout = 'quick-workout',
-  Plans = 'plans',
+  AssignedPlans = 'plans',
+  CustomPlans = 'quick-workout',
+  Exercises = 'exercises',
 }
 
 // Unified plan type for the new design

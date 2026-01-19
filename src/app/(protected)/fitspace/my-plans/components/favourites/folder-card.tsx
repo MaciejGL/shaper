@@ -17,13 +17,13 @@ export function FolderCard({ folder, onClick }: FolderCardProps) {
 
   return (
     <Card
-      className="cursor-pointer hover:bg-accent/50 group active:scale-[0.98] transition-all duration-200"
+      className="cursor-pointer hover:bg-accent/50 group active:scale-[0.98] transition-all duration-200 shadow-md border-transparent"
       onClick={onClick}
     >
-      <CardContent className="p-4">
+      <CardContent>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="flex-center size-10 rounded-lg bg-primary/10 text-primary flex-shrink-0">
+            <div className="flex-center size-10 rounded-lg bg-primary/10 text-primary shrink-0">
               <Folder className="size-5" />
             </div>
             <div className="flex-1 min-w-0">

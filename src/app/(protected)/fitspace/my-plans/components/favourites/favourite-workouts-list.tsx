@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   Check,
   Dumbbell,
-  FolderPlus,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -34,6 +33,7 @@ import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 import { CreateEmptyFavouriteDialog } from './create-empty-favourite-dialog'
 import { FavouriteWorkoutCard } from './favourite-workout-card'
 import { FolderCard } from './folder-card'
+import { DeleteFolderDialog } from './delete-folder-dialog'
 import { ManageFolderDialog } from './manage-folder-dialog'
 
 interface FavouriteWorkoutsListProps {
@@ -61,6 +61,7 @@ interface FavouriteWorkoutsListProps {
     typeof import('@/hooks/use-favourite-workouts').useFavouriteWorkoutFolderOperations
   >
   totalWorkoutCount: number
+  hideTitle?: boolean
 }
 
 export function FavouriteWorkoutsList({
@@ -78,6 +79,7 @@ export function FavouriteWorkoutsList({
   onBackToRoot,
   folderOperations,
   totalWorkoutCount,
+  hideTitle = false,
 }: FavouriteWorkoutsListProps) {
   const { hasPremium, subscription } = useUser()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -85,6 +87,12 @@ export function FavouriteWorkoutsList({
   const [folderToEdit, setFolderToEdit] = useState<{
     id: string
     name: string
+  } | null>(null)
+  const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false)
+  const [folderToDelete, setFolderToDelete] = useState<{
+    id: string
+    name: string
+    workoutCount: number
   } | null>(null)
   const [isRenamingFolder, setIsRenamingFolder] = useState(false)
   const [draftFolderName, setDraftFolderName] = useState('')
@@ -103,7 +111,7 @@ export function FavouriteWorkoutsList({
           )}
           <div className="flex gap-2 ml-auto">
             {!currentFolderId && (
-              <Button disabled iconStart={<FolderPlus />}>
+              <Button disabled iconStart={<Plus />}>
                 New Plan
               </Button>
             )}
@@ -139,11 +147,31 @@ export function FavouriteWorkoutsList({
     setIsManageFolderOpen(true)
   }
 
-  const handleDeleteFolder = async (folderId: string) => {
-    if (confirm('Are you sure you want to delete this folder?')) {
-      await folderOperations.deleteFolder(folderId)
+  const handleDeleteFolder = (folder: { id: string; name: string }) => {
+    setFolderToDelete({
+      id: folder.id,
+      name: folder.name,
+      workoutCount: favouriteWorkouts.length,
+    })
+    setDeleteFolderDialogOpen(true)
+  }
+
+  const handleConfirmDeleteFolder = async () => {
+    if (!folderToDelete) return
+
+    try {
+      await folderOperations.deleteFolder(folderToDelete.id)
+      setDeleteFolderDialogOpen(false)
+      setFolderToDelete(null)
       onBackToRoot()
+    } catch (error) {
+      console.error('Failed to delete folder:', error)
     }
+  }
+
+  const handleCloseDeleteFolderDialog = () => {
+    setDeleteFolderDialogOpen(false)
+    setFolderToDelete(null)
   }
 
   const handleStartFolderRename = () => {
@@ -199,7 +227,7 @@ export function FavouriteWorkoutsList({
             Plans
           </Button>
         ) : (
-          <h2 className="text-lg font-semibold px-1">Plans</h2>
+          !hideTitle && <h2 className="text-lg font-semibold px-1">Plans</h2>
         )}
 
         <div className="flex gap-2 ml-auto">
@@ -210,7 +238,7 @@ export function FavouriteWorkoutsList({
               tooltipText="Free tier limit reached. Upgrade to create more folders."
             >
               <Button
-                iconStart={<FolderPlus />}
+                iconStart={<Plus />}
                 onClick={handleCreateFolder}
                 variant="default"
                 disabled={hasReachedFolderLimit}
@@ -245,7 +273,11 @@ export function FavouriteWorkoutsList({
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
                     onClick={() =>
-                      currentFolder && handleDeleteFolder(currentFolder.id)
+                      currentFolder &&
+                      handleDeleteFolder({
+                        id: currentFolder.id,
+                        name: currentFolder.name,
+                      })
                     }
                   >
                     <Trash2 className="mr-2 size-4" />
@@ -335,12 +367,8 @@ export function FavouriteWorkoutsList({
       <div className="animate-in fade-in zoom-in-95 duration-300">
         {isEmpty ? (
           <EmptyFavouritesState
-            onCreateNew={() => setIsCreateModalOpen(true)}
-            onCreateFolder={handleCreateFolder}
-            workoutStatus={workoutStatus}
             hasPremium={hasPremium}
             hasReachedFolderLimit={hasReachedFolderLimit}
-            hasReachedWorkoutLimit={hasReachedWorkoutLimit}
             handleCreateFolder={handleCreateFolder}
           />
         ) : (
@@ -364,12 +392,12 @@ export function FavouriteWorkoutsList({
             {(favouriteWorkouts.length > 0 ||
               (!isRoot && folders.length === 0)) && (
               <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
-                {isRoot && folders.length > 0 && (
+                {isRoot  && (
                   <h3 className="text-sm font-medium text-muted-foreground mt-6 mb-2">
-                    Uncategorized Workouts
+                    Uncategorized Training Days
                   </h3>
                 )}
-                <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+                <div className="grid gap-2 grid-cols-1 -mx-3">
                   {favouriteWorkouts.map((favourite) => (
                     <FavouriteWorkoutCard
                       key={favourite.id}
@@ -385,13 +413,13 @@ export function FavouriteWorkoutsList({
                 </div>
                 {!isRoot && favouriteWorkouts.length === 0 && (
                   <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
-                    <p>No workouts in this folder yet.</p>
+                    <p>No training days in this folder yet.</p>
                     <Button
                       variant="link"
                       onClick={() => setIsCreateModalOpen(true)}
                       className="mt-2"
                     >
-                      Create your first workout
+                      Create your first training day
                     </Button>
                   </div>
                 )}
@@ -410,6 +438,15 @@ export function FavouriteWorkoutsList({
         currentFolderId={currentFolderId}
       />
 
+      <DeleteFolderDialog
+        open={deleteFolderDialogOpen}
+        folderName={folderToDelete?.name ?? null}
+        workoutCount={folderToDelete?.workoutCount}
+        onClose={handleCloseDeleteFolderDialog}
+        onConfirm={handleConfirmDeleteFolder}
+        isDeleting={folderOperations.isDeletingFolder}
+      />
+
       <ManageFolderDialog
         open={isManageFolderOpen}
         onClose={() => setIsManageFolderOpen(false)}
@@ -425,25 +462,15 @@ export function FavouriteWorkoutsList({
 }
 
 function EmptyFavouritesState({
-  onCreateNew,
-  workoutStatus,
   hasPremium,
   hasReachedFolderLimit,
-  hasReachedWorkoutLimit,
   handleCreateFolder,
 }: {
-  onCreateNew: () => void
-  onCreateFolder: () => void
-  workoutStatus: WorkoutStatusAnalysis
   hasPremium: boolean
   hasReachedFolderLimit: boolean
-  hasReachedWorkoutLimit: boolean
   handleCreateFolder: () => void
 }) {
-  const canStartMessage =
-    workoutStatus.status === 'active-plan-workout'
-      ? 'You have already a workout scheduled in your training plan for today.'
-      : workoutStatus.message
+
 
   return (
     <Card>
@@ -451,16 +478,10 @@ function EmptyFavouritesState({
         <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
           <Dumbbell className="w-6 h-6 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold mb-2">No custom days yet</h3>
+        <h3 className="text-lg font-semibold mb-2">Create your first training day</h3>
         <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-          Create custom days or organize them into folders for quick access to
-          your preferred exercise routines.
+          Create your first training with days, exercises and sets. Reusable for your next workouts.
         </p>
-        {workoutStatus.status === 'active-plan-workout' && (
-          <p className="text-sm text-muted-foreground my-4 max-w-sm mx-auto">
-            {canStartMessage}
-          </p>
-        )}
         <div className="flex gap-2">
           <PremiumButtonWrapper
             hasPremium={hasPremium}
@@ -469,23 +490,10 @@ function EmptyFavouritesState({
           >
             <Button
               onClick={handleCreateFolder}
-              iconStart={<FolderPlus />}
+              iconStart={<Plus />}
               disabled={hasReachedFolderLimit}
             >
-              Create Folder
-            </Button>
-          </PremiumButtonWrapper>
-          <PremiumButtonWrapper
-            hasPremium={hasPremium}
-            showIndicator={hasReachedWorkoutLimit}
-            tooltipText="Free tier limit reached. Upgrade to create more workouts."
-          >
-            <Button
-              onClick={onCreateNew}
-              iconStart={<Plus />}
-              disabled={hasReachedWorkoutLimit}
-            >
-              Create Day
+              Create Training Plan
             </Button>
           </PremiumButtonWrapper>
         </div>
