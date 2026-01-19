@@ -44,12 +44,11 @@ const createMockSubscription = (overrides: any = {}) => ({
           id: 'price_monthly',
           lookup_key: 'premium_monthly',
         },
+        current_period_start: Math.floor(Date.now() / 1000),
         current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
       },
     ],
   },
-  current_period_start: Math.floor(Date.now() / 1000),
-  current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
   metadata: {},
   pause_collection: null,
   ...overrides,
@@ -164,7 +163,6 @@ describe('Subscription Switching Flows', () => {
             },
           ],
         },
-        current_period_end: currentTime + 86400 * 30,
       })
 
       const user = {

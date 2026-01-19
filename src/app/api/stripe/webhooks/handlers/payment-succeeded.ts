@@ -28,13 +28,9 @@ interface InvoiceWithSubscription extends Stripe.Invoice {
   payment_intent?: string | Stripe.PaymentIntent | null
 }
 
-type StripeSubscriptionWithPeriod = Stripe.Subscription & {
-  current_period_end?: number | null
-}
-
 export async function handlePaymentSucceeded(invoice: InvoiceWithSubscription) {
   try {
-    let stripeSubscription: StripeSubscriptionWithPeriod | null = null
+    let stripeSubscription: Stripe.Subscription | null = null
     let subscription: UserSubscription | null = null
 
     // Get Stripe customer ID from invoice.
@@ -350,7 +346,7 @@ async function findSubscriptionById(stripeSubscriptionId: string) {
 async function updateSubscriptionAfterPayment(
   subscription: UserSubscription,
   invoice: Stripe.Invoice,
-  stripeSubscription: StripeSubscriptionWithPeriod | null,
+  stripeSubscription: Stripe.Subscription | null,
 ) {
   // Prepare update data
   const updateData: Prisma.UserSubscriptionUpdateInput = {
@@ -370,7 +366,16 @@ async function updateSubscriptionAfterPayment(
   const invoicePeriodStart = invoice.period_start
   const isInitialSetupInvoice = invoicePeriodEnd === invoicePeriodStart
 
-  const stripePeriodEnd = stripeSubscription?.current_period_end
+  const stripeSubscriptionItems = stripeSubscription?.items?.data ?? []
+  const stripePeriodEnds = stripeSubscriptionItems
+    .map((item) => item.current_period_end)
+    .filter((value): value is number => typeof value === 'number')
+
+  // Stripe API 2025-03-31+: period fields live on subscription items.
+  // For flexible subscriptions with multiple items, endDate should be the earliest item end.
+  const stripePeriodEnd = stripePeriodEnds.length
+    ? Math.min(...stripePeriodEnds)
+    : null
 
   if (!subscription.isTrialActive) {
     // Prefer Stripe subscription's current_period_end (source of truth for renewals)

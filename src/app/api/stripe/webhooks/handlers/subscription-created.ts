@@ -27,20 +27,28 @@ import {
   findUserByStripeCustomerId,
 } from '../utils/shared'
 
-type StripeSubscriptionWithPeriod = Stripe.Subscription & {
-  current_period_start?: number | null
-  current_period_end?: number | null
-}
-
 export async function handleSubscriptionCreated(
-  subscription: StripeSubscriptionWithPeriod,
+  subscription: Stripe.Subscription,
 ) {
   try {
     const customerId = subscription.customer as string
     const priceId = subscription.items.data[0]?.price.id
-    // Use Stripe's subscription data directly - trust their calculations
-    const currentPeriodStart = subscription.current_period_start
-    const currentPeriodEnd = subscription.current_period_end
+    const subscriptionItems = subscription.items?.data ?? []
+    const periodStarts = subscriptionItems
+      .map((item) => item.current_period_start)
+      .filter((value): value is number => typeof value === 'number')
+    const periodEnds = subscriptionItems
+      .map((item) => item.current_period_end)
+      .filter((value): value is number => typeof value === 'number')
+
+    // Stripe API 2025-03-31+: period fields live on subscription items.
+    // For flexible subscriptions with multiple items:
+    // - Start: latest item start
+    // - End: earliest item end
+    const currentPeriodStart = periodStarts.length
+      ? Math.max(...periodStarts)
+      : null
+    const currentPeriodEnd = periodEnds.length ? Math.min(...periodEnds) : null
 
     if (!currentPeriodStart || !currentPeriodEnd) {
       console.error(

@@ -12,12 +12,8 @@ import {
   resolvePriceIdToLookupKey,
 } from '@/lib/stripe/lookup-keys'
 
-type StripeSubscriptionWithPeriod = Stripe.Subscription & {
-  current_period_end?: number | null
-}
-
 export async function handleSubscriptionUpdated(
-  subscription: StripeSubscriptionWithPeriod,
+  subscription: Stripe.Subscription,
 ) {
   try {
     const dbSubscription = await prisma.userSubscription.findFirst({
@@ -44,7 +40,14 @@ export async function handleSubscriptionUpdated(
         ? SubscriptionStatus.CANCELLED_ACTIVE
         : mapStripeStatusToSubscriptionStatus(subscription.status)
 
-    const currentPeriodEnd = subscription.current_period_end
+    const subscriptionItems = subscription.items?.data ?? []
+    const periodEnds = subscriptionItems
+      .map((item) => item.current_period_end)
+      .filter((value): value is number => typeof value === 'number')
+
+    // Stripe API 2025-03-31+: period fields live on subscription items.
+    // For flexible subscriptions with multiple items, endDate should be the earliest item end.
+    const currentPeriodEnd = periodEnds.length ? Math.min(...periodEnds) : null
     const endDate = currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null
     const endDateUpdate = endDate ? { endDate } : {}
 
