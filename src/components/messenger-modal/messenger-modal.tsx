@@ -191,7 +191,7 @@ export function MessengerModal({
             />
 
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-              <div className="flex items-center gap-3 pr-4 py-3">
+              <div className="flex items-center gap-3 px-4 py-3">
                 <div className="text-base font-medium truncate">
                   {partnerName}
                 </div>
