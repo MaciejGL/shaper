@@ -70,13 +70,11 @@ export function ManageFolderDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent
-        dialogTitle={isEditing ? 'Edit Folder' : 'Create New Folder'}
-      >
+      <DialogContent dialogTitle={isEditing ? 'Edit plan' : 'Create new plan'}>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {isEditing ? 'Edit Folder' : 'Create New Folder'}
+              {isEditing ? 'Edit plan' : 'Create new plan'}
             </DialogTitle>
             <DialogDescription>
               {isEditing
@@ -85,8 +83,8 @@ export function ManageFolderDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4 space-y-1">
-            <Label htmlFor="folder-name">Folder Name</Label>
+          <div className="py-8 space-y-1">
+            <Label htmlFor="folder-name">Plan Name</Label>
             <Input
               id="folder-name"
               value={folderName}

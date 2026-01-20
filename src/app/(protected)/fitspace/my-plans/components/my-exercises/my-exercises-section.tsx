@@ -6,11 +6,9 @@ import { useMemo } from 'react'
 import { BaseExerciseItem } from '@/app/(protected)/fitspace/workout/training/components/add-single-exercise/selectable-exercise-item'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
-
+import { DISPLAY_GROUP_TO_HIGH_LEVEL } from '@/config/muscles'
 import type { GQLFitspaceGetExercisesQuery } from '@/generated/graphql-client'
 import { translateEquipment } from '@/utils/translate-equipment'
-
-import { DISPLAY_GROUP_TO_HIGH_LEVEL } from '@/config/muscles'
 
 type CustomExercise = NonNullable<
   NonNullable<GQLFitspaceGetExercisesQuery['getExercises']>['userExercises']
@@ -38,12 +36,13 @@ export function MyExercisesSection({
     [exercises],
   )
 
-  const shouldShowEmptyState = showEmptyState && sorted.length === 0 && !isLoading
+  const shouldShowEmptyState =
+    showEmptyState && sorted.length === 0 && !isLoading
 
   return (
     <div className="space-y-3 animate-in fade-in duration-300">
       {isLoading ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <LoadingSkeleton count={6} variant="sm" />
         </div>
       ) : shouldShowEmptyState ? (
@@ -69,7 +68,7 @@ export function MyExercisesSection({
                 muscleDisplay={highLevel ?? displayGroup ?? undefined}
                 equipmentDisplay={equipmentDisplay}
                 onClick={() => onEditExercise(exercise)}
-                className='pr-0'
+                className="pr-0"
                 trailing={
                   <div className="flex items-center gap-1 shrink-0">
                     <Button
@@ -101,4 +100,3 @@ export function MyExercisesSection({
     </div>
   )
 }
-

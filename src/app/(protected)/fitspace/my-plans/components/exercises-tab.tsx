@@ -5,7 +5,12 @@ import { useMemo, useState } from 'react'
 
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import {
   DISPLAY_GROUP_TO_HIGH_LEVEL,
   HIGH_LEVEL_GROUPS,
@@ -14,18 +19,18 @@ import {
 } from '@/config/muscles'
 import { useUser } from '@/context/user-context'
 import {
-  type GQLFitspaceGetExercisesQuery,
   type GQLEquipment,
+  type GQLFitspaceGetExercisesQuery,
   useFitspaceGetExercisesQuery,
 } from '@/generated/graphql-client'
 import { translateEquipment } from '@/utils/translate-equipment'
 
 import { CustomExerciseDialog } from '../../workout/training/components/custom-exercise-dialog/custom-exercise-dialog'
 import { useCustomExerciseMutations } from '../../workout/training/components/custom-exercise-dialog/use-custom-exercise-mutations'
+
 import { DeleteExerciseDialog } from './my-exercises/delete-exercise-dialog'
 import { MyExercisesFilters } from './my-exercises/my-exercises-filters'
 import { MyExercisesSection } from './my-exercises/my-exercises-section'
-import { Card, CardContent } from '@/components/ui/card'
 
 type CustomExercise = NonNullable<
   NonNullable<GQLFitspaceGetExercisesQuery['getExercises']>['userExercises']
@@ -94,7 +99,9 @@ export function ExercisesTab() {
     }
 
     if (selectedEquipment) {
-      result = result.filter((exercise) => exercise.equipment === selectedEquipment)
+      result = result.filter(
+        (exercise) => exercise.equipment === selectedEquipment,
+      )
     }
 
     return result
@@ -109,7 +116,6 @@ export function ExercisesTab() {
   const shouldShowFilters =
     availableMuscleGroups.length > 1 || availableEquipment.length > 1
 
-
   return (
     <div className="space-y-4">
       <div className="flex items-end justify-between gap-3 min-h-[40px]">
@@ -119,10 +125,8 @@ export function ExercisesTab() {
             Create exercises you can reuse in workouts and templates.
           </div>
         </div>
-
       </div>
       <div className="flex items-center justify-between gap-3">
-
         {shouldShowCreateButton ? (
           <div className="flex items-center gap-2 w-full">
             {shouldShowFilters ? (
@@ -169,7 +173,7 @@ export function ExercisesTab() {
         ) : null}
       </div>
 
-      {sorted.length === 0 ? (
+      {sorted.length === 0 && !isLoading ? (
         <EmptyExercisesState
           hasPremium={hasPremium}
           handleCreateExercise={() => {
@@ -215,9 +219,6 @@ export function ExercisesTab() {
   )
 }
 
-
-
-
 function EmptyExercisesState({
   hasPremium,
   handleCreateExercise,
@@ -225,15 +226,15 @@ function EmptyExercisesState({
   hasPremium: boolean
   handleCreateExercise: () => void
 }) {
-
-
   return (
     <Card>
       <CardContent className="flex flex-col items-center justify-center text-center py-6">
         <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
           <Dumbbell className="w-6 h-6 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold mb-2">Create your first exercise</h3>
+        <h3 className="text-lg font-semibold mb-2">
+          Create your first exercise
+        </h3>
         <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
           Create exercises you can reuse in workouts and templates.
         </p>

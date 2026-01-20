@@ -40,7 +40,7 @@ export function PlanView({
 
       {days.length === 0 ? (
         <Card>
-          <CardContent className="py-6 text-center space-y-3">
+          <CardContent className="py-6 text-center space-y-3 flex-center flex-col gap-4">
             <p className="text-sm text-muted-foreground">
               No days yet. Create your first day to start building this plan.
             </p>
@@ -83,4 +83,3 @@ export function PlanView({
     </div>
   )
 }
-

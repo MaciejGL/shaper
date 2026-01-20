@@ -8,10 +8,16 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { ArrowLeft, Pencil, Play, PlusIcon, Trash2 } from 'lucide-react'
+import { Pencil, Play, PlusIcon, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Loader } from '@/components/loader'
 import { Button } from '@/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import {
   type GQLGetFavouriteWorkoutsQuery,
   type GQLUpdateFavouriteWorkoutInput,
@@ -43,7 +49,6 @@ export function DayEditorView({
   day,
   isLoading,
   workoutStatus,
-  onBack,
   onStartWorkout,
   isStartingWorkout,
   onRequestDeleteDay,
@@ -168,43 +173,51 @@ export function DayEditorView({
     })
   }, [draftTitle, isEditing])
 
-  if (!day) {
+  if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            iconStart={<ArrowLeft />}
-            onClick={onBack}
-            disabled={isLoading}
-            className="-ml-4"
-          >
-            Back
-          </Button>
-        </div>
-        <p className="text-sm text-muted-foreground">Loading day…</p>
+      <div className="flex items-center justify-center h-full">
+        <Loader />
       </div>
     )
   }
+
+  if (!day) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-muted-foreground">Day not found.</p>
+      </div>
+    )
+  }
+
+  const startButton = !isEmpty ? (
+    <Button
+      variant={buttonProps.variant}
+      size="md"
+      iconEnd={<Play className="size-4" />}
+      onClick={() => onStartWorkout(day.id)}
+      disabled={buttonProps.disabled || isEmpty}
+      loading={buttonProps.loading}
+      aria-label={buttonProps.text}
+    >
+      {buttonProps.text}
+    </Button>
+  ) : null
 
   return (
     <>
       <div className="space-y-4">
         <div className="flex items-center justify-end gap-2">
           <div className="flex items-center gap-2">
-            {!isEmpty ? (
-              <Button
-                variant={buttonProps.variant}
-                size="md"
-                iconEnd={<Play className="size-4" />}
-                onClick={() => onStartWorkout(day.id)}
-                disabled={buttonProps.disabled || isEmpty}
-                loading={buttonProps.loading}
-                aria-label={buttonProps.text}
-              >
-                {buttonProps.text}
-              </Button>
-            ) : null}
+            {buttonProps.disabled && buttonProps.subtext && startButton ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>{startButton}</div>
+                </TooltipTrigger>
+                <TooltipContent>{buttonProps.subtext}</TooltipContent>
+              </Tooltip>
+            ) : (
+              startButton
+            )}
             <Button
               variant="destructive"
               size="icon-md"
@@ -295,7 +308,7 @@ export function DayEditorView({
                 items={exercises.map((ex) => ex.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   {exercises.map((exercise) => (
                     <SortableFavouriteExerciseItem
                       key={exercise.id}
@@ -312,6 +325,7 @@ export function DayEditorView({
 
             <Button
               variant="default"
+              className="w-full"
               iconStart={<PlusIcon />}
               onClick={() => setShowAddExercise(true)}
             >

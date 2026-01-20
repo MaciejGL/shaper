@@ -1,16 +1,17 @@
 'use client'
 
-import { Folder, Plus } from 'lucide-react'
+import { ChevronRight, Folder, Plus } from 'lucide-react'
 import { useState } from 'react'
 
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useUser } from '@/context/user-context'
 import type {
   GQLGetFavouriteWorkoutFoldersQuery,
   GQLGetFavouriteWorkoutsQuery,
 } from '@/generated/graphql-client'
-import { useUser } from '@/context/user-context'
 import {
   useFavouriteWorkoutFolderOperations,
   useFavouriteWorkoutFolders,
@@ -201,40 +202,51 @@ export function CustomPlansTab() {
       </div>
 
       {isLoadingFavourites || isLoadingFolders ? (
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">Loading…</p>
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <LoadingSkeleton count={6} variant="sm" cardVariant="secondary" />
+        </div>
       ) : foldersList.length === 0 && uncategorizedCount === 0 ? (
         <Card>
-          <CardContent className="py-6 text-center space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Create your first plan, then add training days and exercises.
+          <CardContent className="flex flex-col items-center justify-center text-center py-6">
+            <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Folder className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">
+              Create your first plan
+            </h3>
+            <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
+              Create plans to use in your training.
             </p>
-            <Button
-              iconStart={<Plus />}
-              onClick={handleCreateFolder}
-              disabled={hasReachedFolderLimit}
-            >
-              Create plan
-            </Button>
+            <div className="flex gap-2">
+              <PremiumButtonWrapper
+                hasPremium={hasPremium}
+                tooltipText="Premium feature - upgrade to create more exercises"
+              >
+                <Button
+                  onClick={handleCreateFolder}
+                  iconStart={<Plus />}
+                  disabled={!hasPremium}
+                >
+                  Create Plan
+                </Button>
+              </PremiumButtonWrapper>
+            </div>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+        <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
           {uncategorizedCount > 0 ? (
             <button
               type="button"
               onClick={() => handleOpenPlan({ kind: 'uncategorized' })}
               className={cn(
                 'cursor-pointer hover:bg-accent/50 group active:scale-[0.98] transition-all duration-200 shadow-md border-transparent',
-                'rounded-xl border bg-card text-left p-6',
+                'rounded-xl border bg-card text-left p-2',
               )}
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="flex-center size-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                  <div className="flex-center size-20 rounded-xl bg-primary/10 text-primary shrink-0">
                     <Folder className="size-5" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -244,6 +256,7 @@ export function CustomPlansTab() {
                       {uncategorizedCount === 1 ? 'day' : 'days'}
                     </p>
                   </div>
+                  <ChevronRight className="size-5 text-muted-foreground" />
                 </div>
               </div>
             </button>
@@ -302,4 +315,3 @@ export function CustomPlansTab() {
     </>
   )
 }
-
