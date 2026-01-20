@@ -24,11 +24,9 @@ import {
 import { useUser } from '@/context/user-context'
 import type { GQLEquipment } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
-
 import { translateEquipment } from '@/utils/translate-equipment'
-import {
-  CustomExerciseDialog,
-} from '../custom-exercise-dialog/custom-exercise-dialog'
+
+import { CustomExerciseDialog } from '../custom-exercise-dialog/custom-exercise-dialog'
 import type { MuscleGroupCategories } from '../custom-exercise-dialog/types'
 import { useCustomExerciseMutations } from '../custom-exercise-dialog/use-custom-exercise-mutations'
 
@@ -89,9 +87,8 @@ export function ExerciseListWithFilters({
     [selectedExerciseIds],
   )
   const [onlyMyExercises, setOnlyMyExercises] = useState(false)
-  const [selectedEquipment, setSelectedEquipment] = useState<GQLEquipment | null>(
-    null,
-  )
+  const [selectedEquipment, setSelectedEquipment] =
+    useState<GQLEquipment | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<HighLevelGroup | null>(
     null,
   )
@@ -179,8 +176,6 @@ export function ExerciseListWithFilters({
           isSelected={isSelected}
           onToggle={onToggleExercise}
           detailExercise={exercise}
-         
-        
         />
       )
     },
@@ -189,106 +184,105 @@ export function ExerciseListWithFilters({
 
   const itemRenderer = renderItem ?? defaultRenderItem
 
-  const { remove: removeCustomExercise, isDeleting } = useCustomExerciseMutations(
-    {
+  const { remove: removeCustomExercise, isDeleting } =
+    useCustomExerciseMutations({
       categories,
       userId: user?.id,
-    },
-  )
+    })
 
   const headerContent = (
     <div className="pb-3">
-   
-
-
       {suggestions ? <div className="mt-6 mb-2 px-3">{suggestions}</div> : null}
       <div className="p-3 bg-background/50 dark:bg-background">
-      {!showWeeklyFocusVolume && <div className="flex items-center justify-between gap-4 mb-4">
+        {!showWeeklyFocusVolume && (
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div
+              className={cn(
+                buttonVariants({
+                  variant: 'secondary',
+                  size: 'sm',
+                }),
+                'px-3 justify-between',
+              )}
+              onClick={() => setOnlyMyExercises((prev) => !prev)}
+            >
+              <span className="text-sm text-foreground">My exercises</span>
+              <Switch checked={onlyMyExercises} />
+            </div>
+
+            <PremiumButtonWrapper
+              hasPremium={hasPremium}
+              tooltipText="Premium feature - upgrade to create custom exercises"
+            >
+              <Button
+                size="sm"
+                variant="secondary"
+                iconStart={<PlusIcon />}
+                onClick={() => setCustomExerciseDialogOpen(true)}
+                disabled={!hasPremium}
+                className="flex-1"
+              >
+                Create exercise
+              </Button>
+            </PremiumButtonWrapper>
+          </div>
+        )}
+
+        <p className="text-xs text-muted-foreground transition-all h-4">
+          Equipment
+        </p>
+        {availableEquipment.length > 1 ? (
+          <div className="mt-2">
+            <EquipmentFilterChips
+              equipment={availableEquipment}
+              selectedEquipment={selectedEquipment}
+              onSelectEquipment={setSelectedEquipment}
+            />
+          </div>
+        ) : null}
+
+        {muscleFilterMode === 'weeklyFocus' && weeklyFocus ? (
+          <div className="mt-3">
+            <WeeklyFocusChips
+              groupSummaries={weeklyFocus.groupSummaries}
+              selectedGroup={selectedGroup}
+              onSelectGroup={setSelectedGroup}
+              isLoading={weeklyFocus.isLoading}
+              showVolume={showWeeklyFocusVolume}
+            />
+          </div>
+        ) : null}
+
+        {muscleFilterMode === 'simple' ? (
+          <div className="mt-3">
+            <p className="text-xs text-muted-foreground transition-all h-4">
+              Muscle group
+            </p>
+            <div className="mt-2">
+              <SimpleMuscleFilterChips
+                selectedGroup={selectedGroup}
+                onSelectGroup={setSelectedGroup}
+              />
+            </div>
+          </div>
+        ) : null}
+
         <div
           className={cn(
-            buttonVariants({
-              variant: 'secondary',
-              size: 'sm',
-            }),
-            'px-3 justify-between',
+            suggestions || muscleFilterMode !== 'none' ? 'pt-3 -mx-1' : 'pt-2',
           )}
-          onClick={() => setOnlyMyExercises((prev) => !prev)}
         >
-          <span className="text-sm text-foreground">My exercises</span>
-          <Switch checked={onlyMyExercises} />
-        </div>
-
-        <PremiumButtonWrapper
-          hasPremium={hasPremium}
-          tooltipText="Premium feature - upgrade to create custom exercises"
-        >
-          <Button
-            size="sm"
+          <Input
+            id="search-exercises"
+            placeholder="Search exercises name or muscle group..."
+            value={searchQuery}
             variant="secondary"
-            iconStart={<PlusIcon />}
-            onClick={() => setCustomExerciseDialogOpen(true)}
-            disabled={!hasPremium}
-            className='flex-1'
-          >
-            Create exercise
-          </Button>
-        </PremiumButtonWrapper>
-      </div>}
-   
-
-
-<p className="text-xs text-muted-foreground transition-all h-4">Equipment</p>
-      {availableEquipment.length > 1 ? (
-        <div className="mt-2">
-          <EquipmentFilterChips
-            equipment={availableEquipment}
-            selectedEquipment={selectedEquipment}
-            onSelectEquipment={setSelectedEquipment}
+            size="xl"
+            className="rounded-2xl"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            iconStart={<SearchIcon />}
           />
         </div>
-      ) : null}
-
-{muscleFilterMode === 'weeklyFocus' && weeklyFocus ? (
-          <div className="mt-3">
-          <WeeklyFocusChips
-            groupSummaries={weeklyFocus.groupSummaries}
-            selectedGroup={selectedGroup}
-            onSelectGroup={setSelectedGroup}
-            isLoading={weeklyFocus.isLoading}
-            showVolume={showWeeklyFocusVolume}
-          />
-          </div>
-      ) : null}
-
-      {muscleFilterMode === 'simple' ? (
-        <div className="mt-3">
-          <p className="text-xs text-muted-foreground transition-all h-4">Muscle group</p>
-        <div className="mt-2">
-          <SimpleMuscleFilterChips
-            selectedGroup={selectedGroup}
-            onSelectGroup={setSelectedGroup}
-          />
-        </div>
-        </div>
-      ) : null}
-     
-
-      <div
-        className={cn(
-          suggestions || muscleFilterMode !== 'none' ? 'pt-3 -mx-1' : 'pt-2',
-        )}
-      >
-        <Input
-          id="search-exercises"
-          placeholder="Search exercises name or muscle group..."
-          value={searchQuery}
-          variant="secondary"
-          size="xl"
-          className='rounded-2xl'
-          onChange={(e) => setSearchQuery(e.target.value)}
-          iconStart={<SearchIcon />}
-        />
-      </div>
       </div>
 
       <h3 className="text-sm font-medium text-muted-foreground pt-4 px-3">
@@ -300,7 +294,7 @@ export function ExerciseListWithFilters({
 
   return (
     <div className="flex-1 min-h-0">
-         {title !== false && (
+      {title !== false && (
         <div className="flex items-start justify-between gap-3 px-3 pb-2">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">

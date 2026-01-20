@@ -221,7 +221,7 @@ function ToggleLoggingMode({
           variant: 'secondary',
           size: 'md',
         }),
-        'rounded-full shadow-lg flex-1',
+        'rounded-xl flex-1',
       )}
       onClick={() =>
         setTrainingView(

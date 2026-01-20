@@ -175,40 +175,42 @@ export function AddExerciseToFavouriteDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onClose}>
-      <DrawerContent dialogTitle="Add Exercise" className="max-h-[85vh]">
-        <DrawerHeader>
-          <DrawerTitle>Add Exercise</DrawerTitle>
-          <DrawerDescription>
-            {canAddMore
-              ? `Select an exercise to add to your template (${currentExerciseCount}/${MAX_EXERCISES})`
-              : `Maximum limit reached (${MAX_EXERCISES} exercises)`}
-          </DrawerDescription>
-        </DrawerHeader>
-        <ExerciseListWithFilters
-          title={false}
-          exercises={allExercises}
-          selectedExerciseIds={selectedExerciseIds}
-          onToggleExercise={(exerciseId) => {
-            const exercise = allExercises.find((ex) => ex.id === exerciseId)
-            if (!exercise) return
-            void handleToggleExercise(exerciseId, exercise.name)
-          }}
-          isLoading={isLoading}
-          categories={exercisesData?.muscleGroupCategories}
-          subtitle=""
-          muscleFilterMode="simple"
-          renderItem={(exercise, isSelected) => (
-            <SelectableExerciseRow
-              exercise={exercise as Exercise}
-              isSelected={isSelected}
-              isAdding={isAdding}
-              mutatingExerciseId={mutatingExerciseId}
-              addedExerciseIds={addedExerciseIds}
-              canAddMore={canAddMore}
-              onToggle={(id, name) => void handleToggleExercise(id, name)}
-            />
-          )}
-        />
+      <DrawerContent dialogTitle="Add Exercise" className="max-h-[85vh] h-full">
+        <div className="overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Add Exercise</DrawerTitle>
+            <DrawerDescription>
+              {canAddMore
+                ? `Select an exercise to add to your template (${currentExerciseCount}/${MAX_EXERCISES})`
+                : `Maximum limit reached (${MAX_EXERCISES} exercises)`}
+            </DrawerDescription>
+          </DrawerHeader>
+          <ExerciseListWithFilters
+            title={false}
+            exercises={allExercises}
+            selectedExerciseIds={selectedExerciseIds}
+            onToggleExercise={(exerciseId) => {
+              const exercise = allExercises.find((ex) => ex.id === exerciseId)
+              if (!exercise) return
+              void handleToggleExercise(exerciseId, exercise.name)
+            }}
+            isLoading={isLoading}
+            categories={exercisesData?.muscleGroupCategories}
+            subtitle=""
+            muscleFilterMode="simple"
+            renderItem={(exercise, isSelected) => (
+              <SelectableExerciseRow
+                exercise={exercise as Exercise}
+                isSelected={isSelected}
+                isAdding={isAdding}
+                mutatingExerciseId={mutatingExerciseId}
+                addedExerciseIds={addedExerciseIds}
+                canAddMore={canAddMore}
+                onToggle={(id, name) => void handleToggleExercise(id, name)}
+              />
+            )}
+          />
+        </div>
       </DrawerContent>
     </Drawer>
   )

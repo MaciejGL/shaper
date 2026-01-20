@@ -32,10 +32,13 @@ export const Main = ({
 
       <div className={cn('w-full grid bg-sidebar')}>
         <div
-          className={cn('w-full h-full bg-background safe-area-bottom', {
-            'p-2 md:p-4 lg:p-8': isTrainer,
-            'pt-[calc(var(--safe-area-inset-top))] grow': !isTrainer,
-          })}
+          className={cn(
+            'w-full h-full bg-background safe-area-bottom',
+            {
+              'p-2 md:p-4 lg:p-8': isTrainer,
+            },
+            !isTrainer && 'grow',
+          )}
         >
           {children}
         </div>
