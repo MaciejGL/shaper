@@ -21,7 +21,6 @@ import {
   type HighLevelGroup,
 } from '@/config/muscles'
 import { useUser } from '@/context/user-context'
-import { cn } from '@/lib/utils'
 
 import type {
   CustomExerciseDialogExercise,
