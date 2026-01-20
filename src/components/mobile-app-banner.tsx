@@ -52,8 +52,13 @@ export function MobileAppBanner({
   openAppHelperText,
   showAllStoreButtons: _showAllStoreButtons = false,
 }: MobileAppBannerProps) {
+  const ref =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search)?.get('ref')
+      : null
+
   const openStoreUrl = (url: string, store: 'ios' | 'android') => {
-    analyticsEvents.appStoreClick({ store, source })
+    analyticsEvents.appStoreClick({ store, source, ref })
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 

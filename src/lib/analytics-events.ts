@@ -68,6 +68,7 @@ type AppStoreClickSource =
 type AppStoreClickProperties = Record<string, unknown> & {
   store: 'ios' | 'android'
   source: AppStoreClickSource
+  ref: string | null
 }
 
 // ============================================================================
