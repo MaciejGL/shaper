@@ -129,7 +129,7 @@ export function UnifiedPreviewDrawer({
       }}
     >
       <DrawerContent
-        className="max-h-[90vh]"
+        className="max-h-[90vh] h-full"
         dialogTitle={getTitle()}
         grabberAbsolute
         onAnimationEnd={handleAnimationEnd}
