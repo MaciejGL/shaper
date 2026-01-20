@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useCircumferenceConversion } from '@/hooks/use-circumference-conversion'
 import { cn } from '@/lib/utils'
 
+import { AddMeasurementModal } from '../add-measurement-modal'
 import { useBodyMeasurementsContext } from '../body-measurements-context'
 import { MeasurementCategoryDrawer } from '../measurement-category-drawer'
 import {
@@ -89,7 +90,6 @@ interface LabelItemProps {
   displayTrend: number | null
   unit: string
   isHovered: boolean
-  hasFieldData: boolean
   onHover: (hovered: boolean) => void
   config: LabelSizeConfig
 }
@@ -100,7 +100,6 @@ function LabelItem({
   displayTrend,
   unit,
   isHovered,
-  hasFieldData,
   onHover,
   config,
 }: LabelItemProps) {
@@ -112,11 +111,11 @@ function LabelItem({
       className={cn(
         'flex flex-col justify-center',
         isLeft ? 'items-end' : 'items-start',
-        hasFieldData ? 'cursor-pointer' : 'cursor-default',
+        'cursor-pointer',
       )}
       style={{ height: `${config.height}px` }}
-      onMouseEnter={() => hasFieldData && onHover(true)}
-      onMouseLeave={() => hasFieldData && onHover(false)}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
     >
       {/* Label row with trend */}
       <div
@@ -213,7 +212,6 @@ export function MeasurementBodyMapDisplay({
             displayTrend={displayTrend}
             unit={circumferenceUnit}
             isHovered={hoveredField === position.field}
-            hasFieldData={hasFieldData}
             onHover={(hovered) =>
               setHoveredField(hovered ? position.field : null)
             }
@@ -234,7 +232,14 @@ export function MeasurementBodyMapDisplay({
           )
         }
 
-        return labelElement
+        return (
+          <AddMeasurementModal
+            showFields={[position.field]}
+            onSuccess={onMeasurementAdded}
+          >
+            <button className="contents">{labelElement}</button>
+          </AddMeasurementModal>
+        )
       }}
     />
   )

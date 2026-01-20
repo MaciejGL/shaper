@@ -65,7 +65,10 @@ export function Input({
 
       <div className="relative group [&_svg]:transition-colors">
         {iconStart && (
-          <div className="[&>svg]:size-4 absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 group-focus-within:text-primary group-hover:text-primary dark:text-muted-foreground">
+          <div
+            className="[&>svg]:size-4 pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 group-focus-within:text-primary group-hover:text-primary dark:text-muted-foreground"
+            aria-hidden
+          >
             {iconStart}
           </div>
         )}
@@ -84,7 +87,10 @@ export function Input({
         />
 
         {iconEnd && (
-          <div className="[&>svg]:size-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-foreground group-hover:text-foreground">
+          <div
+            className="[&>svg]:size-4 pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-foreground group-hover:text-foreground"
+            aria-hidden
+          >
             {iconEnd}
           </div>
         )}
