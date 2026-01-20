@@ -71,7 +71,7 @@ export function LogsSection() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-4">
         <CardTitle className="flex items-center gap-2 whitespace-nowrap">
           <TrendingUpDown className="h-5 w-5 text-blue-500" />
           Body Measurements
