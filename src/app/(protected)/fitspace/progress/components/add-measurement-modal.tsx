@@ -9,8 +9,11 @@ import { DatePicker } from '@/components/date-picker'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
   DrawerTrigger,
-  SimpleDrawerContent,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -215,129 +218,144 @@ export function AddMeasurementModal({
           </Button>
         )}
       </DrawerTrigger>
-      <SimpleDrawerContent
-        title={
+      <DrawerContent
+        dialogTitle={
           title || (isEdit ? 'Edit Body Measurements' : 'Add Body Measurements')
         }
-        footer={
-          <div className="flex gap-3">
-            {isEdit && (
+        // className="max-h-[90vh]"
+      >
+        <div className="flex flex-col min-h-0 overflow-y-auto pb-24">
+          <DrawerHeader className="border-b flex-none">
+            <DrawerTitle>
+              {title ||
+                (isEdit ? 'Edit Body Measurements' : 'Add Body Measurements')}
+            </DrawerTitle>
+          </DrawerHeader>
+
+          <div className="flex-1 px-4 pt-4">
+            <form className="space-y-6">
+              <DatePicker
+                label="Measurement Date"
+                date={selectedDate}
+                setDate={(date) => date && setSelectedDate(date)}
+              />
+
+              {/* Weight & Body Fat - Prominent inputs at top */}
+              {(!showFields ||
+                showFields.includes(MeasurementFieldEnum.Weight) ||
+                showFields.includes(MeasurementFieldEnum.BodyFat)) && (
+                <div className="grid grid-cols-2 gap-4">
+                  <WeightInput
+                    id="weight"
+                    label="Weight"
+                    weightInKg={
+                      form.weight ? parseFloat(form.weight || '0') : null
+                    }
+                    onWeightChange={(weightInKg) =>
+                      setForm({
+                        ...form,
+                        weight: weightInKg?.toString() || '',
+                      })
+                    }
+                    showLabel={true}
+                    decimals={2}
+                    placeholder={lastValues[
+                      MeasurementFieldEnum.Weight
+                    ]?.toFixed(1)}
+                  />
+                  <Input
+                    id="bodyFat"
+                    type="number"
+                    inputMode="decimal"
+                    step="0.1"
+                    iconEnd="%"
+                    label="Body Fat"
+                    variant="secondary"
+                    value={form.bodyFat}
+                    placeholder={lastValues[
+                      MeasurementFieldEnum.BodyFat
+                    ]?.toFixed(1)}
+                    onChange={(e) =>
+                      setForm({ ...form, bodyFat: e.target.value || '' })
+                    }
+                  />
+                </div>
+              )}
+
+              {/* Body Map for circumference measurements */}
+              {(!showFields ||
+                showFields.some((f) =>
+                  [
+                    MeasurementFieldEnum.Chest,
+                    MeasurementFieldEnum.Waist,
+                    MeasurementFieldEnum.Hips,
+                    MeasurementFieldEnum.Neck,
+                    MeasurementFieldEnum.BicepsLeft,
+                    MeasurementFieldEnum.BicepsRight,
+                    MeasurementFieldEnum.ThighLeft,
+                    MeasurementFieldEnum.ThighRight,
+                    MeasurementFieldEnum.CalfLeft,
+                    MeasurementFieldEnum.CalfRight,
+                  ].includes(f),
+                )) && (
+                <div className="w-full mt-12 mb-18">
+                  <MeasurementBodyMap
+                    values={bodyMapValues}
+                    lastValues={lastValues}
+                    onChange={handleBodyMapChange}
+                  />
+                </div>
+              )}
+
+              <Textarea
+                id="notes"
+                name="notes"
+                label="Additional Notes (Optional)"
+                placeholder="Any additional notes..."
+                variant="ghost"
+                className="resize-none min-h-24"
+                rows={3}
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              />
+            </form>
+          </div>
+
+          <DrawerFooter className="border-t flex-none absolute bottom-0 left-0 right-0">
+            <div className="flex gap-3">
+              {isEdit && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeleting || isAdding || isUpdating}
+                  loading={isDeleting}
+                  className="gap-2"
+                  iconOnly={<Trash2 />}
+                >
+                  Delete
+                </Button>
+              )}
               <Button
                 type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting || isAdding || isUpdating}
-                loading={isDeleting}
-                className="gap-2"
-                iconOnly={<Trash2 />}
+                variant="tertiary"
+                onClick={() => setOpen(false)}
+                className="flex-1"
               >
-                Delete
+                Cancel
               </Button>
-            )}
-            <Button
-              type="button"
-              variant="tertiary"
-              onClick={() => setOpen(false)}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              disabled={isAdding || isUpdating || isDeleting || !hasValues}
-              loading={isAdding || isUpdating}
-              className="flex-1"
-              onClick={() => handleSubmit(form)}
-            >
-              {isEdit ? 'Update' : 'Save Measurements'}
-            </Button>
-          </div>
-        }
-      >
-        <form className="space-y-6">
-          <DatePicker
-            label="Measurement Date"
-            date={selectedDate}
-            setDate={(date) => date && setSelectedDate(date)}
-          />
-
-          {/* Weight & Body Fat - Prominent inputs at top */}
-          {(!showFields ||
-            showFields.includes(MeasurementFieldEnum.Weight) ||
-            showFields.includes(MeasurementFieldEnum.BodyFat)) && (
-            <div className="grid grid-cols-2 gap-4">
-              <WeightInput
-                id="weight"
-                label="Weight"
-                weightInKg={form.weight ? parseFloat(form.weight || '0') : null}
-                onWeightChange={(weightInKg) =>
-                  setForm({
-                    ...form,
-                    weight: weightInKg?.toString() || '',
-                  })
-                }
-                showLabel={true}
-                decimals={2}
-                placeholder={lastValues[MeasurementFieldEnum.Weight]?.toFixed(
-                  1,
-                )}
-              />
-              <Input
-                id="bodyFat"
-                type="number"
-                inputMode="decimal"
-                step="0.1"
-                iconEnd="%"
-                label="Body Fat"
-                variant="secondary"
-                value={form.bodyFat}
-                placeholder={lastValues[MeasurementFieldEnum.BodyFat]?.toFixed(
-                  1,
-                )}
-                onChange={(e) =>
-                  setForm({ ...form, bodyFat: e.target.value || '' })
-                }
-              />
+              <Button
+                disabled={isAdding || isUpdating || isDeleting || !hasValues}
+                loading={isAdding || isUpdating}
+                className="flex-1"
+                onClick={() => handleSubmit(form)}
+              >
+                {isEdit ? 'Update' : 'Save Measurements'}
+              </Button>
             </div>
-          )}
-
-          {/* Body Map for circumference measurements */}
-          {(!showFields ||
-            showFields.some((f) =>
-              [
-                MeasurementFieldEnum.Chest,
-                MeasurementFieldEnum.Waist,
-                MeasurementFieldEnum.Hips,
-                MeasurementFieldEnum.Neck,
-                MeasurementFieldEnum.BicepsLeft,
-                MeasurementFieldEnum.BicepsRight,
-                MeasurementFieldEnum.ThighLeft,
-                MeasurementFieldEnum.ThighRight,
-                MeasurementFieldEnum.CalfLeft,
-                MeasurementFieldEnum.CalfRight,
-              ].includes(f),
-            )) && (
-            <div className="w-full mt-12 mb-18">
-              <MeasurementBodyMap
-                values={bodyMapValues}
-                lastValues={lastValues}
-                onChange={handleBodyMapChange}
-              />
-            </div>
-          )}
-
-          <Textarea
-            id="notes"
-            name="notes"
-            label="Additional Notes (Optional)"
-            placeholder="Any additional notes..."
-            variant="ghost"
-            className="resize-none min-h-24"
-            rows={3}
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          />
-        </form>
-      </SimpleDrawerContent>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
     </Drawer>
   )
 }

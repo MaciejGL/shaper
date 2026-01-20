@@ -2,8 +2,10 @@
 
 import {
   Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
   DrawerTrigger,
-  SimpleDrawerContent,
 } from '@/components/ui/drawer'
 import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
 import { useDynamicUnitResolver } from '@/hooks/use-dynamic-unit-resolver'
@@ -62,63 +64,73 @@ export function MeasurementCategoryDrawer({
   return (
     <Drawer direction={drawerDirection}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <SimpleDrawerContent
-        title={drawerTitle}
-        classNameDrawerContent={className}
+      <DrawerContent
+        dialogTitle={drawerTitle}
+        className={cn('max-h-[90vh]', className)}
       >
-        <div className="space-y-6 pb-6">
-          {/* Current Stats */}
-          <div
-            className={cn(
-              'gap-3',
-              focusField ? 'grid grid-cols-1' : 'grid grid-cols-2',
-            )}
-          >
-            {fieldsToShow.map((field) => {
-              const resolvedUnit = resolveUnit(field.key, field.unit)
-              return (
-                <StatCard
-                  key={field.key}
-                  label={field.label}
-                  value={getLatestMeasurement(field.key)}
-                  unit={resolvedUnit}
-                  trend={getTrend(field.key)}
-                  size={focusField ? 'default' : 'sm'}
+        <div className="flex flex-col min-h-0">
+          <DrawerHeader className="border-b flex-none">
+            <DrawerTitle>{drawerTitle}</DrawerTitle>
+          </DrawerHeader>
+
+          <div className="flex-1 min-h-0 px-4 pt-4">
+            <div className="space-y-6 pb-6">
+              {/* Current Stats */}
+              <div
+                className={cn(
+                  'gap-3',
+                  focusField ? 'grid grid-cols-1' : 'grid grid-cols-2',
+                )}
+              >
+                {fieldsToShow.map((field) => {
+                  const resolvedUnit = resolveUnit(field.key, field.unit)
+                  return (
+                    <StatCard
+                      key={field.key}
+                      label={field.label}
+                      value={getLatestMeasurement(field.key)}
+                      unit={resolvedUnit}
+                      trend={getTrend(field.key)}
+                      size={focusField ? 'default' : 'sm'}
+                      isOnCard
+                    />
+                  )
+                })}
+              </div>
+
+              {/* Charts for fields with enough data */}
+              {hasData &&
+                fieldsToShow.map((field) => {
+                  const resolvedUnit = resolveUnit(field.key, field.unit)
+                  return (
+                    <div key={field.key}>
+                      <h3 className="font-semibold mb-3">
+                        {field.label} Progress
+                      </h3>
+                      <MeasurementChart
+                        measurements={filteredMeasurements}
+                        field={field.key}
+                        label={field.label}
+                        unit={resolvedUnit}
+                      />
+                    </div>
+                  )
+                })}
+
+              {/* Recent History */}
+              <div>
+                <h3 className="font-semibold mb-3">Measurement History</h3>
+                <MeasurementHistoryList
+                  measurements={filteredMeasurements}
+                  onUpdate={onUpdate}
+                  focusField={focusField}
                   isOnCard
                 />
-              )
-            })}
-          </div>
-
-          {/* Charts for fields with enough data */}
-          {hasData &&
-            fieldsToShow.map((field) => {
-              const resolvedUnit = resolveUnit(field.key, field.unit)
-              return (
-                <div key={field.key}>
-                  <h3 className="font-semibold mb-3">{field.label} Progress</h3>
-                  <MeasurementChart
-                    measurements={filteredMeasurements}
-                    field={field.key}
-                    label={field.label}
-                    unit={resolvedUnit}
-                  />
-                </div>
-              )
-            })}
-
-          {/* Recent History */}
-          <div>
-            <h3 className="font-semibold mb-3">Measurement History</h3>
-            <MeasurementHistoryList
-              measurements={filteredMeasurements}
-              onUpdate={onUpdate}
-              focusField={focusField}
-              isOnCard
-            />
+              </div>
+            </div>
           </div>
         </div>
-      </SimpleDrawerContent>
+      </DrawerContent>
     </Drawer>
   )
 }

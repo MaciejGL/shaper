@@ -1,6 +1,13 @@
 'use client'
 
-import { List, Plus, TrendingUpDown } from 'lucide-react'
+import {
+  List,
+  Mars,
+  Plus,
+  Settings2Icon,
+  TrendingUpDown,
+  Venus,
+} from 'lucide-react'
 import { useState } from 'react'
 
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
@@ -12,8 +19,17 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useUser } from '@/context/user-context'
-import { GQLWeightUnit } from '@/generated/graphql-client'
+import {
+  GQLWeightUnit,
+  useUpdateProfileMutation,
+} from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import { AddMeasurementModal } from '../add-measurement-modal'
@@ -38,6 +54,16 @@ export function LogsSection() {
     onMeasurementAdded,
   } = useBodyMeasurementsContext()
   const { toDisplayWeight, weightUnit } = useWeightConversion()
+  const { mutate: updateProfile, isPending: isUpdatingProfile } =
+    useUpdateProfileMutation()
+
+  const isMale = user?.profile?.sex !== 'Female'
+
+  const handleToggleSex = () => {
+    updateProfile({
+      input: { sex: isMale ? 'Female' : 'Male' },
+    })
+  }
 
   if (!user) {
     return null
@@ -50,27 +76,51 @@ export function LogsSection() {
           <TrendingUpDown className="h-5 w-5 text-blue-500" />
           Body Measurements
         </CardTitle>
-        <PremiumButtonWrapper
-          hasPremium={hasPremium}
-          tooltipText="Upgrade to log measurements"
-        >
-          {hasPremium ? (
-            <AddMeasurementModal onSuccess={onMeasurementAdded}>
-              <Button variant="default" size="sm" iconStart={<Plus />}>
+        <div className="flex items-center gap-2">
+          <PremiumButtonWrapper
+            hasPremium={hasPremium}
+            tooltipText="Upgrade to log measurements"
+          >
+            {hasPremium ? (
+              <AddMeasurementModal onSuccess={onMeasurementAdded}>
+                <Button variant="default" size="sm" iconStart={<Plus />}>
+                  Log
+                </Button>
+              </AddMeasurementModal>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                iconStart={<Plus />}
+                disabled={!hasPremium}
+              >
                 Log
               </Button>
-            </AddMeasurementModal>
-          ) : (
-            <Button
-              variant="default"
-              size="sm"
-              iconStart={<Plus />}
-              disabled={!hasPremium}
-            >
-              Log
-            </Button>
-          )}
-        </PremiumButtonWrapper>
+            )}
+          </PremiumButtonWrapper>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon-sm"
+                variant="secondary"
+                iconOnly={<Settings2Icon className="size-4" />}
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={handleToggleSex}
+                disabled={isUpdatingProfile}
+              >
+                {isMale ? (
+                  <Venus className="size-4" />
+                ) : (
+                  <Mars className="size-4" />
+                )}
+                Switch to {isMale ? 'female' : 'male'} body
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </CardHeader>
       <MeasurementChart
         measurements={bodyMeasures}
