@@ -72,6 +72,7 @@ export default function AccountManagementPage() {
               openAppPlacement="belowDownload"
               openAppHelperText="Already installed? Open the app."
               className="mx-auto my-12"
+              source="account_management"
             />
           </div>
 

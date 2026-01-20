@@ -19,7 +19,7 @@ export function HomepageClient() {
       <main>
         <HeroSection />
         <UserStatsSection />
-        <MobileAppBanner className="py-14" />
+        <MobileAppBanner className="py-14" source="hero" />
         <BentoSection />
         <FeaturesSection />
         <PlatformStatsSection />

@@ -1,8 +1,6 @@
 import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
 
 import { MobileAppBanner } from '@/components/mobile-app-banner'
-import { MOBILE_STORE_LINKS } from '@/config/mobile-store-links'
 import { ServerEvent, captureServerEvent } from '@/lib/posthog-server'
 
 export const dynamic = 'force-dynamic'
@@ -83,35 +81,6 @@ export default async function DownloadPage({
   const device = detectDevice(userAgent)
   const shouldTrack = shouldTrackDownloadVisit(headersList, userAgent)
 
-  // iOS -> App Store
-  if (device === 'ios') {
-    if (shouldTrack) {
-      trackDownloadVisit({
-        ref,
-        referer,
-        device,
-        userAgent,
-        redirectedTo: 'app_store',
-      })
-    }
-    redirect(MOBILE_STORE_LINKS.ios.url)
-  }
-
-  // Android -> Google Play
-  if (device === 'android') {
-    if (shouldTrack) {
-      trackDownloadVisit({
-        ref,
-        referer,
-        device,
-        userAgent,
-        redirectedTo: 'google_play',
-      })
-    }
-    redirect(MOBILE_STORE_LINKS.android.url)
-  }
-
-  // Desktop/unknown - track and show fallback UI
   if (shouldTrack) {
     trackDownloadVisit({
       ref,
@@ -134,7 +103,12 @@ export default async function DownloadPage({
           </p>
         </div>
 
-        <MobileAppBanner alwaysShow hideOpenAppButton />
+        <MobileAppBanner
+          alwaysShow
+          hideOpenAppButton
+          showAllStoreButtons
+          source="download_page"
+        />
       </div>
     </div>
   )

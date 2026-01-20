@@ -49,7 +49,7 @@ export function MobilePushSettings() {
   }
 
   if (!isNativeApp) {
-    return <MobileAppBanner />
+    return <MobileAppBanner source="push_settings" />
   }
 
   return (

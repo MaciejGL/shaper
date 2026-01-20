@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import Link from 'next/link'
 
+import { MobileAppBanner } from '@/components/mobile-app-banner'
 import { ButtonLink } from '@/components/ui/button-link'
 import { analyticsEvents } from '@/lib/analytics-events'
 
@@ -50,20 +50,13 @@ export function HeroSection() {
               </ButtonLink>
             </div>
 
-            <Link
-              href="/login"
-              className="mt-12 flex items-center gap-4 text-sm font-medium text-foreground bg-white/10 rounded-3xl p-4 shadow-sm backdrop-blur-sm cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            >
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full bg-primary border-2 border-background"
-                  />
-                ))}
-              </div>
-              <p>Join our lifting community</p>
-            </Link>
+            <MobileAppBanner
+              alwaysShow
+              hideOpenAppButton
+              showAllStoreButtons
+              source="hero"
+              className="my-12"
+            />
           </motion.div>
         </div>
       </div>

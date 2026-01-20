@@ -22,6 +22,9 @@ export const ANALYTICS_EVENTS = {
   AUTH_OTP_REQUEST_ERROR: 'auth_otp_request_error',
   AUTH_OTP_VERIFY_SUCCESS: 'auth_otp_verify_success',
   AUTH_OTP_VERIFY_ERROR: 'auth_otp_verify_error',
+
+  // App download
+  APP_STORE_CLICK: 'app_store_click',
 } as const
 
 export type AnalyticsEventName =
@@ -54,6 +57,17 @@ type AuthOtpRequestErrorProperties = Record<string, unknown> & {
 
 type AuthOtpVerifyErrorProperties = Record<string, unknown> & {
   reason: 'invalid_otp' | 'expired' | 'no_session' | 'missing_credentials'
+}
+
+type AppStoreClickSource =
+  | 'download_page'
+  | 'hero'
+  | 'account_management'
+  | 'push_settings'
+
+type AppStoreClickProperties = Record<string, unknown> & {
+  store: 'ios' | 'android'
+  source: AppStoreClickSource
 }
 
 // ============================================================================
@@ -107,5 +121,9 @@ export const analyticsEvents = {
 
   authOtpVerifyError: (properties: AuthOtpVerifyErrorProperties) => {
     captureEvent(ANALYTICS_EVENTS.AUTH_OTP_VERIFY_ERROR, properties)
+  },
+
+  appStoreClick: (properties: AppStoreClickProperties) => {
+    captureEvent(ANALYTICS_EVENTS.APP_STORE_CLICK, properties)
   },
 }
