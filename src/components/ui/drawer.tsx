@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { RemoveScroll } from 'react-remove-scroll'
+// import { RemoveScroll } from 'react-remove-scroll'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
 import { useModalHistory } from '@/hooks/use-modal-history'
