@@ -161,7 +161,7 @@ export function ExerciseStatsDrawer({
                   currentOneRM={currentOneRM}
                   oneRmChangePercent={oneRmChangePercent}
                   weightUnit={weightUnit}
-                sessionsCount={oneRmSeries.length}
+                  sessionsCount={oneRmSeries.length}
                 />
               </div>
               <WeeklyVolumeCard
