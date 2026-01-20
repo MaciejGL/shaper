@@ -20,7 +20,10 @@ export function useFavouriteCardData({
   workoutStatus,
   isStarting = false,
 }: UseFavouriteCardDataProps) {
-  const exercises = favourite?.exercises ?? []
+  const exercises = useMemo(
+    () => favourite?.exercises ?? [],
+    [favourite?.exercises],
+  )
   const totalExercises = exercises.length
   const totalSets = exercises.reduce(
     (sum, exercise) => sum + exercise.sets.length,
