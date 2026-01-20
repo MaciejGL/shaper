@@ -1,8 +1,16 @@
 'use client'
 
+import { Folder, Plus } from 'lucide-react'
 import { useState } from 'react'
 
-import { GQLFavouriteWorkout } from '@/generated/graphql-client'
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import type {
+  GQLGetFavouriteWorkoutFoldersQuery,
+  GQLGetFavouriteWorkoutsQuery,
+} from '@/generated/graphql-client'
+import { useUser } from '@/context/user-context'
 import {
   useFavouriteWorkoutFolderOperations,
   useFavouriteWorkoutFolders,
@@ -10,29 +18,53 @@ import {
   useFavouriteWorkoutStatus,
   useFavouriteWorkouts,
 } from '@/hooks/use-favourite-workouts'
+import { cn } from '@/lib/utils'
 
+import { CustomPlansDrawer } from './custom-plans-drawer/custom-plans-drawer'
+import type { CustomPlan } from './custom-plans-drawer/types'
 import { DeleteFavouriteDialog } from './favourites/delete-favourite-dialog'
-import { FavouriteWorkoutsList } from './favourites/favourite-workouts-list'
+import { FolderCard } from './favourites/folder-card'
+import { ManageFolderDialog } from './favourites/manage-folder-dialog'
 import { ReplacementConfirmationDialog } from './favourites/replacement-confirmation-dialog'
 
+type FavouriteWorkout = NonNullable<
+  NonNullable<GQLGetFavouriteWorkoutsQuery>['getFavouriteWorkouts']
+>[number]
+
+type FavouriteWorkoutFolder = NonNullable<
+  NonNullable<GQLGetFavouriteWorkoutFoldersQuery>['getFavouriteWorkoutFolders']
+>[number]
+
 export function CustomPlansTab() {
+  const { hasPremium, subscription } = useUser()
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [favouriteToDelete, setFavouriteToDelete] =
-    useState<GQLFavouriteWorkout | null>(null)
+    useState<FavouriteWorkout | null>(null)
   const [replacementDialogOpen, setReplacementDialogOpen] = useState(false)
   const [pendingFavouriteId, setPendingFavouriteId] = useState<string | null>(
     null,
   )
   const [isStarting, setIsStarting] = useState(false)
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<CustomPlan | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  const [isManageFolderOpen, setIsManageFolderOpen] = useState(false)
+  const [folderToEdit, setFolderToEdit] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   const {
     data: favouriteWorkouts,
     isLoading: isLoadingFavourites,
     refetch,
   } = useFavouriteWorkouts()
-  const { data: folders, isLoading: isLoadingFolders } =
-    useFavouriteWorkoutFolders()
+  const {
+    data: folders,
+    isLoading: isLoadingFolders,
+    refetch: refetchFolders,
+  } = useFavouriteWorkoutFolders()
   const favouriteOperations = useFavouriteWorkoutOperations()
   const folderOperations = useFavouriteWorkoutFolderOperations()
 
@@ -82,7 +114,7 @@ export function CustomPlansTab() {
     )
     if (!favourite) return
 
-    setFavouriteToDelete(favourite as GQLFavouriteWorkout)
+    setFavouriteToDelete(favourite)
     setDeleteDialogOpen(true)
   }
 
@@ -103,49 +135,142 @@ export function CustomPlansTab() {
     setFavouriteToDelete(null)
   }
 
-  const filteredWorkouts =
-    favouriteWorkouts?.getFavouriteWorkouts.filter((workout) => {
-      if (currentFolderId === null) {
-        return !workout.folderId
-      }
-      return workout.folderId === currentFolderId
-    }) ?? []
+  const foldersList: FavouriteWorkoutFolder[] =
+    folders?.getFavouriteWorkoutFolders ?? []
+  const allFavourites: FavouriteWorkout[] =
+    favouriteWorkouts?.getFavouriteWorkouts ?? []
 
-  const totalWorkoutCount = favouriteWorkouts?.getFavouriteWorkouts.length ?? 0
+  const uncategorizedCount = allFavourites.filter((w) => !w.folderId).length
+  const totalWorkoutCount = allFavourites.length
 
-  const foldersList = (folders?.getFavouriteWorkoutFolders ??
-    []) as NonNullable<
-    NonNullable<typeof folders>['getFavouriteWorkoutFolders']
-  >
-  const currentFolder = (foldersList.find((f) => f.id === currentFolderId) ??
-    null) as (typeof foldersList)[number] | null
+  const hasReachedWorkoutLimit =
+    !hasPremium &&
+    totalWorkoutCount >= (subscription?.favouriteWorkoutLimit ?? 3)
+  const hasReachedFolderLimit =
+    !hasPremium &&
+    foldersList.length >= (subscription?.favouriteFolderLimit ?? 1)
+
+  const handleOpenPlan = (plan: CustomPlan) => {
+    setSelectedPlan(plan)
+    setDrawerOpen(true)
+  }
+
+  const handleCloseDrawer = () => {
+    setDrawerOpen(false)
+    setSelectedPlan(null)
+  }
+
+  const handleCreateFolder = () => {
+    if (hasReachedFolderLimit) return
+    setFolderToEdit(null)
+    setIsManageFolderOpen(true)
+  }
+
+  const handleRefetchAll = () => {
+    void refetch()
+    void refetchFolders()
+  }
 
   return (
     <>
-     
-     <div className="space-y-0.5 mb-6">
-            <div className="text-2xl font-semibold">Custom plans</div>
-            <div className="text-sm text-muted-foreground">
-              Create plans templates to use in your training.
-            </div>
-          </div>
+      <div className="space-y-0.5 mb-6">
+        <div className="text-2xl font-semibold">Custom plans</div>
+        <div className="text-sm text-muted-foreground">
+          Create plans templates to use in your training.
+        </div>
+      </div>
 
-      <FavouriteWorkoutsList
-        hideTitle={true}
-        favouriteWorkouts={filteredWorkouts}
-        folders={foldersList}
-        currentFolder={currentFolder}
-        loading={isLoadingFavourites || isLoadingFolders}
-        onStartWorkout={handleStartFromFavourite}
-        onDeleteWorkout={handleDeleteFavourite}
-        onRefetch={refetch}
+      <div className="flex justify-between items-center gap-2 mb-4">
+        <div className="text-sm text-muted-foreground">
+          {foldersList.length} plans · {totalWorkoutCount} days
+        </div>
+        <PremiumButtonWrapper
+          hasPremium={hasPremium}
+          showIndicator={hasReachedFolderLimit}
+          tooltipText="Free tier limit reached. Upgrade to create more plans."
+        >
+          <Button
+            iconStart={<Plus />}
+            onClick={handleCreateFolder}
+            variant="default"
+            disabled={hasReachedFolderLimit}
+          >
+            New plan
+          </Button>
+        </PremiumButtonWrapper>
+      </div>
+
+      {isLoadingFavourites || isLoadingFolders ? (
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          </CardContent>
+        </Card>
+      ) : foldersList.length === 0 && uncategorizedCount === 0 ? (
+        <Card>
+          <CardContent className="py-6 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Create your first plan, then add training days and exercises.
+            </p>
+            <Button
+              iconStart={<Plus />}
+              onClick={handleCreateFolder}
+              disabled={hasReachedFolderLimit}
+            >
+              Create plan
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+          {uncategorizedCount > 0 ? (
+            <button
+              type="button"
+              onClick={() => handleOpenPlan({ kind: 'uncategorized' })}
+              className={cn(
+                'cursor-pointer hover:bg-accent/50 group active:scale-[0.98] transition-all duration-200 shadow-md border-transparent',
+                'rounded-xl border bg-card text-left p-6',
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex-center size-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <Folder className="size-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold truncate">Uncategorized</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {uncategorizedCount}{' '}
+                      {uncategorizedCount === 1 ? 'day' : 'days'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </button>
+          ) : null}
+
+          {foldersList.map((folder) => (
+            <FolderCard
+              key={folder.id}
+              folder={folder}
+              onClick={() => handleOpenPlan({ kind: 'folder', folder })}
+            />
+          ))}
+        </div>
+      )}
+
+      <CustomPlansDrawer
+        open={drawerOpen}
+        onClose={handleCloseDrawer}
+        plan={selectedPlan}
+        favourites={allFavourites}
+        isLoading={isLoadingFavourites || isLoadingFolders}
+        onRefetch={handleRefetchAll}
         workoutStatus={workoutStatus}
-        isStarting={isStarting}
-        currentFolderId={currentFolderId}
-        onFolderClick={setCurrentFolderId}
-        onBackToRoot={() => setCurrentFolderId(null)}
-        folderOperations={folderOperations}
-        totalWorkoutCount={totalWorkoutCount}
+        canCreateDay={!hasReachedWorkoutLimit}
+        isStartingWorkout={isStarting}
+        onStartWorkout={handleStartFromFavourite}
+        onRequestDeleteDay={handleDeleteFavourite}
       />
 
       <DeleteFavouriteDialog
@@ -162,6 +287,17 @@ export function CustomPlansTab() {
         onConfirm={handleConfirmReplacement}
         isStarting={favouriteOperations.isStarting}
         message={workoutStatus.message}
+      />
+
+      <ManageFolderDialog
+        open={isManageFolderOpen}
+        onClose={() => setIsManageFolderOpen(false)}
+        onSuccess={() => {
+          setIsManageFolderOpen(false)
+          handleRefetchAll()
+        }}
+        folderOperations={folderOperations}
+        folderToEdit={folderToEdit}
       />
     </>
   )

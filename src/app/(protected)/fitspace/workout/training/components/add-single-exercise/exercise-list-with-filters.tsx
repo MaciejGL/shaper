@@ -293,7 +293,7 @@ export function ExerciseListWithFilters({
   )
 
   return (
-    <div className="flex-1 min-h-0">
+    <div className="flex-1 min-h-0 h-full">
       {title !== false && (
         <div className="flex items-start justify-between gap-3 px-3 pb-2">
           <div className="space-y-0.5">

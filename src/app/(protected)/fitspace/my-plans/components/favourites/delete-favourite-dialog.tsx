@@ -41,7 +41,7 @@ export function DeleteFavouriteDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="bg-card-on-card p-4 rounded-lg">
+        <div className="bg-card-on-card dark:bg-card p-4 rounded-lg">
           <p className="text-sm dark:text-muted-foreground">
             This action cannot be undone. The custom day and all its exercises
             will be permanently deleted.

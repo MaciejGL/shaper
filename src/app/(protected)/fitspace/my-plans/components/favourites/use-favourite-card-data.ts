@@ -10,7 +10,7 @@ type FavouriteWorkout = NonNullable<
 >[number]
 
 interface UseFavouriteCardDataProps {
-  favourite: FavouriteWorkout
+  favourite: FavouriteWorkout | null
   workoutStatus: WorkoutStatusAnalysis
   isStarting?: boolean
 }
@@ -20,8 +20,9 @@ export function useFavouriteCardData({
   workoutStatus,
   isStarting = false,
 }: UseFavouriteCardDataProps) {
-  const totalExercises = favourite.exercises.length
-  const totalSets = favourite.exercises.reduce(
+  const exercises = favourite?.exercises ?? []
+  const totalExercises = exercises.length
+  const totalSets = exercises.reduce(
     (sum, exercise) => sum + exercise.sets.length,
     0,
   )
@@ -29,7 +30,7 @@ export function useFavouriteCardData({
 
   // Get unique muscle groups by filtering duplicates based on displayGroup
   const uniqueMuscleGroups = useMemo(() => {
-    return favourite.exercises
+    return exercises
       .flatMap((exercise) => exercise.base?.muscleGroups ?? [])
       .filter(
         (muscleGroup, index, array) =>
@@ -37,12 +38,12 @@ export function useFavouriteCardData({
             (mg) => mg.displayGroup === muscleGroup.displayGroup,
           ) === index,
       )
-  }, [favourite.exercises])
+  }, [exercises])
 
   // Calculate estimated workout time
   const estimatedMinutes = useMemo(() => {
-    return estimateWorkoutTime(favourite.exercises)
-  }, [favourite.exercises])
+    return estimateWorkoutTime(exercises)
+  }, [exercises])
 
   // Get start button props based on workout status
   const getStartButtonProps = (): {
