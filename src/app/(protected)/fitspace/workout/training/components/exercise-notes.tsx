@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 import { AnimateHeightItem } from '@/components/animations/animated-container'
 import { Button } from '@/components/ui/button'
-import { DrawerTitle, SimpleDrawerContent } from '@/components/ui/drawer'
+import { DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
@@ -205,59 +205,59 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
   }
 
   return (
-    <SimpleDrawerContent
-      title="Exercise Notes"
-      className="flex flex-col"
-      header={
-        <div className="flex justify-between gap-2 items-center">
-          <DrawerTitle>Exercise Notes</DrawerTitle>
-        </div>
-      }
-    >
-      <div className="flex-1">
-        <div className="space-y-6">
-          {/* Create Note Form */}
-          <CreateNoteForm
-            newNoteText={newNoteText}
-            newNoteShareWithTrainer={newNoteShareWithTrainer}
-            isCreatingNote={isCreatingNote}
-            onNewNoteTextChange={setNewNoteText}
-            onNewNoteShareWithTrainerChange={setNewNoteShareWithTrainer}
-            onCreateNote={handleCreateNote}
-          />
+    <DrawerContent dialogTitle="Exercise Notes" className="max-h-[90vh]">
+      <div className="flex flex-col min-h-0">
+        <DrawerHeader className="border-b flex-none">
+          <div className="flex justify-between gap-2 items-center">
+            <DrawerTitle>Exercise Notes</DrawerTitle>
+          </div>
+        </DrawerHeader>
 
-          {notes.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-sm text-muted-foreground">No notes yet.</p>
-            </div>
-          ) : null}
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-[calc(var(--safe-area-inset-bottom)+24px)]">
+          <div className="space-y-6">
+            {/* Create Note Form */}
+            <CreateNoteForm
+              newNoteText={newNoteText}
+              newNoteShareWithTrainer={newNoteShareWithTrainer}
+              isCreatingNote={isCreatingNote}
+              onNewNoteTextChange={setNewNoteText}
+              onNewNoteShareWithTrainerChange={setNewNoteShareWithTrainer}
+              onCreateNote={handleCreateNote}
+            />
 
-          {/* Notes List */}
-          {notes.length > 0 && (
-            <div className="space-y-4">
-              {notes.map((note) => (
-                <ExerciseNote
-                  key={note.id}
-                  note={note}
-                  isEditing={editingNoteId === note.id}
-                  editingText={editingText}
-                  editingShareWithTrainer={editingShareWithTrainer}
-                  isUpdatingNote={isUpdatingNote}
-                  isDeletingNote={isDeletingNote}
-                  loading={isLoading}
-                  onStartEdit={handleStartEdit}
-                  onSaveEdit={handleSaveEdit}
-                  onCancelEdit={handleCancelEdit}
-                  onDeleteNote={handleDeleteNote}
-                  onEditingTextChange={setEditingText}
-                  onEditingShareWithTrainerChange={setEditingShareWithTrainer}
-                />
-              ))}
-            </div>
-          )}
+            {notes.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-sm text-muted-foreground">No notes yet.</p>
+              </div>
+            ) : null}
+
+            {/* Notes List */}
+            {notes.length > 0 && (
+              <div className="space-y-4">
+                {notes.map((note) => (
+                  <ExerciseNote
+                    key={note.id}
+                    note={note}
+                    isEditing={editingNoteId === note.id}
+                    editingText={editingText}
+                    editingShareWithTrainer={editingShareWithTrainer}
+                    isUpdatingNote={isUpdatingNote}
+                    isDeletingNote={isDeletingNote}
+                    loading={isLoading}
+                    onStartEdit={handleStartEdit}
+                    onSaveEdit={handleSaveEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onDeleteNote={handleDeleteNote}
+                    onEditingTextChange={setEditingText}
+                    onEditingShareWithTrainerChange={setEditingShareWithTrainer}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </SimpleDrawerContent>
+    </DrawerContent>
   )
 }
 

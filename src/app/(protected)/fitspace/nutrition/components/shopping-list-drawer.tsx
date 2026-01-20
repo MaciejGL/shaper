@@ -4,7 +4,12 @@ import { ChevronRight, ShoppingCartIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { Drawer, SimpleDrawerContent } from '@/components/ui/drawer'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 
 import { ShoppingList } from './shopping-list'
@@ -64,13 +69,21 @@ export function ShoppingListDrawer({
         </CardContent>
       </Card>
 
-      <SimpleDrawerContent title="Shopping list">
-        <ShoppingList
-          days={days}
-          planId={planId}
-          initialSelectedDayId={activeDay.id}
-        />
-      </SimpleDrawerContent>
+      <DrawerContent dialogTitle="Shopping list" className="max-h-[90vh]">
+        <div className="flex flex-col min-h-0">
+          <DrawerHeader className="border-b flex-none">
+            <DrawerTitle>Shopping list</DrawerTitle>
+          </DrawerHeader>
+
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-[calc(var(--safe-area-inset-bottom)+24px)]">
+            <ShoppingList
+              days={days}
+              planId={planId}
+              initialSelectedDayId={activeDay.id}
+            />
+          </div>
+        </div>
+      </DrawerContent>
     </Drawer>
   )
 }

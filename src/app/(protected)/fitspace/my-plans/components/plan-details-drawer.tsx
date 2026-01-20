@@ -99,9 +99,9 @@ export function PlanDetailsDrawer({
           dialogTitle={plan.title}
           grabberAbsolute={!!heroImageUrl}
         >
-          <div className="flex flex-col h-full overflow-hidden">
+          <div className="flex flex-col overflow-y-auto">
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto" ref={scrollContainerRef}>
+            <div className="flex-1" ref={scrollContainerRef}>
               {/* Hero Header */}
               <TrainingPlanHeroHeader
                 title={plan.title}

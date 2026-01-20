@@ -4,7 +4,13 @@ import { ChevronRight } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { ButtonLink } from '@/components/ui/button-link'
-import { Drawer, SimpleDrawerContent } from '@/components/ui/drawer'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
 
 import { type AvailablePlan, PlanStatus, getPlanStatus } from '../../types'
@@ -19,38 +25,44 @@ export function SelectPlanDrawer({
 }: SelectPlanDrawerProps) {
   return (
     <Drawer open={open} onOpenChange={onClose}>
-      <SimpleDrawerContent
-        title="Select plan to activate"
-        // classNameDrawerContent="dark"
-        footer={
-          <ButtonLink
-            href="/fitspace/explore?tab=plans"
-            iconEnd={<ChevronRight />}
-            className="w-full"
-            size="lg"
-          >
-            Explore more plans
-          </ButtonLink>
-        }
-      >
-        {plans.length === 0 ? (
-          <div className="rounded-xl border border-border bg-muted/20 p-4">
-            <p className="text-sm text-muted-foreground">
-              No plans available to activate right now.
-            </p>
+      <DrawerContent dialogTitle="Select plan to activate" className="max-h-[90vh]">
+        <div className="flex flex-col min-h-0">
+          <DrawerHeader className="border-b flex-none">
+            <DrawerTitle>Select plan to activate</DrawerTitle>
+          </DrawerHeader>
+
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-4 pb-6">
+            {plans.length === 0 ? (
+              <div className="rounded-xl border border-border bg-muted/20 p-4">
+                <p className="text-sm text-muted-foreground">
+                  No plans available to activate right now.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {plans.map((plan) => (
+                  <PlanRow
+                    key={plan.id}
+                    plan={plan}
+                    onClick={() => onSelectPlan(plan)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="space-y-2">
-            {plans.map((plan) => (
-              <PlanRow
-                key={plan.id}
-                plan={plan}
-                onClick={() => onSelectPlan(plan)}
-              />
-            ))}
-          </div>
-        )}
-      </SimpleDrawerContent>
+
+          <DrawerFooter className="border-t flex-none">
+            <ButtonLink
+              href="/fitspace/explore?tab=plans"
+              iconEnd={<ChevronRight />}
+              className="w-full"
+              size="lg"
+            >
+              Explore more plans
+            </ButtonLink>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
     </Drawer>
   )
 }

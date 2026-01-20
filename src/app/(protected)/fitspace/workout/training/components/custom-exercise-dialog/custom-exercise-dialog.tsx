@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -11,7 +12,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { EQUIPMENT_OPTIONS } from '@/config/equipment'
@@ -23,12 +23,12 @@ import {
 import { useUser } from '@/context/user-context'
 import { cn } from '@/lib/utils'
 
-import { useCustomExerciseMutations } from './use-custom-exercise-mutations'
 import type {
   CustomExerciseDialogExercise,
   CustomExerciseFormState,
   MuscleGroupCategories,
 } from './types'
+import { useCustomExerciseMutations } from './use-custom-exercise-mutations'
 
 interface CustomExerciseDialogProps {
   open: boolean
@@ -48,10 +48,12 @@ export function CustomExerciseDialog({
   exercise,
 }: CustomExerciseDialogProps) {
   const { user } = useUser()
-  const { create, update, isCreating, isUpdating } = useCustomExerciseMutations({
-    categories,
-    userId: user?.id,
-  })
+  const { create, update, isCreating, isUpdating } = useCustomExerciseMutations(
+    {
+      categories,
+      userId: user?.id,
+    },
+  )
 
   const initialGroup = useMemo<HighLevelGroup | null>(() => {
     const displayGroup = exercise?.muscleGroups?.[0]?.displayGroup
@@ -72,7 +74,14 @@ export function CustomExerciseDialog({
       highLevelGroup: initialGroup,
       equipment: exercise?.equipment ?? null,
     })
-  }, [open, exercise?.id, exercise?.name, exercise?.equipment, initialName, initialGroup])
+  }, [
+    open,
+    exercise?.id,
+    exercise?.name,
+    exercise?.equipment,
+    initialName,
+    initialGroup,
+  ])
 
   const isBusy = isCreating || isUpdating
   const hasCategories = (categories?.length ?? 0) > 0
@@ -109,15 +118,13 @@ export function CustomExerciseDialog({
       <DrawerContent
         dialogTitle={title}
         onOpenAutoFocus={(e) => e.preventDefault()}
-        className={cn(
-          'data-[vaul-drawer-direction=bottom]:h-max',
-        )}
       >
         <div className="flex flex-col h-full">
           <DrawerHeader className="border-b flex-none">
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>
-              Create your own exercise so you can reuse it in workouts and templates.
+              Create your own exercise so you can reuse it in workouts and
+              templates.
             </DrawerDescription>
           </DrawerHeader>
 
@@ -146,7 +153,7 @@ export function CustomExerciseDialog({
                         key={group}
                         asChild
                         variant={selected ? 'primary' : 'secondary'}
-                        size='md-lg'
+                        size="md-lg"
                       >
                         <button
                           type="button"
@@ -178,7 +185,7 @@ export function CustomExerciseDialog({
                         key={value}
                         asChild
                         variant={selected ? 'equipment' : 'secondary'}
-                        size='md-lg'
+                        size="md-lg"
                       >
                         <button
                           type="button"
@@ -205,7 +212,11 @@ export function CustomExerciseDialog({
               <Button variant="secondary" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSubmit} disabled={!canSubmit} loading={isBusy}>
+              <Button
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                loading={isBusy}
+              >
                 {exercise?.id ? 'Save' : 'Add'}
               </Button>
             </div>
@@ -215,4 +226,3 @@ export function CustomExerciseDialog({
     </Drawer>
   )
 }
-

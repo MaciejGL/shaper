@@ -100,7 +100,7 @@ function DrawerContent({
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(
-          'group/drawer-content bg-card dark:bg-sidebar fixed z-50 flex flex-col h-max',
+          'group/drawer-content bg-card dark:bg-sidebar fixed z-50 flex flex-col h-full',
           'data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-2xl data-[vaul-drawer-direction=top]:border-b',
           'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:pb-[var(--safe-area-inset-bottom)px] data-[vaul-drawer-direction=bottom]:max-h-[calc(95dvh-var(--safe-area-inset-bottom,0px)-var(--safe-area-inset-top,0px))] data-[vaul-drawer-direction=bottom]:rounded-t-2xl',
           'data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=right]:sm:max-w-sm',
@@ -195,57 +195,4 @@ export {
   DrawerFooter,
   DrawerTitle,
   DrawerDescription,
-}
-
-type SimpleDrawerProps = {
-  title: string
-  headerIcon?: React.ReactNode
-  header?: React.ReactNode
-  children: React.ReactNode
-  footer?: React.ReactNode
-  className?: string
-  classNameDrawerContent?: string
-}
-
-export function SimpleDrawerContent({
-  title,
-  headerIcon,
-  header,
-  children,
-  footer,
-  className,
-  classNameDrawerContent,
-}: SimpleDrawerProps) {
-  const Icon = headerIcon
-  return (
-    <DrawerContent dialogTitle={title} className={classNameDrawerContent}>
-      <div className="flex flex-col h-full">
-        <DrawerHeader className="border-b flex-none">
-          {header ? (
-            header
-          ) : (
-            <DrawerTitle className="flex items-center gap-2">
-              {Icon && Icon}
-              {title}
-            </DrawerTitle>
-          )}
-        </DrawerHeader>
-
-        <div
-          className={cn(
-            'min-h-0 px-4 pt-4 pb-8 flex-1 overflow-y-auto',
-            className,
-          )}
-        >
-          {children}
-        </div>
-
-        {footer && (
-          <DrawerFooter className="sticky bottom-0 border-t p-4 flex-none">
-            {footer}
-          </DrawerFooter>
-        )}
-      </div>
-    </DrawerContent>
-  )
 }

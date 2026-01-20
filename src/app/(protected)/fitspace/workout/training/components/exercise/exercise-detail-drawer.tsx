@@ -62,11 +62,7 @@ export function ExerciseDetailDrawer({
           <Button variant="secondary" size="icon-md" iconOnly={getIcon()} />
         )}
       </DrawerTrigger>
-      <DrawerContent
-        dialogTitle="Exercise Metadata"
-        className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
-        grabber={false}
-      >
+      <DrawerContent dialogTitle="Exercise Metadata" grabber={false}>
         <div className="overflow-y-auto overscroll-behavior-y-contain">
           <DrawerClose asChild>
             <Button
