@@ -37,6 +37,8 @@ export interface ExerciseSetsProps {
   onSetsLogsChange?: (
     setsLogs: Record<string, { weight: string; reps: string }>,
   ) => void
+  appliedSuggestedWeights?: Record<string, string>
+  applySuggestedNonce?: number
 }
 
 export interface ExerciseSetProps {
@@ -61,6 +63,10 @@ export interface ExerciseMetadataProps {
   isRemoving: boolean
   activeTimerSetId: string | null
   onTimerComplete: () => void
+  onApplySuggestedLoad?: (
+    suggestions: { setId: string; suggestedWeightKg: number }[],
+  ) => void
+  isApplyingSuggestedLoad?: boolean
 }
 
 export interface ExerciseNotebookProps {

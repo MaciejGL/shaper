@@ -80,6 +80,8 @@ export function ExerciseMetadata({
   isRemoving,
   activeTimerSetId,
   onTimerComplete,
+  onApplySuggestedLoad,
+  isApplyingSuggestedLoad,
 }: ExerciseMetadataProps) {
   const { preferences } = useUserPreferences()
   const showImages = preferences.showImages ?? true
@@ -318,16 +320,21 @@ export function ExerciseMetadata({
                 baseExerciseId={currentExercise.baseId}
                 exerciseName={currentExercise.name}
                 sets={exerciseSets.map((s) => ({
+                  setId: s.id,
                   order: s.order,
                   minReps: s.minReps ?? null,
                   maxReps: s.maxReps ?? null,
                 }))}
                 previousLogs={previousLogs ?? null}
+                onApplySuggested={onApplySuggestedLoad}
+                isApplyingSuggested={isApplyingSuggestedLoad}
                 trigger={
                   <Button
                     variant="secondary"
                     size="icon-md"
-                    iconOnly={<BarChart4 className="text-blue-500!" />}
+                    iconOnly={
+                      <BarChart4 className="text-blue-600 dark:text-blue-400" />
+                    }
                   />
                 }
               />

@@ -47,10 +47,12 @@ export function ExerciseDetailDrawer({
     return null
 
   const getIcon = () => {
-    if (videoUrl) return <VideoIcon className="text-amber-500!" />
-    if (images.length) return <ImageIcon className="text-amber-500!" />
+    if (videoUrl)
+      return <VideoIcon className="text-amber-500 dark:text-amber-400" />
+    if (images.length)
+      return <ImageIcon className="text-amber-500 dark:text-amber-400" />
     if (instructions?.length || tips?.length || description)
-      return <BookIcon className="text-amber-500!" />
+      return <BookIcon className="text-amber-500 dark:text-amber-400" />
   }
 
   return (

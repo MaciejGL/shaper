@@ -2,7 +2,7 @@
 
 import { BarChart4 } from 'lucide-react'
 import type { ReactElement } from 'react'
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
@@ -25,10 +25,17 @@ export function ExerciseStatsDrawer({
   sets,
   previousLogs,
   trigger,
+  onApplySuggested,
+  isApplyingSuggested,
 }: {
   baseExerciseId: string
   exerciseName: string
-  sets?: { order: number; minReps: number | null; maxReps: number | null }[]
+  sets?: {
+    setId: string
+    order: number
+    minReps: number | null
+    maxReps: number | null
+  }[]
   previousLogs?:
     | {
         order: number
@@ -36,10 +43,16 @@ export function ExerciseStatsDrawer({
       }[]
     | null
   trigger?: ReactElement
+  onApplySuggested?: (
+    suggestions: { setId: string; suggestedWeightKg: number }[],
+  ) => void
+  isApplyingSuggested?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('3months')
   const chartId = useId().replace(/:/g, '')
+  const wasApplyingRef = useRef(false)
+  const didTriggerApplyRef = useRef(false)
 
   const { weightUnit, toDisplayWeight } = useWeightConversion()
   const { exercise, isLoading } = useExerciseStatsQuery({
@@ -68,6 +81,25 @@ export function ExerciseStatsDrawer({
     volume: { label: `Volume (${weightUnit})`, color: 'var(--chart-2)' },
   }
 
+  useEffect(() => {
+    if (!open) {
+      wasApplyingRef.current = false
+      didTriggerApplyRef.current = false
+      return
+    }
+
+    if (isApplyingSuggested) {
+      wasApplyingRef.current = true
+      return
+    }
+
+    if (didTriggerApplyRef.current && wasApplyingRef.current) {
+      setOpen(false)
+      didTriggerApplyRef.current = false
+      wasApplyingRef.current = false
+    }
+  }, [isApplyingSuggested, open])
+
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild suppressHydrationWarning>
@@ -78,20 +110,29 @@ export function ExerciseStatsDrawer({
         )}
       </DrawerTrigger>
 
-      <DrawerContent dialogTitle="Exercise stats" className="max-h-[92vh]">
-        <div className="flex flex-col min-h-0">
+      <DrawerContent
+        dialogTitle="Exercise stats"
+        className="max-h-[92vh] "
+        grabberAbsolute
+      >
+        <div className="flex flex-col min-h-0 ">
           <ExerciseStatsHeader
             exerciseName={exerciseName}
             lastPerformedLabel={lastPerformedLabel}
           />
 
-          <div className="flex-1 overflow-y-auto px-4 pb-[calc(var(--safe-area-inset-bottom)+24px)] space-y-6">
+          <div className="flex-1 px-4 pb-[calc(var(--safe-area-inset-bottom)+24px)] space-y-10 overflow-y-auto hide-scrollbar">
             {sets?.length ? (
               <WorkoutSuggestionsList
                 sets={sets}
                 previousLogs={previousLogs ?? null}
                 weightUnit={weightUnit}
                 toDisplayWeight={toDisplayWeight}
+                onApplySuggested={(suggestions) => {
+                  didTriggerApplyRef.current = true
+                  onApplySuggested?.(suggestions)
+                }}
+                isApplyingSuggested={isApplyingSuggested}
               />
             ) : null}
 
@@ -101,24 +142,28 @@ export function ExerciseStatsDrawer({
               suggestions={repMaxSuggestions}
             />
 
-            <div className="space-y-4 pt-2 border-t border-border/50">
-              <ExerciseStatsPeriodTabs
-                timePeriod={timePeriod}
-                onTimePeriodChange={setTimePeriod}
-              />
+            <div>
+              <div className="flex items-center justify-between pb-4">
+                <p className="text-lg font-medium">Progress</p>
+
+                <ExerciseStatsPeriodTabs
+                  timePeriod={timePeriod}
+                  onTimePeriodChange={setTimePeriod}
+                />
+              </div>
 
               {isLoading ? <LoadingSkeleton variant="lg" count={2} /> : null}
-
-              <OneRmProgressCard
-                chartId={chartId}
-                chartConfig={chartConfig}
-                oneRmSeries={oneRmSeries}
-                currentOneRM={currentOneRM}
-                oneRmChangePercent={oneRmChangePercent}
-                weightUnit={weightUnit}
-                sessionsCount={exercise?.estimated1RMProgress?.length ?? 0}
-              />
-
+              <div className="pb-6">
+                <OneRmProgressCard
+                  chartId={chartId}
+                  chartConfig={chartConfig}
+                  oneRmSeries={oneRmSeries}
+                  currentOneRM={currentOneRM}
+                  oneRmChangePercent={oneRmChangePercent}
+                  weightUnit={weightUnit}
+                sessionsCount={oneRmSeries.length}
+                />
+              </div>
               <WeeklyVolumeCard
                 chartId={chartId}
                 chartConfig={chartConfig}

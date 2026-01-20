@@ -34,6 +34,8 @@ export function ExerciseSets({
   onSetCompleted,
   onSetUncompleted,
   onSetsLogsChange,
+  appliedSuggestedWeights,
+  applySuggestedNonce,
 }: ExerciseSetsProps) {
   const isFirstRender = useIsFirstRender()
   const { trainingId } = useParams<{ trainingId: string }>()
@@ -69,6 +71,20 @@ export function ExerciseSets({
     })
     return initialState
   })
+
+  // Force-overwrite weights when user applies suggested load
+  useEffect(() => {
+    if (!applySuggestedNonce || !appliedSuggestedWeights) return
+
+    setSetsLogs((prev) => {
+      const updated = { ...prev }
+      Object.entries(appliedSuggestedWeights).forEach(([setId, weight]) => {
+        if (!updated[setId]) return
+        updated[setId] = { ...updated[setId], weight }
+      })
+      return updated
+    })
+  }, [appliedSuggestedWeights, applySuggestedNonce])
 
   // Keep setsLogs in sync with exercise sets (for when new sets are added/removed/updated)
   useEffect(() => {

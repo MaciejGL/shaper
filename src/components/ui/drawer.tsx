@@ -35,16 +35,16 @@ function Drawer({
   })
 
   return (
-    <RemoveScroll enabled={currentOpen}>
-      <DrawerPrimitive.Root
-        repositionInputs={false}
-        data-slot="drawer"
-        modal={true}
-        open={currentOpen}
-        onOpenChange={handleOpenChange}
-        {...props}
-      />
-    </RemoveScroll>
+    // <RemoveScroll enabled={currentOpen}>
+    <DrawerPrimitive.Root
+      repositionInputs={false}
+      data-slot="drawer"
+      modal={true}
+      open={currentOpen}
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+    // </RemoveScroll>
   )
 }
 
@@ -117,7 +117,7 @@ function DrawerContent({
             className={cn(
               'bg-primary/30 mx-auto my-2 hidden h-1.5 w-[70px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block',
               grabberAbsolute &&
-                'group-data-[vaul-drawer-direction=bottom]/drawer-content:absolute bg-black/60 z-100 top-2 left-0 right-0 my-0',
+                'group-data-[vaul-drawer-direction=bottom]/drawer-content:absolute z-100 top-2 left-0 right-0 my-0',
             )}
           />
         )}
@@ -125,7 +125,7 @@ function DrawerContent({
         {grabber && (
           <div
             className={cn(
-              'bg-primary/30 mx-auto my-2 hidden h-1 w-[70px] shrink-0 rounded-full group-data-[vaul-drawer-direction=top]/drawer-content:block',
+              'mx-auto my-2 hidden h-1 w-[70px] shrink-0 rounded-full group-data-[vaul-drawer-direction=top]/drawer-content:block',
               grabberAbsolute && 'absolute bottom-0 left-0 right-0',
             )}
           />

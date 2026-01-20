@@ -12,8 +12,11 @@ export function ExerciseStatsPeriodTabs({
   onTimePeriodChange: (timePeriod: TimePeriod) => void
 }) {
   return (
-    <div className="flex justify-center pt-1">
-      <Tabs value={timePeriod} onValueChange={(v) => onTimePeriodChange(v as TimePeriod)}>
+    <div className="flex justify-center">
+      <Tabs
+        value={timePeriod}
+        onValueChange={(v) => onTimePeriodChange(v as TimePeriod)}
+      >
         <TabsList variant="secondary" rounded="full" size="sm">
           <TabsTrigger rounded="full" value="1month" size="sm">
             1M
@@ -35,4 +38,3 @@ export function ExerciseStatsPeriodTabs({
     </div>
   )
 }
-

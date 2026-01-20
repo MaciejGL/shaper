@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 
 const cardVariants = cva(
   cn(
-    'text-card-foreground flex flex-col gap-6 rounded-2xl py-4 relative bg-card border border-border transition-[border,shadow] duration-200 shadow-xl',
+    'text-card-foreground flex flex-col gap-6 rounded-2xl py-4 relative bg-card border border-border transition-[border,shadow] duration-200 shadow-lg',
   ),
   {
     variants: {
@@ -24,6 +24,7 @@ const cardVariants = cva(
           'after:bg-gradient-to-tl after:from-foreground/12 after:via-transparent after:to-transparent after:opacity-60',
         ),
         tertiary: 'bg-card-on-card border-border',
+        default: 'border-border',
         highlighted: cn(
           ' bg-linear-to-tr dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-800 from-neutral-100 via-neutral-300 to-neutral-400 border-none',
         ),

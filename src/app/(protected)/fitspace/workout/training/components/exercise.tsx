@@ -18,6 +18,7 @@ import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { ExerciseMetadata } from './exercise/exercise-metadata'
 import { ExerciseSets } from './exercise/exercise-sets'
 import { ExerciseProps } from './exercise/types'
+import { useApplySuggestedLoad } from './exercise/use-apply-suggested-load'
 import { createOptimisticExerciseUpdate } from './optimistic-updates'
 
 export function Exercise({
@@ -39,6 +40,15 @@ export function Exercise({
   const [setsLogs, setSetsLogs] = useState<
     Record<string, { weight: string; reps: string }>
   >({})
+
+  const [appliedSuggestedWeights, setAppliedSuggestedWeights] = useState<
+    Record<string, string>
+  >({})
+  const [applySuggestedNonce, setApplySuggestedNonce] = useState(0)
+
+  const { applySuggestedLoad, isApplyingSuggestedLoad } = useApplySuggestedLoad({
+    dayId: dayId ?? '',
+  })
 
   const { mutateAsync: markSetAsCompleted } =
     useFitspaceMarkSetAsCompletedMutation()
@@ -278,6 +288,34 @@ export function Exercise({
     setSetsLogs(newSetsLogs)
   }
 
+  const handleApplySuggestedLoad = async (
+    suggestions: { setId: string; suggestedWeightKg: number }[],
+  ) => {
+    const nextWeights: Record<string, string> = {}
+    suggestions.forEach((s) => {
+      nextWeights[s.setId] = s.suggestedWeightKg.toString()
+    })
+
+    // Immediate UI update (inputs)
+    setAppliedSuggestedWeights(nextWeights)
+    setApplySuggestedNonce((n) => n + 1)
+
+    try {
+      await applySuggestedLoad(suggestions)
+    } catch (error) {
+      console.error('Failed to apply suggested load:', error)
+
+      // Re-sync inputs to current cache-backed exercise logs (after rollback)
+      const rollbackWeights: Record<string, string> = {}
+      const currentSets = exercise.substitutedBy?.sets || exercise.sets
+      currentSets.forEach((set) => {
+        rollbackWeights[set.id] = set.log?.weight?.toString() ?? ''
+      })
+      setAppliedSuggestedWeights(rollbackWeights)
+      setApplySuggestedNonce((n) => n + 1)
+    }
+  }
+
   return (
     <div className="bg-linear-to-b from-white via-white to-background dark:from-background dark:via-background dark:to-background-subtle">
       <div id={exercise.id}>
@@ -291,6 +329,8 @@ export function Exercise({
           isRemoving={isRemoving}
           activeTimerSetId={activeTimerSetId}
           onTimerComplete={handleTimerComplete}
+          onApplySuggestedLoad={handleApplySuggestedLoad}
+          isApplyingSuggestedLoad={isApplyingSuggestedLoad}
         />
       </div>
       <div
@@ -306,6 +346,8 @@ export function Exercise({
           onSetCompleted={handleSetCompleted}
           onSetUncompleted={handleSetUncompleted}
           onSetsLogsChange={handleSetsLogsChange}
+          appliedSuggestedWeights={appliedSuggestedWeights}
+          applySuggestedNonce={applySuggestedNonce}
         />
       </div>
     </div>
