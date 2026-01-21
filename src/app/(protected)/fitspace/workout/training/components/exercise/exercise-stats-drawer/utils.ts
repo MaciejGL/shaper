@@ -115,7 +115,8 @@ export function buildWeeklyVolumeSeriesKg(
       if (!date) return null
 
       const volumeKg =
-        typeof entry.totalVolume === 'number' && Number.isFinite(entry.totalVolume)
+        typeof entry.totalVolume === 'number' &&
+        Number.isFinite(entry.totalVolume)
           ? entry.totalVolume
           : 0
       const sets =
@@ -191,4 +192,3 @@ export function buildRepMaxSuggestionsKg(
 
   return suggestions
 }
-
