@@ -35,7 +35,7 @@ export async function createSupportChatForUser(userId: string): Promise<void> {
         chatId: chat.id,
         senderId: SUPPORT_ACCOUNT_ID,
         content:
-          'Hey! I’m Mats from Hypro Team. Welcome to Hypro — message me anytime if you want help navigating the app or choosing what to do next. We reply personally (no bots), so I’ll get back to you when I’m available.',
+          'Hey! 👋 I’m Mats from Hypro Team. Welcome to Hypro — message me anytime if you want help navigating the app or choosing what to do next. We reply personally (no bots), so I’ll get back to you when I’m available.',
       },
     })
   } catch (error) {
