@@ -380,7 +380,7 @@ export function AddSingleExercise({
       >
         <DrawerContent
           dialogTitle="Build my own workout"
-          className="max-h-[85vh]"
+          className="max-h-[85vh] h-full"
         >
           {drawerContent}
         </DrawerContent>
@@ -402,7 +402,7 @@ export function AddSingleExercise({
         </DrawerTrigger>
         <DrawerContent
           dialogTitle="Add Single Exercise"
-          className="max-h-[85vh]"
+          className="max-h-[85vh] h-full"
         >
           {drawerContent}
         </DrawerContent>
@@ -430,7 +430,10 @@ export function AddSingleExercise({
           </CardContent>
         </Card>
       </DrawerTrigger>
-      <DrawerContent dialogTitle="Add Single Exercise" className="max-h-[85vh]">
+      <DrawerContent
+        dialogTitle="Add Single Exercise"
+        className="max-h-[85vh] h-full"
+      >
         {drawerContent}
       </DrawerContent>
     </Drawer>

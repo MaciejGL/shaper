@@ -174,8 +174,8 @@ export function TrainerDetailsDrawer({
         dialogTitle={`${trainerName} - Trainer Details`}
         grabberAbsolute
       >
-        <div className="flex flex-col h-full">
-          <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-0 pb-20 space-y-8">
+        <div className="flex flex-col h-full overflow-y-auto">
+          <div className="min-h-0 flex-1 p-4 pt-0 pb-20 space-y-8">
             {/* Trainer Card Header */}
             <div className="-mx-4">
               <TrainerCard

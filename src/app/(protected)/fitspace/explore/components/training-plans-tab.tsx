@@ -534,14 +534,16 @@ export function TrainingPlansTab({
           dialogTitle={selectedPlan?.title || 'Plan'}
           grabberAbsolute
         >
-          {selectedPlan && (
-            <TrainingPlanPreviewContent
-              plan={selectedPlan}
-              onAssignTemplate={handleAssignTemplate}
-              isAssigning={isAssigning}
-              weeksData={selectedPlan}
-            />
-          )}
+          <div className="overflow-y-auto">
+            {selectedPlan && (
+              <TrainingPlanPreviewContent
+                plan={selectedPlan}
+                onAssignTemplate={handleAssignTemplate}
+                isAssigning={isAssigning}
+                weeksData={selectedPlan}
+              />
+            )}
+          </div>
         </DrawerContent>
       </Drawer>
     </div>

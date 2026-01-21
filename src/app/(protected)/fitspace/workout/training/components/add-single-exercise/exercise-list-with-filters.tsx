@@ -191,7 +191,7 @@ export function ExerciseListWithFilters({
     })
 
   const headerContent = (
-    <div className="pb-3">
+    <div className="pb-3 overflow-x-hidden">
       {suggestions ? <div className="mt-6 mb-2 px-3">{suggestions}</div> : null}
       <div className="p-3 bg-background/50 dark:bg-background">
         {!showWeeklyFocusVolume && (
