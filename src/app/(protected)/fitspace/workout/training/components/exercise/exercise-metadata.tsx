@@ -319,11 +319,13 @@ export function ExerciseMetadata({
               <ExerciseStatsDrawer
                 baseExerciseId={currentExercise.baseId}
                 exerciseName={currentExercise.name}
+                equipment={exercise.equipment ?? null}
                 sets={exerciseSets.map((s) => ({
                   setId: s.id,
                   order: s.order,
                   minReps: s.minReps ?? null,
                   maxReps: s.maxReps ?? null,
+                  loggedWeightKg: s.log?.weight ?? null,
                 }))}
                 previousLogs={previousLogs ?? null}
                 onApplySuggested={onApplySuggestedLoad}

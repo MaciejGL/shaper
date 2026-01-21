@@ -53,6 +53,7 @@ fragment WorkoutExerciseData on TrainingExercise {
   id
   name
   baseId
+  equipment
   restSeconds
   tempo
   warmupSets

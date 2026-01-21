@@ -192,12 +192,3 @@ export function buildRepMaxSuggestionsKg(
   return suggestions
 }
 
-export function roundDisplayWeight(
-  displayWeight: number,
-  unit: 'kg' | 'lbs',
-): number {
-  if (!Number.isFinite(displayWeight)) return 0
-  const step = unit === 'lbs' ? 5 : 2.5
-  return Math.round(displayWeight / step) * step
-}
-

@@ -65,7 +65,7 @@ export interface ExerciseMetadataProps {
   onTimerComplete: () => void
   onApplySuggestedLoad?: (
     suggestions: { setId: string; suggestedWeightKg: number }[],
-  ) => void
+  ) => Promise<void>
   isApplyingSuggestedLoad?: boolean
 }
 

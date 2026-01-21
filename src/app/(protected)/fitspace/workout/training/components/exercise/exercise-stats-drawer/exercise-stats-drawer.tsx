@@ -2,11 +2,12 @@
 
 import { BarChart4 } from 'lucide-react'
 import type { ReactElement } from 'react'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import type { GQLEquipment } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import { useExerciseStatsQuery } from './data'
@@ -22,6 +23,7 @@ import { WorkoutSuggestionsList } from './workout-suggestions-list'
 export function ExerciseStatsDrawer({
   baseExerciseId,
   exerciseName,
+  equipment,
   sets,
   previousLogs,
   trigger,
@@ -30,11 +32,13 @@ export function ExerciseStatsDrawer({
 }: {
   baseExerciseId: string
   exerciseName: string
+  equipment?: GQLEquipment | null
   sets?: {
     setId: string
     order: number
     minReps: number | null
     maxReps: number | null
+    loggedWeightKg?: number | null
   }[]
   previousLogs?:
     | {
@@ -45,14 +49,12 @@ export function ExerciseStatsDrawer({
   trigger?: ReactElement
   onApplySuggested?: (
     suggestions: { setId: string; suggestedWeightKg: number }[],
-  ) => void
+  ) => Promise<void>
   isApplyingSuggested?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('3months')
   const chartId = useId().replace(/:/g, '')
-  const wasApplyingRef = useRef(false)
-  const didTriggerApplyRef = useRef(false)
 
   const { weightUnit, toDisplayWeight } = useWeightConversion()
   const { exercise, isLoading } = useExerciseStatsQuery({
@@ -80,25 +82,6 @@ export function ExerciseStatsDrawer({
     oneRM: { label: `1RM (${weightUnit})`, color: 'var(--chart-1)' },
     volume: { label: `Volume (${weightUnit})`, color: 'var(--chart-2)' },
   }
-
-  useEffect(() => {
-    if (!open) {
-      wasApplyingRef.current = false
-      didTriggerApplyRef.current = false
-      return
-    }
-
-    if (isApplyingSuggested) {
-      wasApplyingRef.current = true
-      return
-    }
-
-    if (didTriggerApplyRef.current && wasApplyingRef.current) {
-      setOpen(false)
-      didTriggerApplyRef.current = false
-      wasApplyingRef.current = false
-    }
-  }, [isApplyingSuggested, open])
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -128,10 +111,8 @@ export function ExerciseStatsDrawer({
                 previousLogs={previousLogs ?? null}
                 weightUnit={weightUnit}
                 toDisplayWeight={toDisplayWeight}
-                onApplySuggested={(suggestions) => {
-                  didTriggerApplyRef.current = true
-                  onApplySuggested?.(suggestions)
-                }}
+                equipment={equipment ?? null}
+                onApplySuggested={onApplySuggested}
                 isApplyingSuggested={isApplyingSuggested}
               />
             ) : null}
