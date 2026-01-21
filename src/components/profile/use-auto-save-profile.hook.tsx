@@ -93,10 +93,10 @@ export function useAutoSaveProfile() {
         ...latestChangesRef.current,
         // Always include required fields
         firstName:
-          latestChangesRef.current.firstName || currentServerProfile.firstName,
+          latestChangesRef.current.firstName ?? currentServerProfile.firstName,
         lastName:
-          latestChangesRef.current.lastName || currentServerProfile.lastName,
-        email: latestChangesRef.current.email || currentServerProfile.email,
+          latestChangesRef.current.lastName ?? currentServerProfile.lastName,
+        email: latestChangesRef.current.email ?? currentServerProfile.email,
       }
 
       try {

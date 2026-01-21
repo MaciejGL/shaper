@@ -3,6 +3,7 @@
 import { ChevronLeft, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { HyproTeamBadge } from '@/components/ui/hypro-team-badge'
 import { UserAvatar } from '@/components/user-avatar'
 import { cn } from '@/lib/utils'
 
@@ -13,6 +14,7 @@ interface MobileChatHeaderProps {
     firstName?: string | null
     lastName?: string | null
   } | null
+  isHyproTeam?: boolean
   isLoading: boolean
   onBack: () => void
   onClose: () => void
@@ -22,6 +24,7 @@ export function MobileChatHeader({
   partnerName,
   partnerAvatar,
   partner,
+  isHyproTeam = false,
   isLoading,
   onBack,
   onClose,
@@ -44,7 +47,12 @@ export function MobileChatHeader({
           className="size-8"
         />
         <div className={cn('min-w-0', isLoading && 'masked-placeholder-text')}>
-          <div className="text-base font-medium truncate">{partnerName}</div>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="text-base font-medium truncate">{partnerName}</div>
+            {isHyproTeam ? (
+              <HyproTeamBadge />
+            ) : null}
+          </div>
         </div>
       </div>
 

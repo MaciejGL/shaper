@@ -11,7 +11,8 @@ import { Account, Profile } from 'next-auth'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
-import { captureServerEvent, ServerEvent } from '@/lib/posthog-server'
+import { ServerEvent, captureServerEvent } from '@/lib/posthog-server'
+import { createSupportChatForUser } from '@/lib/support-chat'
 
 import {
   type GoogleProfile,
@@ -109,6 +110,8 @@ export async function handleGoogleSignIn(
         data: mapGoogleAccountForLinking(sanitizedProfile, mappedAccount),
       })
 
+      await createSupportChatForUser(existingUser.id)
+
       console.info(
         `Linked Google account to existing user: ${existingUser.email}`,
       )
@@ -140,6 +143,8 @@ export async function handleGoogleSignIn(
           },
         },
       })
+
+      await createSupportChatForUser(newUser.id)
 
       captureServerEvent({
         distinctId: newUser.id,

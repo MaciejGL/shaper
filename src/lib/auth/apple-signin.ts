@@ -11,7 +11,8 @@ import { Account, Profile } from 'next-auth'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { notifyAdminNewUser } from '@/lib/notifications/admin-notifications'
-import { captureServerEvent, ServerEvent } from '@/lib/posthog-server'
+import { ServerEvent, captureServerEvent } from '@/lib/posthog-server'
+import { createSupportChatForUser } from '@/lib/support-chat'
 
 import {
   type AppleProfile,
@@ -85,6 +86,8 @@ export async function handleAppleSignIn(
         data: mapAppleAccountForLinking(sanitizedProfile),
       })
 
+      await createSupportChatForUser(existingUser.id)
+
       console.info(
         `Linked Apple account to existing user: ${existingUser.email}`,
       )
@@ -107,6 +110,8 @@ export async function handleAppleSignIn(
           },
         },
       })
+
+      await createSupportChatForUser(newUser.id)
 
       captureServerEvent({
         distinctId: newUser.id,

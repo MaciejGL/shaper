@@ -101,17 +101,11 @@ export const Navbar = ({
   const { totalUnreadCount, notifications } = useUnreadMessageCount(userContext)
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
 
-  const isTrainer = user?.user?.role === GQLUserRole.Trainer
-
   const linkToDashboard =
     user?.user?.role === 'TRAINER'
       ? TRAINER_LINKS.clients.href
       : CLIENT_LINKS.workout.href
   const isFitspace = pathname.startsWith('/fitspace')
-
-  const showMessenger =
-    (user?.user?.role === GQLUserRole.Client && user?.user?.trainerId) ||
-    isTrainer
 
   return (
     <>
@@ -119,7 +113,7 @@ export const Navbar = ({
         <div
           className={cn(
             'py-3 px-4 flex justify-between items-center bg-sidebar',
-            'mt-[var(--safe-area-inset-top)]',
+            'mt-(--safe-area-inset-top)',
             withSidebar && 'border-b border-border',
           )}
         >
@@ -145,23 +139,21 @@ export const Navbar = ({
             ) : (
               <div className="h-[60px]" />
             )}
-            {showMessenger && (
-              <div className="relative dark">
-                <Button
-                  variant="outline"
-                  iconOnly={
-                    <MessageSquare className="text-sidebar-foreground dark" />
-                  }
-                  onClick={() => setIsMessengerOpen(true)}
-                  className="rounded-full"
-                />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-sky-700 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
-                    {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
-                  </span>
-                )}
-              </div>
-            )}
+            <div className="relative dark">
+              <Button
+                variant="outline"
+                iconOnly={
+                  <MessageSquare className="text-sidebar-foreground dark" />
+                }
+                onClick={() => setIsMessengerOpen(true)}
+                className="rounded-full"
+              />
+              {totalUnreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-sky-700 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
+                  {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+                </span>
+              )}
+            </div>
             {userContext ? (
               <NavbarUser user={userContext} />
             ) : (
@@ -172,17 +164,15 @@ export const Navbar = ({
       </div>
 
       {/* Messenger Modal */}
-      {showMessenger && (
-        <MessengerModal
-          isOpen={isMessengerOpen}
-          onClose={() => setIsMessengerOpen(false)}
-          partnerId={
-            user?.user?.role === GQLUserRole.Client
-              ? (user.user.trainerId ?? undefined)
-              : undefined
-          }
-        />
-      )}
+      <MessengerModal
+        isOpen={isMessengerOpen}
+        onClose={() => setIsMessengerOpen(false)}
+        partnerId={
+          user?.user?.role === GQLUserRole.Client
+            ? (user.user.trainerId ?? undefined)
+            : undefined
+        }
+      />
     </>
   )
 }

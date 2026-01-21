@@ -8,46 +8,36 @@ export async function createSupportChatForUser(userId: string): Promise<void> {
   }
 
   try {
-    const chat = await prisma.chat.upsert({
+    const existingChat = await prisma.chat.findUnique({
       where: {
         trainerId_clientId: {
           trainerId: SUPPORT_ACCOUNT_ID,
           clientId: userId,
         },
       },
-      update: {
-        updatedAt: new Date(),
-      },
-      create: {
+      select: { id: true },
+    })
+
+    // Fast path: chat already exists (no extra work on repeated logins)
+    if (existingChat) return
+
+    const chat = await prisma.chat.create({
+      data: {
         trainerId: SUPPORT_ACCOUNT_ID, // Support account is trainer
         clientId: userId, // User is client
       },
+      select: { id: true },
     })
 
-    // Check if this chat needs a welcome message (for newly created chats)
-    const existingMessages = await prisma.message.count({
-      where: { chatId: chat.id },
+    // Welcome message (sent once — only for newly created chat)
+    await prisma.message.create({
+      data: {
+        chatId: chat.id,
+        senderId: SUPPORT_ACCOUNT_ID,
+        content:
+          'Hey! I’m Mats from Hypro Team. Welcome to Hypro — message me anytime if you want help navigating the app or choosing what to do next. We reply personally (no bots), so I’ll get back to you when I’m available.',
+      },
     })
-
-    if (existingMessages === 0) {
-      await prisma.message.create({
-        data: {
-          chatId: chat.id,
-          senderId: SUPPORT_ACCOUNT_ID,
-          content: `Welcome to Hypro Premium!
-
-Thank you for subscribing! I'm here to help you get the most out of your premium experience.
-
-As a premium member, you have access to:
-• Advanced training features
-• Priority support
-• Enhanced progress tracking
-• Direct trainer connections
-
-If you have any questions or need assistance, just send me a message. I'm here to help!`,
-        },
-      })
-    }
   } catch (error) {
     // Log error but don't fail the payment/subscription process
     console.error('Failed to create support chat for user:', error)

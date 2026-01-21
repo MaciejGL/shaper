@@ -3,9 +3,11 @@
 import { X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
+import { HyproTeamBadge } from '@/components/ui/hypro-team-badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useUser } from '@/context/user-context'
+import { SUPPORT_ACCOUNT_ID } from '@/lib/support-account'
 
 import { ChatListPage } from './chat-list-page'
 import { ChatSidebar } from './chat-sidebar'
@@ -61,6 +63,7 @@ export function MessengerModal({
   // Get partner display info
   const partnerName = partner ? getUserDisplayName(partner) : 'User'
   const partnerAvatar = partner?.image || undefined
+  const isHyproTeam = partner?.id === SUPPORT_ACCOUNT_ID
 
   const { isPartnerTyping, notifyTypingActivity } = useRealtimeChat({
     enabled: isOpen,
@@ -192,8 +195,11 @@ export function MessengerModal({
 
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
               <div className="flex items-center gap-3 px-4 py-3">
-                <div className="text-base font-medium truncate">
-                  {partnerName}
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="text-base font-medium truncate">
+                    {partnerName}
+                  </div>
+                  {isHyproTeam ? <HyproTeamBadge /> : null}
                 </div>
                 <Button
                   variant="ghost"
@@ -255,6 +261,7 @@ export function MessengerModal({
                 partnerName={partnerName}
                 partnerAvatar={partnerAvatar}
                 partner={partner}
+                isHyproTeam={isHyproTeam}
                 isLoading={isLoading}
                 onBack={handleMobileBack}
                 onClose={onClose}

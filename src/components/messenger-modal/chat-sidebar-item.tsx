@@ -2,7 +2,9 @@
 
 import { formatDistanceToNow } from 'date-fns'
 
+import { HyproTeamBadge } from '@/components/ui/hypro-team-badge'
 import { UserAvatar } from '@/components/user-avatar'
+import { SUPPORT_ACCOUNT_ID } from '@/lib/support-account'
 import { cn } from '@/lib/utils'
 
 import { getUserDisplayName } from './utils'
@@ -48,6 +50,8 @@ export function ChatSidebarItem({
   partner,
   onClick,
 }: ChatSidebarItemProps) {
+  const isHyproTeam = partner.id === SUPPORT_ACCOUNT_ID
+
   return (
     <button
       type="button"
@@ -67,19 +71,22 @@ export function ChatSidebarItem({
             className="size-10"
           />
           {isPartnerUnread && (
-            <div className="absolute -top-1 -right-1 size-3 bg-primary rounded-full" />
+            <div className="absolute -top-1 -right-1 size-3 bg-sky-600 rounded-full" />
           )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1 min-w-0">
-            <p
-              className={cn(
-                'text-sm truncate flex-1 min-w-0',
-                isPartnerUnread ? 'font-semibold' : 'font-medium',
-              )}
-            >
-              {getUserDisplayName(partner)}
-            </p>
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span
+                className={cn(
+                  'text-sm truncate min-w-0',
+                  isPartnerUnread ? 'font-semibold' : 'font-medium',
+                )}
+              >
+                {getUserDisplayName(partner)}
+              </span>
+              {isHyproTeam ? <HyproTeamBadge /> : null}
+            </div>
             {chat.lastMessage && (
               <span className="text-xs text-muted-foreground shrink-0 ml-2">
                 {formatDistanceToNow(new Date(chat.lastMessage.createdAt), {
