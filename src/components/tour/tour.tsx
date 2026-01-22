@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import {
   useCallback,
   useEffect,
@@ -9,7 +10,6 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { motion } from 'framer-motion'
 
 import { TourPopover } from './tour-popover'
 import { TourSpotlight } from './tour-spotlight'
