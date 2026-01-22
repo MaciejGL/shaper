@@ -28,6 +28,11 @@ import { createUserLoaders } from './loaders/user.loader'
 // Initialize monitoring (only active in development)
 import './monitoring/user-cache'
 
+declare global {
+  // Prevent interval duplication across dev HMR/module reloads
+  var __getUserCleanupInterval: NodeJS.Timeout | undefined
+}
+
 export type User = {
   id: string
   email: string
@@ -129,7 +134,12 @@ function cleanupExpiredCacheEntries(): void {
 }
 
 // Start periodic cleanup
-setInterval(cleanupExpiredCacheEntries, CLEANUP_INTERVAL)
+if (!globalThis.__getUserCleanupInterval) {
+  globalThis.__getUserCleanupInterval = setInterval(
+    cleanupExpiredCacheEntries,
+    CLEANUP_INTERVAL,
+  )
+}
 
 // ============================================================================
 // User Fetching
