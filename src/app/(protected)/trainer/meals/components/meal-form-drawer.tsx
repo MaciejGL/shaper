@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
+import posthog from 'posthog-js'
 import { useEffect } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -24,7 +25,9 @@ import {
   useAddIngredientToMealMutation,
   useCreateMealInLibraryMutation,
   useGetMealsForLibraryQuery,
+  useRemoveIngredientFromMealInLibraryMutation,
   useUpdateMealInLibraryMutation,
+  useUpdateMealIngredientInLibraryMutation,
 } from '@/generated/graphql-client'
 
 type Meal = NonNullable<GQLGetMealsForLibraryQuery['teamMeals']>[number]
@@ -117,6 +120,8 @@ export function MealFormDrawer({
   const createMealMutation = useCreateMealInLibraryMutation()
   const updateMealMutation = useUpdateMealInLibraryMutation()
   const addIngredientMutation = useAddIngredientToMealMutation()
+  const removeIngredientMutation = useRemoveIngredientFromMealInLibraryMutation()
+  const updateMealIngredientMutation = useUpdateMealIngredientInLibraryMutation()
 
   const form = useForm<MealFormData>({
     resolver: zodResolver(mealFormSchema),
@@ -201,7 +206,7 @@ export function MealFormDrawer({
 
         toast.success('Meal created successfully!')
         queryClient.invalidateQueries({
-          queryKey: useGetMealsForLibraryQuery.getKey({}),
+          queryKey: useGetMealsForLibraryQuery.getKey(),
         })
 
         if (onSuccess) {
@@ -223,9 +228,58 @@ export function MealFormDrawer({
           },
         })
 
+        const existingIngredients = meal.ingredients ?? []
+        const desiredIngredients = values.ingredients ?? []
+
+        const existingByIngredientId = new Map(
+          existingIngredients.map((mi) => [
+            mi.ingredient.id,
+            { mealIngredientId: mi.id, grams: mi.grams },
+          ]),
+        )
+
+        const desiredByIngredientId = new Map(
+          desiredIngredients.map((i) => [i.id, { grams: i.grams }]),
+        )
+
+        // Remove ingredients that were removed in the form
+        for (const existing of existingIngredients) {
+          if (!desiredByIngredientId.has(existing.ingredient.id)) {
+            await removeIngredientMutation.mutateAsync({ id: existing.id })
+          }
+        }
+
+        // Add new ingredients
+        for (const desired of desiredIngredients) {
+          if (!existingByIngredientId.has(desired.id)) {
+            await addIngredientMutation.mutateAsync({
+              input: {
+                mealId: meal.id,
+                ingredientId: desired.id,
+                grams: desired.grams,
+              },
+            })
+          }
+        }
+
+        // Update grams for existing ingredients
+        for (const [ingredientId, existing] of existingByIngredientId) {
+          const desired = desiredByIngredientId.get(ingredientId)
+          if (!desired) continue
+
+          if (existing.grams !== desired.grams) {
+            await updateMealIngredientMutation.mutateAsync({
+              input: {
+                id: existing.mealIngredientId,
+                grams: desired.grams,
+              },
+            })
+          }
+        }
+
         toast.success('Meal updated successfully!')
         queryClient.invalidateQueries({
-          queryKey: useGetMealsForLibraryQuery.getKey({}),
+          queryKey: useGetMealsForLibraryQuery.getKey(),
         })
 
         if (onSuccess) {
@@ -236,18 +290,37 @@ export function MealFormDrawer({
       onOpenChange(false)
       form.reset()
     } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error')
+      posthog.captureException(err, {
+        context: 'meal_library_meal_form_drawer',
+        mode,
+        mealId: meal?.id,
+        ingredientCount: values.ingredients?.length ?? 0,
+      })
       toast.error(
         `Failed to ${mode === 'create' ? 'create' : 'update'} meal: ` +
-          (error as Error).message,
+          err.message,
       )
     }
   }
 
   const handleIngredientAdded = (ingredient: GQLIngredient, grams?: number) => {
+    const existingIngredients = form.getValues('ingredients') || []
+    const existingIndex = existingIngredients.findIndex(
+      (field) => field.id === ingredient.id,
+    )
+
+    const nextGrams = grams ?? 100
+
+    if (existingIndex >= 0) {
+      form.setValue(`ingredients.${existingIndex}.grams`, nextGrams)
+      return
+    }
+
     appendIngredient({
       id: ingredient.id,
       name: ingredient.name,
-      grams: grams || 100,
+      grams: nextGrams,
       caloriesPer100g: ingredient.caloriesPer100g,
       proteinPer100g: ingredient.proteinPer100g,
       carbsPer100g: ingredient.carbsPer100g,
@@ -262,7 +335,9 @@ export function MealFormDrawer({
   const isPending =
     createMealMutation.isPending ||
     updateMealMutation.isPending ||
-    addIngredientMutation.isPending
+    addIngredientMutation.isPending ||
+    removeIngredientMutation.isPending ||
+    updateMealIngredientMutation.isPending
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

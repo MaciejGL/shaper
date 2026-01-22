@@ -5274,6 +5274,20 @@ export type GQLUpdateMealInLibraryMutationVariables = Exact<{
 
 export type GQLUpdateMealInLibraryMutation = { __typename?: 'Mutation', updateMeal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, usageCount: number, createdAt: string, updatedAt: string, totalMacros: { __typename?: 'MacroTotals', protein: number, carbs: number, fat: number, calories: number } } };
 
+export type GQLUpdateMealIngredientInLibraryMutationVariables = Exact<{
+  input: GQLUpdateMealIngredientInput;
+}>;
+
+
+export type GQLUpdateMealIngredientInLibraryMutation = { __typename?: 'Mutation', updateMealIngredient: { __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } } };
+
+export type GQLRemoveIngredientFromMealInLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveIngredientFromMealInLibraryMutation = { __typename?: 'Mutation', removeIngredientFromMeal: boolean };
+
 export type GQLDuplicateMealInLibraryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   newName?: InputMaybe<Scalars['String']['input']>;
@@ -13988,6 +14002,66 @@ useUpdateMealInLibraryMutation.getKey = () => ['UpdateMealInLibrary'];
 
 
 useUpdateMealInLibraryMutation.fetcher = (variables: GQLUpdateMealInLibraryMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealInLibraryMutation, GQLUpdateMealInLibraryMutationVariables>(UpdateMealInLibraryDocument, variables, options);
+
+export const UpdateMealIngredientInLibraryDocument = `
+    mutation UpdateMealIngredientInLibrary($input: UpdateMealIngredientInput!) {
+  updateMealIngredient(input: $input) {
+    id
+    grams
+    order
+    ingredient {
+      id
+      name
+      proteinPer100g
+      carbsPer100g
+      fatPer100g
+      caloriesPer100g
+    }
+  }
+}
+    `;
+
+export const useUpdateMealIngredientInLibraryMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateMealIngredientInLibraryMutation, TError, GQLUpdateMealIngredientInLibraryMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateMealIngredientInLibraryMutation, TError, GQLUpdateMealIngredientInLibraryMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateMealIngredientInLibrary'],
+    mutationFn: (variables?: GQLUpdateMealIngredientInLibraryMutationVariables) => fetchData<GQLUpdateMealIngredientInLibraryMutation, GQLUpdateMealIngredientInLibraryMutationVariables>(UpdateMealIngredientInLibraryDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateMealIngredientInLibraryMutation.getKey = () => ['UpdateMealIngredientInLibrary'];
+
+
+useUpdateMealIngredientInLibraryMutation.fetcher = (variables: GQLUpdateMealIngredientInLibraryMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealIngredientInLibraryMutation, GQLUpdateMealIngredientInLibraryMutationVariables>(UpdateMealIngredientInLibraryDocument, variables, options);
+
+export const RemoveIngredientFromMealInLibraryDocument = `
+    mutation RemoveIngredientFromMealInLibrary($id: ID!) {
+  removeIngredientFromMeal(id: $id)
+}
+    `;
+
+export const useRemoveIngredientFromMealInLibraryMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveIngredientFromMealInLibraryMutation, TError, GQLRemoveIngredientFromMealInLibraryMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveIngredientFromMealInLibraryMutation, TError, GQLRemoveIngredientFromMealInLibraryMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveIngredientFromMealInLibrary'],
+    mutationFn: (variables?: GQLRemoveIngredientFromMealInLibraryMutationVariables) => fetchData<GQLRemoveIngredientFromMealInLibraryMutation, GQLRemoveIngredientFromMealInLibraryMutationVariables>(RemoveIngredientFromMealInLibraryDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveIngredientFromMealInLibraryMutation.getKey = () => ['RemoveIngredientFromMealInLibrary'];
+
+
+useRemoveIngredientFromMealInLibraryMutation.fetcher = (variables: GQLRemoveIngredientFromMealInLibraryMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveIngredientFromMealInLibraryMutation, GQLRemoveIngredientFromMealInLibraryMutationVariables>(RemoveIngredientFromMealInLibraryDocument, variables, options);
 
 export const DuplicateMealInLibraryDocument = `
     mutation DuplicateMealInLibrary($id: ID!, $newName: String) {

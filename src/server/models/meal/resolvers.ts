@@ -4,6 +4,7 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { requireAuth } from '@/lib/getUser'
+import { captureServerException } from '@/lib/posthog-server'
 import { GQLContext } from '@/types/gql-context'
 
 import {
@@ -79,28 +80,58 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
   addIngredientToMeal: async (_, { input }, context) => {
     const user = requireAuth(GQLUserRole.Trainer, context.user)
-    const mealIngredient = await addIngredientToMeal(
-      input.mealId,
-      input.ingredientId,
-      input.grams,
-      user.user.id,
-    )
-    return new MealIngredient(mealIngredient, context)
+    try {
+      const mealIngredient = await addIngredientToMeal(
+        input.mealId,
+        input.ingredientId,
+        input.grams,
+        user.user.id,
+      )
+      return new MealIngredient(mealIngredient, context)
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error')
+      captureServerException(err, user.user.id, {
+        mutation: 'addIngredientToMeal',
+        mealId: input.mealId,
+        ingredientId: input.ingredientId,
+        grams: input.grams,
+      })
+      throw error
+    }
   },
 
   updateMealIngredient: async (_, { input }, context) => {
     const user = requireAuth(GQLUserRole.Trainer, context.user)
-    const mealIngredient = await updateMealIngredient(
-      input.id,
-      input.grams,
-      user.user.id,
-    )
-    return new MealIngredient(mealIngredient, context)
+    try {
+      const mealIngredient = await updateMealIngredient(
+        input.id,
+        input.grams,
+        user.user.id,
+      )
+      return new MealIngredient(mealIngredient, context)
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error')
+      captureServerException(err, user.user.id, {
+        mutation: 'updateMealIngredient',
+        mealIngredientId: input.id,
+        grams: input.grams,
+      })
+      throw error
+    }
   },
 
   removeIngredientFromMeal: async (_, { id }, context) => {
     const user = requireAuth(GQLUserRole.Trainer, context.user)
-    return await removeIngredientFromMeal(id, user.user.id)
+    try {
+      return await removeIngredientFromMeal(id, user.user.id)
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error')
+      captureServerException(err, user.user.id, {
+        mutation: 'removeIngredientFromMeal',
+        mealIngredientId: id,
+      })
+      throw error
+    }
   },
 
   reorderMealIngredients: async (_, { input }, context) => {
