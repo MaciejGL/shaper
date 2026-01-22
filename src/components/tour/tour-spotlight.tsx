@@ -27,7 +27,7 @@ export function TourSpotlight({
     <motion.div
       className={cn(
         'fixed pointer-events-none',
-        'ring-4 ring-ring rounded-xl outline outline-primary/80',
+        'ring-4 ring-ring rounded-xl outline-2 outline-[invert(1)] shadow-2xl',
       )}
       initial={{ opacity: 0 }}
       animate={{

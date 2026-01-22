@@ -52,9 +52,9 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
     return (
       <motion.div
         ref={ref}
-        layout
+        layout="size"
         className={cn(
-          'fixed w-[340px] max-w-[calc(100vw-32px)] rounded-2xl border border-border bg-card py-4 shadow-lg',
+          'fixed w-[340px] max-w-[calc(100vw-32px)] rounded-2xl border border-border bg-card py-4 shadow-2xl',
           className,
         )}
         initial={{ opacity: 0, scale: 0.98 }}
@@ -64,7 +64,11 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
           top: position.top,
           left: position.left,
         }}
-        transition={{ duration: 0.28, ease: 'easeOut' }}
+        transition={{
+          duration: 0.28,
+          ease: 'easeOut',
+          layout: { duration: 0.28, ease: 'easeOut' },
+        }}
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-3 px-4">
@@ -77,25 +81,25 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
             <h3 className="text-lg font-semibold text-foreground">{title}</h3>
           </div>
           {allowClose && (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon-md"
               onClick={onClose}
-              className="p-1 -m-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               aria-label="Close tour"
-            >
-              <X className="size-5" />
-            </button>
+              iconOnly={<X className="size-5" />}
+            />
           )}
         </div>
 
         {/* Description */}
         <div className="mb-5 px-4">
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={stepId}
+              layout
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
               className="text-sm text-muted-foreground leading-relaxed text-pretty"
             >

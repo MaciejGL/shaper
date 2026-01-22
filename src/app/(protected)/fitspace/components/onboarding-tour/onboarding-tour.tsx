@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import { Tour, type TourStep } from '@/components/tour'
@@ -24,7 +24,7 @@ const TOUR_CONTENT = {
     title: 'Nice — You’re set up',
     description: [
       'I’m Mats from the Hypro team.',
-      'Let show you the main places you’ll use—then you’re straight into your first workout.',
+      'Let me show you the main places you’ll use. Then you’re straight into your first workout.',
     ],
   },
   workout: {
@@ -79,6 +79,22 @@ export function OnboardingTour() {
   const router = useRouter()
   const { user } = useUser()
   const { open, close } = useOnboardingTour()
+
+  // Prefetch likely destinations while the tour is open.
+  useEffect(() => {
+    if (!open) return
+    const hrefs = [
+      '/fitspace/workout',
+      '/fitspace/my-plans',
+      '/fitspace/explore',
+      '/fitspace/explore?tab=free-workouts',
+      '/fitspace/explore?tab=premium-plans',
+    ]
+
+    for (const href of hrefs) {
+      router.prefetch(href)
+    }
+  }, [open, router])
 
   // Ensure we have the userBasic query in cache for optimistic updates
   useUserBasicQuery(

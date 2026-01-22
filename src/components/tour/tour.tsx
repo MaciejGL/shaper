@@ -1,6 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { createPortal } from 'react-dom'
 
 import { TourPopover } from './tour-popover'
@@ -231,9 +238,11 @@ export function Tour({
     }
   }, [onComplete, onSkip])
 
-  const footerNode = useMemo(() => {
-    if (!currentStep?.footer) return undefined
-    if (typeof currentStep.footer !== 'function') return currentStep.footer
+  // Intentionally not memoized: keeps React Compiler happy and this is cheap.
+  const footerNode = (() => {
+    const footer = currentStep?.footer
+    if (!footer) return undefined
+    if (typeof footer !== 'function') return footer
 
     const ctx: TourFooterContext = {
       stepIndex: currentStepIndex,
@@ -245,17 +254,8 @@ export function Tour({
       close: handleClose,
     }
 
-    return currentStep.footer(ctx)
-  }, [
-    currentStep?.footer,
-    currentStepIndex,
-    handleClose,
-    handleNext,
-    handlePrev,
-    isFirstStep,
-    isLastStep,
-    steps.length,
-  ])
+    return footer(ctx)
+  })()
 
   const popoverPosition = useMemo(() => {
     if (!currentStep) return { top: 0, left: 0 }
@@ -271,12 +271,8 @@ export function Tour({
 
   return createPortal(
     <div className="fixed inset-0 z-9999">
-      {/* Overlay (click to close if allowed) */}
-      <div
-        className="absolute inset-0"
-        onClick={allowClose ? handleClose : undefined}
-        aria-hidden="true"
-      />
+      {/* Overlay (no click-to-close to prevent accidental dismiss) */}
+      <div className="absolute inset-0" aria-hidden="true" />
 
       {/* Spotlight (only if target exists) */}
       {targetRect && <TourSpotlight rect={targetRect} />}
