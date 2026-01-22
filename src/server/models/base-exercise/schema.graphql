@@ -10,6 +10,7 @@ type BaseExercise {
   secondaryMuscleGroups: [MuscleGroup!]!
   isPublic: Boolean!
   createdBy: UserPublic
+  createdById: ID
   createdAt: String!
   updatedAt: String!
   substitutes: [BaseExerciseSubstitute!]!

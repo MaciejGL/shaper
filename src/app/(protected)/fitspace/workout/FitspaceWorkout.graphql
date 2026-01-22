@@ -5,9 +5,7 @@ fragment BaseExerciseData on BaseExercise {
   videoUrl
   equipment
   isPublic
-  createdBy {
-    id
-  }
+  createdById
   instructions
   tips
   difficulty

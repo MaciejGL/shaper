@@ -67,7 +67,7 @@ export function useCustomExerciseMutations({
         videoUrl: null,
         equipment: variables.equipment,
         isPublic: false,
-        createdBy: { id: userId },
+        createdById: userId,
         instructions: [],
         tips: [],
         difficulty: null,

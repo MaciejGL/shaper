@@ -189,6 +189,10 @@ export default class BaseExercise implements GQLBaseExercise {
     return this.data.isPublic
   }
 
+  get createdById() {
+    return this.data.createdById
+  }
+
   async createdBy() {
     if (!this.data.createdById) {
       return null

@@ -119,7 +119,7 @@ export function ExerciseListWithFilters({
     let result = exercises
 
     if (onlyMyExercises && user?.id) {
-      result = result.filter((exercise) => exercise.createdBy?.id === user.id)
+      result = result.filter((exercise) => exercise.createdById === user.id)
     }
 
     if (selectedEquipment) {

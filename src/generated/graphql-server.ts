@@ -236,6 +236,7 @@ export type GQLBaseExercise = {
   canBeSubstitutedBy: EntireFieldWrapper<Array<GQLBaseExerciseSubstitute>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   createdBy?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
+  createdById?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
   description?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   difficulty?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   equipment?: EntireFieldWrapper<Maybe<GQLEquipment>>;
@@ -4842,6 +4843,7 @@ export type GQLBaseExerciseResolvers<ContextType = GQLContext, ParentType extend
   canBeSubstitutedBy?: Resolver<Array<GQLResolversTypes['BaseExerciseSubstitute']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   createdBy?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
+  createdById?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
   description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   difficulty?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   equipment?: Resolver<Maybe<GQLResolversTypes['Equipment']>, ParentType, ContextType>;
