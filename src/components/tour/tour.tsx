@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { motion } from 'framer-motion'
 
 import { TourPopover } from './tour-popover'
 import { TourSpotlight } from './tour-spotlight'
@@ -25,6 +26,10 @@ interface TargetRect {
   width: number
   height: number
 }
+
+const OVERLAY_CLASS = 'bg-black/60'
+const CUTOUT_PADDING = 2
+const CUTOUT_RADIUS = 12
 
 function getTargetRect(selector: string): TargetRect | null {
   try {
@@ -164,33 +169,45 @@ export function Tour({
   const [mounted, setMounted] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
   const [popoverSize, setPopoverSize] = useState({ width: 340, height: 200 })
+  const [lastCutoutRect, setLastCutoutRect] = useState<TargetRect | null>(null)
 
   const currentStep = steps[currentStepIndex]
   const isFirstStep = currentStepIndex === 0
   const isLastStep = currentStepIndex === steps.length - 1
 
-  // Update target rect when step changes
-  useEffect(() => {
+  // Update target rect before paint to avoid 1-frame \"center\" state.
+  useLayoutEffect(() => {
     if (!open || !currentStep) return
+    if (!currentStep.target) {
+      setTargetRect(null)
+      return
+    }
+    const rect = getTargetRect(currentStep.target)
+    setTargetRect(rect)
+    if (rect) {
+      setLastCutoutRect(rect)
+    }
+  }, [currentStep, open])
+
+  // Keep target rect updated on scroll/resize.
+  useEffect(() => {
+    if (!open || !currentStep?.target) return
 
     const updateRect = () => {
-      if (currentStep.target) {
-        setTargetRect(getTargetRect(currentStep.target))
-      } else {
-        setTargetRect(null)
+      const rect = getTargetRect(currentStep.target!)
+      setTargetRect(rect)
+      if (rect) {
+        setLastCutoutRect(rect)
       }
     }
 
-    updateRect()
-
     window.addEventListener('resize', updateRect)
     window.addEventListener('scroll', updateRect, { passive: true })
-
     return () => {
       window.removeEventListener('resize', updateRect)
       window.removeEventListener('scroll', updateRect)
     }
-  }, [open, currentStep])
+  }, [currentStep?.target, open])
 
   // Reset step index when tour opens
   useEffect(() => {
@@ -320,13 +337,39 @@ export function Tour({
 
   return createPortal(
     <div className="fixed inset-0 z-9999">
-      {/* Overlay (no click-to-close to prevent accidental dismiss) */}
-      <div
-        className={`absolute inset-0 ${
-          targetRect ? '' : 'bg-black/60 backdrop-blur-sm'
-        }`}
+      {/* Overlay (always mounted). Full-screen dim for centered steps. */}
+      <motion.div
+        className={`absolute inset-0 ${OVERLAY_CLASS} pointer-events-none`}
         aria-hidden="true"
+        initial={false}
+        animate={{ opacity: targetRect ? 0 : 1 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
       />
+
+      {/* Cutout overlay (rounded hole) for spotlight steps. Keeps last rect to avoid \"fly-in\". */}
+      {(() => {
+        const rect = targetRect ?? lastCutoutRect
+        if (!rect) return null
+        return (
+          <motion.div
+            className="fixed pointer-events-none"
+            aria-hidden="true"
+            initial={false}
+            animate={{
+              opacity: targetRect ? 1 : 0,
+              top: rect.top - CUTOUT_PADDING,
+              left: rect.left - CUTOUT_PADDING,
+              width: rect.width + CUTOUT_PADDING * 2,
+              height: rect.height + CUTOUT_PADDING * 2,
+              borderRadius: CUTOUT_RADIUS,
+            }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            style={{
+              boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6)',
+            }}
+          />
+        )
+      })()}
 
       {/* Spotlight (only if target exists) */}
       {targetRect && <TourSpotlight rect={targetRect} />}

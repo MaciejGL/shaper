@@ -23,23 +23,37 @@ export function TourSpotlight({
   padding = 2,
   borderRadius = 12,
 }: TourSpotlightProps) {
+  const top = rect.top - padding
+  const left = rect.left - padding
+  const width = rect.width + padding * 2
+  const height = rect.height + padding * 2
+
   return (
     <motion.div
       className={cn(
         'fixed pointer-events-none',
         'ring-4 ring-ring rounded-xl outline-2 outline-[invert(1)] shadow-2xl',
       )}
-      initial={{ opacity: 0 }}
-      animate={{
-        opacity: 1,
-        top: rect.top - padding,
-        left: rect.left - padding,
-        width: rect.width + padding * 2,
-        height: rect.height + padding * 2,
+      initial={{
+        opacity: 0,
+        top,
+        left,
+        width,
+        height,
         borderRadius,
       }}
-      transition={{ duration: 0.28, ease: 'easeOut' }}
-      style={{ boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6)' }}
+      animate={{
+        opacity: 1,
+        top,
+        left,
+        width,
+        height,
+        borderRadius,
+      }}
+      transition={{
+        opacity: { duration: 0.12, ease: 'easeOut' },
+        default: { duration: 0.22, ease: 'easeOut' },
+      }}
     />
   )
 }

@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { forwardRef } from 'react'
 
+import { SimpleLogo } from '@/components/simple-logo'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -51,6 +52,8 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
     },
     ref,
   ) {
+    const isWelcomeStep = stepId === 'welcome'
+
     return (
       <motion.div
         ref={ref}
@@ -76,10 +79,26 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
         <div className="flex items-start justify-between gap-3 mb-3 px-4">
           <div className="flex-1">
             {showProgress && (
-              <div className="text-xs text-muted-foreground mb-1">
-                {currentStep} of {totalSteps}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                {!isWelcomeStep && (
+                  <motion.div layoutId="hypro-tour-logo">
+                    <SimpleLogo size={16} className="text-muted-foreground" />
+                  </motion.div>
+                )}
+                <span>
+                  {currentStep} of {totalSteps}
+                </span>
               </div>
             )}
+
+            {isWelcomeStep && (
+              <div className="flex justify-center my-2">
+                <motion.div layoutId="hypro-tour-logo">
+                  <SimpleLogo size={56} className="text-primary" />
+                </motion.div>
+              </div>
+            )}
+
             <h3 className="text-lg font-semibold text-foreground">{title}</h3>
           </div>
           {allowClose && (
