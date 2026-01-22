@@ -2,9 +2,9 @@ import { prisma } from '@/lib/db'
 
 declare global {
   // Prevent interval duplication across dev HMR/module reloads
-  // eslint-disable-next-line no-var
+
   var __dbMonitorHealthInterval: NodeJS.Timeout | undefined
-  // eslint-disable-next-line no-var
+
   var __dbMonitorDeadlockInterval: NodeJS.Timeout | undefined
 }
 
