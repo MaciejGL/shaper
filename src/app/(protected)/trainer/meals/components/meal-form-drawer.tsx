@@ -120,8 +120,10 @@ export function MealFormDrawer({
   const createMealMutation = useCreateMealInLibraryMutation()
   const updateMealMutation = useUpdateMealInLibraryMutation()
   const addIngredientMutation = useAddIngredientToMealMutation()
-  const removeIngredientMutation = useRemoveIngredientFromMealInLibraryMutation()
-  const updateMealIngredientMutation = useUpdateMealIngredientInLibraryMutation()
+  const removeIngredientMutation =
+    useRemoveIngredientFromMealInLibraryMutation()
+  const updateMealIngredientMutation =
+    useUpdateMealIngredientInLibraryMutation()
 
   const form = useForm<MealFormData>({
     resolver: zodResolver(mealFormSchema),
