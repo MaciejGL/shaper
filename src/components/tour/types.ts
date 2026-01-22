@@ -23,6 +23,14 @@ export interface TourFooterContext {
   close: () => void
 }
 
+export interface TourStepChangeContext {
+  stepIndex: number
+  stepsCount: number
+  stepId: string
+  isFirstStep: boolean
+  isLastStep: boolean
+}
+
 export interface TourProps {
   /** Array of tour steps */
   steps: TourStep[]
@@ -36,4 +44,8 @@ export interface TourProps {
   showProgress?: boolean
   /** Allow closing via X button */
   allowClose?: boolean
+  /** Notified whenever the visible step changes */
+  onStepChange?: (ctx: TourStepChangeContext) => void
+  /** Notified when the user explicitly closes/skips the tour */
+  onClose?: (ctx: TourStepChangeContext) => void
 }

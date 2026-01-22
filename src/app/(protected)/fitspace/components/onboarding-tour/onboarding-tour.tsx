@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { Tour, type TourStep } from '@/components/tour'
@@ -15,13 +15,15 @@ import {
   useUserBasicQuery,
 } from '@/generated/graphql-client'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
+import { captureEvent } from '@/lib/posthog'
 
+import { useOnboardingFreeTierVariant } from './use-onboarding-free-tier-variant'
 import { useOnboardingTour } from './use-onboarding-tour'
 
 // Step content
 const TOUR_CONTENT = {
   welcome: {
-    title: 'Nice — You’re set up',
+    title: 'Nice - You’re set up!',
     description: [
       'I’m Mats from the Hypro team.',
       'Let me show you the main places you’ll use. Then you’re straight into your first workout.',
@@ -53,20 +55,21 @@ const TOUR_CONTENT = {
     title: 'Need Help? Chat with Mats',
     description: [
       'That’s me.',
-      'I’m a real person on the Hypro team—message me anytime for help with the app, training questions, or a quick nudge to stay on track.',
+      'I’m a real person on the Hypro team. Message me anytime for help with the app, training questions, or a quick nudge to stay on track.',
     ],
   },
   freeTier: {
-    title: 'Free tier (no hard paywall)',
+    title: 'Train free. Upgrade when you want more',
     description: [
-      `Real talk: you don’t need to pay to train here. Free works long-term.`,
-      `Upgrade is there when you want more: coach-made plans, recovery analytics, and smarter exercise suggestions.`,
+      'No hard paywall - you can train and log workouts for free.',
+      'Premium unlocks coach-built plans, recovery insights, and smarter exercise suggestions.',
+      'Upgrade anytime when it helps you progress faster.',
     ],
   },
   goodbye: {
     title: "You're All Set!",
     description: [
-      'Alright—time to train.',
+      'Alright! Time to train.',
       'Pick a free workout, browse plans, or jump straight into a session.',
       'If you get stuck, just message me.',
     ],
@@ -77,6 +80,13 @@ export function OnboardingTour() {
   const router = useRouter()
   const { user } = useUser()
   const { open, close } = useOnboardingTour()
+  const {
+    variant: freeTierVariant,
+    isLoading: isVariantLoading,
+    flagKey,
+  } = useOnboardingFreeTierVariant(open)
+  const includeFreeTierStep = freeTierVariant === 'A'
+  const hasTrackedStartRef = useRef(false)
 
   // Prefetch likely destinations while the tour is open.
   useEffect(() => {
@@ -93,6 +103,27 @@ export function OnboardingTour() {
       router.prefetch(href)
     }
   }, [open, router])
+
+  // Track when the tour actually starts (once per open).
+  useEffect(() => {
+    if (!open) return
+    if (isVariantLoading) return
+    if (hasTrackedStartRef.current) return
+    hasTrackedStartRef.current = true
+
+    captureEvent('onboarding_tour_started', {
+      source: 'fitspace',
+      ab_test: flagKey,
+      variant: freeTierVariant,
+      include_free_tier_slide: includeFreeTierStep,
+    })
+  }, [flagKey, freeTierVariant, includeFreeTierStep, isVariantLoading, open])
+
+  useEffect(() => {
+    if (!open) {
+      hasTrackedStartRef.current = false
+    }
+  }, [open])
 
   // Ensure we have the userBasic query in cache for optimistic updates
   useUserBasicQuery(
@@ -135,7 +166,7 @@ export function OnboardingTour() {
   })
 
   const handleComplete = useCallback(
-    (nextPath?: string) => {
+    (nextPath?: string, context?: { cta?: string }) => {
       close()
       if (!user?.profile) return
       markCompletedOptimistic({
@@ -143,13 +174,31 @@ export function OnboardingTour() {
       }).catch(() => {
         // error already handled by mutation onError
       })
+
+      captureEvent('onboarding_tour_completed', {
+        source: 'fitspace',
+        ab_test: flagKey,
+        variant: freeTierVariant,
+        include_free_tier_slide: includeFreeTierStep,
+        cta: context?.cta ?? null,
+        next_path: nextPath ?? null,
+      })
+
       if (nextPath) router.push(nextPath)
     },
-    [close, markCompletedOptimistic, router, user?.profile],
+    [
+      close,
+      flagKey,
+      freeTierVariant,
+      includeFreeTierStep,
+      markCompletedOptimistic,
+      router,
+      user?.profile,
+    ],
   )
 
-  const steps = useMemo<TourStep[]>(
-    () => [
+  const steps = useMemo<TourStep[]>(() => {
+    const base: TourStep[] = [
       // Step 1: Welcome (centered)
       {
         id: 'welcome',
@@ -189,66 +238,109 @@ export function OnboardingTour() {
         description: TOUR_CONTENT.chat.description,
         placement: 'bottom',
       },
-      // Step 6: Free tier + upgrade (centered)
-      {
+    ]
+
+    if (includeFreeTierStep) {
+      base.push({
         id: 'free-tier',
         title: TOUR_CONTENT.freeTier.title,
         description: TOUR_CONTENT.freeTier.description,
         placement: 'center',
-      },
-      // Step 7: Goodbye (centered) with custom CTAs
-      {
-        id: 'goodbye',
-        title: TOUR_CONTENT.goodbye.title,
-        description: TOUR_CONTENT.goodbye.description,
-        placement: 'center',
-        footer: ({ prev }: { prev: () => void }) => (
-          <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() =>
-                  handleComplete('/fitspace/explore?tab=free-workouts')
-                }
-              >
-                Free workouts
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() =>
-                  handleComplete('/fitspace/explore?tab=premium-plans')
-                }
-              >
-                Browse plans
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={prev}>
-                Back
-              </Button>
-              <Button
-                variant="default"
-                className="flex-1"
-                onClick={() => handleComplete('/fitspace/workout')}
-              >
-                Start training
-              </Button>
-            </div>
+      })
+    }
+
+    base.push({
+      id: 'goodbye',
+      title: TOUR_CONTENT.goodbye.title,
+      description: TOUR_CONTENT.goodbye.description,
+      placement: 'center',
+      footer: ({ prev }: { prev: () => void }) => (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                captureEvent('onboarding_tour_cta_clicked', {
+                  cta: 'free_workouts',
+                  ab_test: flagKey,
+                  variant: freeTierVariant,
+                })
+                handleComplete('/fitspace/explore?tab=free-workouts', {
+                  cta: 'free_workouts',
+                })
+              }}
+            >
+              Free workouts
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                captureEvent('onboarding_tour_cta_clicked', {
+                  cta: 'browse_plans',
+                  ab_test: flagKey,
+                  variant: freeTierVariant,
+                })
+                handleComplete('/fitspace/explore?tab=premium-plans', {
+                  cta: 'browse_plans',
+                })
+              }}
+            >
+              Browse plans
+            </Button>
           </div>
-        ),
-      },
-    ],
-    [handleComplete],
-  )
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={prev}>
+              Back
+            </Button>
+            <Button
+              variant="default"
+              className="flex-1"
+              onClick={() => {
+                captureEvent('onboarding_tour_cta_clicked', {
+                  cta: 'start_training',
+                  ab_test: flagKey,
+                  variant: freeTierVariant,
+                })
+                handleComplete('/fitspace/workout', { cta: 'start_training' })
+              }}
+            >
+              Start training
+            </Button>
+          </div>
+        </div>
+      ),
+    })
+
+    return base
+  }, [flagKey, freeTierVariant, handleComplete, includeFreeTierStep])
 
   return (
     <Tour
       steps={steps}
-      open={open}
-      onComplete={() => handleComplete()}
-      onSkip={() => handleComplete()}
+      open={open && !isVariantLoading}
+      onComplete={() => handleComplete(undefined, { cta: 'finish' })}
+      onSkip={() => {
+        captureEvent('onboarding_tour_dismissed', {
+          source: 'fitspace',
+          ab_test: flagKey,
+          variant: freeTierVariant,
+          include_free_tier_slide: includeFreeTierStep,
+        })
+        handleComplete(undefined, { cta: 'dismiss' })
+      }}
+      onStepChange={({ stepId, stepIndex, stepsCount }) => {
+        captureEvent('onboarding_tour_step_viewed', {
+          source: 'fitspace',
+          ab_test: flagKey,
+          variant: freeTierVariant,
+          include_free_tier_slide: includeFreeTierStep,
+          step_id: stepId,
+          step_index: stepIndex,
+          steps_count: stepsCount,
+        })
+      }}
       showProgress
       allowClose
     />

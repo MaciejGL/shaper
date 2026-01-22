@@ -9,6 +9,7 @@ import {
   useFitspaceMarkSetAsCompletedMutation,
 } from '@/generated/graphql-client'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
+import { captureEvent, getFeatureFlag } from '@/lib/posthog'
 import { calculateEstimated1RM } from '@/utils/one-rm-calculator'
 
 import { createOptimisticSetUpdate } from '../optimistic-updates'
@@ -104,6 +105,38 @@ export function useSetCompletion({
         }
 
         if (variables.completed) {
+          const flagKey = 'onboarding_free_tier_slide_v1'
+          const abVariant = getFeatureFlag(flagKey) ?? null
+
+          captureEvent('workout_set_completed', {
+            source: 'fitspace',
+            day_id: dayId,
+            set_id: variables.setId,
+            ab_test: flagKey,
+            variant: abVariant,
+          })
+
+          // "First workout started" = first time user completes any set.
+          // We track this once per browser to avoid inflating the funnel.
+          try {
+            const storageKey = 'hypro:first_rep_completed'
+            if (typeof window !== 'undefined' && window.localStorage) {
+              const already = window.localStorage.getItem(storageKey) === '1'
+              if (!already) {
+                window.localStorage.setItem(storageKey, '1')
+                captureEvent('workout_first_rep_completed', {
+                  source: 'fitspace',
+                  day_id: dayId,
+                  set_id: variables.setId,
+                  ab_test: flagKey,
+                  variant: abVariant,
+                })
+              }
+            }
+          } catch {
+            // ignore storage failures (private mode, denied, etc.)
+          }
+
           onSetCompleted(false)
         }
       },

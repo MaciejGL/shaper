@@ -12,7 +12,12 @@ import { createPortal } from 'react-dom'
 
 import { TourPopover } from './tour-popover'
 import { TourSpotlight } from './tour-spotlight'
-import type { TourFooterContext, TourProps, TourStep } from './types'
+import type {
+  TourFooterContext,
+  TourProps,
+  TourStep,
+  TourStepChangeContext,
+} from './types'
 
 interface TargetRect {
   top: number
@@ -151,6 +156,8 @@ export function Tour({
   onSkip,
   showProgress = true,
   allowClose = true,
+  onStepChange,
+  onClose,
 }: TourProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [targetRect, setTargetRect] = useState<TargetRect | null>(null)
@@ -231,12 +238,54 @@ export function Tour({
   }, [])
 
   const handleClose = useCallback(() => {
+    if (onClose && currentStep) {
+      const ctx: TourStepChangeContext = {
+        stepIndex: currentStepIndex,
+        stepsCount: steps.length,
+        stepId: currentStep.id,
+        isFirstStep,
+        isLastStep,
+      }
+      onClose(ctx)
+    }
     if (onSkip) {
       onSkip()
     } else {
       onComplete()
     }
-  }, [onComplete, onSkip])
+  }, [
+    currentStep,
+    currentStepIndex,
+    isFirstStep,
+    isLastStep,
+    onClose,
+    onComplete,
+    onSkip,
+    steps.length,
+  ])
+
+  useEffect(() => {
+    if (!open) return
+    if (!onStepChange) return
+    if (!currentStep) return
+
+    const ctx: TourStepChangeContext = {
+      stepIndex: currentStepIndex,
+      stepsCount: steps.length,
+      stepId: currentStep.id,
+      isFirstStep,
+      isLastStep,
+    }
+    onStepChange(ctx)
+  }, [
+    currentStep,
+    currentStepIndex,
+    isFirstStep,
+    isLastStep,
+    onStepChange,
+    open,
+    steps.length,
+  ])
 
   // Intentionally not memoized: keeps React Compiler happy and this is cheap.
   const footerNode = (() => {
@@ -272,7 +321,12 @@ export function Tour({
   return createPortal(
     <div className="fixed inset-0 z-9999">
       {/* Overlay (no click-to-close to prevent accidental dismiss) */}
-      <div className="absolute inset-0" aria-hidden="true" />
+      <div
+        className={`absolute inset-0 ${
+          targetRect ? '' : 'bg-black/60 backdrop-blur-sm'
+        }`}
+        aria-hidden="true"
+      />
 
       {/* Spotlight (only if target exists) */}
       {targetRect && <TourSpotlight rect={targetRect} />}
