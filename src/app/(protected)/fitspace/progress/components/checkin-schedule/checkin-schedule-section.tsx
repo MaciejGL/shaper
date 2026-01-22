@@ -85,7 +85,7 @@ export function CheckinScheduleSection({
             </p>
             <PremiumButtonWrapper
               hasPremium={hasPremium}
-              tooltipText="Upgrade to schedule check-ins"
+              tooltipText="Set reminders to track your progress consistently — small habits lead to big results."
             >
               <Button
                 onClick={() => setShowSetupModal(true)}
@@ -143,7 +143,7 @@ export function CheckinScheduleSection({
                   <div className="flex gap-2">
                     <PremiumButtonWrapper
                       hasPremium={hasPremium}
-                      tooltipText="Upgrade to schedule check-ins"
+                      tooltipText="Set reminders to track your progress consistently — small habits lead to big results."
                     >
                       <Button
                         onClick={() => setShowSetupModal(true)}
@@ -353,7 +353,7 @@ export function CheckinScheduleSection({
             <div className="flex gap-2">
               <PremiumButtonWrapper
                 hasPremium={hasPremium}
-                tooltipText="Requires additional access"
+                tooltipText="Set reminders to track your progress consistently — small habits lead to big results."
               >
                 <Button
                   onClick={() => setShowCheckinDrawer(true)}

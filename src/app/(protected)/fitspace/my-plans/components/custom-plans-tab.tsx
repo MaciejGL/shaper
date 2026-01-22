@@ -188,7 +188,7 @@ export function CustomPlansTab() {
         <PremiumButtonWrapper
           hasPremium={hasPremium}
           showIndicator={hasReachedFolderLimit}
-          tooltipText="Free tier limit reached. Upgrade to create more plans."
+          tooltipText="Organize your workout plans into unlimited collections and build a training library ready whenever you are."
         >
           <Button
             iconStart={<Plus />}
@@ -220,7 +220,7 @@ export function CustomPlansTab() {
             <div className="flex gap-2">
               <PremiumButtonWrapper
                 hasPremium={hasPremium}
-                tooltipText="Premium feature - upgrade to create more exercises"
+                tooltipText="Organize your workout plans into unlimited collections and build a training library ready whenever you are."
               >
                 <Button
                   onClick={handleCreateFolder}

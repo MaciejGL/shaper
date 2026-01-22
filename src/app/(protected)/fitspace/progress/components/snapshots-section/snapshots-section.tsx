@@ -300,7 +300,7 @@ export function SnapshotsSection() {
             </Button>
             <PremiumButtonWrapper
               hasPremium={hasPremium}
-              tooltipText="Snapshots let you capture your transformation and compare progress photos side-by-side for powerful motivation."
+              tooltipText="Capture your transformation journey and compare photos side-by-side — seeing is believing."
             >
               <Button
                 variant="default"

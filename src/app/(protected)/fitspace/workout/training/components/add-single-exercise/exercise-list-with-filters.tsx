@@ -194,7 +194,7 @@ export function ExerciseListWithFilters({
 
   const headerContent = (
     <div className="pb-3 overflow-x-hidden">
-      <div className="p-3 bg-background/50 dark:bg-background">
+      <div className="p-3 rounded-2xl bg-background/50 dark:bg-background">
         {suggestions ? <div className="mb-2 w-full">{suggestions}</div> : null}
 
         <p className="text-xs text-muted-foreground transition-all h-4">

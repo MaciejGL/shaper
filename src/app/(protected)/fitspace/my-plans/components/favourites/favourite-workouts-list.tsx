@@ -235,7 +235,7 @@ export function FavouriteWorkoutsList({
             <PremiumButtonWrapper
               hasPremium={hasPremium}
               showIndicator={hasReachedFolderLimit}
-              tooltipText="Free tier limit reached. Upgrade to create more folders."
+              tooltipText="Organize your workout plans into unlimited collections and build a training library ready whenever you are."
             >
               <Button
                 iconStart={<Plus />}
@@ -289,7 +289,7 @@ export function FavouriteWorkoutsList({
               <PremiumButtonWrapper
                 hasPremium={hasPremium}
                 showIndicator={hasReachedWorkoutLimit}
-                tooltipText="Free tier limit reached. Upgrade to create more workouts."
+                tooltipText="Save unlimited workout templates to build your personal training library."
               >
                 <Button
                   onClick={() => setIsCreateModalOpen(true)}
@@ -486,7 +486,7 @@ function EmptyFavouritesState({
           <PremiumButtonWrapper
             hasPremium={hasPremium}
             showIndicator={hasReachedFolderLimit}
-            tooltipText="Free tier limit reached. Upgrade to create more folders."
+            tooltipText="Organize your workout plans into unlimited collections and build a training library ready whenever you are."
           >
             <Button
               onClick={handleCreateFolder}

@@ -154,7 +154,7 @@ export function ExercisesTab() {
 
             <PremiumButtonWrapper
               hasPremium={hasPremium}
-              tooltipText="Premium feature - upgrade to create custom exercises"
+              tooltipText="Create your own exercises and reuse them across workouts — make training truly personal."
             >
               <Button
                 size="md"
@@ -241,7 +241,7 @@ function EmptyExercisesState({
         <div className="flex gap-2">
           <PremiumButtonWrapper
             hasPremium={hasPremium}
-            tooltipText="Premium feature - upgrade to create more exercises"
+            tooltipText="Create your own exercises and reuse them across workouts — make training truly personal."
           >
             <Button
               onClick={handleCreateExercise}

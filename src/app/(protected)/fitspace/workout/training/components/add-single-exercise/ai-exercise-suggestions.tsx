@@ -134,7 +134,7 @@ export function AiExerciseSuggestions({
         <PremiumButtonWrapper
           hasPremium={hasPremium}
           showIndicator={true}
-          tooltipText="Smart suggestions helps you find the best exercises for your workout, based on your recent workout logs and muscle fatigue levels."
+          tooltipText="We analyze your recent muscle fatigue and exercises to suggest what's missing for complete weekly muscle coverage."
         >
           <Button
             variant="variantless"

@@ -358,7 +358,7 @@ export function PlanDetailsDrawer({
                       {!isActive && (
                         <PremiumButtonWrapper
                           hasPremium={canActivate}
-                          tooltipText="Premium subscription required to activate this plan"
+                          tooltipText="Unlock this plan and follow the structured program designed to maximize your results."
                         >
                           <Button
                             onClick={() => onAction('activate', plan)}

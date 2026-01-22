@@ -67,7 +67,7 @@ export function PlanPreviewDay({
     <AccordionItem value={day.id} className="border-none">
       <PremiumButtonWrapper
         hasPremium={canViewDays}
-        tooltipText="Premium required to view day details"
+        tooltipText="See the full workout breakdown and exercises planned for each day."
       >
         <AccordionTrigger variant="default" disabled={!canViewDays}>
           <div className="flex items-center justify-between w-full pr-2">

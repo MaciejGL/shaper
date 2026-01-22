@@ -51,7 +51,7 @@ export function BodyProgressContent() {
       action={
         <PremiumButtonWrapper
           hasPremium={hasPremium}
-          tooltipText="Upgrade to add progress logs"
+          tooltipText="Document your journey with photos, compare changes on a timeline, and see your transformation unfold."
         >
           <Button
             onClick={() => setIsCreateDialogOpen(true)}

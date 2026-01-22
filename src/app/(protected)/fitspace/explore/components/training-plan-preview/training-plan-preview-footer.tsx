@@ -49,7 +49,7 @@ export function TrainingPlanPreviewFooter({
     <DrawerFooter className="border-t">
       <PremiumButtonWrapper
         hasPremium={hasPremium}
-        tooltipText="Requires additional access"
+        tooltipText="Get full access to all trainer-designed plans and add them to your collection."
       >
         <Button
           className="w-full"

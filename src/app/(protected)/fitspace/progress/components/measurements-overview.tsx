@@ -39,7 +39,7 @@ export function MeasurementsOverview({ className }: { className?: string }) {
       action={
         <PremiumButtonWrapper
           hasPremium={hasPremium}
-          tooltipText="Logging measurements helps you track your progress over time and identify trends."
+          tooltipText="Track your body changes over time and spot patterns you'd otherwise miss."
         >
           {hasPremium ? (
             <AddMeasurementModal onSuccess={onMeasurementAdded} />
