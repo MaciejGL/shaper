@@ -37,42 +37,22 @@ export class ExerciseSearchEngine {
       keys: [
         {
           name: 'name',
-          weight: 0.8, // Highest weight for exercise name
+          weight: 0.9, // Highest weight for exercise name
         },
         {
           name: 'description',
-          weight: 0.3,
+          weight: 0.1,
         },
         {
           name: 'equipment',
-          weight: 0.4,
+          weight: 0.1,
         },
         {
           name: 'muscleGroups.name',
-          weight: 0.6,
-        },
-        {
-          name: 'muscleGroups.alias',
-          weight: 0.6,
-        },
-        {
-          name: 'muscleGroups.displayGroup',
-          weight: 0.5,
-        },
-        {
-          name: 'secondaryMuscleGroups.name',
-          weight: 0.4,
-        },
-        {
-          name: 'secondaryMuscleGroups.alias',
-          weight: 0.4,
-        },
-        {
-          name: 'secondaryMuscleGroups.displayGroup',
-          weight: 0.3,
+          weight: 0.1,
         },
       ],
-      threshold: 0.4, // Lower = more strict, higher = more fuzzy
+      threshold: 0.5, // Lower = more strict, higher = more fuzzy
       distance: 100, // Maximum distance for fuzzy matching
       includeScore: true,
       includeMatches: true,
