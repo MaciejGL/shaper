@@ -56,6 +56,15 @@ const TOUR_CONTENT = {
       'I’m a real person on the Hypro team—message me anytime for help with the app, training questions, or a quick nudge to stay on track.',
     ],
   },
+  freeTier: {
+    title: 'Free tier (no hard paywall)',
+    description: [
+      `Quick note before you start: Hypro has a free tier, and you can use it for as long as you want.`,
+      `Nothing will lock you out mid‑workout or block the basics behind a paywall.`,
+      `If you ever upgrade, you’ll unlock extra content like coach-made plans, recovery analytics, smart exercise suggestions and much more.`,
+      `We care about long-term routines, not quick hacks. Hypro is built to help you stay consistent.`,
+    ],
+  },
   goodbye: {
     title: "You're All Set!",
     description: [
@@ -166,13 +175,20 @@ export function OnboardingTour() {
         description: TOUR_CONTENT.chat.description,
         placement: 'bottom',
       },
-      // Step 6: Goodbye (centered) with custom CTAs
+      // Step 6: Free tier + upgrade (centered)
+      {
+        id: 'free-tier',
+        title: TOUR_CONTENT.freeTier.title,
+        description: TOUR_CONTENT.freeTier.description,
+        placement: 'center',
+      },
+      // Step 7: Goodbye (centered) with custom CTAs
       {
         id: 'goodbye',
         title: TOUR_CONTENT.goodbye.title,
         description: TOUR_CONTENT.goodbye.description,
         placement: 'center',
-        footer: (
+        footer: ({ prev }: { prev: () => void }) => (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <Button
@@ -194,13 +210,18 @@ export function OnboardingTour() {
                 Browse plans
               </Button>
             </div>
-            <Button
-              variant="default"
-              className="w-full"
-              onClick={() => handleComplete('/fitspace/workout')}
-            >
-              Start training
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={prev}>
+                Back
+              </Button>
+              <Button
+                variant="default"
+                className="flex-1"
+                onClick={() => handleComplete('/fitspace/workout')}
+              >
+                Start training
+              </Button>
+            </div>
           </div>
         ),
       },

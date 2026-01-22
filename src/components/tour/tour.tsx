@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 
 import { TourPopover } from './tour-popover'
 import { TourSpotlight } from './tour-spotlight'
-import type { TourProps, TourStep } from './types'
+import type { TourFooterContext, TourProps, TourStep } from './types'
 
 interface TargetRect {
   top: number
@@ -231,6 +231,32 @@ export function Tour({
     }
   }, [onComplete, onSkip])
 
+  const footerNode = useMemo(() => {
+    if (!currentStep?.footer) return undefined
+    if (typeof currentStep.footer !== 'function') return currentStep.footer
+
+    const ctx: TourFooterContext = {
+      stepIndex: currentStepIndex,
+      stepsCount: steps.length,
+      isFirstStep,
+      isLastStep,
+      next: handleNext,
+      prev: handlePrev,
+      close: handleClose,
+    }
+
+    return currentStep.footer(ctx)
+  }, [
+    currentStep?.footer,
+    currentStepIndex,
+    handleClose,
+    handleNext,
+    handlePrev,
+    isFirstStep,
+    isLastStep,
+    steps.length,
+  ])
+
   const popoverPosition = useMemo(() => {
     if (!currentStep) return { top: 0, left: 0 }
     return calculatePopoverPosition(
@@ -272,7 +298,7 @@ export function Tour({
           onNext={handleNext}
           onPrev={handlePrev}
           onClose={handleClose}
-          footer={currentStep.footer}
+          footer={footerNode}
         />
       </div>
     </div>,

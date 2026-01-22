@@ -10,7 +10,17 @@ export interface TourStep {
   /** Popover placement relative to target */
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'center'
   /** Custom footer content (replaces default navigation) */
-  footer?: ReactNode
+  footer?: ReactNode | ((ctx: TourFooterContext) => ReactNode)
+}
+
+export interface TourFooterContext {
+  stepIndex: number
+  stepsCount: number
+  isFirstStep: boolean
+  isLastStep: boolean
+  next: () => void
+  prev: () => void
+  close: () => void
 }
 
 export interface TourProps {
