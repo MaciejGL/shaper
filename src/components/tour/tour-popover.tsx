@@ -8,6 +8,8 @@ import { forwardRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+import { TypewriterText } from './typewriter-text'
+
 interface TourPopoverProps {
   title: string
   description: string[]
@@ -103,11 +105,7 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
               transition={{ duration: 0.18, ease: 'easeOut' }}
               className="text-sm text-muted-foreground leading-relaxed text-pretty"
             >
-              {description.map((p, idx) => (
-                <p key={idx} className={idx === 0 ? undefined : 'mt-2'}>
-                  {p}
-                </p>
-              ))}
+              <TypewriterText paragraphs={description} animationKey={stepId} />
             </motion.div>
           </AnimatePresence>
         </div>
