@@ -127,7 +127,7 @@ function DayCard({ day, avgSessionTime }: DayCardProps) {
                 'object-cover',
                 day.isRestDay && 'grayscale opacity-60',
               )}
-              quality={90}
+              quality={100}
             />
           ) : null}
         </div>
