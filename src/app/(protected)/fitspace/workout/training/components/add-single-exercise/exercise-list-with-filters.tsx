@@ -23,6 +23,7 @@ import {
 } from '@/config/muscles'
 import { useUser } from '@/context/user-context'
 import type { GQLEquipment } from '@/generated/graphql-client'
+import { ExerciseSearchEngine } from '@/lib/exercise-search'
 import { cn } from '@/lib/utils'
 import { translateEquipment } from '@/utils/translate-equipment'
 
@@ -107,6 +108,11 @@ export function ExerciseListWithFilters({
     )
   }, [exercises])
 
+  const searchEngine = useMemo(
+    () => new ExerciseSearchEngine(exercises),
+    [exercises],
+  )
+
   const filteredExercises = useMemo(() => {
     let result = exercises
 
@@ -130,14 +136,9 @@ export function ExerciseListWithFilters({
     }
 
     if (deferredSearchQuery.trim()) {
-      const query = deferredSearchQuery.toLowerCase()
-      result = result.filter((exercise) => {
-        const nameMatch = exercise.name.toLowerCase().includes(query)
-        const muscleGroupMatch = exercise.muscleGroups?.some((mg) =>
-          mg.alias?.toLowerCase().includes(query),
-        )
-        return nameMatch || muscleGroupMatch
-      })
+      const searchResults = searchEngine.search(deferredSearchQuery.trim())
+      const searchResultIds = new Set(searchResults.map((e) => e.id))
+      result = result.filter((e) => searchResultIds.has(e.id))
     }
 
     return result
@@ -148,6 +149,7 @@ export function ExerciseListWithFilters({
     onlyMyExercises,
     user,
     selectedEquipment,
+    searchEngine,
   ])
 
   const [customExerciseDialogOpen, setCustomExerciseDialogOpen] =
@@ -192,41 +194,8 @@ export function ExerciseListWithFilters({
 
   const headerContent = (
     <div className="pb-3 overflow-x-hidden">
-      {suggestions ? <div className="mt-6 mb-2 px-3">{suggestions}</div> : null}
       <div className="p-3 bg-background/50 dark:bg-background">
-        {!showWeeklyFocusVolume && (
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div
-              className={cn(
-                buttonVariants({
-                  variant: 'secondary',
-                  size: 'sm',
-                }),
-                'px-3 justify-between',
-              )}
-              onClick={() => setOnlyMyExercises((prev) => !prev)}
-            >
-              <span className="text-sm text-foreground">My exercises</span>
-              <Switch checked={onlyMyExercises} />
-            </div>
-
-            <PremiumButtonWrapper
-              hasPremium={hasPremium}
-              tooltipText="Premium feature - upgrade to create custom exercises"
-            >
-              <Button
-                size="sm"
-                variant="secondary"
-                iconStart={<PlusIcon />}
-                onClick={() => setCustomExerciseDialogOpen(true)}
-                disabled={!hasPremium}
-                className="flex-1"
-              >
-                Create exercise
-              </Button>
-            </PremiumButtonWrapper>
-          </div>
-        )}
+        {suggestions ? <div className="mb-2 w-full">{suggestions}</div> : null}
 
         <p className="text-xs text-muted-foreground transition-all h-4">
           Equipment
@@ -285,10 +254,25 @@ export function ExerciseListWithFilters({
         </div>
       </div>
 
-      <h3 className="text-sm font-medium text-muted-foreground pt-4 px-3">
-        {selectedGroup ? `${selectedGroup} exercises` : 'All exercises'}{' '}
-        {!isLoading && `(${filteredExercises.length})`}
-      </h3>
+      <div className="flex items-center justify-between pt-4 px-3">
+        <h3 className="text-sm font-medium text-muted-foreground ">
+          {selectedGroup ? `${selectedGroup} exercises` : 'All exercises'}{' '}
+          {!isLoading && `(${filteredExercises.length})`}
+        </h3>
+        <div
+          className={cn(
+            buttonVariants({
+              variant: 'secondary',
+              size: 'sm',
+            }),
+            'px-3 justify-between',
+          )}
+          onClick={() => setOnlyMyExercises((prev) => !prev)}
+        >
+          <span className="text-sm text-foreground">My exercises</span>
+          <Switch checked={onlyMyExercises} />
+        </div>
+      </div>
     </div>
   )
 
@@ -335,10 +319,10 @@ export function ExerciseListWithFilters({
                 <div className="pt-4 flex justify-center">
                   <PremiumButtonWrapper
                     hasPremium={hasPremium}
-                    tooltipText="Premium feature - upgrade to create custom exercises"
+                    tooltipText="Create custom exercises to reuse them in your workouts and plans."
                   >
                     <Button
-                      variant="secondary"
+                      variant="default"
                       iconStart={<PlusIcon />}
                       onClick={() => setCustomExerciseDialogOpen(true)}
                       disabled={!hasPremium}

@@ -34,13 +34,15 @@ export function ExerciseMediaPreview({
   const validImages = (images || []).filter(
     (img): img is { medium: string } => !!img?.medium,
   )
-  const hasMultipleImages = validImages.length > 1
+  const finalImages =
+    validImages.length === 2 ? validImages.reverse() : validImages
+  const hasMultipleImages = finalImages.length > 1
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
     e.preventDefault()
     if (hasMultipleImages) {
-      setCurrentImageIndex((prev) => (prev + 1) % validImages.length)
+      setCurrentImageIndex((prev) => (prev + 1) % finalImages.length)
     }
   }
 
@@ -62,9 +64,9 @@ export function ExerciseMediaPreview({
           hasMultipleImages && !disableImageToggle && 'cursor-pointer',
         )}
       >
-        {validImages.length > 0 ? (
+        {finalImages.length > 0 ? (
           <>
-            {validImages.map((image, index) => (
+            {finalImages.map((image, index) => (
               <Image
                 key={index}
                 src={image.medium}
@@ -91,7 +93,7 @@ export function ExerciseMediaPreview({
 
       {hasMultipleImages && !hidePagination && (
         <div className="flex items-center justify-center gap-1">
-          {validImages.map((_, index) => (
+          {finalImages.map((_, index) => (
             <button
               key={index}
               onClick={() => handleDotClick(index)}

@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRight, Crown } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 import { toast } from 'sonner'
 
@@ -41,7 +41,6 @@ export function WorkoutDayPreviewContent({
     `${day.plan?.createdBy?.firstName || ''} ${day.plan?.createdBy?.lastName || ''}`.trim() ||
     'Unknown Trainer'
   const exercises = day.trainingDay?.exercises || []
-  const isPlanPremium = day.plan?.premium || false
 
   const handleViewFullPlan = () => {
     if (!day.plan?.id) return
@@ -76,7 +75,6 @@ export function WorkoutDayPreviewContent({
           {day.plan && (
             <PlanPromotion
               planTitle={planTitle}
-              isPremium={isPlanPremium}
               onViewPlan={handleViewFullPlan}
             />
           )}
@@ -117,7 +115,7 @@ function HeroImage({
         quality={100}
         sizes="(max-width: 768px) 100vw, 50vw"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black via-black/60 to-transparent" />
 
       <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
         <h2 className="text-2xl font-semibold mb-2">
@@ -172,22 +170,14 @@ function ExercisesList({ exercises }: ExercisesListProps) {
 
 interface PlanPromotionProps {
   planTitle: string
-  isPremium: boolean
   onViewPlan: () => void
 }
 
-function PlanPromotion({
-  planTitle,
-  isPremium,
-  onViewPlan,
-}: PlanPromotionProps) {
+function PlanPromotion({ planTitle, onViewPlan }: PlanPromotionProps) {
   return (
-    <Card variant="premium">
+    <Card variant="glass" onClick={onViewPlan}>
       <CardContent>
         <div className="flex items-start gap-3">
-          {isPremium && (
-            <Crown className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-          )}
           <div className="space-y-2 flex-1">
             <p className="font-semibold">
               Love this workout? Get the full plan!
@@ -198,12 +188,7 @@ function PlanPromotion({
             </p>
           </div>
         </div>
-        <Button
-          variant="gradient"
-          size="sm"
-          onClick={onViewPlan}
-          className="w-full mt-4"
-        >
+        <Button variant="outline" size="sm" className="w-full mt-4">
           View Full Plan
         </Button>
       </CardContent>
@@ -223,17 +208,17 @@ function WorkoutDayActions({
   isStarting,
 }: WorkoutDayActionsProps) {
   return (
-    <DrawerFooter className="border-t">
+    <DrawerFooter className="border-t flex flex-row gap-2">
+      <Button variant="outline" onClick={onClose} disabled={isStarting}>
+        Close
+      </Button>
       <Button
         onClick={onStart}
         disabled={isStarting}
         loading={isStarting}
-        className="w-full"
+        className="flex-1"
       >
         Start Workout
-      </Button>
-      <Button variant="outline" onClick={onClose} disabled={isStarting}>
-        Close
       </Button>
     </DrawerFooter>
   )

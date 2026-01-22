@@ -104,7 +104,7 @@ export function ExerciseStatsDrawer({
             lastPerformedLabel={lastPerformedLabel}
           />
 
-          <div className="flex-1 px-4 pb-[calc(var(--safe-area-inset-bottom)+24px)] space-y-10 overflow-y-auto hide-scrollbar">
+          <div className="flex-1 px-4 pb-[calc(var(--safe-area-inset-bottom)+24px)] space-y-10 overflow-y-auto hide-scrollbar pt-4">
             {sets?.length ? (
               <WorkoutSuggestionsList
                 sets={sets}

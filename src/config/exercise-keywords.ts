@@ -81,6 +81,26 @@ export const EXERCISE_KEYWORD_MAPPING: Record<string, string[]> = {
     'latissimus pulldown',
   ],
   'shoulder press': ['shoulder press', 'overhead press', 'military press'],
+
+  // Common abbreviations
+  ohp: ['ohp', 'overhead press', 'shoulder press', 'military press'],
+  rdl: ['rdl', 'romanian deadlift', 'romanian dead lift', 'stiff leg deadlift'],
+  sldl: ['sldl', 'stiff leg deadlift', 'straight leg deadlift'],
+
+  // Fly variations
+  fly: ['fly', 'flye', 'flies', 'flyes', 'chest fly', 'pec fly'],
+
+  // Lateral raise variations
+  'lateral raise': [
+    'lateral raise',
+    'lat raise',
+    'side raise',
+    'side lateral',
+    'shoulder lateral',
+  ],
+
+  // Row variations
+  row: ['row', 'rows', 'rowing', 'bent over row', 'cable row', 'seated row'],
 }
 
 /**

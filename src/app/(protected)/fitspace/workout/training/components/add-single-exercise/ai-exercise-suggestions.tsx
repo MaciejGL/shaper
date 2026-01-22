@@ -130,31 +130,26 @@ export function AiExerciseSuggestions({
 
   return (
     <div>
-      <div className="rounded-full bg-primary/5 px-1 py-1 shadow-md border border-amber-500">
-        <div className="grid grid-cols-[1fr_auto] gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="bg-white/60 dark:bg-black/60 rounded-full p-3">
+      {showGenerateButton && (
+        <PremiumButtonWrapper
+          hasPremium={hasPremium}
+          showIndicator={true}
+          tooltipText="Smart suggestions helps you find the best exercises for your workout, based on your recent workout logs and muscle fatigue levels."
+        >
+          <Button
+            variant="variantless"
+            onClick={() => fetchSuggestions({ workoutType })}
+            className="bg-white/60 dark:bg-black/60 dark:hover:bg-black/40 hover:bg-white/40 h-full w-full"
+            iconStart={
               <SparklesIcon className="size-5 shrink-0 text-amber-500 animate-pulse" />
-            </div>
-            <span className="text-sm font-medium text-foreground truncate">
-              Smart suggestions
-            </span>
-          </div>
-          {showGenerateButton && (
-            <PremiumButtonWrapper hasPremium={hasPremium} showIndicator={true}>
-              <Button
-                variant="variantless"
-                onClick={() => fetchSuggestions({ workoutType })}
-                className="bg-white/60 dark:bg-black/60 dark:hover:bg-black/40 hover:bg-white/40 h-full rounded-full"
-                iconEnd={<ChevronRight className="size-5" />}
-                disabled={!hasPremium}
-              >
-                Get
-              </Button>
-            </PremiumButtonWrapper>
-          )}
-        </div>
-      </div>
+            }
+            iconEnd={<ChevronRight className="size-5" />}
+            disabled={!hasPremium}
+          >
+            Get smart suggestions
+          </Button>
+        </PremiumButtonWrapper>
+      )}
       <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div

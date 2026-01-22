@@ -79,7 +79,7 @@ export function LogsSection() {
         <div className="flex items-center gap-2">
           <PremiumButtonWrapper
             hasPremium={hasPremium}
-            tooltipText="Upgrade to log measurements"
+            tooltipText="Logging measurements helps you track your progress over time and identify trends."
           >
             {hasPremium ? (
               <AddMeasurementModal onSuccess={onMeasurementAdded}>
@@ -197,7 +197,7 @@ export function LogsSection() {
           </Button>
           <PremiumButtonWrapper
             hasPremium={hasPremium}
-            tooltipText="Upgrade to log measurements"
+            tooltipText="Logging measurements helps you track your progress over time and identify trends."
           >
             {hasPremium ? (
               <AddMeasurementModal onSuccess={onMeasurementAdded}>

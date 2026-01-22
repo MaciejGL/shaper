@@ -106,7 +106,7 @@ export function WorkoutSuggestionsList({
   if (!hasRows) return null
 
   return (
-    <div className="flex flex-col gap-4 mt-4">
+    <div className="flex flex-col gap-4">
       <div className="flex items-baseline justify-between">
         <p className="text-lg font-medium">Suggested load</p>
       </div>

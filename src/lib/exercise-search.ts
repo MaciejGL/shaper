@@ -1,9 +1,6 @@
 import Fuse from 'fuse.js'
 
-import {
-  EQUIPMENT_SYNONYMS,
-  expandSearchTerm,
-} from '@/config/exercise-keywords'
+import { expandSearchTerm } from '@/config/exercise-keywords'
 
 /**
  * Exercise interface for search
@@ -12,16 +9,16 @@ export interface SearchableExercise {
   id: string
   name: string
   description?: string | null
-  equipment: string
+  equipment?: string | null
   muscleGroups?: {
     id: string
-    name: string
+    name?: string | null
     alias?: string | null
     displayGroup: string
   }[]
   secondaryMuscleGroups?: {
     id: string
-    name: string
+    name?: string | null
     alias?: string | null
     displayGroup: string
   }[]
@@ -95,14 +92,18 @@ export class ExerciseSearchEngine {
       scoreThreshold?: number
     },
   ): SearchableExercise[] {
-    const { limit = 50, scoreThreshold = 0.8 } = options || {}
+    const { limit = 50, scoreThreshold = 0.5 } = options || {}
 
-    if (!searchTerm || searchTerm.trim().length === 0) {
+    const trimmedTerm = searchTerm?.trim() ?? ''
+
+    // Skip search for very short queries (not useful)
+    if (trimmedTerm.length < 2) {
       return this.exercises.slice(0, limit)
     }
 
-    // Expand search term using semantic keywords
-    const expandedTerms = expandSearchTerm(searchTerm.trim())
+    // Only expand terms 3+ chars to avoid performance issues
+    const expandedTerms =
+      trimmedTerm.length >= 3 ? expandSearchTerm(trimmedTerm) : [trimmedTerm]
 
     // Perform multiple searches with different expanded terms
     const allResults = new Map<
@@ -131,47 +132,11 @@ export class ExerciseSearchEngine {
       })
     })
 
-    // Also search for equipment matches
-    this.searchByEquipment(searchTerm).forEach((exercise) => {
-      if (!allResults.has(exercise.id)) {
-        allResults.set(exercise.id, {
-          exercise,
-          score: 0.3, // Good score for equipment matches
-        })
-      }
-    })
-
     // Sort by score and return
     return Array.from(allResults.values())
       .sort((a, b) => a.score - b.score)
       .slice(0, limit)
       .map((result) => result.exercise)
-  }
-
-  /**
-   * Search by equipment with synonym matching
-   */
-  private searchByEquipment(searchTerm: string): SearchableExercise[] {
-    const normalizedTerm = searchTerm.toLowerCase().trim()
-    const matches: SearchableExercise[] = []
-
-    // Check equipment synonyms
-    Object.entries(EQUIPMENT_SYNONYMS).forEach(([equipmentType, synonyms]) => {
-      if (
-        synonyms.some(
-          (synonym) =>
-            synonym.includes(normalizedTerm) ||
-            normalizedTerm.includes(synonym),
-        )
-      ) {
-        const exercisesWithEquipment = this.exercises.filter(
-          (ex) => ex.equipment === equipmentType,
-        )
-        matches.push(...exercisesWithEquipment)
-      }
-    })
-
-    return matches
   }
 
   /**

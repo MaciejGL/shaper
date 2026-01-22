@@ -39,7 +39,7 @@ export function MeasurementsOverview({ className }: { className?: string }) {
       action={
         <PremiumButtonWrapper
           hasPremium={hasPremium}
-          tooltipText="Upgrade to log measurements"
+          tooltipText="Logging measurements helps you track your progress over time and identify trends."
         >
           {hasPremium ? (
             <AddMeasurementModal onSuccess={onMeasurementAdded} />

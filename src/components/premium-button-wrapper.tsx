@@ -60,8 +60,6 @@ export function PremiumButtonWrapper({
     )
   }
 
-
-
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -73,7 +71,7 @@ export function PremiumButtonWrapper({
         <p className="font-medium text-amber-400 text-base">
           Requires additional access
         </p>
-        <p className="text-xs">
+        <p className="text-sm text-center leading-relaxed">
           {rules.canShowUpgradeUI ? tooltipText : rules.premiumGateText}
         </p>
 
