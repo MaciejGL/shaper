@@ -147,6 +147,7 @@ export const Navbar = ({
                 }
                 onClick={() => setIsMessengerOpen(true)}
                 className="rounded-full"
+                data-onboarding-id="top-chat"
               />
               {totalUnreadCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-sky-700 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">

@@ -1,0 +1,29 @@
+export interface TourStep {
+  /** Unique identifier for the step */
+  id: string
+  /** Selector for the target element to highlight (optional - if not provided, popover is centered) */
+  target?: string
+  /** Title displayed in the popover */
+  title: string
+  /** Description paragraphs */
+  description: string[]
+  /** Popover placement relative to target */
+  placement?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+  /** Custom footer content (replaces default navigation) */
+  footer?: ReactNode
+}
+
+export interface TourProps {
+  /** Array of tour steps */
+  steps: TourStep[]
+  /** Whether the tour is currently active */
+  open: boolean
+  /** Called when the tour is completed or dismissed */
+  onComplete: () => void
+  /** Called when user clicks skip/close */
+  onSkip?: () => void
+  /** Show progress indicator (e.g., "1 of 6") */
+  showProgress?: boolean
+  /** Allow closing via X button */
+  allowClose?: boolean
+}

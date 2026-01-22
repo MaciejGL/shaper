@@ -44,8 +44,6 @@ export function usePaymentRules(): PaymentRule {
   if (process.env.NEXT_PUBLIC_PLATFORM) {
     devicePlatform = process.env.NEXT_PUBLIC_PLATFORM as Platform
   }
-  if (process.env.NODE_ENV !== 'production') {
-    console.info(devicePlatform, regionRules[devicePlatform])
-  }
+
   return regionRules[devicePlatform]
 }

@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 
 import { MobileAppAuthSync } from '@/components/mobile-app-auth-sync'
 import { MobileAppThemeSync } from '@/components/mobile-app-theme-sync'
-import { OnboardingProvider } from '@/components/onboarding/onboarding-provider'
 import { PostHogProvider } from '@/components/posthog-provider'
 import { PromotionalToastManager } from '@/components/promotional-toast'
 import { SimplePullToRefresh } from '@/components/simple-pull-to-refresh'
@@ -58,7 +57,6 @@ export default async function ProtectedLayout({
             <SimplePullToRefresh />
             <MobileAppAuthSync />
             <MobileAppThemeSync />
-            <OnboardingProvider />
             <PromotionalToastManager />
             {children}
           </ThemeProvider>

@@ -236,7 +236,7 @@ export default class UserProfile implements GQLUserProfile {
   }
 
   get hasCompletedOnboarding() {
-    return this.data.hasCompletedOnboarding ?? true
+    return this.data.hasCompletedOnboarding ?? false
   }
 
   get timezone() {
