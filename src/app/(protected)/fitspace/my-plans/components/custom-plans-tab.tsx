@@ -183,7 +183,9 @@ export function CustomPlansTab() {
 
       <div className="flex justify-between items-center gap-2 mb-4">
         <div className="text-sm text-muted-foreground">
-          {foldersList.length} plans · {totalWorkoutCount} days
+          {hasPremium
+            ? `${foldersList.length} plans · ${totalWorkoutCount} days`
+            : `${foldersList.length}/${subscription?.favouriteFolderLimit ?? 1} plans · ${totalWorkoutCount}/${subscription?.favouriteWorkoutLimit ?? 3} days`}
         </div>
         <PremiumButtonWrapper
           hasPremium={hasPremium}
@@ -220,12 +222,13 @@ export function CustomPlansTab() {
             <div className="flex gap-2">
               <PremiumButtonWrapper
                 hasPremium={hasPremium}
+                showIndicator={hasReachedFolderLimit}
                 tooltipText="Organize your workout plans into unlimited collections and build a training library ready whenever you are."
               >
                 <Button
                   onClick={handleCreateFolder}
                   iconStart={<Plus />}
-                  disabled={!hasPremium}
+                  disabled={hasReachedFolderLimit}
                 >
                   Create Plan
                 </Button>
