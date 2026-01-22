@@ -168,12 +168,11 @@ export default class BaseExercise implements GQLBaseExercise {
       return this.data.muscleGroups.map((muscleGroup) => {
         return new MuscleGroup(muscleGroup, this.context)
       })
-    } else {
-      console.error(
-        `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
-      )
-      throw new GraphQLError('No muscle groups found for exercise')
     }
+    console.warn(
+      `[BaseExercise] No muscle groups found for exercise ${this.id}. Returning empty list.`,
+    )
+    return []
   }
 
   async secondaryMuscleGroups() {
