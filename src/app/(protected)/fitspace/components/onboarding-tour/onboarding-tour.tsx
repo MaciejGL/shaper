@@ -59,10 +59,8 @@ const TOUR_CONTENT = {
   freeTier: {
     title: 'Free tier (no hard paywall)',
     description: [
-      `Quick note before you start: Hypro has a free tier, and you can use it for as long as you want.`,
-      `Nothing will lock you out mid‑workout or block the basics behind a paywall.`,
-      `If you ever upgrade, you’ll unlock extra content like coach-made plans, recovery analytics, smart exercise suggestions and much more.`,
-      `We care about long-term routines, not quick hacks. Hypro is built to help you stay consistent.`,
+      `Real talk: you don’t need to pay to train here. Free works long-term.`,
+      `Upgrade is there when you want more: coach-made plans, recovery analytics, and smarter exercise suggestions.`,
     ],
   },
   goodbye: {
