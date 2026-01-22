@@ -25,7 +25,11 @@ import {
 import { useCreateFavouriteWorkout } from '@/hooks/use-favourite-workouts'
 import { queryInvalidation } from '@/lib/query-invalidation'
 
-import { AiExerciseSuggestions } from './ai-exercise-suggestions'
+import {
+  AiExerciseSuggestionsPanel,
+  AiExerciseSuggestionsProvider,
+  AiExerciseSuggestionsTrigger,
+} from './ai-exercise-suggestions'
 import { ExerciseListWithFilters } from './exercise-list-with-filters'
 import { ReviewExercises } from './review-exercises'
 import { SelectedExercisesFooter } from './selected-exercises-footer'
@@ -345,23 +349,23 @@ export function AddSingleExercise({
     />
   ) : (
     <>
-      <ExerciseListWithFilters
-        exercises={allExercises}
+      <AiExerciseSuggestionsProvider
+        allExercises={allExercises}
         selectedExerciseIds={selectedExerciseIds}
         onToggleExercise={handleToggleExercise}
-        isLoading={isLoading}
-        categories={exercisesData?.muscleGroupCategories}
-        tagLabel="Today"
-        suggestions={
-          <AiExerciseSuggestions
-            allExercises={allExercises}
-            selectedExerciseIds={selectedExerciseIds}
-            onToggleExercise={handleToggleExercise}
-          />
-        }
-        muscleFilterMode="weeklyFocus"
-        weeklyFocus={weeklyFocus}
-      />
+      >
+        <ExerciseListWithFilters
+          exercises={allExercises}
+          selectedExerciseIds={selectedExerciseIds}
+          onToggleExercise={handleToggleExercise}
+          isLoading={isLoading}
+          categories={exercisesData?.muscleGroupCategories}
+          suggestionsTrigger={<AiExerciseSuggestionsTrigger />}
+          suggestionsPanel={<AiExerciseSuggestionsPanel />}
+          muscleFilterMode="weeklyFocus"
+          weeklyFocus={weeklyFocus}
+        />
+      </AiExerciseSuggestionsProvider>
 
       <SelectedExercisesFooter
         selectedCount={selectedExerciseIds.length}

@@ -47,10 +47,11 @@ interface ExerciseListWithFiltersProps {
   categories?: MuscleGroupCategories
 
   title?: string | false
-  subtitle?: string
+  subtitle?: string | false
   tagLabel?: string
 
-  suggestions?: React.ReactNode
+  suggestionsTrigger?: React.ReactNode
+  suggestionsPanel?: React.ReactNode
 
   muscleFilterMode?: MuscleFilterMode
   weeklyFocus?: {
@@ -74,7 +75,8 @@ export function ExerciseListWithFilters({
   title = 'Build your workout',
   subtitle = "Pick exercises for today's session.",
   tagLabel,
-  suggestions,
+  suggestionsTrigger,
+  suggestionsPanel,
   muscleFilterMode = 'weeklyFocus',
   weeklyFocus,
   showWeeklyFocusVolume = true,
@@ -194,22 +196,7 @@ export function ExerciseListWithFilters({
 
   const headerContent = (
     <div className="pb-3 overflow-x-hidden">
-      <div className="p-3 rounded-2xl bg-background/50 dark:bg-background">
-        {suggestions ? <div className="mb-2 w-full">{suggestions}</div> : null}
-
-        <p className="text-xs text-muted-foreground transition-all h-4">
-          Equipment
-        </p>
-        {availableEquipment.length > 1 ? (
-          <div className="mt-2">
-            <EquipmentFilterChips
-              equipment={availableEquipment}
-              selectedEquipment={selectedEquipment}
-              onSelectEquipment={setSelectedEquipment}
-            />
-          </div>
-        ) : null}
-
+      <div className="p-3 rounded-t-2xl bg-background/50 dark:bg-background">
         {muscleFilterMode === 'weeklyFocus' && weeklyFocus ? (
           <div className="mt-3">
             <WeeklyFocusChips
@@ -236,11 +223,20 @@ export function ExerciseListWithFilters({
           </div>
         ) : null}
 
-        <div
-          className={cn(
-            suggestions || muscleFilterMode !== 'none' ? 'pt-3 -mx-1' : 'pt-2',
-          )}
-        >
+        <p className="text-xs text-muted-foreground transition-all h-4 mt-3">
+          Equipment
+        </p>
+        {availableEquipment.length > 1 ? (
+          <div className="mt-2">
+            <EquipmentFilterChips
+              equipment={availableEquipment}
+              selectedEquipment={selectedEquipment}
+              onSelectEquipment={setSelectedEquipment}
+            />
+          </div>
+        ) : null}
+
+        <div className="mt-6 pb-3">
           <Input
             id="search-exercises"
             placeholder="Search exercises name or muscle group..."
@@ -255,10 +251,6 @@ export function ExerciseListWithFilters({
       </div>
 
       <div className="flex items-center justify-between pt-4 px-3">
-        <h3 className="text-sm font-medium text-muted-foreground ">
-          {selectedGroup ? `${selectedGroup} exercises` : 'All exercises'}{' '}
-          {!isLoading && `(${filteredExercises.length})`}
-        </h3>
         <div
           className={cn(
             buttonVariants({
@@ -272,7 +264,11 @@ export function ExerciseListWithFilters({
           <span className="text-sm text-foreground">My exercises</span>
           <Switch checked={onlyMyExercises} />
         </div>
+        {suggestionsTrigger ? (
+          <div className="shrink-0">{suggestionsTrigger}</div>
+        ) : null}
       </div>
+      {suggestionsPanel ? <div className="px-3">{suggestionsPanel}</div> : null}
     </div>
   )
 
@@ -289,7 +285,7 @@ export function ExerciseListWithFilters({
                 </span>
               ) : null}
             </div>
-            {subtitle ? (
+            {subtitle !== false ? (
               <p className="text-sm text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
