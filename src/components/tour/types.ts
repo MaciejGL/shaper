@@ -1,3 +1,5 @@
+import { ReactNode } from 'react'
+
 export interface TourStep {
   /** Unique identifier for the step */
   id: string

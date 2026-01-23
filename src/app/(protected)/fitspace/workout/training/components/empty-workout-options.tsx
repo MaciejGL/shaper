@@ -70,10 +70,10 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
     setShowFavourites(true)
   }
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 },
-  }
+  // const cardVariants = {
+  //   hidden: { opacity: 0, y: 10 },
+  //   visible: { opacity: 1, y: 0 },
+  // }
 
   return (
     <>
@@ -102,31 +102,34 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
           className="grid gap-4"
         >
           {/* Hero card: Hypertro library */}
-          <motion.div variants={cardVariants}>
-            <Card variant="glass" className="border-border">
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
+          <motion.div key="hypertro-library">
+            <Card variant="glass" className="border-border pb-0">
+              <CardContent className="space-y-4 px-0">
+                <div className="space-y-1 px-4">
                   <CardTitle className="text-lg">Hypro Library</CardTitle>
                   <CardDescription>
                     Choose a program or a ready-made workout.
                   </CardDescription>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 border-t border-border pt-4">
+                <div className="grid grid-cols-[1fr_auto_1fr] border-t border-border pt-0">
                   <Button
-                    variant="default"
+                    variant="variantless"
                     size="lg"
-                    className="justify-start"
+                    className="min-h-14 w-full rounded-none"
                     iconStart={<CalendarDays />}
+                    iconEnd={<ChevronRight className="size-6!" />}
                     onClick={handleStartPlanClick}
                   >
                     Programs
                   </Button>
+                  <Separator orientation="vertical" className="h-full" />
                   <Button
-                    variant="default"
+                    variant="variantless"
                     size="lg"
-                    className="justify-start"
+                    className="h-full w-full rounded-none"
                     iconStart={<Dumbbell />}
+                    iconEnd={<ChevronRight className="size-6!" />}
                     onClick={handleQuickWorkoutClick}
                   >
                     Workouts
@@ -141,7 +144,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
           </div>
 
           {/* Card 3: Build my own workout */}
-          <motion.div variants={cardVariants}>
+          <motion.div key="build-my-own-workout">
             <Card
               className="cursor-pointer transition-all hover:scale-[1.01] py-3"
               onClick={handleBuildOwnClick}
@@ -174,7 +177,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
 
           {/* Card 4: My plans (conditional) */}
           {hasCustomPlans && (
-            <motion.div variants={cardVariants}>
+            <motion.div key="my-plans">
               <Card
                 className="cursor-pointer transition-all hover:scale-[1.01] py-3"
                 onClick={handleMyPlansClick}

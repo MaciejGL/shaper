@@ -19,8 +19,8 @@ export function SelectedExercisesFooter({
   }
 
   return (
-    <DrawerFooter className="border-t">
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center justify-between w-full gap-3">
+    <DrawerFooter className="border-t bg-card relative">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center justify-between w-full gap-3 px-3">
         <span className="text-sm font-medium">
           {selectedCount} exercise{selectedCount !== 1 ? 's' : ''} selected
         </span>
