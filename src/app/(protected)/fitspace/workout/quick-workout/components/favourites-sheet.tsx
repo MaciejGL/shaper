@@ -1,11 +1,14 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { XIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 
+import { Button } from '@/components/ui/button'
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
@@ -58,11 +61,20 @@ export function FavouritesSheet({
   }
 
   return (
-    <Drawer open={open} onOpenChange={onClose}>
+    <Drawer open={open} onOpenChange={onClose} direction="right">
       <DrawerContent
         dialogTitle="Select Custom Workout"
-        className="max-h-[85vh]"
+        className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
       >
+        <DrawerClose asChild>
+          <Button
+            variant="secondary"
+            size="icon-lg"
+            onClick={onClose}
+            iconOnly={<XIcon />}
+            className="absolute top-4 right-4 z-10"
+          />
+        </DrawerClose>
         <DrawerHeader>
           <DrawerTitle>My Plans</DrawerTitle>
           <DrawerDescription>

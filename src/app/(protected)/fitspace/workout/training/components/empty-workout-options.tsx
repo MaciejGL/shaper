@@ -6,12 +6,11 @@ import {
   CalendarDays,
   ChevronRight,
   Dumbbell,
-  PencilRuler,
+  ListTodoIcon,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -20,6 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
+import { Separator } from '@/components/ui/separator'
 import {
   GQLFitspaceGetWorkoutDayQuery,
   useGetFavouriteWorkoutsQuery,
@@ -79,9 +79,9 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
     <>
       <div className="space-y-4 pt-6">
         <div className="space-y-2 mb-6">
-          <p className="text-xl font-medium text-center">Today's workout</p>
+          <p className="text-2xl font-semibold text-left">Today's workout</p>
 
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="text-sm text-muted-foreground text-left">
             Choose how you want to train today.
           </p>
         </div>
@@ -101,96 +101,61 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
           }}
           className="grid gap-4"
         >
-          {/* Card 1: Start a training plan (Recommended) */}
+          {/* Hero card: Hypertro library */}
           <motion.div variants={cardVariants}>
-            <Card
-              className="cursor-pointer transition-all hover:scale-[1.01]"
-              onClick={handleStartPlanClick}
-            >
-              <CardContent>
-                <div className="flex items-center">
-                  <SectionIcon
-                    icon={CalendarDays}
-                    variant="primary"
-                    size="sm"
-                    className="mr-3"
-                  />
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">
-                      Our training plans
-                    </CardTitle>
-                    <CardDescription>
-                      Follow a structured program over weeks.
-                    </CardDescription>
-                  </div>
+            <Card variant="glass" className="border-border">
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg">Hypro Library</CardTitle>
+                  <CardDescription>
+                    Choose a program or a ready-made workout.
+                  </CardDescription>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 border-t border-border pt-4">
                   <Button
-                    variant="link"
-                    size="icon-xs"
-                    iconOnly={<ChevronRight className="size-6!" />}
+                    variant="default"
+                    size="lg"
+                    className="justify-start"
+                    iconStart={<CalendarDays />}
+                    onClick={handleStartPlanClick}
                   >
-                    Browse
+                    Programs
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="lg"
+                    className="justify-start"
+                    iconStart={<Dumbbell />}
+                    onClick={handleQuickWorkoutClick}
+                  >
+                    Workouts
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Card 2: Quick workout */}
-          <motion.div variants={cardVariants}>
-            <Card
-              className="cursor-pointer transition-all hover:scale-[1.01]"
-              onClick={handleQuickWorkoutClick}
-            >
-              <CardContent>
-                <div className="flex items-center">
-                  <SectionIcon
-                    icon={Dumbbell}
-                    variant="amber"
-                    size="sm"
-                    className="mr-3"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-0.5"></div>
-                    <CardTitle className="text-lg flex items-center">
-                      Single workout session
-                      <Badge variant="primary" size="xs" className="ml-2">
-                        Free
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription>
-                      Use a ready-made workout session to train today.
-                    </CardDescription>
-                  </div>
-                  <Button
-                    variant="link"
-                    size="icon-xs"
-                    iconOnly={<ChevronRight className="size-6!" />}
-                  >
-                    Browse
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <div className="px-4">
+            <Separator />
+          </div>
 
           {/* Card 3: Build my own workout */}
           <motion.div variants={cardVariants}>
             <Card
-              className="cursor-pointer transition-all hover:scale-[1.01]"
+              className="cursor-pointer transition-all hover:scale-[1.01] py-3"
               onClick={handleBuildOwnClick}
             >
               <CardContent>
                 <div className="flex items-center">
                   <SectionIcon
-                    icon={PencilRuler}
+                    icon={ListTodoIcon}
                     variant="indigo"
                     size="sm"
                     className="mr-3"
                   />
                   <div className="flex-1">
-                    <CardTitle className="text-lg">
-                      Custom workout session
-                    </CardTitle>
+                    <CardTitle className="text-lg">Custom Workout</CardTitle>
                     <CardDescription>
                       Choose your own exercises and sets.
                     </CardDescription>
@@ -211,14 +176,14 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
           {hasCustomPlans && (
             <motion.div variants={cardVariants}>
               <Card
-                className="cursor-pointer transition-all hover:scale-[1.01]"
+                className="cursor-pointer transition-all hover:scale-[1.01] py-3"
                 onClick={handleMyPlansClick}
               >
                 <CardContent>
                   <div className="flex items-center">
                     <SectionIcon
                       icon={BookmarkIcon}
-                      variant="purple"
+                      variant="amber"
                       size="sm"
                       className="mr-3"
                     />
@@ -231,7 +196,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                     <Button
                       variant="link"
                       size="icon-sm"
-                      iconOnly={<ChevronRight />}
+                      iconOnly={<ChevronRight className="size-6!" />}
                     >
                       Select
                     </Button>

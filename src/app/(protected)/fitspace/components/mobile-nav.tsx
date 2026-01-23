@@ -67,7 +67,7 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
   const navItems = useMemo(() => {
     // Use stable workout URL during hydration to prevent hydration mismatch
     const workoutHref = trainingId
-      ? `/fitspace/workout?weekId=${weekId || ''}&dayId=${dayId || ''}`
+      ? `/fitspace/workout?week=${weekId || ''}&day=${dayId || ''}`
       : '/fitspace/workout' // Fallback to plans page when no training data available
 
     return [
@@ -127,7 +127,8 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
         <div className="grid grid-cols-6 items-center pt-1 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname.includes(item.href) && !pendingNavigation
+            const itemPath = item.href.split('?')[0]
+            const isActive = pathname.startsWith(itemPath) && !pendingNavigation
             const isClicked =
               (clickedItem === item.label || pendingNavigation === item.href) &&
               !isActive
