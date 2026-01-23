@@ -78,10 +78,11 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
           <div className="flex-1">
             {showProgress && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                <motion.div layoutId="hypro-tour-logo">
-                  <SimpleLogo size={24} />
-                </motion.div>
-
+                {!isWelcomeStep && (
+                  <motion.div layoutId="hypro-tour-logo">
+                    <SimpleLogo size={16} className="text-muted-foreground" />
+                  </motion.div>
+                )}
                 <span>
                   {currentStep} of {totalSteps}
                 </span>
@@ -89,20 +90,23 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
             )}
 
             {isWelcomeStep && (
-              <div className="flex justify-center my-2">
+              <div className="flex justify-center my-6">
                 <motion.div layoutId="hypro-tour-logo">
                   <SimpleLogo size={56} className="text-primary" />
                 </motion.div>
               </div>
             )}
 
-            <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+            <h3 className="text-xl font-semibold text-foreground mt-6">
+              {title}
+            </h3>
           </div>
           {allowClose && (
             <Button
               variant="ghost"
               size="icon-md"
               onClick={onClose}
+              className="absolute top-4 right-4"
               aria-label="Close tour"
               iconOnly={<X className="size-5" />}
             />
@@ -121,14 +125,17 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
               transition={{ duration: 0.18, ease: 'easeOut' }}
               className="text-sm text-muted-foreground leading-relaxed text-pretty"
             >
-              {/* <TypewriterText paragraphs={description} animationKey={stepId} /> */}
               {description.map((p, idx) => (
-                <p
+                <motion.p
                   key={`${stepId}-${idx}`}
                   className="whitespace-pre-wrap mt-2"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
                 >
                   {p}
-                </p>
+                </motion.p>
               ))}
             </motion.div>
           </AnimatePresence>
