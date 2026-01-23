@@ -9,8 +9,6 @@ import { SimpleLogo } from '@/components/simple-logo'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-import { TypewriterText } from './typewriter-text'
-
 interface TourPopoverProps {
   title: string
   description: string[]
@@ -124,7 +122,15 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
               transition={{ duration: 0.18, ease: 'easeOut' }}
               className="text-sm text-muted-foreground leading-relaxed text-pretty"
             >
-              <TypewriterText paragraphs={description} animationKey={stepId} />
+              {/* <TypewriterText paragraphs={description} animationKey={stepId} /> */}
+              {description.map((p, idx) => (
+                <p
+                  key={`${stepId}-${idx}`}
+                  className="whitespace-pre-wrap mt-2"
+                >
+                  {p}
+                </p>
+              ))}
             </motion.div>
           </AnimatePresence>
         </div>

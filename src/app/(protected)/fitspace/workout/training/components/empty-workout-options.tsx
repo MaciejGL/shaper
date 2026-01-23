@@ -116,23 +116,23 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                   <Button
                     variant="variantless"
                     size="lg"
-                    className="min-h-14 w-full rounded-none"
-                    iconStart={<CalendarDays />}
-                    iconEnd={<ChevronRight className="size-6!" />}
-                    onClick={handleStartPlanClick}
-                  >
-                    Programs
-                  </Button>
-                  <Separator orientation="vertical" className="h-full" />
-                  <Button
-                    variant="variantless"
-                    size="lg"
                     className="h-full w-full rounded-none"
                     iconStart={<Dumbbell />}
                     iconEnd={<ChevronRight className="size-6!" />}
                     onClick={handleQuickWorkoutClick}
                   >
                     Workouts
+                  </Button>
+                  <Separator orientation="vertical" className="h-full" />
+                  <Button
+                    variant="variantless"
+                    size="lg"
+                    className="min-h-14 w-full rounded-none"
+                    iconStart={<CalendarDays />}
+                    iconEnd={<ChevronRight className="size-6!" />}
+                    onClick={handleStartPlanClick}
+                  >
+                    Programs
                   </Button>
                 </div>
               </CardContent>
