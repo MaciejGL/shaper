@@ -78,11 +78,10 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
           <div className="flex-1">
             {showProgress && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                {!isWelcomeStep && (
-                  <motion.div layoutId="hypro-tour-logo">
-                    <SimpleLogo size={16} className="text-muted-foreground" />
-                  </motion.div>
-                )}
+                <motion.div layoutId="hypro-tour-logo">
+                  <SimpleLogo size={24} />
+                </motion.div>
+
                 <span>
                   {currentStep} of {totalSteps}
                 </span>
