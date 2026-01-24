@@ -82,6 +82,7 @@ export function ExerciseMetadata({
   onTimerComplete,
   onApplySuggestedLoad,
   isApplyingSuggestedLoad,
+  isQuickWorkout = false,
 }: ExerciseMetadataProps) {
   const { preferences } = useUserPreferences()
   const showImages = preferences.showImages ?? true
@@ -175,6 +176,8 @@ export function ExerciseMetadata({
   const currentExercise = exercise.substitutedBy || exercise
   const exerciseSets = currentExercise.sets
 
+  const isRemoveExerciseVisible = exercise.isExtra || isQuickWorkout
+
   return (
     <div
       className={cn(
@@ -200,7 +203,7 @@ export function ExerciseMetadata({
 
               return (
                 <CarouselItem key={image.id} className="basis-1/2 px-0">
-                  <div className="relative overflow-hidden aspect-square rounded-lg ml-1">
+                  <div className="relative overflow-hidden aspect-square rounded-2xl ml-1">
                     <Image
                       src={src}
                       alt={exercise.name}
@@ -224,7 +227,7 @@ export function ExerciseMetadata({
         </Carousel>
       )}
       <div className="flex gap-2 items-start mt-4 px-3">
-        <div className="flex-center h-8 min-w-8 px-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold leading-none shrink-0 tabular-nums">
+        <div className="flex-center h-8 min-w-8 px-2 rounded-full bg-primary/10 text-primary text-sm font-semibold leading-none shrink-0 tabular-nums">
           {exercise.order}
         </div>
         <p className="text-2xl font-medium mt-px">{exercise.name}</p>
@@ -349,7 +352,7 @@ export function ExerciseMetadata({
               <DropdownMenuTrigger
                 asChild
                 className={cn(
-                  exercise.substitutes.length === 0 && !exercise.isExtra
+                  exercise.substitutes.length === 0 && !isRemoveExerciseVisible
                     ? 'hidden'
                     : '',
                 )}
@@ -366,7 +369,7 @@ export function ExerciseMetadata({
                     <Replace /> Swap exercise
                   </DropdownMenuItem>
                 )}
-                {exercise.isExtra && (
+                {isRemoveExerciseVisible && (
                   <DropdownMenuItem
                     onClick={handleRemoveClick}
                     loading={isRemoving}

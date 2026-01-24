@@ -14,6 +14,7 @@ export interface ExerciseProps {
   exercise: WorkoutExercise
   exercises?: WorkoutExercise[]
   previousDayLogs?: PreviousDayLogs
+  isQuickWorkout?: boolean
 }
 
 export interface ExerciseHeaderProps {
@@ -67,6 +68,7 @@ export interface ExerciseMetadataProps {
     suggestions: { setId: string; suggestedWeightKg: number }[],
   ) => Promise<void>
   isApplyingSuggestedLoad?: boolean
+  isQuickWorkout?: boolean
 }
 
 export interface ExerciseNotebookProps {

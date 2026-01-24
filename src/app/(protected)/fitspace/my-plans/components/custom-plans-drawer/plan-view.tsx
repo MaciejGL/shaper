@@ -28,13 +28,15 @@ export function PlanView({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-muted-foreground">Days</p>
+        <p className="text-sm font-medium text-muted-foreground">
+          Workout Sessions
+        </p>
         <Button
           iconStart={<Plus />}
           onClick={onCreateDay}
           disabled={disableCreate}
         >
-          Add day
+          Add session
         </Button>
       </div>
 
@@ -42,14 +44,15 @@ export function PlanView({
         <Card>
           <CardContent className="py-6 text-center space-y-3 flex-center flex-col gap-4">
             <p className="text-sm text-muted-foreground">
-              No days yet. Create your first day to start building this plan.
+              No sessions yet. Create your first session to start building this
+              plan.
             </p>
             <Button
               iconStart={<Plus />}
               onClick={onCreateDay}
               disabled={disableCreate}
             >
-              Create day
+              Create session
             </Button>
           </CardContent>
         </Card>

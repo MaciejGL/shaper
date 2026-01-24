@@ -161,6 +161,7 @@ export function Exercises({
               exercise={exercise}
               exercises={exercises}
               previousDayLogs={previousDayLogs}
+              isQuickWorkout={isQuickWorkout}
             />
           ))}
           {isQuickWorkout && day.id && (

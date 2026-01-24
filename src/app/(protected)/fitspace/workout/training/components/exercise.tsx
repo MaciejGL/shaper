@@ -25,6 +25,7 @@ export function Exercise({
   exercise,
   exercises,
   previousDayLogs,
+  isQuickWorkout = false,
 }: ExerciseProps) {
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -46,9 +47,11 @@ export function Exercise({
   >({})
   const [applySuggestedNonce, setApplySuggestedNonce] = useState(0)
 
-  const { applySuggestedLoad, isApplyingSuggestedLoad } = useApplySuggestedLoad({
-    dayId: dayId ?? '',
-  })
+  const { applySuggestedLoad, isApplyingSuggestedLoad } = useApplySuggestedLoad(
+    {
+      dayId: dayId ?? '',
+    },
+  )
 
   const { mutateAsync: markSetAsCompleted } =
     useFitspaceMarkSetAsCompletedMutation()
@@ -331,6 +334,7 @@ export function Exercise({
           onTimerComplete={handleTimerComplete}
           onApplySuggestedLoad={handleApplySuggestedLoad}
           isApplyingSuggestedLoad={isApplyingSuggestedLoad}
+          isQuickWorkout={isQuickWorkout}
         />
       </div>
       <div

@@ -197,7 +197,7 @@ export function ExerciseListWithFilters({
 
   const headerContent = (
     <div className="pb-3 overflow-x-hidden">
-      <div className="dark p-3 bg-sidebar">
+      <div className="dark p-3 bg-sidebar dark:bg-card">
         <p className="text-lg font-semibold text-foreground">Filters</p>
         {muscleFilterMode === 'weeklyFocus' && weeklyFocus ? (
           <div className="mt-3">
@@ -275,7 +275,7 @@ export function ExerciseListWithFilters({
   )
 
   return (
-    <div className="flex-1 min-h-0 h-full">
+    <div className="flex-1 min-h-0 h-full grid grid-rows-[auto_1fr]">
       <div className="p-4 flex gap-4">
         <DrawerGoBackButton className="relative m-0 top-0 left-0" />
         {title !== false && (
@@ -296,7 +296,7 @@ export function ExerciseListWithFilters({
           </div>
         )}
       </div>
-      <div ref={setScrollParentRef} className="h-full overflow-y-auto">
+      <div ref={setScrollParentRef} className="min-h-0 overflow-y-auto pb-10">
         {headerContent}
 
         {isLoading ? (
@@ -304,7 +304,7 @@ export function ExerciseListWithFilters({
             <LoadingSkeleton count={8} />
           </div>
         ) : filteredExercises.length === 0 ? (
-          <div className="p-3">
+          <div className="p-3 h-full min-h-0">
             <div className="text-center py-8 space-y-1">
               <p className="text-muted-foreground">
                 {searchQuery.trim()

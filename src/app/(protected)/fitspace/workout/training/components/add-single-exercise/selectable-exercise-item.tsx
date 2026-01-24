@@ -3,10 +3,10 @@ import type * as React from 'react'
 
 import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 import { ExerciseDetailDrawer } from '../exercise/exercise-detail-drawer'
-import { Card, CardContent } from '@/components/ui/card'
 
 export interface BaseExerciseItemProps {
   id: string
@@ -151,13 +151,13 @@ export function BaseExerciseItem({
   className,
   classNameImage,
 }: BaseExerciseItemProps) {
-  const infoLine = [muscleDisplay, equipmentDisplay].filter(Boolean).join(' • ')
-
   return (
     <Card
       className={cn(
         'transition-all duration-200 shadow-sm border-border p-1',
-        onClick ? 'cursor-pointer hover:bg-muted/30 hover:border-border/50' : 'cursor-default',
+        onClick
+          ? 'cursor-pointer hover:bg-muted/30 hover:border-border/50'
+          : 'cursor-default',
         isSelected && 'bg-primary/5 border-primary/20 ring-1 ring-primary/20',
         disabled && 'opacity-50 pointer-events-none',
         className,
@@ -166,7 +166,7 @@ export function BaseExerciseItem({
     >
       <CardContent className="flex items-center gap-3 pl-0">
         {leading}
-        {(images?.length && images.length > 0 || videoUrl) ? (
+        {(images?.length && images.length > 0) || videoUrl ? (
           <div
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
@@ -179,7 +179,10 @@ export function BaseExerciseItem({
                     <ExerciseMediaPreview
                       images={images}
                       videoUrl={videoUrl}
-                      className={cn("size-26 shrink-0 rounded-xl", classNameImage)}
+                      className={cn(
+                        'size-26 shrink-0 rounded-xl',
+                        classNameImage,
+                      )}
                       hidePagination={true}
                       hideVideoOverlay={true}
                       disableImageToggle={true}
@@ -191,22 +194,37 @@ export function BaseExerciseItem({
               <ExerciseMediaPreview
                 images={images}
                 videoUrl={videoUrl}
-                className={cn("size-26 shrink-0 rounded-xl", classNameImage)}
+                className={cn('size-26 shrink-0 rounded-xl', classNameImage)}
                 hidePagination={true}
                 hideVideoOverlay={true}
               />
             )}
           </div>
-        ) : <div className={cn("size-26 shrink-0 rounded-xl bg-muted flex-center", classNameImage)} >
-          <Dumbbell className="size-6 text-muted-foreground" />
-        </div>}
+        ) : (
+          <div
+            className={cn(
+              'size-26 shrink-0 rounded-xl bg-muted flex-center',
+              classNameImage,
+            )}
+          >
+            <Dumbbell className="size-6 text-muted-foreground" />
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <h4 className="text-base font-semibold leading-tight">{name}</h4>
-          {infoLine ? (
-            <p className="text-sm text-muted-foreground/80 truncate mt-1">
-              {infoLine}
-            </p>
-          ) : null}
+          <p className="inline">
+            {muscleDisplay ? (
+              <span className="inline text-sm text-muted-foreground/80 line-clamp-2">
+                {muscleDisplay}
+              </span>
+            ) : null}
+            {equipmentDisplay ? (
+              <span className="inline text-sm text-muted-foreground/80 line-clamp-2">
+                {' '}
+                • <span className="text-foreground">{equipmentDisplay}</span>
+              </span>
+            ) : null}
+          </p>
 
           {belowContent}
         </div>

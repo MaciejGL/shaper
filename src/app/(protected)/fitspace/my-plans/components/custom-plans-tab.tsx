@@ -218,21 +218,6 @@ export function CustomPlansTab() {
             <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
               Create plans to use in your training.
             </p>
-            <div className="flex gap-2">
-              <PremiumButtonWrapper
-                hasPremium={hasPremium}
-                showIndicator={hasReachedFolderLimit}
-                tooltipText="Organize your workout plans into unlimited collections and build a training library ready whenever you are."
-              >
-                <Button
-                  onClick={handleCreateFolder}
-                  iconStart={<Plus />}
-                  disabled={hasReachedFolderLimit}
-                >
-                  Create Plan
-                </Button>
-              </PremiumButtonWrapper>
-            </div>
           </CardContent>
         </Card>
       ) : (
@@ -248,14 +233,14 @@ export function CustomPlansTab() {
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="flex-center size-20 rounded-xl bg-primary/10 text-primary shrink-0">
+                  <div className="flex-center rounded-xl bg-primary/10 text-primary shrink-0 p-4">
                     <Folder className="size-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold truncate">Uncategorized</h3>
                     <p className="text-sm text-muted-foreground">
                       {uncategorizedCount}{' '}
-                      {uncategorizedCount === 1 ? 'day' : 'days'}
+                      {uncategorizedCount === 1 ? 'session' : 'sessions'}
                     </p>
                   </div>
                   <ChevronRight className="size-5 text-muted-foreground" />

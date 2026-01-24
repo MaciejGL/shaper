@@ -136,8 +136,8 @@ export function ExerciseSet({
         {/* Set Number */}
         <div
           className={cn(
-            'text-xs font-medium text-center rounded-full size-6 flex items-center justify-center mx-auto',
-            'bg-muted text-muted-foreground ',
+            'text-xs font-medium text-center flex items-center justify-center mx-auto',
+            'text-muted-foreground ',
           )}
         >
           {set.order}

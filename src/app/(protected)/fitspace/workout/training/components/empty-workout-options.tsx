@@ -156,7 +156,9 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                     className="mr-3"
                   />
                   <div className="flex-1">
-                    <CardTitle className="text-lg">Custom Workout</CardTitle>
+                    <CardTitle className="text-lg">
+                      Quick Workout Builder
+                    </CardTitle>
                     <CardDescription>
                       Choose your own exercises and sets.
                     </CardDescription>

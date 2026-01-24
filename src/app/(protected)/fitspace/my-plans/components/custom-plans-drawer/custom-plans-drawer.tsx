@@ -294,7 +294,7 @@ export function CustomPlansDrawer({
                 )}
               </div>
               <p className="text-sm text-muted-foreground">
-                Create training days and add exercises.
+                Manage your workout sessions.
               </p>
             </div>
 

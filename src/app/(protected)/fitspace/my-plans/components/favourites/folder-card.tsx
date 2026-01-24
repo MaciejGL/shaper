@@ -23,13 +23,13 @@ export function FolderCard({ folder, onClick }: FolderCardProps) {
       <CardContent className="px-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="flex-center size-20 rounded-xl bg-primary/10 text-primary shrink-0">
+            <div className="flex-center rounded-xl bg-primary/10 text-primary shrink-0 p-4">
               <Folder className="size-5" />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold truncate">{folder.name}</h3>
               <p className="text-sm text-muted-foreground">
-                {workoutCount} {workoutCount === 1 ? 'workout' : 'workouts'}
+                {workoutCount} {workoutCount === 1 ? 'session' : 'sessions'}
               </p>
             </div>
           </div>
