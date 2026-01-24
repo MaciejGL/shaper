@@ -7,6 +7,7 @@ import { signOut } from 'next-auth/react'
 import { MobileAppBanner } from '@/components/mobile-app-banner'
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { PostPaymentSuccessModal } from '@/components/post-payment-success-modal'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
@@ -27,6 +28,9 @@ export default function AccountManagementPage() {
 
   // In companion mode, don't show "Subscription & Billing" header
   const isCompanionMode = !rules.canShowUpgradeUI && !rules.canLinkToPayment
+  const isTrulyNative =
+    typeof window !== 'undefined' &&
+    (window.isNativeApp === true || !!window.nativeApp)
 
   const handleLogout = async () => {
     if (isNativeApp) {
@@ -67,13 +71,30 @@ export default function AccountManagementPage() {
                 </p>
               </div>
             </div>
-            <MobileAppBanner
-              alwaysShow
-              openAppPlacement="belowDownload"
-              openAppHelperText="Already installed? Open the app."
-              className="mx-auto my-12"
-              source="account_management"
-            />
+            {!isTrulyNative ? (
+              <div className="mx-auto my-10 w-full max-w-lg">
+                <Alert variant="info">
+                  <AlertTitle>You're viewing Hypro Web</AlertTitle>
+                  <AlertDescription>
+                    <p>
+                      This page is for account management only. To train and log
+                      workouts, use the Hypro mobile app.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+
+                <p className="text-sm font-medium text-muted-foreground mt-4 text-center">
+                  Download the Hypro App
+                </p>
+                <MobileAppBanner
+                  alwaysShow
+                  openAppPlacement="belowDownload"
+                  openAppHelperText="Already installed? Open the app."
+                  className="mt-4"
+                  source="account_management"
+                />
+              </div>
+            ) : null}
           </div>
 
           <div className="space-y-8 container-hypertro mx-auto">
