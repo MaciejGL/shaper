@@ -233,14 +233,12 @@ export default function PublicProfilePage() {
         </div>
 
         <TrainerDetailsDrawer
-          direction="right"
           trainer={previewData}
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
         />
 
         <TrainerDetailsDrawer
-          direction="right"
           trainer={exampleData}
           isOpen={showExample}
           onClose={() => setShowExample(false)}

@@ -1,14 +1,11 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { XIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 
-import { Button } from '@/components/ui/button'
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
   DrawerGoBackButton,
