@@ -24,7 +24,6 @@ import { BiggyIcon } from '@/components/biggy-icon'
 import { StatsItem } from '@/components/stats-item'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import {
   Drawer,
   DrawerContent,
@@ -296,6 +295,7 @@ function Content({
   }[]
 }) {
   const { toDisplayWeight } = useWeightConversion()
+
   return (
     <div className="space-y-6 py-4">
       {/* Personal Records */}
@@ -345,10 +345,10 @@ function Content({
                   },
                 }}
               >
-                <div className="flex items-start gap-3 text-sm py-2 px-4 bg-linear-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/0 dark:to-amber-600/60 rounded-r-lg ">
+                <div className="flex items-start gap-3 text-sm py-2 px-4 bg-linear-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/0 dark:to-amber-600/60 rounded-r-lg overflow-hidden">
                   <motion.span
                     key="exercise-name"
-                    className="font-medium flex-1 min-w-0 whitespace-normal wrap-break-word"
+                    className="font-medium flex-1 min-w-0 whitespace-normal wrap-break-word line-clamp-2"
                     variants={{
                       hidden: { opacity: 0 },
                       visible: {
@@ -374,43 +374,53 @@ function Content({
                       {toDisplayWeight(pr.estimated1RM)?.toFixed(2)}{' '}
                       {weightUnit}
                     </div>
-                    <div className="text-xs font-medium text-green-600 dark:text-yellow-400 flex items-center justify-end gap-1">
-                      +{pr.improvement.toFixed(1)}%{' '}
-                      <TrendingUp className="size-3" />
-                    </div>
+                    {pr.improvement > 0 ? (
+                      <div className="text-xs font-medium text-green-600 dark:text-yellow-400 flex items-center justify-end gap-1">
+                        +{pr.improvement.toFixed(1)}%{' '}
+                        <TrendingUp className="size-3" />
+                      </div>
+                    ) : (
+                      <div className="text-xs font-medium text-green-600 dark:text-yellow-400 flex items-center justify-end gap-1">
+                        First PR!
+                      </div>
+                    )}
                   </motion.div>
                 </div>
               </motion.div>
             ))}
-            <motion.div
-              key="weight-comparison"
-              className="flex flex-col gap-4 mt-6"
-              variants={{
-                hidden: { opacity: 0, y: 10, scale: 0.95 },
-                visible: { opacity: 1, y: 0, scale: 1 },
-              }}
-              transition={{ duration: 0.4 }}
-            >
-              <div className="bg-linear-to-r from-purple-300 to-blue-300 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4">
-                <div className="text-center">
-                  <p className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-1">
-                    You lifted {toDisplayWeight(totalWeight) || 0} {weightUnit}!
-                  </p>
-                  <p
-                    className={cn(
-                      'text-md text-purple-600 dark:text-purple-400',
-                      !weightComparison && 'animate-pulse',
-                    )}
-                  >
-                    {weightComparison ||
-                      'Calculating your weight comparison...'}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       )}
+
+      {totalWeight > 0 ? (
+        <motion.div
+          key="weight-comparison"
+          className="flex flex-col gap-4"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0, y: 10, scale: 0.95 },
+            visible: { opacity: 1, y: 0, scale: 1 },
+          }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="bg-linear-to-r from-purple-300 to-blue-300 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4">
+            <div className="text-center">
+              <p className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-1">
+                You lifted {toDisplayWeight(totalWeight)} {weightUnit}!
+              </p>
+              <p
+                className={cn(
+                  'text-md text-purple-600 dark:text-purple-400',
+                  !weightComparison && 'animate-pulse',
+                )}
+              >
+                {weightComparison || 'Calculating your weight comparison...'}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      ) : null}
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
           {shouldShowDurationAndCalories ? (
@@ -454,7 +464,7 @@ function Content({
               <CheckCheck className=" text-green-600" />
             </Badge>
           </div>
-          <div className="space-y-3 border-none bg-transparent">
+          <div className="space-y-3 border border-border rounded-2xl bg-transparent divide-y">
             {exercises.map((exercise) => {
               const prRecord = personalRecords?.find(
                 (pr) =>
@@ -478,15 +488,10 @@ function Content({
                 )
 
               return (
-                <Card
+                <div
                   key={exercise.id}
-                  className="relative overflow-hidden flex flex-col py-3 px-4 shadow-md"
+                  className="relative overflow-hidden flex flex-col p-3"
                 >
-                  {/* PR Gradient Background if PR */}
-                  {prRecord && (
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none" />
-                  )}
-
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0 pr-2">
                       <p className="text-base font-medium leading-tight whitespace-normal wrap-break-word">
@@ -494,7 +499,7 @@ function Content({
                       </p>
                     </div>
                     {exercise.completedAt ? (
-                      <div className="flex-center size-6 rounded-full bg-green-500/10 text-green-500 shrink-0">
+                      <div className="flex-center size-6 rounded-full bg-green-500/20 text-green-600 shrink-0">
                         <CheckIcon className="size-3.5" />
                       </div>
                     ) : (
@@ -511,7 +516,7 @@ function Content({
                           <span className="text-sm font-medium text-muted-foreground">
                             Top set
                           </span>
-                          <span className="text-lg font-bold tabular-nums tracking-tight">
+                          <span className="text-sm font-bold tabular-nums tracking-tight">
                             {toDisplayWeight(bestSet.weight)?.toFixed(1)}
                             <span className="text-sm font-medium text-muted-foreground ml-0.5">
                               {weightUnit}
@@ -526,29 +531,27 @@ function Content({
                           No sets logged
                         </span>
                       )}
-
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>
-                          {exercise.sets?.filter((set) => set.completedAt)
-                            .length || 0}{' '}
-                          / {exercise.sets?.length || 0} sets
-                        </span>
-                      </div>
                     </div>
 
-                    {prRecord && (
+                    {prRecord && prRecord.improvement > 0 ? (
                       <Badge
                         variant="premium"
                         className="pl-1.5 pr-2 py-0.5 h-auto"
                       >
-                        <TrophyIcon className="size-3 mr-1" />
                         <span className="font-semibold">
                           PR +{prRecord.improvement.toFixed(1)}%
                         </span>
                       </Badge>
-                    )}
+                    ) : prRecord && prRecord.improvement === 0 ? (
+                      <Badge
+                        variant="premium"
+                        className="pl-1.5 pr-2 py-0.5 h-auto"
+                      >
+                        <span className="font-semibold">First PR!</span>
+                      </Badge>
+                    ) : null}
                   </div>
-                </Card>
+                </div>
               )
             })}
           </div>

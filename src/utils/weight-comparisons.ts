@@ -114,16 +114,16 @@ function formatComparison(
   quantity: number,
   comparison: WeightComparison,
 ): string {
-  const emoji = comparison.emoji || ''
+  const emojiPrefix = comparison.emoji ? `${comparison.emoji} ` : ''
   const name = comparison.name
 
   // Handle fractional quantities
   if (quantity < 1) {
     const fraction = Math.round(quantity * 10) / 10
     if (fraction === 0.5) {
-      return `${emoji} Half a ${name}!`
+      return `${emojiPrefix}Half a ${name}!`
     }
-    return `${emoji} ${fraction} ${name}!`
+    return `${emojiPrefix}${fraction} ${name}!`
   }
 
   // Handle plural vs singular
@@ -133,10 +133,14 @@ function formatComparison(
 
   // Add some variety to the format
   const formats = [
-    `${emoji} You lifted ${roundedQuantity} ${displayName}!`,
-    `${emoji} That's ${roundedQuantity} ${displayName}!`,
-    `${emoji} ${roundedQuantity} ${displayName} worth of iron!`,
-    `${emoji} Equivalent to ${roundedQuantity} ${displayName}!`,
+    `${emojiPrefix}Damn. That's ${roundedQuantity} ${displayName}.`,
+    `${emojiPrefix}You're cooked… that's ${roundedQuantity} ${displayName}.`,
+    `${emojiPrefix}Proud of you. That's ${roundedQuantity} ${displayName}.`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Respect.`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Nice work.`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. You earned that.`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Now re-rack.`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Put the dumbbells back.`,
   ]
 
   return formats[Math.floor(Math.random() * formats.length)]

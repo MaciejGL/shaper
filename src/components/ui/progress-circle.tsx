@@ -55,10 +55,10 @@ export function ProgressCircle({
     if (value >= 90) return 'text-green-600 dark:text-green-500'
     if (value >= 80) return 'text-green-600 dark:text-green-500'
     if (value >= 70) return 'text-green-500'
-    if (value >= 60) return 'text-green-400'
-    if (value >= 50) return 'text-amber-500'
-    if (value >= 40) return 'text-amber-400'
-    if (value >= 10) return 'text-amber-300'
+    if (value >= 60) return 'text-green-500'
+    if (value >= 50) return 'text-green-500'
+    if (value >= 40) return 'text-green-500'
+    if (value >= 10) return 'text-green-500'
     return 'text-primary'
   }
 
