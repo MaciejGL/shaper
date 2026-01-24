@@ -103,10 +103,10 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
         >
           {/* Hero card: Hypertro library */}
           <motion.div key="hypertro-library">
-            <Card variant="glass" className="border-border pb-0">
+            <Card variant="glass" className="border border-neutral-300 pb-0">
               <CardContent className="space-y-4 px-0">
                 <div className="space-y-1 px-4">
-                  <CardTitle className="text-lg">Hypro Library</CardTitle>
+                  <CardTitle className="text-lg">Hypro Plans</CardTitle>
                   <CardDescription>
                     Choose a program or a ready-made workout.
                   </CardDescription>

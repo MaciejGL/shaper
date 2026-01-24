@@ -14,6 +14,7 @@ const cardVariants = cva(
           'bg-card border-border',
           'dark:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] dark:from-neutral-100 dark:via-neutral-300 dark:to-neutral-400',
         ),
+
         glass: cn(
           'bg-card border-border',
           'overflow-hidden isolate',

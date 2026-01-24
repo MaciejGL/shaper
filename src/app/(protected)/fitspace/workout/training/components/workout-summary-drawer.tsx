@@ -345,10 +345,10 @@ function Content({
                   },
                 }}
               >
-                <div className="flex justify-between items-center text-sm py-2 px-4 bg-linear-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/0 dark:to-amber-600/60 rounded-r-lg ">
+                <div className="flex items-start gap-3 text-sm py-2 px-4 bg-linear-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/0 dark:to-amber-600/60 rounded-r-lg ">
                   <motion.span
                     key="exercise-name"
-                    className="font-medium whitespace-nowrap"
+                    className="font-medium flex-1 min-w-0 whitespace-normal wrap-break-word"
                     variants={{
                       hidden: { opacity: 0 },
                       visible: {
@@ -361,7 +361,7 @@ function Content({
                   </motion.span>
                   <motion.div
                     key="weight-and-improvement"
-                    className="text-right whitespace-nowrap"
+                    className="text-right whitespace-nowrap shrink-0"
                     variants={{
                       hidden: { opacity: 0 },
                       visible: {
@@ -489,7 +489,7 @@ function Content({
 
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0 pr-2">
-                      <p className="text-base font-medium truncate leading-tight">
+                      <p className="text-base font-medium leading-tight whitespace-normal wrap-break-word">
                         {exercise.name}
                       </p>
                     </div>

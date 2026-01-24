@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { getDayImage } from '../../my-plans/utils'
+import { PlanDayExercisePreviewDrawer } from './plan-day-exercise-preview-drawer'
 
 type PlanWeeks = NonNullable<
   GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]['weeks']
@@ -29,6 +30,12 @@ export function PlanPreviewTab({ weeks, avgSessionTime }: PlanPreviewTabProps) {
     (a, b) => a.weekNumber - b.weekNumber,
   )
 
+  const [selectedDay, setSelectedDay] = useState<Day | null>(null)
+  const [isDayPreviewOpen, setIsDayPreviewOpen] = useState(false)
+  const clearSelectedDayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  )
+
   const [activeTab, setActiveTab] = useState<string>(() => {
     if (sortedWeeks.length > 0) return sortedWeeks[0].id
     return ''
@@ -39,6 +46,24 @@ export function PlanPreviewTab({ weeks, avgSessionTime }: PlanPreviewTabProps) {
       setActiveTab(sortedWeeks[0].id)
     }
   }, [activeTab, sortedWeeks])
+
+  const handleDayClick = (day: Day) => {
+    if (day.isRestDay) return
+    if (clearSelectedDayTimeoutRef.current) {
+      clearTimeout(clearSelectedDayTimeoutRef.current)
+      clearSelectedDayTimeoutRef.current = null
+    }
+    setSelectedDay(day)
+    setIsDayPreviewOpen(true)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (clearSelectedDayTimeoutRef.current) {
+        clearTimeout(clearSelectedDayTimeoutRef.current)
+      }
+    }
+  }, [])
 
   if (!weeks || weeks.length === 0) {
     return (
@@ -84,12 +109,30 @@ export function PlanPreviewTab({ weeks, avgSessionTime }: PlanPreviewTabProps) {
                   key={day.id}
                   day={day}
                   avgSessionTime={avgSessionTime}
+                  onClick={handleDayClick}
                 />
               ))}
             </div>
           </TabsContent>
         )
       })}
+
+      {selectedDay ? (
+        <PlanDayExercisePreviewDrawer
+          open={isDayPreviewOpen}
+          onOpenChange={(open) => {
+            setIsDayPreviewOpen(open)
+            if (!open) {
+              // Keep mounted briefly so close animation can play.
+              clearSelectedDayTimeoutRef.current = setTimeout(() => {
+                setSelectedDay(null)
+                clearSelectedDayTimeoutRef.current = null
+              }, 350)
+            }
+          }}
+          day={selectedDay}
+        />
+      ) : null}
     </Tabs>
   )
 }
@@ -99,17 +142,22 @@ type Day = NonNullable<PlanWeeks[number]['days']>[number]
 interface DayCardProps {
   day: Day
   avgSessionTime?: number | null
+  onClick?: (day: Day) => void
 }
 
-function DayCard({ day, avgSessionTime }: DayCardProps) {
+function DayCard({ day, avgSessionTime, onClick }: DayCardProps) {
   const firstExercise = day.exercises?.[0]
   const firstImage = getDayImage(day)
   const exerciseCount = day.exercises?.length ?? 0
   const showDuration = !!avgSessionTime && !day.isRestDay
 
+  const canPreview = !day.isRestDay
+
   return (
     <Card
       variant="glass"
+      hoverable={canPreview}
+      onClick={canPreview ? () => onClick?.(day) : undefined}
       className={cn(
         'flex-row gap-0 overflow-hidden border-none p-0',
         day.isRestDay ? 'h-24' : 'h-34',
@@ -132,7 +180,21 @@ function DayCard({ day, avgSessionTime }: DayCardProps) {
           ) : null}
         </div>
 
-        <div className="flex h-full flex-1 flex-col justify-between bg-card px-3 py-3">
+        <div className="flex h-full flex-1 flex-col justify-center gap-4 bg-card px-3 py-3">
+          <div>
+            <p className="text-lg font-semibold leading-tight text-foreground line-clamp-1">
+              {day.isRestDay
+                ? 'Rest'
+                : day.workoutType
+                  ? formatWorkoutType(day.workoutType)
+                  : 'Workout'}
+            </p>
+            {!day.isRestDay && showDuration ? (
+              <p className="mt-1 text-xs font-medium text-muted-foreground">
+                Est. {avgSessionTime} min
+              </p>
+            ) : null}
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="glass">Day {day.dayOfWeek + 1}</Badge>
             {!day.isRestDay ? (
@@ -140,17 +202,6 @@ function DayCard({ day, avgSessionTime }: DayCardProps) {
             ) : (
               <Badge variant="glass">Recovery</Badge>
             )}
-          </div>
-
-          <div>
-            <p className="text-lg font-semibold leading-tight text-foreground line-clamp-1">
-              {day.isRestDay ? 'Rest' : formatWorkoutType(day.workoutType)}
-            </p>
-            {!day.isRestDay && showDuration ? (
-              <p className="mt-1 text-xs font-medium text-muted-foreground">
-                Est. {avgSessionTime} min
-              </p>
-            ) : null}
           </div>
         </div>
       </CardContent>
