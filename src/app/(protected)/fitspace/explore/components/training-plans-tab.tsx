@@ -529,21 +529,21 @@ export function TrainingPlansTab({
       <Drawer
         open={isPreviewOpen}
         onOpenChange={(open) => !open && setIsPreviewOpen(false)}
+        direction="right"
       >
         <DrawerContent
           dialogTitle={selectedPlan?.title || 'Plan'}
           grabberAbsolute
+          className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
         >
-          <div className="overflow-y-auto">
-            {selectedPlan && (
-              <TrainingPlanPreviewContent
-                plan={selectedPlan}
-                onAssignTemplate={handleAssignTemplate}
-                isAssigning={isAssigning}
-                weeksData={selectedPlan}
-              />
-            )}
-          </div>
+          {selectedPlan && (
+            <TrainingPlanPreviewContent
+              plan={selectedPlan}
+              onAssignTemplate={handleAssignTemplate}
+              isAssigning={isAssigning}
+              weeksData={selectedPlan}
+            />
+          )}
         </DrawerContent>
       </Drawer>
     </div>

@@ -1,5 +1,4 @@
 import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
-import { formatUserCount } from '@/utils/format-user-count'
 
 import { CreatorSection } from './sections/creator-section'
 import { DescriptionSection } from './sections/description-section'
@@ -22,19 +21,15 @@ export function TrainingPlanPreviewInfoTab({
   onWeekClick,
   onCreatorClick,
 }: TrainingPlanPreviewInfoTabProps) {
-  const formattedUserCount = formatUserCount(plan.assignmentCount)
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <ProgramDetailsSection
         weekCount={plan.weekCount}
-        formattedUserCount={formattedUserCount}
         sessionsPerWeek={plan.sessionsPerWeek}
         avgSessionTime={plan.avgSessionTime}
       />
       <TargetGoalsSection targetGoals={plan.targetGoals || []} />
       <FocusTagsSection focusTags={plan.focusTags || []} />
-      {/* <EquipmentSection equipment={plan.equipment || []} /> */}
 
       <WeeklyOverviewSection weeksData={weeksData} onWeekClick={onWeekClick} />
       {plan.description && (

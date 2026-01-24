@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge'
 import { GQLTargetGoal } from '@/generated/graphql-client'
 import { translateTargetGoal } from '@/utils/translate-target-goal'
 
@@ -10,18 +11,19 @@ export function TargetGoalsSection({ targetGoals }: TargetGoalsSectionProps) {
 
   return (
     <div>
-      <h3 className="font-semibold mb-2 text-sm">What You'll Achieve</h3>
-      <ul className="space-y-1">
+      <h3 className="font-semibold mb-2 text-base">Goals</h3>
+      <div className="flex flex-wrap gap-1">
         {targetGoals.map((goal: string, index: number) => (
-          <li
+          <Badge
             key={index}
-            className="text-sm text-muted-foreground flex items-start gap-2"
+            size="md-lg"
+            variant="primary"
+            className="capitalize rounded-full"
           >
-            <div className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0" />
             {translateTargetGoal(goal as GQLTargetGoal)}
-          </li>
+          </Badge>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }

@@ -242,6 +242,7 @@ function UnderlineTabList<T extends string>({
         return (
           <button
             key={option.value}
+            type="button"
             onClick={() => onClick(option.value)}
             className={cn(
               'relative px-3 py-2 text-base font-normal transition-colors flex-1 ',

@@ -11,10 +11,15 @@ export function FocusTagsSection({ focusTags }: FocusTagsSectionProps) {
 
   return (
     <div>
-      <h3 className="font-semibold mb-2 text-sm">Training Focus</h3>
-      <div className="flex flex-wrap gap-2">
+      <h3 className="font-semibold mb-2 text-base">Training Focus</h3>
+      <div className="flex flex-wrap gap-1">
         {focusTags.map((tag: string, index: number) => (
-          <Badge key={index} size="lg" variant="info" className="capitalize">
+          <Badge
+            key={index}
+            size="md-lg"
+            variant="primary"
+            className="capitalize"
+          >
             {focusTagLabels[tag as GQLFocusTag] || tag}
           </Badge>
         ))}

@@ -1,6 +1,10 @@
+import { ArrowLeftIcon } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
+
+import { Button } from './ui/button'
+import { DrawerClose } from './ui/drawer'
 
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
 
@@ -27,8 +31,8 @@ export function TrainingPlanHeroHeader({
   if (!imageUrl) return null
 
   return (
-    <div className="flex-shrink-0 relative overflow-hidden dark">
-      <div className="relative h-52 w-full overflow-hidden rounded-t-2xl">
+    <div className="shrink-0 relative overflow-hidden dark">
+      <div className="relative h-64 w-full overflow-hidden rounded-b-3xl">
         <Image
           src={imageUrl}
           alt={title}
@@ -37,9 +41,19 @@ export function TrainingPlanHeroHeader({
           quality={100}
           sizes="(max-width: 768px) 100vw, 50vw"
         />
-        <div className="absolute -inset-1 bg-gradient-to-t from-black via-black/60 to-transparent" />
+        <div className="absolute -inset-1 bg-linear-to-t from-black via-black/60 to-transparent" />
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+        <div className="absolute top-0 left-0 p-4 text-white">
+          <DrawerClose asChild>
+            <Button
+              variant="default"
+              size="icon-lg"
+              iconOnly={<ArrowLeftIcon />}
+            />
+          </DrawerClose>
+        </div>
+
+        <div className="absolute bottom-6 left-0 right-0 p-4 text-white">
           <h2 className="text-2xl font-semibold mb-2">{title}</h2>
           <div className="flex justify-between gap-1 text-white/80">
             {difficulty && (
@@ -56,4 +70,3 @@ export function TrainingPlanHeroHeader({
     </div>
   )
 }
-

@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { createTrainerDataFromUser } from '@/components/trainer/utils'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 
 import { PlanPreviewTab } from '../plan-preview-tab'
 import { TrainingPlanPreviewFooter } from '../training-plan-preview/training-plan-preview-footer'
@@ -27,9 +27,11 @@ export function TrainingPlanPreviewContent({
   weeksData,
 }: TrainingPlanPreviewContentProps) {
   const [activeTab, setActiveTab] = useState('info')
+  const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
   const [isTrainerDrawerOpen, setIsTrainerDrawerOpen] = useState(false)
 
-  const handleWeekClick = () => {
+  const handleWeekClick = (weekId: string) => {
+    setSelectedWeekId(weekId)
     setActiveTab('preview')
   }
 
@@ -41,28 +43,27 @@ export function TrainingPlanPreviewContent({
 
   return (
     <>
-      <div className="flex flex-col h-full">
-        <div className="overflow-y-auto overflow-x-hidden flex-1">
+      <div className="flex flex-col h-full min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
           <TrainingPlanPreviewHeader plan={plan} />
           <div className="p-4">
             <Tabs
               value={activeTab}
-              onValueChange={setActiveTab}
+              // onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList
-                className="w-full"
-                variant="secondary"
-                size="xl"
-                rounded="full"
-              >
-                <TabsTrigger value="info" className="flex-1" rounded="full">
-                  Info
-                </TabsTrigger>
-                <TabsTrigger value="preview" className="flex-1" rounded="full">
-                  Preview
-                </TabsTrigger>
-              </TabsList>
+              <div className="mb-2 -mt-10 relative">
+                <PrimaryTabList
+                  options={[
+                    { label: 'Info', value: 'info' },
+                    { label: 'Preview', value: 'preview' },
+                  ]}
+                  onClick={setActiveTab}
+                  active={activeTab}
+                  className="grid grid-cols-2"
+                  size="lg"
+                />
+              </div>
 
               <TabsContent value="info" className="space-y-6 mt-2">
                 <TrainingPlanPreviewInfoTab
@@ -77,6 +78,7 @@ export function TrainingPlanPreviewContent({
                 <PlanPreviewTab
                   weeks={weeksData?.weeks || null}
                   avgSessionTime={plan.avgSessionTime ?? null}
+                  selectedWeekId={selectedWeekId}
                 />
               </TabsContent>
             </Tabs>

@@ -12,6 +12,7 @@ export function StatsItem({
   border = false,
   classNameLabel = '',
   className = '',
+  classNameValue = '',
 }: {
   value: number | string | React.ReactNode
   icon?: React.ReactNode
@@ -21,6 +22,7 @@ export function StatsItem({
   loading?: boolean
   border?: boolean
   classNameLabel?: string
+  classNameValue?: string
   className?: string
 }) {
   return (
@@ -51,15 +53,30 @@ export function StatsItem({
             })}
           >
             {typeof value === 'number' ? (
-              <div className="text-lg text-left font-bold text-primary">
+              <div
+                className={cn(
+                  'text-lg text-left font-bold text-primary',
+                  classNameValue,
+                )}
+              >
                 <AnimateNumber value={value} />
               </div>
             ) : typeof value === 'string' ? (
-              <div className="text-lg text-left font-bold text-primary">
+              <div
+                className={cn(
+                  'text-lg text-left font-bold text-primary',
+                  classNameValue,
+                )}
+              >
                 {value}
               </div>
             ) : (
-              <div className="text-lg text-left font-bold text-primary w-full">
+              <div
+                className={cn(
+                  'text-lg text-left font-bold text-primary w-full',
+                  classNameValue,
+                )}
+              >
                 {value}
               </div>
             )}

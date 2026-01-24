@@ -1,6 +1,6 @@
 'use client'
 
-import { XIcon } from 'lucide-react'
+import { ArrowLeftIcon } from 'lucide-react'
 
 import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
 import { Button } from '@/components/ui/button'
@@ -47,19 +47,23 @@ export function PlanDayExercisePreviewDrawer({
         className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
         grabber={false}
       >
-        <DrawerClose asChild>
-          <Button
-            variant="secondary"
-            size="icon-lg"
-            iconOnly={<XIcon />}
-            className="absolute top-4 right-4 z-10"
-          />
-        </DrawerClose>
-
         <div className="flex flex-col h-full min-h-0">
-          <DrawerHeader className="flex-none">
-            <DrawerTitle>{title}</DrawerTitle>
-          </DrawerHeader>
+          <div className="flex items-center gap-4 px-4 py-4">
+            <DrawerClose asChild>
+              <Button
+                variant="default"
+                size="lg"
+                iconStart={<ArrowLeftIcon />}
+                className="w-max"
+              >
+                Plan
+              </Button>
+            </DrawerClose>
+
+            <DrawerHeader className="flex-none p-0">
+              <DrawerTitle className="text-xl font-medium">{title}</DrawerTitle>
+            </DrawerHeader>
+          </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-[calc(var(--safe-area-inset-bottom)+24px)]">
             {exercises.length === 0 ? (

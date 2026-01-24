@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { getDayImage } from '../../my-plans/utils'
+
 import { PlanDayExercisePreviewDrawer } from './plan-day-exercise-preview-drawer'
 
 type PlanWeeks = NonNullable<
@@ -20,9 +21,14 @@ type PlanWeeks = NonNullable<
 interface PlanPreviewTabProps {
   weeks?: PlanWeeks | null
   avgSessionTime?: number | null
+  selectedWeekId?: string | null
 }
 
-export function PlanPreviewTab({ weeks, avgSessionTime }: PlanPreviewTabProps) {
+export function PlanPreviewTab({
+  weeks,
+  avgSessionTime,
+  selectedWeekId,
+}: PlanPreviewTabProps) {
   const { preferences } = useUserPreferences()
 
   // Sort weeks by weekNumber
@@ -32,13 +38,16 @@ export function PlanPreviewTab({ weeks, avgSessionTime }: PlanPreviewTabProps) {
 
   const [selectedDay, setSelectedDay] = useState<Day | null>(null)
   const [isDayPreviewOpen, setIsDayPreviewOpen] = useState(false)
-  const clearSelectedDayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  )
 
   const [activeTab, setActiveTab] = useState<string>(() => {
-    if (sortedWeeks.length > 0) return sortedWeeks[0].id
-    return ''
+    if (
+      selectedWeekId &&
+      sortedWeeks.some((week) => week.id === selectedWeekId)
+    ) {
+      return selectedWeekId
+    }
+
+    return sortedWeeks[0]?.id ?? ''
   })
 
   useEffect(() => {
@@ -47,23 +56,21 @@ export function PlanPreviewTab({ weeks, avgSessionTime }: PlanPreviewTabProps) {
     }
   }, [activeTab, sortedWeeks])
 
+  useEffect(() => {
+    if (
+      selectedWeekId &&
+      sortedWeeks.some((week) => week.id === selectedWeekId)
+    ) {
+      setActiveTab(selectedWeekId)
+    }
+  }, [selectedWeekId, sortedWeeks])
+
   const handleDayClick = (day: Day) => {
     if (day.isRestDay) return
-    if (clearSelectedDayTimeoutRef.current) {
-      clearTimeout(clearSelectedDayTimeoutRef.current)
-      clearSelectedDayTimeoutRef.current = null
-    }
+
     setSelectedDay(day)
     setIsDayPreviewOpen(true)
   }
-
-  useEffect(() => {
-    return () => {
-      if (clearSelectedDayTimeoutRef.current) {
-        clearTimeout(clearSelectedDayTimeoutRef.current)
-      }
-    }
-  }, [])
 
   if (!weeks || weeks.length === 0) {
     return (
@@ -78,7 +85,7 @@ export function PlanPreviewTab({ weeks, avgSessionTime }: PlanPreviewTabProps) {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar pb-2">
-        <TabsList className="w-max justify-start h-auto bg-transparent gap-2 p-0 pr-6">
+        <TabsList className="w-max justify-start h-auto bg-transparent! gap-2 p-0 pr-6">
           {sortedWeeks.map((week) => (
             <TabsTrigger
               key={week.id}
@@ -123,11 +130,7 @@ export function PlanPreviewTab({ weeks, avgSessionTime }: PlanPreviewTabProps) {
           onOpenChange={(open) => {
             setIsDayPreviewOpen(open)
             if (!open) {
-              // Keep mounted briefly so close animation can play.
-              clearSelectedDayTimeoutRef.current = setTimeout(() => {
-                setSelectedDay(null)
-                clearSelectedDayTimeoutRef.current = null
-              }, 350)
+              setSelectedDay(null)
             }
           }}
           day={selectedDay}

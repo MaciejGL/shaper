@@ -1,69 +1,25 @@
-import { Badge } from '@/components/ui/badge'
+import { StatsItem } from '@/components/stats-item'
 
 interface ProgramDetailsSectionProps {
   weekCount: number
-  formattedUserCount?: string | null
   sessionsPerWeek?: number | null
   avgSessionTime?: number | null
 }
 
 export function ProgramDetailsSection({
   weekCount,
-  formattedUserCount,
   sessionsPerWeek,
   avgSessionTime,
 }: ProgramDetailsSectionProps) {
   return (
-    <div>
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        <Badge
-          variant="secondary"
-          size="lg"
-          className="w-full justify-between py-2"
-        >
-          <span className="text-muted-foreground font-normal text-sm">
-            Weeks:
-          </span>
-          <span className="font-medium text-base">{weekCount}</span>
-        </Badge>
-
-        {sessionsPerWeek && (
-          <Badge
-            variant="secondary"
-            size="lg"
-            className="w-full justify-between py-2"
-          >
-            <span className="text-muted-foreground font-normal text-sm">
-              Sessions/week:
-            </span>
-            <span className="font-medium text-base">{sessionsPerWeek}</span>
-          </Badge>
-        )}
-        {avgSessionTime && (
-          <Badge
-            variant="secondary"
-            size="lg"
-            className="w-full justify-between py-2"
-          >
-            <span className="text-muted-foreground font-normal text-sm">
-              Avg. time:
-            </span>
-            <span className="font-medium text-base">{avgSessionTime} min</span>
-          </Badge>
-        )}
-        {formattedUserCount && (
-          <Badge
-            variant="secondary"
-            size="lg"
-            className="w-full justify-between py-2"
-          >
-            <span className="text-muted-foreground font-normal text-sm">
-              Users enrolled:
-            </span>
-            <span className="font-medium text-base">{formattedUserCount}</span>
-          </Badge>
-        )}
-      </div>
+    <div className="grid grid-cols-3 gap-2">
+      <StatsItem variant="outline" label="Weeks" value={weekCount} />
+      <StatsItem
+        variant="outline"
+        label="Sessions / week"
+        value={sessionsPerWeek}
+      />
+      <StatsItem variant="outline" label="Avg. time" value={avgSessionTime} />
     </div>
   )
 }
