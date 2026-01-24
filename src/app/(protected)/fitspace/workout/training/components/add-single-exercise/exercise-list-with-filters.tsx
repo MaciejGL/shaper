@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { DrawerGoBackButton } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -196,7 +197,8 @@ export function ExerciseListWithFilters({
 
   const headerContent = (
     <div className="pb-3 overflow-x-hidden">
-      <div className="p-3 rounded-t-2xl bg-background/50 dark:bg-background">
+      <div className="dark p-3 bg-sidebar">
+        <p className="text-lg font-semibold text-foreground">Filters</p>
         {muscleFilterMode === 'weeklyFocus' && weeklyFocus ? (
           <div className="mt-3">
             <WeeklyFocusChips
@@ -274,23 +276,26 @@ export function ExerciseListWithFilters({
 
   return (
     <div className="flex-1 min-h-0 h-full">
-      {title !== false && (
-        <div className="flex items-start justify-between gap-3 px-3 pb-2">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">{title}</h2>
-              {tagLabel ? (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                  {tagLabel}
-                </span>
+      <div className="p-4 flex gap-4">
+        <DrawerGoBackButton className="relative m-0 top-0 left-0" />
+        {title !== false && (
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-semibold">{title}</h2>
+                {tagLabel ? (
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                    {tagLabel}
+                  </span>
+                ) : null}
+              </div>
+              {subtitle !== false ? (
+                <p className="text-sm text-muted-foreground">{subtitle}</p>
               ) : null}
             </div>
-            {subtitle !== false ? (
-              <p className="text-sm text-muted-foreground">{subtitle}</p>
-            ) : null}
           </div>
-        </div>
-      )}
+        )}
+      </div>
       <div ref={setScrollParentRef} className="h-full overflow-y-auto">
         {headerContent}
 

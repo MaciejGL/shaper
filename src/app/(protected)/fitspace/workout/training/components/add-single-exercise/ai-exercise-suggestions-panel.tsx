@@ -6,11 +6,11 @@ import { XIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
-import { SelectableExerciseItem } from './selectable-exercise-item'
 import {
   type AiExerciseSuggestionsExercise,
   useAiExerciseSuggestionsContext,
 } from './ai-exercise-suggestions-context'
+import { SelectableExerciseItem } from './selectable-exercise-item'
 import type { ExerciseSuggestion } from './use-ai-suggestions'
 import { getExerciseMuscleDisplay } from './utils'
 
@@ -56,10 +56,10 @@ function SuggestionsResultsContent({
 
   return (
     <div className="space-y-3 pt-2">
-      <div className="flex items-start justify-between gap-2 px-1 pb-2">
-        <p className="text-sm text-muted-foreground">{context}</p>
+      <div className="flex items-start justify-between gap-2 pb-2">
+        <p className="text-sm font-medium text-foreground">{context}</p>
         <Button
-          variant="tertiary"
+          variant="ghost"
           size="icon-sm"
           iconOnly={<XIcon />}
           onClick={onClose}
@@ -142,7 +142,12 @@ export function AiExerciseSuggestionsPanel() {
           >
             <div className="p-3">
               <p className="text-sm text-destructive">{error.message}</p>
-              <Button variant="ghost" size="sm" className="mt-2" onClick={reset}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2"
+                onClick={reset}
+              >
                 Dismiss
               </Button>
             </div>
@@ -156,7 +161,7 @@ export function AiExerciseSuggestionsPanel() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-            className="bg-muted/20 dark:bg-black/20 rounded-lg px-3"
+            className="bg-muted dark:bg-black/20 rounded-lg -mx-3 px-3"
           >
             <div className="pt-4 pb-6">
               <SuggestionsResultsContent
@@ -174,4 +179,3 @@ export function AiExerciseSuggestionsPanel() {
     </div>
   )
 }
-

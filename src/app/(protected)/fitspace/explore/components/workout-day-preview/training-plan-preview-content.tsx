@@ -18,6 +18,9 @@ interface TrainingPlanPreviewContentProps {
   onAssignTemplate: (planId: string) => void
   isAssigning: boolean
   weeksData: PublicPlan
+  hideCloseButton?: boolean
+  hasDemoWorkoutDay?: boolean
+  onTryDemoWorkoutDay?: () => void
 }
 
 export function TrainingPlanPreviewContent({
@@ -25,6 +28,9 @@ export function TrainingPlanPreviewContent({
   onAssignTemplate,
   isAssigning,
   weeksData,
+  hideCloseButton = false,
+  hasDemoWorkoutDay = false,
+  onTryDemoWorkoutDay,
 }: TrainingPlanPreviewContentProps) {
   const [activeTab, setActiveTab] = useState('info')
   const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
@@ -39,13 +45,25 @@ export function TrainingPlanPreviewContent({
     setIsTrainerDrawerOpen(true)
   }
 
+  const handleTryDemoWorkoutDay = () => {
+    if (hasDemoWorkoutDay) {
+      onTryDemoWorkoutDay?.()
+      return
+    }
+
+    setActiveTab('preview')
+  }
+
   const trainerData = createTrainerDataFromUser(plan.createdBy)
 
   return (
     <>
       <div className="flex flex-col h-full min-h-0">
         <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-          <TrainingPlanPreviewHeader plan={plan} />
+          <TrainingPlanPreviewHeader
+            plan={plan}
+            hideCloseButton={hideCloseButton}
+          />
           <div className="p-4">
             <Tabs
               value={activeTab}
@@ -71,6 +89,8 @@ export function TrainingPlanPreviewContent({
                   weeksData={weeksData}
                   onWeekClick={handleWeekClick}
                   onCreatorClick={handleCreatorClick}
+                  hasDemoWorkoutDay={hasDemoWorkoutDay}
+                  onTryDemoWorkoutDay={handleTryDemoWorkoutDay}
                 />
               </TabsContent>
 

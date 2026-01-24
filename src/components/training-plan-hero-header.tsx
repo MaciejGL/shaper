@@ -1,10 +1,8 @@
-import { ArrowLeftIcon } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
 
-import { Button } from './ui/button'
-import { DrawerClose } from './ui/drawer'
+import { DrawerGoBackButton } from './ui/drawer'
 
 type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
 
@@ -13,6 +11,7 @@ interface TrainingPlanHeroHeaderProps {
   imageUrl: string | null
   difficulty?: Difficulty | null
   createdByName?: string | null
+  hideCloseButton?: boolean
 }
 
 const difficultyVariantMap = {
@@ -27,11 +26,12 @@ export function TrainingPlanHeroHeader({
   imageUrl,
   difficulty,
   createdByName,
+  hideCloseButton = false,
 }: TrainingPlanHeroHeaderProps) {
   if (!imageUrl) return null
 
   return (
-    <div className="shrink-0 relative overflow-hidden dark">
+    <div className="shrink-0 relative overflow-hidden">
       <div className="relative h-64 w-full overflow-hidden rounded-b-3xl">
         <Image
           src={imageUrl}
@@ -43,15 +43,7 @@ export function TrainingPlanHeroHeader({
         />
         <div className="absolute -inset-1 bg-linear-to-t from-black via-black/60 to-transparent" />
 
-        <div className="absolute top-0 left-0 p-4 text-white">
-          <DrawerClose asChild>
-            <Button
-              variant="default"
-              size="icon-lg"
-              iconOnly={<ArrowLeftIcon />}
-            />
-          </DrawerClose>
-        </div>
+        {!hideCloseButton && <DrawerGoBackButton />}
 
         <div className="absolute bottom-6 left-0 right-0 p-4 text-white">
           <h2 className="text-2xl font-semibold mb-2">{title}</h2>

@@ -3,6 +3,7 @@
 import { Dumbbell, Plus, SlidersHorizontal } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
+import { HeaderTab } from '@/components/header-tab'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -118,14 +119,11 @@ export function ExercisesTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-end justify-between gap-3 min-h-[40px]">
-        <div className="space-y-0.5">
-          <div className="text-2xl font-semibold">My exercises</div>
-          <div className="text-sm text-muted-foreground">
-            Create exercises you can reuse in workouts and templates.
-          </div>
-        </div>
-      </div>
+      <HeaderTab
+        title="My exercises"
+        description="Create exercises you can reuse in workouts and templates."
+      />
+
       <div className="flex items-center justify-between gap-3">
         {shouldShowCreateButton ? (
           <div className="flex items-center gap-2 w-full">

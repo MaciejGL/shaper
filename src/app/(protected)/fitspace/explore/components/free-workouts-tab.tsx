@@ -249,7 +249,11 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
                 {day.plan.difficulty.toLowerCase()}
               </Badge>
             )}
-            <Badge className="flex items-center gap-1 ml-auto" size="md-lg">
+            <Badge
+              variant="glass"
+              className="flex items-center gap-1 ml-auto border-transparent"
+              size="md-lg"
+            >
               <Users className="h-3 w-3" />
               <span>{formatUserCount(getFakeUserCount(day.id))}</span>
             </Badge>

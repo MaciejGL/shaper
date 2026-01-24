@@ -27,7 +27,13 @@ const cardVariants = cva(
         tertiary: 'bg-card-on-card border-border',
         default: 'border-border',
         highlighted: cn(
-          ' bg-linear-to-tr dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-800 from-neutral-100 via-neutral-300 to-neutral-400 border-none',
+          'bg-card border-border',
+          'overflow-hidden isolate',
+          'bg-neutral-900 dark:bg-neutral-900 border-border/50 backdrop-blur-md backdrop-saturate-150',
+          'before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none',
+          'before:bg-gradient-to-br before:from-white/25 before:via-transparent before:to-transparent before:opacity-70',
+          'after:absolute after:inset-0 after:rounded-[inherit] after:pointer-events-none',
+          'after:bg-gradient-to-tl after:from-white/12 after:via-transparent after:to-transparent after:opacity-60',
         ),
         premium:
           'relative bg-card border-[1.5px] border-transparent bg-origin-border [background-clip:padding-box,border-box] [background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(245_158_11),rgb(251_146_60),rgb(249_115_22))] dark:[background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(251_191_36),rgb(251_146_60),rgb(251_146_60))] shadow-xl',

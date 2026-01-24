@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 
 import { CreatorSection } from './sections/creator-section'
@@ -13,6 +15,8 @@ interface TrainingPlanPreviewInfoTabProps {
   weeksData?: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
   onWeekClick: (weekId: string) => void
   onCreatorClick?: () => void
+  hasDemoWorkoutDay?: boolean
+  onTryDemoWorkoutDay?: () => void
 }
 
 export function TrainingPlanPreviewInfoTab({
@@ -20,6 +24,8 @@ export function TrainingPlanPreviewInfoTab({
   weeksData,
   onWeekClick,
   onCreatorClick,
+  hasDemoWorkoutDay = false,
+  onTryDemoWorkoutDay,
 }: TrainingPlanPreviewInfoTabProps) {
   return (
     <div className="space-y-6">
@@ -30,6 +36,26 @@ export function TrainingPlanPreviewInfoTab({
       />
       <TargetGoalsSection targetGoals={plan.targetGoals || []} />
       <FocusTagsSection focusTags={plan.focusTags || []} />
+
+      {hasDemoWorkoutDay && (
+        <Card variant="highlighted" className="dark shadow-xl">
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              <p className="font-semibold">Try a demo workout day</p>
+              <p className="text-sm text-muted-foreground">
+                Preview one full workout day and start it instantly.
+              </p>
+            </div>
+            <Button
+              className="w-full mt-4"
+              variant="default"
+              onClick={onTryDemoWorkoutDay}
+            >
+              Try demo workout day
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <WeeklyOverviewSection weeksData={weeksData} onWeekClick={onWeekClick} />
       {plan.description && (

@@ -126,12 +126,12 @@ function MuscleChip({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'shrink-0 flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all',
+        'shrink-0 flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all text-foreground',
         'outline whitespace-nowrap',
         'disabled:opacity-50 disabled:pointer-events-none',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         isSelected
-          ? 'outline-primary bg-card'
+          ? 'outline-primary'
           : 'outline-border bg-card hover:bg-muted/50 text-foreground',
       )}
     >

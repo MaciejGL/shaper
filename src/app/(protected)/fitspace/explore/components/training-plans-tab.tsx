@@ -25,19 +25,23 @@ import {
   GQLGetPublicTrainingPlansQuery,
   useAssignTemplateToSelfMutation,
   useGetPublicTrainingPlansQuery,
+  useStartFreeWorkoutDayMutation,
 } from '@/generated/graphql-client'
 import { useOpenUrl } from '@/hooks/use-open-url'
 import { usePaymentRules } from '@/hooks/use-payment-rules'
+import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 import { formatUserCount, getFakeUserCount } from '@/utils/format-user-count'
 
-import { PublicTrainingPlan } from './explore.client'
+import { FreeWorkoutDay, PublicTrainingPlan } from './explore.client'
 import { PlanFinder } from './plan-finder/plan-finder'
 import { TrainingPlanPreviewContent } from './workout-day-preview/training-plan-preview-content'
+import { UnifiedPreviewDrawer } from './workout-day-preview/unified-preview-drawer'
 
 interface TrainingPlansTabProps {
   initialPlans?: PublicTrainingPlan[]
   initialPlanId?: string | null
+  workouts: FreeWorkoutDay[]
 }
 
 type QuickPlanBadgeId =
@@ -118,12 +122,16 @@ const quickPlanBadges: readonly QuickPlanBadge[] = [
 export function TrainingPlansTab({
   initialPlans = [],
   initialPlanId,
+  workouts,
 }: TrainingPlansTabProps) {
   const [selectedPlan, setSelectedPlan] = useState<
     GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number] | null
   >(null)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isPlanFinderOpen, setIsPlanFinderOpen] = useState(false)
+  const [selectedDemoWorkout, setSelectedDemoWorkout] =
+    useState<FreeWorkoutDay | null>(null)
+  const [isDemoPreviewOpen, setIsDemoPreviewOpen] = useState(false)
 
   // Filters
   const [selectedFocusTags, setSelectedFocusTags] = useState<GQLFocusTag[]>([])
@@ -161,6 +169,22 @@ export function TrainingPlansTab({
   // Fetch assignment mutation
   const { mutateAsync: assignTemplate, isPending: isAssigning } =
     useAssignTemplateToSelfMutation({})
+
+  const { mutateAsync: startWorkoutDay, isPending: isStarting } =
+    useStartFreeWorkoutDayMutation({
+      onSuccess: (data) => {
+        if (!data.startFreeWorkoutDay) return
+
+        const { weekId, dayId } = data.startFreeWorkoutDay
+
+        startTransition(() => {
+          router.refresh()
+          router.push(`/fitspace/workout?week=${weekId}&day=${dayId}`)
+        })
+
+        queryInvalidation.favouriteWorkoutStart(queryClient)
+      },
+    })
 
   const handlePlanClick = (
     plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number],
@@ -293,6 +317,10 @@ export function TrainingPlansTab({
 
   // Get all public plans from the API (includes both free and premium)
   const allPlans = data?.getPublicTrainingPlans || []
+
+  const demoWorkoutForSelectedPlan = selectedPlan
+    ? (workouts.find((w) => w.plan?.id === selectedPlan.id) ?? null)
+    : null
 
   const availableFocusTags = (() => {
     const set = new Set<GQLFocusTag>()
@@ -542,10 +570,53 @@ export function TrainingPlansTab({
               onAssignTemplate={handleAssignTemplate}
               isAssigning={isAssigning}
               weeksData={selectedPlan}
+              hasDemoWorkoutDay={!!demoWorkoutForSelectedPlan}
+              onTryDemoWorkoutDay={() => {
+                if (!demoWorkoutForSelectedPlan) return
+                setSelectedDemoWorkout(demoWorkoutForSelectedPlan)
+                setIsDemoPreviewOpen(true)
+              }}
             />
           )}
         </DrawerContent>
       </Drawer>
+
+      <UnifiedPreviewDrawer
+        initialView={
+          selectedDemoWorkout
+            ? { type: 'workout', data: selectedDemoWorkout }
+            : null
+        }
+        isOpen={isDemoPreviewOpen}
+        onClose={() => {
+          setIsDemoPreviewOpen(false)
+        }}
+        onAnimationComplete={() => {
+          setSelectedDemoWorkout(null)
+        }}
+        onStartWorkout={async (trainingDayId) => {
+          try {
+            await startWorkoutDay({
+              input: {
+                trainingDayId,
+                replaceExisting: true,
+              },
+            })
+            startTransition(() => {
+              router.refresh()
+              router.push(`/fitspace/workout`)
+            })
+          } catch (error) {
+            console.error('Failed to start workout:', error)
+            toast.error('Failed to start workout')
+          }
+        }}
+        isStarting={isStarting}
+        onAssignTemplate={handleAssignTemplate}
+        isAssigning={isAssigning}
+        availablePlans={allPlans}
+        hidePreviewPlan
+      />
     </div>
   )
 }
@@ -647,7 +718,11 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
                       </Badge>
                     ))
                 : null}
-              <Badge variant="primary" size="md-lg" className="ml-auto">
+              <Badge
+                variant="glass"
+                className="flex items-center gap-1 ml-auto border-transparent"
+                size="lg"
+              >
                 <Users className="h-3 w-3" />
                 {formatUserCount(getFakeUserCount(plan.id))}
               </Badge>

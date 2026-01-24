@@ -381,10 +381,11 @@ export function AddSingleExercise({
         open={open}
         onOpenChange={setOpen}
         dismissible={!isReorderDragging}
+        direction="right"
       >
         <DrawerContent
           dialogTitle="Build my own workout"
-          className="max-h-[85vh] h-full"
+          className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
         >
           {drawerContent}
         </DrawerContent>
@@ -398,6 +399,7 @@ export function AddSingleExercise({
         open={open}
         onOpenChange={setOpen}
         dismissible={!isReorderDragging}
+        direction="right"
       >
         <DrawerTrigger asChild>
           <Button size="lg" iconStart={<PlusIcon />} className="w-full">
@@ -406,7 +408,7 @@ export function AddSingleExercise({
         </DrawerTrigger>
         <DrawerContent
           dialogTitle="Add Single Exercise"
-          className="max-h-[85vh] h-full"
+          className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
         >
           {drawerContent}
         </DrawerContent>
@@ -415,7 +417,12 @@ export function AddSingleExercise({
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen} dismissible={!isReorderDragging}>
+    <Drawer
+      open={open}
+      onOpenChange={setOpen}
+      dismissible={!isReorderDragging}
+      direction="right"
+    >
       <DrawerTrigger asChild>
         <Card className="cursor-pointer transition-all hover:scale-[1.01]">
           <CardContent>
@@ -436,7 +443,7 @@ export function AddSingleExercise({
       </DrawerTrigger>
       <DrawerContent
         dialogTitle="Add Single Exercise"
-        className="max-h-[85vh] h-full"
+        className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
       >
         {drawerContent}
       </DrawerContent>

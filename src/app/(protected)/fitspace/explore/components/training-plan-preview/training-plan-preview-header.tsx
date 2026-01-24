@@ -5,10 +5,12 @@ type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
 
 interface TrainingPlanPreviewHeaderProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
+  hideCloseButton?: boolean
 }
 
 export function TrainingPlanPreviewHeader({
   plan,
+  hideCloseButton = false,
 }: TrainingPlanPreviewHeaderProps) {
   const trainerName =
     plan.createdBy?.firstName ||
@@ -21,6 +23,7 @@ export function TrainingPlanPreviewHeader({
       imageUrl={plan.heroImageUrl ?? null}
       difficulty={(plan.difficulty as Difficulty) ?? null}
       createdByName={trainerName}
+      hideCloseButton={hideCloseButton}
     />
   )
 }

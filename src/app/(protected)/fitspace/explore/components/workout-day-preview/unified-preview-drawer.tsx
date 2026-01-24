@@ -5,7 +5,11 @@ import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerGoBackButton,
+} from '@/components/ui/drawer'
 
 import { TrainingPlanPreviewContent } from './training-plan-preview-content'
 import { DrawerView, PublicPlan } from './types'
@@ -21,6 +25,7 @@ interface UnifiedPreviewDrawerProps {
   onAssignTemplate: (planId: string) => void
   isAssigning: boolean
   availablePlans: PublicPlan[]
+  hidePreviewPlan?: boolean
 }
 
 export function UnifiedPreviewDrawer({
@@ -33,6 +38,7 @@ export function UnifiedPreviewDrawer({
   onAssignTemplate,
   isAssigning,
   availablePlans,
+  hidePreviewPlan = false,
 }: UnifiedPreviewDrawerProps) {
   const [viewStack, setViewStack] = useState<DrawerView[]>([])
   const [direction, setDirection] = useState<'forward' | 'back'>('forward')
@@ -127,17 +133,17 @@ export function UnifiedPreviewDrawer({
           handleDrawerClose()
         }
       }}
+      direction="right"
     >
       <DrawerContent
-        className="max-h-[90vh] h-full"
+        className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
         dialogTitle={getTitle()}
-        grabberAbsolute
         onAnimationEnd={handleAnimationEnd}
       >
         {viewStack.length > 0 && (
-          <div className="absolute top-4 left-4 z-50">
+          <div className="dark absolute top-4 left-4 z-50">
             <Button
-              size="icon-sm"
+              size="icon-lg"
               variant="default"
               onClick={handleBack}
               iconOnly={<ArrowLeft />}
@@ -146,6 +152,7 @@ export function UnifiedPreviewDrawer({
             </Button>
           </div>
         )}
+        <DrawerGoBackButton />
 
         <div className="relative overflow-hidden h-full">
           {!isClosing ? (
@@ -177,6 +184,7 @@ export function UnifiedPreviewDrawer({
                     isStarting={isStarting}
                     onNavigateToPlan={handleNavigateToPlan}
                     onClose={handleDrawerClose}
+                    hidePreviewPlan={hidePreviewPlan}
                   />
                 </motion.div>
               )}
@@ -203,6 +211,7 @@ export function UnifiedPreviewDrawer({
                     onAssignTemplate={onAssignTemplate}
                     isAssigning={isAssigning}
                     weeksData={currentView.data}
+                    hideCloseButton={true}
                   />
                 </motion.div>
               )}

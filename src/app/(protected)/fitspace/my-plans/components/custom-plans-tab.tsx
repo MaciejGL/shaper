@@ -3,6 +3,7 @@
 import { ChevronRight, Folder, Plus } from 'lucide-react'
 import { useState } from 'react'
 
+import { HeaderTab } from '@/components/header-tab'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
@@ -174,12 +175,10 @@ export function CustomPlansTab() {
 
   return (
     <>
-      <div className="space-y-0.5 mb-6">
-        <div className="text-2xl font-semibold">Custom plans</div>
-        <div className="text-sm text-muted-foreground">
-          Create plans templates to use in your training.
-        </div>
-      </div>
+      <HeaderTab
+        title="Custom plans"
+        description="Create plans templates to use in your training."
+      />
 
       <div className="flex justify-between items-center gap-2 mb-4">
         <div className="text-sm text-muted-foreground">

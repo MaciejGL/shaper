@@ -4,25 +4,26 @@ import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
 import { ExtendHeader } from '@/components/extend-header'
+import { HeaderTab } from '@/components/header-tab'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import {
   useFitspaceMyPlansQuery,
   useGetCheckinStatusQuery,
 } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 
+import { CustomPlansTab } from './components/custom-plans-tab'
+import { ExercisesTab } from './components/exercises-tab'
 import { NoActivePlanHeaderCard } from './components/no-active-plan-header-card/no-active-plan-header-card'
 import { PlanActionDialog } from './components/plan-action-dialog/plan-action-dialog'
 import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
 import { PlanCard } from './components/plan-card'
 import { PlanDetailsDrawer } from './components/plan-details-drawer'
 import { PlansTab } from './components/plans-tab'
-import { CustomPlansTab } from './components/custom-plans-tab'
-import { ExercisesTab } from './components/exercises-tab'
 // import { TodayWorkoutCta } from './components/summary/today-workout-cta/today-workout-cta'
 import { PlanTab, getPlanStatus } from './types'
 import { getPlanImage } from './utils'
-import { cn } from '@/lib/utils'
 
 export default function MyPlansPage() {
   const [tab, setTab] = useQueryState<PlanTab>(
@@ -89,12 +90,10 @@ export default function MyPlansPage() {
         value={PlanTab.AssignedPlans}
         className="space-y-4 py-6 px-4"
       >
-        <div className="space-y-0.5 mb-6">
-            <div className="text-2xl font-semibold">Assigned plans</div>
-            <div className="text-sm text-muted-foreground">
-              Plans you have been assigned to by your trainer or from our library.
-            </div>
-          </div>
+        <HeaderTab
+          title="Assigned plans"
+          description="Plans you have been assigned to by your trainer or from our library."
+        />
         {/* {activePlan?.weeks && activePlan.weeks.length > 0 && (
           <div className="mb-6">
             <TodayWorkoutCta

@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { HeaderTab } from '@/components/header-tab'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -78,13 +79,10 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
   return (
     <>
       <div className="space-y-4 pt-6">
-        <div className="space-y-2 mb-6">
-          <p className="text-2xl font-semibold text-left">Today's workout</p>
-
-          <p className="text-sm text-muted-foreground text-left">
-            Choose how you want to train today.
-          </p>
-        </div>
+        <HeaderTab
+          title="Today's workout"
+          description="Choose how you want to train today."
+        />
 
         <motion.div
           key={`empty-workout-options-${day.id}`}
@@ -103,7 +101,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
         >
           {/* Hero card: Hypertro library */}
           <motion.div key="hypertro-library">
-            <Card variant="glass" className="border border-neutral-300 pb-0">
+            <Card variant="highlighted" className="pb-0 dark">
               <CardContent className="space-y-4 px-0">
                 <div className="space-y-1 px-4">
                   <CardTitle className="text-lg">Hypro Plans</CardTitle>

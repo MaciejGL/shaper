@@ -17,7 +17,7 @@ export function TargetGoalsSection({ targetGoals }: TargetGoalsSectionProps) {
           <Badge
             key={index}
             size="md-lg"
-            variant="primary"
+            variant="secondary"
             className="capitalize rounded-full"
           >
             {translateTargetGoal(goal as GQLTargetGoal)}

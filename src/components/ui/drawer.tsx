@@ -1,11 +1,14 @@
 'use client'
 
+import { ArrowLeft } from 'lucide-react'
 import * as React from 'react'
 // import { RemoveScroll } from 'react-remove-scroll'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
 import { useModalHistory } from '@/hooks/use-modal-history'
 import { cn } from '@/lib/utils'
+
+import { Button } from './button'
 
 function Drawer({
   onOpenChange,
@@ -184,12 +187,32 @@ function DrawerDescription({
   )
 }
 
+function DrawerGoBackButton({
+  className,
+  ...props
+}: React.ComponentProps<typeof DrawerClose>) {
+  return (
+    <DrawerClose
+      data-slot="drawer-close-button"
+      className={cn(
+        'dark absolute top-4 left-4 z-10 border-none transition-opacity',
+        className,
+      )}
+      {...props}
+      asChild
+    >
+      <Button variant="default" size="icon-lg" iconOnly={<ArrowLeft />} />
+    </DrawerClose>
+  )
+}
+
 export {
   Drawer,
   DrawerPortal,
   DrawerOverlay,
   DrawerTrigger,
   DrawerClose,
+  DrawerGoBackButton,
   DrawerContent,
   DrawerHeader,
   DrawerFooter,

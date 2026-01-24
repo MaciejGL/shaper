@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
+
+import { Drawer, DrawerContent } from '../ui/drawer'
 
 import { CancellationInfo } from './components/cancellation-info'
 import { OffersSection } from './components/offers-section'
@@ -30,11 +32,13 @@ export function CoachingInfoModal({
   }, [currentStep])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        fullScreen
-        className="flex flex-col gap-0 h-full p-0"
+    <Drawer open={open} onOpenChange={onOpenChange} direction="right">
+      <DrawerContent
         dialogTitle="How Personal Coaching Works"
+        className={cn(
+          'data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0',
+          'flex flex-col gap-0 h-full p-0',
+        )}
       >
         {/* Scrollable content area */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4">
@@ -84,7 +88,7 @@ export function CoachingInfoModal({
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </DrawerContent>
+    </Drawer>
   )
 }

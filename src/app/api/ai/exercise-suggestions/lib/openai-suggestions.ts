@@ -195,6 +195,55 @@ export async function generateAiSuggestions(params: {
   context: string
   debug: GenerateAiSuggestionsDebugInfo
 }> {
+  const buildSignalContext = (): string => {
+    const needsWork = params.muscleProgress
+      .filter((m) => m.targetSets > 0 && m.completedSets < m.targetSets * 0.5)
+      .sort(
+        (a, b) =>
+          a.completedSets / a.targetSets - b.completedSets / b.targetSets,
+      )
+      .map((m) => m.muscle)
+
+    const recovered = params.muscleProgress
+      .filter((m) => m.percentRecovered >= 100)
+      .sort((a, b) => b.percentRecovered - a.percentRecovered)
+      .map((m) => m.muscle)
+
+    const topNeed = needsWork.slice(0, 2)
+    const topRecovered = recovered.slice(0, 2)
+
+    const joinTwo = (items: string[]) =>
+      items.length === 2 ? `${items[0]} and ${items[1]}` : items[0] ?? ''
+
+    if (topNeed.length > 0 && topRecovered.length > 0) {
+      return `Focus today: add volume for ${joinTwo(topNeed)} while ${joinTwo(
+        topRecovered,
+      )} is fresh.`
+    }
+
+    if (topNeed.length > 0) {
+      return `Focus today: add volume for ${joinTwo(topNeed)} to balance your week.`
+    }
+
+    if (topRecovered.length > 0) {
+      return `Good day to train ${joinTwo(topRecovered)}—it fits your recovery this week.`
+    }
+
+    return 'Solid picks that fit today and keep your week balanced.'
+  }
+
+  const normalizeContext = (value: unknown): string => {
+    const signalContext = buildSignalContext()
+    const raw =
+      typeof value === 'string' ? value : signalContext
+
+    const trimmed = raw.trim().replace(/\s+/g, ' ')
+    if (!trimmed) return signalContext
+
+    const endsWithSentencePunctuation = /[.!?]$/.test(trimmed)
+    return endsWithSentencePunctuation ? trimmed : `${trimmed}.`
+  }
+
   const model = 'gpt-4.1-mini'
   const systemPrompt = buildSystemPrompt()
   const userPrompt = buildUserPrompt({
@@ -243,6 +292,20 @@ export async function generateAiSuggestions(params: {
     availableExercises: params.availableExercises,
   })
 
+  const signalContext = buildSignalContext()
+  const aiContext = normalizeContext(aiResult.context)
+  const shouldPreferAiContext =
+    signalContext === 'Solid picks that fit today and keep your week balanced.' ||
+    (() => {
+      const topMuscles = params.muscleProgress
+        .map((m) => m.muscle)
+        .filter((m) => m && m.length > 1)
+        .slice(0, 12)
+
+      const aiLower = aiContext.toLowerCase()
+      return topMuscles.some((m) => aiLower.includes(m.toLowerCase()))
+    })()
+
   const envKey = getEnvKeyForModel(model)
   const cost: GenerateAiSuggestionsDebugInfo['cost'] = costEstimate
     ? {
@@ -256,10 +319,7 @@ export async function generateAiSuggestions(params: {
 
   return {
     suggestions,
-    context:
-      typeof aiResult.context === 'string'
-        ? aiResult.context
-        : 'Based on your week so far:',
+    context: shouldPreferAiContext ? aiContext : signalContext,
     debug: {
       model,
       systemPrompt,

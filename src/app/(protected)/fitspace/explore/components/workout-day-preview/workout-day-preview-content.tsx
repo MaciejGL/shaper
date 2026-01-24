@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { ExerciseMediaPreview } from '@/components/exercise-media-preview'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { DrawerFooter } from '@/components/ui/drawer'
+import { DrawerFooter, DrawerGoBackButton } from '@/components/ui/drawer'
 import {
   GQLWorkoutType,
   useFitspaceGetActivePlanIdQuery,
@@ -22,6 +22,7 @@ interface WorkoutDayPreviewContentProps {
   isStarting: boolean
   onNavigateToPlan: (planId: string) => void
   onClose: () => void
+  hidePreviewPlan?: boolean
 }
 
 export function WorkoutDayPreviewContent({
@@ -30,6 +31,7 @@ export function WorkoutDayPreviewContent({
   isStarting,
   onNavigateToPlan,
   onClose,
+  hidePreviewPlan = false,
 }: WorkoutDayPreviewContentProps) {
   const { data: activePlanData } = useFitspaceGetActivePlanIdQuery()
   const hasActivePlan = !!activePlanData?.getActivePlanId
@@ -67,12 +69,13 @@ export function WorkoutDayPreviewContent({
             planTitle={planTitle}
             trainerName={trainerName}
             onViewPlan={handleViewFullPlan}
+            hidePreviewPlan={hidePreviewPlan}
           />
         )}
 
         <div className="px-4 py-6 space-y-6">
           <ExercisesList exercises={exercises} />
-          {day.plan && (
+          {day.plan && !hidePreviewPlan && (
             <PlanPromotion
               planTitle={planTitle}
               onViewPlan={handleViewFullPlan}
@@ -96,6 +99,7 @@ interface HeroImageProps {
   planTitle?: string
   trainerName: string
   onViewPlan: () => void
+  hidePreviewPlan?: boolean
 }
 
 function HeroImage({
@@ -104,9 +108,10 @@ function HeroImage({
   planTitle,
   trainerName,
   onViewPlan,
+  hidePreviewPlan = false,
 }: HeroImageProps) {
   return (
-    <div className="relative h-52 w-full overflow-hidden rounded-t-2xl">
+    <div className="relative h-64 w-full overflow-hidden rounded-b-3xl">
       <Image
         src={imageUrl}
         alt={`${workoutType} workout`}
@@ -116,6 +121,7 @@ function HeroImage({
         sizes="(max-width: 768px) 100vw, 50vw"
       />
       <div className="absolute inset-0 bg-linear-to-t from-black via-black/60 to-transparent" />
+      {hidePreviewPlan && <DrawerGoBackButton />}
 
       <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
         <h2 className="text-2xl font-semibold mb-2">
@@ -124,11 +130,11 @@ function HeroImage({
         <div className="flex justify-between gap-1 text-white/80">
           {planTitle && (
             <button
-              onClick={onViewPlan}
+              onClick={!hidePreviewPlan ? onViewPlan : undefined}
               className="font-medium text-white hover:text-primary underline-offset-2 hover:underline flex items-center gap-1 text-sm cursor-pointer"
             >
               <span className="text-muted-foreground">From</span> {planTitle}
-              <ChevronRight className="size-4" />
+              {!hidePreviewPlan && <ChevronRight className="size-4" />}
             </button>
           )}
           <span className="text-sm">by {trainerName}</span>
@@ -175,15 +181,13 @@ interface PlanPromotionProps {
 
 function PlanPromotion({ planTitle, onViewPlan }: PlanPromotionProps) {
   return (
-    <Card variant="glass" onClick={onViewPlan}>
+    <Card variant="highlighted" className="dark" onClick={onViewPlan}>
       <CardContent>
         <div className="flex items-start gap-3">
           <div className="space-y-2 flex-1">
-            <p className="font-semibold">
-              Love this workout? Get the full plan!
-            </p>
+            <p className="font-semibold">Want to check full plan?</p>
             <p className="text-sm text-muted-foreground">
-              {planTitle} includes structured training to help you reach your
+              {planTitle} is a structured training plan to help you reach your
               goals.
             </p>
           </div>
@@ -209,7 +213,12 @@ function WorkoutDayActions({
 }: WorkoutDayActionsProps) {
   return (
     <DrawerFooter className="border-t flex flex-row gap-2">
-      <Button variant="outline" onClick={onClose} disabled={isStarting}>
+      <Button
+        variant="outline"
+        onClick={onClose}
+        disabled={isStarting}
+        size="lg"
+      >
         Close
       </Button>
       <Button
@@ -217,6 +226,7 @@ function WorkoutDayActions({
         disabled={isStarting}
         loading={isStarting}
         className="flex-1"
+        size="lg"
       >
         Start Workout
       </Button>

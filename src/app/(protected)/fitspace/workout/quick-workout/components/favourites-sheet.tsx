@@ -11,6 +11,7 @@ import {
   DrawerClose,
   DrawerContent,
   DrawerDescription,
+  DrawerGoBackButton,
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
@@ -66,22 +67,14 @@ export function FavouritesSheet({
         dialogTitle="Select Custom Workout"
         className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
       >
-        <DrawerClose asChild>
-          <Button
-            variant="secondary"
-            size="icon-lg"
-            onClick={onClose}
-            iconOnly={<XIcon />}
-            className="absolute top-4 right-4 z-10"
-          />
-        </DrawerClose>
-        <DrawerHeader>
-          <DrawerTitle>My Plans</DrawerTitle>
-          <DrawerDescription>
-            Select a saved workout to add to your day
-          </DrawerDescription>
-        </DrawerHeader>
+        <DrawerGoBackButton className="relative mb-8" />
         <div className="px-4 pb-4 overflow-y-auto">
+          <DrawerHeader className="relative px-0">
+            <DrawerTitle>My Plans</DrawerTitle>
+            <DrawerDescription>
+              Select a saved workout to add to your day
+            </DrawerDescription>
+          </DrawerHeader>
           <FavouritesStep
             onSelectFavourite={handleSelectFavourite}
             isStarting={isStarting}

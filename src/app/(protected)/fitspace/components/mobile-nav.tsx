@@ -82,7 +82,7 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
         id: 'plans',
         href: '/fitspace/my-plans',
         icon: LayoutList,
-        label: 'Plans',
+        label: 'My Plans',
         prefetch: true,
       },
       {

@@ -6,6 +6,8 @@ import { parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs'
 import { toast } from 'sonner'
 
 import { ExtendHeader } from '@/components/extend-header'
+import { HeaderTab } from '@/components/header-tab'
+import { Badge } from '@/components/ui/badge'
 import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import {
   GQLGetFeaturedTrainersQuery,
@@ -114,7 +116,7 @@ export function ExploreClient({
         <div className="mb-2 -mt-6 relative px-3">
           <PrimaryTabList
             options={[
-              { label: 'Free', value: Tab.FreeWorkouts },
+              { label: 'Workouts', value: Tab.FreeWorkouts },
               { label: 'Plans', value: Tab.PremiumPlans },
               { label: 'Trainers', value: Tab.Trainers },
             ]}
@@ -125,7 +127,18 @@ export function ExploreClient({
           />
         </div>
 
-        <TabsContent value="free-workouts" className="px-4">
+        <TabsContent value={Tab.FreeWorkouts} className="px-4">
+          <HeaderTab
+            title={
+              <span className="flex items-center gap-2">
+                Workouts{' '}
+                <Badge variant="secondary" size="md">
+                  Free
+                </Badge>
+              </span>
+            }
+            description="Free workouts selection from our plans. Select a workout to start training."
+          />
           <FreeWorkoutsTab
             initialWorkouts={workouts}
             initialWorkoutId={params.workout}
@@ -135,14 +148,23 @@ export function ExploreClient({
           />
         </TabsContent>
 
-        <TabsContent value="premium-plans" className="px-4">
+        <TabsContent value={Tab.PremiumPlans} className="px-4">
+          <HeaderTab
+            title="Plans"
+            description="Coach-made training plans. Choose the one that fits your goals and lifestyle or try our plan finder."
+          />
           <TrainingPlansTab
             initialPlans={plans || []}
             initialPlanId={params.plan}
+            workouts={workouts || []}
           />
         </TabsContent>
 
-        <TabsContent value="trainers" className="px-4">
+        <TabsContent value={Tab.Trainers} className="px-4">
+          <HeaderTab
+            title="Trainers"
+            description="Connect with certified trainers to get personalized guidance and support - First assessment is free and non-binding."
+          />
           <TrainersTab
             initialTrainers={trainers || []}
             initialTrainerId={params.trainer}

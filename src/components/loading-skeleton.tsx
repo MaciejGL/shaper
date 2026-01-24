@@ -34,7 +34,7 @@ export function LoadingSkeleton({
       <Card
         key={index}
         variant={cardVariant}
-        className={cn(withBorder && '!border', className)}
+        className={cn(withBorder && 'border!', className)}
       >
         <CardHeader>
           <Skeleton className="h-6 w-1/3" />
@@ -53,12 +53,12 @@ export function LoadingSkeleton({
       <Card
         key={index}
         variant={cardVariant}
-        className={cn('py-0', withBorder && '!border', className)}
+        className={cn('py-0', withBorder && 'border!', className)}
       >
         <CardContent className="p-4">
-          <Skeleton className="h-6 w-3/4 mb-3" />
+          <Skeleton className="h-6 w-1/4 mb-3" />
           <Skeleton className="h-4 w-1/2 mb-2" />
-          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
         </CardContent>
       </Card>
     ))
@@ -68,7 +68,7 @@ export function LoadingSkeleton({
     return Array.from({ length: count }).map((_, index) => (
       <Card
         key={index}
-        className={cn('py-0', withBorder && '!border', className)}
+        className={cn('py-0', withBorder && 'border!', className)}
         variant={cardVariant}
       >
         <CardContent className="p-4">
@@ -83,7 +83,7 @@ export function LoadingSkeleton({
     <Card
       key={index}
       variant={cardVariant}
-      className={cn(withBorder && '!border', className)}
+      className={cn(withBorder && 'border!', className)}
     >
       <CardHeader>
         <Skeleton className="h-8 w-1/3" />

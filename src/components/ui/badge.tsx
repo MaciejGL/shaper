@@ -47,7 +47,7 @@ const badgeVariants = cva(
         advanced:
           'border-transparent bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 [a&]:hover:bg-orange-200 dark:[a&]:hover:bg-orange-800',
         expert:
-          'border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 [a&]:hover:bg-red-200 dark:[a&]:hover:bg-red-800',
+          'border-transparent bg-orange-100 text-amber-800 dark:bg-orange-900 dark:text-amber-200 [a&]:hover:bg-amber-200 dark:[a&]:hover:bg-amber-800',
       },
       size: {
         '2xs': cn('text-[10px] px-[3px] py-px rounded-[3px] [&>svg]:size-2.5'),

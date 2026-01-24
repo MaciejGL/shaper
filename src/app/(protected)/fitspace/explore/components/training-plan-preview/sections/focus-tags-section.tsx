@@ -17,7 +17,7 @@ export function FocusTagsSection({ focusTags }: FocusTagsSectionProps) {
           <Badge
             key={index}
             size="md-lg"
-            variant="primary"
+            variant="secondary"
             className="capitalize"
           >
             {focusTagLabels[tag as GQLFocusTag] || tag}

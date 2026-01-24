@@ -50,7 +50,11 @@ const serviceOffers: ServiceOffer[] = [
     title: 'Assessment + Custom Training Plan',
     description:
       'A trainer-led assessment and a personalized training plan based on your goals, experience level, and available equipment.',
-    features: ['Trainer assessment', '4-week training plan'],
+    features: [
+      'Trainer assessment',
+      'Bi-Weekly check-ins',
+      '4-week training plan',
+    ],
     icon: Notebook,
     variant: 'green',
   },
@@ -63,6 +67,7 @@ const serviceOffers: ServiceOffer[] = [
       'Trainer nutrition assessment',
       'Meal structure and macro guidance',
       'Dietary preferences accommodated',
+      'Bi-Weekly check-ins',
     ],
     icon: Utensils,
     variant: 'sky',

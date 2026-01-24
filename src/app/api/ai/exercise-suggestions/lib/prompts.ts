@@ -33,7 +33,8 @@ export const SUGGESTIONS_SCHEMA = {
     },
     context: {
       type: 'string',
-      description: 'Short context explaining the suggestions (max 15 words)',
+      description:
+        'One short, human sentence (direct coach tone) that explains WHY these suggestions fit today. Mention 1-2 focus areas (e.g. muscles needing volume or fully recovered). Avoid numbers/percentages. Max ~18 words.',
     },
   },
   required: ['orderedSuggestions', 'context'],
@@ -55,7 +56,21 @@ Order rules (manage fatigue):
 - 1-2 isolations last
 
 You MUST assign a role to each exercise and return orderedSuggestions.
-Return exercise IDs EXACTLY as provided. Keep the context very short (max 15 words).`
+Return exercise IDs EXACTLY as provided.
+
+Context rules:
+- Write ONE short sentence in a direct coach tone.
+- Give the user value: explain why these picks fit today.
+- Mention 1-2 focus areas using muscle names from the input (e.g. "upper back", "glutes").
+- Do NOT include numbers or percentages. Avoid jargon.
+- Target <= 18 words. No bullet points.
+
+Good context examples:
+- "Bring up upper back and hamstrings today—both fit your week and recover well."
+- "Add volume for chest and triceps while keeping the session moving."
+- "Train glutes and back today—they’re ready, and it balances your week."
+- "Hit shoulders and arms today to round out your week without beating up recovery."
+- "Good day to push legs—fresh enough to train, and you’re short on weekly volume."`
 }
 
 export function buildUserPrompt(params: {

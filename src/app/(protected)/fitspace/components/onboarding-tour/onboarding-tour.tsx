@@ -41,14 +41,15 @@ const TOUR_CONTENT = {
     title: 'My Plans',
     description: [
       'This is your personal library.',
-      'You’ll find plans from your trainer, plans you picked from our public collection, and you can create your own when you’re ready.',
+      'You’ll find plans from your trainer, plans you picked from our collection, and you can create your own when you’re ready.',
     ],
   },
   explore: {
     title: 'Discover',
     description: [
-      'This is where you grab new training.',
-      'Start a free workout anytime, browse coach-built plans, and reach out to a trainer whenever you want guidance.',
+      'Free workouts selection from our plans - those are selected days from our full plans.',
+      'Coach-built plans - choose the one that fits your goals and lifestyle or try our plan finder.',
+      'Connect with certified trainers to get personalized guidance and support - first assessment is free and non-binding.',
     ],
   },
   chat: {
@@ -70,7 +71,7 @@ const TOUR_CONTENT = {
     title: "You're All Set!",
     description: [
       'Alright! Time to train.',
-      'Pick a free workout, browse plans, or jump straight into a session.',
+      'Pick a free workout, browse plans, or jump straight into a custom session builder.',
       'If you get stuck, just message me.',
     ],
   },

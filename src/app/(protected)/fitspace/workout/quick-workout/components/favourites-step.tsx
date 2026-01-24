@@ -5,7 +5,6 @@ import {
   BookmarkIcon,
   ChevronRight,
   Clock,
-  Dot,
   Folder,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -19,7 +18,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
@@ -31,7 +29,7 @@ import {
 import { cn } from '@/lib/utils'
 import { estimateWorkoutTime } from '@/lib/workout/estimate-workout-time'
 
-import { getSetRange } from '../../utils'
+import { BaseExerciseItem } from '../../training/components/add-single-exercise/selectable-exercise-item'
 
 interface FavouritesStepProps {
   onSelectFavourite: (favouriteId: string) => void
@@ -80,7 +78,11 @@ export function FavouritesStep({
   }
 
   if (isLoading) {
-    return <LoadingSkeleton count={4} variant="lg" />
+    return (
+      <div className="space-y-3">
+        <LoadingSkeleton count={4} variant="md" />
+      </div>
+    )
   }
 
   const isEmpty =
@@ -107,7 +109,7 @@ export function FavouritesStep({
 
       {/* Folders Grid */}
       {displayedFolders.length > 0 && (
-        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500 pt-4">
           {displayedFolders.map((folder) => (
             <FolderCard
               key={folder.id}
@@ -139,12 +141,20 @@ export function FavouritesStep({
                     <CardTitle className="text-base">
                       {favourite.title}
                     </CardTitle>
-                    {estimatedTime > 0 && (
-                      <Badge variant="secondary">
-                        <Clock className="w-3 h-3 mr-1" />~{estimatedTime}
-                        min
-                      </Badge>
-                    )}
+                    <Button
+                      size="md"
+                      disabled={isStarting}
+                      loading={
+                        isStarting && selectedFavouriteId === favourite.id
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleSelectFavourite(favourite.id)
+                      }}
+                      iconEnd={<ChevronRight />}
+                    >
+                      Start Workout
+                    </Button>
                   </div>
                   {favourite.description && (
                     <CardDescription className="mt-1">
@@ -154,6 +164,12 @@ export function FavouritesStep({
                 </CardHeader>
 
                 <CardContent className="pt-0 pb-4 space-y-4">
+                  {estimatedTime > 0 && (
+                    <Badge variant="secondary">
+                      <Clock className="w-3 h-3 mr-1" />~{estimatedTime}
+                      min
+                    </Badge>
+                  )}
                   <div className="space-y-1">
                     <div className="text-sm flex flex-col gap-1">
                       {favourite.exercises.map((exercise) => (
@@ -162,21 +178,6 @@ export function FavouritesStep({
                     </div>
                   </div>
                 </CardContent>
-
-                <CardFooter className="grid justify-end">
-                  <Button
-                    size="sm"
-                    disabled={isStarting}
-                    loading={isStarting && selectedFavouriteId === favourite.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleSelectFavourite(favourite.id)
-                    }}
-                    iconEnd={<ChevronRight />}
-                  >
-                    Start Workout
-                  </Button>
-                </CardFooter>
               </Card>
             )
           })}
@@ -215,21 +216,21 @@ function ExerciseItem({
 }: {
   exercise: FavouriteWorkout['exercises'][0]
 }) {
-  const repRange = getSetRange(exercise.sets.at(0))
   return (
-    <div
+    <BaseExerciseItem
+      id={exercise.id}
       key={exercise.id}
-      className="grid grid-cols-[minmax(14px,auto)_1fr] items-center gap-2"
-    >
-      <div className="text-sm text-muted-foreground">{exercise.order}</div>
-      <div className="p-2 bg-card-on-card rounded-md">
-        <p>{exercise.name}</p>
-        <div className="flex items-center text-sm text-muted-foreground">
-          <p>{exercise.sets.length} sets</p>
-          {repRange && <Dot />}
-          {repRange && <p>{repRange} reps</p>}
+      name={`${exercise.order}. ${exercise.name}`}
+      images={exercise.base?.images}
+      videoUrl={exercise.base?.videoUrl}
+      className={cn('shadow-sm border-border py-2 relative')}
+      classNameImage={cn('size-26 shrink-0 rounded-xl')}
+      detailExercise={exercise.base ?? undefined}
+      belowContent={
+        <div className="text-sm text-muted-foreground">
+          {exercise.sets.length > 0 && `Sets: ${exercise.sets.length}`}
         </div>
-      </div>
-    </div>
+      }
+    />
   )
 }
