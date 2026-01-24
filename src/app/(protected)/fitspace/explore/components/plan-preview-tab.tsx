@@ -84,13 +84,18 @@ export function PlanPreviewTab({
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <div className="-mx-4 px-4 overflow-x-auto hide-scrollbar pb-2">
+      <div
+        className="-mx-4 px-4 overflow-x-auto hide-scrollbar pb-2 touch-pan-x"
+        data-vaul-no-drag
+        onPointerDownCapture={(e) => e.stopPropagation()}
+        onTouchStartCapture={(e) => e.stopPropagation()}
+      >
         <TabsList className="w-max justify-start h-auto bg-transparent! gap-2 p-0 pr-6">
           {sortedWeeks.map((week) => (
             <TabsTrigger
               key={week.id}
               value={week.id}
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none rounded-full px-4 py-2 h-auto border border-border bg-card/50 min-w-max"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none rounded-full px-4 py-2 h-auto border border-border bg-card min-w-max"
             >
               Week {week.weekNumber}
             </TabsTrigger>
