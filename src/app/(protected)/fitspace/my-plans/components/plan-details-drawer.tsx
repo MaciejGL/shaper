@@ -94,10 +94,10 @@ export function PlanDetailsDrawer({
 
   return (
     <>
-      <Drawer open={open} onOpenChange={onClose}>
+      <Drawer open={open} onOpenChange={onClose} direction="right">
         <DrawerContent
           dialogTitle={plan.title}
-          grabberAbsolute={!!heroImageUrl}
+          className="data-[vaul-drawer-direction=right]:max-w-screen data-[vaul-drawer-direction=right]:w-screen overflow-hidden data-[vaul-drawer-direction=right]:border-l-0"
         >
           <div className="flex flex-col overflow-y-auto">
             {/* Scrollable Content */}
@@ -146,7 +146,7 @@ export function PlanDetailsDrawer({
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <div className="px-2 mt-2">
+                <div className="px-4 -mt-6 relative">
                   {isTemplate ? (
                     <PrimaryTabList
                       options={[
@@ -322,59 +322,58 @@ export function PlanDetailsDrawer({
                 </TabsContent>
               </Tabs>
             </div>
-
-            {/* Footer */}
-            <DrawerFooter className="border-t shrink-0">
-              <div className="flex items-center justify-between gap-2 w-full">
-                <Button
-                  variant="destructive"
-                  disabled={isButtonLoading}
-                  onClick={() => onAction('delete', plan)}
-                  iconOnly={<Trash />}
-                >
-                  Delete
-                </Button>
-                <div className="flex items-center gap-2">
-                  {!isCompleted && (
-                    <>
-                      {isActive && (
-                        <Button
-                          onClick={() => onAction('pause', plan)}
-                          variant="outline"
-                          disabled={isButtonLoading}
-                        >
-                          Pause
-                        </Button>
-                      )}
-                      {(isActive || isPaused) && (
-                        <Button
-                          onClick={() => onAction('close', plan)}
-                          variant="default"
-                          disabled={isButtonLoading}
-                        >
-                          Complete
-                        </Button>
-                      )}
-                      {!isActive && (
-                        <PremiumButtonWrapper
-                          hasPremium={canActivate}
-                          tooltipText="Unlock this plan and follow the structured program designed to maximize your results."
-                        >
-                          <Button
-                            onClick={() => onAction('activate', plan)}
-                            variant="default"
-                            disabled={isButtonLoading || !canActivate}
-                          >
-                            {isPaused ? 'Resume' : 'Activate'}
-                          </Button>
-                        </PremiumButtonWrapper>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            </DrawerFooter>
           </div>
+          {/* Footer */}
+          <DrawerFooter className="border-t shrink-0">
+            <div className="flex items-center justify-between gap-2 w-full">
+              <Button
+                variant="destructive"
+                disabled={isButtonLoading}
+                onClick={() => onAction('delete', plan)}
+                iconOnly={<Trash />}
+              >
+                Delete
+              </Button>
+              <div className="flex items-center gap-2">
+                {!isCompleted && (
+                  <>
+                    {isActive && (
+                      <Button
+                        onClick={() => onAction('pause', plan)}
+                        variant="outline"
+                        disabled={isButtonLoading}
+                      >
+                        Pause
+                      </Button>
+                    )}
+                    {(isActive || isPaused) && (
+                      <Button
+                        onClick={() => onAction('close', plan)}
+                        variant="default"
+                        disabled={isButtonLoading}
+                      >
+                        Complete
+                      </Button>
+                    )}
+                    {!isActive && (
+                      <PremiumButtonWrapper
+                        hasPremium={canActivate}
+                        tooltipText="Unlock this plan and follow the structured program designed to maximize your results."
+                      >
+                        <Button
+                          onClick={() => onAction('activate', plan)}
+                          variant="default"
+                          disabled={isButtonLoading || !canActivate}
+                        >
+                          {isPaused ? 'Resume' : 'Activate'}
+                        </Button>
+                      </PremiumButtonWrapper>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          </DrawerFooter>
         </DrawerContent>
       </Drawer>
 

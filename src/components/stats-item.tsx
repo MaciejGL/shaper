@@ -87,7 +87,9 @@ export function StatsItem({
         </div>
       ) : (
         <>
-          <div className="text-lg font-bold text-primary">{value}</div>
+          <div className={cn('text-lg font-bold text-primary', classNameValue)}>
+            {value}
+          </div>
           <div className={cn('text-xs text-muted-foreground', classNameLabel)}>
             {label}
           </div>

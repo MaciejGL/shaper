@@ -159,7 +159,7 @@ function PrimaryTabList<T extends string>({
   return (
     <div
       className={cn(
-        'rounded-[18px] bg-card dark:bg-background border border-zinc-400/60 dark:border-zinc-800 p-px min-w-max w-full shadow-xs shadow-black/10 dark:shadow-neutral-950',
+        'rounded-[18px] bg-card dark:bg-background border border-zinc-400/60 dark:border-zinc-800 p-px min-w-max w-full shadow-lg dark:shadow-neutral-950',
         classNameWrapper,
       )}
     >

@@ -73,7 +73,10 @@ export function PlanPreviewTab({
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <div className="w-full overflow-x-auto hide-scrollbar pb-2">
+      <div
+        data-vaul-no-drag
+        className="overflow-x-auto hide-scrollbar pb-2 -mx-4 px-4"
+      >
         <TabsList className="w-full justify-start h-auto bg-transparent gap-2 p-0">
           {sortedWeeks.map((week) => {
             // Calculate progress for the week
