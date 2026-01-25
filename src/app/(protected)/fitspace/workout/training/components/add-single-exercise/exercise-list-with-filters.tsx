@@ -200,7 +200,7 @@ export function ExerciseListWithFilters({
       <div className="dark p-3 bg-sidebar dark:bg-card">
         <p className="text-lg font-semibold text-foreground">Filters</p>
         {muscleFilterMode === 'weeklyFocus' && weeklyFocus ? (
-          <div className="mt-3">
+          <div className="mt-3" data-vaul-no-drag>
             <WeeklyFocusChips
               groupSummaries={weeklyFocus.groupSummaries}
               selectedGroup={selectedGroup}
@@ -212,7 +212,7 @@ export function ExerciseListWithFilters({
         ) : null}
 
         {muscleFilterMode === 'simple' ? (
-          <div className="mt-3">
+          <div className="mt-3" data-vaul-no-drag>
             <p className="text-xs text-muted-foreground transition-all h-4">
               Muscle group
             </p>
@@ -229,7 +229,7 @@ export function ExerciseListWithFilters({
           Equipment
         </p>
         {availableEquipment.length > 1 ? (
-          <div className="mt-2">
+          <div className="mt-2" data-vaul-no-drag>
             <EquipmentFilterChips
               equipment={availableEquipment}
               selectedEquipment={selectedEquipment}

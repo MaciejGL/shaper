@@ -4,13 +4,13 @@ import { format } from 'date-fns'
 import { useId, useMemo } from 'react'
 import { Bar, BarChart, LabelList, ReferenceLine, XAxis, YAxis } from 'recharts'
 
-import { getVolumeGoalPresetById } from '@/config/volume-goals'
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { getVolumeGoalPresetById } from '@/config/volume-goals'
 import { useUser } from '@/context/user-context'
 import { useWeeklyProgressHistoryQuery } from '@/generated/graphql-client'
 import { formatNumber } from '@/lib/utils'
@@ -91,7 +91,7 @@ export function WeeklyProgressChart() {
         </p>
       </div>
 
-      <div className="w-full bg-card-on-card dark:bg-black/40 py-4 rounded-2xl">
+      <div className="w-full py-4 rounded-2xl">
         <ChartContainer
           id={`weekly-progress-${chartId}`}
           config={chartConfig}

@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 
 import {
-  DEFAULT_SETS_GOAL_PER_GROUP,
   DISPLAY_GROUP_TO_HIGH_LEVEL,
   HIGH_LEVEL_GROUPS,
   type HighLevelGroup,
@@ -31,7 +30,7 @@ export function useWeeklyFocus(scheduledAt?: string | null) {
     > = {} as Record<HighLevelGroup, { setsDone: number; setsGoal: number }>
 
     HIGH_LEVEL_GROUPS.forEach((group) => {
-      aggregated[group] = { setsDone: 0, setsGoal: DEFAULT_SETS_GOAL_PER_GROUP }
+      aggregated[group] = { setsDone: 0, setsGoal: 0 }
     })
 
     if (weeklyProgress?.muscleProgress) {
@@ -39,16 +38,34 @@ export function useWeeklyFocus(scheduledAt?: string | null) {
         const highLevelGroup = DISPLAY_GROUP_TO_HIGH_LEVEL[progress.muscleGroup]
         if (highLevelGroup && aggregated[highLevelGroup]) {
           aggregated[highLevelGroup].setsDone += progress.completedSets
+          aggregated[highLevelGroup].setsGoal += progress.targetSets
         }
       })
     }
 
-    return HIGH_LEVEL_GROUPS.map((group) => ({
+    const summaries = HIGH_LEVEL_GROUPS.map((group) => ({
       groupId: group,
       label: group,
       setsDone: aggregated[group].setsDone,
       setsGoal: aggregated[group].setsGoal,
     }))
+      .filter((s) => s.setsGoal > 0)
+      // Sort by deficit ratio (most behind first)
+      .sort((a, b) => {
+        const aRatio = a.setsGoal > 0 ? a.setsDone / a.setsGoal : 1
+        const bRatio = b.setsGoal > 0 ? b.setsDone / b.setsGoal : 1
+        return aRatio - bRatio
+      })
+
+    // Keep any zero-goal groups at the end (rare fallback)
+    const zeroGoal = HIGH_LEVEL_GROUPS.map((group) => ({
+      groupId: group,
+      label: group,
+      setsDone: aggregated[group].setsDone,
+      setsGoal: aggregated[group].setsGoal,
+    })).filter((s) => s.setsGoal === 0)
+
+    return [...summaries, ...zeroGoal]
   }, [weeklyProgress])
 
   return {

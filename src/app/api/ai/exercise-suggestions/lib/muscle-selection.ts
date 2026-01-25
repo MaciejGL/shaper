@@ -1,12 +1,12 @@
 import { differenceInHours, endOfWeek, startOfWeek, subWeeks } from 'date-fns'
 
 import {
-  DEFAULT_SETS_GOAL_PER_GROUP,
   HIGH_LEVEL_TO_DISPLAY_GROUPS,
   SVG_ALIAS_TO_DISPLAY_GROUP,
   TRACKED_DISPLAY_GROUPS,
   getMuscleById,
 } from '@/config/muscles'
+import { computeTargets } from '@/config/volume-goals'
 import { prisma } from '@/lib/db'
 
 import type { MuscleProgressData } from './types'
@@ -56,6 +56,17 @@ export async function getWeeklyMuscleProgress(
     | 4
     | 5
     | 6
+
+  // Use active volume goal targets (focusPreset + commitment)
+  const activeGoal = await prisma.volumeGoalPeriod.findFirst({
+    where: { userId, endedAt: null },
+    orderBy: { startedAt: 'desc' },
+    select: { focusPreset: true, commitment: true },
+  })
+  const computedTargets = computeTargets(
+    activeGoal?.focusPreset,
+    activeGoal?.commitment,
+  )
 
   const now = new Date()
   const weekStart = startOfWeek(now, { weekStartsOn })
@@ -148,7 +159,7 @@ export async function getWeeklyMuscleProgress(
     return {
       muscle: group,
       completedSets,
-      targetSets: DEFAULT_SETS_GOAL_PER_GROUP,
+      targetSets: computedTargets[group] ?? 12,
       percentRecovered,
       lastSessionSets: lastSession,
     }
