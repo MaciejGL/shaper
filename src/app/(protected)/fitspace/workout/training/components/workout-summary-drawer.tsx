@@ -355,7 +355,7 @@ function Content({
                 <div className="flex items-start gap-3 text-sm py-2 px-4 bg-linear-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/0 dark:to-amber-600/60 rounded-r-lg overflow-hidden">
                   <motion.span
                     key="exercise-name"
-                    className="font-medium flex-1 min-w-0 whitespace-normal wrap-break-word line-clamp-2 w-max"
+                    className="font-medium flex-1 min-w-0 h-10 overflow-hidden"
                     variants={{
                       hidden: { opacity: 0 },
                       visible: {
