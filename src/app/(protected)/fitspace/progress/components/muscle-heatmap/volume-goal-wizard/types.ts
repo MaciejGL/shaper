@@ -1,4 +1,4 @@
-import type { CommitmentId, VolumeGoalPresetId } from '@/config/volume-goals'
+import type { CommitmentId } from '@/config/volume-goals'
 
 export type WizardStep = 'focus' | 'commitment' | 'results'
 

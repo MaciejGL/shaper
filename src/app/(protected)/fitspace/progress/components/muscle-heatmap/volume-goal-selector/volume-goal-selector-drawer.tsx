@@ -31,7 +31,7 @@ export function VolumeGoalSelectorDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
+      <DrawerContent dialogTitle="Set Volume Goal">
         <DrawerHeader>
           <DrawerTitle>Set Volume Goal</DrawerTitle>
           <DrawerDescription>

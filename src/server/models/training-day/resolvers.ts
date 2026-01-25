@@ -97,6 +97,20 @@ export const Query: GQLQueryResolvers = {
       where: { id: dayId },
       include: {
         events: true,
+        exercises: {
+          include: {
+            base: {
+              include: {
+                muscleGroups: true,
+                secondaryMuscleGroups: true,
+              },
+            },
+            sets: {
+              where: { completedAt: { not: null } },
+              select: { completedAt: true },
+            },
+          },
+        },
       },
     })
 

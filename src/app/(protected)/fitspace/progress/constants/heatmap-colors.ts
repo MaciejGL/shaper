@@ -82,7 +82,7 @@ export const HEATMAP_COLORS = {
       fillColor: cn('fill-orange-500'),
       bgColor: cn('bg-orange-500'),
       textColor: cn('text-white'),
-      progressColor: cn('bg-orange-500 dark:bg-orange-500'),
+      progressColor: cn('bg-green-500 dark:bg-green-500'),
       label: 'Maximum',
     },
     {
@@ -90,7 +90,7 @@ export const HEATMAP_COLORS = {
       fillColor: cn('fill-orange-400'),
       bgColor: cn('bg-orange-400'),
       textColor: cn('text-white'),
-      progressColor: cn('bg-orange-400 dark:bg-orange-400'),
+      progressColor: cn('bg-green-400 dark:bg-green-400'),
       label: 'Optimal',
     },
     {
@@ -98,7 +98,7 @@ export const HEATMAP_COLORS = {
       fillColor: cn('fill-orange-200'),
       bgColor: cn('bg-orange-200'),
       textColor: cn('text-orange-900'),
-      progressColor: cn('bg-orange-200 dark:bg-orange-200'),
+      progressColor: cn('bg-green-200 dark:bg-green-200'),
       label: 'Moderate',
     },
     {
@@ -106,7 +106,7 @@ export const HEATMAP_COLORS = {
       fillColor: cn('fill-orange-100'),
       bgColor: cn('bg-orange-100'),
       textColor: cn('text-orange-800'),
-      progressColor: cn('bg-orange-100 dark:bg-orange-100'),
+      progressColor: cn('bg-green-100 dark:bg-green-100'),
       label: 'Low',
     },
     {

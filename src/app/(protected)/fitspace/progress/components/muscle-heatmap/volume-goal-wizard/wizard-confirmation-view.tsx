@@ -4,8 +4,8 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Sparkles } from 'lucide-react'
 import { useMemo } from 'react'
 
-import { computeTargets, getVolumeGoalPresetById } from '@/config/volume-goals'
 import { Button } from '@/components/ui/button'
+import { computeTargets, getVolumeGoalPresetById } from '@/config/volume-goals'
 
 import { BodyTargetPreview } from './body-target-preview'
 
@@ -89,7 +89,7 @@ export function WizardConfirmationView({
           {focusAreas.map(([group, sets]) => (
             <div
               key={group}
-              className="flex items-center gap-1.5 bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-200 px-2.5 py-1 rounded-full text-xs font-medium"
+              className="flex items-center gap-1.5 bg-orange-100 dark:bg-orange-600 text-orange-800 dark:text-orange-100 px-2.5 py-1 rounded-full text-xs font-medium"
             >
               <span>{group}</span>
               <span className="tabular-nums font-bold">{sets}</span>

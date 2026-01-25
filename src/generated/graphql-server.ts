@@ -3503,6 +3503,8 @@ export type GQLTrainingDay = {
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   isFreeDemo: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isRestDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  muscleGroupSets: EntireFieldWrapper<Array<GQLWorkoutMuscleGroupSet>>;
+  muscleGroupSetsMax: EntireFieldWrapper<Scalars['Float']['output']>;
   personalRecords?: EntireFieldWrapper<Maybe<Array<GQLPersonalRecord>>>;
   scheduledAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   sourcePlanId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -4196,6 +4198,12 @@ export type GQLWorkoutExerciseNotes = {
   notes: EntireFieldWrapper<Array<GQLNote>>;
 };
 
+export type GQLWorkoutMuscleGroupSet = {
+  __typename?: 'WorkoutMuscleGroupSet';
+  displayGroup: EntireFieldWrapper<Scalars['String']['output']>;
+  weightedSets: EntireFieldWrapper<Scalars['Float']['output']>;
+};
+
 export enum GQLWorkoutSessionEvent {
   Complete = 'COMPLETE',
   Progress = 'PROGRESS'
@@ -4574,6 +4582,7 @@ export type GQLResolversTypes = {
   WeightUnit: GQLWeightUnit;
   WorkoutCompletionResult: ResolverTypeWrapper<GQLWorkoutCompletionResult>;
   WorkoutExerciseNotes: ResolverTypeWrapper<GQLWorkoutExerciseNotes>;
+  WorkoutMuscleGroupSet: ResolverTypeWrapper<GQLWorkoutMuscleGroupSet>;
   WorkoutSessionEvent: GQLWorkoutSessionEvent;
   WorkoutType: GQLWorkoutType;
 };
@@ -4819,6 +4828,7 @@ export type GQLResolversParentTypes = {
   WeightProgressLog: GQLWeightProgressLog;
   WorkoutCompletionResult: GQLWorkoutCompletionResult;
   WorkoutExerciseNotes: GQLWorkoutExerciseNotes;
+  WorkoutMuscleGroupSet: GQLWorkoutMuscleGroupSet;
 };
 
 export type GQLActivityHeatmapDataResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ActivityHeatmapData'] = GQLResolversParentTypes['ActivityHeatmapData']> = {
@@ -6080,6 +6090,8 @@ export type GQLTrainingDayResolvers<ContextType = GQLContext, ParentType extends
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   isFreeDemo?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isRestDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  muscleGroupSets?: Resolver<Array<GQLResolversTypes['WorkoutMuscleGroupSet']>, ParentType, ContextType>;
+  muscleGroupSetsMax?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   personalRecords?: Resolver<Maybe<Array<GQLResolversTypes['PersonalRecord']>>, ParentType, ContextType>;
   scheduledAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   sourcePlanId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
@@ -6389,6 +6401,11 @@ export type GQLWorkoutExerciseNotesResolvers<ContextType = GQLContext, ParentTyp
   notes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType>;
 };
 
+export type GQLWorkoutMuscleGroupSetResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WorkoutMuscleGroupSet'] = GQLResolversParentTypes['WorkoutMuscleGroupSet']> = {
+  displayGroup?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  weightedSets?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+};
+
 export type GQLResolvers<ContextType = GQLContext> = {
   ActivityHeatmapData?: GQLActivityHeatmapDataResolvers<ContextType>;
   AdminUserListItem?: GQLAdminUserListItemResolvers<ContextType>;
@@ -6511,5 +6528,6 @@ export type GQLResolvers<ContextType = GQLContext> = {
   WeightProgressLog?: GQLWeightProgressLogResolvers<ContextType>;
   WorkoutCompletionResult?: GQLWorkoutCompletionResultResolvers<ContextType>;
   WorkoutExerciseNotes?: GQLWorkoutExerciseNotesResolvers<ContextType>;
+  WorkoutMuscleGroupSet?: GQLWorkoutMuscleGroupSetResolvers<ContextType>;
 };
 

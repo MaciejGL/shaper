@@ -63,6 +63,16 @@ export function MuscleHeatmapSection() {
     setGoalSelectorOpen(true)
   }, [searchParams])
 
+  useEffect(() => {
+    const openWizard = () => {
+      setGoalSelectorOpen(true)
+    }
+    window.addEventListener('hypro:open-volume-goal-wizard', openWizard)
+    return () => {
+      window.removeEventListener('hypro:open-volume-goal-wizard', openWizard)
+    }
+  }, [])
+
   if (!user) {
     return null
   }

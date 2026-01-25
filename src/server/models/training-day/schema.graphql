@@ -17,6 +17,11 @@ type PersonalRecordHistory {
   exerciseId: ID!
 }
 
+type WorkoutMuscleGroupSet {
+  displayGroup: String!
+  weightedSets: Float!
+}
+
 type TrainingDay {
   id: ID!
   dayOfWeek: Int!
@@ -30,6 +35,8 @@ type TrainingDay {
   exercises: [TrainingExercise!]!
   exercisesCount: Int!
   personalRecords: [PersonalRecord!]
+  muscleGroupSets: [WorkoutMuscleGroupSet!]!
+  muscleGroupSetsMax: Float!
 
   trainingWeekId: ID!
   isFreeDemo: Boolean!

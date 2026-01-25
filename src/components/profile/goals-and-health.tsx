@@ -73,9 +73,11 @@ function GoalsField({
   return goalOptions.map((goal) => (
     <Badge
       key={goal.value}
-      className={cn('w-full py-4 cursor-pointer justify-start gap-2')}
+      className={cn(
+        'w-full rounded-2xl py-4 cursor-pointer justify-start gap-2',
+      )}
       size="lg"
-      variant={'outline'}
+      variant={profile?.goals.includes(goal.value) ? 'secondary' : 'outline'}
       onClick={() => handleGoalClick(goal.value)}
     >
       {profile?.goals.includes(goal.value) ? (

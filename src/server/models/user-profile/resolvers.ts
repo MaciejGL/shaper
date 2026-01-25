@@ -27,6 +27,7 @@ import { invalidateUserCache } from '@/lib/getUser'
 import { GQLContext } from '@/types/gql-context'
 
 import UserProfile from './model'
+import { computeWeeklyProgressFromExercises } from './weekly-progress/compute-weekly-progress'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
   profile: async (_parent, _args, context) => {
@@ -419,152 +420,14 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     // Use tracked display groups from static muscles file
     const trackedMuscleGroups = [...TRACKED_DISPLAY_GROUPS]
 
-    // Initialize progress for all muscle groups
-    const muscleProgress: Record<
-      string,
-      { completedSets: number; lastTrained: Date | null }
-    > = {}
-    trackedMuscleGroups.forEach((group) => {
-      muscleProgress[group] = { completedSets: 0, lastTrained: null }
+    const computed = computeWeeklyProgressFromExercises({
+      exercises: exercisesWithCompletedSets,
+      trackedMuscleGroups,
+      getTargetForGroup,
     })
 
-    // Track individual sub-muscle sets for breakdown
-    const subMuscleProgress: Record<
-      string,
-      Record<string, { name: string; alias: string; completedSets: number }>
-    > = {}
-    trackedMuscleGroups.forEach((group) => {
-      subMuscleProgress[group] = {}
-    })
-
-    // Aggregate sets by muscle group
-    // Count sets ONCE per display group per exercise (not per sub-muscle)
-    // Secondary muscles = 25% weight
-    const SECONDARY_MUSCLE_WEIGHT = 0.25
-
-    exercisesWithCompletedSets.forEach((exercise) => {
-      if (!exercise.base) return
-      const setCount = exercise.sets.length
-
-      // Track which display groups we've already counted for THIS exercise
-      // to avoid double-counting when exercise targets multiple muscles in same group
-      const countedPrimaryGroups = new Set<string>()
-      const countedSecondaryGroups = new Set<string>()
-
-      // Primary muscle groups (100% weight) - count only ONCE per display group
-      exercise.base.muscleGroups?.forEach((muscleGroup) => {
-        const staticMuscle = getMuscleById(muscleGroup.id)
-        const mappedGroup =
-          staticMuscle?.displayGroup || muscleGroup.displayGroup
-
-        if (mappedGroup && muscleProgress[mappedGroup]) {
-          // Only add sets if we haven't counted this display group yet for this exercise
-          if (!countedPrimaryGroups.has(mappedGroup)) {
-            muscleProgress[mappedGroup].completedSets += setCount
-            countedPrimaryGroups.add(mappedGroup)
-          }
-
-          // Track sub-muscle breakdown (still track each sub-muscle)
-          const subMuscleKey = muscleGroup.name
-          if (!subMuscleProgress[mappedGroup][subMuscleKey]) {
-            subMuscleProgress[mappedGroup][subMuscleKey] = {
-              name: muscleGroup.name,
-              alias: muscleGroup.alias || muscleGroup.name,
-              completedSets: 0,
-            }
-          }
-          subMuscleProgress[mappedGroup][subMuscleKey].completedSets += setCount
-
-          // Update lastTrained
-          exercise.sets.forEach((set) => {
-            if (
-              set.completedAt &&
-              (!muscleProgress[mappedGroup].lastTrained ||
-                set.completedAt > muscleProgress[mappedGroup].lastTrained!)
-            ) {
-              muscleProgress[mappedGroup].lastTrained = set.completedAt
-            }
-          })
-        }
-      })
-
-      // Secondary muscle groups (25% weight) - count only ONCE per display group
-      exercise.base.secondaryMuscleGroups?.forEach((muscleGroup) => {
-        const staticMuscle = getMuscleById(muscleGroup.id)
-        const mappedGroup =
-          staticMuscle?.displayGroup || muscleGroup.displayGroup
-
-        if (mappedGroup && muscleProgress[mappedGroup]) {
-          // Only add sets if we haven't counted this display group yet
-          // (check both primary and secondary to avoid double-counting)
-          if (
-            !countedPrimaryGroups.has(mappedGroup) &&
-            !countedSecondaryGroups.has(mappedGroup)
-          ) {
-            muscleProgress[mappedGroup].completedSets +=
-              setCount * SECONDARY_MUSCLE_WEIGHT
-            countedSecondaryGroups.add(mappedGroup)
-          }
-
-          // Track sub-muscle breakdown (with weight)
-          const subMuscleKey = muscleGroup.name
-          if (!subMuscleProgress[mappedGroup][subMuscleKey]) {
-            subMuscleProgress[mappedGroup][subMuscleKey] = {
-              name: muscleGroup.name,
-              alias: muscleGroup.alias || muscleGroup.name,
-              completedSets: 0,
-            }
-          }
-          subMuscleProgress[mappedGroup][subMuscleKey].completedSets +=
-            setCount * SECONDARY_MUSCLE_WEIGHT
-
-          // Update lastTrained
-          exercise.sets.forEach((set) => {
-            if (
-              set.completedAt &&
-              (!muscleProgress[mappedGroup].lastTrained ||
-                set.completedAt > muscleProgress[mappedGroup].lastTrained!)
-            ) {
-              muscleProgress[mappedGroup].lastTrained = set.completedAt
-            }
-          })
-        }
-      })
-    })
-
-    // Calculate weekly progress array with raw totals
-    const weeklyMuscleProgress = trackedMuscleGroups.map((group) => {
-      const progress = muscleProgress[group]
-      const targetSets = getTargetForGroup(group)
-      const percentage = Math.min(
-        100,
-        (progress.completedSets / targetSets) * 100,
-      )
-
-      // Get sub-muscle breakdown
-      const subMuscles = Object.values(subMuscleProgress[group]).map((sub) => ({
-        name: sub.name,
-        alias: sub.alias,
-        completedSets: Math.floor(sub.completedSets),
-      }))
-
-      return {
-        muscleGroup: group,
-        completedSets: Math.floor(progress.completedSets),
-        targetSets,
-        percentage: Math.round(percentage * 10) / 10,
-        lastTrained: progress.lastTrained?.toISOString() || null,
-        subMuscles,
-      }
-    })
-
-    // Calculate overall percentage (average of all muscle groups)
-    const totalPercentage = weeklyMuscleProgress.reduce(
-      (sum, m) => sum + m.percentage,
-      0,
-    )
-    const overallPercentage =
-      Math.round((totalPercentage / trackedMuscleGroups.length) * 10) / 10
+    const weeklyMuscleProgress = computed.muscleProgress
+    const overallPercentage = computed.overallPercentage
 
     // Calculate streak (consecutive weeks with >= 80% overall completion)
     let streakWeeks = 0
@@ -802,50 +665,24 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           sets: { some: { completedAt: { not: null } } },
         },
         include: {
-          base: { include: { muscleGroups: true } },
+          base: { include: { muscleGroups: true, secondaryMuscleGroups: true } },
           sets: { where: { completedAt: { not: null } } },
         },
       })
 
-      // Calculate muscle progress
-      const muscleProgress: Record<string, number> = {}
       const trackedMuscleGroups = [...TRACKED_DISPLAY_GROUPS]
-      trackedMuscleGroups.forEach((group) => {
-        muscleProgress[group] = 0
-      })
 
-      let totalSets = 0
-      exercises.forEach((exercise) => {
-        if (!exercise.base?.muscleGroups) return
-        const countedGroups = new Set<string>()
-        exercise.base.muscleGroups.forEach((muscleGroup) => {
-          const staticMuscle = getMuscleById(muscleGroup.id)
-          const mappedGroup =
-            staticMuscle?.displayGroup || muscleGroup.displayGroup
-          if (mappedGroup && muscleProgress[mappedGroup] !== undefined) {
-            if (!countedGroups.has(mappedGroup)) {
-              muscleProgress[mappedGroup] += exercise.sets.length
-              countedGroups.add(mappedGroup)
-            }
-          }
-        })
-        totalSets += exercise.sets.length
+      const computed = computeWeeklyProgressFromExercises({
+        exercises,
+        trackedMuscleGroups,
+        getTargetForGroup,
       })
-
-      // Calculate overall percentage
-      const totalPercentage = trackedMuscleGroups.reduce((sum, group) => {
-        const targetSets = getTargetForGroup(group)
-        const pct = Math.min(100, (muscleProgress[group] / targetSets) * 100)
-        return sum + pct
-      }, 0)
-      const overallPercentage =
-        Math.round((totalPercentage / trackedMuscleGroups.length) * 10) / 10
 
       results.push({
         weekStartDate: weekStart.toISOString(),
         weekEndDate: weekEnd.toISOString(),
-        overallPercentage,
-        totalSets,
+        overallPercentage: computed.overallPercentage,
+        totalSets: computed.totalSets,
         focusPreset: activeGoal?.focusPreset ?? null,
       })
     }

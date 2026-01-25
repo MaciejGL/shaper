@@ -12,7 +12,10 @@ import {
 } from '../../../progress/components/muscle-heatmap/muscle-body-map'
 import { HEATMAP_COLORS } from '../../../progress/constants/heatmap-colors'
 
-import type { WorkoutExercise } from './workout-day'
+export interface WorkoutMuscleGroupSet {
+  displayGroup: string
+  weightedSets: number
+}
 
 const DISPLAY_NAMES: Record<string, string> = {
   'Upper Back': 'Up-Back',
@@ -21,41 +24,28 @@ const DISPLAY_NAMES: Record<string, string> = {
   'Inner Thighs': 'Adductors',
 }
 
-function buildSetsDoneByDisplayGroup(exercises: WorkoutExercise[]) {
+function buildSetsDoneByDisplayGroup(sets: WorkoutMuscleGroupSet[]) {
   const setsDone: Record<string, number> = {}
-
-  exercises.forEach((exercise) => {
-    const completedSetCount = exercise.sets.filter((s) => s.completedAt).length
-    if (completedSetCount <= 0) return
-
-    const uniqueGroups = new Set(
-      (exercise.muscleGroups ?? [])
-        .map((mg) => mg.displayGroup)
-        .filter(Boolean),
-    )
-
-    uniqueGroups.forEach((group) => {
-      setsDone[group] = (setsDone[group] ?? 0) + completedSetCount
-    })
+  sets.forEach((item) => {
+    setsDone[item.displayGroup] = item.weightedSets
   })
-
   return setsDone
 }
 
-function buildIntensityFromSets(setsDone: Record<string, number>) {
-  const maxSets = Math.max(0, ...Object.values(setsDone))
+function buildIntensityFromSets(setsDone: Record<string, number>, maxSets: number) {
   const intensity: Record<string, number> = {}
 
   Object.entries(setsDone).forEach(([group, sets]) => {
     intensity[group] = maxSets > 0 ? Math.min(1, sets / maxSets) : 0
   })
 
-  return { intensity, maxSets }
+  return { intensity }
 }
 
 interface MuscleSetsLabelProps {
   position: MusclePosition
   setsDone: Record<string, number>
+  maxSets: number
   isSelected: boolean
   onClick: () => void
 }
@@ -63,12 +53,13 @@ interface MuscleSetsLabelProps {
 function MuscleSetsLabel({
   position,
   setsDone,
+  maxSets,
   isSelected,
   onClick,
 }: MuscleSetsLabelProps) {
   const sets = setsDone[position.muscle] ?? 0
-  const progress = sets > 0 ? Math.min(100, sets * 10) : 0
-  const colorLevel = HEATMAP_COLORS.getColorForProgress(sets > 0 ? 0.75 : 0)
+  const progress = maxSets > 0 ? Math.min(100, (sets / maxSets) * 100) : 0
+  const colorLevel = HEATMAP_COLORS.getColorForProgress(progress / 100)
   const isLeft = position.side === 'left'
   const displayName = DISPLAY_NAMES[position.muscle] ?? position.muscle
 
@@ -105,21 +96,23 @@ function MuscleSetsLabel({
 }
 
 export function WorkoutSetsHeatmap({
-  completedExercises,
+  muscleGroupSets,
+  maxSets,
 }: {
-  completedExercises: WorkoutExercise[]
+  muscleGroupSets: WorkoutMuscleGroupSet[]
+  maxSets: number
 }) {
   const [view, setView] = useState<'front' | 'back'>('front')
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null)
 
   const setsDone = useMemo(
-    () => buildSetsDoneByDisplayGroup(completedExercises),
-    [completedExercises],
+    () => buildSetsDoneByDisplayGroup(muscleGroupSets),
+    [muscleGroupSets],
   )
 
   const { intensity } = useMemo(
-    () => buildIntensityFromSets(setsDone),
-    [setsDone],
+    () => buildIntensityFromSets(setsDone, maxSets),
+    [maxSets, setsDone],
   )
 
   const handleMuscleClick = (muscle: string) => {
@@ -160,6 +153,7 @@ export function WorkoutSetsHeatmap({
                 <MuscleSetsLabel
                   position={position}
                   setsDone={setsDone}
+                  maxSets={maxSets}
                   isSelected={selectedMuscle === position.muscle}
                   onClick={() => handleMuscleClick(position.muscle)}
                 />
@@ -177,6 +171,7 @@ export function WorkoutSetsHeatmap({
                 <MuscleSetsLabel
                   position={position}
                   setsDone={setsDone}
+                  maxSets={maxSets}
                   isSelected={selectedMuscle === position.muscle}
                   onClick={() => handleMuscleClick(position.muscle)}
                 />

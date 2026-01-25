@@ -198,7 +198,7 @@ export function WorkoutSummaryDrawer({
           </DrawerTitle>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-4">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4">
           {isLoading ? <LoadingContent /> : null}
           {!isLoading && !error && data ? (
             <Content
@@ -215,6 +215,8 @@ export function WorkoutSummaryDrawer({
               personalRecords={
                 data.getWorkoutInfo?.personalRecords || undefined
               }
+              muscleGroupSets={data.getWorkoutInfo?.muscleGroupSets ?? []}
+              muscleGroupSetsMax={data.getWorkoutInfo?.muscleGroupSetsMax ?? 0}
             />
           ) : null}
           {!isLoading && error ? <ErrorContent /> : null}
@@ -276,6 +278,8 @@ function Content({
   exercises,
   shouldShowDurationAndCalories,
   personalRecords,
+  muscleGroupSets,
+  muscleGroupSetsMax,
 }: {
   displayedDuration: number
   displayedCalories: { moderate: number; high: number }
@@ -294,6 +298,8 @@ function Content({
     reps: number
     improvement: number
   }[]
+  muscleGroupSets: { displayGroup: string; weightedSets: number }[]
+  muscleGroupSetsMax: number
 }) {
   const { toDisplayWeight } = useWeightConversion()
 
@@ -349,7 +355,7 @@ function Content({
                 <div className="flex items-start gap-3 text-sm py-2 px-4 bg-linear-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/0 dark:to-amber-600/60 rounded-r-lg overflow-hidden">
                   <motion.span
                     key="exercise-name"
-                    className="font-medium flex-1 min-w-0 whitespace-normal wrap-break-word line-clamp-2"
+                    className="font-medium flex-1 min-w-0 whitespace-normal wrap-break-word line-clamp-2 w-max"
                     variants={{
                       hidden: { opacity: 0 },
                       visible: {
@@ -456,7 +462,10 @@ function Content({
       </div>
 
       <div className="pt-2">
-        <WorkoutSetsHeatmap completedExercises={completedExercises} />
+        <WorkoutSetsHeatmap
+          muscleGroupSets={muscleGroupSets}
+          maxSets={muscleGroupSetsMax}
+        />
       </div>
 
       {/* Exercises Completed */}
@@ -497,7 +506,7 @@ function Content({
                   key={exercise.id}
                   className="relative overflow-hidden flex flex-col p-3"
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between pb-1">
                     <div className="flex-1 min-w-0 pr-2">
                       <p className="text-base font-medium leading-tight whitespace-normal wrap-break-word">
                         {exercise.name}

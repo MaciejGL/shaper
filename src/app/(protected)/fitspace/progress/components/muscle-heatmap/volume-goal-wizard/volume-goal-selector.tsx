@@ -57,7 +57,18 @@ export function VolumeGoalSelector({
 
   // Goal is set - show current goal with edit option
   return (
-    <button onClick={onOpenWizard} className="w-full text-left">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onOpenWizard}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onOpenWizard()
+        }
+      }}
+      className="w-full text-left"
+    >
       <Card className="w-full p-3 dark" variant="highlighted">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-start gap-2 min-w-0">
@@ -75,11 +86,19 @@ export function VolumeGoalSelector({
             </div>
           </div>
 
-          <Button variant="link" size="sm" iconEnd={<ChevronRight />}>
+          <Button
+            variant="link"
+            size="sm"
+            iconEnd={<ChevronRight />}
+            onClick={(e) => {
+              e.stopPropagation()
+              onOpenWizard()
+            }}
+          >
             Change
           </Button>
         </div>
       </Card>
-    </button>
+    </div>
   )
 }

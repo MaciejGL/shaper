@@ -14,7 +14,7 @@ import { WizardQuestionView } from './wizard-question-view'
 export function VolumeGoalWizardDrawer({
   open,
   onOpenChange,
-  currentGoal,
+  currentGoal: _currentGoal,
   onSelect,
 }: VolumeGoalWizardDrawerProps) {
   const {

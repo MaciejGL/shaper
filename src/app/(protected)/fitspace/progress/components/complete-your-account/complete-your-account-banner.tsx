@@ -1,8 +1,7 @@
 'use client'
 
 import { Check, ChevronRight, Target, UserRound, X } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -10,6 +9,7 @@ import { CircularProgress } from '@/components/ui/circular-progress'
 import { LocalStorageKey, useLocalStorage } from '@/hooks/use-local-storage'
 import { cn } from '@/lib/utils'
 
+import { CompleteProfileDrawer } from './complete-profile-drawer/complete-profile-drawer'
 import type { CompleteYourAccountState } from './types'
 
 interface CompleteYourAccountBannerProps {
@@ -19,11 +19,11 @@ interface CompleteYourAccountBannerProps {
 export function CompleteYourAccountBanner({
   state,
 }: CompleteYourAccountBannerProps) {
-  const router = useRouter()
   const [dismissed, setDismissed] = useLocalStorage(
     LocalStorageKey.COMPLETE_ACCOUNT_BANNER_DISMISSED,
     false,
   )
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false)
 
   const { profileBasicsComplete, volumeGoalComplete } = useMemo(() => {
     const missingVolumeGoal = state.missingSteps.includes('volumeGoal')
@@ -42,13 +42,11 @@ export function CompleteYourAccountBanner({
   }
 
   const handleGoToProfile = () => {
-    router.push('/fitspace/profile')
+    setProfileDrawerOpen(true)
   }
 
   const handleSetVolumeGoal = () => {
-    router.push(
-      '/fitspace/progress?tab=activity&volumeGoalWizard=1#muscle-heatmap',
-    )
+    window.dispatchEvent(new Event('hypro:open-volume-goal-wizard'))
   }
 
   const completedMajorSteps =
@@ -103,6 +101,12 @@ export function CompleteYourAccountBanner({
           />
         </div>
       </Card>
+
+      <CompleteProfileDrawer
+        open={profileDrawerOpen}
+        onOpenChange={setProfileDrawerOpen}
+        missingSteps={state.missingSteps}
+      />
     </div>
   )
 }

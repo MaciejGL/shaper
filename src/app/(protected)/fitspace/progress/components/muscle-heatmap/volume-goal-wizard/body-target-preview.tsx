@@ -6,7 +6,7 @@ import { FemaleBodyBackView } from '@/components/human-body/female-body-back/fem
 import { FemaleBodyFrontView } from '@/components/human-body/female-body-front/female-body-front'
 import { MaleBodyBackView } from '@/components/human-body/male-body-back/male-body-back'
 import { MaleBodyFrontView } from '@/components/human-body/male-body-front/male-body-front'
-import { SVG_ALIAS_TO_DISPLAY_GROUP, type DisplayGroup } from '@/config/muscles'
+import { type DisplayGroup, SVG_ALIAS_TO_DISPLAY_GROUP } from '@/config/muscles'
 import { useUser } from '@/context/user-context'
 import { cn } from '@/lib/utils'
 
@@ -20,14 +20,14 @@ function getTargetColorClass(
   maxSets: number,
 ): string {
   const range = maxSets - minSets
-  if (range === 0) return 'fill-orange-300'
+  if (range === 0) return 'fill-orange-100'
 
   const normalized = (sets - minSets) / range
 
   if (normalized >= 0.8) return 'fill-orange-600' // Top focus
-  if (normalized >= 0.5) return 'fill-orange-500' // High focus
+  if (normalized >= 0.5) return 'fill-orange-400' // High focus
   if (normalized >= 0.2) return 'fill-orange-300' // Medium
-  return 'fill-orange-200' // Baseline
+  return 'fill-orange-100' // Baseline
 }
 
 interface BodyTargetPreviewProps {
@@ -63,6 +63,8 @@ export function BodyTargetPreview({ targets }: BodyTargetPreviewProps) {
         'transition-all duration-300',
         getTargetColorClass(sets, minSets, maxSets),
       ),
+      // Required by body SVG components; preview is intentionally non-interactive.
+      onClick: () => {},
     }
   }
 

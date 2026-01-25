@@ -190,6 +190,11 @@ query FitspaceGetWorkoutInfo($dayId: ID!) {
   getWorkoutInfo(dayId: $dayId) {
     id
     duration
+    muscleGroupSetsMax
+    muscleGroupSets {
+      displayGroup
+      weightedSets
+    }
     personalRecords {
       exerciseName
       estimated1RM

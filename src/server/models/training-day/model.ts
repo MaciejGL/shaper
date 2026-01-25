@@ -13,9 +13,14 @@ import {
 } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
+import { computeWorkoutMuscleGroupSets } from './compute-workout-muscle-group-sets'
 import TrainingExercise from '../training-exercise/model'
 
 export default class TrainingDay implements GQLTrainingDay {
+  private muscleGroupSetsCache:
+    | { sets: ReturnType<typeof computeWorkoutMuscleGroupSets>['sets']; max: number }
+    | null = null
+
   constructor(
     protected data: PrismaTrainingDay & {
       events?: PrismaWorkoutSessionEvent[]
@@ -38,6 +43,7 @@ export default class TrainingDay implements GQLTrainingDay {
         base?:
           | (PrismaBaseExercise & {
               muscleGroups: PrismaMuscleGroup[]
+              secondaryMuscleGroups?: PrismaMuscleGroup[]
               images: PrismaImage[]
             })
           | null
@@ -127,6 +133,30 @@ export default class TrainingDay implements GQLTrainingDay {
       )
       return 0
     }
+  }
+
+  get muscleGroupSets() {
+    if (!this.muscleGroupSetsCache) {
+      const exercises = this.data.exercises ?? []
+      const computed = computeWorkoutMuscleGroupSets(exercises)
+      this.muscleGroupSetsCache = {
+        sets: computed.sets,
+        max: computed.maxWeightedSets,
+      }
+    }
+    return this.muscleGroupSetsCache.sets
+  }
+
+  get muscleGroupSetsMax() {
+    if (!this.muscleGroupSetsCache) {
+      const exercises = this.data.exercises ?? []
+      const computed = computeWorkoutMuscleGroupSets(exercises)
+      this.muscleGroupSetsCache = {
+        sets: computed.sets,
+        max: computed.maxWeightedSets,
+      }
+    }
+    return this.muscleGroupSetsCache.max
   }
 
   get scheduledAt() {

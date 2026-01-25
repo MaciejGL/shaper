@@ -1,5 +1,3 @@
-import type { VolumeGoalPreset } from '@/config/volume-goals'
-
 export interface VolumeGoalSelectorProps {
   open: boolean
   onOpenChange: (open: boolean) => void

@@ -3,7 +3,6 @@
 import { ChevronRight, Target } from 'lucide-react'
 
 import { getVolumeGoalPresetById } from '@/config/volume-goals'
-import { Button } from '@/components/ui/button'
 
 interface VolumeGoalBannerProps {
   currentGoal: {

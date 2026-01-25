@@ -3501,6 +3501,8 @@ export type GQLTrainingDay = {
   id: Scalars['ID']['output'];
   isFreeDemo: Scalars['Boolean']['output'];
   isRestDay: Scalars['Boolean']['output'];
+  muscleGroupSets: Array<GQLWorkoutMuscleGroupSet>;
+  muscleGroupSetsMax: Scalars['Float']['output'];
   personalRecords?: Maybe<Array<GQLPersonalRecord>>;
   scheduledAt?: Maybe<Scalars['String']['output']>;
   sourcePlanId?: Maybe<Scalars['String']['output']>;
@@ -4194,6 +4196,12 @@ export type GQLWorkoutExerciseNotes = {
   notes: Array<GQLNote>;
 };
 
+export type GQLWorkoutMuscleGroupSet = {
+  __typename?: 'WorkoutMuscleGroupSet';
+  displayGroup: Scalars['String']['output'];
+  weightedSets: Scalars['Float']['output'];
+};
+
 export enum GQLWorkoutSessionEvent {
   Complete = 'COMPLETE',
   Progress = 'PROGRESS'
@@ -4837,7 +4845,7 @@ export type GQLFitspaceGetWorkoutInfoQueryVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGetWorkoutInfoQuery = { __typename?: 'Query', getWorkoutInfo: { __typename?: 'TrainingDay', id: string, duration?: number | undefined | null, personalRecords?: Array<{ __typename?: 'PersonalRecord', exerciseName: string, estimated1RM: number, weight: number, reps: number, improvement: number }> | undefined | null } };
+export type GQLFitspaceGetWorkoutInfoQuery = { __typename?: 'Query', getWorkoutInfo: { __typename?: 'TrainingDay', id: string, duration?: number | undefined | null, muscleGroupSetsMax: number, muscleGroupSets: Array<{ __typename?: 'WorkoutMuscleGroupSet', displayGroup: string, weightedSets: number }>, personalRecords?: Array<{ __typename?: 'PersonalRecord', exerciseName: string, estimated1RM: number, weight: number, reps: number, improvement: number }> | undefined | null } };
 
 export type GQLFitspaceGetWorkoutDayQueryVariables = Exact<{
   dayId?: InputMaybe<Scalars['ID']['input']>;
@@ -10864,6 +10872,11 @@ export const FitspaceGetWorkoutInfoDocument = `
   getWorkoutInfo(dayId: $dayId) {
     id
     duration
+    muscleGroupSetsMax
+    muscleGroupSets {
+      displayGroup
+      weightedSets
+    }
     personalRecords {
       exerciseName
       estimated1RM

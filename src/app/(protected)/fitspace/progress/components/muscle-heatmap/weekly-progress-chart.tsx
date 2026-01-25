@@ -111,12 +111,12 @@ export function WeeklyProgressChart() {
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset="0%"
-                    stopColor="var(--color-emerald-500)"
+                    stopColor="var(--color-green-600)"
                     stopOpacity={0.95}
                   />
                   <stop
                     offset="100%"
-                    stopColor="var(--color-teal-400)"
+                    stopColor="var(--color-green-300)"
                     stopOpacity={0.6}
                   />
                 </linearGradient>
