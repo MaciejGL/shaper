@@ -1,9 +1,10 @@
 'use client'
 
 import { ChevronsDownIcon, ChevronsUpIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
+import { Loader } from '@/components/loader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { TRACKED_DISPLAY_GROUPS } from '@/config/muscles'
@@ -16,12 +17,30 @@ const SHOW_ALL_RECOVERY_THRESHOLD = 10
 
 interface TrainingAnalyticsContentProps {
   analytics: TrainingAnalyticsType
+  isLoading: boolean
 }
 
 export function TrainingAnalyticsContent({
   analytics,
+  isLoading,
 }: TrainingAnalyticsContentProps) {
   const [showAllRecovery, setShowAllRecovery] = useState(false)
+  const [colorsEnabled, setColorsEnabled] = useState(false)
+
+  useEffect(() => {
+    if (isLoading) {
+      setColorsEnabled(false)
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setColorsEnabled(true)
+    }, 150)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [isLoading])
 
   const orderedRecovery = useMemo(() => {
     const pinned = TRACKED_DISPLAY_GROUPS.slice(0, SHOW_ALL_RECOVERY_THRESHOLD)
@@ -46,9 +65,17 @@ export function TrainingAnalyticsContent({
     : orderedRecovery.slice(0, SHOW_ALL_RECOVERY_THRESHOLD)
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 relative">
+      {isLoading ? (
+        <div className="absolute top-4 right-4">
+          <Loader size="sm" />
+        </div>
+      ) : null}
       {orderedRecovery.length > 0 && (
-        <RecoveryBodyPreview recovery={orderedRecovery} />
+        <RecoveryBodyPreview
+          recovery={orderedRecovery}
+          colorsEnabled={colorsEnabled}
+        />
       )}
       {/* AI Insight - only shown when there's something notable */}
       {/* {analytics.insight && (
@@ -79,7 +106,10 @@ export function TrainingAnalyticsContent({
                     <p className="text-xs font-medium text-right">
                       <RecoveryLabel percentRecovered={r.percentRecovered} />
                     </p>
-                    <RecoveryDots percentRecovered={r.percentRecovered} />
+                    <RecoveryDots
+                      percentRecovered={r.percentRecovered}
+                      colorsEnabled={colorsEnabled}
+                    />
                   </div>
                 </div>
               ))}
@@ -155,7 +185,13 @@ export function TrainingAnalyticsContent({
   )
 }
 
-function RecoveryDots({ percentRecovered }: { percentRecovered: number }) {
+function RecoveryDots({
+  percentRecovered,
+  colorsEnabled,
+}: {
+  percentRecovered: number
+  colorsEnabled: boolean
+}) {
   // 5 dots based on percent recovered (0-100%)
   // Each dot = 20% of recovery
   const recoveredDots = Math.max(
@@ -169,8 +205,12 @@ function RecoveryDots({ percentRecovered }: { percentRecovered: number }) {
         <div
           key={i}
           className={cn(
-            'size-2.5 rounded-full transition-colors',
-            i < recoveredDots ? 'bg-green-500' : 'bg-amber-500',
+            'size-2.5 rounded-full transition-colors duration-500',
+            !colorsEnabled
+              ? 'bg-muted-foreground/25'
+              : i < recoveredDots
+                ? 'bg-green-500'
+                : 'bg-amber-500',
           )}
         />
       ))}

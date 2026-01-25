@@ -15,9 +15,17 @@ type RecoveryItem = {
 
 interface RecoveryBodyPreviewProps {
   recovery: RecoveryItem[]
+  colorsEnabled?: boolean
 }
 
-function getRecoveryFillClass(percentRecovered: number | undefined): string {
+function getRecoveryFillClass({
+  percentRecovered,
+  colorsEnabled,
+}: {
+  percentRecovered: number | undefined
+  colorsEnabled: boolean
+}): string {
+  if (!colorsEnabled) return 'fill-neutral-400 dark:fill-neutral-500'
   if (percentRecovered == null) return 'fill-neutral-400 dark:fill-neutral-500'
   if (percentRecovered >= 100) return 'fill-green-500 dark:fill-green-500'
   // if (percentRecovered >= 75) return 'fill-green-400 dark:fill-amber-200'
@@ -25,7 +33,10 @@ function getRecoveryFillClass(percentRecovered: number | undefined): string {
   return 'fill-amber-500 dark:fill-amber-500'
 }
 
-export function RecoveryBodyPreview({ recovery }: RecoveryBodyPreviewProps) {
+export function RecoveryBodyPreview({
+  recovery,
+  colorsEnabled = true,
+}: RecoveryBodyPreviewProps) {
   const { user } = useUser()
   const isMale = user?.profile?.sex !== 'Female'
 
@@ -48,8 +59,8 @@ export function RecoveryBodyPreview({ recovery }: RecoveryBodyPreviewProps) {
 
     return {
       className: cn(
-        'transition-colors duration-200 pointer-events-none',
-        getRecoveryFillClass(percentRecovered),
+        'transition-colors duration-500 pointer-events-none',
+        getRecoveryFillClass({ percentRecovered, colorsEnabled }),
       ),
       onClick: () => {},
     }

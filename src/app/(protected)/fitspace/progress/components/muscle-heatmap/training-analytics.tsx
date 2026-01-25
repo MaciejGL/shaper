@@ -1,10 +1,26 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { TRACKED_DISPLAY_GROUPS } from '@/config/muscles'
 
 import { TrainingAnalytics as TrainingAnalyticsType } from './analytics-types'
 import { TrainingAnalyticsContent } from './training-analytics-content'
 import { useTrainingAnalytics } from './use-training-analytics'
+
+const LOADING_PLACEHOLDER_ANALYTICS: TrainingAnalyticsType = {
+  totalSets: 0,
+  trendPercent: 0,
+  strong: [],
+  needsWork: [],
+  insight: null,
+  status: 'empty',
+  recovery: TRACKED_DISPLAY_GROUPS.map((muscle) => ({
+    muscle,
+    hours: 72,
+    targetHours: 72,
+    percentRecovered: 100,
+  })),
+}
 
 // function CrushingItBanner() {
 //   return (
@@ -44,16 +60,10 @@ export function TrainingAnalytics() {
   if (!analytics && !isLoading) {
     return null
   }
-  const fallbackNullAnalytics: TrainingAnalyticsType = {
-    totalSets: 0,
-    trendPercent: 0,
-    strong: [],
-    needsWork: [],
-    insight: null,
-    status: 'empty',
-    recovery: [],
-  }
   return (
-    <TrainingAnalyticsContent analytics={analytics ?? fallbackNullAnalytics} />
+    <TrainingAnalyticsContent
+      analytics={analytics ?? LOADING_PLACEHOLDER_ANALYTICS}
+      isLoading={isLoading}
+    />
   )
 }
