@@ -10,6 +10,7 @@ import { TRACKED_DISPLAY_GROUPS } from '@/config/muscles'
 import { cn } from '@/lib/utils'
 
 import type { TrainingAnalytics as TrainingAnalyticsType } from './analytics-types'
+import { RecoveryBodyPreview } from './recovery-body-preview'
 
 const SHOW_ALL_RECOVERY_THRESHOLD = 10
 
@@ -46,6 +47,9 @@ export function TrainingAnalyticsContent({
 
   return (
     <div className="space-y-5">
+      {orderedRecovery.length > 0 && (
+        <RecoveryBodyPreview recovery={orderedRecovery} />
+      )}
       {/* AI Insight - only shown when there's something notable */}
       {/* {analytics.insight && (
         <div className="py-3 px-4 rounded-lg bg-muted/50 border border-border/50">
@@ -117,12 +121,12 @@ export function TrainingAnalyticsContent({
                     </p>
                   </div>
 
-                  <div className="shrink-0 flex items-center gap-4">
+                  {/* <div className="shrink-0 flex items-center gap-4">
                     <p className="text-xs font-medium text-right">
                       <RecoveryLabel percentRecovered={r.percentRecovered} />
                     </p>
                     <RecoveryDots percentRecovered={r.percentRecovered} />
-                  </div>
+                  </div> */}
                 </div>
               ))}
             </div>

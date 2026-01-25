@@ -103,7 +103,7 @@ export const HEATMAP_COLORS = {
     },
     {
       threshold: 0.01, // 1-43% = 1-6 sets - Low
-      fillColor: cn('fill-orange-100'),
+      fillColor: cn('fill-orange-100 dark:fill-orange-50'),
       bgColor: cn('bg-orange-100'),
       textColor: cn('text-orange-800'),
       progressColor: cn('bg-green-100 dark:bg-green-100'),
@@ -111,7 +111,7 @@ export const HEATMAP_COLORS = {
     },
     {
       threshold: 0, // 0% = 0 sets - Not trained
-      fillColor: cn('fill-neutral-500 dark:fill-neutral-700'),
+      fillColor: cn('fill-orange-50 dark:fill-neutral-400'),
       bgColor: cn('bg-neutral-500 dark:bg-neutral-700'),
       textColor: cn('text-muted-foreground'),
       progressColor: cn('bg-neutral-500 dark:bg-neutral-500'),

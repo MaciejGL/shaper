@@ -3,8 +3,8 @@
  * These are non-interactive elements that form the silhouette but aren't muscle groups
  */
 export function Unselectable() {
-  const fillClass = 'fill-neutral-500'
-  const hairFillClass = 'fill-[#424747]'
+  const fillClass = 'fill-neutral-400 dark:fill-neutral-500'
+  const hairFillClass = 'fill-neutral-400 dark:fill-neutral-500'
 
   return (
     <>
