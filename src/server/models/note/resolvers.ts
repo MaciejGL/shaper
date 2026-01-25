@@ -765,7 +765,21 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         user.user.email?.split('@')[0] ||
         'User'
 
-      await notifyExerciseCommentReply(parentNote.createdById, senderName, text)
+      const exerciseName = parentNote.relatedToId
+        ? await prisma.trainingExercise
+            .findUnique({
+              where: { id: parentNote.relatedToId },
+              select: { name: true },
+            })
+            .then((ex) => ex?.name ?? undefined)
+        : undefined
+
+      await notifyExerciseCommentReply(
+        parentNote.createdById,
+        senderName,
+        text,
+        exerciseName,
+      )
     }
 
     return new Note(reply, context)

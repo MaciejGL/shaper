@@ -42,6 +42,7 @@ export async function sendPushForNotification(
     planTitle?: string
     workoutType?: string
     noteText?: string
+    exerciseName?: string
     clientName?: string
     clientId?: string
     trainerName?: string
@@ -135,6 +136,7 @@ export async function sendPushForNotification(
           userId,
           additionalData?.senderName || 'User',
           additionalData?.noteText || 'Replied to your exercise note',
+          additionalData?.exerciseName,
         )
 
       case GQLNotificationType.TrainerWorkoutCompleted:

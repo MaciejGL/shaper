@@ -238,13 +238,17 @@ export async function notifyExerciseCommentReply(
   recipientId: string,
   replierName: string,
   replyText: string,
+  exerciseName?: string,
 ) {
-  const truncatedText =
-    replyText.length > 50 ? `${replyText.substring(0, 50)}...` : replyText
+  const title = `${replierName} replied to your comment on ${
+    exerciseName || 'your exercise'
+  }`
+
+  const body = replyText.length > 200 ? `${replyText.substring(0, 200)}...` : replyText
   return await sendPushNotificationToUsers(
     [recipientId],
-    'Exercise comment reply',
-    `${replierName} replied to your exercise note: "${truncatedText}"`,
+    title,
+    body,
     '/fitspace/workout',
   )
 }
