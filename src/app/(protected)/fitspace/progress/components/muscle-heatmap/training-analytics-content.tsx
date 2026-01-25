@@ -59,6 +59,55 @@ export function TrainingAnalyticsContent({
         </div>
       )} */}
 
+      {/* Recovery */}
+      {orderedRecovery.length > 0 && (
+        <div>
+          <AnimateChangeInHeight>
+            <div className="divide-y divide-border">
+              {visibleRecovery.map((r) => (
+                <div
+                  key={r.muscle}
+                  className="flex items-center justify-between gap-4 py-2"
+                >
+                  <div className="min-w-0">
+                    <p className="text-base font-semibold truncate">
+                      {r.muscle}
+                    </p>
+                  </div>
+
+                  <div className="shrink-0 flex items-center gap-4">
+                    <p className="text-xs font-medium text-right">
+                      <RecoveryLabel percentRecovered={r.percentRecovered} />
+                    </p>
+                    <RecoveryDots percentRecovered={r.percentRecovered} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </AnimateChangeInHeight>
+
+          {hasMoreRecovery && (
+            <div className="flex justify-center mt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                iconEnd={
+                  showAllRecovery ? (
+                    <ChevronsUpIcon className="size-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronsDownIcon className="size-4 text-muted-foreground" />
+                  )
+                }
+                onClick={() => setShowAllRecovery((v) => !v)}
+              >
+                {showAllRecovery
+                  ? 'Show fewer'
+                  : `Show all (${orderedRecovery.length - SHOW_ALL_RECOVERY_THRESHOLD})`}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
       {/* Strong / Needs Work */}
       {(analytics.strong.length > 0 || analytics.needsWork.length > 0) && (
         <div className="space-y-4">
@@ -98,58 +147,6 @@ export function TrainingAnalyticsContent({
                   </Badge>
                 ))}
               </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Recovery */}
-      {orderedRecovery.length > 0 && (
-        <div>
-          <p className="text-base font-medium mb-3">Recovery Status</p>
-
-          <AnimateChangeInHeight>
-            <div className="rounded-xl border bg-card divide-y divide-border">
-              {visibleRecovery.map((r) => (
-                <div
-                  key={r.muscle}
-                  className="flex items-center justify-between gap-4 px-3 py-2"
-                >
-                  <div className="min-w-0">
-                    <p className="text-base font-semibold truncate">
-                      {r.muscle}
-                    </p>
-                  </div>
-
-                  {/* <div className="shrink-0 flex items-center gap-4">
-                    <p className="text-xs font-medium text-right">
-                      <RecoveryLabel percentRecovered={r.percentRecovered} />
-                    </p>
-                    <RecoveryDots percentRecovered={r.percentRecovered} />
-                  </div> */}
-                </div>
-              ))}
-            </div>
-          </AnimateChangeInHeight>
-
-          {hasMoreRecovery && (
-            <div className="flex justify-center mt-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                iconEnd={
-                  showAllRecovery ? (
-                    <ChevronsUpIcon className="size-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronsDownIcon className="size-4 text-muted-foreground" />
-                  )
-                }
-                onClick={() => setShowAllRecovery((v) => !v)}
-              >
-                {showAllRecovery
-                  ? 'Show fewer'
-                  : `Show all (${orderedRecovery.length - SHOW_ALL_RECOVERY_THRESHOLD})`}
-              </Button>
             </div>
           )}
         </div>

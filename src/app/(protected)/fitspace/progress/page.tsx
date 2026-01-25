@@ -36,7 +36,9 @@ export default function ProgressPage() {
 
   const isPremiumActivated = searchParams?.get('premium_activated') === 'true'
 
-  const completeYourAccount = useCompleteYourAccount({ enabled: tab === ProgressTab.Activity })
+  const completeYourAccount = useCompleteYourAccount({
+    enabled: tab === ProgressTab.Activity,
+  })
 
   const {
     isPostPayment,
@@ -89,12 +91,15 @@ export default function ProgressPage() {
               value={ProgressTab.Activity}
               className="space-y-6 py-6 px-4"
             >
-              <ActivityByDaySection />
               <MuscleHeatmapSection />
+              <ActivityByDaySection />
               <LatestPRs />
             </TabsContent>
 
-            <TabsContent value={ProgressTab.Logs} className="space-y-6 py-6 px-4">
+            <TabsContent
+              value={ProgressTab.Logs}
+              className="space-y-6 py-6 px-4"
+            >
               <BodyMeasurementsProvider>
                 <LogsSection />
                 <SnapshotsSection />

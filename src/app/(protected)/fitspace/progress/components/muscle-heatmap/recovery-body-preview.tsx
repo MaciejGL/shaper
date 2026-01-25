@@ -60,8 +60,7 @@ export function RecoveryBodyPreview({ recovery }: RecoveryBodyPreviewProps) {
 
   return (
     <div className="">
-      <p className="text-sm font-medium mb-3">Muscle Recovery Map</p>
-      <div className="flex items-center justify-center gap-3 px-2 py-6">
+      <div className="flex items-center justify-center gap-3 px-6 py-6">
         <div className="w-1/2 [&_svg]:w-full [&_svg]:h-full">
           <FrontBody getPathProps={getPathProps} />
         </div>

@@ -23,8 +23,8 @@ import { useMuscleHeatmap } from './use-muscle-heatmap'
 import { useVolumeGoal } from './volume-goal-selector/use-volume-goal'
 import { VolumeGoalSelector } from './volume-goal-wizard/volume-goal-selector'
 import { VolumeGoalWizardDrawer } from './volume-goal-wizard/volume-goal-wizard-drawer'
-import { WeeklyProgressChart } from './weekly-progress-chart'
 import { WeekNavigator } from './week-navigator'
+import { WeeklyProgressChart } from './weekly-progress-chart'
 
 export function MuscleHeatmapSection() {
   const { user } = useUser()
@@ -118,12 +118,6 @@ export function MuscleHeatmapSection() {
               <PremiumGate feature="Muscle Heatmap" compact showPartialContent>
                 <div>
                   <div className="mb-6 flex flex-col gap-3">
-                    <VolumeGoalSelector
-                      currentGoal={currentGoal}
-                      durationWeeks={getDurationWeeks()}
-                      onOpenWizard={() => setGoalSelectorOpen(true)}
-                    />
-
                     <div className="flex items-center justify-end">
                       <WeekNavigator
                         weekStartDate={weekStartDate}
@@ -186,6 +180,14 @@ export function MuscleHeatmapSection() {
 
                   {/* Color Legend */}
                   <HeatmapLegend />
+
+                  <div className="my-6">
+                    <VolumeGoalSelector
+                      currentGoal={currentGoal}
+                      durationWeeks={getDurationWeeks()}
+                      onOpenWizard={() => setGoalSelectorOpen(true)}
+                    />
+                  </div>
 
                   {/* Weekly Progress Chart */}
                   <div className="mt-6 pt-6 border-t border-border">
