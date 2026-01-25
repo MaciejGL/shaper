@@ -1,7 +1,8 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 
 import { PremiumGate } from '@/components/premium-gate'
 import {
@@ -27,9 +28,11 @@ import { WeekNavigator } from './week-navigator'
 
 export function MuscleHeatmapSection() {
   const { user } = useUser()
+  const searchParams = useSearchParams()
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'heatmap' | 'recovery'>('heatmap')
   const [goalSelectorOpen, setGoalSelectorOpen] = useState(false)
+  const hasAutoOpenedGoalWizardRef = useRef(false)
 
   const { currentGoal, setGoal, getDurationWeeks } = useVolumeGoal()
 
@@ -51,6 +54,15 @@ export function MuscleHeatmapSection() {
     setSelectedMuscle(selectedMuscle === muscle ? null : muscle)
   }
 
+  useEffect(() => {
+    const shouldAutoOpen = searchParams?.get('volumeGoalWizard') === '1'
+    if (!shouldAutoOpen) return
+    if (hasAutoOpenedGoalWizardRef.current) return
+
+    hasAutoOpenedGoalWizardRef.current = true
+    setGoalSelectorOpen(true)
+  }, [searchParams])
+
   if (!user) {
     return null
   }
@@ -60,131 +72,133 @@ export function MuscleHeatmapSection() {
     : overallPercentage.toFixed(1)
 
   return (
-    <Card>
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) => {
-          if (value === 'heatmap' || value === 'recovery') {
-            setActiveTab(value)
-          }
-        }}
-      >
-        <CardHeader className="pb-2">
-          {streakWeeks > 0 && isCurrentWeek && (
-            <div className="flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-300">
-              <span className="font-semibold">{streakWeeks}</span>
-              <span>week streak</span>
+    <div id="muscle-heatmap">
+      <Card>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => {
+            if (value === 'heatmap' || value === 'recovery') {
+              setActiveTab(value)
+            }
+          }}
+        >
+          <CardHeader className="pb-2">
+            {streakWeeks > 0 && isCurrentWeek && (
+              <div className="flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-300">
+                <span className="font-semibold">{streakWeeks}</span>
+                <span>week streak</span>
+              </div>
+            )}
+            <div className="flex items-end justify-between gap-1">
+              <CardTitle>Muscle</CardTitle>
+              <TabsList variant="secondary">
+                <TabsTrigger value="heatmap">Volume</TabsTrigger>
+                <TabsTrigger value="recovery">Recovery</TabsTrigger>
+              </TabsList>
             </div>
-          )}
-          <div className="flex items-end justify-between gap-1">
-            <CardTitle>Muscle</CardTitle>
-            <TabsList variant="secondary">
-              <TabsTrigger value="heatmap">Volume</TabsTrigger>
-              <TabsTrigger value="recovery">Recovery</TabsTrigger>
-            </TabsList>
-          </div>
-          <CardDescription>
-            {activeTab === 'heatmap'
-              ? 'Weekly sets per muscle. Tap a muscle to see details.'
-              : 'Recovery status per muscle based on your recent training.'}
-          </CardDescription>
-        </CardHeader>
+            <CardDescription>
+              {activeTab === 'heatmap'
+                ? 'Weekly sets per muscle. Tap a muscle to see details.'
+                : 'Recovery status per muscle based on your recent training.'}
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent className="flex flex-col">
-          <TabsContent value="heatmap" className="pt-4 flex flex-col gap-4">
-            <PremiumGate feature="Muscle Heatmap" compact showPartialContent>
-              <div>
-                <div className="mb-6 flex flex-col gap-3">
-                  <VolumeGoalSelector
-                    currentGoal={currentGoal}
-                    durationWeeks={getDurationWeeks()}
-                    onOpenWizard={() => setGoalSelectorOpen(true)}
-                  />
+          <CardContent className="flex flex-col">
+            <TabsContent value="heatmap" className="pt-4 flex flex-col gap-4">
+              <PremiumGate feature="Muscle Heatmap" compact showPartialContent>
+                <div>
+                  <div className="mb-6 flex flex-col gap-3">
+                    <VolumeGoalSelector
+                      currentGoal={currentGoal}
+                      durationWeeks={getDurationWeeks()}
+                      onOpenWizard={() => setGoalSelectorOpen(true)}
+                    />
 
-                  <div className="flex items-center justify-end">
-                    <WeekNavigator
-                      weekStartDate={weekStartDate}
-                      weekEndDate={weekEndDate}
-                      weekOffset={weekOffset}
-                      onPrevious={goToPreviousWeek}
-                      onNext={goToNextWeek}
+                    <div className="flex items-center justify-end">
+                      <WeekNavigator
+                        weekStartDate={weekStartDate}
+                        weekEndDate={weekEndDate}
+                        weekOffset={weekOffset}
+                        onPrevious={goToPreviousWeek}
+                        onNext={goToNextWeek}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-left rounded-xl px-3 py-2 shadow-md outline outline-border dark:outline-muted">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                          Total sets
+                        </p>
+                        <p className="text-2xl font-bold tabular-nums">
+                          {totalSets}
+                        </p>
+                      </div>
+                      <div className="text-left rounded-xl px-3 py-2 shadow-md outline outline-border dark:outline-muted">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                          Score
+                        </p>
+                        <p className="text-2xl font-bold tabular-nums">
+                          {formattedScore}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mb-10">
+                    <HeatmapBodyView
+                      muscleIntensity={muscleIntensity}
+                      muscleProgress={muscleProgress}
+                      selectedMuscle={selectedMuscle}
+                      onMuscleClick={handleMuscleClick}
                     />
                   </div>
+                  {/* Selected Muscle Details */}
+                  <AnimatePresence>
+                    {selectedMuscle && muscleProgress[selectedMuscle] && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{
+                          duration: 0.3,
+                          ease: [0.32, 0.72, 0, 1],
+                        }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pb-6">
+                          <SelectedMuscleDetails
+                            selectedMuscle={selectedMuscle}
+                            muscleProgress={muscleProgress}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="text-left rounded-xl px-3 py-2 shadow-md outline outline-border dark:outline-muted">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                        Total sets
-                      </p>
-                      <p className="text-2xl font-bold tabular-nums">
-                        {totalSets}
-                      </p>
-                    </div>
-                    <div className="text-left rounded-xl px-3 py-2 shadow-md outline outline-border dark:outline-muted">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                        Score
-                      </p>
-                      <p className="text-2xl font-bold tabular-nums">
-                        {formattedScore}%
-                      </p>
-                    </div>
+                  {/* Color Legend */}
+                  <HeatmapLegend />
+
+                  {/* Weekly Progress Chart */}
+                  <div className="mt-6 pt-6 border-t border-border">
+                    <WeeklyProgressChart />
                   </div>
                 </div>
-                <div className="mb-10">
-                  <HeatmapBodyView
-                    muscleIntensity={muscleIntensity}
-                    muscleProgress={muscleProgress}
-                    selectedMuscle={selectedMuscle}
-                    onMuscleClick={handleMuscleClick}
-                  />
-                </div>
-                {/* Selected Muscle Details */}
-                <AnimatePresence>
-                  {selectedMuscle && muscleProgress[selectedMuscle] && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{
-                        duration: 0.3,
-                        ease: [0.32, 0.72, 0, 1],
-                      }}
-                      className="overflow-hidden"
-                    >
-                      <div className="pb-6">
-                        <SelectedMuscleDetails
-                          selectedMuscle={selectedMuscle}
-                          muscleProgress={muscleProgress}
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+              </PremiumGate>
+            </TabsContent>
+            <TabsContent value="recovery" className="pt-4">
+              <PremiumGate feature="Muscle Recovery & Focus" compact>
+                <TrainingAnalytics />
+              </PremiumGate>
+            </TabsContent>
+          </CardContent>
+        </Tabs>
 
-                {/* Color Legend */}
-                <HeatmapLegend />
-
-                {/* Weekly Progress Chart */}
-                <div className="mt-6 pt-6 border-t border-border">
-                  <WeeklyProgressChart />
-                </div>
-              </div>
-            </PremiumGate>
-          </TabsContent>
-          <TabsContent value="recovery" className="pt-4">
-            <PremiumGate feature="Muscle Recovery & Focus" compact>
-              <TrainingAnalytics />
-            </PremiumGate>
-          </TabsContent>
-        </CardContent>
-      </Tabs>
-
-      <VolumeGoalWizardDrawer
-        open={goalSelectorOpen}
-        onOpenChange={setGoalSelectorOpen}
-        currentGoal={currentGoal}
-        onSelect={setGoal}
-      />
-    </Card>
+        <VolumeGoalWizardDrawer
+          open={goalSelectorOpen}
+          onOpenChange={setGoalSelectorOpen}
+          currentGoal={currentGoal}
+          onSelect={setGoal}
+        />
+      </Card>
+    </div>
   )
 }

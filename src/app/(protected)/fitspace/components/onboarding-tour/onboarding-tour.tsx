@@ -11,6 +11,7 @@ import {
   GQLUpdateProfileMutation,
   GQLUpdateProfileMutationVariables,
   GQLUserBasicQuery,
+  useCurrentVolumeGoalQuery,
   useUpdateProfileMutation,
   useUserBasicQuery,
 } from '@/generated/graphql-client'
@@ -42,6 +43,14 @@ const TOUR_CONTENT = {
     description: [
       'This is your personal library.',
       'You’ll find plans from your trainer, plans you picked from our collection, and you can create your own when you’re ready.',
+    ],
+  },
+  volumeGoal: {
+    title: 'Set a weekly volume goal',
+    description: [
+      'Pick a focus (like Upper Body or Glutes) and how hard you want to push.',
+      'We’ll use it to highlight the right muscles in your heatmap and guide your growth over time.',
+      'You can set it anytime in Progress → Muscle heatmap.',
     ],
   },
   explore: {
@@ -89,6 +98,12 @@ export function OnboardingTour() {
   const includeFreeTierStep = freeTierVariant === 'A'
   const hasTrackedStartRef = useRef(false)
 
+  const { data: volumeGoalData } = useCurrentVolumeGoalQuery(
+    {},
+    { enabled: open, staleTime: 60_000 },
+  )
+  const hasVolumeGoal = Boolean(volumeGoalData?.profile?.currentVolumeGoal?.id)
+
   // Prefetch likely destinations while the tour is open.
   useEffect(() => {
     if (!open) return
@@ -98,6 +113,7 @@ export function OnboardingTour() {
       '/fitspace/explore',
       '/fitspace/explore?tab=free-workouts',
       '/fitspace/explore?tab=premium-plans',
+      '/fitspace/progress?tab=activity&volumeGoalWizard=1',
     ]
 
     for (const href of hrefs) {
@@ -223,7 +239,19 @@ export function OnboardingTour() {
         description: TOUR_CONTENT.plans.description,
         placement: 'top',
       },
-      // Step 4: Explore tab
+      // Step 4: Volume goal (only if not set)
+      ...(!hasVolumeGoal
+        ? ([
+            {
+              id: 'volume-goal',
+              target: '[data-onboarding-id="nav-progress"]',
+              title: TOUR_CONTENT.volumeGoal.title,
+              description: TOUR_CONTENT.volumeGoal.description,
+              placement: 'top',
+            } satisfies TourStep,
+          ] as TourStep[])
+        : []),
+      // Step 5: Explore tab
       {
         id: 'explore',
         target: '[data-onboarding-id="nav-explore"]',
@@ -315,7 +343,13 @@ export function OnboardingTour() {
     })
 
     return base
-  }, [flagKey, freeTierVariant, handleComplete, includeFreeTierStep])
+  }, [
+    flagKey,
+    freeTierVariant,
+    handleComplete,
+    hasVolumeGoal,
+    includeFreeTierStep,
+  ])
 
   return (
     <Tour

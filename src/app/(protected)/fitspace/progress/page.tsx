@@ -11,6 +11,8 @@ import { usePostPaymentSuccess } from '@/hooks/use-post-payment-success'
 
 import { BodyMeasurementsProvider } from './components/body-measurements-context'
 import { CheckinScheduleSection } from './components/checkin-schedule/checkin-schedule-section'
+import { CompleteYourAccountBanner } from './components/complete-your-account/complete-your-account-banner'
+import { useCompleteYourAccount } from './components/complete-your-account/use-complete-your-account'
 import { LatestPRs } from './components/latest-prs/latest-prs'
 import { LogsSection } from './components/logs-section/logs-section'
 import { ActivityByDaySection } from './components/muscle-heatmap/activity-by-day-section'
@@ -34,6 +36,8 @@ export default function ProgressPage() {
 
   const isPremiumActivated = searchParams?.get('premium_activated') === 'true'
 
+  const completeYourAccount = useCompleteYourAccount({ enabled: tab === ProgressTab.Activity })
+
   const {
     isPostPayment,
     state: paymentState,
@@ -51,7 +55,13 @@ export default function ProgressPage() {
         onRefresh={refetch}
       />
       <ExtendHeader
-        headerChildren={<div />}
+        headerChildren={
+          tab === ProgressTab.Activity ? (
+            <CompleteYourAccountBanner state={completeYourAccount} />
+          ) : (
+            <div />
+          )
+        }
         classNameHeaderContent="pb-8"
         classNameContent="px-0 pt-0"
       >

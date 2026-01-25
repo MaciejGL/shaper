@@ -2,10 +2,14 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { getVolumeGoalPresetById } from '@/config/volume-goals'
 import {
+  type GQLCurrentVolumeGoalQuery,
+  type GQLSetVolumeGoalMutation,
+  type GQLSetVolumeGoalMutationVariables,
   useCurrentVolumeGoalQuery,
   useSetVolumeGoalMutation,
 } from '@/generated/graphql-client'
 import { useUser } from '@/context/user-context'
+import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 
 export function useVolumeGoal() {
   const { user } = useUser()
@@ -21,24 +25,59 @@ export function useVolumeGoal() {
     ? getVolumeGoalPresetById(currentGoal.focusPreset)
     : null
 
-  const { mutate: setGoalMutation, isPending: isSettingGoal } =
-    useSetVolumeGoalMutation({
-      onSuccess: () => {
-        // Invalidate queries to refetch with new goal
-        queryClient.invalidateQueries({
-          queryKey: useCurrentVolumeGoalQuery.getKey({}),
-        })
-        // Also invalidate weekly progress to recalculate with new targets
-        if (user?.id) {
-          queryClient.invalidateQueries({
-            queryKey: ['WeeklyMuscleProgress'],
-          })
-        }
-      },
-    })
+  const setGoalMutation = useSetVolumeGoalMutation()
+  const queryKey = useCurrentVolumeGoalQuery.getKey({})
+
+  const { optimisticMutate: setGoalOptimistic } = useOptimisticMutation<
+    GQLCurrentVolumeGoalQuery,
+    GQLSetVolumeGoalMutation,
+    GQLSetVolumeGoalMutationVariables
+  >({
+    queryKey,
+    mutationFn: setGoalMutation.mutateAsync,
+    updateFn: (oldData, variables) => {
+      if (!oldData.profile) return oldData
+
+      const now = new Date().toISOString()
+      const existingId = oldData.profile.currentVolumeGoal?.id ?? 'temp-volume-goal'
+
+      return {
+        ...oldData,
+        profile: {
+          ...oldData.profile,
+          currentVolumeGoal: {
+            __typename: 'VolumeGoalPeriod',
+            id: existingId,
+            focusPreset: variables.focusPreset,
+            commitment: variables.commitment,
+            startedAt: now,
+            endedAt: null,
+          },
+        },
+      }
+    },
+    onSuccess: () => {
+      // Always refetch to ensure server is the source of truth
+      queryClient.invalidateQueries({ queryKey })
+      // Recalculate weekly targets
+      queryClient.invalidateQueries({ queryKey: ['WeeklyMuscleProgress'] })
+    },
+  })
 
   const setGoal = (focusPreset: string, commitment: string) => {
-    setGoalMutation({ focusPreset, commitment })
+    const hasCache = Boolean(
+      queryClient.getQueryData<GQLCurrentVolumeGoalQuery>(queryKey),
+    )
+
+    if (!hasCache) {
+      // Still perform the mutation even if we can't optimistically update yet.
+      setGoalMutation.mutate({ focusPreset, commitment })
+      return
+    }
+
+    setGoalOptimistic({ focusPreset, commitment }).catch(() => {
+      // Error handling (rollback) is handled in useOptimisticMutation
+    })
   }
 
   // Calculate duration since goal started
@@ -55,7 +94,7 @@ export function useVolumeGoal() {
     currentGoal,
     currentPreset,
     isLoading,
-    isSettingGoal,
+    isSettingGoal: setGoalMutation.isPending,
     setGoal,
     getDurationWeeks,
   }

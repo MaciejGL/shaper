@@ -169,6 +169,8 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
                     ? 'nav-workout'
                     : item.id === 'plans'
                       ? 'nav-my-plans'
+                      : item.id === 'progress'
+                        ? 'nav-progress'
                       : item.id === 'discover'
                         ? 'nav-explore'
                         : undefined
