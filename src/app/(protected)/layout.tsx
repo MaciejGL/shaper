@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
+import { ExplorePrefetch } from '@/components/explore-prefetch'
 import { MobileAppAuthSync } from '@/components/mobile-app-auth-sync'
 import { MobileAppThemeSync } from '@/components/mobile-app-theme-sync'
 import { PostHogProvider } from '@/components/posthog-provider'
@@ -55,6 +56,7 @@ export default async function ProtectedLayout({
             disableTransitionOnChange={false}
           >
             <SimplePullToRefresh />
+            <ExplorePrefetch />
             <MobileAppAuthSync />
             <MobileAppThemeSync />
             <PromotionalToastManager />
