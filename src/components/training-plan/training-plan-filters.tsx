@@ -33,7 +33,7 @@ import { cn } from '@/lib/utils'
 
 import { Badge } from '../ui/badge'
 
-export type SortOption = 'popular' | 'newest' | 'shortest'
+export type SortOption = 'popular' | 'newest' | 'shortest' | 'difficulty'
 
 export const focusTagLabels: Record<GQLFocusTag, string> = {
   [GQLFocusTag.Strength]: 'Strength',
@@ -51,6 +51,7 @@ const sortLabels: Record<SortOption, string> = {
   popular: 'Popular',
   newest: 'Newest',
   shortest: 'Shortest',
+  difficulty: 'Difficulty',
 }
 
 export const difficultyLabels: Record<GQLDifficulty, string> = {

@@ -228,7 +228,7 @@ function WorkoutDayActions({
         className="flex-1"
         size="lg"
       >
-        Start Workout
+        Start Now
       </Button>
     </DrawerFooter>
   )

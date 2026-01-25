@@ -25,6 +25,11 @@ export const ANALYTICS_EVENTS = {
 
   // App download
   APP_STORE_CLICK: 'app_store_click',
+
+  // Explore plans drawer
+  EXPLORE_PLAN_START_NOW_TAP: 'explore_plan_start_now_tap',
+  EXPLORE_PLAN_START_DEMO_TAP: 'explore_plan_start_demo_tap',
+  EXPLORE_PLAN_ADD_TO_MY_PLANS_TAP: 'explore_plan_add_to_my_plans_tap',
 } as const
 
 export type AnalyticsEventName =
@@ -69,6 +74,13 @@ type AppStoreClickProperties = Record<string, unknown> & {
   store: 'ios' | 'android'
   source: AppStoreClickSource
   ref: string | null
+}
+
+type ExplorePlanDrawerEventProperties = Record<string, unknown> & {
+  plan_id: string
+  plan_title: string
+  has_premium: boolean
+  has_demo_workout_day: boolean
 }
 
 // ============================================================================
@@ -126,5 +138,17 @@ export const analyticsEvents = {
 
   appStoreClick: (properties: AppStoreClickProperties) => {
     captureEvent(ANALYTICS_EVENTS.APP_STORE_CLICK, properties)
+  },
+
+  explorePlanStartNowTap: (properties: ExplorePlanDrawerEventProperties) => {
+    captureEvent(ANALYTICS_EVENTS.EXPLORE_PLAN_START_NOW_TAP, properties)
+  },
+
+  explorePlanStartDemoTap: (properties: ExplorePlanDrawerEventProperties) => {
+    captureEvent(ANALYTICS_EVENTS.EXPLORE_PLAN_START_DEMO_TAP, properties)
+  },
+
+  explorePlanAddToMyPlansTap: (properties: ExplorePlanDrawerEventProperties) => {
+    captureEvent(ANALYTICS_EVENTS.EXPLORE_PLAN_ADD_TO_MY_PLANS_TAP, properties)
   },
 }

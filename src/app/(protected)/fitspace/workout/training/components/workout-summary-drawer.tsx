@@ -149,7 +149,11 @@ export function WorkoutSummaryDrawer({
 
         // Generate fun weight comparison if there's weight lifted
         if (totalWeight > 0) {
-          const { comparison } = generateWeightComparison(totalWeight)
+          const { comparison } = generateWeightComparison(
+            totalWeight,
+            [],
+            sex as 'male' | 'female' | null | undefined,
+          )
           setWeightComparison(comparison)
         } else {
           setWeightComparison('')

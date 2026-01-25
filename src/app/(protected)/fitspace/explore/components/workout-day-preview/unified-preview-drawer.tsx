@@ -209,7 +209,9 @@ export function UnifiedPreviewDrawer({
                   <TrainingPlanPreviewContent
                     plan={currentView.data}
                     onAssignTemplate={onAssignTemplate}
+                    onStartNow={() => {}}
                     isAssigning={isAssigning}
+                    isStartingNow={false}
                     weeksData={currentView.data}
                     hideCloseButton={true}
                   />
@@ -231,7 +233,9 @@ export function UnifiedPreviewDrawer({
                 <TrainingPlanPreviewContent
                   plan={currentView.data}
                   onAssignTemplate={onAssignTemplate}
+                  onStartNow={() => {}}
                   isAssigning={isAssigning}
+                  isStartingNow={false}
                   weeksData={currentView.data}
                 />
               )}

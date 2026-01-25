@@ -41,9 +41,9 @@ export function TrainingPlanPreviewInfoTab({
         <Card variant="highlighted" className="dark shadow-xl">
           <CardContent className="pt-0">
             <div className="space-y-2">
-              <p className="font-semibold">Try a demo workout day</p>
+              <p className="font-semibold">Start a preview session</p>
               <p className="text-sm text-muted-foreground">
-                Preview one full workout day and start it instantly.
+                Try one full workout day from this plan before committing.
               </p>
             </div>
             <Button
@@ -51,7 +51,7 @@ export function TrainingPlanPreviewInfoTab({
               variant="default"
               onClick={onTryDemoWorkoutDay}
             >
-              Try demo workout day
+              Start preview session
             </Button>
           </CardContent>
         </Card>

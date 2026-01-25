@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Calendar, Clock, Dumbbell, Layers, Users } from 'lucide-react'
 import Image from 'next/image'
@@ -23,6 +24,7 @@ import {
   GQLDifficulty,
   GQLFocusTag,
   GQLGetPublicTrainingPlansQuery,
+  useActivatePlanMutation,
   useAssignTemplateToSelfMutation,
   useGetPublicTrainingPlansQuery,
   useStartFreeWorkoutDayMutation,
@@ -132,6 +134,7 @@ export function TrainingPlansTab({
   const [selectedDemoWorkout, setSelectedDemoWorkout] =
     useState<FreeWorkoutDay | null>(null)
   const [isDemoPreviewOpen, setIsDemoPreviewOpen] = useState(false)
+  const [isStartingNow, setIsStartingNow] = useState(false)
 
   // Filters
   const [selectedFocusTags, setSelectedFocusTags] = useState<GQLFocusTag[]>([])
@@ -139,7 +142,7 @@ export function TrainingPlansTab({
     useState<GQLDifficulty | null>(null)
   const [daysPerWeek, setDaysPerWeek] = useState<number | null>(null)
   const [sessionMaxMins, setSessionMaxMins] = useState<number>(90) // 90 = "Any"
-  const [sort, setSort] = useState<SortOption>('popular')
+  const [sort, setSort] = useState<SortOption>('difficulty')
   const [selectedQuickBadges, setSelectedQuickBadges] = useState<
     QuickPlanBadgeId[]
   >([])
@@ -169,6 +172,12 @@ export function TrainingPlansTab({
   // Fetch assignment mutation
   const { mutateAsync: assignTemplate, isPending: isAssigning } =
     useAssignTemplateToSelfMutation({})
+
+  const { mutateAsync: activatePlan } = useActivatePlanMutation({
+    onError: () => {
+      toast.error('Failed to start plan')
+    },
+  })
 
   const { mutateAsync: startWorkoutDay, isPending: isStarting } =
     useStartFreeWorkoutDayMutation({
@@ -238,6 +247,39 @@ export function TrainingPlansTab({
       } else {
         toast.error('Failed to add training plan')
       }
+    }
+  }
+
+  const handleStartNow = async (planId: string) => {
+    setIsStartingNow(true)
+
+    try {
+      const assigned = await assignTemplate({ planId })
+      const assignedPlanId = assigned.assignTemplateToSelf
+      if (!assignedPlanId) {
+        throw new Error('Failed to assign plan')
+      }
+
+      await activatePlan({
+        planId: assignedPlanId,
+        startDate: format(new Date(), 'yyyy-MM-dd'),
+        resume: false,
+      })
+
+      await queryInvalidation.planStateChange(queryClient)
+
+      setIsPreviewOpen(false)
+      setSelectedPlan(null)
+
+      startTransition(() => {
+        router.refresh()
+        router.push('/fitspace/workout')
+      })
+    } catch (error) {
+      console.error('Failed to start plan:', error)
+      toast.error('Failed to start plan')
+    } finally {
+      setIsStartingNow(false)
     }
   }
 
@@ -425,6 +467,17 @@ export function TrainingPlansTab({
           )
         case 'shortest':
           return (a.avgSessionTime || 0) - (b.avgSessionTime || 0)
+        case 'difficulty': {
+          const difficultyOrder: Record<GQLDifficulty, number> = {
+            [GQLDifficulty.Beginner]: 1,
+            [GQLDifficulty.Intermediate]: 2,
+            [GQLDifficulty.Advanced]: 3,
+            [GQLDifficulty.Expert]: 4,
+          }
+          const aOrder = a.difficulty ? difficultyOrder[a.difficulty] : 0
+          const bOrder = b.difficulty ? difficultyOrder[b.difficulty] : 0
+          return aOrder - bOrder
+        }
         default:
           return 0
       }
@@ -568,7 +621,9 @@ export function TrainingPlansTab({
             <TrainingPlanPreviewContent
               plan={selectedPlan}
               onAssignTemplate={handleAssignTemplate}
+              onStartNow={() => handleStartNow(selectedPlan.id)}
               isAssigning={isAssigning}
+              isStartingNow={isStartingNow}
               weeksData={selectedPlan}
               hasDemoWorkoutDay={!!demoWorkoutForSelectedPlan}
               onTryDemoWorkoutDay={() => {

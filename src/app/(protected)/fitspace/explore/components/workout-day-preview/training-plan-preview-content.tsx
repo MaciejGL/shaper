@@ -16,7 +16,9 @@ import { PublicPlan } from './types'
 interface TrainingPlanPreviewContentProps {
   plan: PublicPlan
   onAssignTemplate: (planId: string) => void
+  onStartNow: () => void
   isAssigning: boolean
+  isStartingNow: boolean
   weeksData: PublicPlan
   hideCloseButton?: boolean
   hasDemoWorkoutDay?: boolean
@@ -26,7 +28,9 @@ interface TrainingPlanPreviewContentProps {
 export function TrainingPlanPreviewContent({
   plan,
   onAssignTemplate,
+  onStartNow,
   isAssigning,
+  isStartingNow,
   weeksData,
   hideCloseButton = false,
   hasDemoWorkoutDay = false,
@@ -108,7 +112,11 @@ export function TrainingPlanPreviewContent({
         <TrainingPlanPreviewFooter
           plan={plan}
           onAssignTemplate={onAssignTemplate}
+          onStartNow={onStartNow}
+          hasDemoWorkoutDay={hasDemoWorkoutDay}
+          onTryDemoWorkoutDay={onTryDemoWorkoutDay ?? (() => {})}
           isAssigning={isAssigning}
+          isStartingNow={isStartingNow}
         />
       </div>
 

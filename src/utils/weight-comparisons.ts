@@ -3,15 +3,19 @@ import {
   WeightComparison,
 } from '@/config/weight-comparisons'
 
+export type Gender = 'male' | 'female' | null | undefined
+
 /**
  * Generates a fun weight comparison for gamification
  * @param weightKg - Total weight lifted in kilograms
  * @param previousComparisons - Array of recently used comparison names to avoid repetition
+ * @param gender - User's gender for personalized messages
  * @returns Fun comparison string like "You lifted 3 elephants!" or "140 chickens"
  */
 export function generateWeightComparison(
   weightKg: number,
   previousComparisons: string[] = [],
+  gender?: Gender,
 ): {
   comparison: string
   comparisonName: string
@@ -41,7 +45,7 @@ export function generateWeightComparison(
         ]
       const quantity = Math.max(1, Math.round(weightKg / randomComp.weightKg))
       return {
-        comparison: formatComparison(quantity, randomComp),
+        comparison: formatComparison(quantity, randomComp, gender),
         comparisonName: randomComp.name,
       }
     }
@@ -56,7 +60,7 @@ export function generateWeightComparison(
   )
 
   return {
-    comparison: formatComparison(quantity, selectedComparison),
+    comparison: formatComparison(quantity, selectedComparison, gender),
     comparisonName: selectedComparison.name,
   }
 }
@@ -113,6 +117,7 @@ function getQuantityScore(quantity: number): number {
 function formatComparison(
   quantity: number,
   comparison: WeightComparison,
+  gender?: Gender,
 ): string {
   const emojiPrefix = comparison.emoji ? `${comparison.emoji} ` : ''
   const name = comparison.name
@@ -131,17 +136,51 @@ function formatComparison(
   const pluralName = getPluralForm(name)
   const displayName = roundedQuantity === 1 ? name : pluralName
 
-  // Add some variety to the format
-  const formats = [
-    `${emojiPrefix}Damn. That's ${roundedQuantity} ${displayName}.`,
-    `${emojiPrefix}You're cooked… that's ${roundedQuantity} ${displayName}.`,
-    `${emojiPrefix}Proud of you. That's ${roundedQuantity} ${displayName}.`,
-    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Respect.`,
-    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Nice work.`,
-    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. You earned that.`,
-    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Now re-rack.`,
-    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Put the dumbbells back.`,
+  // Gender-specific formats
+  const maleFormats = [
+    `${emojiPrefix}Damn. That's ${roundedQuantity} ${displayName}. 🔥`,
+    `${emojiPrefix}You're cooked… that's ${roundedQuantity} ${displayName}. 😮‍💨`,
+    `${emojiPrefix}Bro. ${roundedQuantity} ${displayName}. Absolutely sickening. 🫡`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. We're all gonna make it. 🤝`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Light weight baby! 💪`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. Time to hit the showers, king. ✨`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Now re-rack. 🏋️`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Put the dumbbells back. 😉`,
+    `${emojiPrefix}Hold up… ${roundedQuantity} ${displayName}?! Bro's locked in. 🤯`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. No days off mentality. 😎`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Gains goblin mode. 🦍`,
+    `${emojiPrefix}Whoa. ${roundedQuantity} ${displayName}. Natty or not? 📈`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Solid pump. 🎯`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. Absolute unit. 👑`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Sleep, eat, repeat. 😴`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. The iron never lies. 🫠`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Go slam a shake. 🍗`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. Anabolic window open. 🥛`,
   ]
+
+  const femaleFormats = [
+    `${emojiPrefix}Damn. That's ${roundedQuantity} ${displayName}. 🔥`,
+    `${emojiPrefix}You're cooked… that's ${roundedQuantity} ${displayName}. 😮‍💨`,
+    `${emojiPrefix}Girl. ${roundedQuantity} ${displayName}. Absolutely sickening. 🫡`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. We're all gonna make it. 🤝`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Light weight baby! 💪`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. Time to hit the showers, queen. ✨`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Now re-rack. 🏋️`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Put the dumbbells back. 😉`,
+    `${emojiPrefix}Hold up… ${roundedQuantity} ${displayName}?! She's locked in. 🤯`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. No days off mentality. 😎`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Gains goblin mode. 🦍`,
+    `${emojiPrefix}Whoa. ${roundedQuantity} ${displayName}. Strong girl era. 📈`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Solid pump. 🎯`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. Absolute queen. 👑`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Sleep, eat, repeat. 😴`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. The iron never lies. 🫠`,
+    `${emojiPrefix}That's ${roundedQuantity} ${displayName}. Go slam a shake. 🍗`,
+    `${emojiPrefix}${roundedQuantity} ${displayName}. Protein time. 🥛`,
+  ]
+
+  const formats =
+    gender?.toLowerCase() === 'female' ? femaleFormats : maleFormats
 
   return formats[Math.floor(Math.random() * formats.length)]
 }
@@ -237,11 +276,14 @@ export class WeightComparisonHistory {
     return [...this.history]
   }
 
-  generateComparison(weightKg: number): {
+  generateComparison(
+    weightKg: number,
+    gender?: Gender,
+  ): {
     comparison: string
     comparisonName: string
   } {
-    const result = generateWeightComparison(weightKg, this.history)
+    const result = generateWeightComparison(weightKg, this.history, gender)
     this.addComparison(result.comparisonName)
     return result
   }
