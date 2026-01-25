@@ -7,10 +7,10 @@ import {
   TRACKED_DISPLAY_GROUPS,
 } from '@/config/muscles'
 import { authOptions } from '@/lib/auth/config'
-import { getTrainingAnalyticsCacheKey } from '@/lib/cache/training-analytics-cache'
+// import { getTrainingAnalyticsCacheKey } from '@/lib/cache/training-analytics-cache'
 import { prisma } from '@/lib/db'
-import { openai } from '@/lib/open-ai/open-ai'
-import { getFromCache, setInCache } from '@/lib/redis'
+// import { openai } from '@/lib/open-ai/open-ai'
+// import { getFromCache, setInCache } from '@/lib/redis'
 import { checkPremiumAccess } from '@/lib/subscription/subscription-validator'
 
 interface MuscleProgressData {
@@ -22,10 +22,10 @@ interface MuscleProgressData {
   lastSessionSets: number
 }
 
-interface WeekSummary {
-  totalSets: number
-  muscleData: MuscleProgressData[]
-}
+// interface WeekSummary {
+//   totalSets: number
+//   muscleData: MuscleProgressData[]
+// }
 
 interface RecoveryItem {
   muscle: string
@@ -52,73 +52,73 @@ function getRecoveryTarget(setsInLastSession: number): number {
 }
 
 // AI schema for trend-based insights only
-const INSIGHT_SCHEMA = {
-  type: 'object',
-  properties: {
-    insight: {
-      type: 'string',
-      description:
-        'A personalized observation about a notable trend or improvement. Must reference specific comparison to previous weeks. If nothing notable, return empty string. Max 25 words.',
-    },
-    hasNotableInsight: {
-      type: 'boolean',
-      description:
-        'True only if there is a genuinely interesting trend worth mentioning.',
-    },
-  },
-  required: ['insight', 'hasNotableInsight'],
-  additionalProperties: false,
-} as const
+// const INSIGHT_SCHEMA = {
+//   type: 'object',
+//   properties: {
+//     insight: {
+//       type: 'string',
+//       description:
+//         'A personalized observation about a notable trend or improvement. Must reference specific comparison to previous weeks. If nothing notable, return empty string. Max 25 words.',
+//     },
+//     hasNotableInsight: {
+//       type: 'boolean',
+//       description:
+//         'True only if there is a genuinely interesting trend worth mentioning.',
+//     },
+//   },
+//   required: ['insight', 'hasNotableInsight'],
+//   additionalProperties: false,
+// } as const
 
-function buildInsightPrompt(
-  currentWeek: WeekSummary,
-  previousWeeks: WeekSummary[],
-  dayOfWeek: number, // 0 = start of week, 6 = end of week
-): string {
-  const daysIntoWeek = dayOfWeek + 1
+// function buildInsightPrompt(
+//   currentWeek: WeekSummary,
+//   previousWeeks: WeekSummary[],
+//   dayOfWeek: number, // 0 = start of week, 6 = end of week
+// ): string {
+//   const daysIntoWeek = dayOfWeek + 1
 
-  // Current week muscle breakdown
-  const currentMuscles = currentWeek.muscleData
-    .filter((m) => m.completedSets > 0)
-    .sort((a, b) => b.completedSets - a.completedSets)
+//   // Current week muscle breakdown
+//   const currentMuscles = currentWeek.muscleData
+//     .filter((m) => m.completedSets > 0)
+//     .sort((a, b) => b.completedSets - a.completedSets)
 
-  // Calculate average per muscle over previous weeks
-  const muscleAverages: Record<string, number> = {}
-  previousWeeks.forEach((week) => {
-    week.muscleData.forEach((m) => {
-      muscleAverages[m.muscle] =
-        (muscleAverages[m.muscle] || 0) + m.completedSets
-    })
-  })
-  Object.keys(muscleAverages).forEach((m) => {
-    muscleAverages[m] = Math.round(muscleAverages[m] / previousWeeks.length)
-  })
+//   // Calculate average per muscle over previous weeks
+//   const muscleAverages: Record<string, number> = {}
+//   previousWeeks.forEach((week) => {
+//     week.muscleData.forEach((m) => {
+//       muscleAverages[m.muscle] =
+//         (muscleAverages[m.muscle] || 0) + m.completedSets
+//     })
+//   })
+//   Object.keys(muscleAverages).forEach((m) => {
+//     muscleAverages[m] = Math.round(muscleAverages[m] / previousWeeks.length)
+//   })
 
-  // Find top focus muscle
-  const topMuscle = currentMuscles[0]
-  const topMuscleVsAvg =
-    topMuscle && muscleAverages[topMuscle.muscle]
-      ? Math.round(
-          ((topMuscle.completedSets - muscleAverages[topMuscle.muscle]) /
-            muscleAverages[topMuscle.muscle]) *
-            100,
-        )
-      : 0
+//   // Find top focus muscle
+//   const topMuscle = currentMuscles[0]
+//   const topMuscleVsAvg =
+//     topMuscle && muscleAverages[topMuscle.muscle]
+//       ? Math.round(
+//           ((topMuscle.completedSets - muscleAverages[topMuscle.muscle]) /
+//             muscleAverages[topMuscle.muscle]) *
+//             100,
+//         )
+//       : 0
 
-  return `Client check-in (day ${daysIntoWeek}):
-- ${currentWeek.totalSets} sets done so far
-- Main focus: ${topMuscle?.muscle || 'getting started'} (${topMuscle?.completedSets || 0} sets)
-${topMuscleVsAvg > 20 ? `- That's ${topMuscleVsAvg}% more ${topMuscle?.muscle} than usual!` : ''}
-- Muscles trained: ${currentMuscles.map((m) => m.muscle).join(', ') || 'none yet'}
+//   return `Client check-in (day ${daysIntoWeek}):
+// - ${currentWeek.totalSets} sets done so far
+// - Main focus: ${topMuscle?.muscle || 'getting started'} (${topMuscle?.completedSets || 0} sets)
+// ${topMuscleVsAvg > 20 ? `- That's ${topMuscleVsAvg}% more ${topMuscle?.muscle} than usual!` : ''}
+// - Muscles trained: ${currentMuscles.map((m) => m.muscle).join(', ') || 'none yet'}
 
-Say something encouraging and natural, like:
-- "Nice leg focus this week - those quads are getting solid work!"
-- "Love seeing you hit back early in the week"
-- "Good variety so far - you're spreading the work around nicely"
+// Say something encouraging and natural, like:
+// - "Nice leg focus this week - those quads are getting solid work!"
+// - "Love seeing you hit back early in the week"
+// - "Good variety so far - you're spreading the work around nicely"
 
-Keep it warm and brief. If they haven't done much yet, just encourage them to get after it.
-NEVER mention pace, averages, or that anything is "down" or "behind".`
-}
+// Keep it warm and brief. If they haven't done much yet, just encourage them to get after it.
+// NEVER mention pace, averages, or that anything is "down" or "behind".`
+// }
 
 async function getWeeklyMuscleProgress(
   userId: string,
@@ -307,7 +307,7 @@ function calculateStrongAndNeedsWork(
   return { strong, needsWork }
 }
 
-const CACHE_TTL = 24 * 60 * 60 // 24 hours
+// const CACHE_TTL = 24 * 60 * 60 // 24 hours
 
 export async function POST(_request: NextRequest) {
   try {
@@ -325,13 +325,6 @@ export async function POST(_request: NextRequest) {
         { error: 'Premium subscription required' },
         { status: 403 },
       )
-    }
-
-    // Check Redis cache first
-    const cacheKey = getTrainingAnalyticsCacheKey(userId)
-    const cached = await getFromCache<TrainingAnalyticsResponse>(cacheKey)
-    if (cached) {
-      return NextResponse.json(cached)
     }
 
     // Get current week's data
@@ -412,92 +405,89 @@ export async function POST(_request: NextRequest) {
     }
 
     // AI insight - only when there's enough historical data for meaningful trends
-    let insight: string | null = null
-    const hasHistoricalData = weeksWithData >= 2
-    const hasMeaningfulActivity = totalSets >= 10
+    // let insight: string | null = null
+    // const hasHistoricalData = weeksWithData >= 2
+    // const hasMeaningfulActivity = totalSets >= 10
 
-    if (hasHistoricalData && hasMeaningfulActivity) {
-      try {
-        // Calculate day of week (0 = start of week, 6 = end of week)
-        const userProfile = await prisma.userProfile.findUnique({
-          where: { userId },
-          select: { weekStartsOn: true },
-        })
-        const weekStartsOn = (userProfile?.weekStartsOn ?? 1) as
-          | 0
-          | 1
-          | 2
-          | 3
-          | 4
-          | 5
-          | 6
-        const { startOfWeek, differenceInDays } = await import('date-fns')
-        // Calculate days since week started (0-6)
-        const weekStart = startOfWeek(now, { weekStartsOn })
-        const dayOfWeek = differenceInDays(now, weekStart)
+    // if (hasHistoricalData && hasMeaningfulActivity) {
+    //   try {
+    //     // Calculate day of week (0 = start of week, 6 = end of week)
+    //     const userProfile = await prisma.userProfile.findUnique({
+    //       where: { userId },
+    //       select: { weekStartsOn: true },
+    //     })
+    //     const weekStartsOn = (userProfile?.weekStartsOn ?? 1) as
+    //       | 0
+    //       | 1
+    //       | 2
+    //       | 3
+    //       | 4
+    //       | 5
+    //       | 6
+    //     const { startOfWeek, differenceInDays } = await import('date-fns')
+    //     // Calculate days since week started (0-6)
+    //     const weekStart = startOfWeek(now, { weekStartsOn })
+    //     const dayOfWeek = differenceInDays(now, weekStart)
 
-        const currentWeekSummary: WeekSummary = {
-          totalSets,
-          muscleData: currentWeekData,
-        }
-        const previousWeeks: WeekSummary[] = [
-          { totalSets: prevWeekTotals[0], muscleData: week1Data },
-          { totalSets: prevWeekTotals[1], muscleData: week2Data },
-          { totalSets: prevWeekTotals[2], muscleData: week3Data },
-        ]
+    //     const currentWeekSummary: WeekSummary = {
+    //       totalSets,
+    //       muscleData: currentWeekData,
+    //     }
+    //     const previousWeeks: WeekSummary[] = [
+    //       { totalSets: prevWeekTotals[0], muscleData: week1Data },
+    //       { totalSets: prevWeekTotals[1], muscleData: week2Data },
+    //       { totalSets: prevWeekTotals[2], muscleData: week3Data },
+    //     ]
 
-        const response = await openai.chat.completions.create({
-          model: 'gpt-4.1-mini',
-          temperature: 1.5,
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a supportive personal trainer checking in with your client. Be warm, encouraging, and natural. Notice what they are doing well. Never point out negatives or that they are behind. Keep it short (1-2 sentences max). If nothing positive stands out, return empty.',
-            },
-            {
-              role: 'user',
-              content: buildInsightPrompt(
-                currentWeekSummary,
-                previousWeeks,
-                dayOfWeek,
-              ),
-            },
-          ],
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'training_insight',
-              strict: true,
-              schema: INSIGHT_SCHEMA,
-            },
-          },
-        })
+    //     const response = await openai.chat.completions.create({
+    //       model: 'gpt-4.1-mini',
+    //       temperature: 1.5,
+    //       messages: [
+    //         {
+    //           role: 'system',
+    //           content:
+    //             'You are a supportive personal trainer checking in with your client. Be warm, encouraging, and natural. Notice what they are doing well. Never point out negatives or that they are behind. Keep it short (1-2 sentences max). If nothing positive stands out, return empty.',
+    //         },
+    //         {
+    //           role: 'user',
+    //           content: buildInsightPrompt(
+    //             currentWeekSummary,
+    //             previousWeeks,
+    //             dayOfWeek,
+    //           ),
+    //         },
+    //       ],
+    //       response_format: {
+    //         type: 'json_schema',
+    //         json_schema: {
+    //           name: 'training_insight',
+    //           strict: true,
+    //           schema: INSIGHT_SCHEMA,
+    //         },
+    //       },
+    //     })
 
-        const aiResult = JSON.parse(
-          response.choices[0]?.message?.content || '{}',
-        )
-        if (aiResult.hasNotableInsight && aiResult.insight) {
-          insight = aiResult.insight
-        }
-      } catch (error) {
-        console.error('AI insight generation failed:', error)
-        // Continue without insight - not critical
-      }
-    }
+    //     const aiResult = JSON.parse(
+    //       response.choices[0]?.message?.content || '{}',
+    //     )
+    //     if (aiResult.hasNotableInsight && aiResult.insight) {
+    //       insight = aiResult.insight
+    //     }
+    //   } catch (error) {
+    //     console.error('AI insight generation failed:', error)
+    //     // Continue without insight - not critical
+    //   }
+    // }
 
     const result: TrainingAnalyticsResponse = {
       totalSets,
       trendPercent,
       strong,
       needsWork,
-      insight,
+      insight: '',
       status,
       recovery,
     }
-
-    // Cache the result
-    await setInCache(cacheKey, result, CACHE_TTL)
 
     return NextResponse.json(result)
   } catch (error) {

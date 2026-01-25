@@ -5,8 +5,8 @@ import {
   BookmarkIcon,
   CalendarDays,
   ChevronRight,
+  ClipboardCheck,
   Dumbbell,
-  ListTodoIcon,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -99,50 +99,37 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
           }}
           className="grid gap-4"
         >
-          {/* Hero card: Hypertro library */}
-          <motion.div key="hypertro-library">
-            <Card variant="highlighted" className="pb-0 dark">
-              <CardContent className="space-y-4 px-0">
-                <div className="space-y-1 px-4">
-                  <CardTitle className="text-lg">Hypro Plans</CardTitle>
+          <Card
+            className="border-dashed border-black/40 dark:border-neutral-700 bg-transparent py-3 shadow-none"
+            onClick={handleBuildOwnClick}
+          >
+            <CardContent>
+              <div className="flex items-center">
+                <SectionIcon
+                  icon={Dumbbell}
+                  variant="indigo"
+                  size="sm"
+                  className="mr-3"
+                />
+                <div className="flex-1">
+                  <CardTitle className="text-lg">Add Exercises</CardTitle>
                   <CardDescription>
-                    Choose a program or a ready-made workout.
+                    Add exercises to your workout.
                   </CardDescription>
                 </div>
-
-                <div className="grid grid-cols-[1fr_auto_1fr] border-t border-border pt-0">
-                  <Button
-                    variant="variantless"
-                    size="lg"
-                    className="h-full w-full rounded-none"
-                    iconStart={<Dumbbell />}
-                    iconEnd={<ChevronRight className="size-6!" />}
-                    onClick={handleQuickWorkoutClick}
-                  >
-                    Workouts
-                  </Button>
-                  <Separator orientation="vertical" className="h-full" />
-                  <Button
-                    variant="variantless"
-                    size="lg"
-                    className="min-h-14 w-full rounded-none"
-                    iconStart={<CalendarDays />}
-                    iconEnd={<ChevronRight className="size-6!" />}
-                    onClick={handleStartPlanClick}
-                  >
-                    Programs
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <div className="px-4">
-            <Separator />
-          </div>
+                <Button
+                  variant="link"
+                  size="icon-sm"
+                  iconOnly={<ChevronRight className="size-6!" />}
+                >
+                  Select
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Card 3: Build my own workout */}
-          <motion.div key="build-my-own-workout">
+          {/* <motion.div key="build-my-own-workout">
             <Card
               className="cursor-pointer transition-all hover:scale-[1.01] py-3"
               onClick={handleBuildOwnClick}
@@ -173,14 +160,15 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </motion.div> */}
 
           {/* Card 4: My plans (conditional) */}
           {hasCustomPlans && (
             <motion.div key="my-plans">
               <Card
-                className="cursor-pointer transition-all hover:scale-[1.01] py-3"
+                className="dark cursor-pointer transition-all hover:scale-[1.01] py-3"
                 onClick={handleMyPlansClick}
+                variant="default"
               >
                 <CardContent>
                   <div className="flex items-center">
@@ -191,7 +179,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                       className="mr-3"
                     />
                     <div className="flex-1">
-                      <CardTitle className="text-lg">My plans</CardTitle>
+                      <CardTitle className="text-lg">Your Library</CardTitle>
                       <CardDescription>
                         Use one of your saved programs.
                       </CardDescription>
@@ -208,6 +196,58 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
               </Card>
             </motion.div>
           )}
+
+          <div className="px-3 my-2">
+            <Separator />
+          </div>
+
+          {/* Coaches library */}
+          <motion.div key="hypertro-library">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <h3 className="text-base font-semibold">Coaching Programs</h3>
+                <p className="text-sm text-muted-foreground">
+                  Choose a program from our coaches.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-border bg-card/50 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={handleQuickWorkoutClick}
+                  aria-label="Browse coach workouts"
+                  className="w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40"
+                >
+                  <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+                    <SectionIcon
+                      icon={ClipboardCheck}
+                      variant="default"
+                      size="xs"
+                    />
+                    <span className="font-medium">Single Sessions</span>
+                    <ChevronRight className="size-5 text-muted-foreground" />
+                  </div>
+                </button>
+                <Separator />
+                <button
+                  type="button"
+                  onClick={handleStartPlanClick}
+                  aria-label="Browse coach programs"
+                  className="w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40"
+                >
+                  <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+                    <SectionIcon
+                      icon={CalendarDays}
+                      variant="default"
+                      size="xs"
+                    />
+                    <span className="font-medium">Full Programs</span>
+                    <ChevronRight className="size-5 text-muted-foreground" />
+                  </div>
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
       </div>
 

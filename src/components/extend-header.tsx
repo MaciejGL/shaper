@@ -34,7 +34,7 @@ export const ExtendHeader = ({
       )}
       <div
         className={cn(
-          'bg-linear-to-b from-background to-background-subtle p-4 flex-1 navbar-height',
+          'bg-linear-to-b from-background to-background p-4 flex-1 navbar-height',
           classNameContent,
         )}
       >

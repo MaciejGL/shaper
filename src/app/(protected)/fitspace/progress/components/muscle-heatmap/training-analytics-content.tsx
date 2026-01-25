@@ -58,28 +58,9 @@ export function TrainingAnalyticsContent({
       {/* Strong / Needs Work */}
       {(analytics.strong.length > 0 || analytics.needsWork.length > 0) && (
         <div className="space-y-4">
-          {analytics.strong.length > 0 && (
-            <div className="space-y-2 rounded-xl p-3 shadow-md outline outline-border dark:outline-muted">
-              <p className="text-sm text-amber-600 dark:text-amber-500 font-semibold">
-                Worked hardest
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {analytics.strong.map((m) => (
-                  <Badge
-                    key={m}
-                    variant="secondary"
-                    size="lg"
-                    className="bg-amber-100 dark:bg-amber-900/30"
-                  >
-                    {m}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
           {analytics.needsWork.length > 0 && (
-            <div className="space-y-2 rounded-xl p-3 shadow-md outline outline-border dark:outline-muted">
-              <p className="text-sm text-green-600 dark:text-green-400 font-semibold">
+            <div className="space-y-2">
+              <p className="text-sm text-green-600 dark:text-green-400 font-medium">
                 Ready to train more
               </p>
               <div className="flex flex-wrap gap-1">
@@ -87,8 +68,27 @@ export function TrainingAnalyticsContent({
                   <Badge
                     key={m}
                     variant="secondary"
-                    size="lg"
+                    size="md"
                     className="bg-green-100 dark:bg-green-900/30"
+                  >
+                    {m}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          {analytics.strong.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm text-amber-600 dark:text-amber-500 font-medium">
+                Worked hardest
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {analytics.strong.map((m) => (
+                  <Badge
+                    key={m}
+                    variant="secondary"
+                    size="md"
+                    className="bg-amber-100 dark:bg-amber-900/30"
                   >
                     {m}
                   </Badge>
