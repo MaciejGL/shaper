@@ -13,7 +13,7 @@ import { analyticsEvents } from '@/lib/analytics-events'
 interface TrainingPlanPreviewFooterProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
   onAssignTemplate: (planId: string) => void
-  onStartNow: () => void
+  onStartNow?: () => void
   hasDemoWorkoutDay: boolean
   onTryDemoWorkoutDay: () => void
   isAssigning: boolean
@@ -66,11 +66,12 @@ export function TrainingPlanPreviewFooter({
   return (
     <DrawerFooter className="border-t">
       <div className="flex flex-col gap-2">
-        {hasPremium ? (
+        {hasPremium && onStartNow ? (
           <Button
             className="w-full"
             size="lg"
             onClick={() => {
+              if (!onStartNow) return
               analyticsEvents.explorePlanStartNowTap(trackProps)
               onStartNow()
             }}

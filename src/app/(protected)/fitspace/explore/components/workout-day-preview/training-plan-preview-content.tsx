@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { createTrainerDataFromUser } from '@/components/trainer/utils'
 import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
+import { useFitspaceGetActivePlanIdQuery } from '@/generated/graphql-client'
 
 import { PlanPreviewTab } from '../plan-preview-tab'
 import { TrainingPlanPreviewFooter } from '../training-plan-preview/training-plan-preview-footer'
@@ -40,6 +41,12 @@ export function TrainingPlanPreviewContent({
   const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null)
   const [isTrainerDrawerOpen, setIsTrainerDrawerOpen] = useState(false)
 
+  const { data: activePlanData, isLoading: isLoadingActivePlanId } =
+    useFitspaceGetActivePlanIdQuery()
+  const hasActivePlan = isLoadingActivePlanId
+    ? false
+    : !!activePlanData?.getActivePlanId
+
   const handleWeekClick = (weekId: string) => {
     setSelectedWeekId(weekId)
     setActiveTab('preview')
@@ -50,6 +57,8 @@ export function TrainingPlanPreviewContent({
   }
 
   const handleTryDemoWorkoutDay = () => {
+    if (hasActivePlan) return
+
     if (hasDemoWorkoutDay) {
       onTryDemoWorkoutDay?.()
       return
@@ -93,7 +102,7 @@ export function TrainingPlanPreviewContent({
                   weeksData={weeksData}
                   onWeekClick={handleWeekClick}
                   onCreatorClick={handleCreatorClick}
-                  hasDemoWorkoutDay={hasDemoWorkoutDay}
+                  hasDemoWorkoutDay={hasDemoWorkoutDay && !hasActivePlan}
                   onTryDemoWorkoutDay={handleTryDemoWorkoutDay}
                 />
               </TabsContent>
@@ -112,8 +121,8 @@ export function TrainingPlanPreviewContent({
         <TrainingPlanPreviewFooter
           plan={plan}
           onAssignTemplate={onAssignTemplate}
-          onStartNow={onStartNow}
-          hasDemoWorkoutDay={hasDemoWorkoutDay}
+          onStartNow={hasActivePlan ? undefined : onStartNow}
+          hasDemoWorkoutDay={hasDemoWorkoutDay && !hasActivePlan}
           onTryDemoWorkoutDay={onTryDemoWorkoutDay ?? (() => {})}
           isAssigning={isAssigning}
           isStartingNow={isStartingNow}
