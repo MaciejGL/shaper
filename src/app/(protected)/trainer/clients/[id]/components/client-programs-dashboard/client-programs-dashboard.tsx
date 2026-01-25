@@ -14,8 +14,8 @@ import {
   Trash2Icon,
   Utensils,
 } from 'lucide-react'
-import { parseAsStringEnum, useQueryState } from 'nuqs'
-import { useState } from 'react'
+import { parseAsInteger, parseAsString, parseAsStringEnum, useQueryState } from 'nuqs'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { CollapsibleText } from '@/components/collapsible-text'
@@ -55,6 +55,10 @@ import { WeeklyProgress } from '../plan-assignment/weekly-progress'
 
 type ProgramSubTab = 'training' | 'active' | 'nutrition'
 
+function isProgramSubTab(value: string): value is ProgramSubTab {
+  return value === 'training' || value === 'active' || value === 'nutrition'
+}
+
 interface ClientProgramsDashboardProps {
   client: NonNullable<GQLGetClientByIdQuery['userPublic']>
   clientName: string
@@ -77,13 +81,35 @@ export function ClientProgramsDashboard({
 
   const hasAssignedPlans = plans && plans.length > 0
 
+  const [week] = useQueryState('week', parseAsInteger)
+  const [day] = useQueryState('day', parseAsInteger)
+  const [exercise] = useQueryState('exercise', parseAsString)
+  const hasDeepLink = week !== null && day !== null && exercise !== null
+
+  const didAutoOpenDeepLink = useRef(false)
+
+  useEffect(() => {
+    // If we were deep-linked to a specific exercise, ensure we open the Active Plan subtab.
+    // Run only once to avoid overriding the user's manual subtab changes.
+    if (!hasDeepLink || didAutoOpenDeepLink.current) return
+    if (!hasAssignedPlans) return
+
+    didAutoOpenDeepLink.current = true
+
+    if (subTab !== 'active') {
+      void setSubTab('active')
+    }
+  }, [hasAssignedPlans, hasDeepLink, setSubTab, subTab])
+
   return (
     <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_minmax(400px,2fr)] gap-6">
       {/* Left Column: Main Content */}
       <div className="space-y-6">
         <Tabs
           value={subTab}
-          onValueChange={(value) => setSubTab(value as ProgramSubTab)}
+          onValueChange={(value) => {
+            if (isProgramSubTab(value)) setSubTab(value)
+          }}
         >
           <div className="overflow-x-auto hide-scrollbar -mx-2 px-2">
             <TabsList className="w-max min-w-full">

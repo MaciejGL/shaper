@@ -552,7 +552,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         const clientId = user.user.id
         const weekNumber = exercise.day.week.weekNumber
         const dayOfWeek = exercise.day.dayOfWeek
-        const deepLink = `/trainer/clients/${clientId}?tab=active-plan&week=${weekNumber}&day=${dayOfWeek}&exercise=${exerciseId}`
+        const deepLink = `/trainer/clients/${clientId}?tab=programs&subtab=active&week=${weekNumber}&day=${dayOfWeek}&exercise=${exerciseId}`
 
         // Create in-app notification
         await createNotification(

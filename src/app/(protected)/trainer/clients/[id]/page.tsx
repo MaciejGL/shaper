@@ -1,8 +1,9 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import { User } from 'lucide-react'
-import { parseAsStringEnum, useQueryState } from 'nuqs'
-import { use } from 'react'
+import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs'
+import { use, useEffect } from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -20,12 +21,23 @@ import { ClientServicesDashboard } from './components/client-services-dashboard/
 
 type Tab = 'info' | 'programs' | 'measurements' | 'services' | 'meetings'
 
+function isTab(value: string): value is Tab {
+  return (
+    value === 'info' ||
+    value === 'programs' ||
+    value === 'measurements' ||
+    value === 'services' ||
+    value === 'meetings'
+  )
+}
+
 export default function ClientDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const searchParams = useSearchParams()
   const { data } = useGetClientByIdQuery({
     id,
   })
@@ -42,6 +54,18 @@ export default function ClientDetailPage({
       .withDefault('info')
       .withOptions({ clearOnDefault: true }),
   )
+
+  const [, setSubTab] = useQueryState('subtab', parseAsString)
+
+  useEffect(() => {
+    // Backward compatibility for legacy deep links stored in notifications.
+    // Old format used: ?tab=active-plan&week=...&day=...&exercise=...
+    const legacyTab = searchParams.get('tab')
+    if (legacyTab !== 'active-plan') return
+
+    void setActiveTab('programs')
+    void setSubTab('active')
+  }, [searchParams, setActiveTab, setSubTab])
 
   const client = data?.userPublic
 
@@ -63,7 +87,9 @@ export default function ClientDetailPage({
 
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as Tab)}
+        onValueChange={(value) => {
+          if (isTab(value)) setActiveTab(value)
+        }}
       >
         <div className="overflow-x-auto hide-scrollbar -mx-2 px-2 mb-4">
           <TabsList size="lg" className="w-max min-w-full">
