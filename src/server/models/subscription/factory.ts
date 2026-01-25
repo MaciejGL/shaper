@@ -527,6 +527,9 @@ export async function removeUserSubscription(userId: string) {
 
 /**
  * Trainer: Pause client's coaching subscription
+ *
+ * Stores `pausedAt` and `pausedPeriodEnd` in Stripe metadata so we can
+ * compute shifted billing on resume (credit the paused days).
  */
 export async function pauseClientCoachingSubscription(
   clientId: string,
@@ -562,9 +565,26 @@ export async function pauseClientCoachingSubscription(
     coachingSubscription.stripeSubscriptionId,
   )
 
+  // Idempotent: if already paused, return success
   if (stripeSubscription.pause_collection) {
-    throw new Error('Coaching subscription is already paused')
+    console.info(
+      `ℹ️ Coaching subscription ${coachingSubscription.stripeSubscriptionId} is already paused (idempotent return)`,
+    )
+    return {
+      success: true,
+      message: 'Coaching subscription is already paused',
+      pausedUntil: null,
+      subscription: new UserSubscription(coachingSubscription),
+    }
   }
+
+  // Get current_period_end from subscription items to store for shifted billing
+  const subscriptionItem = stripeSubscription.items.data[0]
+  const currentPeriodEnd = subscriptionItem?.current_period_end
+    ? new Date(subscriptionItem.current_period_end * 1000).toISOString()
+    : null
+
+  const pausedAt = new Date().toISOString()
 
   // Pause the coaching subscription in Stripe
   await stripe.subscriptions.update(coachingSubscription.stripeSubscriptionId, {
@@ -574,13 +594,14 @@ export async function pauseClientCoachingSubscription(
     metadata: {
       ...stripeSubscription.metadata,
       manuallyPausedByTrainer: 'true',
-      pausedAt: new Date().toISOString(),
+      pausedAt,
+      pausedPeriodEnd: currentPeriodEnd, // Store for shifted billing on resume
       trainerId: userId,
     },
   })
 
   console.info(
-    `✅ Trainer ${userId} paused coaching subscription ${coachingSubscription.stripeSubscriptionId} for client ${clientId}`,
+    `✅ Trainer ${userId} paused coaching subscription ${coachingSubscription.stripeSubscriptionId} for client ${clientId} (periodEnd: ${currentPeriodEnd})`,
   )
 
   return {
@@ -592,7 +613,23 @@ export async function pauseClientCoachingSubscription(
 }
 
 /**
+ * Compute the number of whole days paused (rounded up).
+ */
+function computePausedDays(pausedAt: string, resumedAt: Date): number {
+  const pausedDate = new Date(pausedAt)
+  const diffMs = resumedAt.getTime() - pausedDate.getTime()
+  const diffDays = diffMs / (1000 * 60 * 60 * 24)
+  return Math.ceil(diffDays) // Round up to whole days
+}
+
+/**
  * Trainer: Resume client's coaching subscription
+ *
+ * Implements shifted billing: the next charge is pushed forward by the number
+ * of paused days (rounded up) so the client is credited for the pause period.
+ *
+ * - If shiftTarget > now: set trial_end to shiftTarget (no charge until then)
+ * - If shiftTarget <= now: bill immediately with billing_cycle_anchor=now
  */
 export async function resumeClientCoachingSubscription(
   clientId: string,
@@ -628,27 +665,116 @@ export async function resumeClientCoachingSubscription(
     coachingSubscription.stripeSubscriptionId,
   )
 
+  // Idempotent: if already active (not paused), return success
   if (!stripeSubscription.pause_collection) {
-    throw new Error('Coaching subscription is not paused')
+    console.info(
+      `ℹ️ Coaching subscription ${coachingSubscription.stripeSubscriptionId} is already active (idempotent return)`,
+    )
+    return {
+      success: true,
+      message: 'Coaching subscription is already active',
+      subscription: new UserSubscription(coachingSubscription),
+    }
+  }
+
+  const now = new Date()
+  const resumedAt = now.toISOString()
+  const metadata = stripeSubscription.metadata || {}
+  const pausedAt = metadata.pausedAt
+  const pausedPeriodEndStr = metadata.pausedPeriodEnd
+
+  // Compute shifted billing target
+  let shiftTarget: Date | null = null
+  let pausedDays = 0
+
+  if (pausedAt && pausedPeriodEndStr) {
+    pausedDays = computePausedDays(pausedAt, now)
+    const pausedPeriodEnd = new Date(pausedPeriodEndStr)
+    shiftTarget = new Date(
+      pausedPeriodEnd.getTime() + pausedDays * 24 * 60 * 60 * 1000,
+    )
+
+    console.info(
+      `📅 Shifted billing: pausedAt=${pausedAt}, pausedDays=${pausedDays}, pausedPeriodEnd=${pausedPeriodEndStr}, shiftTarget=${shiftTarget.toISOString()}`,
+    )
+  } else {
+    console.warn(
+      `⚠️ Missing pausedAt or pausedPeriodEnd metadata for subscription ${coachingSubscription.stripeSubscriptionId}; cannot compute shifted billing`,
+    )
+  }
+
+  // Prepare update params
+  const updateParams: Parameters<typeof stripe.subscriptions.update>[1] = {
+    pause_collection: null, // Resume billing
+    metadata: {
+      ...metadata,
+      manuallyPausedByTrainer: null, // Remove pause flag
+      pausedAt: null, // Clear pause metadata
+      pausedPeriodEnd: null,
+      resumedAt,
+      shiftedBillingDays: pausedDays > 0 ? String(pausedDays) : null,
+    },
+  }
+
+  // Apply shifted billing via trial_end if shiftTarget is in the future
+  if (shiftTarget && shiftTarget > now) {
+    // Set trial_end to push the next charge to shiftTarget
+    // proration_behavior=none to avoid proration charges
+    updateParams.trial_end = Math.floor(shiftTarget.getTime() / 1000)
+    updateParams.proration_behavior = 'none'
+
+    console.info(
+      `⏳ Setting trial_end to ${shiftTarget.toISOString()} to shift next billing`,
+    )
+  } else if (shiftTarget && shiftTarget <= now) {
+    // shiftTarget is in the past; bill immediately by resetting billing cycle anchor
+    // Note: For flexible billing mode subscriptions, this may be restricted.
+    // We'll attempt it and log the result.
+    updateParams.billing_cycle_anchor = 'now'
+    updateParams.proration_behavior = 'none'
+
+    console.info(
+      `💳 shiftTarget ${shiftTarget.toISOString()} is in the past; setting billing_cycle_anchor=now for immediate billing`,
+    )
   }
 
   // Resume the coaching subscription in Stripe
-  await stripe.subscriptions.update(coachingSubscription.stripeSubscriptionId, {
-    pause_collection: null, // Resume billing
-    metadata: {
-      ...stripeSubscription.metadata,
-      manuallyPausedByTrainer: null, // Remove pause flag
-      resumedAt: new Date().toISOString(),
-    },
-  })
+  const updatedSubscription = await stripe.subscriptions.update(
+    coachingSubscription.stripeSubscriptionId,
+    updateParams,
+  )
+
+  // Sync DB endDate from updated subscription
+  const subscriptionItem = updatedSubscription.items.data[0]
+  let newEndDate: Date | null = null
+
+  if (subscriptionItem?.current_period_end) {
+    newEndDate = new Date(subscriptionItem.current_period_end * 1000)
+  } else if (updatedSubscription.trial_end) {
+    // If trial_end was set, the effective "period end" is the trial end
+    newEndDate = new Date(updatedSubscription.trial_end * 1000)
+  }
+
+  if (newEndDate) {
+    await prisma.userSubscription.update({
+      where: { id: coachingSubscription.id },
+      data: { endDate: newEndDate },
+    })
+    console.info(
+      `📆 Updated DB endDate to ${newEndDate.toISOString()} for subscription ${coachingSubscription.id}`,
+    )
+  }
 
   console.info(
-    `✅ Trainer ${userId} resumed coaching subscription ${coachingSubscription.stripeSubscriptionId} for client ${clientId}`,
+    `✅ Trainer ${userId} resumed coaching subscription ${coachingSubscription.stripeSubscriptionId} for client ${clientId} (shifted ${pausedDays} days)`,
   )
 
   return {
     success: true,
-    message: 'Coaching subscription resumed successfully',
+    message:
+      pausedDays > 0
+        ? `Coaching subscription resumed. Next billing shifted by ${pausedDays} day${pausedDays > 1 ? 's' : ''}.`
+        : 'Coaching subscription resumed successfully',
     subscription: new UserSubscription(coachingSubscription),
   }
 }

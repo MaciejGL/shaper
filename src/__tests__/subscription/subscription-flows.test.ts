@@ -391,9 +391,11 @@ describe('Coaching Pause/Resume by Trainer', () => {
         status: 'ACTIVE',
         package: { stripeLookupKey: 'premium_coaching' },
       }
+      const currentPeriodEnd = Math.floor(Date.now() / 1000) + 86400 * 25 // 25 days from now
       const stripeSub = {
         id: 'sub_coaching',
         pause_collection: null,
+        items: { data: [{ current_period_end: currentPeriodEnd }] },
         metadata: {},
       }
 
@@ -417,7 +419,7 @@ describe('Coaching Pause/Resume by Trainer', () => {
         'client_123',
       )
 
-      // Assert - Should pause in Stripe
+      // Assert - Should pause in Stripe with pausedPeriodEnd metadata
       expect(mockStripe.stripe.subscriptions.update).toHaveBeenCalledWith(
         'sub_coaching',
         expect.objectContaining({
@@ -425,6 +427,8 @@ describe('Coaching Pause/Resume by Trainer', () => {
           metadata: expect.objectContaining({
             manuallyPausedByTrainer: 'true',
             trainerId: 'trainer_123',
+            pausedAt: expect.any(String),
+            pausedPeriodEnd: expect.any(String), // Stored for shifted billing on resume
           }),
         }),
       )
@@ -433,7 +437,7 @@ describe('Coaching Pause/Resume by Trainer', () => {
       expect(result.success).toBe(true)
     })
 
-    it('should throw error if subscription already paused', async () => {
+    it('should return success idempotently if subscription already paused', async () => {
       // Arrange
       const context = createMockContext()
       const clientId = 'client_123'
@@ -445,6 +449,8 @@ describe('Coaching Pause/Resume by Trainer', () => {
       const pausedStripeSub = {
         id: 'sub_coaching',
         pause_collection: { behavior: 'mark_uncollectible' },
+        items: { data: [{ current_period_end: Math.floor(Date.now() / 1000) }] },
+        metadata: { pausedAt: new Date().toISOString() },
       }
 
       vi.mocked(mockAccessControl.ensureTrainerClientAccess).mockResolvedValue()
@@ -455,10 +461,13 @@ describe('Coaching Pause/Resume by Trainer', () => {
         pausedStripeSub as any,
       )
 
-      // Act & Assert
-      await expect(
-        pauseClientCoachingSubscription(clientId, context),
-      ).rejects.toThrow('already paused')
+      // Act
+      const result = await pauseClientCoachingSubscription(clientId, context)
+
+      // Assert - Should return success without calling update
+      expect(result.success).toBe(true)
+      expect(result.message).toContain('already paused')
+      expect(mockStripe.stripe.subscriptions.update).not.toHaveBeenCalled()
     })
 
     it('should throw error if no permission', async () => {
@@ -478,7 +487,7 @@ describe('Coaching Pause/Resume by Trainer', () => {
   })
 
   describe('resumeClientCoachingSubscription', () => {
-    it('should resume coaching subscription', async () => {
+    it('should resume coaching subscription with shifted billing', async () => {
       // Arrange
       const context = createMockContext()
       const clientId = 'client_123'
@@ -488,10 +497,39 @@ describe('Coaching Pause/Resume by Trainer', () => {
         stripeSubscriptionId: 'sub_coaching',
         package: { stripeLookupKey: 'premium_coaching' },
       }
+
+      // Simulate 5 days of pause
+      const pausedAt = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+      const pausedPeriodEnd = new Date(Date.now() + 25 * 24 * 60 * 60 * 1000) // 25 days from now
+      const expectedTrialEnd = new Date(
+        pausedPeriodEnd.getTime() + 5 * 24 * 60 * 60 * 1000,
+      ) // +5 days shift
+
       const pausedStripeSub = {
         id: 'sub_coaching',
         pause_collection: { behavior: 'mark_uncollectible' },
-        metadata: { manuallyPausedByTrainer: 'true' },
+        items: {
+          data: [
+            { current_period_end: Math.floor(pausedPeriodEnd.getTime() / 1000) },
+          ],
+        },
+        metadata: {
+          manuallyPausedByTrainer: 'true',
+          pausedAt: pausedAt.toISOString(),
+          pausedPeriodEnd: pausedPeriodEnd.toISOString(),
+        },
+      }
+
+      const updatedStripeSub = {
+        id: 'sub_coaching',
+        items: {
+          data: [
+            {
+              current_period_end: Math.floor(expectedTrialEnd.getTime() / 1000),
+            },
+          ],
+        },
+        trial_end: Math.floor(expectedTrialEnd.getTime() / 1000),
       }
 
       vi.mocked(mockAccessControl.ensureTrainerClientAccess).mockResolvedValue()
@@ -502,29 +540,44 @@ describe('Coaching Pause/Resume by Trainer', () => {
         pausedStripeSub as any,
       )
       vi.mocked(mockStripe.stripe.subscriptions.update).mockResolvedValue(
-        {} as any,
+        updatedStripeSub as any,
+      )
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        coachingSub as any,
       )
 
       // Act
       const result = await resumeClientCoachingSubscription(clientId, context)
 
-      // Assert - Should resume in Stripe
+      // Assert - Should resume in Stripe with trial_end for shifted billing
       expect(mockStripe.stripe.subscriptions.update).toHaveBeenCalledWith(
         'sub_coaching',
         expect.objectContaining({
           pause_collection: null,
+          trial_end: expect.any(Number),
+          proration_behavior: 'none',
           metadata: expect.objectContaining({
             manuallyPausedByTrainer: null,
+            pausedAt: null,
+            pausedPeriodEnd: null,
             resumedAt: expect.any(String),
+            shiftedBillingDays: '5',
           }),
         }),
       )
 
-      // Assert - Should return success
+      // Assert - Should update DB endDate
+      expect(mockPrisma.prisma.userSubscription.update).toHaveBeenCalledWith({
+        where: { id: 'user_sub_coaching' },
+        data: { endDate: expect.any(Date) },
+      })
+
+      // Assert - Should return success with shift info
       expect(result.success).toBe(true)
+      expect(result.message).toContain('5 day')
     })
 
-    it('should throw error if subscription not paused', async () => {
+    it('should return success idempotently if subscription not paused', async () => {
       // Arrange
       const context = createMockContext()
       const clientId = 'client_123'
@@ -536,6 +589,8 @@ describe('Coaching Pause/Resume by Trainer', () => {
       const activeStripeSub = {
         id: 'sub_coaching',
         pause_collection: null,
+        items: { data: [{ current_period_end: Math.floor(Date.now() / 1000) }] },
+        metadata: {},
       }
 
       vi.mocked(mockAccessControl.ensureTrainerClientAccess).mockResolvedValue()
@@ -546,10 +601,83 @@ describe('Coaching Pause/Resume by Trainer', () => {
         activeStripeSub as any,
       )
 
-      // Act & Assert
-      await expect(
-        resumeClientCoachingSubscription(clientId, context),
-      ).rejects.toThrow('not paused')
+      // Act
+      const result = await resumeClientCoachingSubscription(clientId, context)
+
+      // Assert - Should return success without calling update
+      expect(result.success).toBe(true)
+      expect(result.message).toContain('already active')
+      expect(mockStripe.stripe.subscriptions.update).not.toHaveBeenCalled()
+    })
+
+    it('should bill immediately when shift target is in the past', async () => {
+      // Arrange
+      const context = createMockContext()
+      const clientId = 'client_123'
+      const coachingSub = {
+        id: 'user_sub_coaching',
+        userId: 'client_123',
+        stripeSubscriptionId: 'sub_coaching',
+        package: { stripeLookupKey: 'premium_coaching' },
+      }
+
+      // Edge case: period had already ended BEFORE pause was initiated
+      // (e.g., pausing during a grace period or past_due state)
+      // pausedAt = 10 days ago, pausedPeriodEnd = 20 days ago
+      // pausedDays = 10, shiftTarget = -20 + 10 = -10 days (in past!)
+      const pausedAt = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) // 10 days ago
+      const pausedPeriodEnd = new Date(Date.now() - 20 * 24 * 60 * 60 * 1000) // 20 days ago
+
+      const pausedStripeSub = {
+        id: 'sub_coaching',
+        pause_collection: { behavior: 'mark_uncollectible' },
+        items: {
+          data: [
+            { current_period_end: Math.floor(pausedPeriodEnd.getTime() / 1000) },
+          ],
+        },
+        metadata: {
+          manuallyPausedByTrainer: 'true',
+          pausedAt: pausedAt.toISOString(),
+          pausedPeriodEnd: pausedPeriodEnd.toISOString(),
+        },
+      }
+
+      const updatedStripeSub = {
+        id: 'sub_coaching',
+        items: {
+          data: [{ current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30 }],
+        },
+      }
+
+      vi.mocked(mockAccessControl.ensureTrainerClientAccess).mockResolvedValue()
+      vi.mocked(mockPrisma.prisma.userSubscription.findFirst).mockResolvedValue(
+        coachingSub as any,
+      )
+      vi.mocked(mockStripe.stripe.subscriptions.retrieve).mockResolvedValue(
+        pausedStripeSub as any,
+      )
+      vi.mocked(mockStripe.stripe.subscriptions.update).mockResolvedValue(
+        updatedStripeSub as any,
+      )
+      vi.mocked(mockPrisma.prisma.userSubscription.update).mockResolvedValue(
+        coachingSub as any,
+      )
+
+      // Act
+      const result = await resumeClientCoachingSubscription(clientId, context)
+
+      // Assert - Should use billing_cycle_anchor=now (not trial_end)
+      expect(mockStripe.stripe.subscriptions.update).toHaveBeenCalledWith(
+        'sub_coaching',
+        expect.objectContaining({
+          pause_collection: null,
+          billing_cycle_anchor: 'now',
+          proration_behavior: 'none',
+        }),
+      )
+
+      expect(result.success).toBe(true)
     })
   })
 })
