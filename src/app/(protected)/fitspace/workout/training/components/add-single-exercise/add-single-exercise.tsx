@@ -58,6 +58,7 @@ export function AddSingleExercise({
   onOpenChange,
   scheduledAt,
 }: AddSingleExerciseProps) {
+  const isBuildFlow = variant === 'drawer-only'
   const [internalOpen, setInternalOpen] = useState(false)
 
   const isControlled = controlledOpen !== undefined
@@ -80,6 +81,7 @@ export function AddSingleExercise({
   const [isBatchAdding, setIsBatchAdding] = useState(false)
   const [isReviewMode, setIsReviewMode] = useState(false)
   const [isReorderDragging, setIsReorderDragging] = useState(false)
+  const [isAppendingSingle, setIsAppendingSingle] = useState(false)
 
   const queryClient = useQueryClient()
   const [dayIdFromUrl] = useQueryState('day')
@@ -315,6 +317,27 @@ export function AddSingleExercise({
     getDesiredSetCount,
   ])
 
+  const handleAppendSingleExercise = useCallback(
+    async (exerciseId: string) => {
+      if (isAppendingSingle) return
+      setIsAppendingSingle(true)
+      try {
+        await addMultipleExercises({
+          dayId,
+          exerciseBaseIds: [exerciseId],
+        })
+        await invalidateWorkoutQueries()
+        setOpen(false)
+      } catch (error) {
+        console.error('Failed to add exercise:', error)
+        toast.error('Failed to add exercise.')
+      } finally {
+        setIsAppendingSingle(false)
+      }
+    },
+    [addMultipleExercises, dayId, invalidateWorkoutQueries, isAppendingSingle, setOpen],
+  )
+
   // Reset selection and review mode when drawer closes
   useEffect(() => {
     if (!open) {
@@ -325,10 +348,11 @@ export function AddSingleExercise({
       setFavouriteDescription('')
       setIsReviewMode(false)
       setIsReorderDragging(false)
+      setIsAppendingSingle(false)
     }
   }, [open])
 
-  const drawerContent = isReviewMode ? (
+  const drawerContent = isBuildFlow && isReviewMode ? (
     <ReviewExercises
       selectedExerciseIds={selectedExerciseIds}
       exercises={allExercises}
@@ -347,7 +371,7 @@ export function AddSingleExercise({
       isAdding={isBatchAdding}
       onDraggingChange={setIsReorderDragging}
     />
-  ) : (
+  ) : isBuildFlow ? (
     <>
       <AiExerciseSuggestionsProvider
         allExercises={allExercises}
@@ -373,6 +397,26 @@ export function AddSingleExercise({
         onReview={handleReviewWorkout}
       />
     </>
+  ) : (
+    <AiExerciseSuggestionsProvider
+      allExercises={allExercises}
+      selectedExerciseIds={[]}
+      onToggleExercise={handleAppendSingleExercise}
+    >
+      <ExerciseListWithFilters
+        exercises={allExercises}
+        selectedExerciseIds={[]}
+        onToggleExercise={handleAppendSingleExercise}
+        isLoading={isLoading || isAppendingSingle}
+        categories={exercisesData?.muscleGroupCategories}
+        title="Add exercise"
+        subtitle="Tap an exercise to add it to this workout."
+        suggestionsTrigger={<AiExerciseSuggestionsTrigger />}
+        suggestionsPanel={<AiExerciseSuggestionsPanel />}
+        muscleFilterMode="weeklyFocus"
+        weeklyFocus={weeklyFocus}
+      />
+    </AiExerciseSuggestionsProvider>
   )
 
   if (variant === 'drawer-only') {

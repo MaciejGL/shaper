@@ -164,9 +164,13 @@ export function Exercises({
               isQuickWorkout={isQuickWorkout}
             />
           ))}
-          {isQuickWorkout && day.id && (
+          {day.id && (
             <div className="pb-4 px-4 mb-16">
-              <AddSingleExercise dayId={day.id} variant="button" />
+              <AddSingleExercise
+                dayId={day.id}
+                variant="button"
+                scheduledAt={day.scheduledAt}
+              />
             </div>
           )}
         </div>

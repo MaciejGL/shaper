@@ -399,10 +399,10 @@ export const addSingleExerciseToDay = async (
     throw new GraphQLError('Training day not found')
   }
 
-  // Verify this is the user's quick workout (created by them and assigned to them)
+  // Verify user has access to this training day (assigned plan)
   const plan = day.week.plan
-  if (plan.assignedToId !== user.user.id || plan.createdById !== user.user.id) {
-    throw new GraphQLError('Can only add exercises to your own quick workout')
+  if (plan.assignedToId !== user.user.id) {
+    throw new GraphQLError('Can only add exercises to your assigned plan')
   }
 
   // Find the base exercise
@@ -505,10 +505,10 @@ export const addMultipleExercisesToDay = async (
     throw new GraphQLError('Training day not found')
   }
 
-  // Verify this is the user's quick workout (created by them and assigned to them)
+  // Verify user has access to this training day (assigned plan)
   const plan = day.week.plan
-  if (plan.assignedToId !== user.user.id || plan.createdById !== user.user.id) {
-    throw new GraphQLError('Can only add exercises to your own quick workout')
+  if (plan.assignedToId !== user.user.id) {
+    throw new GraphQLError('Can only add exercises to your assigned plan')
   }
 
   // Find all base exercises
@@ -610,7 +610,13 @@ export const removeExerciseFromWorkout = async (
       exercises: true,
       week: {
         include: {
-          plan: { select: { id: true } },
+          plan: {
+            select: {
+              id: true,
+              assignedToId: true,
+              createdById: true,
+            },
+          },
         },
       },
     },
@@ -620,6 +626,11 @@ export const removeExerciseFromWorkout = async (
     throw new Error('Workout not found')
   }
 
+  // Access control: only assigned user can mutate this day
+  if (workout.week.plan.assignedToId !== user.user.id) {
+    throw new GraphQLError('Access denied')
+  }
+
   const removedExercise = workout.exercises.find(
     (exercise) => exercise.id === exerciseId,
   )
@@ -627,22 +638,35 @@ export const removeExerciseFromWorkout = async (
     throw new Error('Exercise not found in workout')
   }
 
-  await prisma.trainingExercise.delete({
+  // We treat a workout as “quick” when the user both created and is assigned to the plan.
+  const isUserQuickWorkout =
+    workout.week.plan.createdById === user.user.id
+
+  // For planned trainings, only allow removing extra exercises.
+  // For quick workouts, allow removing any exercise (user owns the workout).
+  if (!isUserQuickWorkout && !removedExercise.isExtra) {
+    throw new GraphQLError('Can only remove extra exercises from planned workouts')
+  }
+
+  // Idempotent delete (avoids crashing on double calls / stale UI)
+  const deleteResult = await prisma.trainingExercise.deleteMany({
     where: {
       id: exerciseId,
-      isExtra: true,
+      ...(isUserQuickWorkout ? {} : { isExtra: true }),
     },
   })
+  if (deleteResult.count === 0) {
+    return true
+  }
 
+  // Reorder remaining exercises
   await prisma.trainingExercise.updateMany({
     where: {
       dayId: workout.id,
-      isExtra: true,
+      ...(isUserQuickWorkout ? {} : { isExtra: true }),
       order: { gt: removedExercise.order },
     },
-    data: {
-      order: { decrement: 1 },
-    },
+    data: { order: { decrement: 1 } },
   })
 
   const day = await prisma.trainingDay.findUnique({

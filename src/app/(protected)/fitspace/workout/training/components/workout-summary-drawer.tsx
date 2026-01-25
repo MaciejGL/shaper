@@ -42,6 +42,7 @@ import { calculateCaloriesBurned } from '@/lib/workout/calculate-calories-burned
 import { generateWeightComparison } from '@/utils/weight-comparisons'
 
 import { WorkoutExercise } from './workout-day'
+import { WorkoutSetsHeatmap } from './workout-sets-heatmap'
 
 interface WorkoutSummaryDrawerProps {
   open: boolean
@@ -452,6 +453,10 @@ function Content({
             icon={<WeightIcon className="h-4 w-4 text-blue-600" />}
           />
         </div>
+      </div>
+
+      <div className="pt-2">
+        <WorkoutSetsHeatmap completedExercises={completedExercises} />
       </div>
 
       {/* Exercises Completed */}
