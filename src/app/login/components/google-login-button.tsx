@@ -51,7 +51,7 @@ export const GoogleLoginButton = ({
 
   return (
     <Button
-      variant="tertiary"
+      variant="default"
       size="lg"
       onClick={handleGoogleLogin}
       loading={isLoading}

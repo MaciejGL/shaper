@@ -33,7 +33,7 @@ export const AppleLoginButton = ({
 
   return (
     <Button
-      variant="tertiary"
+      variant="default"
       size="lg"
       onClick={handleAppleLogin}
       loading={isLoading}

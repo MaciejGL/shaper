@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -22,6 +23,8 @@ import { OtpForm } from './otp-form'
 import { useLoginForm } from './use-login-form.hook'
 
 export const LoginCard = () => {
+  const [mode, setMode] = useState<'login' | 'signup'>('login')
+
   const {
     email,
     otp,
@@ -42,10 +45,15 @@ export const LoginCard = () => {
     <Card className="flex flex-col gap-8 w-full max-w-md relative">
       <LoginAuthOverlay />
       <CardHeader className="space-y-1">
-        <CardTitle>Login</CardTitle>
+        <CardTitle>{mode === 'login' ? 'Login' : 'Create account'}</CardTitle>
         {showOtp ? (
           <CardDescription>
-            Enter the 4-digit code sent to your email to login.
+            Enter the 4-digit code sent to your email to{' '}
+            {mode === 'login' ? 'login' : 'create your account'}.
+          </CardDescription>
+        ) : mode === 'signup' ? (
+          <CardDescription>
+            Create your account in seconds and start working out!
           </CardDescription>
         ) : null}
       </CardHeader>
@@ -104,6 +112,24 @@ export const LoginCard = () => {
             </motion.p>
           )}
         </AnimatePresence>
+
+        {!showOtp ? (
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            {mode === 'login'
+              ? "Don't have an account? "
+              : 'Already have an account? '}
+            <Button
+              type="button"
+              variant="link"
+              size="lg"
+              className="mx-auto"
+              onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+              disabled={isLoading || isResending}
+            >
+              {mode === 'login' ? 'Sign up' : 'Log in'}
+            </Button>
+          </p>
+        ) : null}
       </CardContent>
       {showOtp && (
         <CardFooter>
@@ -114,7 +140,7 @@ export const LoginCard = () => {
               onClick={handleLogin}
               disabled={otp.length !== 4}
             >
-              Login
+              {mode === 'login' ? 'Login' : 'Create account'}
             </Button>
             {!leftTime ? (
               <Button
