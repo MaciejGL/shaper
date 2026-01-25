@@ -37,6 +37,7 @@ function MuscleProgressLabel({
   onClick,
 }: MuscleProgressLabelProps) {
   const completedSets = progress?.completedSets ?? 0
+  const targetSets = progress?.targetSets ?? 12
   const percentage = progress?.percentage ?? 0
   const colorLevel = HEATMAP_COLORS.getColorForProgress(percentage / 100)
   const isLeft = position.side === 'left'
@@ -61,7 +62,7 @@ function MuscleProgressLabel({
       >
         <span className="font-medium truncate">{displayName}</span>
         <span className="tabular-nums text-muted-foreground whitespace-nowrap">
-          {completedSets}/12
+          {completedSets}/{targetSets}
         </span>
       </div>
 

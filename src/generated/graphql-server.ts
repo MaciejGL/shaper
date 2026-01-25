@@ -1349,6 +1349,7 @@ export type GQLMutation = {
   resumeMySubscription: EntireFieldWrapper<GQLFreezeResult>;
   sendMessage: EntireFieldWrapper<GQLMessage>;
   setMacroTargets: EntireFieldWrapper<GQLMacroTarget>;
+  setVolumeGoal: EntireFieldWrapper<GQLVolumeGoalPeriod>;
   shareNutritionPlanWithClient: EntireFieldWrapper<GQLNutritionPlan>;
   shiftTrainingSchedule: EntireFieldWrapper<Scalars['Boolean']['output']>;
   skipCheckin: EntireFieldWrapper<GQLCheckinCompletion>;
@@ -2039,6 +2040,12 @@ export type GQLMutationSetMacroTargetsArgs = {
 };
 
 
+export type GQLMutationSetVolumeGoalArgs = {
+  commitment: Scalars['String']['input'];
+  focusPreset: Scalars['String']['input'];
+};
+
+
 export type GQLMutationShareNutritionPlanWithClientArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2688,7 +2695,10 @@ export type GQLQuery = {
   userBodyProgressLogs: EntireFieldWrapper<Array<GQLBodyProgressLog>>;
   userExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
   userPublic?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
+  volumeGoalAtDate?: EntireFieldWrapper<Maybe<GQLVolumeGoalPeriod>>;
+  volumeGoalHistory: EntireFieldWrapper<Array<GQLVolumeGoalPeriod>>;
   weeklyMuscleProgress: EntireFieldWrapper<GQLWeeklyProgressSummary>;
+  weeklyProgressHistory: EntireFieldWrapper<Array<GQLWeeklyProgressHistoryItem>>;
   workoutExerciseNotes: EntireFieldWrapper<Array<GQLWorkoutExerciseNotes>>;
 };
 
@@ -3070,10 +3080,26 @@ export type GQLQueryUserPublicArgs = {
 };
 
 
+export type GQLQueryVolumeGoalAtDateArgs = {
+  targetDate: Scalars['String']['input'];
+};
+
+
+export type GQLQueryVolumeGoalHistoryArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type GQLQueryWeeklyMuscleProgressArgs = {
   targetDate?: InputMaybe<Scalars['String']['input']>;
   userId: Scalars['ID']['input'];
   weekOffset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryWeeklyProgressHistoryArgs = {
+  userId: Scalars['ID']['input'];
+  weekCount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3980,6 +4006,7 @@ export type GQLUserProfile = {
   checkinReminders?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   credentials: EntireFieldWrapper<Array<Scalars['String']['output']>>;
+  currentVolumeGoal?: EntireFieldWrapper<Maybe<GQLVolumeGoalPeriod>>;
   email?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   firstName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   fitnessLevel?: EntireFieldWrapper<Maybe<GQLFitnessLevel>>;
@@ -4108,6 +4135,15 @@ export type GQLVolumeEntry = {
   week: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
+export type GQLVolumeGoalPeriod = {
+  __typename?: 'VolumeGoalPeriod';
+  commitment: EntireFieldWrapper<Scalars['String']['output']>;
+  endedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  focusPreset: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  startedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
 export type GQLWeeklyMuscleProgress = {
   __typename?: 'WeeklyMuscleProgress';
   completedSets: EntireFieldWrapper<Scalars['Int']['output']>;
@@ -4116,6 +4152,15 @@ export type GQLWeeklyMuscleProgress = {
   percentage: EntireFieldWrapper<Scalars['Float']['output']>;
   subMuscles: EntireFieldWrapper<Array<GQLSubMuscleProgress>>;
   targetSets: EntireFieldWrapper<Scalars['Int']['output']>;
+};
+
+export type GQLWeeklyProgressHistoryItem = {
+  __typename?: 'WeeklyProgressHistoryItem';
+  focusPreset?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  overallPercentage: EntireFieldWrapper<Scalars['Float']['output']>;
+  totalSets: EntireFieldWrapper<Scalars['Int']['output']>;
+  weekEndDate: EntireFieldWrapper<Scalars['String']['output']>;
+  weekStartDate: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
 export type GQLWeeklyProgressSummary = {
@@ -4521,7 +4566,9 @@ export type GQLResolversTypes = {
   UsersWithSubscriptionsResult: ResolverTypeWrapper<GQLUsersWithSubscriptionsResult>;
   VirtualMethod: GQLVirtualMethod;
   VolumeEntry: ResolverTypeWrapper<GQLVolumeEntry>;
+  VolumeGoalPeriod: ResolverTypeWrapper<GQLVolumeGoalPeriod>;
   WeeklyMuscleProgress: ResolverTypeWrapper<GQLWeeklyMuscleProgress>;
+  WeeklyProgressHistoryItem: ResolverTypeWrapper<GQLWeeklyProgressHistoryItem>;
   WeeklyProgressSummary: ResolverTypeWrapper<GQLWeeklyProgressSummary>;
   WeightProgressLog: ResolverTypeWrapper<GQLWeightProgressLog>;
   WeightUnit: GQLWeightUnit;
@@ -4765,7 +4812,9 @@ export type GQLResolversParentTypes = {
   UserWithSubscription: GQLUserWithSubscription;
   UsersWithSubscriptionsResult: GQLUsersWithSubscriptionsResult;
   VolumeEntry: GQLVolumeEntry;
+  VolumeGoalPeriod: GQLVolumeGoalPeriod;
   WeeklyMuscleProgress: GQLWeeklyMuscleProgress;
+  WeeklyProgressHistoryItem: GQLWeeklyProgressHistoryItem;
   WeeklyProgressSummary: GQLWeeklyProgressSummary;
   WeightProgressLog: GQLWeightProgressLog;
   WorkoutCompletionResult: GQLWorkoutCompletionResult;
@@ -5445,6 +5494,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   resumeMySubscription?: Resolver<GQLResolversTypes['FreezeResult'], ParentType, ContextType>;
   sendMessage?: Resolver<GQLResolversTypes['Message'], ParentType, ContextType, RequireFields<GQLMutationSendMessageArgs, 'input'>>;
   setMacroTargets?: Resolver<GQLResolversTypes['MacroTarget'], ParentType, ContextType, RequireFields<GQLMutationSetMacroTargetsArgs, 'input'>>;
+  setVolumeGoal?: Resolver<GQLResolversTypes['VolumeGoalPeriod'], ParentType, ContextType, RequireFields<GQLMutationSetVolumeGoalArgs, 'commitment' | 'focusPreset'>>;
   shareNutritionPlanWithClient?: Resolver<GQLResolversTypes['NutritionPlan'], ParentType, ContextType, RequireFields<GQLMutationShareNutritionPlanWithClientArgs, 'id'>>;
   shiftTrainingSchedule?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationShiftTrainingScheduleArgs, 'input'>>;
   skipCheckin?: Resolver<GQLResolversTypes['CheckinCompletion'], ParentType, ContextType>;
@@ -5832,7 +5882,10 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   userBodyProgressLogs?: Resolver<Array<GQLResolversTypes['BodyProgressLog']>, ParentType, ContextType, RequireFields<GQLQueryUserBodyProgressLogsArgs, 'userProfileId'>>;
   userExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, Partial<GQLQueryUserExercisesArgs>>;
   userPublic?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType, RequireFields<GQLQueryUserPublicArgs, 'id'>>;
+  volumeGoalAtDate?: Resolver<Maybe<GQLResolversTypes['VolumeGoalPeriod']>, ParentType, ContextType, RequireFields<GQLQueryVolumeGoalAtDateArgs, 'targetDate'>>;
+  volumeGoalHistory?: Resolver<Array<GQLResolversTypes['VolumeGoalPeriod']>, ParentType, ContextType, Partial<GQLQueryVolumeGoalHistoryArgs>>;
   weeklyMuscleProgress?: Resolver<GQLResolversTypes['WeeklyProgressSummary'], ParentType, ContextType, RequireFields<GQLQueryWeeklyMuscleProgressArgs, 'userId' | 'weekOffset'>>;
+  weeklyProgressHistory?: Resolver<Array<GQLResolversTypes['WeeklyProgressHistoryItem']>, ParentType, ContextType, RequireFields<GQLQueryWeeklyProgressHistoryArgs, 'userId' | 'weekCount'>>;
   workoutExerciseNotes?: Resolver<Array<GQLResolversTypes['WorkoutExerciseNotes']>, ParentType, ContextType, RequireFields<GQLQueryWorkoutExerciseNotesArgs, 'exerciseNames'>>;
 };
 
@@ -6178,6 +6231,7 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   checkinReminders?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   credentials?: Resolver<Array<GQLResolversTypes['String']>, ParentType, ContextType>;
+  currentVolumeGoal?: Resolver<Maybe<GQLResolversTypes['VolumeGoalPeriod']>, ParentType, ContextType>;
   email?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   firstName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   fitnessLevel?: Resolver<Maybe<GQLResolversTypes['FitnessLevel']>, ParentType, ContextType>;
@@ -6286,6 +6340,14 @@ export type GQLVolumeEntryResolvers<ContextType = GQLContext, ParentType extends
   week?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type GQLVolumeGoalPeriodResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['VolumeGoalPeriod'] = GQLResolversParentTypes['VolumeGoalPeriod']> = {
+  commitment?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  endedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  focusPreset?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  startedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type GQLWeeklyMuscleProgressResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WeeklyMuscleProgress'] = GQLResolversParentTypes['WeeklyMuscleProgress']> = {
   completedSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   lastTrained?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
@@ -6293,6 +6355,14 @@ export type GQLWeeklyMuscleProgressResolvers<ContextType = GQLContext, ParentTyp
   percentage?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   subMuscles?: Resolver<Array<GQLResolversTypes['SubMuscleProgress']>, ParentType, ContextType>;
   targetSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+};
+
+export type GQLWeeklyProgressHistoryItemResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WeeklyProgressHistoryItem'] = GQLResolversParentTypes['WeeklyProgressHistoryItem']> = {
+  focusPreset?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  overallPercentage?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  totalSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  weekEndDate?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  weekStartDate?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type GQLWeeklyProgressSummaryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WeeklyProgressSummary'] = GQLResolversParentTypes['WeeklyProgressSummary']> = {
@@ -6434,7 +6504,9 @@ export type GQLResolvers<ContextType = GQLContext> = {
   UserWithSubscription?: GQLUserWithSubscriptionResolvers<ContextType>;
   UsersWithSubscriptionsResult?: GQLUsersWithSubscriptionsResultResolvers<ContextType>;
   VolumeEntry?: GQLVolumeEntryResolvers<ContextType>;
+  VolumeGoalPeriod?: GQLVolumeGoalPeriodResolvers<ContextType>;
   WeeklyMuscleProgress?: GQLWeeklyMuscleProgressResolvers<ContextType>;
+  WeeklyProgressHistoryItem?: GQLWeeklyProgressHistoryItemResolvers<ContextType>;
   WeeklyProgressSummary?: GQLWeeklyProgressSummaryResolvers<ContextType>;
   WeightProgressLog?: GQLWeightProgressLogResolvers<ContextType>;
   WorkoutCompletionResult?: GQLWorkoutCompletionResultResolvers<ContextType>;

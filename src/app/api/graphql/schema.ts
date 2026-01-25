@@ -5,7 +5,7 @@ import * as path from 'node:path'
 export async function createSchema() {
   const modelFolder = path.join(process.cwd(), 'src', 'server', 'models')
 
-  const resolvers = {
+  const resolvers: Record<string, Record<string, unknown>> = {
     Query: {},
     Mutation: {},
   }
@@ -24,6 +24,14 @@ export async function createSchema() {
       resolvers.Mutation = {
         ...resolvers.Mutation,
         ...resolversModule.Mutation,
+      }
+
+      // Merge field resolvers for types (e.g., UserProfileResolvers)
+      if (resolversModule.UserProfileResolvers) {
+        resolvers.UserProfile = {
+          ...resolvers.UserProfile,
+          ...resolversModule.UserProfileResolvers,
+        }
       }
     } else if (fileString.endsWith('.graphql')) {
       const schema = fs.readFileSync(path.join(modelFolder, fileString), 'utf8')

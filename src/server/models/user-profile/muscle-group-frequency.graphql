@@ -53,6 +53,15 @@ type WeeklyProgressSummary {
   streakWeeks: Int!
 }
 
+# Weekly progress history item (simplified for charts)
+type WeeklyProgressHistoryItem {
+  weekStartDate: String!
+  weekEndDate: String!
+  overallPercentage: Float!
+  totalSets: Int!
+  focusPreset: String
+}
+
 # Daily Activity for Activity Heatmap (GitHub-style)
 type DailyActivity {
   date: String!
@@ -74,5 +83,6 @@ extend type Query {
     weekOffset: Int = 0
     targetDate: String
   ): WeeklyProgressSummary!
+  weeklyProgressHistory(userId: ID!, weekCount: Int = 8): [WeeklyProgressHistoryItem!]!
   activityHeatmap(userId: ID!, weekCount: Int = 8): ActivityHeatmapData!
 }

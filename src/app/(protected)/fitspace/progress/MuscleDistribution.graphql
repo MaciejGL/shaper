@@ -71,3 +71,56 @@ query ActivityHeatmap($userId: ID!, $weekCount: Int = 8) {
     weekCount
   }
 }
+
+query VolumeGoalHistory($limit: Int) {
+  volumeGoalHistory(limit: $limit) {
+    id
+    focusPreset
+    commitment
+    startedAt
+    endedAt
+  }
+}
+
+query VolumeGoalAtDate($targetDate: String!) {
+  volumeGoalAtDate(targetDate: $targetDate) {
+    id
+    focusPreset
+    commitment
+    startedAt
+    endedAt
+  }
+}
+
+query CurrentVolumeGoal {
+  profile {
+    id
+    currentVolumeGoal {
+      id
+      focusPreset
+      commitment
+      startedAt
+      endedAt
+    }
+  }
+}
+
+query WeeklyProgressHistory($userId: ID!, $weekCount: Int = 8) {
+  weeklyProgressHistory(userId: $userId, weekCount: $weekCount) {
+    weekStartDate
+    weekEndDate
+    overallPercentage
+    totalSets
+    focusPreset
+  }
+}
+
+mutation SetVolumeGoal($focusPreset: String!, $commitment: String!) {
+  setVolumeGoal(focusPreset: $focusPreset, commitment: $commitment) {
+    id
+    focusPreset
+    commitment
+    startedAt
+    endedAt
+  }
+}

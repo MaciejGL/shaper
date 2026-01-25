@@ -8,9 +8,16 @@ import {
 } from 'date-fns'
 
 import { TRACKED_DISPLAY_GROUPS, getMuscleById } from '@/config/muscles'
+import { computeTargets } from '@/config/volume-goals'
+import {
+  VolumeGoalFieldResolvers,
+  VolumeGoalMutations,
+  VolumeGoalQueries,
+} from '@/server/models/volume-goal/resolvers'
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,
+  GQLUserProfileResolvers,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
 import { ImageHandler } from '@/lib/aws/image-handler'
@@ -324,7 +331,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     { userId, weekOffset = 0, targetDate },
     context,
   ) => {
-    const TARGET_SETS_PER_MUSCLE = 12
+    const DEFAULT_TARGET_SETS = 12
 
     // Get user's week start preference (0 = Sunday, 1 = Monday, etc.)
     const userProfile =
@@ -346,6 +353,25 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       : subWeeks(new Date(), weekOffset)
     const targetWeekStart = startOfWeek(baseDate, { weekStartsOn })
     const targetWeekEnd = endOfWeek(baseDate, { weekStartsOn })
+
+    // Look up the goal that was active at the target date
+    const activeGoal = await prisma.volumeGoalPeriod.findFirst({
+      where: {
+        userId,
+        startedAt: { lte: targetWeekEnd },
+        OR: [{ endedAt: { gte: targetWeekStart } }, { endedAt: null }],
+      },
+      orderBy: { startedAt: 'desc' },
+    })
+
+    // Compute dynamic targets based on focus preset and commitment
+    const computedTargets = computeTargets(
+      activeGoal?.focusPreset,
+      activeGoal?.commitment,
+    )
+    const getTargetForGroup = (group: string): number => {
+      return (computedTargets as Record<string, number>)[group] ?? DEFAULT_TARGET_SETS
+    }
 
     // Get exercises where the day is SCHEDULED in the target week
     // This counts sets based on when the workout was planned, not when it was logged
@@ -509,9 +535,10 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     // Calculate weekly progress array with raw totals
     const weeklyMuscleProgress = trackedMuscleGroups.map((group) => {
       const progress = muscleProgress[group]
+      const targetSets = getTargetForGroup(group)
       const percentage = Math.min(
         100,
-        (progress.completedSets / TARGET_SETS_PER_MUSCLE) * 100,
+        (progress.completedSets / targetSets) * 100,
       )
 
       // Get sub-muscle breakdown
@@ -524,7 +551,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       return {
         muscleGroup: group,
         completedSets: Math.floor(progress.completedSets),
-        targetSets: TARGET_SETS_PER_MUSCLE,
+        targetSets,
         percentage: Math.round(percentage * 10) / 10,
         lastTrained: progress.lastTrained?.toISOString() || null,
         subMuscles,
@@ -604,9 +631,10 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         })
 
         const prevTotalPercentage = trackedMuscleGroups.reduce((sum, group) => {
+          const targetSets = getTargetForGroup(group)
           const pct = Math.min(
             100,
-            (prevMuscleProgress[group] / TARGET_SETS_PER_MUSCLE) * 100,
+            (prevMuscleProgress[group] / targetSets) * 100,
           )
           return sum + pct
         }, 0)
@@ -702,6 +730,132 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       weekCount,
     }
   },
+
+  weeklyProgressHistory: async (
+    _parent,
+    { userId, weekCount = 8 },
+    context,
+  ) => {
+    const DEFAULT_TARGET_SETS = 12
+
+    // Get user's week start preference
+    const userProfile =
+      await context.loaders.user.userProfileByUserId.load(userId)
+    const weekStartsOn = (userProfile?.weekStartsOn ?? 1) as
+      | 0
+      | 1
+      | 2
+      | 3
+      | 4
+      | 5
+      | 6
+
+    const now = new Date()
+    const results: {
+      weekStartDate: string
+      weekEndDate: string
+      overallPercentage: number
+      totalSets: number
+      focusPreset: string | null
+    }[] = []
+
+    // Get all goal periods for this user (to find which goal was active each week)
+    const goalPeriods = await prisma.volumeGoalPeriod.findMany({
+      where: { userId },
+      orderBy: { startedAt: 'desc' },
+    })
+
+    // Process each week
+    for (let i = 0; i < weekCount; i++) {
+      const targetWeek = subWeeks(now, i)
+      const weekStart = startOfWeek(targetWeek, { weekStartsOn })
+      const weekEnd = endOfWeek(targetWeek, { weekStartsOn })
+
+      // Find goal active during this week
+      const activeGoal = goalPeriods.find((g) => {
+        const startedAt = new Date(g.startedAt)
+        const endedAt = g.endedAt ? new Date(g.endedAt) : null
+        return (
+          startedAt <= weekEnd && (endedAt === null || endedAt >= weekStart)
+        )
+      })
+
+      // Compute dynamic targets based on focus preset and commitment
+      const computedTargets = computeTargets(
+        activeGoal?.focusPreset,
+        activeGoal?.commitment,
+      )
+      const getTargetForGroup = (group: string): number => {
+        return (
+          (computedTargets as Record<string, number>)[group] ??
+          DEFAULT_TARGET_SETS
+        )
+      }
+
+      // Get exercises for this week
+      const exercises = await prisma.trainingExercise.findMany({
+        where: {
+          day: {
+            scheduledAt: { gte: weekStart, lte: weekEnd },
+            week: { plan: { assignedToId: userId } },
+          },
+          sets: { some: { completedAt: { not: null } } },
+        },
+        include: {
+          base: { include: { muscleGroups: true } },
+          sets: { where: { completedAt: { not: null } } },
+        },
+      })
+
+      // Calculate muscle progress
+      const muscleProgress: Record<string, number> = {}
+      const trackedMuscleGroups = [...TRACKED_DISPLAY_GROUPS]
+      trackedMuscleGroups.forEach((group) => {
+        muscleProgress[group] = 0
+      })
+
+      let totalSets = 0
+      exercises.forEach((exercise) => {
+        if (!exercise.base?.muscleGroups) return
+        const countedGroups = new Set<string>()
+        exercise.base.muscleGroups.forEach((muscleGroup) => {
+          const staticMuscle = getMuscleById(muscleGroup.id)
+          const mappedGroup =
+            staticMuscle?.displayGroup || muscleGroup.displayGroup
+          if (mappedGroup && muscleProgress[mappedGroup] !== undefined) {
+            if (!countedGroups.has(mappedGroup)) {
+              muscleProgress[mappedGroup] += exercise.sets.length
+              countedGroups.add(mappedGroup)
+            }
+          }
+        })
+        totalSets += exercise.sets.length
+      })
+
+      // Calculate overall percentage
+      const totalPercentage = trackedMuscleGroups.reduce((sum, group) => {
+        const targetSets = getTargetForGroup(group)
+        const pct = Math.min(100, (muscleProgress[group] / targetSets) * 100)
+        return sum + pct
+      }, 0)
+      const overallPercentage =
+        Math.round((totalPercentage / trackedMuscleGroups.length) * 10) / 10
+
+      results.push({
+        weekStartDate: weekStart.toISOString(),
+        weekEndDate: weekEnd.toISOString(),
+        overallPercentage,
+        totalSets,
+        focusPreset: activeGoal?.focusPreset ?? null,
+      })
+    }
+
+    // Return in chronological order (oldest first)
+    return results.reverse()
+  },
+
+  // Volume goal queries imported from volume-goal/resolvers
+  ...VolumeGoalQueries,
 }
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {
@@ -858,4 +1012,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     return new UserProfile(userProfile)
   },
+
+  // Volume goal mutations imported from volume-goal/resolvers
+  ...VolumeGoalMutations,
+}
+
+// Field resolvers for UserProfile
+export const UserProfileResolvers: GQLUserProfileResolvers<GQLContext> = {
+  // Volume goal field resolver imported from volume-goal/resolvers
+  ...VolumeGoalFieldResolvers,
 }

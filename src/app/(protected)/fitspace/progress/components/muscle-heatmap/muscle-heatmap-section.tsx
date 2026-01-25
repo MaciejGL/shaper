@@ -19,12 +19,19 @@ import { HeatmapLegend } from './heatmap-legend'
 import { SelectedMuscleDetails } from './selected-muscle-details'
 import { TrainingAnalytics } from './training-analytics'
 import { useMuscleHeatmap } from './use-muscle-heatmap'
+import { useVolumeGoal } from './volume-goal-selector/use-volume-goal'
+import { VolumeGoalSelector } from './volume-goal-wizard/volume-goal-selector'
+import { VolumeGoalWizardDrawer } from './volume-goal-wizard/volume-goal-wizard-drawer'
+import { WeeklyProgressChart } from './weekly-progress-chart'
 import { WeekNavigator } from './week-navigator'
 
 export function MuscleHeatmapSection() {
   const { user } = useUser()
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'heatmap' | 'recovery'>('heatmap')
+  const [goalSelectorOpen, setGoalSelectorOpen] = useState(false)
+
+  const { currentGoal, setGoal, getDurationWeeks } = useVolumeGoal()
 
   const {
     muscleIntensity,
@@ -88,6 +95,12 @@ export function MuscleHeatmapSection() {
             <PremiumGate feature="Muscle Heatmap" compact showPartialContent>
               <div>
                 <div className="mb-6 flex flex-col gap-3">
+                  <VolumeGoalSelector
+                    currentGoal={currentGoal}
+                    durationWeeks={getDurationWeeks()}
+                    onOpenWizard={() => setGoalSelectorOpen(true)}
+                  />
+
                   <div className="flex items-center justify-end">
                     <WeekNavigator
                       weekStartDate={weekStartDate}
@@ -149,8 +162,12 @@ export function MuscleHeatmapSection() {
                 </AnimatePresence>
 
                 {/* Color Legend */}
-
                 <HeatmapLegend />
+
+                {/* Weekly Progress Chart */}
+                <div className="mt-6 pt-6 border-t border-border">
+                  <WeeklyProgressChart />
+                </div>
               </div>
             </PremiumGate>
           </TabsContent>
@@ -161,6 +178,13 @@ export function MuscleHeatmapSection() {
           </TabsContent>
         </CardContent>
       </Tabs>
+
+      <VolumeGoalWizardDrawer
+        open={goalSelectorOpen}
+        onOpenChange={setGoalSelectorOpen}
+        currentGoal={currentGoal}
+        onSelect={setGoal}
+      />
     </Card>
   )
 }

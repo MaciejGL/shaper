@@ -1347,6 +1347,7 @@ export type GQLMutation = {
   resumeMySubscription: GQLFreezeResult;
   sendMessage: GQLMessage;
   setMacroTargets: GQLMacroTarget;
+  setVolumeGoal: GQLVolumeGoalPeriod;
   shareNutritionPlanWithClient: GQLNutritionPlan;
   shiftTrainingSchedule: Scalars['Boolean']['output'];
   skipCheckin: GQLCheckinCompletion;
@@ -2037,6 +2038,12 @@ export type GQLMutationSetMacroTargetsArgs = {
 };
 
 
+export type GQLMutationSetVolumeGoalArgs = {
+  commitment: Scalars['String']['input'];
+  focusPreset: Scalars['String']['input'];
+};
+
+
 export type GQLMutationShareNutritionPlanWithClientArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2686,7 +2693,10 @@ export type GQLQuery = {
   userBodyProgressLogs: Array<GQLBodyProgressLog>;
   userExercises: Array<GQLBaseExercise>;
   userPublic?: Maybe<GQLUserPublic>;
+  volumeGoalAtDate?: Maybe<GQLVolumeGoalPeriod>;
+  volumeGoalHistory: Array<GQLVolumeGoalPeriod>;
   weeklyMuscleProgress: GQLWeeklyProgressSummary;
+  weeklyProgressHistory: Array<GQLWeeklyProgressHistoryItem>;
   workoutExerciseNotes: Array<GQLWorkoutExerciseNotes>;
 };
 
@@ -3068,10 +3078,26 @@ export type GQLQueryUserPublicArgs = {
 };
 
 
+export type GQLQueryVolumeGoalAtDateArgs = {
+  targetDate: Scalars['String']['input'];
+};
+
+
+export type GQLQueryVolumeGoalHistoryArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type GQLQueryWeeklyMuscleProgressArgs = {
   targetDate?: InputMaybe<Scalars['String']['input']>;
   userId: Scalars['ID']['input'];
   weekOffset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryWeeklyProgressHistoryArgs = {
+  userId: Scalars['ID']['input'];
+  weekCount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3978,6 +4004,7 @@ export type GQLUserProfile = {
   checkinReminders?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['String']['output'];
   credentials: Array<Scalars['String']['output']>;
+  currentVolumeGoal?: Maybe<GQLVolumeGoalPeriod>;
   email?: Maybe<Scalars['String']['output']>;
   firstName?: Maybe<Scalars['String']['output']>;
   fitnessLevel?: Maybe<GQLFitnessLevel>;
@@ -4106,6 +4133,15 @@ export type GQLVolumeEntry = {
   week: Scalars['String']['output'];
 };
 
+export type GQLVolumeGoalPeriod = {
+  __typename?: 'VolumeGoalPeriod';
+  commitment: Scalars['String']['output'];
+  endedAt?: Maybe<Scalars['String']['output']>;
+  focusPreset: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  startedAt: Scalars['String']['output'];
+};
+
 export type GQLWeeklyMuscleProgress = {
   __typename?: 'WeeklyMuscleProgress';
   completedSets: Scalars['Int']['output'];
@@ -4114,6 +4150,15 @@ export type GQLWeeklyMuscleProgress = {
   percentage: Scalars['Float']['output'];
   subMuscles: Array<GQLSubMuscleProgress>;
   targetSets: Scalars['Int']['output'];
+};
+
+export type GQLWeeklyProgressHistoryItem = {
+  __typename?: 'WeeklyProgressHistoryItem';
+  focusPreset?: Maybe<Scalars['String']['output']>;
+  overallPercentage: Scalars['Float']['output'];
+  totalSets: Scalars['Int']['output'];
+  weekEndDate: Scalars['String']['output'];
+  weekStartDate: Scalars['String']['output'];
 };
 
 export type GQLWeeklyProgressSummary = {
@@ -4596,6 +4641,41 @@ export type GQLActivityHeatmapQueryVariables = Exact<{
 
 
 export type GQLActivityHeatmapQuery = { __typename?: 'Query', activityHeatmap: { __typename?: 'ActivityHeatmapData', weekCount: number, activities: Array<{ __typename?: 'DailyActivity', date: string, totalSets: number, dayOfWeek: number }> } };
+
+export type GQLVolumeGoalHistoryQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLVolumeGoalHistoryQuery = { __typename?: 'Query', volumeGoalHistory: Array<{ __typename?: 'VolumeGoalPeriod', id: string, focusPreset: string, commitment: string, startedAt: string, endedAt?: string | undefined | null }> };
+
+export type GQLVolumeGoalAtDateQueryVariables = Exact<{
+  targetDate: Scalars['String']['input'];
+}>;
+
+
+export type GQLVolumeGoalAtDateQuery = { __typename?: 'Query', volumeGoalAtDate?: { __typename?: 'VolumeGoalPeriod', id: string, focusPreset: string, commitment: string, startedAt: string, endedAt?: string | undefined | null } | undefined | null };
+
+export type GQLCurrentVolumeGoalQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLCurrentVolumeGoalQuery = { __typename?: 'Query', profile?: { __typename?: 'UserProfile', id: string, currentVolumeGoal?: { __typename?: 'VolumeGoalPeriod', id: string, focusPreset: string, commitment: string, startedAt: string, endedAt?: string | undefined | null } | undefined | null } | undefined | null };
+
+export type GQLWeeklyProgressHistoryQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  weekCount?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLWeeklyProgressHistoryQuery = { __typename?: 'Query', weeklyProgressHistory: Array<{ __typename?: 'WeeklyProgressHistoryItem', weekStartDate: string, weekEndDate: string, overallPercentage: number, totalSets: number, focusPreset?: string | undefined | null }> };
+
+export type GQLSetVolumeGoalMutationVariables = Exact<{
+  focusPreset: Scalars['String']['input'];
+  commitment: Scalars['String']['input'];
+}>;
+
+
+export type GQLSetVolumeGoalMutation = { __typename?: 'Mutation', setVolumeGoal: { __typename?: 'VolumeGoalPeriod', id: string, focusPreset: string, commitment: string, startedAt: string, endedAt?: string | undefined | null } };
 
 export type GQLProgressPageExercisesQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -9569,6 +9649,255 @@ useInfiniteActivityHeatmapQuery.getKey = (variables: GQLActivityHeatmapQueryVari
 
 
 useActivityHeatmapQuery.fetcher = (variables: GQLActivityHeatmapQueryVariables, options?: RequestInit['headers']) => fetchData<GQLActivityHeatmapQuery, GQLActivityHeatmapQueryVariables>(ActivityHeatmapDocument, variables, options);
+
+export const VolumeGoalHistoryDocument = `
+    query VolumeGoalHistory($limit: Int) {
+  volumeGoalHistory(limit: $limit) {
+    id
+    focusPreset
+    commitment
+    startedAt
+    endedAt
+  }
+}
+    `;
+
+export const useVolumeGoalHistoryQuery = <
+      TData = GQLVolumeGoalHistoryQuery,
+      TError = unknown
+    >(
+      variables?: GQLVolumeGoalHistoryQueryVariables,
+      options?: Omit<UseQueryOptions<GQLVolumeGoalHistoryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLVolumeGoalHistoryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLVolumeGoalHistoryQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['VolumeGoalHistory'] : ['VolumeGoalHistory', variables],
+    queryFn: fetchData<GQLVolumeGoalHistoryQuery, GQLVolumeGoalHistoryQueryVariables>(VolumeGoalHistoryDocument, variables),
+    ...options
+  }
+    )};
+
+useVolumeGoalHistoryQuery.getKey = (variables?: GQLVolumeGoalHistoryQueryVariables) => variables === undefined ? ['VolumeGoalHistory'] : ['VolumeGoalHistory', variables];
+
+export const useInfiniteVolumeGoalHistoryQuery = <
+      TData = InfiniteData<GQLVolumeGoalHistoryQuery>,
+      TError = unknown
+    >(
+      variables: GQLVolumeGoalHistoryQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLVolumeGoalHistoryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLVolumeGoalHistoryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLVolumeGoalHistoryQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['VolumeGoalHistory.infinite'] : ['VolumeGoalHistory.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLVolumeGoalHistoryQuery, GQLVolumeGoalHistoryQueryVariables>(VolumeGoalHistoryDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteVolumeGoalHistoryQuery.getKey = (variables?: GQLVolumeGoalHistoryQueryVariables) => variables === undefined ? ['VolumeGoalHistory.infinite'] : ['VolumeGoalHistory.infinite', variables];
+
+
+useVolumeGoalHistoryQuery.fetcher = (variables?: GQLVolumeGoalHistoryQueryVariables, options?: RequestInit['headers']) => fetchData<GQLVolumeGoalHistoryQuery, GQLVolumeGoalHistoryQueryVariables>(VolumeGoalHistoryDocument, variables, options);
+
+export const VolumeGoalAtDateDocument = `
+    query VolumeGoalAtDate($targetDate: String!) {
+  volumeGoalAtDate(targetDate: $targetDate) {
+    id
+    focusPreset
+    commitment
+    startedAt
+    endedAt
+  }
+}
+    `;
+
+export const useVolumeGoalAtDateQuery = <
+      TData = GQLVolumeGoalAtDateQuery,
+      TError = unknown
+    >(
+      variables: GQLVolumeGoalAtDateQueryVariables,
+      options?: Omit<UseQueryOptions<GQLVolumeGoalAtDateQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLVolumeGoalAtDateQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLVolumeGoalAtDateQuery, TError, TData>(
+      {
+    queryKey: ['VolumeGoalAtDate', variables],
+    queryFn: fetchData<GQLVolumeGoalAtDateQuery, GQLVolumeGoalAtDateQueryVariables>(VolumeGoalAtDateDocument, variables),
+    ...options
+  }
+    )};
+
+useVolumeGoalAtDateQuery.getKey = (variables: GQLVolumeGoalAtDateQueryVariables) => ['VolumeGoalAtDate', variables];
+
+export const useInfiniteVolumeGoalAtDateQuery = <
+      TData = InfiniteData<GQLVolumeGoalAtDateQuery>,
+      TError = unknown
+    >(
+      variables: GQLVolumeGoalAtDateQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLVolumeGoalAtDateQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLVolumeGoalAtDateQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLVolumeGoalAtDateQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['VolumeGoalAtDate.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLVolumeGoalAtDateQuery, GQLVolumeGoalAtDateQueryVariables>(VolumeGoalAtDateDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteVolumeGoalAtDateQuery.getKey = (variables: GQLVolumeGoalAtDateQueryVariables) => ['VolumeGoalAtDate.infinite', variables];
+
+
+useVolumeGoalAtDateQuery.fetcher = (variables: GQLVolumeGoalAtDateQueryVariables, options?: RequestInit['headers']) => fetchData<GQLVolumeGoalAtDateQuery, GQLVolumeGoalAtDateQueryVariables>(VolumeGoalAtDateDocument, variables, options);
+
+export const CurrentVolumeGoalDocument = `
+    query CurrentVolumeGoal {
+  profile {
+    id
+    currentVolumeGoal {
+      id
+      focusPreset
+      commitment
+      startedAt
+      endedAt
+    }
+  }
+}
+    `;
+
+export const useCurrentVolumeGoalQuery = <
+      TData = GQLCurrentVolumeGoalQuery,
+      TError = unknown
+    >(
+      variables?: GQLCurrentVolumeGoalQueryVariables,
+      options?: Omit<UseQueryOptions<GQLCurrentVolumeGoalQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLCurrentVolumeGoalQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLCurrentVolumeGoalQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['CurrentVolumeGoal'] : ['CurrentVolumeGoal', variables],
+    queryFn: fetchData<GQLCurrentVolumeGoalQuery, GQLCurrentVolumeGoalQueryVariables>(CurrentVolumeGoalDocument, variables),
+    ...options
+  }
+    )};
+
+useCurrentVolumeGoalQuery.getKey = (variables?: GQLCurrentVolumeGoalQueryVariables) => variables === undefined ? ['CurrentVolumeGoal'] : ['CurrentVolumeGoal', variables];
+
+export const useInfiniteCurrentVolumeGoalQuery = <
+      TData = InfiniteData<GQLCurrentVolumeGoalQuery>,
+      TError = unknown
+    >(
+      variables: GQLCurrentVolumeGoalQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLCurrentVolumeGoalQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLCurrentVolumeGoalQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLCurrentVolumeGoalQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['CurrentVolumeGoal.infinite'] : ['CurrentVolumeGoal.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLCurrentVolumeGoalQuery, GQLCurrentVolumeGoalQueryVariables>(CurrentVolumeGoalDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteCurrentVolumeGoalQuery.getKey = (variables?: GQLCurrentVolumeGoalQueryVariables) => variables === undefined ? ['CurrentVolumeGoal.infinite'] : ['CurrentVolumeGoal.infinite', variables];
+
+
+useCurrentVolumeGoalQuery.fetcher = (variables?: GQLCurrentVolumeGoalQueryVariables, options?: RequestInit['headers']) => fetchData<GQLCurrentVolumeGoalQuery, GQLCurrentVolumeGoalQueryVariables>(CurrentVolumeGoalDocument, variables, options);
+
+export const WeeklyProgressHistoryDocument = `
+    query WeeklyProgressHistory($userId: ID!, $weekCount: Int = 8) {
+  weeklyProgressHistory(userId: $userId, weekCount: $weekCount) {
+    weekStartDate
+    weekEndDate
+    overallPercentage
+    totalSets
+    focusPreset
+  }
+}
+    `;
+
+export const useWeeklyProgressHistoryQuery = <
+      TData = GQLWeeklyProgressHistoryQuery,
+      TError = unknown
+    >(
+      variables: GQLWeeklyProgressHistoryQueryVariables,
+      options?: Omit<UseQueryOptions<GQLWeeklyProgressHistoryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLWeeklyProgressHistoryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLWeeklyProgressHistoryQuery, TError, TData>(
+      {
+    queryKey: ['WeeklyProgressHistory', variables],
+    queryFn: fetchData<GQLWeeklyProgressHistoryQuery, GQLWeeklyProgressHistoryQueryVariables>(WeeklyProgressHistoryDocument, variables),
+    ...options
+  }
+    )};
+
+useWeeklyProgressHistoryQuery.getKey = (variables: GQLWeeklyProgressHistoryQueryVariables) => ['WeeklyProgressHistory', variables];
+
+export const useInfiniteWeeklyProgressHistoryQuery = <
+      TData = InfiniteData<GQLWeeklyProgressHistoryQuery>,
+      TError = unknown
+    >(
+      variables: GQLWeeklyProgressHistoryQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLWeeklyProgressHistoryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLWeeklyProgressHistoryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLWeeklyProgressHistoryQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['WeeklyProgressHistory.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLWeeklyProgressHistoryQuery, GQLWeeklyProgressHistoryQueryVariables>(WeeklyProgressHistoryDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteWeeklyProgressHistoryQuery.getKey = (variables: GQLWeeklyProgressHistoryQueryVariables) => ['WeeklyProgressHistory.infinite', variables];
+
+
+useWeeklyProgressHistoryQuery.fetcher = (variables: GQLWeeklyProgressHistoryQueryVariables, options?: RequestInit['headers']) => fetchData<GQLWeeklyProgressHistoryQuery, GQLWeeklyProgressHistoryQueryVariables>(WeeklyProgressHistoryDocument, variables, options);
+
+export const SetVolumeGoalDocument = `
+    mutation SetVolumeGoal($focusPreset: String!, $commitment: String!) {
+  setVolumeGoal(focusPreset: $focusPreset, commitment: $commitment) {
+    id
+    focusPreset
+    commitment
+    startedAt
+    endedAt
+  }
+}
+    `;
+
+export const useSetVolumeGoalMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLSetVolumeGoalMutation, TError, GQLSetVolumeGoalMutationVariables, TContext>) => {
+    
+    return useMutation<GQLSetVolumeGoalMutation, TError, GQLSetVolumeGoalMutationVariables, TContext>(
+      {
+    mutationKey: ['SetVolumeGoal'],
+    mutationFn: (variables?: GQLSetVolumeGoalMutationVariables) => fetchData<GQLSetVolumeGoalMutation, GQLSetVolumeGoalMutationVariables>(SetVolumeGoalDocument, variables)(),
+    ...options
+  }
+    )};
+
+useSetVolumeGoalMutation.getKey = () => ['SetVolumeGoal'];
+
+
+useSetVolumeGoalMutation.fetcher = (variables: GQLSetVolumeGoalMutationVariables, options?: RequestInit['headers']) => fetchData<GQLSetVolumeGoalMutation, GQLSetVolumeGoalMutationVariables>(SetVolumeGoalDocument, variables, options);
 
 export const ProgressPageExercisesDocument = `
     query ProgressPageExercises($userId: ID!) {

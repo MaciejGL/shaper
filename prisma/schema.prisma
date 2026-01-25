@@ -65,6 +65,7 @@ model User {
   locations                UserLocation[]
   profile                  UserProfile?
   sessions                 UserSession[]
+  volumeGoalPeriods        VolumeGoalPeriod[]
   clientSubscriptions      UserSubscription[]   @relation("TrainerSubscriptions")
   subscriptions            UserSubscription[]   @relation("UserSubscriptions")
   termsAgreements          UserTermsAgreement[]
@@ -130,6 +131,19 @@ model UserProfile {
   checkinSchedule        CheckinSchedule?
   bodyMeasures           UserBodyMeasure[]
   user                   User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VolumeGoalPeriod {
+  id          String    @id @default(uuid())
+  userId      String
+  focusPreset String    @default("balanced")
+  commitment  String    @default("moderate")
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, endedAt])
 }
 
 model UserBodyMeasure {
@@ -969,6 +983,7 @@ model Chat {
   messages  Message[]
 
   @@unique([trainerId, clientId])
+  @@index([trainerId, clientId], map: "idx_chat_trainer_client")
   @@index([trainerId])
   @@index([clientId])
 }

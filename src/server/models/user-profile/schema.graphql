@@ -58,6 +58,14 @@ type NotificationPreferences {
   checkinReminders: Boolean!
 }
 
+type VolumeGoalPeriod {
+  id: ID!
+  focusPreset: String!
+  commitment: String!
+  startedAt: String!
+  endedAt: String
+}
+
 type UserProfile {
   id: ID!
   firstName: String
@@ -98,6 +106,9 @@ type UserProfile {
   timezone: String
   checkinReminders: Boolean
 
+  # Volume goal
+  currentVolumeGoal: VolumeGoalPeriod
+
   createdAt: String!
   updatedAt: String!
 
@@ -134,6 +145,8 @@ type Query {
   profile: UserProfile
   bodyMeasures: [UserBodyMeasure!]!
   clientBodyMeasures(clientId: ID!): [UserBodyMeasure!]!
+  volumeGoalHistory(limit: Int): [VolumeGoalPeriod!]!
+  volumeGoalAtDate(targetDate: String!): VolumeGoalPeriod
 }
 
 input NotificationPreferencesInput {
@@ -235,4 +248,5 @@ type Mutation {
   deleteBodyMeasurement(id: ID!): Boolean!
   addUserLocation(input: AddUserLocationInput!): UserProfile!
   removeUserLocation(locationId: ID!): UserProfile!
+  setVolumeGoal(focusPreset: String!, commitment: String!): VolumeGoalPeriod!
 }
