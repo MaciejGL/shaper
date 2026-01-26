@@ -32,11 +32,64 @@ function buildSetsDoneByDisplayGroup(sets: WorkoutMuscleGroupSet[]) {
   return setsDone
 }
 
-function buildIntensityFromSets(setsDone: Record<string, number>, maxSets: number) {
+const REWARD_SET_MILESTONES = {
+  moderate: 3, // noticeably orange
+  optimal: 6, // stronger orange
+  max: 9, // current maximum color
+} as const
+
+function clamp01(value: number) {
+  return Math.min(1, Math.max(0, value))
+}
+
+function getRewardProgress(sets: number, maxSets: number) {
+  const safeSets = Math.max(0, sets)
+
+  const a = REWARD_SET_MILESTONES.moderate
+  const b = REWARD_SET_MILESTONES.optimal
+  const c = REWARD_SET_MILESTONES.max
+
+  // Map sets -> progress so:
+  // 3 sets => ~Moderate threshold
+  // 6 sets => ~Optimal threshold
+  // 9+ sets => current maximum color
+  const absoluteProgress =
+    safeSets >= c
+      ? 1
+      : safeSets >= b
+        ? 0.75 + ((safeSets - b) / (c - b)) * (1 - 0.75)
+        : safeSets >= a
+          ? 0.44 + ((safeSets - a) / (b - a)) * (0.75 - 0.44)
+          : (safeSets / a) * 0.44
+
+  // If workout's max muscle volume is < 9 sets, normalize so the most-trained
+  // muscle still hits 100% (never less “rewarding” than before).
+  const workoutMax = Math.max(0, maxSets)
+  const maxAbsoluteProgress =
+    workoutMax >= c
+      ? 1
+      : workoutMax >= b
+        ? 0.75 + ((workoutMax - b) / (c - b)) * (1 - 0.75)
+        : workoutMax >= a
+          ? 0.44 + ((workoutMax - a) / (b - a)) * (0.75 - 0.44)
+          : workoutMax > 0
+            ? (workoutMax / a) * 0.44
+            : 0
+
+  const normalized =
+    maxAbsoluteProgress > 0 ? absoluteProgress / maxAbsoluteProgress : 0
+
+  return clamp01(normalized)
+}
+
+function buildIntensityFromSets(
+  setsDone: Record<string, number>,
+  maxSets: number,
+) {
   const intensity: Record<string, number> = {}
 
   Object.entries(setsDone).forEach(([group, sets]) => {
-    intensity[group] = maxSets > 0 ? Math.min(1, sets / maxSets) : 0
+    intensity[group] = getRewardProgress(sets, maxSets)
   })
 
   return { intensity }
@@ -58,8 +111,9 @@ function MuscleSetsLabel({
   onClick,
 }: MuscleSetsLabelProps) {
   const sets = setsDone[position.muscle] ?? 0
-  const progress = maxSets > 0 ? Math.min(100, (sets / maxSets) * 100) : 0
-  const colorLevel = HEATMAP_COLORS.getColorForProgress(progress / 100)
+  const progress01 = getRewardProgress(sets, maxSets)
+  const progress = progress01 * 100
+  const colorLevel = HEATMAP_COLORS.getColorForProgress(progress01)
   const isLeft = position.side === 'left'
   const displayName = DISPLAY_NAMES[position.muscle] ?? position.muscle
 
