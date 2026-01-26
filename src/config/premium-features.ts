@@ -8,7 +8,7 @@ export const PREMIUM_FEATURES = [
     copy: {
       short: 'Unlimited plans',
       medium: 'Unlimited training plans',
-      long: `Create and save unlimited training plans (free plan includes up to ${SUBSCRIPTION_LIMITS.FREE.TRAINING_PLANS}).`,
+      long: `Create and save unlimited training plans (free plan includes up to ${SUBSCRIPTION_LIMITS.FREE.FAVOURITE_WORKOUTS}).`,
     },
     includeIn: {
       email: true,

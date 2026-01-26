@@ -38,7 +38,6 @@ type UserSubscriptionStatus {
   canAccessMealPlans: Boolean!
   subscriptionEndDate: String # When current subscription ends
   isInGracePeriod: Boolean! # Stripe handles grace periods
-  trainingPlanLimit: Int!
   favouriteWorkoutLimit: Int!
   favouriteFolderLimit: Int!
 }

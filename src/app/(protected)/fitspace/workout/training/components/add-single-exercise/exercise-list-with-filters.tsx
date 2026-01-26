@@ -156,10 +156,11 @@ export function ExerciseListWithFilters({
     searchEngine,
   ])
 
+  const userId = user?.id
   const customExerciseCount = useMemo(() => {
-    if (!user?.id) return 0
-    return exercises.filter((e) => e.createdById === user.id).length
-  }, [exercises, user?.id])
+    if (!userId) return 0
+    return exercises.filter((e) => e.createdById === userId).length
+  }, [exercises, userId])
   const canCreateExercise =
     hasPremium ||
     customExerciseCount < SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES

@@ -438,16 +438,6 @@ export class SubscriptionValidator {
   }
 
   /**
-   * Get training plan limit
-   */
-  async getTrainingPlanLimit(userId: string): Promise<number> {
-    const hasPremium = await this.hasPremiumAccess(userId)
-    return hasPremium
-      ? SUBSCRIPTION_LIMITS.PREMIUM.TRAINING_PLANS
-      : SUBSCRIPTION_LIMITS.FREE.TRAINING_PLANS
-  }
-
-  /**
    * Check if user is currently in grace period
    * Grace period allows continued access after payment failure for a limited time
    */

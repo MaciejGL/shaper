@@ -11,7 +11,6 @@ export interface UserSubscriptionStatusData {
   hasPremium: boolean
   activeSubscriptions: UserSubscription[]
   cancelledSubscriptions: UserSubscription[]
-  trainingPlanLimit: number
   favouriteWorkoutLimit: number
   favouriteFolderLimit: number
   usageTrackers: ServiceUsageTracker[]
@@ -24,17 +23,11 @@ export interface UserSubscriptionStatusData {
   subscriptionEndDate?: string | null
 }
 
-export default class UserSubscriptionStatus
-  implements GQLUserSubscriptionStatus
-{
+export default class UserSubscriptionStatus implements GQLUserSubscriptionStatus {
   constructor(private data: UserSubscriptionStatusData) {}
 
   get hasPremium() {
     return this.data.hasPremium
-  }
-
-  get trainingPlanLimit() {
-    return this.data.trainingPlanLimit
   }
 
   get favouriteWorkoutLimit() {

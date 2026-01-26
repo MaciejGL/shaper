@@ -4103,7 +4103,6 @@ export type GQLUserSubscriptionStatus = {
   isInGracePeriod: EntireFieldWrapper<Scalars['Boolean']['output']>;
   subscriptionEndDate?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainerId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
-  trainingPlanLimit: EntireFieldWrapper<Scalars['Int']['output']>;
 };
 
 export type GQLUserWithSubscription = {
@@ -6328,7 +6327,6 @@ export type GQLUserSubscriptionStatusResolvers<ContextType = GQLContext, ParentT
   isInGracePeriod?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   subscriptionEndDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
-  trainingPlanLimit?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
 };
 
 export type GQLUserWithSubscriptionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UserWithSubscription'] = GQLResolversParentTypes['UserWithSubscription']> = {

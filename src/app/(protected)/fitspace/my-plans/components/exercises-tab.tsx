@@ -136,6 +136,12 @@ export function ExercisesTab() {
               shouldShowFilters ? 'justify-between' : 'justify-end',
             )}
           >
+            {!hasPremium ? (
+              <p className="text-xs text-muted-foreground tabular-nums flex-1">
+                {sorted.length}/{SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES}{' '}
+                exercises
+              </p>
+            ) : null}
             {shouldShowFilters ? (
               <Popover>
                 <PopoverTrigger asChild>
