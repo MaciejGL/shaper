@@ -20,7 +20,7 @@ import {
 import { PlanDetailsDrawer } from './plan-details-drawer'
 import { PlanSection } from './plan-section'
 
-interface PlansTabProps {
+interface CoachingPlansProps {
   activePlan: ActivePlan | null
   availablePlans?: AvailablePlan[]
   completedPlans?: CompletedPlan[]
@@ -139,6 +139,8 @@ function PlansList({ plans, onPlanClick }: PlansListProps) {
       !('sourceTrainingPlanId' in plan) || !plan.sourceTrainingPlanId,
   )
 
+  const coachingPlans = [...trainerPlans, ...readymadePlans]
+
   const pausedPlans = plans.filter(
     ({ plan }) => getPlanStatus(plan, false) === PlanStatus.Paused,
   )
@@ -147,28 +149,18 @@ function PlansList({ plans, onPlanClick }: PlansListProps) {
   )
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-4">
       {/* {!hasActivePlan && <EmptyStatusCard status={PlanStatus.Active} />} */}
 
-      {trainerPlans.length > 0 && (
+      {coachingPlans.length > 0 && (
         <PlanSection
-          title="Coaching Plans"
-          plans={trainerPlans.map(({ plan }) => plan)}
+          title="Plans from coaching"
+          plans={coachingPlans.map(({ plan }) => plan)}
           onPlanClick={onPlanClick}
           showProgress={false}
-          showEmptyState={false}
+          showCoachingBadge={true}
         />
       )}
-
-      <PlanSection
-        title="Premium Plans"
-        plans={readymadePlans.map(({ plan }) => plan)}
-        onPlanClick={onPlanClick}
-        showProgress={false}
-        showEmptyState={templatePlans.length === 0}
-        showPromoCard={readymadePlans.length === 0}
-        titleLink="/fitspace/explore?tab=premium-plans"
-      />
 
       <PlanSection
         title="Paused Plans"
@@ -189,13 +181,13 @@ function PlansList({ plans, onPlanClick }: PlansListProps) {
   )
 }
 
-export function PlansTab({
+export function CoachingPlans({
   activePlan,
   availablePlans = [],
   completedPlans = [],
   handlePlanAction,
   loading,
-}: PlansTabProps) {
+}: CoachingPlansProps) {
   const [selectedPlan, setSelectedPlan] = useState<UnifiedPlan | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
@@ -276,8 +268,8 @@ function EmptyPlansState() {
     <div className="space-y-4">
       <TrainerDiscoveryCta
         variant="banner"
-        title="Get Your First Plan"
-        subtitle="Check out our featured plans"
+        title="Check our trainers plans"
+        subtitle="Explore our ready-made plans and find the perfect one for you"
         href="/fitspace/explore?tab=premium-plans"
         showBadge={false}
       />

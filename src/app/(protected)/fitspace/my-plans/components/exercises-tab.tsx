@@ -18,12 +18,14 @@ import {
   HIGH_LEVEL_TO_DISPLAY_GROUPS,
   type HighLevelGroup,
 } from '@/config/muscles'
+import { SUBSCRIPTION_LIMITS } from '@/config/subscription-limits'
 import { useUser } from '@/context/user-context'
 import {
   type GQLEquipment,
   type GQLFitspaceGetExercisesQuery,
   useFitspaceGetExercisesQuery,
 } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 import { translateEquipment } from '@/utils/translate-equipment'
 
 import { CustomExerciseDialog } from '../../workout/training/components/custom-exercise-dialog/custom-exercise-dialog'
@@ -113,6 +115,8 @@ export function ExercisesTab() {
     userId: user?.id,
   })
 
+  const canCreateExercise =
+    hasPremium || sorted.length < SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES
   const shouldShowCreateButton = sorted.length > 0 || isLoading || true // showEmptyState=false for tab
   const shouldShowFilters =
     availableMuscleGroups.length > 1 || availableEquipment.length > 1
@@ -126,7 +130,12 @@ export function ExercisesTab() {
 
       <div className="flex items-center justify-between gap-3">
         {shouldShowCreateButton ? (
-          <div className="flex items-center gap-2 w-full">
+          <div
+            className={cn(
+              'flex items-center gap-2 w-full',
+              shouldShowFilters ? 'justify-between' : 'justify-end',
+            )}
+          >
             {shouldShowFilters ? (
               <Popover>
                 <PopoverTrigger asChild>
@@ -151,8 +160,8 @@ export function ExercisesTab() {
             ) : null}
 
             <PremiumButtonWrapper
-              hasPremium={hasPremium}
-              tooltipText="Create your own exercises and reuse them across workouts — make training truly personal."
+              hasPremium={canCreateExercise}
+              tooltipText={`Free plan includes up to ${SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES} custom exercises. Upgrade to create more.`}
             >
               <Button
                 size="md"
@@ -161,7 +170,7 @@ export function ExercisesTab() {
                   setEditingExercise(null)
                   setDialogOpen(true)
                 }}
-                disabled={!hasPremium}
+                disabled={!canCreateExercise}
                 className="ml-auto"
               >
                 Add Exercise
@@ -173,7 +182,7 @@ export function ExercisesTab() {
 
       {sorted.length === 0 && !isLoading ? (
         <EmptyExercisesState
-          hasPremium={hasPremium}
+          canCreateExercise={canCreateExercise}
           handleCreateExercise={() => {
             setEditingExercise(null)
             setDialogOpen(true)
@@ -218,10 +227,10 @@ export function ExercisesTab() {
 }
 
 function EmptyExercisesState({
-  hasPremium,
+  canCreateExercise,
   handleCreateExercise,
 }: {
-  hasPremium: boolean
+  canCreateExercise: boolean
   handleCreateExercise: () => void
 }) {
   return (
@@ -238,13 +247,13 @@ function EmptyExercisesState({
         </p>
         <div className="flex gap-2">
           <PremiumButtonWrapper
-            hasPremium={hasPremium}
-            tooltipText="Create your own exercises and reuse them across workouts — make training truly personal."
+            hasPremium={canCreateExercise}
+            tooltipText={`Free plan includes up to ${SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES} custom exercises. Upgrade to create more.`}
           >
             <Button
               onClick={handleCreateExercise}
               iconStart={<Plus />}
-              disabled={!hasPremium}
+              disabled={!canCreateExercise}
             >
               Add Exercise
             </Button>

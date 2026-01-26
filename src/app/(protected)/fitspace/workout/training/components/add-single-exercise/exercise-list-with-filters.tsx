@@ -22,6 +22,7 @@ import {
   HIGH_LEVEL_TO_DISPLAY_GROUPS,
   type HighLevelGroup,
 } from '@/config/muscles'
+import { SUBSCRIPTION_LIMITS } from '@/config/subscription-limits'
 import { useUser } from '@/context/user-context'
 import type { GQLEquipment } from '@/generated/graphql-client'
 import { ExerciseSearchEngine } from '@/lib/exercise-search'
@@ -154,6 +155,14 @@ export function ExerciseListWithFilters({
     selectedEquipment,
     searchEngine,
   ])
+
+  const customExerciseCount = useMemo(() => {
+    if (!user?.id) return 0
+    return exercises.filter((e) => e.createdById === user.id).length
+  }, [exercises, user?.id])
+  const canCreateExercise =
+    hasPremium ||
+    customExerciseCount < SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES
 
   const [customExerciseDialogOpen, setCustomExerciseDialogOpen] =
     useState(false)
@@ -319,14 +328,14 @@ export function ExerciseListWithFilters({
               {searchQuery.trim() ? (
                 <div className="pt-4 flex justify-center">
                   <PremiumButtonWrapper
-                    hasPremium={hasPremium}
-                    tooltipText="Create custom exercises to reuse them in your workouts and plans."
+                    hasPremium={canCreateExercise}
+                    tooltipText={`Free plan includes up to ${SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES} custom exercises. Upgrade to create more.`}
                   >
                     <Button
                       variant="default"
                       iconStart={<PlusIcon />}
                       onClick={() => setCustomExerciseDialogOpen(true)}
-                      disabled={!hasPremium}
+                      disabled={!canCreateExercise}
                     >
                       Create exercise
                     </Button>

@@ -15,6 +15,7 @@ interface PlanCarouselCardProps {
   showProgress?: boolean
   isExpanded?: boolean
   layoutId?: string
+  showCoachingBadge?: boolean
 }
 
 export function PlanCarouselCard({
@@ -24,6 +25,7 @@ export function PlanCarouselCard({
   isExpanded = false,
   showProgress = true,
   layoutId,
+  showCoachingBadge = false,
 }: PlanCarouselCardProps) {
   if (!plan) return null
 
@@ -43,8 +45,6 @@ export function PlanCarouselCard({
   // Personalized plan: created by another person specifically for me (not from public library)
   const now = new Date()
   const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
-  const isPublicPlan =
-    'sourceTrainingPlanId' in plan && plan.sourceTrainingPlanId
 
   const isNewPlan =
     'createdAt' in plan &&
@@ -56,11 +56,11 @@ export function PlanCarouselCard({
       onClick={() => onClick(plan)}
       className={cn(
         'h-full flex flex-col justify-between bg-cover rounded-2xl relative',
-        'shadow-lg shadow-neutral-400 dark:shadow-neutral-950 cursor-pointer hover:border-primary/50 transition-all group relative aspect-[4/5] w-full dark:border dark:border-border bg-sidebar py-4',
+        'shadow-lg shadow-neutral-400 dark:shadow-neutral-950 cursor-pointer hover:border-primary/50 transition-all group relative aspect-4/5 w-full dark:border dark:border-border bg-sidebar py-4',
       )}
       style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : 'none' }}
     >
-      <div className="absolute rounded-2xl inset-[-0.5px] bg-gradient-to-t from-black to-black/5 dark:to-black/10" />
+      <div className="absolute rounded-2xl inset-[-0.5px] bg-linear-to-t from-black to-black/5 dark:to-black/10" />
 
       <div className="flex justify-end">
         {hasProgress && (
@@ -84,7 +84,7 @@ export function PlanCarouselCard({
             Premium
           </Badge>
         )}
-        {!isPublicPlan && (
+        {showCoachingBadge && (
           <Badge
             variant="primary"
             className="w-fit"

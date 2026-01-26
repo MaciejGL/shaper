@@ -32,10 +32,10 @@ export function NoActivePlanHeaderCard({
     <>
       <Card variant="glass" className="shadow-md shadow-black">
         <CardHeader>
-          <CardTitle>No active plan</CardTitle>
+          <CardTitle>Activate full plan</CardTitle>
           <CardDescription>
-            Pick a plan to start, or explore new programs tailored to your
-            goals.
+            Pick one of the plans from our coaches or ask coach to make one only
+            for You.
           </CardDescription>
         </CardHeader>
         <CardContent />

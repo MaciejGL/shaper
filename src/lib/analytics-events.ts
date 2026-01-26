@@ -30,6 +30,7 @@ export const ANALYTICS_EVENTS = {
   EXPLORE_PLAN_START_NOW_TAP: 'explore_plan_start_now_tap',
   EXPLORE_PLAN_START_DEMO_TAP: 'explore_plan_start_demo_tap',
   EXPLORE_PLAN_ADD_TO_MY_PLANS_TAP: 'explore_plan_add_to_my_plans_tap',
+  EXPLORE_PLAN_UPGRADE_TAP: 'explore_plan_upgrade_tap',
 } as const
 
 export type AnalyticsEventName =
@@ -150,5 +151,9 @@ export const analyticsEvents = {
 
   explorePlanAddToMyPlansTap: (properties: ExplorePlanDrawerEventProperties) => {
     captureEvent(ANALYTICS_EVENTS.EXPLORE_PLAN_ADD_TO_MY_PLANS_TAP, properties)
+  },
+
+  explorePlanUpgradeTap: (properties: ExplorePlanDrawerEventProperties) => {
+    captureEvent(ANALYTICS_EVENTS.EXPLORE_PLAN_UPGRADE_TAP, properties)
   },
 }

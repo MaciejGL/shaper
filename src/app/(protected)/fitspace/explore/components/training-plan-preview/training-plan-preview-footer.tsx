@@ -1,4 +1,4 @@
-import { Play, Plus } from 'lucide-react'
+import { ArrowRight, Play } from 'lucide-react'
 
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
@@ -8,35 +8,32 @@ import { GQLGetPublicTrainingPlansQuery } from '@/generated/graphql-client'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 import { useOpenUrl } from '@/hooks/use-open-url'
 import { usePaymentRules } from '@/hooks/use-payment-rules'
-import { analyticsEvents } from '@/lib/analytics-events'
+import { ANALYTICS_EVENTS, analyticsEvents } from '@/lib/analytics-events'
+import { captureEvent } from '@/lib/posthog'
 
 interface TrainingPlanPreviewFooterProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
-  onAssignTemplate: (planId: string) => void
   onStartNow?: () => void
   hasDemoWorkoutDay: boolean
   onTryDemoWorkoutDay: () => void
-  isAssigning: boolean
   isStartingNow: boolean
 }
 
 export function TrainingPlanPreviewFooter({
   plan,
-  onAssignTemplate,
   onStartNow,
   hasDemoWorkoutDay,
   onTryDemoWorkoutDay,
-  isAssigning,
   isStartingNow,
 }: TrainingPlanPreviewFooterProps) {
   const { user } = useUser()
+  const { data: subscriptionData } = useCurrentSubscription(user?.id)
+  const hasPremium = subscriptionData?.hasPremiumAccess || false
   const rules = usePaymentRules()
   const { openUrl, isLoading: isOpeningUrl } = useOpenUrl({
     errorMessage: 'Failed to open subscription plans',
     openInApp: rules.canLinkToPayment,
   })
-  const { data: subscriptionData } = useCurrentSubscription(user?.id)
-  const hasPremium = subscriptionData?.hasPremiumAccess || false
 
   const trackProps = {
     plan_id: plan.id,
@@ -45,23 +42,8 @@ export function TrainingPlanPreviewFooter({
     has_demo_workout_day: hasDemoWorkoutDay,
   }
 
-  const handleAddPlan = () => {
-    analyticsEvents.explorePlanAddToMyPlansTap(trackProps)
-
-    // If user doesn't have premium, redirect to offers page
-    // This prevents hitting the backend training plan limit error
-    if (!hasPremium) {
-      openUrl(
-        '/account-management/offers?redirectUrl=/fitspace/explore?tab=premium-plans',
-      )
-      return
-    }
-
-    // Add the plan to user's plans (they can activate it later from My Plans)
-    onAssignTemplate(plan.id)
-  }
-
-  const isLoading = isAssigning || isOpeningUrl
+  const showUpgradeCta = !hasPremium && plan.premium
+  const isUpgradeLoading = showUpgradeCta && isOpeningUrl
 
   return (
     <DrawerFooter className="border-t">
@@ -89,30 +71,35 @@ export function TrainingPlanPreviewFooter({
               analyticsEvents.explorePlanStartDemoTap(trackProps)
               onTryDemoWorkoutDay()
             }}
-            disabled={isLoading}
-            loading={isLoading}
             iconStart={<Play />}
           >
             Start preview session
           </Button>
         ) : null}
 
-        <PremiumButtonWrapper
-          hasPremium={hasPremium}
-          tooltipText="Get full access to all trainer-designed plans and add them to your collection."
-        >
-          <Button
-            className="w-full"
-            size="lg"
-            variant="outline"
-            onClick={handleAddPlan}
-            disabled={isLoading}
-            loading={isLoading}
-            iconStart={<Plus />}
+        {showUpgradeCta ? (
+          <PremiumButtonWrapper
+            hasPremium={hasPremium}
+            tooltipText="Upgrade to get full access to this plan."
           >
-            Add to My Plans
-          </Button>
-        </PremiumButtonWrapper>
+            <Button
+              className="w-full"
+              size="lg"
+              variant="outline"
+              onClick={() => {
+                captureEvent(ANALYTICS_EVENTS.EXPLORE_PLAN_UPGRADE_TAP, trackProps)
+                openUrl(
+                  `/account-management/offers?redirectUrl=/fitspace/explore?tab=premium-plans&plan=${plan.id}`,
+                )
+              }}
+              disabled={isUpgradeLoading}
+              loading={isUpgradeLoading}
+              iconEnd={<ArrowRight />}
+            >
+              Get full plan
+            </Button>
+          </PremiumButtonWrapper>
+        ) : null}
       </div>
     </DrawerFooter>
   )

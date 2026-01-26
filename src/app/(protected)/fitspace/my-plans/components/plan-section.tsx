@@ -32,6 +32,7 @@ interface PlanSectionProps {
   showEmptyState?: boolean
   showPromoCard?: boolean
   titleLink?: string
+  showCoachingBadge?: boolean
 }
 
 interface SectionHeaderProps {
@@ -79,6 +80,7 @@ export function PlanSection({
   showEmptyState = false,
   showPromoCard = false,
   titleLink,
+  showCoachingBadge = false,
 }: PlanSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const { isTrainerServiceEnabled } = useTrainerServiceAccess()
@@ -133,7 +135,7 @@ export function PlanSection({
   const maxPlans = 6
 
   return (
-    <div className="space-y-4 bg-card -mx-4 px-4 py-4">
+    <div className="space-y-4 bg-card -mx-4 px-4 py-0">
       <SectionHeader title={title} count={plans.length} titleLink={titleLink}>
         {plans.length > 2 && (
           <Button
@@ -167,7 +169,7 @@ export function PlanSection({
       <AnimatePresence mode="wait">
         <LayoutGroup id="plan-section" key={`plan-section-`}>
           {!isExpanded ? (
-            <div className="overflow-x-hidden -mx-4 px-4">
+            <div className="overflow-x-hidden -mx-4 px-4 pb-6">
               <Carousel
                 opts={{
                   align: 'start',
@@ -193,6 +195,7 @@ export function PlanSection({
                         imageUrl={getPlanImage(plan)}
                         showProgress={showProgress}
                         layoutId={`plan-${plan?.id}`}
+                        showCoachingBadge={showCoachingBadge}
                       />
                     </CarouselItem>
                   ))}

@@ -2,6 +2,7 @@ import { GraphQLError } from 'graphql'
 
 import { GQLUserRole } from '@/generated/graphql-server'
 import type { GQLEquipment } from '@/generated/graphql-server'
+import { SUBSCRIPTION_LIMITS } from '@/config/subscription-limits'
 import { prisma } from '@/lib/db'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
@@ -29,14 +30,24 @@ type FitspaceDeleteCustomExerciseArgs = {
   id: string
 }
 
-async function requirePremiumIfClient(context: GQLContext) {
+async function enforceCustomExerciseCreateAccess(context: GQLContext) {
   const user = context.user?.user
   if (!user) throw new GraphQLError('Authentication required')
 
   if (user.role !== GQLUserRole.Client) return
 
   const hasPremium = await subscriptionValidator.hasPremiumAccess(user.id)
-  if (!hasPremium) throw new GraphQLError('Premium required')
+  if (hasPremium) return
+
+  const customExerciseCount = await prisma.baseExercise.count({
+    where: { createdById: user.id, isPublic: false },
+  })
+
+  if (customExerciseCount >= SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES) {
+    throw new GraphQLError(
+      `Free plan includes up to ${SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES} custom exercises. Upgrade to create more.`,
+    )
+  }
 }
 
 export const Mutation = {
@@ -48,7 +59,7 @@ export const Mutation = {
     const user = context.user?.user
     if (!user) throw new GraphQLError('Authentication required')
 
-    await requirePremiumIfClient(context)
+    await enforceCustomExerciseCreateAccess(context)
 
     const name = input.name.trim()
     if (!name) throw new GraphQLError('Exercise name is required')
@@ -97,8 +108,6 @@ export const Mutation = {
   ) => {
     const user = context.user?.user
     if (!user) throw new GraphQLError('Authentication required')
-
-    await requirePremiumIfClient(context)
 
     const existing = await prisma.baseExercise.findFirst({
       where: { id, createdById: user.id },
@@ -149,8 +158,6 @@ export const Mutation = {
   ) => {
     const user = context.user?.user
     if (!user) throw new GraphQLError('Authentication required')
-
-    await requirePremiumIfClient(context)
 
     const exercise = await prisma.baseExercise.findFirst({
       where: { id, createdById: user.id },

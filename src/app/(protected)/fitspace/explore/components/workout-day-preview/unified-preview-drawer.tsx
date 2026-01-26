@@ -22,8 +22,6 @@ interface UnifiedPreviewDrawerProps {
   onAnimationComplete?: () => void
   onStartWorkout: (dayId: string) => void
   isStarting: boolean
-  onAssignTemplate: (planId: string) => void
-  isAssigning: boolean
   availablePlans: PublicPlan[]
   hidePreviewPlan?: boolean
 }
@@ -35,8 +33,6 @@ export function UnifiedPreviewDrawer({
   onAnimationComplete,
   onStartWorkout,
   isStarting,
-  onAssignTemplate,
-  isAssigning,
   availablePlans,
   hidePreviewPlan = false,
 }: UnifiedPreviewDrawerProps) {
@@ -208,9 +204,6 @@ export function UnifiedPreviewDrawer({
                 >
                   <TrainingPlanPreviewContent
                     plan={currentView.data}
-                    onAssignTemplate={onAssignTemplate}
-                    onStartNow={() => {}}
-                    isAssigning={isAssigning}
                     isStartingNow={false}
                     weeksData={currentView.data}
                     hideCloseButton={true}
@@ -232,9 +225,6 @@ export function UnifiedPreviewDrawer({
               {currentView?.type === 'plan' && (
                 <TrainingPlanPreviewContent
                   plan={currentView.data}
-                  onAssignTemplate={onAssignTemplate}
-                  onStartNow={() => {}}
-                  isAssigning={isAssigning}
                   isStartingNow={false}
                   weeksData={currentView.data}
                 />

@@ -1,10 +1,10 @@
 'use client'
 
 import { parseAsStringEnum, useQueryState } from 'nuqs'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
+import { Divider } from '@/components/divider'
 import { ExtendHeader } from '@/components/extend-header'
-import { HeaderTab } from '@/components/header-tab'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import {
@@ -13,6 +13,7 @@ import {
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
+import { CoachingPlans } from './components/coaching-plans'
 import { CustomPlansTab } from './components/custom-plans-tab'
 import { ExercisesTab } from './components/exercises-tab'
 import { NoActivePlanHeaderCard } from './components/no-active-plan-header-card/no-active-plan-header-card'
@@ -20,7 +21,6 @@ import { PlanActionDialog } from './components/plan-action-dialog/plan-action-di
 import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
 import { PlanCard } from './components/plan-card'
 import { PlanDetailsDrawer } from './components/plan-details-drawer'
-import { PlansTab } from './components/plans-tab'
 // import { TodayWorkoutCta } from './components/summary/today-workout-cta/today-workout-cta'
 import { PlanTab, getPlanStatus } from './types'
 import { getPlanImage } from './utils'
@@ -51,6 +51,21 @@ export default function MyPlansPage() {
   const availablePlans = data?.getMyPlansOverviewFull?.availablePlans
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
 
+  const defaultTab = PlanTab.CustomPlans
+
+  const safeTab = useMemo(() => {
+    const selected = tab ?? defaultTab
+    // Backward-compatible: old links used `tab=plans` (AssignedPlans)
+    if (selected === PlanTab.AssignedPlans) return PlanTab.CustomPlans
+    return selected
+  }, [defaultTab, tab])
+
+  useEffect(() => {
+    if (tab === PlanTab.AssignedPlans) {
+      void setTab(PlanTab.CustomPlans)
+    }
+  }, [setTab, tab])
+
   const handleActivePlanClick = () => {
     setIsActivePlanDrawerOpen(true)
   }
@@ -63,56 +78,39 @@ export default function MyPlansPage() {
     setIsActivePlanDrawerOpen(false)
   }
 
+  const tabOptions = [
+    { label: 'Plans', value: PlanTab.CustomPlans },
+    { label: 'Exercises', value: PlanTab.Exercises },
+  ]
+
   const tabsContent = (
     <Tabs
-      value={tab ?? PlanTab.AssignedPlans}
-      defaultValue={PlanTab.AssignedPlans}
+      value={safeTab}
+      defaultValue={defaultTab}
       onValueChange={(value) => setTab(value as PlanTab)}
       className="gap-0"
     >
       <div className="-mt-6 relative z-10 max-w-screen px-3">
         <PrimaryTabList
-          options={[
-            { label: 'Assigned', value: PlanTab.AssignedPlans },
-            { label: 'Custom', value: PlanTab.CustomPlans },
-            { label: 'Exercises', value: PlanTab.Exercises },
-          ]}
+          options={tabOptions}
           onClick={setTab}
-          active={tab ?? PlanTab.AssignedPlans}
+          active={safeTab}
           size="lg"
-          className="grid grid-cols-[auto_auto_auto] max-w-full"
-          classNameButton={cn('px-2 [min-width:370px]:px-3 gap-0')}
+          className="grid max-w-full grid-cols-2"
+          classNameButton={cn('px-2 [min-width:370px]:px-3 gap-0 flex-1')}
         />
       </div>
 
-      <TabsContent
-        id="my-plans-content"
-        value={PlanTab.AssignedPlans}
-        className="space-y-4 py-6 px-4"
-      >
-        <HeaderTab
-          title="Assigned plans"
-          description="Plans you have been assigned to by your trainer or from our library."
-        />
-        {/* {activePlan?.weeks && activePlan.weeks.length > 0 && (
-          <div className="mb-6">
-            <TodayWorkoutCta
-              weeks={activePlan.weeks}
-              startDate={activePlan.startDate ?? null}
-            />
-          </div>
-        )} */}
-        <PlansTab
+      <TabsContent value={PlanTab.CustomPlans} className="space-y-10 py-6 px-4">
+        <CustomPlansTab />
+        <Divider className="my-8" />
+        <CoachingPlans
           activePlan={activePlan}
           availablePlans={availablePlans}
           completedPlans={completedPlans}
           handlePlanAction={handlePlanAction}
           loading={isLoadingPlans}
         />
-      </TabsContent>
-
-      <TabsContent value={PlanTab.CustomPlans} className="space-y-4 py-6 px-4">
-        <CustomPlansTab />
       </TabsContent>
 
       <TabsContent value={PlanTab.Exercises} className="space-y-4 py-6 px-4">

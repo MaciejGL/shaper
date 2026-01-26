@@ -27,8 +27,6 @@ import { UnifiedPreviewDrawer } from './workout-day-preview/unified-preview-draw
 interface FreeWorkoutsTabProps {
   initialWorkouts: FreeWorkoutDay[]
   initialWorkoutId?: string | null
-  onAssignTemplate: (planId: string) => void
-  isAssigning: boolean
   availablePlans: PublicTrainingPlan[]
 }
 
@@ -44,8 +42,6 @@ const difficultyVariantMap = {
 export function FreeWorkoutsTab({
   initialWorkouts,
   initialWorkoutId,
-  onAssignTemplate,
-  isAssigning,
   availablePlans,
 }: FreeWorkoutsTabProps) {
   const router = useRouter()
@@ -164,8 +160,6 @@ export function FreeWorkoutsTab({
         }}
         onStartWorkout={handleStartWorkout}
         isStarting={isStarting}
-        onAssignTemplate={onAssignTemplate}
-        isAssigning={isAssigning}
         availablePlans={availablePlans}
       />
     </div>

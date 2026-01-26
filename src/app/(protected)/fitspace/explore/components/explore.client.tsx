@@ -1,9 +1,6 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
 import { parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs'
-import { toast } from 'sonner'
 
 import { ExtendHeader } from '@/components/extend-header'
 import { HeaderTab } from '@/components/header-tab'
@@ -13,10 +10,7 @@ import {
   GQLGetFeaturedTrainersQuery,
   GQLGetFreeWorkoutDaysQuery,
   GQLGetPublicTrainingPlansQuery,
-  useAssignTemplateToSelfMutation,
 } from '@/generated/graphql-client'
-import { useOpenUrl } from '@/hooks/use-open-url'
-import { usePaymentRules } from '@/hooks/use-payment-rules'
 
 import { FreeWorkoutsTab } from './free-workouts-tab'
 import { TrainersTab } from './trainers-tab'
@@ -48,14 +42,6 @@ export function ExploreClient({
   trainers,
   workouts,
 }: ExploreClientProps) {
-  const queryClient = useQueryClient()
-  const router = useRouter()
-  const rules = usePaymentRules()
-  const { openUrl } = useOpenUrl({
-    errorMessage: 'Failed to open subscription plans',
-    openInApp: rules.canLinkToPayment,
-  })
-
   const [params, setParams] = useQueryStates(
     {
       tab: parseAsStringEnum<Tab>(Object.values(Tab)).withDefault(
@@ -69,38 +55,6 @@ export function ExploreClient({
       history: 'push',
     },
   )
-
-  const { mutateAsync: assignTemplate, isPending: isAssigning } =
-    useAssignTemplateToSelfMutation({})
-
-  const handleAssignTemplate = async (planId: string) => {
-    try {
-      await assignTemplate({ planId })
-
-      toast.success('Plan added to My Plans')
-
-      await queryClient.refetchQueries({
-        queryKey: ['FitspaceMyPlans'],
-      })
-
-      router.push('/fitspace/my-plans')
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
-      if (
-        errorMessage.includes('limit reached') ||
-        errorMessage.includes('Premium') ||
-        errorMessage.includes('subscription')
-      ) {
-        toast.error('Premium required')
-        openUrl(
-          `/account-management/offers?redirectUrl=/fitspace/explore/plan/${planId}`,
-        )
-      } else {
-        toast.error('Failed to add training plan')
-      }
-    }
-  }
 
   return (
     <ExtendHeader
@@ -142,8 +96,6 @@ export function ExploreClient({
           <FreeWorkoutsTab
             initialWorkouts={workouts}
             initialWorkoutId={params.workout}
-            onAssignTemplate={handleAssignTemplate}
-            isAssigning={isAssigning}
             availablePlans={plans || []}
           />
         </TabsContent>

@@ -29,8 +29,6 @@ import {
   useGetPublicTrainingPlansQuery,
   useStartFreeWorkoutDayMutation,
 } from '@/generated/graphql-client'
-import { useOpenUrl } from '@/hooks/use-open-url'
-import { usePaymentRules } from '@/hooks/use-payment-rules'
 import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 import { formatUserCount, getFakeUserCount } from '@/utils/format-user-count'
@@ -149,11 +147,6 @@ export function TrainingPlansTab({
 
   const queryClient = useQueryClient()
   const router = useRouter()
-  const rules = usePaymentRules()
-  const { openUrl } = useOpenUrl({
-    errorMessage: 'Failed to open subscription plans',
-    openInApp: rules.canLinkToPayment,
-  })
 
   // Fetch public training plans
   const { data, isLoading } = useGetPublicTrainingPlansQuery(
@@ -169,9 +162,7 @@ export function TrainingPlansTab({
     },
   )
 
-  // Fetch assignment mutation
-  const { mutateAsync: assignTemplate, isPending: isAssigning } =
-    useAssignTemplateToSelfMutation({})
+  const { mutateAsync: assignTemplate } = useAssignTemplateToSelfMutation({})
 
   const { mutateAsync: activatePlan } = useActivatePlanMutation({
     onError: () => {
@@ -215,40 +206,6 @@ export function TrainingPlansTab({
       }
     }
   }, [initialPlanId, data])
-
-  const handleAssignTemplate = async (planId: string) => {
-    try {
-      await assignTemplate({
-        planId,
-      })
-
-      toast.success('Plan added to My Plans')
-
-      await queryClient.refetchQueries({
-        queryKey: ['FitspaceMyPlans'],
-      })
-
-      router.push('/fitspace/my-plans')
-    } catch (error) {
-      console.error('Failed to add training plan to your plans:', error)
-
-      // If error contains "limit reached" or "Premium", redirect to offers
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
-      if (
-        errorMessage.includes('limit reached') ||
-        errorMessage.includes('Premium') ||
-        errorMessage.includes('subscription')
-      ) {
-        toast.error('Premium required')
-        openUrl(
-          `/account-management/offers?redirectUrl=/fitspace/explore/plan/${planId}`,
-        )
-      } else {
-        toast.error('Failed to add training plan')
-      }
-    }
-  }
 
   const handleStartNow = async (planId: string) => {
     setIsStartingNow(true)
@@ -620,9 +577,7 @@ export function TrainingPlansTab({
           {selectedPlan && (
             <TrainingPlanPreviewContent
               plan={selectedPlan}
-              onAssignTemplate={handleAssignTemplate}
               onStartNow={() => handleStartNow(selectedPlan.id)}
-              isAssigning={isAssigning}
               isStartingNow={isStartingNow}
               weeksData={selectedPlan}
               hasDemoWorkoutDay={!!demoWorkoutForSelectedPlan}
@@ -667,8 +622,6 @@ export function TrainingPlansTab({
           }
         }}
         isStarting={isStarting}
-        onAssignTemplate={handleAssignTemplate}
-        isAssigning={isAssigning}
         availablePlans={allPlans}
         hidePreviewPlan
       />

@@ -174,17 +174,20 @@ export function CustomPlansTab() {
   }
 
   return (
-    <>
+    <div>
       <HeaderTab
-        title="Custom plans"
-        description="Create plans templates to use in your training."
+        title="Plans"
+        description="Manage your assigned plans and build your own."
       />
 
-      <div className="flex justify-between items-center gap-2 mb-4">
-        <div className="text-sm text-muted-foreground">
-          {hasPremium
-            ? `${foldersList.length} plans · ${totalWorkoutCount} days`
-            : `${foldersList.length}/${subscription?.favouriteFolderLimit ?? 1} plans · ${totalWorkoutCount}/${subscription?.favouriteWorkoutLimit ?? 3} days`}
+      <div className="flex justify-between items-center gap-2 mb-4 mt-8">
+        <div>
+          <p className="text-xl font-semibold">Custom plans</p>
+          <p className="text-sm text-muted-foreground">
+            {hasPremium
+              ? `${foldersList.length} plans · ${totalWorkoutCount} days`
+              : `${foldersList.length}/${subscription?.favouriteFolderLimit ?? 1} plans · ${totalWorkoutCount}/${subscription?.favouriteWorkoutLimit ?? 3} days`}
+          </p>
         </div>
         <PremiumButtonWrapper
           hasPremium={hasPremium}
@@ -299,6 +302,6 @@ export function CustomPlansTab() {
         folderOperations={folderOperations}
         folderToEdit={folderToEdit}
       />
-    </>
+    </div>
   )
 }
