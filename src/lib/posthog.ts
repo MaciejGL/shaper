@@ -59,11 +59,6 @@ export async function initPostHog(): Promise<PostHog | null> {
         // Privacy settings
         respect_dnt: true, // Respect Do Not Track browser setting
         opt_out_capturing_by_default: false,
-
-        debug: true,
-        loaded: (posthog: PostHog) => {
-          posthog.debug(false)
-        },
       })
 
       posthogInstance = posthog
