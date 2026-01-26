@@ -154,7 +154,7 @@ function PlansList({ plans, onPlanClick }: PlansListProps) {
 
       {coachingPlans.length > 0 && (
         <PlanSection
-          title="Plans from coaching"
+          title="Plans from coaches"
           plans={coachingPlans.map(({ plan }) => plan)}
           onPlanClick={onPlanClick}
           showProgress={false}

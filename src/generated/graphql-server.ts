@@ -1242,7 +1242,6 @@ export type GQLMutation = {
   addTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
   addUserLocation: EntireFieldWrapper<GQLUserProfile>;
   archiveMeal: EntireFieldWrapper<GQLMeal>;
-  assignTemplateToSelf: EntireFieldWrapper<Scalars['ID']['output']>;
   assignTrainingPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   cancelClientCoachingSubscription: EntireFieldWrapper<GQLCancelCoachingResult>;
   cancelCoaching: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1512,11 +1511,6 @@ export type GQLMutationAddUserLocationArgs = {
 
 export type GQLMutationArchiveMealArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type GQLMutationAssignTemplateToSelfArgs = {
-  planId: Scalars['ID']['input'];
 };
 
 
@@ -5396,7 +5390,6 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   addTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddTrainingWeekArgs, 'input'>>;
   addUserLocation?: Resolver<GQLResolversTypes['UserProfile'], ParentType, ContextType, RequireFields<GQLMutationAddUserLocationArgs, 'input'>>;
   archiveMeal?: Resolver<GQLResolversTypes['Meal'], ParentType, ContextType, RequireFields<GQLMutationArchiveMealArgs, 'id'>>;
-  assignTemplateToSelf?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAssignTemplateToSelfArgs, 'planId'>>;
   assignTrainingPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignTrainingPlanToClientArgs, 'input'>>;
   cancelClientCoachingSubscription?: Resolver<GQLResolversTypes['CancelCoachingResult'], ParentType, ContextType, RequireFields<GQLMutationCancelClientCoachingSubscriptionArgs, 'cancelAt' | 'clientId'>>;
   cancelCoaching?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;

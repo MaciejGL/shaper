@@ -11,6 +11,7 @@ export interface UserSubscriptionStatusData {
   hasPremium: boolean
   activeSubscriptions: UserSubscription[]
   cancelledSubscriptions: UserSubscription[]
+  trainingPlanLimit: number
   favouriteWorkoutLimit: number
   favouriteFolderLimit: number
   usageTrackers: ServiceUsageTracker[]

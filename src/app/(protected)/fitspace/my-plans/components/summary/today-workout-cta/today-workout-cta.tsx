@@ -123,7 +123,7 @@ export function TodayWorkoutCta({ weeks, startDate }: TodayWorkoutCtaProps) {
         {day.exercises?.length > 0 && (
           <CardContent>
             <WorkoutStatsTiles
-              variant="premium"
+              variant="default"
               exercises={day.exercises}
               estimatedDuration={estimatedDuration}
             />

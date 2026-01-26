@@ -42,15 +42,19 @@ export function WorkoutStatsTiles({
   estimatedDuration,
 }: WorkoutStatsTilesProps) {
   const tileBg =
-    variant === 'premium' ? 'bg-background/50 backdrop-blur-sm' : 'bg-muted/50'
+    variant === 'premium'
+      ? 'bg-background/50 backdrop-blur-sm rounded-2xl'
+      : 'bg-card-on-card rounded-2xl'
 
   const clickableTileBg =
-    variant === 'premium' ? 'hover:bg-background/80' : 'hover:bg-muted'
+    variant === 'premium'
+      ? 'hover:bg-background/80'
+      : 'hover:bg-card-on-card/50'
 
   const clickableTileClassName = cn(
     tileBg,
     clickableTileBg,
-    'group flex w-full flex-col relative items-center justify-center gap-1 rounded-lg p-2 text-center text-sm transition-colors ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-full',
+    'group flex w-full flex-col relative items-center justify-center gap-1 rounded-2xl p-2 text-center text-sm transition-colors ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-full',
   )
   return (
     <div className="grid grid-cols-2 gap-3">

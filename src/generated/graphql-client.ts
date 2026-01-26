@@ -1240,7 +1240,6 @@ export type GQLMutation = {
   addTrainingWeek: Scalars['ID']['output'];
   addUserLocation: GQLUserProfile;
   archiveMeal: GQLMeal;
-  assignTemplateToSelf: Scalars['ID']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   cancelClientCoachingSubscription: GQLCancelCoachingResult;
   cancelCoaching: Scalars['Boolean']['output'];
@@ -1510,11 +1509,6 @@ export type GQLMutationAddUserLocationArgs = {
 
 export type GQLMutationArchiveMealArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type GQLMutationAssignTemplateToSelfArgs = {
-  planId: Scalars['ID']['input'];
 };
 
 
@@ -5988,13 +5982,6 @@ export type GQLGetActivePackageTemplatesQueryVariables = Exact<{
 
 
 export type GQLGetActivePackageTemplatesQuery = { __typename?: 'Query', getActivePackageTemplates: Array<{ __typename?: 'PackageTemplate', id: string, name: string, description?: string | undefined | null, duration: GQLSubscriptionDuration, isActive: boolean, stripeProductId?: string | undefined | null, stripeLookupKey?: string | undefined | null, trainerId?: string | undefined | null, serviceType?: GQLServiceType | undefined | null, createdAt: string, updatedAt: string }> };
-
-export type GQLAssignTemplateToSelfMutationVariables = Exact<{
-  planId: Scalars['ID']['input'];
-}>;
-
-
-export type GQLAssignTemplateToSelfMutation = { __typename?: 'Mutation', assignTemplateToSelf: string };
 
 export type GQLUserBasicQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -18139,30 +18126,6 @@ useInfiniteGetActivePackageTemplatesQuery.getKey = (variables?: GQLGetActivePack
 
 
 useGetActivePackageTemplatesQuery.fetcher = (variables?: GQLGetActivePackageTemplatesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetActivePackageTemplatesQuery, GQLGetActivePackageTemplatesQueryVariables>(GetActivePackageTemplatesDocument, variables, options);
-
-export const AssignTemplateToSelfDocument = `
-    mutation AssignTemplateToSelf($planId: ID!) {
-  assignTemplateToSelf(planId: $planId)
-}
-    `;
-
-export const useAssignTemplateToSelfMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLAssignTemplateToSelfMutation, TError, GQLAssignTemplateToSelfMutationVariables, TContext>) => {
-    
-    return useMutation<GQLAssignTemplateToSelfMutation, TError, GQLAssignTemplateToSelfMutationVariables, TContext>(
-      {
-    mutationKey: ['AssignTemplateToSelf'],
-    mutationFn: (variables?: GQLAssignTemplateToSelfMutationVariables) => fetchData<GQLAssignTemplateToSelfMutation, GQLAssignTemplateToSelfMutationVariables>(AssignTemplateToSelfDocument, variables)(),
-    ...options
-  }
-    )};
-
-useAssignTemplateToSelfMutation.getKey = () => ['AssignTemplateToSelf'];
-
-
-useAssignTemplateToSelfMutation.fetcher = (variables: GQLAssignTemplateToSelfMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAssignTemplateToSelfMutation, GQLAssignTemplateToSelfMutationVariables>(AssignTemplateToSelfDocument, variables, options);
 
 export const UserBasicDocument = `
     query UserBasic {

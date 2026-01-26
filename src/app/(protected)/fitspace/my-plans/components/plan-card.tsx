@@ -54,14 +54,14 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
       )}
       <CardContent
         className={cn(
-          'relative flex gap-2 justify-between aspect-12/5',
+          'relative flex gap-2 justify-between aspect-12/7',
           status !== PlanStatus.Active && 'items-center',
         )}
       >
         <div className="self-end space-y-2 w-full">
           <div className="flex items-end gap-2 empty:hidden mt-2">
             {status === PlanStatus.Active && (
-              <Badge variant="primary" className="w-fit" size="lg">
+              <Badge variant="primary" className="w-fit" size="md-lg">
                 Active
               </Badge>
             )}
@@ -82,7 +82,7 @@ export function PlanCard({ plan, onClick, status, imageUrl }: PlanCardProps) {
             <p>{plan.title}</p>
             <Button
               variant="default"
-              size="icon-xl"
+              size="icon-lg"
               className="rounded-full"
               iconOnly={<ChevronRight className="size-6!" />}
             />

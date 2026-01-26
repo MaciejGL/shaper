@@ -16,7 +16,7 @@ import { PublicPlan } from './types'
 
 interface TrainingPlanPreviewContentProps {
   plan: PublicPlan
-  onStartNow?: () => void
+  onStartNow?: () => void | Promise<void>
   isStartingNow: boolean
   weeksData: PublicPlan
   hideCloseButton?: boolean
@@ -116,7 +116,8 @@ export function TrainingPlanPreviewContent({
 
         <TrainingPlanPreviewFooter
           plan={plan}
-          onStartNow={hasActivePlan ? undefined : onStartNow}
+          onStartNow={onStartNow}
+          hasActivePlan={hasActivePlan}
           hasDemoWorkoutDay={hasDemoWorkoutDay && !hasActivePlan}
           onTryDemoWorkoutDay={onTryDemoWorkoutDay ?? (() => {})}
           isStartingNow={isStartingNow}

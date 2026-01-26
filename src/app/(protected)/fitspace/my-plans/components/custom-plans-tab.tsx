@@ -182,7 +182,7 @@ export function CustomPlansTab() {
 
       <div className="flex justify-between items-center gap-2 mb-4 mt-8">
         <div>
-          <p className="text-xl font-semibold">Custom plans</p>
+          <p className="text-base font-semibold">Custom plans</p>
           <p className="text-sm text-muted-foreground">
             {hasPremium
               ? `${foldersList.length} plans · ${totalWorkoutCount} days`

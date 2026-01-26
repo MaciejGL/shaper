@@ -141,7 +141,3 @@ query GetActivePackageTemplates($trainerId: ID) {
   }
 }
 
-# Assign training plan template to current user
-mutation AssignTemplateToSelf($planId: ID!) {
-  assignTemplateToSelf(planId: $planId)
-}

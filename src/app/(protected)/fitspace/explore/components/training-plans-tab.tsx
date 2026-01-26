@@ -25,7 +25,6 @@ import {
   GQLFocusTag,
   GQLGetPublicTrainingPlansQuery,
   useActivatePlanMutation,
-  useAssignTemplateToSelfMutation,
   useGetPublicTrainingPlansQuery,
   useStartFreeWorkoutDayMutation,
 } from '@/generated/graphql-client'
@@ -162,11 +161,16 @@ export function TrainingPlansTab({
     },
   )
 
-  const { mutateAsync: assignTemplate } = useAssignTemplateToSelfMutation({})
-
   const { mutateAsync: activatePlan } = useActivatePlanMutation({
     onError: () => {
       toast.error('Failed to start plan')
+    },
+    onSuccess: () => {
+      queryInvalidation.planStateChange(queryClient)
+      startTransition(() => {
+        router.refresh()
+        router.push('/fitspace/workout')
+      })
     },
   })
 
@@ -211,26 +215,10 @@ export function TrainingPlansTab({
     setIsStartingNow(true)
 
     try {
-      const assigned = await assignTemplate({ planId })
-      const assignedPlanId = assigned.assignTemplateToSelf
-      if (!assignedPlanId) {
-        throw new Error('Failed to assign plan')
-      }
-
       await activatePlan({
-        planId: assignedPlanId,
+        planId,
         startDate: format(new Date(), 'yyyy-MM-dd'),
         resume: false,
-      })
-
-      await queryInvalidation.planStateChange(queryClient)
-
-      setIsPreviewOpen(false)
-      setSelectedPlan(null)
-
-      startTransition(() => {
-        router.refresh()
-        router.push('/fitspace/workout')
       })
     } catch (error) {
       console.error('Failed to start plan:', error)

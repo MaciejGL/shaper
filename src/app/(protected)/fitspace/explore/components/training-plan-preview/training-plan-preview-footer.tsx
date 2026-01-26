@@ -1,5 +1,7 @@
 import { ArrowRight, Play } from 'lucide-react'
+import Link from 'next/link'
 
+import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import { DrawerFooter } from '@/components/ui/drawer'
@@ -13,10 +15,11 @@ import { captureEvent } from '@/lib/posthog'
 
 interface TrainingPlanPreviewFooterProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
-  onStartNow?: () => void
+  onStartNow?: () => void | Promise<void>
   hasDemoWorkoutDay: boolean
   onTryDemoWorkoutDay: () => void
   isStartingNow: boolean
+  hasActivePlan: boolean
 }
 
 export function TrainingPlanPreviewFooter({
@@ -25,9 +28,11 @@ export function TrainingPlanPreviewFooter({
   hasDemoWorkoutDay,
   onTryDemoWorkoutDay,
   isStartingNow,
+  hasActivePlan,
 }: TrainingPlanPreviewFooterProps) {
   const { user } = useUser()
   const { data: subscriptionData } = useCurrentSubscription(user?.id)
+  const { openModal } = useConfirmationModalContext()
   const hasPremium = subscriptionData?.hasPremiumAccess || false
   const rules = usePaymentRules()
   const { openUrl, isLoading: isOpeningUrl } = useOpenUrl({
@@ -54,6 +59,34 @@ export function TrainingPlanPreviewFooter({
             size="lg"
             onClick={() => {
               if (!onStartNow) return
+
+              if (hasActivePlan) {
+                openModal({
+                  title: 'You already have an active plan',
+                  description:
+                    'Starting this plan will pause your current plan. You can resume paused plans or mark them as done any time in My Plans.',
+                  cancelText: 'Keep current plan',
+                  confirmText: 'Start new plan',
+                  onConfirm: async () => {
+                    analyticsEvents.explorePlanStartNowTap(trackProps)
+                    await onStartNow()
+                  },
+                  children: (
+                    <p className="text-sm text-muted-foreground">
+                      Manage your paused plans in{' '}
+                      <Link
+                        href="/fitspace/my-plans"
+                        className="text-primary underline"
+                      >
+                        My Plans
+                      </Link>
+                      .
+                    </p>
+                  ),
+                })
+                return
+              }
+
               analyticsEvents.explorePlanStartNowTap(trackProps)
               onStartNow()
             }}
@@ -71,26 +104,31 @@ export function TrainingPlanPreviewFooter({
               analyticsEvents.explorePlanStartDemoTap(trackProps)
               onTryDemoWorkoutDay()
             }}
-            iconStart={<Play />}
+            iconEnd={<Play />}
           >
-            Start preview session
+            View and start preview session
           </Button>
         ) : null}
 
         {showUpgradeCta ? (
           <PremiumButtonWrapper
             hasPremium={hasPremium}
-            tooltipText="Upgrade to get full access to this plan."
+            tooltipText="Upgrade to get full access to all plans made by coaches."
           >
             <Button
               className="w-full"
               size="lg"
               variant="outline"
               onClick={() => {
-                captureEvent(ANALYTICS_EVENTS.EXPLORE_PLAN_UPGRADE_TAP, trackProps)
-                openUrl(
-                  `/account-management/offers?redirectUrl=/fitspace/explore?tab=premium-plans&plan=${plan.id}`,
+                captureEvent(
+                  ANALYTICS_EVENTS.EXPLORE_PLAN_UPGRADE_TAP,
+                  trackProps,
                 )
+                if (hasPremium) {
+                  openUrl(
+                    `/account-management/offers?redirectUrl=/fitspace/explore?tab=premium-plans&plan=${plan.id}`,
+                  )
+                }
               }}
               disabled={isUpgradeLoading}
               loading={isUpgradeLoading}

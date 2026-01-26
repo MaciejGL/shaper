@@ -51,7 +51,7 @@ export function TrainingPlanPreviewInfoTab({
               variant="default"
               onClick={onTryDemoWorkoutDay}
             >
-              Start preview session
+              View and start preview session
             </Button>
           </CardContent>
         </Card>

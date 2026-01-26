@@ -10,7 +10,6 @@ import {
   GQLQueryGetClientActivePlanArgs,
 } from '@/generated/graphql-client'
 import {
-  GQLMutationAssignTemplateToSelfArgs,
   GQLMutationAssignTrainingPlanToClientArgs,
   GQLMutationCreateTrainingPlanArgs,
   GQLMutationDeleteTrainingPlanArgs,
@@ -1259,108 +1258,6 @@ export async function removeTrainingPlanFromClient(
   return true
 }
 
-export async function assignTemplateToSelf(
-  args: GQLMutationAssignTemplateToSelfArgs,
-  context: GQLContext,
-) {
-  const { planId } = args
-  const user = context.user
-
-  if (!user) {
-    throw new Error('User not authenticated')
-  }
-
-  const userId = user.user.id
-
-  // Get the template plan to check if it's premium
-  const template = await prisma.trainingPlan.findUnique({
-    where: { id: planId },
-    select: {
-      id: true,
-      title: true,
-      premium: true,
-      isTemplate: true,
-      isPublic: true,
-    },
-  })
-
-  if (!template) {
-    throw new Error('Training plan template not found')
-  }
-
-  if (!template.isTemplate) {
-    throw new Error('Plan is not a template')
-  }
-
-  // Check if template is premium and user has access
-  if (template.premium) {
-    const subscriptionStatus =
-      await subscriptionValidator.getUserSubscriptionStatus(userId)
-
-    if (
-      !subscriptionStatus.hasPremium &&
-      !subscriptionStatus.canAccessPremiumTrainingPlans
-    ) {
-      throw new Error(
-        'Premium subscription required to access this training plan template',
-      )
-    }
-  }
-
-  // Check training plan limits
-  const subscriptionStatus =
-    await subscriptionValidator.getUserSubscriptionStatus(userId)
-
-  if (!subscriptionStatus.hasPremium) {
-    // Count current assigned training plans (non-completed, non-Quick Workout)
-    const currentPlansCount = await prisma.trainingPlan.count({
-      where: {
-        assignedToId: userId,
-        active: false,
-        title: { not: 'Quick Workout' },
-        completedAt: null,
-      },
-    })
-
-    if (currentPlansCount >= subscriptionStatus.trainingPlanLimit) {
-      throw new GraphQLError(
-        `Training plan limit reached. Upgrade to Premium for unlimited plans.`,
-      )
-    }
-  }
-
-  // Get the full plan for duplication
-  const fullPlan = await getFullPlanById(planId)
-
-  if (!fullPlan) {
-    throw new Error('Training plan template not found')
-  }
-
-  // Duplicate the plan
-  const duplicated = await duplicatePlan({
-    plan: fullPlan,
-    asTemplate: false,
-    createdById: fullPlan.createdById,
-  })
-
-  if (!duplicated) {
-    throw new Error('Failed to assign template')
-  }
-
-  // Assign the plan to user without activating it
-  await prisma.trainingPlan.update({
-    where: { id: duplicated.id },
-    data: {
-      assignedToId: userId,
-      isTemplate: false,
-      templateId: planId,
-      active: false,
-    },
-  })
-
-  return duplicated.id
-}
-
 export async function activatePlan(
   args: GQLMutationActivatePlanArgs,
   context: GQLContext,
@@ -1480,8 +1377,25 @@ export async function activatePlan(
     return true
   }
 
-  if (!fullPlan || fullPlan.assignedToId !== user.user.id) {
+  const isUserOwnedPlan = fullPlan.assignedToId === user.user.id
+  const isStartablePublicTemplate =
+    fullPlan.assignedToId === null && fullPlan.isTemplate && fullPlan.isPublic
+
+  if (!isUserOwnedPlan && !isStartablePublicTemplate) {
     throw new Error('Training plan not found or unauthorized')
+  }
+
+  // When starting from Explore (public template), enforce access + limits
+  if (!isUserOwnedPlan) {
+    const subscriptionStatus =
+      await subscriptionValidator.getUserSubscriptionStatus(user.user.id)
+
+    // Product rule: starting a full plan requires Premium (regardless of plan flag)
+    if (!subscriptionStatus.hasPremium) {
+      throw new GraphQLError(
+        'Premium subscription required to start a training plan.',
+      )
+    }
   }
 
   try {
@@ -1528,12 +1442,20 @@ export async function activatePlan(
         // Use the week start date as calculated by the client (already aligned with user preference)
         const baseStartDate = parseUTCDate(startDate, 'UTC')
 
+        const shouldSetTemplateId = !isUserOwnedPlan
+
         // Use bulk operations for much better performance
         await Promise.all([
           // Activate the plan
           tx.trainingPlan.update({
-            where: { id: duplicated.id, assignedToId: user.user.id },
-            data: { active: true, startDate: baseStartDate },
+            where: { id: duplicated.id },
+            data: {
+              assignedToId: user.user.id,
+              isTemplate: false,
+              templateId: shouldSetTemplateId ? fullPlan.id : duplicated.templateId,
+              active: true,
+              startDate: baseStartDate,
+            },
           }),
 
           // Bulk update all weeks scheduling

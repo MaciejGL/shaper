@@ -122,7 +122,6 @@ type Mutation {
   deleteTrainingPlan(id: ID!): Boolean!
   duplicateTrainingPlan(id: ID!): ID!
   assignTrainingPlanToClient(input: AssignTrainingPlanToClientInput!): Boolean!
-  assignTemplateToSelf(planId: ID!): ID!
   removeTrainingPlanFromClient(planId: ID!, clientId: ID!): Boolean!
   activatePlan(planId: ID!, startDate: String!, resume: Boolean!): Boolean!
   pausePlan(planId: ID!): Boolean!
