@@ -1,9 +1,10 @@
 'use client'
 
-import { LayoutGroup } from 'framer-motion'
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import React, { useState } from 'react'
 
 import { MarkDayAsCompletedButton } from '@/app/(protected)/fitspace/workout/training/components/mark-day-as-completed-button'
+import { WorkoutCelebrationCta } from '@/app/(protected)/fitspace/workout/training/components/workout-celebration-cta/workout-celebration-cta'
 import { buttonVariants } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useUserPreferences } from '@/context/user-preferences-context'
@@ -121,6 +122,9 @@ export function Exercises({
     }
   })
 
+  const showCelebrationCta =
+    exercises.length > 4 && exercises.every((exercise) => exercise.completedAt)
+
   // Main workout view
   return (
     <LayoutGroup>
@@ -173,6 +177,20 @@ export function Exercises({
               />
             </div>
           )}
+          <AnimatePresence>
+            {showCelebrationCta && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: 'spring', stiffness: 600, damping: 14 }}
+                className="mb-10"
+              >
+                <WorkoutCelebrationCta />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </LayoutGroup>
