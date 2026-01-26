@@ -148,22 +148,22 @@ export function ClientNotes({ clientId }: { clientId: string }) {
       />
 
       <div>
+        <CreateNoteForm
+          isCreating={isCreating}
+          newNoteText={newNoteText}
+          newNoteShareWithClient={newNoteShareWithClient}
+          isCreatingNote={isCreatingNote}
+          onNewNoteTextChange={setNewNoteText}
+          onNewNoteShareWithClientChange={setNewNoteShareWithClient}
+          onCreateNote={handleCreateNote}
+          onCancelCreate={handleCancelCreate}
+        />
         {notes.length === 0 ? (
           <div className="text-sm text-muted-foreground">
             You haven't added any notes yet.
           </div>
         ) : (
           <div className="space-y-3">
-            <CreateNoteForm
-              isCreating={isCreating}
-              newNoteText={newNoteText}
-              newNoteShareWithClient={newNoteShareWithClient}
-              isCreatingNote={isCreatingNote}
-              onNewNoteTextChange={setNewNoteText}
-              onNewNoteShareWithClientChange={setNewNoteShareWithClient}
-              onCreateNote={handleCreateNote}
-              onCancelCreate={handleCancelCreate}
-            />
             {notes.map((note) => (
               <Note
                 loading={isLoading || isPlaceholderData}
