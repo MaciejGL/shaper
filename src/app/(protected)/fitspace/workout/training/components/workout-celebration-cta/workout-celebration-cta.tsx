@@ -13,7 +13,6 @@ interface WorkoutCelebrationCtaProps {
   svgPathD?: string
   svgPathMatrix?: DOMMatrix
   emoji?: string
-  holdThresholdMs?: number
   moveTolerancePx?: number
 }
 
@@ -21,17 +20,14 @@ export function WorkoutCelebrationCta({
   svgPathD,
   svgPathMatrix,
   emoji,
-  holdThresholdMs = 450,
   moveTolerancePx = 8,
 }: WorkoutCelebrationCtaProps) {
-  const { celebration, trigger } = useWorkoutCelebrationCta({
+  const { celebration, start, stop } = useWorkoutCelebrationCta({
     svgPathD,
     svgPathMatrix,
     emoji,
   })
 
-  const holdTimeoutRef = useRef<number | null>(null)
-  const didHoldRef = useRef(false)
   const pointerIdRef = useRef<number | null>(null)
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null)
 
@@ -40,35 +36,21 @@ export function WorkoutCelebrationCta({
     [moveTolerancePx],
   )
 
-  const clearHoldTimeout = useCallback(() => {
-    if (holdTimeoutRef.current) {
-      window.clearTimeout(holdTimeoutRef.current)
-      holdTimeoutRef.current = null
-    }
-  }, [])
-
   const cancelPointerTracking = useCallback(() => {
-    clearHoldTimeout()
-    didHoldRef.current = false
     pointerIdRef.current = null
     pointerStartRef.current = null
-  }, [clearHoldTimeout])
+    stop()
+  }, [stop])
 
   const handlePointerDown = useCallback(
     (e: PointerEvent<HTMLButtonElement>) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return
 
-      didHoldRef.current = false
       pointerIdRef.current = e.pointerId
       pointerStartRef.current = { x: e.clientX, y: e.clientY }
-
-      clearHoldTimeout()
-      holdTimeoutRef.current = window.setTimeout(() => {
-        didHoldRef.current = true
-        trigger('hold')
-      }, holdThresholdMs)
+      start()
     },
-    [clearHoldTimeout, holdThresholdMs, trigger],
+    [start],
   )
 
   const handlePointerMove = useCallback(
@@ -90,13 +72,9 @@ export function WorkoutCelebrationCta({
     (e: PointerEvent<HTMLButtonElement>) => {
       if (pointerIdRef.current !== e.pointerId) return
 
-      const didHold = didHoldRef.current
       cancelPointerTracking()
-
-      if (didHold) return
-      trigger('tap')
     },
-    [cancelPointerTracking, trigger],
+    [cancelPointerTracking],
   )
 
   const handlePointerCancel = useCallback(() => {

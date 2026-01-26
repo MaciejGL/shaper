@@ -13,8 +13,8 @@ interface CelebrationState {
 
 interface UseWorkoutCelebrationCtaReturn {
   celebration: CelebrationState | null
-  trigger: (kind: CelebrationKind) => void
-  dismiss: () => void
+  start: () => void
+  stop: () => void
 }
 
 function sample<T>(arr: readonly T[]): T {
@@ -39,19 +39,13 @@ const HOLD_MESSAGES = [
 
 const MESSAGES = [...TAP_MESSAGES, ...HOLD_MESSAGES] as const
 
-const TEXT_SHAPE_SCALAR = 1.6
-const BASE_SHAPES = [
-  // square
-  confetti.shapeFromPath({ path: 'M0 0 L10 0 L10 10 L0 10 Z' }),
-  // circle
-  confetti.shapeFromPath({ path: 'M5 0 A5 5 0 1 0 5.0001 0 Z' }),
-] as const
+const TEXT_SHAPE_SCALAR = 4
 
 function getCelebrationMessage(): string {
   return sample(MESSAGES)
 }
 
-function getConfettiOptions(kind: CelebrationKind): {
+function getStreamConfettiOptions(kind: CelebrationKind): {
   particleCount: number
   spread: number
   startVelocity: number
@@ -61,22 +55,22 @@ function getConfettiOptions(kind: CelebrationKind): {
 } {
   if (kind === 'hold') {
     return {
-      particleCount: 120,
-      spread: 28,
-      startVelocity: 70,
+      particleCount: 18,
+      spread: 16,
+      startVelocity: 64,
       gravity: 1.05,
       scalar: 1.6,
-      ticks: 260,
+      ticks: 140,
     }
   }
 
   return {
-    particleCount: 55,
-    spread: 24,
-    startVelocity: 60,
+    particleCount: 12,
+    spread: 14,
+    startVelocity: 64,
     gravity: 1,
     scalar: 1.25,
-    ticks: 200,
+    ticks: 120,
   }
 }
 
@@ -87,6 +81,9 @@ export function useWorkoutCelebrationCta(
 
   const shouldReduceMotion = useReducedMotion() ?? false
   const shapesRef = useRef<ConfettiShape[] | null>(null)
+  const rafIdRef = useRef<number | null>(null)
+  const isRunningRef = useRef(false)
+  const lastEmitMsRef = useRef<number>(0)
 
   const [celebration, setCelebration] = useState<CelebrationState | null>(null)
   const hideTimeoutRef = useRef<number | null>(null)
@@ -109,10 +106,10 @@ export function useWorkoutCelebrationCta(
   const ensureShapes = useCallback(async (): Promise<ConfettiShape[]> => {
     if (shapesRef.current) return shapesRef.current
 
-    const shapes: ConfettiShape[] = [...BASE_SHAPES]
+    const shapes: ConfettiShape[] = []
 
     // Gym emoji confetti
-    const emojis = ['💪', '🔥', '🏆'] as const
+    const emojis = ['💪', '🔥', '🏆', '🔥', '✨', '🔥', '⚡️'] as const
     for (const e of emojis) {
       shapes.push(
         confetti.shapeFromText({ text: e, scalar: TEXT_SHAPE_SCALAR }),
@@ -129,14 +126,9 @@ export function useWorkoutCelebrationCta(
       shapes.push(shape)
     }
 
-    // Also include caller-provided emoji (defaults to 💪).
-    shapes.push(
-      confetti.shapeFromText({ text: emoji, scalar: TEXT_SHAPE_SCALAR }),
-    )
-
     shapesRef.current = shapes
     return shapes
-  }, [svgPathD, svgPathMatrix, emoji])
+  }, [svgPathD, svgPathMatrix])
 
   const clearHideTimeout = useCallback(() => {
     if (hideTimeoutRef.current) {
@@ -145,52 +137,75 @@ export function useWorkoutCelebrationCta(
     }
   }, [])
 
-  const dismiss = useCallback(() => {
+  const stop = useCallback(() => {
     clearHideTimeout()
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current)
+      rafIdRef.current = null
+    }
+    isRunningRef.current = false
     setCelebration(null)
   }, [clearHideTimeout])
 
-  const trigger = useCallback(
-    (kind: CelebrationKind) => {
-      clearHideTimeout()
-      setCelebration({ kind, message: getCelebrationMessage() })
+  const start = useCallback(() => {
+    if (isRunningRef.current) return
 
-      hideTimeoutRef.current = window.setTimeout(
-        () => setCelebration(null),
-        kind === 'hold' ? 2500 : 1500,
-      )
+    // We keep kind for tuning, but the effect lasts only while pressed.
+    const kind: CelebrationKind = 'tap'
 
-      if (shouldReduceMotion) return
+    clearHideTimeout()
+    setCelebration({ kind, message: getCelebrationMessage() })
 
-      void (async () => {
-        const shapes = await ensureShapes()
+    if (shouldReduceMotion) return
+    isRunningRef.current = true
 
-        const base = getConfettiOptions(kind)
-        const originY = 0.85
+    void (async () => {
+      const shapes = await ensureShapes()
+      const colors = ['#fde047', '#fbbf24', '#f59e0b', '#ffffff'] as const
+      const originY = 0.85
 
-        const colors = ['#22c55e', '#3b82f6', '#eab308', '#f43f5e'] as const
+      const emit = () => {
+        const base = getStreamConfettiOptions(kind)
 
-        // Dual “cannons” from left and right edges.
         confetti({
           ...base,
-          angle: 70,
+          angle: 62,
           origin: { x: 0, y: originY },
           disableForReducedMotion: true,
+          flat: true,
           shapes,
           colors: [...colors],
         })
         confetti({
           ...base,
-          angle: 110,
+          angle: 118,
           origin: { x: 1, y: originY },
           disableForReducedMotion: true,
+          flat: true,
           shapes,
           colors: [...colors],
         })
-      })()
-    },
-    [clearHideTimeout, ensureShapes, shouldReduceMotion],
-  )
+      }
+
+      // Important: fire immediately so quick taps still show sparks.
+      emit()
+
+      const loop = (nowMs: number) => {
+        if (!isRunningRef.current) return
+
+        // Throttle emissions so it feels like a continuous spark stream.
+        if (nowMs - lastEmitMsRef.current >= 90) {
+          lastEmitMsRef.current = nowMs
+          emit()
+        }
+
+        rafIdRef.current = requestAnimationFrame(loop)
+      }
+
+      lastEmitMsRef.current = performance.now()
+      rafIdRef.current = requestAnimationFrame(loop)
+    })()
+  }, [clearHideTimeout, ensureShapes, shouldReduceMotion])
 
   // If inputs that define the shape change, reset cached shape.
   // This keeps the hook flexible without rebuilding on every trigger.
@@ -198,5 +213,7 @@ export function useWorkoutCelebrationCta(
     shapesRef.current = null
   }, [shapesDepsKey])
 
-  return { celebration, trigger, dismiss }
+  useEffect(() => stop, [stop])
+
+  return { celebration, start, stop }
 }

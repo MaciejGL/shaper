@@ -86,17 +86,17 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
         prefetch: true,
       },
       {
-        id: 'nutrition',
-        href: '/fitspace/nutrition',
-        icon: SaladIcon,
-        label: 'Nutrition',
-        prefetch: true,
-      },
-      {
         id: 'progress',
         href: '/fitspace/progress',
         icon: TrendingUp,
         label: 'Progress',
+        prefetch: true,
+      },
+      {
+        id: 'nutrition',
+        href: '/fitspace/nutrition',
+        icon: SaladIcon,
+        label: 'Nutrition',
         prefetch: true,
       },
       {
@@ -171,9 +171,9 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
                       ? 'nav-my-plans'
                       : item.id === 'progress'
                         ? 'nav-progress'
-                      : item.id === 'discover'
-                        ? 'nav-explore'
-                        : undefined
+                        : item.id === 'discover'
+                          ? 'nav-explore'
+                          : undefined
                 }
                 className={cn(
                   'flex flex-col items-center justify-center p-2 rounded-lg transition-colors hover:text-sidebar-primary dark:hover:text-sidebar-primary-foreground',
