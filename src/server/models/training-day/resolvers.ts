@@ -29,7 +29,7 @@ const detectWorkoutPRs = async (dayId: string, userId: string) => {
        MAX(
          CASE 
            WHEN esl.reps <= 10 THEN esl.weight / (1.0278 - (0.0278 * esl.reps))
-           WHEN esl.reps <= 15 THEN esl.weight * (1 + 0.025 * esl.reps)
+           WHEN esl.reps <= 15 THEN esl.weight * (1 + (esl.reps / 30.0))
            ELSE esl.weight * 1.5
          END
        ) as max1rm

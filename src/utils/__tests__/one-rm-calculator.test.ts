@@ -13,11 +13,18 @@ describe('one-rm-calculator', () => {
       expect(result).toBeCloseTo(expected, 1)
     })
 
-    it("should calculate 1RM using O'Conner formula for reps 11-15", () => {
+    it('should calculate 1RM using Epley formula for reps 11-15', () => {
       // Test case: 80kg x 12 reps
       const result = calculateEstimated1RM(80, 12)
-      const expected = 80 * (1 + 0.025 * 12) // = 80 * 1.3 = 104kg
+      const expected = 80 * (1 + 12 / 30) // = 80 * 1.4 = 112kg
       expect(result).toBe(expected)
+    })
+
+    it('should calculate 1RM using Epley formula for 13 reps', () => {
+      // Regression: 17.5kg x 13 reps ≈ 25.08kg
+      const result = calculateEstimated1RM(17.5, 13)
+      const expected = 17.5 * (1 + 13 / 30)
+      expect(result).toBeCloseTo(expected, 5)
     })
 
     it('should calculate 1RM using conservative estimate for reps > 15', () => {

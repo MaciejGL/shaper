@@ -3,7 +3,7 @@
  *
  * Uses different formulas based on rep ranges for optimal accuracy:
  * - Brzycki formula for 1-10 reps (most accurate)
- * - O'Conner formula for 11-15 reps
+ * - Epley formula for 11-15 reps (commonly used by calculators)
  * - Conservative estimate for 16+ reps
  */
 export function calculateEstimated1RM(weight: number, reps: number): number {
@@ -15,8 +15,8 @@ export function calculateEstimated1RM(weight: number, reps: number): number {
     // Brzycki formula - most accurate for 1-10 reps
     return weight / (1.0278 - 0.0278 * reps)
   } else if (reps <= 15) {
-    // O'Conner formula - better for 11-15 reps
-    return weight * (1 + 0.025 * reps)
+    // Epley formula - commonly used for 11-15 reps
+    return weight * (1 + reps / 30)
   } else {
     // Conservative estimate for 16+ reps
     return weight * 1.5

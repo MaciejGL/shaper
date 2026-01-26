@@ -59,6 +59,9 @@ export function RepMaxGrid({
           </span>
         </div>
       </div>
+      <p className="text-xs text-muted-foreground">
+        Estimates assume you’re fresh (low fatigue) — real performance varies.
+      </p>
       <div className="w-full bg-card-on-card dark:bg-black/40 py-4 rounded-2xl">
         <ChartContainer
           config={chartConfig}

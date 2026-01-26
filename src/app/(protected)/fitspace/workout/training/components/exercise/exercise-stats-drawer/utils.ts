@@ -48,6 +48,38 @@ export function deriveLatestSessionAvg1RMKg(
   return points[points.length - 1].oneRMKg
 }
 
+export function deriveLatestSessionBest1RMKg(
+  estimated1RMProgress:
+    | {
+        date: string
+        detailedLogs: { estimated1RM: number }[]
+      }[]
+    | null
+    | undefined,
+): number | null {
+  let bestSession: { timestamp: number; best1RMKg: number } | null = null
+
+  for (const entry of estimated1RMProgress ?? []) {
+    const date = safeDate(entry.date)
+    if (!date) continue
+
+    const bestForDay = Math.max(
+      0,
+      ...entry.detailedLogs
+        .map((l) => l.estimated1RM)
+        .filter((v) => typeof v === 'number' && Number.isFinite(v) && v > 0),
+    )
+    if (bestForDay <= 0) continue
+
+    const timestamp = date.getTime()
+    if (!bestSession || timestamp > bestSession.timestamp) {
+      bestSession = { timestamp, best1RMKg: bestForDay }
+    }
+  }
+
+  return bestSession?.best1RMKg ?? null
+}
+
 export function buildOneRmSeriesKg(
   estimated1RMProgress:
     | {
@@ -137,7 +169,7 @@ export function buildWeeklyVolumeSeriesKg(
     .filter((v): v is VolumePointKg => v !== null)
     .sort((a, b) => a.timestamp - b.timestamp)
 
-  return rows.slice(-12)
+  return rows
 }
 
 /**

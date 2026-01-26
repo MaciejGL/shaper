@@ -67,7 +67,7 @@ export function ExerciseStatsDrawer({
     oneRmChangePercent,
     oneRmSeries,
     lastWeekVolume,
-    weekOverWeekChangePercent,
+    volumeChangePercent,
     volumeSeries,
     latestOneRMKg,
     repMaxSuggestions,
@@ -150,7 +150,7 @@ export function ExerciseStatsDrawer({
                 chartConfig={chartConfig}
                 volumeSeries={volumeSeries}
                 lastWeekVolume={lastWeekVolume}
-                weekOverWeekChangePercent={weekOverWeekChangePercent}
+                volumeChangePercent={volumeChangePercent}
                 weightUnit={weightUnit}
               />
             </div>

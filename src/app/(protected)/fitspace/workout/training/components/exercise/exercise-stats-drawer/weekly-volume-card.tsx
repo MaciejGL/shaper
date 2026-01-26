@@ -18,14 +18,14 @@ export function WeeklyVolumeCard({
   chartConfig,
   volumeSeries,
   lastWeekVolume,
-  weekOverWeekChangePercent,
+  volumeChangePercent,
   weightUnit,
 }: {
   chartId: string
   chartConfig: ChartConfig
   volumeSeries: { label: string; volume: number }[]
   lastWeekVolume: number
-  weekOverWeekChangePercent: number
+  volumeChangePercent: number
   weightUnit: 'kg' | 'lbs'
 }) {
   const gradientId = `exercise-volume-gradient-${chartId}`
@@ -68,16 +68,16 @@ export function WeeklyVolumeCard({
             icon={<BarChart3 className="size-4 text-blue-500" />}
           />
           <StatsItem
-            label="WoW"
+            label="Change"
             value={
               <span className="tabular-nums">
-                {formatNumber(weekOverWeekChangePercent, 1)}%
+                {formatNumber(volumeChangePercent, 1)}%
               </span>
             }
             icon={
-              weekOverWeekChangePercent > 0 ? (
+              volumeChangePercent > 0 ? (
                 <TrendingUp className="size-4 text-green-500" />
-              ) : weekOverWeekChangePercent < 0 ? (
+              ) : volumeChangePercent < 0 ? (
                 <TrendingDown className="size-4 text-red-500" />
               ) : (
                 <TrendingUp className="size-4 text-muted-foreground" />

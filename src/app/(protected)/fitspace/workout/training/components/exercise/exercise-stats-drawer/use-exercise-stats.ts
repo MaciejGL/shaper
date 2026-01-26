@@ -9,7 +9,7 @@ import {
   buildRepMaxSuggestionsKg,
   buildWeeklyVolumeSeriesKg,
   calculatePercentChange,
-  deriveLatestSessionAvg1RMKg,
+  deriveLatestSessionBest1RMKg,
 } from './utils'
 
 export function useExerciseStats({
@@ -44,7 +44,7 @@ export function useExerciseStats({
   oneRmSeries: { label: string; oneRM: number; timestamp: number }[]
 
   lastWeekVolume: number
-  weekOverWeekChangePercent: number
+  volumeChangePercent: number
   volumeSeries: {
     label: string
     volume: number
@@ -101,15 +101,13 @@ export function useExerciseStats({
   const lastWeekVolume = volumeSeries.length
     ? volumeSeries[volumeSeries.length - 1].volume
     : 0
-  const prevWeekVolume =
-    volumeSeries.length >= 2 ? volumeSeries[volumeSeries.length - 2].volume : 0
-  const weekOverWeekChangePercent =
-    prevWeekVolume > 0
-      ? ((lastWeekVolume - prevWeekVolume) / prevWeekVolume) * 100
-      : 0
+  const volumeChangePercent = useMemo(() => {
+    const points = volumeSeries.map((p) => ({ value: p.volume }))
+    return calculatePercentChange(points)
+  }, [volumeSeries])
 
   const latestOneRMKg = useMemo(
-    () => deriveLatestSessionAvg1RMKg(exercise?.estimated1RMProgress),
+    () => deriveLatestSessionBest1RMKg(exercise?.estimated1RMProgress),
     [exercise?.estimated1RMProgress],
   )
 
@@ -139,7 +137,7 @@ export function useExerciseStats({
     oneRmChangePercent,
     oneRmSeries,
     lastWeekVolume,
-    weekOverWeekChangePercent,
+    volumeChangePercent,
     volumeSeries,
     latestOneRMKg,
     repMaxSuggestions,
