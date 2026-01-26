@@ -178,6 +178,7 @@ export function WorkoutSummaryDrawer({
     totalWeight,
     workoutDuration,
     completionRate,
+    sex,
   ])
 
   const handleCompleteWorkout = async () => {
