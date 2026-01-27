@@ -13,8 +13,8 @@ import type { MuscleProgressData } from './types'
 
 // Same recovery targeting as Progress (volume-based recovery time)
 function getRecoveryTargetHours(setsInLastSession: number): number {
-  if (setsInLastSession <= 4) return 36
-  if (setsInLastSession <= 8) return 48
+  if (setsInLastSession <= 4) return 72
+  if (setsInLastSession <= 8) return 96
   return 72
 }
 
@@ -30,11 +30,14 @@ export function getFocusDisplayGroups(workoutType?: string): string[] {
 
   const aliasKey = normalized.replace(/\s+/g, '_')
   const svgMatch =
-    SVG_ALIAS_TO_DISPLAY_GROUP[normalized] || SVG_ALIAS_TO_DISPLAY_GROUP[aliasKey]
+    SVG_ALIAS_TO_DISPLAY_GROUP[normalized] ||
+    SVG_ALIAS_TO_DISPLAY_GROUP[aliasKey]
   if (svgMatch) return [svgMatch]
 
   const highLevelKey = (
-    Object.keys(HIGH_LEVEL_TO_DISPLAY_GROUPS) as (keyof typeof HIGH_LEVEL_TO_DISPLAY_GROUPS)[]
+    Object.keys(
+      HIGH_LEVEL_TO_DISPLAY_GROUPS,
+    ) as (keyof typeof HIGH_LEVEL_TO_DISPLAY_GROUPS)[]
   ).find((k) => k.toLowerCase() === normalized)
   if (highLevelKey) return HIGH_LEVEL_TO_DISPLAY_GROUPS[highLevelKey]
 
@@ -86,8 +89,10 @@ export async function getWeeklyMuscleProgress(
     },
   })
 
-  const muscleProgress: Record<string, { completedSets: number; lastTrained: Date | null }> =
-    {}
+  const muscleProgress: Record<
+    string,
+    { completedSets: number; lastTrained: Date | null }
+  > = {}
   const lastSessionSets: Record<string, number> = {}
 
   TRACKED_DISPLAY_GROUPS.forEach((group) => {
@@ -148,9 +153,12 @@ export async function getWeeklyMuscleProgress(
   return TRACKED_DISPLAY_GROUPS.map((group) => {
     const completedSets = Math.floor(muscleProgress[group].completedSets)
     const lastTrained = muscleProgress[group].lastTrained
-    const hoursSinceLastTrained = lastTrained ? differenceInHours(now, lastTrained) : 168
+    const hoursSinceLastTrained = lastTrained
+      ? differenceInHours(now, lastTrained)
+      : 168
     const lastSession = Math.floor(lastSessionSets[group] ?? 0)
-    const targetHours = lastSession > 0 ? getRecoveryTargetHours(lastSession) : 72
+    const targetHours =
+      lastSession > 0 ? getRecoveryTargetHours(lastSession) : 72
     const percentRecovered = Math.min(
       100,
       Math.round((hoursSinceLastTrained / targetHours) * 100),
@@ -171,8 +179,12 @@ export function selectMusclesToQuery(params: {
   focusDisplayGroups: string[]
   habitBias: Map<string, number>
 }): { targetMuscles: string[]; musclesToQuery: string[] } {
-  const recovered100 = params.muscleProgress.filter((m) => m.percentRecovered >= 100)
-  const recovered90 = params.muscleProgress.filter((m) => m.percentRecovered >= 90)
+  const recovered100 = params.muscleProgress.filter(
+    (m) => m.percentRecovered >= 100,
+  )
+  const recovered90 = params.muscleProgress.filter(
+    (m) => m.percentRecovered >= 90,
+  )
   const candidates =
     recovered100.length > 0
       ? recovered100
@@ -301,5 +313,3 @@ export async function getHabitBiasStartOfWeek(
 
   return bias
 }
-
-
