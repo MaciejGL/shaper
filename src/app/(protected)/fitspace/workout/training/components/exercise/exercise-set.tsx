@@ -7,6 +7,11 @@ import { startTransition, useCallback } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLTrainingView } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
@@ -172,9 +177,17 @@ export function ExerciseSet({
             className="text-center h-8 focus-visible:ring-0 text-sm w-full"
           />
         ) : (
-          <div className="text-center text-sm font-medium">
-            {displayRepsSimple}
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button type="button" className="w-full">
+                {displayRepsSimple}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={8} className="max-w-[250px]">
+              To change mode for logging please click toggle mode on top of the
+              page
+            </TooltipContent>
+          </Tooltip>
         )}
 
         {/* Weight Input / Text */}
@@ -190,12 +203,26 @@ export function ExerciseSet({
           />
         ) : (
           <div className="text-center text-sm font-medium">
-            {displayWeight}
-            {displayWeight !== '-' && (
-              <span className="text-xs text-muted-foreground ml-0.5">
-                {preferences.weightUnit}
-              </span>
-            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button type="button" className="w-max">
+                  {displayWeight}
+                  {displayWeight !== '-' && (
+                    <span className="text-xs text-muted-foreground ml-0.5">
+                      {preferences.weightUnit}
+                    </span>
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                sideOffset={8}
+                className="max-w-[250px]"
+              >
+                To change mode for logging please click toggle mode on top of
+                the page
+              </TooltipContent>
+            </Tooltip>
           </div>
         )}
 
