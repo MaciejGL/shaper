@@ -8,7 +8,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { Pencil, Play, PlusIcon, Trash2 } from 'lucide-react'
+import { FolderInput, Pencil, Play, PlusIcon, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Loader } from '@/components/loader'
@@ -27,11 +27,12 @@ import type { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 
 import { AddExerciseToFavouriteDrawer } from '../favourites/add-exercise-to-favourite-drawer'
+import { MoveToFolderDrawer } from '../favourites/move-to-folder-drawer'
 import { SortableFavouriteExerciseItem } from '../favourites/sortable-favourite-exercise-item'
 import { useFavouriteCardData } from '../favourites/use-favourite-card-data'
 import { useFavouriteCardMutations } from '../favourites/use-favourite-card-mutations'
 
-import type { FavouriteWorkout } from './types'
+import type { FavouriteWorkout, FavouriteWorkoutFolder } from './types'
 
 interface DayEditorViewProps {
   day: FavouriteWorkout | null
@@ -43,6 +44,9 @@ interface DayEditorViewProps {
   isStartingWorkout: boolean
   onRequestDeleteDay: (favouriteId: string) => void
   onCreateAnotherDay: () => void
+  folders: FavouriteWorkoutFolder[]
+  onRefetch: () => void
+  onMoveSuccess: () => void
 }
 
 export function DayEditorView({
@@ -52,8 +56,12 @@ export function DayEditorView({
   onStartWorkout,
   isStartingWorkout,
   onRequestDeleteDay,
+  folders,
+  onRefetch,
+  onMoveSuccess,
 }: DayEditorViewProps) {
   const [showAddExercise, setShowAddExercise] = useState(false)
+  const [showMoveToFolder, setShowMoveToFolder] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [draftTitle, setDraftTitle] = useState('')
   const skipNextBlurRef = useRef(false)
@@ -215,6 +223,13 @@ export function DayEditorView({
               onClick={() => onRequestDeleteDay(day.id)}
               aria-label="Delete day"
             />
+            <Button
+              variant="secondary"
+              size="icon-md"
+              iconOnly={<FolderInput />}
+              aria-label="Move session to plan"
+              onClick={() => setShowMoveToFolder(true)}
+            />
             {buttonProps.disabled && buttonProps.subtext && startButton ? (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -342,6 +357,20 @@ export function DayEditorView({
           open={showAddExercise}
           onClose={() => setShowAddExercise(false)}
           favouriteId={day.id}
+        />
+      ) : null}
+
+      {showMoveToFolder ? (
+        <MoveToFolderDrawer
+          open={showMoveToFolder}
+          onClose={() => setShowMoveToFolder(false)}
+          favouriteId={day.id}
+          currentFolderId={day.folderId}
+          folders={folders}
+          onSuccess={() => {
+            onMoveSuccess()
+            onRefetch()
+          }}
         />
       ) : null}
     </>

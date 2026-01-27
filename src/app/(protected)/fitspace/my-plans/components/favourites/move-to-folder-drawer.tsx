@@ -2,6 +2,7 @@
 
 import { Check, FolderInput } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -12,8 +13,14 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import { GQLGetFavouriteWorkoutFoldersQuery } from '@/generated/graphql-client'
-import { useUpdateFavouriteWorkout } from '@/hooks/use-favourite-workouts'
+import type {
+  GQLGetFavouriteWorkoutFoldersQuery,
+  GQLGetFavouriteWorkoutsQuery,
+  GQLUpdateFavouriteWorkoutInput,
+} from '@/generated/graphql-client'
+import { useUpdateFavouriteWorkoutMutation } from '@/generated/graphql-client'
+import { useOptimisticMutation } from '@/lib/optimistic-mutations'
+import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 
 interface MoveToFolderDrawerProps {
@@ -35,6 +42,7 @@ export function MoveToFolderDrawer({
   folders,
   onSuccess,
 }: MoveToFolderDrawerProps) {
+  const queryClient = useQueryClient()
   const [selectedFolderId, setSelectedFolderId] = useState<string>(
     currentFolderId || 'none',
   )
@@ -47,11 +55,54 @@ export function MoveToFolderDrawer({
   }, [open, currentFolderId])
 
   const { mutateAsync: updateFavourite, isPending: isUpdating } =
-    useUpdateFavouriteWorkout()
+    useUpdateFavouriteWorkoutMutation()
+  const favouritesQueryKey = ['GetFavouriteWorkouts'] as const
+  const { optimisticMutate: moveFavouriteOptimistic } = useOptimisticMutation<
+    GQLGetFavouriteWorkoutsQuery,
+    unknown,
+    { input: GQLUpdateFavouriteWorkoutInput }
+  >({
+    queryKey: [...favouritesQueryKey],
+    mutationFn: ({ input }) => updateFavourite({ input }),
+    updateFn: (oldData, { input }) => {
+      if (!oldData?.getFavouriteWorkouts) return oldData
+
+      return {
+        ...oldData,
+        getFavouriteWorkouts: oldData.getFavouriteWorkouts.map((fav) => {
+          if (fav.id !== input.id) return fav
+
+          const nextFolderId = input.folderId ?? null
+          const nextFolder = nextFolderId
+            ? {
+                __typename: 'FavouriteWorkoutFolder' as const,
+                id: nextFolderId,
+                name:
+                  folders.find((f) => f.id === nextFolderId)?.name ??
+                  fav.folder?.name ??
+                  '',
+              }
+            : null
+
+          return {
+            ...fav,
+            folderId: nextFolderId,
+            folder: nextFolder,
+          }
+        }),
+      }
+    },
+    onSuccess: () => {
+      void queryInvalidation.favourites(queryClient)
+    },
+    onError: () => {
+      void queryInvalidation.favourites(queryClient)
+    },
+  })
 
   const handleMove = async () => {
     try {
-      await updateFavourite({
+      await moveFavouriteOptimistic({
         input: {
           id: favouriteId,
           folderId: selectedFolderId === 'none' ? null : selectedFolderId,

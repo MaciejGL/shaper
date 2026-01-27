@@ -2,11 +2,11 @@
 
 import {
   List,
-  Mars,
+  // Mars,
   Plus,
-  Settings2Icon,
+  // Settings2Icon,
   TrendingUpDown,
-  Venus,
+  // Venus,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -19,16 +19,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from '@/components/ui/dropdown-menu'
 import { useUser } from '@/context/user-context'
 import {
   GQLWeightUnit,
-  useUpdateProfileMutation,
+  // useUpdateProfileMutation,
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
@@ -54,16 +54,16 @@ export function LogsSection() {
     onMeasurementAdded,
   } = useBodyMeasurementsContext()
   const { toDisplayWeight, weightUnit } = useWeightConversion()
-  const { mutate: updateProfile, isPending: isUpdatingProfile } =
-    useUpdateProfileMutation()
+  // const { mutate: updateProfile, isPending: isUpdatingProfile } =
+  //   useUpdateProfileMutation()
 
-  const isMale = user?.profile?.sex !== 'Female'
+  // const isMale = user?.profile?.sex !== 'Female'
 
-  const handleToggleSex = () => {
-    updateProfile({
-      input: { sex: isMale ? 'Female' : 'Male' },
-    })
-  }
+  // const handleToggleSex = () => {
+  //   updateProfile({
+  //     input: { sex: isMale ? 'Female' : 'Male' },
+  //   })
+  // }
 
   if (!user) {
     return null
@@ -98,7 +98,7 @@ export function LogsSection() {
               </Button>
             )}
           </PremiumButtonWrapper>
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 size="icon-sm"
@@ -119,7 +119,7 @@ export function LogsSection() {
                 Switch to {isMale ? 'female' : 'male'} body
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
       </CardHeader>
       <MeasurementChart

@@ -1,4 +1,5 @@
 import { addDays, getISOWeek, isSameWeek } from 'date-fns'
+import { GraphQLError } from 'graphql'
 
 import {
   GQLCreateFavouriteWorkoutFolderInput,
@@ -103,7 +104,7 @@ export async function createFavouriteWorkout(
     })
 
     if (currentCount >= subscriptionStatus.favouriteWorkoutLimit) {
-      throw new Error(
+      throw new GraphQLError(
         `Free tier limit reached (${subscriptionStatus.favouriteWorkoutLimit} workouts). Upgrade to Premium for unlimited workouts.`,
       )
     }
@@ -111,7 +112,9 @@ export async function createFavouriteWorkout(
 
   // Validate exercise limit
   if (input.exercises.length > MAX_EXERCISES) {
-    throw new Error(`Maximum ${MAX_EXERCISES} exercises allowed per workout`)
+    throw new GraphQLError(
+      `Maximum ${MAX_EXERCISES} exercises allowed per workout`,
+    )
   }
 
   const favouriteWorkout = await prisma.favouriteWorkout.create({

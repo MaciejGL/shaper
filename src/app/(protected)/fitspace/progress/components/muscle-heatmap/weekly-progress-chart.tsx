@@ -97,7 +97,7 @@ export function WeeklyProgressChart() {
         <ChartContainer
           id={`weekly-progress-${chartId}`}
           config={chartConfig}
-          className="w-full h-max"
+          className="w-full "
         >
           {chartData.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -106,7 +106,7 @@ export function WeeklyProgressChart() {
           ) : (
             <BarChart
               data={paddedChartData}
-              margin={{ top: 10, right: 20, left: 0, bottom: 12 }}
+              margin={{ top: 14, right: 0, left: 0, bottom: 12 }}
               maxBarSize={34}
             >
               <defs>
@@ -138,6 +138,7 @@ export function WeeklyProgressChart() {
               />
               <YAxis
                 domain={[0, 120]}
+                ticks={[0, 20, 40, 60, 80, 100, 120]}
                 tick={{ fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
@@ -176,26 +177,26 @@ export function WeeklyProgressChart() {
                 }}
               />
               {/* Reference line at 100% */}
-              <ReferenceLine
+              {/* <ReferenceLine
                 y={100}
-                stroke="var(--primary)"
-                strokeDasharray="3 3"
+                stroke="var(--chart-1)"
+                strokeDasharray="3 0"
                 strokeOpacity={0.5}
                 isFront
-              />
+              /> */}
               {/* Goal change markers */}
-              {goalChangePoints.map((change) => (
+              {goalChangePoints.map((change, idx) => (
                 <ReferenceLine
                   key={change.index}
-                  x={change.index - 0.55}
-                  stroke="var(--destructive)"
+                  x={change.index - 0.5}
+                  stroke="var(--chart-4)"
                   strokeDasharray="2 2"
                   strokeOpacity={0.7}
                   label={{
                     value: change.newGoal,
-                    position: 'top',
+                    position: idx % 2 === 0 ? 'bottom' : 'top',
                     offset: 6,
-                    fill: 'var(--muted-foreground)',
+                    fill: 'var(--chart-4)',
                     fontSize: 10,
                   }}
                   isFront

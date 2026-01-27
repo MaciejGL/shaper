@@ -70,7 +70,7 @@ export function useFavouriteCardData({
       return {
         disabled: isStarting,
         variant: 'default',
-        text: 'Replace & Start Workout',
+        text: 'Replace & Start',
         subtext:
           'You have a workout planned for today. Starting a favourite will replace it.',
         loading: isStarting,

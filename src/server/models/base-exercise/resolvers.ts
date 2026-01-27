@@ -19,7 +19,10 @@ import {
   processExerciseImageToOptimized,
 } from '@/lib/image-optimization'
 import { GQLContext } from '@/types/gql-context'
-import { aggregateEstimated1RM, calculateEstimated1RM } from '@/utils/one-rm-calculator'
+import {
+  aggregateEstimated1RM,
+  calculateEstimated1RM,
+} from '@/utils/one-rm-calculator'
 
 import BaseExercise from './model'
 
@@ -79,17 +82,35 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    const [publicExercises, trainerExercises, userExercises] = await Promise.all([
-      // Use cached public exercises (no filtering needed here)
-      getPublicExercises(),
+    const [publicExercises, trainerExercises, userExercises] =
+      await Promise.all([
+        // Use cached public exercises (no filtering needed here)
+        getPublicExercises(),
 
-      // Keep trainer exercises as direct DB query (not cached)
-      trainerId &&
+        // Keep trainer exercises as direct DB query (not cached)
+        trainerId &&
+          prisma.baseExercise.findMany({
+            where: {
+              createdBy: {
+                id: trainerId,
+              },
+            },
+            include: {
+              images: true,
+              muscleGroups: true,
+              secondaryMuscleGroups: true,
+            },
+          }),
+
+        // User's own exercises (private library)
         prisma.baseExercise.findMany({
           where: {
             createdBy: {
-              id: trainerId,
+              id: user.user.id,
             },
+          },
+          orderBy: {
+            name: 'asc',
           },
           include: {
             images: true,
@@ -97,24 +118,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             secondaryMuscleGroups: true,
           },
         }),
-
-      // User's own exercises (private library)
-      prisma.baseExercise.findMany({
-        where: {
-          createdBy: {
-            id: user.user.id,
-          },
-        },
-        orderBy: {
-          name: 'asc',
-        },
-        include: {
-          images: true,
-          muscleGroups: true,
-          secondaryMuscleGroups: true,
-        },
-      }),
-    ])
+      ])
 
     return {
       publicExercises: publicExercises.map(
@@ -125,7 +129,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             (exercise) => new BaseExercise(exercise, context),
           )
         : [],
-      userExercises: userExercises.map((exercise) => new BaseExercise(exercise, context)),
+      userExercises: userExercises.map(
+        (exercise) => new BaseExercise(exercise, context),
+      ),
     }
   },
   exercise: async (_, { id }, context) => {
@@ -199,23 +205,6 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     // Build a quick map for fast access
     const baseExerciseMap = new Map(
       baseExercises.map((ex) => [ex.id, new BaseExercise(ex, context)]),
-    )
-
-    // 4️⃣ Fetch latest PR for each exercise
-    const latestPRs = await prisma.$queryRaw<
-      { baseExerciseId: string; maxEstimated1RM: number }[]
-    >`
-      SELECT 
-        "baseExerciseId",
-        MAX("estimated1RM") as "maxEstimated1RM"
-      FROM "PersonalRecord" 
-      WHERE "userId" = ${targetUserId}
-        AND "baseExerciseId" = ANY(${baseExerciseIds})
-      GROUP BY "baseExerciseId"
-    `
-
-    const latestPRMap = new Map(
-      latestPRs.map((pr) => [pr.baseExerciseId, pr.maxEstimated1RM]),
     )
 
     // 5️⃣ Process each group into ExerciseProgress

@@ -33,7 +33,7 @@ import { DeleteFolderDialog } from '../favourites/delete-folder-dialog'
 
 import { DayEditorView } from './day-editor-view'
 import { PlanView } from './plan-view'
-import type { CustomPlan, FavouriteWorkout } from './types'
+import type { CustomPlan, FavouriteWorkout, FavouriteWorkoutFolder } from './types'
 import { getCustomPlanFolderId, getCustomPlanTitle } from './types'
 
 type DrawerView = 'plan' | 'day'
@@ -44,6 +44,7 @@ interface CustomPlansDrawerProps {
 
   plan: CustomPlan | null
   favourites: FavouriteWorkout[]
+  folders: FavouriteWorkoutFolder[]
   isLoading: boolean
 
   onRefetch: () => void
@@ -61,6 +62,7 @@ export function CustomPlansDrawer({
   onClose,
   plan,
   favourites,
+  folders,
   isLoading,
   onRefetch,
   workoutStatus,
@@ -72,6 +74,7 @@ export function CustomPlansDrawer({
   const queryClient = useQueryClient()
   const [view, setView] = useState<DrawerView>('plan')
   const [activeDayId, setActiveDayId] = useState<string | null>(null)
+  const [closeIfEmptyAfterMove, setCloseIfEmptyAfterMove] = useState(false)
   const [pendingCreatedDay, setPendingCreatedDay] = useState<{
     tempId: string
     realId: string
@@ -116,6 +119,24 @@ export function CustomPlansDrawer({
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
   }, [favourites, plan])
 
+  const handleMoveSuccess = () => {
+    setCloseIfEmptyAfterMove(true)
+    setView('plan')
+    setActiveDayId(null)
+  }
+
+  useEffect(() => {
+    if (!open) {
+      setCloseIfEmptyAfterMove(false)
+      return
+    }
+
+    if (closeIfEmptyAfterMove && days.length === 0) {
+      setCloseIfEmptyAfterMove(false)
+      onClose()
+    }
+  }, [closeIfEmptyAfterMove, days.length, onClose, open])
+
   const activeDay = useMemo(() => {
     if (!activeDayId) return null
     return days.find((d) => d.id === activeDayId) ?? null
@@ -132,6 +153,7 @@ export function CustomPlansDrawer({
       setView('plan')
       setActiveDayId(null)
       setPendingCreatedDay(null)
+      setCloseIfEmptyAfterMove(false)
     }
   }, [open])
 
@@ -460,6 +482,7 @@ export function CustomPlansDrawer({
                     isLoading={isLoading}
                     canCreateDay={canCreateDay}
                     isCreatingDay={isCreatingDay}
+                    folders={folders}
                     canDeletePlan={canDeletePlan}
                     isDeletingPlan={isDeletingFolder}
                     onDeletePlan={() => setIsDeletePlanOpen(true)}
@@ -468,6 +491,8 @@ export function CustomPlansDrawer({
                       setView('day')
                     }}
                     onCreateDay={handleCreateDay}
+                    onRefetch={onRefetch}
+                    onMoveSuccess={handleMoveSuccess}
                   />
                 </div>
 
@@ -499,6 +524,9 @@ export function CustomPlansDrawer({
                     isStartingWorkout={isStartingWorkout}
                     onRequestDeleteDay={(id) => onRequestDeleteDay(id)}
                     onCreateAnotherDay={handleCreateDay}
+                    folders={folders}
+                    onRefetch={onRefetch}
+                    onMoveSuccess={handleMoveSuccess}
                   />
                 </div>
               </div>

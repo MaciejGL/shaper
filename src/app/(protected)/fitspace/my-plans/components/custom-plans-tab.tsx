@@ -331,6 +331,7 @@ export function CustomPlansTab() {
         onClose={handleCloseDrawer}
         plan={selectedPlan}
         favourites={allFavourites}
+        folders={foldersList}
         isLoading={isLoadingFavourites || isLoadingFolders}
         onRefetch={handleRefetchAll}
         workoutStatus={workoutStatus}

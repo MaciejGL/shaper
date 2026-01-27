@@ -103,19 +103,15 @@ export function useStartWorkoutFromFavourite() {
 
   return useStartWorkoutFromFavouriteMutation({
     onSuccess: async (data) => {
-      if (!data.startWorkoutFromFavourite) return
-
-      const parts = data.startWorkoutFromFavourite.split('|')
+      const parts = data.startWorkoutFromFavourite?.split('|') ?? []
 
       await revalidatePlanPages()
       await queryInvalidation.favouriteWorkoutStart(queryClient)
-      router.refresh()
-
       if (parts.length === 3) {
         const [, weekId, dayId] = parts
         router.push(`/fitspace/workout?week=${weekId}&day=${dayId}`)
       } else {
-        router.push(`/fitspace/workout`)
+        router.push('/fitspace/workout')
       }
     },
   })
