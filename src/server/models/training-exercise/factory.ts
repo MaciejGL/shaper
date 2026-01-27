@@ -598,23 +598,23 @@ export const removeExerciseFromWorkout = async (
     throw new GraphQLError('User not found')
   }
 
-  const workout = await prisma.trainingDay.findFirst({
-    where: {
-      exercises: {
-        some: {
-          id: exerciseId,
-        },
-      },
-    },
-    include: {
-      exercises: true,
-      week: {
-        include: {
-          plan: {
+  const exercise = await prisma.trainingExercise.findUnique({
+    where: { id: exerciseId },
+    select: {
+      id: true,
+      dayId: true,
+      order: true,
+      isExtra: true,
+      day: {
+        select: {
+          week: {
             select: {
-              id: true,
-              assignedToId: true,
-              createdById: true,
+              plan: {
+                select: {
+                  assignedToId: true,
+                  createdById: true,
+                },
+              },
             },
           },
         },
@@ -622,29 +622,24 @@ export const removeExerciseFromWorkout = async (
     },
   })
 
-  if (!workout) {
-    throw new Error('Workout not found')
+  // Idempotent: exercise already removed (double-tap / stale UI)
+  if (!exercise) {
+    return true
   }
 
+  const plan = exercise.day.week.plan
+
   // Access control: only assigned user can mutate this day
-  if (workout.week.plan.assignedToId !== user.user.id) {
+  if (plan.assignedToId !== user.user.id) {
     throw new GraphQLError('Access denied')
   }
 
-  const removedExercise = workout.exercises.find(
-    (exercise) => exercise.id === exerciseId,
-  )
-  if (!removedExercise) {
-    throw new Error('Exercise not found in workout')
-  }
-
   // We treat a workout as “quick” when the user both created and is assigned to the plan.
-  const isUserQuickWorkout =
-    workout.week.plan.createdById === user.user.id
+  const isUserQuickWorkout = plan.createdById === user.user.id
 
   // For planned trainings, only allow removing extra exercises.
   // For quick workouts, allow removing any exercise (user owns the workout).
-  if (!isUserQuickWorkout && !removedExercise.isExtra) {
+  if (!isUserQuickWorkout && !exercise.isExtra) {
     throw new GraphQLError('Can only remove extra exercises from planned workouts')
   }
 
@@ -662,25 +657,24 @@ export const removeExerciseFromWorkout = async (
   // Reorder remaining exercises
   await prisma.trainingExercise.updateMany({
     where: {
-      dayId: workout.id,
+      dayId: exercise.dayId,
       ...(isUserQuickWorkout ? {} : { isExtra: true }),
-      order: { gt: removedExercise.order },
+      order: { gt: exercise.order },
     },
     data: { order: { decrement: 1 } },
   })
 
   const day = await prisma.trainingDay.findUnique({
     where: {
-      id: workout.id,
+      id: exercise.dayId,
     },
     include: {
       exercises: true,
     },
   })
 
-  if (!day) {
-    throw new Error('Day not found')
-  }
+  // Safety: should not happen (exercise references dayId)
+  if (!day) return true
 
   // Update day completion status based on remaining exercises
   const allExercisesCompleted =
@@ -688,7 +682,7 @@ export const removeExerciseFromWorkout = async (
     day.exercises.every((exercise) => exercise.completedAt)
 
   await prisma.trainingDay.update({
-    where: { id: workout.id },
+    where: { id: exercise.dayId },
     data: { completedAt: allExercisesCompleted ? new Date() : null },
   })
 

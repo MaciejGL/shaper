@@ -8,6 +8,7 @@ import { useState } from 'react'
 import {
   GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceMarkExerciseAsCompletedMutation,
+  useFitspaceGetQuickWorkoutDayQuery,
   useFitspaceGetWorkoutDayQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
   useFitspaceMarkSetAsCompletedMutation,
@@ -180,7 +181,7 @@ export function Exercise({
           }),
         }),
         queryClient.invalidateQueries({
-          queryKey: ['FitspaceGetQuickWorkoutDay'],
+          queryKey: useFitspaceGetQuickWorkoutDayQuery.getKey(),
         }),
       ])
       router.refresh()
