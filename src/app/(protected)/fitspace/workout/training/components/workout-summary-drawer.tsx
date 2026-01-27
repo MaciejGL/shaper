@@ -310,7 +310,6 @@ function Content({
   muscleGroupSetsMax: number
 }) {
   const { toDisplayWeight } = useWeightConversion()
-  console.log(personalRecords)
   return (
     <div className="space-y-6 py-4">
       {/* Personal Records */}
