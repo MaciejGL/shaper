@@ -248,7 +248,7 @@ export function ExerciseListWithFilters({
           </div>
         ) : null}
 
-        <div className="mt-6 pb-3">
+        <div className="mt-6 pb-3 dark">
           <Input
             id="search-exercises"
             placeholder="Search exercises name or muscle group..."
