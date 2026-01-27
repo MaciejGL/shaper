@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft,
   Check,
@@ -11,7 +12,6 @@ import {
   X,
 } from 'lucide-react'
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
@@ -110,33 +110,6 @@ export function FavouriteWorkoutsList({
   const [folderNameOverride, setFolderNameOverride] = useState<string | null>(
     null,
   )
-
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center gap-2">
-          {currentFolderId && (
-            <Button variant="ghost" iconStart={<ArrowLeft />} disabled>
-              Plans
-            </Button>
-          )}
-          <div className="flex gap-2 ml-auto">
-            {!currentFolderId && (
-              <Button disabled iconStart={<Plus />}>
-                New Plan
-              </Button>
-            )}
-            <Button disabled iconStart={<Plus />}>
-              Add Day
-            </Button>
-          </div>
-        </div>
-        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
-          <LoadingSkeleton count={6} variant="sm" cardVariant="secondary" />
-        </div>
-      </div>
-    )
-  }
 
   const hasReachedWorkoutLimit =
     !hasPremium &&
@@ -271,6 +244,33 @@ export function FavouriteWorkoutsList({
       onRefetch()
     },
   })
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center gap-2">
+          {currentFolderId && (
+            <Button variant="ghost" iconStart={<ArrowLeft />} disabled>
+              Plans
+            </Button>
+          )}
+          <div className="flex gap-2 ml-auto">
+            {!currentFolderId && (
+              <Button disabled iconStart={<Plus />}>
+                New Plan
+              </Button>
+            )}
+            <Button disabled iconStart={<Plus />}>
+              Add Day
+            </Button>
+          </div>
+        </div>
+        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+          <LoadingSkeleton count={6} variant="sm" cardVariant="secondary" />
+        </div>
+      </div>
+    )
+  }
 
   const handleAddDay = async () => {
     if (hasReachedWorkoutLimit || isCreatingDay) return
@@ -458,10 +458,10 @@ export function FavouriteWorkoutsList({
                 tooltipText="Save unlimited workout templates to build your personal training library."
               >
                 <Button
-                    onClick={handleAddDay}
-                    iconStart={<Plus />}
-                    disabled={hasReachedWorkoutLimit || isCreatingDay}
-                    loading={isCreatingDay}
+                  onClick={handleAddDay}
+                  iconStart={<Plus />}
+                  disabled={hasReachedWorkoutLimit || isCreatingDay}
+                  loading={isCreatingDay}
                 >
                   Add Day
                 </Button>
