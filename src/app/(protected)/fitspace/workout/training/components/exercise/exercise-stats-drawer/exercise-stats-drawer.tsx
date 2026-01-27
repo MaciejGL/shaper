@@ -117,12 +117,6 @@ export function ExerciseStatsDrawer({
               />
             ) : null}
 
-            <RepMaxGrid
-              latestOneRMKg={latestOneRMKg}
-              weightUnit={weightUnit}
-              suggestions={repMaxSuggestions}
-            />
-
             <div>
               <div className="flex items-center justify-between pb-4">
                 <p className="text-lg font-medium">Progress</p>
@@ -154,6 +148,11 @@ export function ExerciseStatsDrawer({
                 weightUnit={weightUnit}
               />
             </div>
+            <RepMaxGrid
+              latestOneRMKg={latestOneRMKg}
+              weightUnit={weightUnit}
+              suggestions={repMaxSuggestions}
+            />
           </div>
         </div>
       </DrawerContent>

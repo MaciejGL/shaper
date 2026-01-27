@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 
 /**
  * Get the best 1RM for a user and exercise, with flexible exclusion options
- * Uses the same 1RM calculation formulas as the shared utility (Brzycki/O'Conner/Conservative)
+ * Uses the same 1RM calculation formulas as the shared utility (Brzycki/Epley/Conservative)
  */
 export async function getHistoricalBest1RM(params: {
   baseExerciseId: string
@@ -27,7 +27,7 @@ export async function getHistoricalBest1RM(params: {
       SELECT MAX(
         CASE 
           WHEN esl.reps <= 10 THEN esl.weight / (1.0278 - (0.0278 * esl.reps))
-          WHEN esl.reps <= 15 THEN esl.weight * (1 + 0.025 * esl.reps)
+          WHEN esl.reps <= 15 THEN esl.weight * (1 + esl.reps / 30.0)
           ELSE esl.weight * 1.5
         END
       ) as max1rm
@@ -50,7 +50,7 @@ export async function getHistoricalBest1RM(params: {
       SELECT MAX(
         CASE 
           WHEN esl.reps <= 10 THEN esl.weight / (1.0278 - (0.0278 * esl.reps))
-          WHEN esl.reps <= 15 THEN esl.weight * (1 + 0.025 * esl.reps)
+          WHEN esl.reps <= 15 THEN esl.weight * (1 + esl.reps / 30.0)
           ELSE esl.weight * 1.5
         END
       ) as max1rm
@@ -74,7 +74,7 @@ export async function getHistoricalBest1RM(params: {
       SELECT MAX(
         CASE 
           WHEN esl.reps <= 10 THEN esl.weight / (1.0278 - (0.0278 * esl.reps))
-          WHEN esl.reps <= 15 THEN esl.weight * (1 + 0.025 * esl.reps)
+          WHEN esl.reps <= 15 THEN esl.weight * (1 + esl.reps / 30.0)
           ELSE esl.weight * 1.5
         END
       ) as max1rm
@@ -98,7 +98,7 @@ export async function getHistoricalBest1RM(params: {
       SELECT MAX(
         CASE 
           WHEN esl.reps <= 10 THEN esl.weight / (1.0278 - (0.0278 * esl.reps))
-          WHEN esl.reps <= 15 THEN esl.weight * (1 + 0.025 * esl.reps)
+          WHEN esl.reps <= 15 THEN esl.weight * (1 + esl.reps / 30.0)
           ELSE esl.weight * 1.5
         END
       ) as max1rm

@@ -1,5 +1,7 @@
 import { format } from 'date-fns'
 
+import { aggregateEstimated1RM } from '@/utils/one-rm-calculator'
+
 import {
   OneRmPointKg,
   RepMaxConfidence,
@@ -7,11 +9,6 @@ import {
   TimePeriod,
   VolumePointKg,
 } from './types'
-
-function average(values: number[]): number {
-  if (values.length === 0) return 0
-  return values.reduce((sum, v) => sum + v, 0) / values.length
-}
 
 function safeDate(value: string): Date | null {
   const d = new Date(value)
@@ -101,15 +98,15 @@ export function buildOneRmSeriesKg(
         .map((l) => l.estimated1RM)
         .filter((v) => typeof v === 'number' && Number.isFinite(v) && v > 0)
 
-      const avg = average(oneRms)
-      if (avg <= 0) return null
+      const best = aggregateEstimated1RM(oneRms, 'best')
+      if (best <= 0) return null
 
       const timestamp = date.getTime()
       if (timestamp < cutoffMs) return null
 
       return {
         label: format(date, 'd MMM'),
-        oneRMKg: avg,
+        oneRMKg: best,
         timestamp,
       } satisfies OneRmPointKg
     })

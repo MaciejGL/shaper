@@ -77,6 +77,7 @@ export function ExploreClient({
             onClick={(value) => setParams({ tab: value as Tab })}
             active={params.tab}
             className="grid grid-cols-3"
+            classNameButton="px-2"
             size="lg"
           />
         </div>

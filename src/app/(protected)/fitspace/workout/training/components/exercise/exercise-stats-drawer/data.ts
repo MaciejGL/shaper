@@ -21,6 +21,9 @@ export function useExerciseStatsQuery({
     { userId: user?.id || '', exerciseId: baseExerciseId },
     {
       enabled: open && !!user?.id && !!baseExerciseId,
+      // Drawer UX: always refresh when opening
+      staleTime: 0,
+      refetchOnMount: 'always',
       select: (resp) => ({
         ...resp,
         exercisesProgressByUser: resp.exercisesProgressByUser.slice(0, 1),

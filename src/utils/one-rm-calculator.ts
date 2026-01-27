@@ -23,6 +23,24 @@ export function calculateEstimated1RM(weight: number, reps: number): number {
   }
 }
 
+export type OneRmAggregation = 'best' | 'average'
+
+export function aggregateEstimated1RM(
+  values: (number | null | undefined)[],
+  aggregation: OneRmAggregation,
+): number {
+  const clean = values.filter(
+    (v): v is number => typeof v === 'number' && Number.isFinite(v) && v > 0,
+  )
+  if (clean.length === 0) return 0
+
+  if (aggregation === 'best') {
+    return Math.max(...clean)
+  }
+
+  return clean.reduce((sum, v) => sum + v, 0) / clean.length
+}
+
 /**
  * Check if a given performance would be a personal record
  * Uses 1% improvement threshold to account for measurement variations

@@ -226,11 +226,10 @@ export function ExerciseMetadata({
           )}
         </Carousel>
       )}
-      <div className="flex gap-2 items-start mt-4 px-3">
-        <div className="flex-center h-8 min-w-8 px-2 rounded-full bg-primary/10 text-primary text-sm font-semibold leading-none shrink-0 tabular-nums">
-          {exercise.order}
-        </div>
-        <p className="text-2xl font-medium mt-px">{exercise.name}</p>
+      <div className="flex items-start mt-4 px-3">
+        <p className="text-2xl font-medium mt-px">
+          {exercise.order}. {exercise.name}
+        </p>
       </div>
 
       {exercise.additionalInstructions && (

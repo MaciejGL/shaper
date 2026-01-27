@@ -19,7 +19,7 @@ import {
   processExerciseImageToOptimized,
 } from '@/lib/image-optimization'
 import { GQLContext } from '@/types/gql-context'
-import { calculateEstimated1RM } from '@/utils/one-rm-calculator'
+import { aggregateEstimated1RM, calculateEstimated1RM } from '@/utils/one-rm-calculator'
 
 import BaseExercise from './model'
 
@@ -243,17 +243,13 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         formatISO(startOfDay(e.date), { representation: 'date' }),
       )
 
-      const average = (values: number[]) =>
-        Number(
-          (
-            values.reduce((sum, value) => sum + value, 0) / values.length
-          ).toFixed(2),
-        )
-
       const estimated1RMProgress = Object.entries(logsByDay).map(
         ([day, dayLogs]) => ({
           date: day, // ISO string (yyyy-MM-dd)
-          average1RM: average(dayLogs.map((l) => l.estimated1RM)),
+          average1RM: aggregateEstimated1RM(
+            dayLogs.map((l) => l.estimated1RM),
+            'best',
+          ),
           detailedLogs: dayLogs.map((l) => ({
             estimated1RM: l.estimated1RM,
             weight: l.weight,
@@ -261,19 +257,6 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           })),
         }),
       )
-
-      // Use the latest PR as the current best instead of calculated average
-      const latestPR = latestPRMap.get(baseExerciseId)
-      if (latestPR && estimated1RMProgress.length > 0) {
-        // Put the PR as the most recent entry (first in array)
-        estimated1RMProgress.sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-        )
-        estimated1RMProgress[0] = {
-          ...estimated1RMProgress[0],
-          average1RM: latestPR, // Use actual PR instead of calculated average
-        }
-      }
       // Weekly aggregation (total volume & total sets)
       const totalVolumeByWeek = new Map<
         string,

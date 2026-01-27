@@ -183,7 +183,9 @@ export function MobileNav({ useDeepLinks = false }: MobileNavProps = {}) {
                 )}
               >
                 <Icon className="size-5 mb-1" />
-                <span className="text-[10px]">{item.label}</span>
+                <span className="text-[10px] whitespace-nowrap">
+                  {item.label}
+                </span>
               </NavComponent>
             )
           })}

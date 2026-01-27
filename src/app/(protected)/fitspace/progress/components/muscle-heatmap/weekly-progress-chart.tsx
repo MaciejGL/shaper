@@ -35,7 +35,8 @@ export function WeeklyProgressChart() {
   const chartData = useMemo(() => {
     if (!data?.weeklyProgressHistory) return []
 
-    return data.weeklyProgressHistory.map((week) => ({
+    return data.weeklyProgressHistory.map((week, index) => ({
+      index,
       label: format(new Date(week.weekStartDate), 'MMM d'),
       percentage: Math.round(week.overallPercentage),
       totalSets: week.totalSets,
@@ -51,7 +52,8 @@ export function WeeklyProgressChart() {
 
     return [
       ...chartData,
-      ...Array.from({ length: TARGET_POINTS - chartData.length }, () => ({
+      ...Array.from({ length: TARGET_POINTS - chartData.length }, (_, i) => ({
+        index: chartData.length + i,
         label: '',
         percentage: 0,
         totalSets: 0,
@@ -95,7 +97,7 @@ export function WeeklyProgressChart() {
         <ChartContainer
           id={`weekly-progress-${chartId}`}
           config={chartConfig}
-          className="w-full h-[180px]"
+          className="w-full h-max"
         >
           {chartData.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -122,12 +124,17 @@ export function WeeklyProgressChart() {
                 </linearGradient>
               </defs>
               <XAxis
-                dataKey="label"
+                dataKey="index"
+                type="number"
+                domain={[-0.75, paddedChartData.length - 0.25]}
                 tick={{ fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
                 height={10}
+                tickFormatter={(value) =>
+                  paddedChartData.find((d) => d.index === value)?.label ?? ''
+                }
               />
               <YAxis
                 domain={[0, 120]}
@@ -171,18 +178,27 @@ export function WeeklyProgressChart() {
               {/* Reference line at 100% */}
               <ReferenceLine
                 y={100}
-                stroke="hsl(var(--primary))"
+                stroke="var(--primary)"
                 strokeDasharray="3 3"
                 strokeOpacity={0.5}
+                isFront
               />
               {/* Goal change markers */}
               {goalChangePoints.map((change) => (
                 <ReferenceLine
                   key={change.index}
-                  x={chartData[change.index]?.label}
-                  stroke="hsl(var(--destructive))"
+                  x={change.index - 0.55}
+                  stroke="var(--destructive)"
                   strokeDasharray="2 2"
                   strokeOpacity={0.7}
+                  label={{
+                    value: change.newGoal,
+                    position: 'top',
+                    offset: 6,
+                    fill: 'var(--muted-foreground)',
+                    fontSize: 10,
+                  }}
+                  isFront
                 />
               ))}
               <Bar
@@ -194,9 +210,9 @@ export function WeeklyProgressChart() {
               >
                 <LabelList
                   dataKey="percentage"
-                  position="insideTop"
-                  offset={12}
-                  className="fill-white"
+                  position="top"
+                  offset={6}
+                  className="fill-foreground"
                   fontSize={10}
                   fontWeight={800}
                   formatter={(value: number) =>

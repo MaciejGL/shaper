@@ -196,7 +196,10 @@ export function WorkoutSummaryDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent dialogTitle="Workout Summary" className="max-h-[90vh]">
+      <DrawerContent
+        dialogTitle="Workout Summary"
+        className="max-h-[90vh] h-full"
+      >
         <DrawerHeader className="pb-4">
           <DrawerTitle className="text-lg text-center">
             Workout Summary
@@ -307,7 +310,7 @@ function Content({
   muscleGroupSetsMax: number
 }) {
   const { toDisplayWeight } = useWeightConversion()
-
+  console.log(personalRecords)
   return (
     <div className="space-y-6 py-4">
       {/* Personal Records */}
@@ -566,7 +569,13 @@ function Content({
                         variant="premium"
                         className="pl-1.5 pr-2 py-0.5 h-auto"
                       >
-                        <span className="font-semibold">First PR!</span>
+                        <span className="font-semibold">
+                          First PR!{' '}
+                          {toDisplayWeight(prRecord.estimated1RM)
+                            ?.toFixed(2)
+                            .replace('.00', '')}{' '}
+                          {weightUnit}
+                        </span>
                       </Badge>
                     ) : null}
                   </div>

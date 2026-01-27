@@ -1,4 +1,5 @@
 import {
+  aggregateEstimated1RM,
   calculateEstimated1RM,
   calculateImprovementPercentage,
   isPersonalRecord,
@@ -148,6 +149,32 @@ describe('one-rm-calculator', () => {
         previousBest1RM,
       )
       expect(result).toBe(100)
+    })
+  })
+
+  describe('aggregateEstimated1RM', () => {
+    it('should return 0 when no valid values', () => {
+      expect(aggregateEstimated1RM([], 'best')).toBe(0)
+      expect(aggregateEstimated1RM([0, -1, NaN, null, undefined], 'best')).toBe(
+        0,
+      )
+    })
+
+    it('should aggregate using best (max)', () => {
+      expect(aggregateEstimated1RM([50, 67.5, 58], 'best')).toBe(67.5)
+    })
+
+    it('should aggregate using average', () => {
+      expect(aggregateEstimated1RM([50, 70], 'average')).toBe(60)
+    })
+
+    it('should ignore invalid values', () => {
+      expect(
+        aggregateEstimated1RM([null, 0, 10, undefined, 20, NaN], 'best'),
+      ).toBe(20)
+      expect(
+        aggregateEstimated1RM([null, 0, 10, undefined, 20, NaN], 'average'),
+      ).toBe(15)
     })
   })
 })
