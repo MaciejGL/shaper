@@ -562,28 +562,30 @@ const saveExercisePR = async (
 
   // First time logging this exercise - save as baseline PR
   if (currentBest <= 0) {
-    if (existingDayPR) {
-      await prisma.personalRecord.update({
-        where: { id: existingDayPR.id },
-        data: {
-          estimated1RM: best1RM,
-          weight: bestWeight,
-          reps: bestReps,
-          achievedAt: new Date(),
-        },
-      })
-    } else {
-      await prisma.personalRecord.create({
-        data: {
+    await prisma.personalRecord.upsert({
+      where: {
+        userId_baseExerciseId_dayId: {
           userId,
           baseExerciseId,
           dayId,
-          estimated1RM: best1RM,
-          weight: bestWeight,
-          reps: bestReps,
         },
-      })
-    }
+      },
+      update: {
+        estimated1RM: best1RM,
+        weight: bestWeight,
+        reps: bestReps,
+        achievedAt: new Date(),
+      },
+      create: {
+        userId,
+        baseExerciseId,
+        dayId,
+        estimated1RM: best1RM,
+        weight: bestWeight,
+        reps: bestReps,
+        achievedAt: new Date(),
+      },
+    })
     return
   }
 
@@ -601,28 +603,30 @@ const saveExercisePR = async (
   const isRealisticPR = improvement <= 50
 
   if (isRealisticPR) {
-    if (existingDayPR) {
-      await prisma.personalRecord.update({
-        where: { id: existingDayPR.id },
-        data: {
-          estimated1RM: best1RM,
-          weight: bestWeight,
-          reps: bestReps,
-          achievedAt: new Date(),
-        },
-      })
-    } else {
-      await prisma.personalRecord.create({
-        data: {
+    await prisma.personalRecord.upsert({
+      where: {
+        userId_baseExerciseId_dayId: {
           userId,
           baseExerciseId,
           dayId,
-          estimated1RM: best1RM,
-          weight: bestWeight,
-          reps: bestReps,
         },
-      })
-    }
+      },
+      update: {
+        estimated1RM: best1RM,
+        weight: bestWeight,
+        reps: bestReps,
+        achievedAt: new Date(),
+      },
+      create: {
+        userId,
+        baseExerciseId,
+        dayId,
+        estimated1RM: best1RM,
+        weight: bestWeight,
+        reps: bestReps,
+        achievedAt: new Date(),
+      },
+    })
   } else if (existingDayPR) {
     await prisma.personalRecord.delete({
       where: { id: existingDayPR.id },
