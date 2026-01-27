@@ -208,6 +208,13 @@ export function DayEditorView({
       <div className="space-y-4">
         <div className="flex items-center justify-end gap-2">
           <div className="flex items-center gap-2">
+            <Button
+              variant="destructive"
+              size="icon-md"
+              iconOnly={<Trash2 />}
+              onClick={() => onRequestDeleteDay(day.id)}
+              aria-label="Delete day"
+            />
             {buttonProps.disabled && buttonProps.subtext && startButton ? (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -218,13 +225,6 @@ export function DayEditorView({
             ) : (
               startButton
             )}
-            <Button
-              variant="destructive"
-              size="icon-md"
-              iconOnly={<Trash2 />}
-              onClick={() => onRequestDeleteDay(day.id)}
-              aria-label="Delete day"
-            />
           </div>
         </div>
 

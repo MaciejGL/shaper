@@ -2,6 +2,7 @@
 
 import { ChevronRight, Folder, Plus } from 'lucide-react'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { HeaderTab } from '@/components/header-tab'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
@@ -10,6 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 import type {
+  GQLCreateFavouriteWorkoutFolderInput,
+  GQLCreateFavouriteWorkoutFolderMutation,
   GQLGetFavouriteWorkoutFoldersQuery,
   GQLGetFavouriteWorkoutsQuery,
 } from '@/generated/graphql-client'
@@ -20,13 +23,14 @@ import {
   useFavouriteWorkoutStatus,
   useFavouriteWorkouts,
 } from '@/hooks/use-favourite-workouts'
+import { generateTempId, useOptimisticMutation } from '@/lib/optimistic-mutations'
+import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 
 import { CustomPlansDrawer } from './custom-plans-drawer/custom-plans-drawer'
 import type { CustomPlan } from './custom-plans-drawer/types'
 import { DeleteFavouriteDialog } from './favourites/delete-favourite-dialog'
 import { FolderCard } from './favourites/folder-card'
-import { ManageFolderDialog } from './favourites/manage-folder-dialog'
 import { ReplacementConfirmationDialog } from './favourites/replacement-confirmation-dialog'
 
 type FavouriteWorkout = NonNullable<
@@ -39,6 +43,7 @@ type FavouriteWorkoutFolder = NonNullable<
 
 export function CustomPlansTab() {
   const { hasPremium, subscription } = useUser()
+  const queryClient = useQueryClient()
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [favouriteToDelete, setFavouriteToDelete] =
@@ -50,12 +55,6 @@ export function CustomPlansTab() {
   const [isStarting, setIsStarting] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<CustomPlan | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
-
-  const [isManageFolderOpen, setIsManageFolderOpen] = useState(false)
-  const [folderToEdit, setFolderToEdit] = useState<{
-    id: string
-    name: string
-  } | null>(null)
 
   const {
     data: favouriteWorkouts,
@@ -152,6 +151,63 @@ export function CustomPlansTab() {
     !hasPremium &&
     foldersList.length >= (subscription?.favouriteFolderLimit ?? 1)
 
+  const isCreatingFolder = folderOperations.isCreatingFolder
+  const foldersQueryKey = ['GetFavouriteWorkoutFolders'] as const
+  const { optimisticMutate: createFolderOptimistic } = useOptimisticMutation<
+    GQLGetFavouriteWorkoutFoldersQuery,
+    GQLCreateFavouriteWorkoutFolderMutation,
+    { input: GQLCreateFavouriteWorkoutFolderInput }
+  >({
+    queryKey: [...foldersQueryKey],
+    mutationFn: ({ input }) => folderOperations.createFolder(input),
+    updateFn: (oldData, { input }, tempId) => {
+      if (!oldData?.getFavouriteWorkoutFolders) return oldData
+
+      const now = new Date().toISOString()
+      const nextTempId = tempId ?? generateTempId('temp')
+
+      return {
+        ...oldData,
+        getFavouriteWorkoutFolders: [
+          {
+            __typename: 'FavouriteWorkoutFolder',
+            id: nextTempId,
+            name: input.name,
+            createdById: 'temp',
+            createdAt: now,
+            updatedAt: now,
+            favouriteWorkouts: [],
+          },
+          ...oldData.getFavouriteWorkoutFolders,
+        ],
+      }
+    },
+    onSuccess: (data, _variables, tempId) => {
+      if (!tempId) return
+      const realId = data.createFavouriteWorkoutFolder.id
+
+      queryClient.setQueryData<GQLGetFavouriteWorkoutFoldersQuery>(
+        [...foldersQueryKey],
+        (oldData) => {
+          if (!oldData?.getFavouriteWorkoutFolders) return oldData
+
+          return {
+            ...oldData,
+            getFavouriteWorkoutFolders: oldData.getFavouriteWorkoutFolders.map(
+              (folder) => (folder.id === tempId ? { ...folder, id: realId } : folder),
+            ),
+          }
+        },
+      )
+
+      void queryInvalidation.favourites(queryClient)
+      handleRefetchAll()
+    },
+    onError: () => {
+      handleRefetchAll()
+    },
+  })
+
   const handleOpenPlan = (plan: CustomPlan) => {
     setSelectedPlan(plan)
     setDrawerOpen(true)
@@ -162,10 +218,17 @@ export function CustomPlansTab() {
     setSelectedPlan(null)
   }
 
-  const handleCreateFolder = () => {
-    if (hasReachedFolderLimit) return
-    setFolderToEdit(null)
-    setIsManageFolderOpen(true)
+  const handleCreateFolder = async () => {
+    if (hasReachedFolderLimit || isCreatingFolder) return
+
+    const nextName = `Plan ${foldersList.length + 1}`
+    const tempId = generateTempId('temp')
+
+    try {
+      await createFolderOptimistic({ input: { name: nextName } }, tempId)
+    } catch {
+      // errors handled globally + rollback in optimistic mutation
+    }
   }
 
   const handleRefetchAll = () => {
@@ -196,9 +259,10 @@ export function CustomPlansTab() {
         >
           <Button
             iconStart={<Plus />}
-            onClick={handleCreateFolder}
+            onClick={() => void handleCreateFolder()}
             variant="default"
-            disabled={hasReachedFolderLimit}
+            disabled={hasReachedFolderLimit || isCreatingFolder}
+            loading={isCreatingFolder}
           >
             New plan
           </Button>
@@ -290,17 +354,6 @@ export function CustomPlansTab() {
         onConfirm={handleConfirmReplacement}
         isStarting={favouriteOperations.isStarting}
         message={workoutStatus.message}
-      />
-
-      <ManageFolderDialog
-        open={isManageFolderOpen}
-        onClose={() => setIsManageFolderOpen(false)}
-        onSuccess={() => {
-          setIsManageFolderOpen(false)
-          handleRefetchAll()
-        }}
-        folderOperations={folderOperations}
-        folderToEdit={folderToEdit}
       />
     </div>
   )

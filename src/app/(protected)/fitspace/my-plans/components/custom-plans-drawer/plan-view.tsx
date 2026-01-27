@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRight, Plus } from 'lucide-react'
+import { ChevronRight, Plus, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,19 +11,28 @@ import type { FavouriteWorkout } from './types'
 interface PlanViewProps {
   days: FavouriteWorkout[]
   isLoading: boolean
+  isCreatingDay?: boolean
   canCreateDay?: boolean
+  canDeletePlan?: boolean
+  isDeletingPlan?: boolean
   onSelectDay: (favouriteId: string) => void
   onCreateDay: () => void
+  onDeletePlan?: () => void
 }
 
 export function PlanView({
   days,
   isLoading,
+  isCreatingDay = false,
   canCreateDay = true,
+  canDeletePlan = false,
+  isDeletingPlan = false,
   onSelectDay,
   onCreateDay,
+  onDeletePlan,
 }: PlanViewProps) {
-  const disableCreate = isLoading || !canCreateDay
+  const disableCreate = isLoading || isCreatingDay || !canCreateDay
+  const canShowDeletePlan = canDeletePlan && !!onDeletePlan
 
   return (
     <div className="space-y-4">
@@ -31,13 +40,27 @@ export function PlanView({
         <p className="text-sm font-medium text-muted-foreground">
           Workout Sessions
         </p>
-        <Button
-          iconStart={<Plus />}
-          onClick={onCreateDay}
-          disabled={disableCreate}
-        >
-          Add session
-        </Button>
+        <div className="flex items-center gap-2">
+          {canShowDeletePlan ? (
+            <Button
+              variant="destructive"
+              size="icon-md"
+              iconOnly={<Trash2 />}
+              aria-label="Delete plan"
+              onClick={onDeletePlan}
+              disabled={isDeletingPlan}
+              loading={isDeletingPlan}
+            />
+          ) : null}
+          <Button
+            iconStart={<Plus />}
+            onClick={onCreateDay}
+            disabled={disableCreate}
+            loading={isCreatingDay}
+          >
+            Add session
+          </Button>
+        </div>
       </div>
 
       {days.length === 0 ? (
@@ -51,6 +74,7 @@ export function PlanView({
               iconStart={<Plus />}
               onClick={onCreateDay}
               disabled={disableCreate}
+              loading={isCreatingDay}
             >
               Create session
             </Button>

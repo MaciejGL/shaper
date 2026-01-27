@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
@@ -25,12 +26,22 @@ import {
 import { Input } from '@/components/ui/input'
 import { useUser } from '@/context/user-context'
 import {
+  GQLCreateFavouriteWorkoutFolderInput,
+  GQLCreateFavouriteWorkoutFolderMutation,
+  GQLCreateFavouriteWorkoutInput,
+  GQLCreateFavouriteWorkoutMutation,
   GQLGetFavouriteWorkoutFoldersQuery,
   GQLGetFavouriteWorkoutsQuery,
+  useCreateFavouriteWorkoutFolderMutation,
+  useCreateFavouriteWorkoutMutation,
 } from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
+import {
+  generateTempId,
+  useOptimisticMutation,
+} from '@/lib/optimistic-mutations'
+import { queryInvalidation } from '@/lib/query-invalidation'
 
-import { CreateEmptyFavouriteDialog } from './create-empty-favourite-dialog'
 import { DeleteFolderDialog } from './delete-folder-dialog'
 import { FavouriteWorkoutCard } from './favourite-workout-card'
 import { FolderCard } from './folder-card'
@@ -82,7 +93,7 @@ export function FavouriteWorkoutsList({
   hideTitle = false,
 }: FavouriteWorkoutsListProps) {
   const { hasPremium, subscription } = useUser()
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const queryClient = useQueryClient()
   const [isManageFolderOpen, setIsManageFolderOpen] = useState(false)
   const [folderToEdit, setFolderToEdit] = useState<{
     id: string
@@ -136,10 +147,164 @@ export function FavouriteWorkoutsList({
   const isRoot = currentFolderId === null
   const isEmpty = favouriteWorkouts.length === 0 && folders.length === 0
 
-  const handleCreateFolder = () => {
-    if (hasReachedFolderLimit) return
-    setFolderToEdit(null)
-    setIsManageFolderOpen(true)
+  const { mutateAsync: createFolderMutation, isPending: isCreatingFolder } =
+    useCreateFavouriteWorkoutFolderMutation()
+  const foldersQueryKey = ['GetFavouriteWorkoutFolders'] as const
+  const { optimisticMutate: createFolderOptimistic } = useOptimisticMutation<
+    GQLGetFavouriteWorkoutFoldersQuery,
+    GQLCreateFavouriteWorkoutFolderMutation,
+    { input: GQLCreateFavouriteWorkoutFolderInput }
+  >({
+    queryKey: [...foldersQueryKey],
+    mutationFn: ({ input }) => createFolderMutation({ input }),
+    updateFn: (oldData, { input }, tempId) => {
+      if (!oldData?.getFavouriteWorkoutFolders) return oldData
+
+      const now = new Date().toISOString()
+      const nextTempId = tempId ?? generateTempId('temp')
+
+      return {
+        ...oldData,
+        getFavouriteWorkoutFolders: [
+          {
+            __typename: 'FavouriteWorkoutFolder',
+            id: nextTempId,
+            name: input.name,
+            createdById: 'temp',
+            createdAt: now,
+            updatedAt: now,
+            favouriteWorkouts: [],
+          },
+          ...oldData.getFavouriteWorkoutFolders,
+        ],
+      }
+    },
+    onSuccess: (data, _variables, tempId) => {
+      if (!tempId) return
+      const realId = data.createFavouriteWorkoutFolder.id
+
+      queryClient.setQueryData<GQLGetFavouriteWorkoutFoldersQuery>(
+        [...foldersQueryKey],
+        (oldData) => {
+          if (!oldData?.getFavouriteWorkoutFolders) return oldData
+
+          return {
+            ...oldData,
+            getFavouriteWorkoutFolders: oldData.getFavouriteWorkoutFolders.map(
+              (folder) =>
+                folder.id === tempId ? { ...folder, id: realId } : folder,
+            ),
+          }
+        },
+      )
+
+      void queryInvalidation.favourites(queryClient)
+      onRefetch()
+    },
+    onError: () => {
+      onRefetch()
+    },
+  })
+
+  const { mutateAsync: createFavouriteWorkout, isPending: isCreatingDay } =
+    useCreateFavouriteWorkoutMutation()
+  const favouritesQueryKey = ['GetFavouriteWorkouts'] as const
+
+  const { optimisticMutate: createDayOptimistic } = useOptimisticMutation<
+    GQLGetFavouriteWorkoutsQuery,
+    GQLCreateFavouriteWorkoutMutation,
+    { input: GQLCreateFavouriteWorkoutInput }
+  >({
+    queryKey: [...favouritesQueryKey],
+    mutationFn: ({ input }) => createFavouriteWorkout({ input }),
+    updateFn: (oldData, { input }, tempId) => {
+      if (!oldData?.getFavouriteWorkouts) return oldData
+
+      const now = new Date().toISOString()
+      const nextTempId = tempId ?? generateTempId('temp')
+      const folder =
+        input.folderId && currentFolder
+          ? { id: currentFolder.id, name: currentFolder.name }
+          : null
+
+      return {
+        ...oldData,
+        getFavouriteWorkouts: [
+          {
+            __typename: 'FavouriteWorkout',
+            id: nextTempId,
+            title: input.title,
+            description: input.description ?? null,
+            createdById: 'temp',
+            createdAt: now,
+            updatedAt: now,
+            folderId: input.folderId ?? null,
+            folder,
+            exercises: [],
+          },
+          ...oldData.getFavouriteWorkouts,
+        ],
+      }
+    },
+    onSuccess: (data, _variables, tempId) => {
+      if (!tempId) return
+      const realId = data.createFavouriteWorkout.id
+
+      queryClient.setQueryData<GQLGetFavouriteWorkoutsQuery>(
+        [...favouritesQueryKey],
+        (oldData) => {
+          if (!oldData?.getFavouriteWorkouts) return oldData
+
+          return {
+            ...oldData,
+            getFavouriteWorkouts: oldData.getFavouriteWorkouts.map((fav) =>
+              fav.id === tempId ? { ...fav, id: realId } : fav,
+            ),
+          }
+        },
+      )
+
+      void queryInvalidation.favourites(queryClient)
+      onRefetch()
+    },
+    onError: () => {
+      onRefetch()
+    },
+  })
+
+  const handleAddDay = async () => {
+    if (hasReachedWorkoutLimit || isCreatingDay) return
+
+    const nextTitle = `Day ${favouriteWorkouts.length + 1}`
+    const tempId = generateTempId('temp')
+
+    try {
+      await createDayOptimistic(
+        {
+          input: {
+            title: nextTitle,
+            folderId: currentFolderId,
+            exercises: [],
+          },
+        },
+        tempId,
+      )
+    } catch {
+      // errors handled globally + rollback in optimistic mutation
+    }
+  }
+
+  const handleCreateFolder = async () => {
+    if (hasReachedFolderLimit || isCreatingFolder) return
+
+    const nextName = `Plan ${folders.length + 1}`
+    const tempId = generateTempId('temp')
+
+    try {
+      await createFolderOptimistic({ input: { name: nextName } }, tempId)
+    } catch {
+      // errors handled globally + rollback in optimistic mutation
+    }
   }
 
   const handleEditFolder = (folder: { id: string; name: string }) => {
@@ -239,9 +404,10 @@ export function FavouriteWorkoutsList({
             >
               <Button
                 iconStart={<Plus />}
-                onClick={handleCreateFolder}
+                onClick={() => void handleCreateFolder()}
                 variant="default"
-                disabled={hasReachedFolderLimit}
+                disabled={hasReachedFolderLimit || isCreatingFolder}
+                loading={isCreatingFolder}
               >
                 New Plan
               </Button>
@@ -292,9 +458,10 @@ export function FavouriteWorkoutsList({
                 tooltipText="Save unlimited workout templates to build your personal training library."
               >
                 <Button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  iconStart={<Plus />}
-                  disabled={hasReachedWorkoutLimit}
+                    onClick={handleAddDay}
+                    iconStart={<Plus />}
+                    disabled={hasReachedWorkoutLimit || isCreatingDay}
+                    loading={isCreatingDay}
                 >
                   Add Day
                 </Button>
@@ -415,7 +582,9 @@ export function FavouriteWorkoutsList({
                     <p>No training days in this folder yet.</p>
                     <Button
                       variant="link"
-                      onClick={() => setIsCreateModalOpen(true)}
+                      onClick={handleAddDay}
+                      disabled={hasReachedWorkoutLimit || isCreatingDay}
+                      loading={isCreatingDay}
                       className="mt-2"
                     >
                       Create your first training day
@@ -427,15 +596,6 @@ export function FavouriteWorkoutsList({
           </div>
         )}
       </div>
-
-      <CreateEmptyFavouriteDialog
-        open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => {
-          onRefetch()
-        }}
-        currentFolderId={currentFolderId}
-      />
 
       <DeleteFolderDialog
         open={deleteFolderDialogOpen}

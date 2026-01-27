@@ -3,20 +3,33 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, Pencil, XIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerClose, DrawerContent } from '@/components/ui/drawer'
 import type {
+  GQLCreateFavouriteWorkoutInput,
+  GQLCreateFavouriteWorkoutMutation,
   GQLGetFavouriteWorkoutFoldersQuery,
+  GQLGetFavouriteWorkoutsQuery,
   GQLUpdateFavouriteWorkoutFolderInput,
 } from '@/generated/graphql-client'
-import { useUpdateFavouriteWorkoutFolderMutation } from '@/generated/graphql-client'
+import {
+  useCreateFavouriteWorkoutMutation,
+  useUpdateFavouriteWorkoutFolderMutation,
+} from '@/generated/graphql-client'
 import type { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
+import { useDeleteFavouriteWorkoutFolder } from '@/hooks/use-favourite-workouts'
 import { useModalHistory } from '@/hooks/use-modal-history'
-import { useOptimisticMutation } from '@/lib/optimistic-mutations'
+import {
+  generateTempId,
+  isTemporaryId,
+  useOptimisticMutation,
+} from '@/lib/optimistic-mutations'
+import { queryInvalidation } from '@/lib/query-invalidation'
 import { cn } from '@/lib/utils'
 
-import { CreateEmptyFavouriteDialog } from '../favourites/create-empty-favourite-dialog'
+import { DeleteFolderDialog } from '../favourites/delete-folder-dialog'
 
 import { DayEditorView } from './day-editor-view'
 import { PlanView } from './plan-view'
@@ -56,9 +69,14 @@ export function CustomPlansDrawer({
   onStartWorkout,
   onRequestDeleteDay,
 }: CustomPlansDrawerProps) {
+  const queryClient = useQueryClient()
   const [view, setView] = useState<DrawerView>('plan')
   const [activeDayId, setActiveDayId] = useState<string | null>(null)
-  const [showCreateDay, setShowCreateDay] = useState(false)
+  const [pendingCreatedDay, setPendingCreatedDay] = useState<{
+    tempId: string
+    realId: string
+  } | null>(null)
+  const [isDeletePlanOpen, setIsDeletePlanOpen] = useState(false)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [draftTitle, setDraftTitle] = useState('')
   const editableTitleRef = useRef<HTMLSpanElement | null>(null)
@@ -113,20 +131,135 @@ export function CustomPlansDrawer({
     if (!open) {
       setView('plan')
       setActiveDayId(null)
-      setShowCreateDay(false)
+      setPendingCreatedDay(null)
     }
   }, [open])
 
   useEffect(() => {
-    if (view === 'day' && activeDayId && !activeDay) {
+    if (
+      view === 'day' &&
+      activeDayId &&
+      !activeDay &&
+      !isTemporaryId(activeDayId)
+    ) {
       setView('plan')
       setActiveDayId(null)
     }
   }, [activeDay, activeDayId, view])
 
+  useEffect(() => {
+    if (!pendingCreatedDay) return
+    if (activeDayId !== pendingCreatedDay.tempId) return
+
+    const created = days.find((d) => d.id === pendingCreatedDay.realId)
+    if (!created) return
+
+    setActiveDayId(pendingCreatedDay.realId)
+    setPendingCreatedDay(null)
+  }, [activeDayId, days, pendingCreatedDay])
+
+  const { mutateAsync: createFavouriteWorkout, isPending: isCreatingDay } =
+    useCreateFavouriteWorkoutMutation()
+  const favouritesQueryKey = useMemo(() => ['GetFavouriteWorkouts'], [])
+
+  const { optimisticMutate: createDayOptimistic } = useOptimisticMutation<
+    GQLGetFavouriteWorkoutsQuery,
+    GQLCreateFavouriteWorkoutMutation,
+    { input: GQLCreateFavouriteWorkoutInput }
+  >({
+    queryKey: favouritesQueryKey,
+    mutationFn: ({ input }) => createFavouriteWorkout({ input }),
+    updateFn: (oldData, { input }, tempId) => {
+      if (!oldData?.getFavouriteWorkouts) return oldData
+
+      const now = new Date().toISOString()
+      const nextTempId = tempId ?? generateTempId('temp')
+      const folder =
+        input.folderId && plan?.kind === 'folder'
+          ? { id: plan.folder.id, name: plan.folder.name }
+          : null
+
+      const optimisticFavourite: FavouriteWorkout = {
+        __typename: 'FavouriteWorkout',
+        id: nextTempId,
+        title: input.title,
+        description: input.description ?? null,
+        createdById: 'temp',
+        createdAt: now,
+        updatedAt: now,
+        folderId: input.folderId ?? null,
+        folder,
+        exercises: [],
+      }
+
+      return {
+        ...oldData,
+        getFavouriteWorkouts: [optimisticFavourite, ...oldData.getFavouriteWorkouts],
+      }
+    },
+    onSuccess: (data, _variables, tempId) => {
+      if (!tempId) return
+
+      const realId = data.createFavouriteWorkout.id
+      queryClient.setQueryData<GQLGetFavouriteWorkoutsQuery>(
+        favouritesQueryKey,
+        (oldData) => {
+          if (!oldData?.getFavouriteWorkouts) return oldData
+
+          return {
+            ...oldData,
+            getFavouriteWorkouts: oldData.getFavouriteWorkouts.map((fav) =>
+              fav.id === tempId ? { ...fav, id: realId } : fav,
+            ),
+          }
+        },
+      )
+
+      setView('day')
+      setPendingCreatedDay({ tempId, realId })
+
+      void queryInvalidation.favourites(queryClient)
+      onRefetch()
+    },
+    onError: () => {
+      setView('plan')
+      setActiveDayId(null)
+    },
+  })
+
+  const handleCreateDay = async () => {
+    if (!canCreateDay || isLoading || isCreatingDay) return
+
+    const nextTitle = `Day ${days.length + 1}`
+    const tempId = generateTempId('temp')
+
+    setActiveDayId(tempId)
+    setView('day')
+    setPendingCreatedDay(null)
+
+    try {
+      await createDayOptimistic(
+        {
+          input: {
+            title: nextTitle,
+            folderId,
+            exercises: [],
+          },
+        },
+        tempId,
+      )
+    } catch {
+      // errors handled globally + rollback in optimistic mutation
+    }
+  }
+
   const title = plan ? getCustomPlanTitle(plan) : ''
   const folderId = plan ? getCustomPlanFolderId(plan) : null
   const canEditTitle = plan?.kind === 'folder'
+  const canDeletePlan = plan?.kind === 'folder'
+
+  const { mutateAsync: deleteFolder, isPending: isDeletingFolder } =
+    useDeleteFavouriteWorkoutFolder()
 
   useEffect(() => {
     if (!canEditTitle) return
@@ -182,6 +315,19 @@ export function CustomPlansDrawer({
   }, [draftTitle, isEditingTitle])
 
   if (!plan) return null
+
+  const handleConfirmDeletePlan = async () => {
+    if (!canDeletePlan) return
+
+    try {
+      await deleteFolder({ id: plan.folder.id })
+      setIsDeletePlanOpen(false)
+      onRefetch()
+      onClose()
+    } catch (error) {
+      console.error('Failed to delete plan folder:', error)
+    }
+  }
 
   return (
     <>
@@ -313,14 +459,15 @@ export function CustomPlansDrawer({
                     days={days}
                     isLoading={isLoading}
                     canCreateDay={canCreateDay}
+                    isCreatingDay={isCreatingDay}
+                    canDeletePlan={canDeletePlan}
+                    isDeletingPlan={isDeletingFolder}
+                    onDeletePlan={() => setIsDeletePlanOpen(true)}
                     onSelectDay={(id) => {
                       setActiveDayId(id)
                       setView('day')
                     }}
-                    onCreateDay={() => {
-                      if (!canCreateDay) return
-                      setShowCreateDay(true)
-                    }}
+                    onCreateDay={handleCreateDay}
                   />
                 </div>
 
@@ -335,7 +482,14 @@ export function CustomPlansDrawer({
                 >
                   <DayEditorView
                     day={activeDay}
-                    isLoading={isLoading}
+                    isLoading={
+                      isLoading ||
+                      (view === 'day' &&
+                        !!activeDayId &&
+                        (isTemporaryId(activeDayId) ||
+                          (pendingCreatedDay?.tempId === activeDayId &&
+                            !activeDay)))
+                    }
                     workoutStatus={workoutStatus}
                     onBack={() => {
                       setView('plan')
@@ -344,7 +498,7 @@ export function CustomPlansDrawer({
                     onStartWorkout={onStartWorkout}
                     isStartingWorkout={isStartingWorkout}
                     onRequestDeleteDay={(id) => onRequestDeleteDay(id)}
-                    onCreateAnotherDay={() => setShowCreateDay(true)}
+                    onCreateAnotherDay={handleCreateDay}
                   />
                 </div>
               </div>
@@ -353,16 +507,16 @@ export function CustomPlansDrawer({
         </DrawerContent>
       </Drawer>
 
-      <CreateEmptyFavouriteDialog
-        open={showCreateDay}
-        onClose={() => setShowCreateDay(false)}
-        onSuccess={(favouriteId) => {
-          onRefetch()
-          setActiveDayId(favouriteId)
-          setView('day')
-        }}
-        currentFolderId={folderId}
-      />
+      {canDeletePlan ? (
+        <DeleteFolderDialog
+          open={isDeletePlanOpen}
+          folderName={plan.folder.name}
+          workoutCount={days.length}
+          onClose={() => setIsDeletePlanOpen(false)}
+          onConfirm={() => void handleConfirmDeletePlan()}
+          isDeleting={isDeletingFolder}
+        />
+      ) : null}
     </>
   )
 }

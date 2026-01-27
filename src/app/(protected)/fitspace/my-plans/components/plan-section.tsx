@@ -135,7 +135,7 @@ export function PlanSection({
   const maxPlans = 6
 
   return (
-    <div className="space-y-4 bg-card -mx-4 px-4 py-0">
+    <div className="space-y-4 bg-card -mx-4 px-4 pb-0 pt-3">
       <SectionHeader title={title} count={plans.length} titleLink={titleLink}>
         {plans.length > 2 && (
           <Button

@@ -28,6 +28,8 @@ export function DeleteFolderDialog({
 }: DeleteFolderDialogProps) {
   if (!folderName) return null
 
+  const dayCount = typeof workoutCount === 'number' ? workoutCount : null
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent dialogTitle="Delete plan">
@@ -42,14 +44,14 @@ export function DeleteFolderDialog({
           <p className="text-sm dark:text-muted-foreground">
             This action cannot be undone.
           </p>
-          {typeof workoutCount === 'number' && workoutCount > 0 ? (
+          {dayCount !== null ? (
             <p className="text-sm dark:text-muted-foreground mt-2">
-              The <strong>{workoutCount}</strong>{' '}
-              {workoutCount === 1 ? 'day' : 'days'} inside will be moved to All.
+              The <strong>{dayCount}</strong> {dayCount === 1 ? 'day' : 'days'}{' '}
+              inside this plan will be permanently deleted.
             </p>
           ) : (
             <p className="text-sm dark:text-muted-foreground mt-2">
-              Days inside will be moved to All.
+              Days inside this plan will be permanently deleted.
             </p>
           )}
         </div>

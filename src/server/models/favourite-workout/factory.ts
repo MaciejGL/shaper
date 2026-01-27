@@ -813,12 +813,20 @@ export async function deleteFavouriteWorkoutFolder(
   id: string,
   userId: string,
 ): Promise<boolean> {
-  const result = await prisma.favouriteWorkoutFolder.deleteMany({
-    where: {
-      id,
-      createdById: userId,
-    },
-  })
+  const [, folderResult] = await prisma.$transaction([
+    prisma.favouriteWorkout.deleteMany({
+      where: {
+        folderId: id,
+        createdById: userId,
+      },
+    }),
+    prisma.favouriteWorkoutFolder.deleteMany({
+      where: {
+        id,
+        createdById: userId,
+      },
+    }),
+  ])
 
-  return result.count > 0
+  return folderResult.count > 0
 }
