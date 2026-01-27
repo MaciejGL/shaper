@@ -21,67 +21,76 @@ import { captureEvent } from '@/lib/posthog'
 import { useOnboardingFreeTierVariant } from './use-onboarding-free-tier-variant'
 import { useOnboardingTour } from './use-onboarding-tour'
 
-// Step content
 const TOUR_CONTENT = {
   welcome: {
-    title: 'Nice - You’re set up!',
+    title: "You're set — quick tour (30 sec)",
     description: [
       'I’m Mats from the Hypro team.',
-      'Let me show you the main places you’ll use. Then you’re straight into your first workout.',
+      'This app is built to remove guesswork: follow a plan, hit the right weekly volume, and track progress as you train.',
+      'I’ll show you the 4 places you’ll actually use — then you’ll start your first workout.',
     ],
   },
+
   workout: {
-    title: 'Workout',
+    title: 'Workout (your daily hub)',
     description: [
-      'This is your training hub.',
-      'Follow your active plan day by day, or start a custom workout anytime.',
-      'Log sets here and track your progress over time.',
+      'This is where training happens — open today’s session and start.',
+      'Follow your active plan day by day, or build a custom workout anytime.',
+      'Log sets while you lift — you’ll see progress over time, not just random sessions.',
     ],
   },
+
   plans: {
     title: 'My Plans',
     description: [
-      'This is your personal library.',
-      'You’ll find plans from your trainer, plans you picked from our collection, and you can create your own when you’re ready.',
+      'Everything you’ll train from lives here.',
+      'Plans from a trainer, plans you activated from our collection, and your own plans when you’re ready.',
+      'Pick one plan and stay consistent — that’s how progress becomes measurable.',
     ],
   },
+
   volumeGoal: {
-    title: 'Set a weekly volume goal',
+    title: 'Set a weekly volume goal (your focus)',
     description: [
-      'Pick a focus (like Upper Body or Glutes) and how hard you want to push.',
-      'We’ll use it to highlight the right muscles in your heatmap and guide your growth over time.',
-      'You can set it anytime in Progress → Muscle heatmap.',
+      'Choose what you want to prioritize (e.g. Upper Body, Glutes) and how hard you want to push.',
+      'We’ll highlight the muscles that matter and help you keep weekly volume on track over time.',
+      'You can change this anytime in Progress → Muscle heatmap.',
     ],
   },
+
   explore: {
-    title: 'Discover',
+    title: 'Discover (find what fits you)',
     description: [
-      'Free workouts selection from our plans - those are selected days from our full plans.',
-      'Coach-built plans - choose the one that fits your goals and lifestyle or try our plan finder.',
-      'Connect with certified trainers to get personalized guidance and support - first assessment is free and non-binding.',
+      'Free workouts: selected sessions from our full plans — perfect to try right now.',
+      'Coach-built plans: choose by goal and schedule (or use the plan finder).',
+      'Work with a certified trainer for personal guidance — first meeting and assessment is free and non-binding.',
     ],
   },
+
   chat: {
-    title: 'Need Help? Chat with Mats',
+    title: 'Need help? Chat with Mats',
     description: [
-      'That’s me.',
-      'I’m a real person on the Hypro team. Message me anytime for help with the app, training questions, or a quick nudge to stay on track.',
+      'That’s me — a real person on the Hypro team.',
+      'Message me anytime for app help, training questions, or to adjust your setup so it fits your goal.',
+      'If you’re unsure what to do next, start here — I’ll point you in the right direction.',
     ],
   },
+
   freeTier: {
-    title: 'Train free. Upgrade when you want more',
+    title: 'Train free — upgrade when it helps',
     description: [
-      'No hard paywall - you can train and log workouts for free.',
+      'No hard paywall: you can train and log workouts for free.',
       'Premium unlocks coach-built plans, recovery insights, and smarter exercise suggestions.',
-      'Upgrade anytime when it helps you progress faster.',
+      'Upgrade anytime when you want faster progress and more guidance.',
     ],
   },
+
   goodbye: {
-    title: "You're All Set!",
+    title: 'All set — let’s train',
     description: [
-      'Alright! Time to train.',
-      'Pick a free workout, browse plans, or jump straight into a custom session builder.',
-      'If you get stuck, just message me.',
+      'Start with a free workout, browse plans, or jump into the custom session builder.',
+      'The fastest win: open Workout and do today’s session.',
+      'If anything feels confusing — message me.',
     ],
   },
 }
