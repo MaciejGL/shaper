@@ -2,7 +2,6 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { useQueryState } from 'nuqs'
 import { useState } from 'react'
 
 import {
@@ -27,10 +26,10 @@ export function Exercise({
   exercises,
   previousDayLogs,
   isQuickWorkout = false,
+  dayId,
 }: ExerciseProps) {
   const queryClient = useQueryClient()
   const router = useRouter()
-  const [dayId] = useQueryState('day')
 
   // Timer state management - only one timer can be active at a time
   const [activeTimerSetId, setActiveTimerSetId] = useState<string | null>(null)
@@ -50,7 +49,7 @@ export function Exercise({
 
   const { applySuggestedLoad, isApplyingSuggestedLoad } = useApplySuggestedLoad(
     {
-      dayId: dayId ?? '',
+      dayId,
     },
   )
 
@@ -63,7 +62,7 @@ export function Exercise({
       GQLFitspaceMarkExerciseAsCompletedMutation,
       { exerciseId: string; completed: boolean }
     >({
-      queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
+      queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId }),
       mutationFn: useFitspaceMarkExerciseAsCompletedMutation().mutateAsync,
       updateFn: (oldData, { exerciseId, completed }) => {
         // Build previous logs map for fallback values
@@ -119,7 +118,7 @@ export function Exercise({
           queryClient.invalidateQueries({ queryKey: ['navigation'] }),
           queryClient.invalidateQueries({
             queryKey: useFitspaceGetWorkoutDayQuery.getKey({
-              dayId: dayId ?? '',
+              dayId,
             }),
           }),
         ])
@@ -135,7 +134,7 @@ export function Exercise({
     boolean,
     { exerciseId: string }
   >({
-    queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
+    queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId }),
     mutationFn: async ({ exerciseId }) => {
       const result = await removeExerciseMutation({ exerciseId })
       return result.removeExerciseFromWorkout
@@ -177,7 +176,7 @@ export function Exercise({
         queryClient.invalidateQueries({ queryKey: ['navigation'] }),
         queryClient.invalidateQueries({
           queryKey: useFitspaceGetWorkoutDayQuery.getKey({
-            dayId: dayId ?? '',
+            dayId,
           }),
         }),
         queryClient.invalidateQueries({
@@ -237,7 +236,7 @@ export function Exercise({
             queryClient.invalidateQueries({ queryKey: ['navigation'] }),
             queryClient.invalidateQueries({
               queryKey: useFitspaceGetWorkoutDayQuery.getKey({
-                dayId: dayId ?? '',
+                dayId,
               }),
             }),
           ])
@@ -353,6 +352,7 @@ export function Exercise({
           onSetsLogsChange={handleSetsLogsChange}
           appliedSuggestedWeights={appliedSuggestedWeights}
           applySuggestedNonce={applySuggestedNonce}
+          dayId={dayId}
         />
       </div>
     </div>

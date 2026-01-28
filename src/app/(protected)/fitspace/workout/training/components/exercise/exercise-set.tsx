@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion'
 import { CheckIcon } from 'lucide-react'
-import { useQueryState } from 'nuqs'
 import { startTransition, useCallback } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -35,21 +34,21 @@ export function ExerciseSet({
   onWeightChange,
   onSetCompleted,
   onSetUncompleted,
+  dayId,
 }: ExerciseSetProps) {
-  const [dayId] = useQueryState('day')
   const { preferences } = useUserPreferences()
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
   const { toDisplayWeight } = useWeightConversion()
 
   const { markAsEdited } = useSetLogUpdate({
     setId: set.id,
-    dayId: dayId ?? '',
+    dayId,
     reps,
     weight,
   })
 
   const { markSetAsCompletedOptimistic, prData, clearPR } = useSetCompletion({
-    dayId: dayId ?? '',
+    dayId,
     onSetCompleted,
   })
 

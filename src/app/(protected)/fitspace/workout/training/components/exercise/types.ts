@@ -15,6 +15,7 @@ export interface ExerciseProps {
   exercises?: WorkoutExercise[]
   previousDayLogs?: PreviousDayLogs
   isQuickWorkout?: boolean
+  dayId: string
 }
 
 export interface ExerciseHeaderProps {
@@ -40,6 +41,7 @@ export interface ExerciseSetsProps {
   ) => void
   appliedSuggestedWeights?: Record<string, string>
   applySuggestedNonce?: number
+  dayId: string
 }
 
 export interface ExerciseSetProps {
@@ -52,6 +54,7 @@ export interface ExerciseSetProps {
   onWeightChange: (weight: string) => void
   onSetCompleted: (skipTimer?: boolean) => void
   onSetUncompleted: () => void
+  dayId: string
 }
 
 export interface ExerciseMetadataProps {

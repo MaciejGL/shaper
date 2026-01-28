@@ -2,7 +2,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence } from 'framer-motion'
 import { PlusIcon } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { useQueryState } from 'nuqs'
 import { useEffect, useState } from 'react'
 
 import { revalidatePlanPages } from '@/app/actions/revalidate'
@@ -36,11 +35,11 @@ export function ExerciseSets({
   onSetsLogsChange,
   appliedSuggestedWeights,
   applySuggestedNonce,
+  dayId,
 }: ExerciseSetsProps) {
   const isFirstRender = useIsFirstRender()
   const { trainingId } = useParams<{ trainingId: string }>()
   const router = useRouter()
-  const [dayId] = useQueryState('day')
   const queryClient = useQueryClient()
   const { preferences } = useUserPreferences()
   const invalidateQuery = useInvalidateQuery()
@@ -158,7 +157,7 @@ export function ExerciseSets({
     useFitspaceAddSetMutation({
       onSuccess: (data) => {
         queryClient.setQueryData(
-          useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
+          useFitspaceGetWorkoutDayQuery.getKey({ dayId }),
           (old: GQLFitspaceGetWorkoutDayQuery) => {
             if (!old?.getWorkoutDay?.day || !data?.addSet) return old
 
@@ -239,7 +238,7 @@ export function ExerciseSets({
     GQLFitspaceRemoveSetMutation,
     { setId: string }
   >({
-    queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
+    queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId }),
     mutationFn: useFitspaceRemoveSetMutation().mutateAsync,
     updateFn: (oldData, { setId }) => {
       const updateFn = createOptimisticRemoveSetUpdate(setId)
@@ -364,6 +363,7 @@ export function ExerciseSets({
                   handleSetCompleted(set.id, skipTimer)
                 }
                 onSetUncompleted={handleSetUncompleted}
+                dayId={dayId}
               />
             )
           })}
