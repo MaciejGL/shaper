@@ -78,7 +78,7 @@ export async function notifyNewMessage(
     [recipientId],
     senderName || 'New message',
     message,
-    '/fitspace/messages',
+    '/fitspace/workout',
   )
 }
 
@@ -244,7 +244,8 @@ export async function notifyExerciseCommentReply(
     exerciseName || 'your exercise'
   }`
 
-  const body = replyText.length > 200 ? `${replyText.substring(0, 200)}...` : replyText
+  const body =
+    replyText.length > 200 ? `${replyText.substring(0, 200)}...` : replyText
   return await sendPushNotificationToUsers(
     [recipientId],
     title,
