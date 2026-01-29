@@ -1,3 +1,11 @@
+import {
+  addDays,
+  differenceInMilliseconds,
+  isAfter,
+  isBefore,
+  isEqual,
+} from 'date-fns'
+
 import { NavigationDay, NavigationPlan, NavigationWeek } from './workout-day'
 
 /**
@@ -11,11 +19,12 @@ export function isQuickWorkout(plan: NavigationPlan): boolean {
  * Checks if a date falls within a week's date range
  */
 export function isDateInWeek(date: Date, weekStart: Date): boolean {
-  const dateTime = date.getTime()
-  const weekStartTime = weekStart.getTime()
-  const weekEndTime = weekStartTime + 7 * 24 * 60 * 60 * 1000 // +7 days
+  const weekEndExclusive = addDays(weekStart, 7)
 
-  return dateTime >= weekStartTime && dateTime < weekEndTime
+  return (
+    (isAfter(date, weekStart) || isEqual(date, weekStart)) &&
+    isBefore(date, weekEndExclusive)
+  )
 }
 
 /**
@@ -38,18 +47,16 @@ export function findClosestWeek(
   weeks: NavigationWeek[],
   date: Date,
 ): NavigationWeek | undefined {
-  const dateTime = date.getTime()
-
   const weeksWithDates = weeks.filter((w) => w.scheduledAt)
 
   if (weeksWithDates.length === 0) return undefined
 
   return weeksWithDates.reduce((closest, current) => {
     const closestDiff = Math.abs(
-      dateTime - new Date(closest.scheduledAt!).getTime(),
+      differenceInMilliseconds(date, new Date(closest.scheduledAt!)),
     )
     const currentDiff = Math.abs(
-      dateTime - new Date(current.scheduledAt!).getTime(),
+      differenceInMilliseconds(date, new Date(current.scheduledAt!)),
     )
     return currentDiff < closestDiff ? current : closest
   })
@@ -64,10 +71,12 @@ export function findQuickWorkoutWeek(
 ): NavigationWeek | undefined {
   // Try exact match first
   const exactWeek = findWeekByDate(weeks, now)
+  const closestWeek = exactWeek ? undefined : findClosestWeek(weeks, now)
+
   if (exactWeek) return exactWeek
 
   // Fallback to closest week
-  return findClosestWeek(weeks, now)
+  return closestWeek
 }
 
 /**
@@ -78,7 +87,7 @@ export function calculateTrainerPlanWeekIndex(
   now: Date,
 ): number {
   const daysSinceStart = Math.floor(
-    (now.getTime() - planStartDate.getTime()) / (1000 * 60 * 60 * 24),
+    differenceInMilliseconds(now, planStartDate) / (1000 * 60 * 60 * 24),
   )
   return Math.max(0, Math.floor(daysSinceStart / 7))
 }
@@ -96,13 +105,40 @@ export function findTrainerPlanWeek(
 
   const startDate = planStartDate ? new Date(planStartDate) : now
   const weekIndex = calculateTrainerPlanWeekIndex(startDate, now)
-  const isPastPlanEnd = weekIndex >= weeks.length
+  let isPastPlanEnd = weekIndex >= weeks.length
+  const safeWeekIndex = Math.min(weekIndex, weeks.length - 1)
+  let selectedWeek = weeks[safeWeekIndex] || weeks[weeks.length - 1]
 
-  return {
-    week:
-      weeks[Math.min(weekIndex, weeks.length - 1)] || weeks[weeks.length - 1],
-    isPastPlanEnd,
+  const weeksWithScheduledAt = weeks.filter((week) => week.scheduledAt)
+  if (weeksWithScheduledAt.length === weeks.length) {
+    const weekByDate = findWeekByDate(weeksWithScheduledAt, now)
+    const closestWeek = weekByDate
+      ? undefined
+      : findClosestWeek(weeksWithScheduledAt, now)
+    selectedWeek = weekByDate ?? closestWeek ?? selectedWeek
+
+    const latestWeek = weeksWithScheduledAt.reduce((latest, current) => {
+      if (!latest) return current
+      return isAfter(
+        new Date(current.scheduledAt!),
+        new Date(latest.scheduledAt!),
+      )
+        ? current
+        : latest
+    }, weeksWithScheduledAt[0])
+
+    if (latestWeek?.scheduledAt) {
+      const latestWeekEndExclusive = addDays(
+        new Date(latestWeek.scheduledAt),
+        7,
+      )
+      isPastPlanEnd =
+        isAfter(now, latestWeekEndExclusive) ||
+        isEqual(now, latestWeekEndExclusive)
+    }
   }
+
+  return { week: selectedWeek, isPastPlanEnd }
 }
 
 /**
