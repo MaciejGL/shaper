@@ -209,16 +209,33 @@ export function CalendarWeekSelector({
             today: new Date(),
           }}
           modifiersClassNames={{
-            completed:
-              'bg-green-300 dark:bg-green-700 font-semibold hover:bg-green-500 rounded-xl',
-            pending:
-              'bg-amber-200 dark:bg-amber-500/50 font-medium hover:bg-yellow-400 rounded-xl',
-            restDay: cn('rounded-xl opacity-75 bg-card-on-card'),
-            empty: 'rounded-xl bg-card-on-card',
-            today: cn('outline-primary outline-offset-1 outline-2 rounded-xl'),
+            completed: cn(
+              '[&_button]:relative',
+              '[&_button]:after:absolute [&_button]:after:bottom-1 [&_button]:after:left-1/2 [&_button]:after:-translate-x-1/2',
+              '[&_button]:after:size-1.5 [&_button]:after:rounded-full [&_button]:after:bg-green-500 [&_button]:dark:after:bg-green-400',
+              '[&_button[data-selected=true]]:after:hidden',
+            ),
+            pending: cn(
+              '[&_button]:relative',
+              '[&_button]:after:absolute [&_button]:after:bottom-1 [&_button]:after:left-1/2 [&_button]:after:-translate-x-1/2',
+              '[&_button]:after:size-1.5 [&_button]:after:rounded-full [&_button]:after:bg-amber-500 [&_button]:dark:after:bg-amber-400',
+              '[&_button[data-selected=true]]:after:hidden',
+            ),
+            restDay: cn(
+              'opacity-75',
+              '[&_button]:relative',
+              '[&_button]:after:absolute [&_button]:after:bottom-1 [&_button]:after:left-1/2 [&_button]:after:-translate-x-1/2',
+              '[&_button]:after:size-1 [&_button]:after:rounded-full [&_button]:after:bg-muted-foreground/40',
+              '[&_button[data-selected=true]]:after:hidden',
+            ),
+            empty: cn(''),
+            today: cn(
+              '[&_button]:ring-1 [&_button]:ring-primary [&_button]:ring-offset-1',
+              '[&_button[data-selected-single=true]]:ring-0 [&_button[data-selected-single=true]]:!bg-primary [&_button[data-selected-single=true]]:!text-primary-foreground [&_button[data-selected-single=true]>span]:!text-primary-foreground',
+            ),
             outside: 'opacity-50',
           }}
-          className="w-full aspect-square max-w-sm mx-auto [&_button]:rounded-xl! **:font-medium [&_[data-selected=true]_button]:bg-primary bg-transparent"
+          className="w-full aspect-square max-w-sm mx-auto [&_button]:rounded-xl! [&_button]:bg-card-on-card **:font-medium [&_[data-selected-single=true]_button]:bg-primary [&_[data-selected-single=true]_button]:text-primary-foreground [&_[data-selected-single=true]_button>span]:text-primary-foreground bg-transparent"
         />
       </DrawerContent>
     </Drawer>

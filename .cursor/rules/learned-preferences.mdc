@@ -1,0 +1,28 @@
+---
+description: Learned preferences and corrections from user feedback - automatically updated by the self-learning skill
+globs:
+  - src/**/*.{ts,tsx}
+  - expo-app/**/*.{ts,tsx}
+alwaysApply: true
+---
+
+# Learned Preferences
+
+This file contains preferences learned from user corrections during development sessions.
+The agent automatically appends new rules here when corrections don't fit other rule files.
+
+## UI/UX
+
+- **Prefer**: Simple confirm dialogs for destructive actions over complex modals
+
+## Code Patterns
+
+<!-- Preferences for code structure and organization -->
+
+## Architecture
+
+<!-- Preferences for system design decisions -->
+
+## Workflow
+
+<!-- Preferences for development workflow and processes -->
