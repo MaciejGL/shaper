@@ -185,10 +185,10 @@ export function MobileNav({
       </AnimatePresence>
 
       {/* Modern floating navbar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 px-2 safe-area-bottom-content">
-        <nav className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-3xl shadow-lg border border-white/20 dark:border-white/10 mx-auto max-w-md">
+      <div className="fixed bottom-0 left-0 right-0 z-50 ">
+        <nav className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-lg border border-white/20 dark:border-white/10 mx-auto max-w-md">
           <div
-            className="grid items-stretch p-px"
+            className="grid items-stretch px-2 safe-area-bottom-content"
             style={{
               gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))`,
             }}

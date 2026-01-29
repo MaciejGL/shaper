@@ -13,6 +13,7 @@ export async function GET(
     const { id } = await params
 
     const plan = await prisma.trainingPlan.findUnique({
+      relationLoadStrategy: 'query',
       where: { id },
       include: {
         weeks: {

@@ -9,6 +9,7 @@ import UserPublic from './model'
 export const Query: GQLQueryResolvers = {
   userPublic: async (_, { id }, context) => {
     const user = await prisma.user.findUnique({
+      relationLoadStrategy: 'query',
       where: { id },
       include: {
         profile: true,
@@ -33,6 +34,7 @@ export const Query: GQLQueryResolvers = {
     }
 
     const trainer = await prisma.user.findUnique({
+      relationLoadStrategy: 'query',
       where: {
         id: user.user.trainerId,
       },

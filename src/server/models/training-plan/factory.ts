@@ -63,6 +63,7 @@ export async function getTrainingPlanById(
 
   try {
     const trainingPlan = await prisma.trainingPlan.findUnique({
+      relationLoadStrategy: 'query',
       where: { id },
       include: {
         createdBy: {
@@ -153,6 +154,7 @@ export async function getTemplates(
 
   const templates = await prisma.trainingPlan.findMany({
     where,
+    relationLoadStrategy: 'query',
     orderBy: {
       createdAt: 'desc',
     },
@@ -791,6 +793,7 @@ export async function updateTrainingPlan(
   }
 
   const createdAt = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: input.id },
     select: { createdAt: true },
   })
@@ -861,6 +864,7 @@ export async function updateTrainingPlan(
             // Handle days for existing week
             if (weekInput.days) {
               const existingDays = await tx.trainingDay.findMany({
+                relationLoadStrategy: 'query',
                 where: { weekId: weekInput.id },
                 include: { exercises: { include: { sets: true } } },
               })
@@ -1143,6 +1147,7 @@ export async function deleteTrainingPlan(
 
   // Check if the training plan exists
   const trainingPlan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id },
   })
 
@@ -1422,6 +1427,7 @@ export async function activatePlan(
 
         // Fetch the duplicated plan structure with all IDs for individual updates
         const duplicatedPlan = await tx.trainingPlan.findUnique({
+          relationLoadStrategy: 'query',
           where: { id: duplicated.id },
           include: {
             weeks: {
@@ -1452,7 +1458,9 @@ export async function activatePlan(
             data: {
               assignedToId: user.user.id,
               isTemplate: false,
-              templateId: shouldSetTemplateId ? fullPlan.id : duplicated.templateId,
+              templateId: shouldSetTemplateId
+                ? fullPlan.id
+                : duplicated.templateId,
               active: true,
               startDate: baseStartDate,
             },
@@ -1735,6 +1743,7 @@ export async function getWorkoutNavigation(
 
   // Lightweight query optimized for navigation - only fetch weeks and days without exercises/sets
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: {
       id: trainingId,
       active: true,
@@ -1777,6 +1786,7 @@ export async function getWorkoutNavigation(
       // Refetch plan if we made updates to ensure we return fresh data
       if (hasUpdates) {
         const updatedPlan = await prisma.trainingPlan.findUnique({
+          relationLoadStrategy: 'query',
           where: { id: plan.id },
           include: {
             weeks: {
@@ -1811,6 +1821,7 @@ export async function getWorkoutNavigation(
 
   // Fallback to default user plan
   const defaultPlan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: {
       id: trainingId,
       assignedToId: user.user.id,
@@ -1857,6 +1868,7 @@ export async function getWorkoutNavigation(
     await ensureQuickWorkoutWeeks(defaultPlan.id, 4)
 
     const refreshedPlan = await prisma.trainingPlan.findUnique({
+      relationLoadStrategy: 'query',
       where: {
         id: trainingId,
         assignedToId: user.user.id,
@@ -1910,6 +1922,7 @@ export async function getWorkoutNavigation(
       // Refetch plan if we made updates to ensure we return fresh data
       if (hasUpdates) {
         const updatedPlan = await prisma.trainingPlan.findUnique({
+          relationLoadStrategy: 'query',
           where: { id: defaultPlan.id },
           include: {
             weeks: {
@@ -2015,6 +2028,7 @@ export async function getWorkoutDay(
 
   if (dayId) {
     day = await prisma.trainingDay.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: dayId, week: { plan: { assignedToId: user.user.id } } },
       include: WORKOUT_DAY_INCLUDE,
     })
@@ -2414,6 +2428,7 @@ export async function getWorkoutDaysBatch(
   }
 
   const days = await prisma.trainingDay.findMany({
+    relationLoadStrategy: 'query',
     where: {
       id: { in: dayIds },
       week: { plan: { assignedToId: user.user.id } },
@@ -2481,6 +2496,7 @@ export async function getQuickWorkoutNavigation(context: GQLContext) {
 
   // Fetch plan with navigation data (lightweight query)
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: quickWorkoutPlan.id },
     include: {
       weeks: {
@@ -2555,6 +2571,7 @@ export async function getQuickWorkoutDay(
   if (dayId) {
     // Direct lookup by dayId
     day = await prisma.trainingDay.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: dayId },
       include: {
         week: {
@@ -2871,6 +2888,7 @@ export async function getPlanSummary(
 
   // Get the training plan with all weeks, days, exercises, and sets
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: planId, assignedToId: context.user.user.id },
     include: {
       weeks: {

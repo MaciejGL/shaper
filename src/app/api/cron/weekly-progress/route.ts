@@ -56,6 +56,7 @@ export async function GET(request: Request) {
       try {
         // Get completed workouts in last 7 days with stats
         const completedDays = await prisma.trainingDay.findMany({
+          relationLoadStrategy: 'query',
           where: {
             completedAt: { gte: sevenDaysAgo },
             week: {

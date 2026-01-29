@@ -52,6 +52,7 @@ export async function updateTrainingPlanDetails(
 
   // Get plan for additional checks
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: input.id },
     select: { id: true, completedAt: true },
   })
@@ -132,6 +133,7 @@ export async function duplicateTrainingWeek(
 
   // Get the plan to determine the next week number
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: input.trainingPlanId },
     include: {
       weeks: {
@@ -334,6 +336,7 @@ export async function addTrainingWeek(
   }
 
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: input.trainingPlanId },
     select: { id: true, completedAt: true },
   })
@@ -395,6 +398,7 @@ export async function updateTrainingDayData(
 
   // Get day with plan ID for permission check
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: input.dayId },
     include: {
       week: {
@@ -631,6 +635,7 @@ export async function addExerciseToDay(
 
   // Get day with plan ID for permission check
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: input.dayId },
     include: {
       week: {
@@ -809,6 +814,7 @@ export async function removeAllExercisesFromDay(
 
   // Get day with exercises and plan ID for permission check
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: input.dayId },
     include: {
       exercises: {
@@ -918,6 +924,7 @@ export async function moveExercise(
       // First, verify target day exists and user has access
       if (input.targetDayId) {
         const targetDay = await tx.trainingDay.findUnique({
+          relationLoadStrategy: 'query',
           where: { id: input.targetDayId },
           include: {
             week: {
@@ -1396,6 +1403,7 @@ export async function shiftTrainingSchedule(
 
   // Load the plan with all weeks
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: input.planId },
     select: {
       id: true,

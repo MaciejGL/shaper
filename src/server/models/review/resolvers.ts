@@ -16,6 +16,7 @@ export const Mutation: GQLMutationResolvers = {
     const { trainingPlanId, rating, comment } = input
 
     const template = await prisma.trainingPlan.findUnique({
+      relationLoadStrategy: 'query',
       where: { assignedToId: userId, id: trainingPlanId },
       select: {
         templateId: true,

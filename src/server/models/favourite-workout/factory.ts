@@ -709,6 +709,7 @@ export async function startWorkoutFromFavourite(
   if (!weekId) {
     // If we still don't have weekId, fetch it
     const dayWithWeek = await prisma.trainingDay.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: targetDay.id },
       include: { week: true },
     })

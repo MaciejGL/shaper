@@ -49,6 +49,7 @@ export async function GET(request: Request) {
       try {
         // Get all completed workouts for this user
         const completedDays = await prisma.trainingDay.findMany({
+          relationLoadStrategy: 'query',
           where: {
             completedAt: { not: null },
             week: {

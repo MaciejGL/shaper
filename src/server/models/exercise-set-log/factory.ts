@@ -178,6 +178,7 @@ const markSetAsCompletedRelatedData = async (
 
   // 5. Check if all weeks in the plan are completed
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: week.planId },
     select: {
       id: true,
@@ -464,6 +465,7 @@ export const markExerciseAsCompleted = async (
   }
 
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: week.planId },
     select: { id: true, weeks: { select: { completedAt: true } } },
   })
@@ -679,6 +681,7 @@ const checkWorkoutMilestones = async (userId: string) => {
 
     // Get completed exercises with sets for stats
     const completedDays = await prisma.trainingDay.findMany({
+      relationLoadStrategy: 'query',
       where: {
         completedAt: { not: null },
         week: {
@@ -745,6 +748,7 @@ export const markWorkoutAsCompleted = async (
 
   // Get user and trainer info for push notifications
   const dayWithInfo = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     select: {
       id: true,
@@ -827,6 +831,7 @@ export const markWorkoutAsCompleted = async (
   // ✅ Cascade completion checks remain sequential
 
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     select: { weekId: true },
   })
@@ -834,6 +839,7 @@ export const markWorkoutAsCompleted = async (
   if (!day) return { success: true, planCompleted: false, planId: null }
 
   const week = await prisma.trainingWeek.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: day.weekId },
     select: {
       id: true,
@@ -855,6 +861,7 @@ export const markWorkoutAsCompleted = async (
   }
 
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: week.planId },
     select: {
       id: true,

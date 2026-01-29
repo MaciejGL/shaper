@@ -10,11 +10,6 @@ import {
 import { TRACKED_DISPLAY_GROUPS, getMuscleById } from '@/config/muscles'
 import { computeTargets } from '@/config/volume-goals'
 import {
-  VolumeGoalFieldResolvers,
-  VolumeGoalMutations,
-  VolumeGoalQueries,
-} from '@/server/models/volume-goal/resolvers'
-import {
   GQLMutationResolvers,
   GQLQueryResolvers,
   GQLUserProfileResolvers,
@@ -24,6 +19,11 @@ import { ImageHandler } from '@/lib/aws/image-handler'
 import { invalidateUserBasicCache } from '@/lib/cache/user-cache'
 import { prisma } from '@/lib/db'
 import { invalidateUserCache } from '@/lib/getUser'
+import {
+  VolumeGoalFieldResolvers,
+  VolumeGoalMutations,
+  VolumeGoalQueries,
+} from '@/server/models/volume-goal/resolvers'
 import { GQLContext } from '@/types/gql-context'
 
 import UserProfile from './model'
@@ -83,6 +83,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // Get completed exercises with muscle groups for the user in the time period
     const completedExercises = await prisma.trainingExercise.findMany({
+      relationLoadStrategy: 'query',
       where: {
         completedAt: {
           gte: startDate,
@@ -164,6 +165,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // Get completed exercises with muscle groups for the user in the time period
     const completedExercises = await prisma.trainingExercise.findMany({
+      relationLoadStrategy: 'query',
       where: {
         completedAt: {
           gte: startDate,
@@ -251,6 +253,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // Get completed exercises with muscle groups for the user in the time period
     const completedExercises = await prisma.trainingExercise.findMany({
+      relationLoadStrategy: 'query',
       where: {
         completedAt: {
           gte: startDate,
@@ -371,7 +374,10 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       activeGoal?.commitment,
     )
     const getTargetForGroup = (group: string): number => {
-      return (computedTargets as Record<string, number>)[group] ?? DEFAULT_TARGET_SETS
+      return (
+        (computedTargets as Record<string, number>)[group] ??
+        DEFAULT_TARGET_SETS
+      )
     }
 
     // Get exercises where the day is SCHEDULED in the target week
@@ -665,7 +671,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           sets: { some: { completedAt: { not: null } } },
         },
         include: {
-          base: { include: { muscleGroups: true, secondaryMuscleGroups: true } },
+          base: {
+            include: { muscleGroups: true, secondaryMuscleGroups: true },
+          },
           sets: { where: { completedAt: { not: null } } },
         },
       })
@@ -799,7 +807,8 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       // If old image exists and is different from new one, mark for deletion
       if (
         existingProfile?.trainerCardBackgroundUrl &&
-        existingProfile.trainerCardBackgroundUrl !== rest.trainerCardBackgroundUrl
+        existingProfile.trainerCardBackgroundUrl !==
+          rest.trainerCardBackgroundUrl
       ) {
         imagesToDelete.push(existingProfile.trainerCardBackgroundUrl)
       }
@@ -835,7 +844,10 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       try {
         await ImageHandler.delete({ images: imagesToDelete })
       } catch (error) {
-        console.error('Failed to delete old trainer card background from S3:', error)
+        console.error(
+          'Failed to delete old trainer card background from S3:',
+          error,
+        )
         // Don't throw - DB update was successful
       }
     }

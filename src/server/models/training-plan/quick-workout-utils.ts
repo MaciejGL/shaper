@@ -18,6 +18,7 @@ export async function ensureQuickWorkoutWeeks(
   weeksAhead: number = 4,
 ): Promise<void> {
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: planId },
     include: { weeks: true },
   })

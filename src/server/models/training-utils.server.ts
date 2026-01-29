@@ -22,6 +22,7 @@ type FullTrainingPlan = PrismaTrainingPlan & {
 // LIGHTWEIGHT VERSION - Use this for quick workout plans and similar operations
 export async function getLightPlanById(id: string) {
   return prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id },
     include: {
       weeks: {
@@ -85,6 +86,7 @@ export async function getFullPlanById(id: string) {
   )
 
   return prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id },
     include: {
       weeks: {
@@ -269,6 +271,7 @@ export async function duplicatePlan({
       if (!asTemplate) {
         // Find empty workout days (not rest days but with no exercises) and mark them as rest days
         const emptyWorkoutDays = await tx.trainingDay.findMany({
+          relationLoadStrategy: 'query',
           where: {
             week: {
               planId: newPlanId,
@@ -299,6 +302,7 @@ export async function duplicatePlan({
       }
 
       return await tx.trainingPlan.findUnique({
+        relationLoadStrategy: 'query',
         where: { id: newPlanId },
       })
     },

@@ -268,6 +268,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     }
 
     const plan = await prisma.trainingPlan.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: planId },
       select: { createdById: true },
     })

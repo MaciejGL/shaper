@@ -26,6 +26,7 @@ export const copyExercisesFromDay = async (
 
   const [sourceDay, targetDay] = await Promise.all([
     prisma.trainingDay.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: sourceDayId },
       include: {
         exercises: {
@@ -47,6 +48,7 @@ export const copyExercisesFromDay = async (
       },
     }),
     prisma.trainingDay.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: targetDayId },
       include: {
         exercises: true,

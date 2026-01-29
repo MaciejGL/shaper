@@ -232,6 +232,7 @@ export const addExercisesToWorkout = async (
   })
 
   const trainingDay = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: {
       id: workoutId,
     },
@@ -319,6 +320,7 @@ export const addAiExerciseToWorkout = async (
   }
 
   const trainingDay = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: {
       id: dayId,
     },
@@ -377,6 +379,7 @@ export const addSingleExerciseToDay = async (
 
   // Find the day and verify access
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     include: {
       week: {
@@ -483,6 +486,7 @@ export const addMultipleExercisesToDay = async (
 
   // Find the day and verify access
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     include: {
       week: {
@@ -640,7 +644,9 @@ export const removeExerciseFromWorkout = async (
   // For planned trainings, only allow removing extra exercises.
   // For quick workouts, allow removing any exercise (user owns the workout).
   if (!isUserQuickWorkout && !exercise.isExtra) {
-    throw new GraphQLError('Can only remove extra exercises from planned workouts')
+    throw new GraphQLError(
+      'Can only remove extra exercises from planned workouts',
+    )
   }
 
   // Idempotent delete (avoids crashing on double calls / stale UI)
@@ -665,6 +671,7 @@ export const removeExerciseFromWorkout = async (
   })
 
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: {
       id: exercise.dayId,
     },
@@ -697,6 +704,7 @@ export const clearWorkoutDay = async (dayId: string, context: GQLContext) => {
 
   // Find the day and verify access
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     include: {
       week: {
@@ -873,6 +881,7 @@ export const getAiExerciseSuggestions = async (
 
   /* 1.  Fetch workout day + logs */
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     include: {
       week: { select: { plan: { select: { createdById: true } } } },
@@ -1160,6 +1169,7 @@ const checkCompletionCascadeAfterSetRemoval = async (exerciseId: string) => {
 
   // 7. Check if all weeks in the plan are completed
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: week.planId },
     select: {
       id: true,
@@ -1206,6 +1216,7 @@ const checkCompletionCascadeAfterSetAddition = async (exerciseId: string) => {
 
   // 3. Check if the day was completed and mark it as incomplete
   const day = await prisma.trainingDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: exercise.dayId },
     select: {
       completedAt: true,
@@ -1252,6 +1263,7 @@ const checkCompletionCascadeAfterSetAddition = async (exerciseId: string) => {
 
   // 7. Check if the plan was completed and mark it as incomplete
   const plan = await prisma.trainingPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: week.planId },
     select: {
       completedAt: true,

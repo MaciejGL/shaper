@@ -321,6 +321,7 @@ model TrainingPlan {
   @@index([assignedToId])
   @@index([assignedToId, active])
   @@index([assignedToId, createdById])
+  @@index([assignedToId, updatedAt])
   @@index([createdById])
   @@index([active])
   @@index([templateId])

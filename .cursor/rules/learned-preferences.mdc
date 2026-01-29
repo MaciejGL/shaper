@@ -25,4 +25,7 @@ The agent automatically appends new rules here when corrections don't fit other 
 
 ## Workflow
 
-<!-- Preferences for development workflow and processes -->
+- **Prefer**: Update `schema.prisma` only; user runs migrations manually
+- **Avoid**: Creating or running Prisma migrations on behalf of the user
+- **Prefer**: Set `relationLoadStrategy` explicitly (use `query` for deep includes)
+- **Avoid**: Leaving deep include queries to Prisma defaults

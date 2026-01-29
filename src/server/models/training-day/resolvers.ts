@@ -94,6 +94,7 @@ const detectWorkoutPRs = async (dayId: string, userId: string) => {
 export const Query: GQLQueryResolvers = {
   getWorkoutInfo: async (_, { dayId }, context) => {
     const day = await prisma.trainingDay.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: dayId },
       include: {
         events: true,
@@ -211,6 +212,7 @@ export const Mutation: GQLMutationResolvers = {
 
     // Verify the user has permission to update this day
     const day = await prisma.trainingDay.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: dayId },
       include: {
         week: {
