@@ -29,7 +29,7 @@ interface TargetRect {
 
 const OVERLAY_CLASS = 'bg-black/60'
 const CUTOUT_PADDING = 2
-const CUTOUT_RADIUS = 12
+const CUTOUT_RADIUS = 16
 
 function getTargetRect(selector: string): TargetRect | null {
   try {

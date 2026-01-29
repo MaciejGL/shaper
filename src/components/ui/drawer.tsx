@@ -18,7 +18,7 @@ function Drawer({
   onClose?: () => void
 }) {
   const [internalOpen, setInternalOpen] = React.useState(false)
-
+  const id = React.useId()
   // Use external open prop if provided (controlled), otherwise use internal state
   const isControlled = open !== undefined
   const currentOpen = isControlled ? open : internalOpen
@@ -45,6 +45,7 @@ function Drawer({
       modal={true}
       open={currentOpen}
       onOpenChange={handleOpenChange}
+      key={`drawer-${id}`}
       {...props}
     />
     // </RemoveScroll>

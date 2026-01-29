@@ -38,7 +38,7 @@ export const ExtendHeader = ({
           classNameContent,
         )}
       >
-        <div className="max-w-md mx-auto">{children}</div>
+        <div className="max-w-md mx-auto pb-12">{children}</div>
       </div>
     </div>
   )

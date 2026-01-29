@@ -34,14 +34,11 @@ export function MacroSummaryCard({
   const fatFill = maxKcal > 0 ? (fatKcal / maxKcal) * 100 : 0
 
   return (
-    <Card className="shadow-xs ">
+    <Card className="shadow-xs">
       <CardContent>
         <div className="text-center space-y-1">
-          <p className="text-muted-foreground text-xl">
-            Planned{' '}
-            <span className="text-foreground font-bold">
-              {calories ?? 0} kcal
-            </span>
+          <p className="text-xl text-foreground font-bold">
+            {calories ?? 0} kcal
           </p>
           <div className="text-muted-foreground text-sm font-medium flex items-center justify-center gap-2 w-full">
             <p className="text-blue-500">P {Math.round(protein ?? 0)}</p>

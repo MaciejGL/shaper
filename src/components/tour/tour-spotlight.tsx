@@ -21,7 +21,7 @@ interface TourSpotlightProps {
 export function TourSpotlight({
   rect,
   padding = 2,
-  borderRadius = 12,
+  borderRadius = 16,
 }: TourSpotlightProps) {
   const top = rect.top - padding
   const left = rect.left - padding
@@ -32,7 +32,7 @@ export function TourSpotlight({
     <motion.div
       className={cn(
         'fixed pointer-events-none',
-        'ring-4 ring-ring rounded-xl outline-2 outline-[invert(1)] shadow-2xl',
+        'ring-4 ring-ring rounded-2xl outline-2 outline-[invert(1)] shadow-2xl',
       )}
       initial={{
         opacity: 0,

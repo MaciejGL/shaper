@@ -1,5 +1,12 @@
+import {
+  type GQLGetMyMacroTargetsQuery,
+  GetMyMacroTargetsDocument,
+  type GQLGetMyNutritionPlansQuery,
+  GetMyNutritionPlansDocument,
+} from '@/generated/graphql-client'
 import { GQLUserRole } from '@/generated/graphql-server'
 import { getCurrentUser, requireAuth } from '@/lib/getUser'
+import { gqlServerFetch } from '@/lib/gqlServerFetch'
 import { cn } from '@/lib/utils'
 
 import { WebNavbar } from './components/web-navbar'
@@ -14,6 +21,22 @@ export default async function ProtectedLayout({
 
   requireAuth(GQLUserRole.Client, user)
 
+  // Fetch nutrition eligibility server-side to avoid flicker
+  const [macroResult, plansResult] = await Promise.all([
+    gqlServerFetch<GQLGetMyMacroTargetsQuery>(GetMyMacroTargetsDocument),
+    gqlServerFetch<GQLGetMyNutritionPlansQuery>(GetMyNutritionPlansDocument),
+  ])
+
+  const macroTargets = macroResult.data?.getMyMacroTargets
+  const hasPlans = (plansResult.data?.nutritionPlans?.length ?? 0) > 0
+  const hasMacroTargets = !!(
+    macroTargets?.calories ||
+    macroTargets?.protein ||
+    macroTargets?.carbs ||
+    macroTargets?.fat
+  )
+  const hasNutritionAccess = hasPlans || hasMacroTargets
+
   return (
     <div className="w-full h-screen flex flex-col">
       <WebNavbar />
@@ -26,7 +49,7 @@ export default async function ProtectedLayout({
         <div className="h-40" />
       </div>
 
-      <SafeMobileNav />
+      <SafeMobileNav hasNutritionAccess={hasNutritionAccess} />
     </div>
   )
 }

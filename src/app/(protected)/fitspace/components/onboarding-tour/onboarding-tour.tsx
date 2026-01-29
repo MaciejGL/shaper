@@ -11,7 +11,6 @@ import {
   GQLUpdateProfileMutation,
   GQLUpdateProfileMutationVariables,
   GQLUserBasicQuery,
-  useCurrentVolumeGoalQuery,
   useUpdateProfileMutation,
   useUserBasicQuery,
 } from '@/generated/graphql-client'
@@ -104,12 +103,6 @@ export function OnboardingTour() {
   } = useOnboardingFreeTierVariant(open)
   const includeFreeTierStep = freeTierVariant === 'A'
   const hasTrackedStartRef = useRef(false)
-
-  const { data: volumeGoalData } = useCurrentVolumeGoalQuery(
-    {},
-    { enabled: open, staleTime: 60_000 },
-  )
-  const hasVolumeGoal = Boolean(volumeGoalData?.profile?.currentVolumeGoal?.id)
 
   // Prefetch likely destinations while the tour is open.
   useEffect(() => {
@@ -265,10 +258,10 @@ export function OnboardingTour() {
         },
         placement: 'top',
       },
-      // Step 5: Explore tab
+      // Step 5: Explore (now in More menu, so highlight More button)
       {
         id: 'explore',
-        target: '[data-onboarding-id="nav-explore"]',
+        target: '[data-onboarding-id="nav-more"]',
         title: TOUR_CONTENT.explore.title,
         description: TOUR_CONTENT.explore.description,
         image: {
@@ -362,13 +355,7 @@ export function OnboardingTour() {
     })
 
     return base
-  }, [
-    flagKey,
-    freeTierVariant,
-    handleComplete,
-    hasVolumeGoal,
-    includeFreeTierStep,
-  ])
+  }, [flagKey, freeTierVariant, handleComplete, includeFreeTierStep])
 
   return (
     <Tour

@@ -216,7 +216,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                   type="button"
                   onClick={handleQuickWorkoutClick}
                   aria-label="Browse coach workouts"
-                  className="w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40 rounded-xl border border-border overflow-hidden"
+                  className="w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40 rounded-2xl border border-border overflow-hidden"
                 >
                   <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <SectionIcon
@@ -232,7 +232,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                   type="button"
                   onClick={handleStartPlanClick}
                   aria-label="Browse coach programs"
-                  className="w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40 rounded-xl border border-border overflow-hidden"
+                  className="w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40 rounded-2xl border border-border overflow-hidden"
                 >
                   <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <SectionIcon
