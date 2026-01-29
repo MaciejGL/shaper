@@ -18,7 +18,9 @@ interface SafeMobileNavProps {
  * Used in account-management which opens in external browser (Safari/Chrome)
  * and needs to return to the mobile app.
  */
-export function SafeMobileNav({ hasNutritionAccess = false }: SafeMobileNavProps) {
+export function SafeMobileNav({
+  hasNutritionAccess = false,
+}: SafeMobileNavProps) {
   const isMobileDevice = useIsMobileDevice()
   const { isNativeApp } = useMobileApp()
 

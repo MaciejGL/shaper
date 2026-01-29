@@ -1,7 +1,7 @@
 import {
   type GQLGetMyMacroTargetsQuery,
-  GetMyMacroTargetsDocument,
   type GQLGetMyNutritionPlansQuery,
+  GetMyMacroTargetsDocument,
   GetMyNutritionPlansDocument,
 } from '@/generated/graphql-client'
 import { GQLUserRole } from '@/generated/graphql-server'

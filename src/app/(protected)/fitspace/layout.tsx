@@ -1,14 +1,14 @@
+import { OnboardingTour } from '@/app/(protected)/fitspace/components/onboarding-tour/onboarding-tour'
 import { Main } from '@/components/main'
 import {
   type GQLGetMyMacroTargetsQuery,
-  GetMyMacroTargetsDocument,
   type GQLGetMyNutritionPlansQuery,
+  GetMyMacroTargetsDocument,
   GetMyNutritionPlansDocument,
 } from '@/generated/graphql-client'
 import { GQLUserRole } from '@/generated/graphql-server'
 import { getCurrentUser, requireAuth } from '@/lib/getUser'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
-import { OnboardingTour } from '@/app/(protected)/fitspace/components/onboarding-tour/onboarding-tour'
 
 import { FitspaceNativeGate } from './components/fitspace-native-gate'
 import { MobileNav } from './components/mobile-nav'
