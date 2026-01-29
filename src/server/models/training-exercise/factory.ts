@@ -216,6 +216,7 @@ export const addExercisesToWorkout = async (
   }
 
   const baseExericse = await prisma.baseExercise.findMany({
+    relationLoadStrategy: 'query',
     where: {
       id: { in: exerciseIds },
     },
@@ -517,6 +518,7 @@ export const addMultipleExercisesToDay = async (
 
   // Find all base exercises
   const baseExercises = await prisma.baseExercise.findMany({
+    relationLoadStrategy: 'query',
     where: { id: { in: exerciseBaseIds } },
     select: {
       id: true,
@@ -923,6 +925,7 @@ export const getAiExerciseSuggestions = async (
 
   /* 5. Hydrate BaseExercise entities */
   const baseExercises = await prisma.baseExercise.findMany({
+    relationLoadStrategy: 'query',
     where: { id: { in: exercises.map((s) => s.id) } },
     include: { muscleGroups: true },
   })
@@ -1531,6 +1534,7 @@ export const addExercisesToQuickWorkout = async (
   const exerciseIds = exercises.map((ex) => ex.exerciseId)
 
   const baseExercises = await prisma.baseExercise.findMany({
+    relationLoadStrategy: 'query',
     where: {
       id: { in: exerciseIds },
     },
@@ -1743,6 +1747,7 @@ export const createQuickWorkout = async (
   const exerciseIds = input.exercises.map((ex) => ex.exerciseId)
 
   const baseExercises = await prisma.baseExercise.findMany({
+    relationLoadStrategy: 'query',
     where: {
       id: { in: exerciseIds },
     },

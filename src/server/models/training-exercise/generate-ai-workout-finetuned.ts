@@ -141,6 +141,7 @@ Provide a professional workout program with exercise selection, sets, and reps.`
   const requestedExerciseIds = aiResponse.exercises.map((e) => e.id)
 
   const dbExercises = await prisma.baseExercise.findMany({
+    relationLoadStrategy: 'query',
     where: {
       id: { in: requestedExerciseIds },
       isPublic: true,

@@ -52,6 +52,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     }
 
     const exercises = await prisma.baseExercise.findMany({
+      relationLoadStrategy: 'query',
       where: whereClause,
       orderBy: {
         name: 'asc',
@@ -90,6 +91,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         // Keep trainer exercises as direct DB query (not cached)
         trainerId &&
           prisma.baseExercise.findMany({
+            relationLoadStrategy: 'query',
             where: {
               createdBy: {
                 id: trainerId,
@@ -104,6 +106,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
         // User's own exercises (private library)
         prisma.baseExercise.findMany({
+          relationLoadStrategy: 'query',
           where: {
             createdBy: {
               id: user.user.id,
@@ -141,6 +144,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     // If not found in cache (not a public exercise), query database directly
     if (!exercise) {
       exercise = await prisma.baseExercise.findUnique({
+        relationLoadStrategy: 'query',
         where: { id },
         include: {
           images: true,
@@ -196,6 +200,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // 3️⃣ Fetch all BaseExercises at once
     const baseExercises = await prisma.baseExercise.findMany({
+      relationLoadStrategy: 'query',
       where: { id: { in: baseExerciseIds } },
       include: {
         muscleGroups: true,
@@ -346,6 +351,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     if (input.substituteIds && input.substituteIds.length > 0) {
       // Validate that substitute exercises exist and are accessible
       const substitutes = await prisma.baseExercise.findMany({
+        relationLoadStrategy: 'query',
         where: {
           id: { in: input.substituteIds },
           OR: [
@@ -479,6 +485,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       if (input.substituteIds && input.substituteIds.length > 0) {
         // Validate that substitute exercises exist and are accessible
         const substitutes = await prisma.baseExercise.findMany({
+          relationLoadStrategy: 'query',
           where: {
             id: { in: input.substituteIds },
             OR: [

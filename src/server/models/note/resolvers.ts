@@ -51,6 +51,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     }
 
     const notes = await prisma.note.findMany({
+      relationLoadStrategy: 'query',
       where: { relatedToId: relatedTo, createdById: user.user.id },
       include: {
         createdBy: {
@@ -109,6 +110,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // Get all notes for these exercises (excluding replies)
     const notes = await prisma.note.findMany({
+      relationLoadStrategy: 'query',
       where: {
         relatedToId: { in: matchedExerciseIds },
         createdById: user.user.id,
@@ -205,6 +207,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // OPTIMIZED: Single query to get ALL notes for ALL exercises
     const notes = await prisma.note.findMany({
+      relationLoadStrategy: 'query',
       where: {
         relatedToId: { in: exerciseIds },
         createdById: user.user.id,
@@ -285,6 +288,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // Get all notes created by the client that are shared with trainer (excluding replies)
     const notes = await prisma.note.findMany({
+      relationLoadStrategy: 'query',
       where: {
         createdById: clientId,
         metadata: {
@@ -311,6 +315,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // Get notes created by the user's trainer that are shared with client and related to this specific client
     const notes = await prisma.note.findMany({
+      relationLoadStrategy: 'query',
       where: {
         createdBy: {
           clients: {
@@ -369,6 +374,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // Get all replies to this note
     const replies = await prisma.note.findMany({
+      relationLoadStrategy: 'query',
       where: {
         metadata: {
           path: ['parentNoteId'],
@@ -920,6 +926,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Find and delete all replies to this note (cascading delete)
     const replies = await prisma.note.findMany({
+      relationLoadStrategy: 'query',
       where: {
         createdById: user.user.id,
         // Find notes where metadata contains parentNoteId matching our note ID

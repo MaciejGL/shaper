@@ -16,6 +16,7 @@ export async function getExercisesForMuscles(
   if (muscleIds.length === 0) return []
 
   const exercises = await prisma.baseExercise.findMany({
+    relationLoadStrategy: 'query',
     where: {
       isPublic: true,
       ...getExerciseVersionWhereClause(),
@@ -56,5 +57,3 @@ export async function getExercisesForMuscles(
     ),
   }))
 }
-
-

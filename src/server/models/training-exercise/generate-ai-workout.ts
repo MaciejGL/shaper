@@ -254,6 +254,7 @@ async function hydrateExercisesFromDatabase(
   context: GQLContext,
 ): Promise<BaseExerciseWithRelations[]> {
   const baseExercises = await prisma.baseExercise.findMany({
+    relationLoadStrategy: 'query',
     where: {
       id: { in: allExerciseIds },
       OR: [

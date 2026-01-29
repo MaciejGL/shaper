@@ -112,6 +112,7 @@ async function fetchPublicExercisesFromDB(
   const whereClause = buildPublicExerciseWhereClause(where)
 
   const exercises = await prisma.baseExercise.findMany({
+    relationLoadStrategy: 'query',
     where: whereClause,
     orderBy: {
       name: 'asc',
