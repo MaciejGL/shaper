@@ -1171,6 +1171,20 @@ export type GQLMoveExerciseInput = {
   targetDayId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export enum GQLMuscleContributionType {
+  Primary = 'PRIMARY',
+  Secondary = 'SECONDARY'
+}
+
+export type GQLMuscleExerciseContribution = {
+  __typename?: 'MuscleExerciseContribution';
+  contributionType: EntireFieldWrapper<GQLMuscleContributionType>;
+  exerciseId: EntireFieldWrapper<Scalars['ID']['output']>;
+  exerciseName: EntireFieldWrapper<Scalars['String']['output']>;
+  rawSets: EntireFieldWrapper<Scalars['Int']['output']>;
+  weightedSets: EntireFieldWrapper<Scalars['Float']['output']>;
+};
+
 export type GQLMuscleFrequency = {
   __typename?: 'MuscleFrequency';
   displayGroup: EntireFieldWrapper<Scalars['String']['output']>;
@@ -4142,6 +4156,7 @@ export type GQLVolumeGoalPeriod = {
 export type GQLWeeklyMuscleProgress = {
   __typename?: 'WeeklyMuscleProgress';
   completedSets: EntireFieldWrapper<Scalars['Int']['output']>;
+  exerciseContributions: EntireFieldWrapper<Array<GQLMuscleExerciseContribution>>;
   lastTrained?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   muscleGroup: EntireFieldWrapper<Scalars['String']['output']>;
   percentage: EntireFieldWrapper<Scalars['Float']['output']>;
@@ -4434,6 +4449,8 @@ export type GQLResolversTypes = {
   MessengerInitialData: ResolverTypeWrapper<GQLMessengerInitialData>;
   ModerateReviewInput: GQLModerateReviewInput;
   MoveExerciseInput: GQLMoveExerciseInput;
+  MuscleContributionType: GQLMuscleContributionType;
+  MuscleExerciseContribution: ResolverTypeWrapper<GQLMuscleExerciseContribution>;
   MuscleFrequency: ResolverTypeWrapper<GQLMuscleFrequency>;
   MuscleGroup: ResolverTypeWrapper<GQLMuscleGroup>;
   MuscleGroupCategory: ResolverTypeWrapper<GQLMuscleGroupCategory>;
@@ -4697,6 +4714,7 @@ export type GQLResolversParentTypes = {
   MessengerInitialData: GQLMessengerInitialData;
   ModerateReviewInput: GQLModerateReviewInput;
   MoveExerciseInput: GQLMoveExerciseInput;
+  MuscleExerciseContribution: GQLMuscleExerciseContribution;
   MuscleFrequency: GQLMuscleFrequency;
   MuscleGroup: GQLMuscleGroup;
   MuscleGroupCategory: GQLMuscleGroupCategory;
@@ -5323,6 +5341,14 @@ export type GQLMessageResolvers<ContextType = GQLContext, ParentType extends GQL
 export type GQLMessengerInitialDataResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MessengerInitialData'] = GQLResolversParentTypes['MessengerInitialData']> = {
   chats?: Resolver<Array<GQLResolversTypes['ChatWithMessages']>, ParentType, ContextType>;
   totalUnreadCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+};
+
+export type GQLMuscleExerciseContributionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MuscleExerciseContribution'] = GQLResolversParentTypes['MuscleExerciseContribution']> = {
+  contributionType?: Resolver<GQLResolversTypes['MuscleContributionType'], ParentType, ContextType>;
+  exerciseId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  rawSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  weightedSets?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
 };
 
 export type GQLMuscleFrequencyResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MuscleFrequency'] = GQLResolversParentTypes['MuscleFrequency']> = {
@@ -6353,6 +6379,7 @@ export type GQLVolumeGoalPeriodResolvers<ContextType = GQLContext, ParentType ex
 
 export type GQLWeeklyMuscleProgressResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WeeklyMuscleProgress'] = GQLResolversParentTypes['WeeklyMuscleProgress']> = {
   completedSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  exerciseContributions?: Resolver<Array<GQLResolversTypes['MuscleExerciseContribution']>, ParentType, ContextType>;
   lastTrained?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   muscleGroup?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   percentage?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
@@ -6450,6 +6477,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   Meeting?: GQLMeetingResolvers<ContextType>;
   Message?: GQLMessageResolvers<ContextType>;
   MessengerInitialData?: GQLMessengerInitialDataResolvers<ContextType>;
+  MuscleExerciseContribution?: GQLMuscleExerciseContributionResolvers<ContextType>;
   MuscleFrequency?: GQLMuscleFrequencyResolvers<ContextType>;
   MuscleGroup?: GQLMuscleGroupResolvers<ContextType>;
   MuscleGroupCategory?: GQLMuscleGroupCategoryResolvers<ContextType>;

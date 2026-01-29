@@ -1169,6 +1169,20 @@ export type GQLMoveExerciseInput = {
   targetDayId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export enum GQLMuscleContributionType {
+  Primary = 'PRIMARY',
+  Secondary = 'SECONDARY'
+}
+
+export type GQLMuscleExerciseContribution = {
+  __typename?: 'MuscleExerciseContribution';
+  contributionType: GQLMuscleContributionType;
+  exerciseId: Scalars['ID']['output'];
+  exerciseName: Scalars['String']['output'];
+  rawSets: Scalars['Int']['output'];
+  weightedSets: Scalars['Float']['output'];
+};
+
 export type GQLMuscleFrequency = {
   __typename?: 'MuscleFrequency';
   displayGroup: Scalars['String']['output'];
@@ -4140,6 +4154,7 @@ export type GQLVolumeGoalPeriod = {
 export type GQLWeeklyMuscleProgress = {
   __typename?: 'WeeklyMuscleProgress';
   completedSets: Scalars['Int']['output'];
+  exerciseContributions: Array<GQLMuscleExerciseContribution>;
   lastTrained?: Maybe<Scalars['String']['output']>;
   muscleGroup: Scalars['String']['output'];
   percentage: Scalars['Float']['output'];
@@ -4633,7 +4648,7 @@ export type GQLWeeklyMuscleProgressQueryVariables = Exact<{
 }>;
 
 
-export type GQLWeeklyMuscleProgressQuery = { __typename?: 'Query', weeklyMuscleProgress: { __typename?: 'WeeklyProgressSummary', weekStartDate: string, weekEndDate: string, overallPercentage: number, streakWeeks: number, muscleProgress: Array<{ __typename?: 'WeeklyMuscleProgress', muscleGroup: string, completedSets: number, targetSets: number, percentage: number, lastTrained?: string | undefined | null, subMuscles: Array<{ __typename?: 'SubMuscleProgress', name: string, alias: string, completedSets: number }> }> } };
+export type GQLWeeklyMuscleProgressQuery = { __typename?: 'Query', weeklyMuscleProgress: { __typename?: 'WeeklyProgressSummary', weekStartDate: string, weekEndDate: string, overallPercentage: number, streakWeeks: number, muscleProgress: Array<{ __typename?: 'WeeklyMuscleProgress', muscleGroup: string, completedSets: number, targetSets: number, percentage: number, lastTrained?: string | undefined | null, subMuscles: Array<{ __typename?: 'SubMuscleProgress', name: string, alias: string, completedSets: number }>, exerciseContributions: Array<{ __typename?: 'MuscleExerciseContribution', exerciseId: string, exerciseName: string, contributionType: GQLMuscleContributionType, rawSets: number, weightedSets: number }> }> } };
 
 export type GQLActivityHeatmapQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -9541,6 +9556,13 @@ export const WeeklyMuscleProgressDocument = `
         name
         alias
         completedSets
+      }
+      exerciseContributions {
+        exerciseId
+        exerciseName
+        contributionType
+        rawSets
+        weightedSets
       }
     }
   }

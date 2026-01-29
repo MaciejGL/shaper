@@ -1,4 +1,5 @@
 import { getMuscleById } from '@/config/muscles'
+import { GQLMuscleContributionType } from '@/generated/graphql-server'
 
 type CompletedSet = {
   completedAt: Date | null
@@ -13,6 +14,8 @@ type ExerciseMuscleGroup = {
 
 type WeeklyProgressExercise = {
   base: {
+    id: string
+    name: string
     muscleGroups: ExerciseMuscleGroup[]
     secondaryMuscleGroups: ExerciseMuscleGroup[]
   } | null
@@ -25,6 +28,16 @@ export interface ComputedSubMuscleProgress {
   completedSets: number
 }
 
+export type MuscleContributionType = GQLMuscleContributionType
+
+export interface ComputedExerciseContribution {
+  exerciseId: string
+  exerciseName: string
+  contributionType: MuscleContributionType
+  rawSets: number
+  weightedSets: number
+}
+
 export interface ComputedWeeklyMuscleProgress {
   muscleGroup: string
   completedSets: number
@@ -32,6 +45,7 @@ export interface ComputedWeeklyMuscleProgress {
   percentage: number
   lastTrained: string | null
   subMuscles: ComputedSubMuscleProgress[]
+  exerciseContributions: ComputedExerciseContribution[]
 }
 
 export interface ComputedWeeklyProgressResult {
@@ -65,9 +79,15 @@ export function computeWeeklyProgressFromExercises(options: {
     Record<string, { name: string; alias: string; completedSets: number }>
   > = {}
 
+  const exerciseContributionsByGroup: Record<
+    string,
+    Record<string, ComputedExerciseContribution>
+  > = {}
+
   trackedMuscleGroups.forEach((group) => {
     muscleProgress[group] = { completedSets: 0, lastTrained: null }
     subMuscleProgress[group] = {}
+    exerciseContributionsByGroup[group] = {}
   })
 
   let totalSets = 0
@@ -75,11 +95,35 @@ export function computeWeeklyProgressFromExercises(options: {
   exercises.forEach((exercise) => {
     if (!exercise.base) return
 
+    const exerciseBase = exercise.base
     const setCount = exercise.sets.length
     totalSets += setCount
 
     const countedPrimaryGroups = new Set<string>()
     const countedSecondaryGroups = new Set<string>()
+
+    const addExerciseContribution = (
+      mappedGroup: string,
+      contributionType: MuscleContributionType,
+      rawSets: number,
+      weightedSets: number,
+    ) => {
+      if (!exerciseContributionsByGroup[mappedGroup]) return
+      const existing = exerciseContributionsByGroup[mappedGroup][exerciseBase.id]
+      if (existing) {
+        existing.rawSets += rawSets
+        existing.weightedSets += weightedSets
+        return
+      }
+
+      exerciseContributionsByGroup[mappedGroup][exerciseBase.id] = {
+        exerciseId: exerciseBase.id,
+        exerciseName: exerciseBase.name,
+        contributionType,
+        rawSets,
+        weightedSets,
+      }
+    }
 
     const updateLastTrained = (mappedGroup: string) => {
       exercise.sets.forEach((set) => {
@@ -101,6 +145,12 @@ export function computeWeeklyProgressFromExercises(options: {
       if (!countedPrimaryGroups.has(mappedGroup)) {
         muscleProgress[mappedGroup].completedSets += setCount
         countedPrimaryGroups.add(mappedGroup)
+        addExerciseContribution(
+          mappedGroup,
+          GQLMuscleContributionType.Primary,
+          setCount,
+          setCount,
+        )
       }
 
       const subMuscleKey = mg.name
@@ -127,6 +177,12 @@ export function computeWeeklyProgressFromExercises(options: {
       ) {
         muscleProgress[mappedGroup].completedSets += setCount * SECONDARY_MUSCLE_WEIGHT
         countedSecondaryGroups.add(mappedGroup)
+        addExerciseContribution(
+          mappedGroup,
+          GQLMuscleContributionType.Secondary,
+          setCount,
+          setCount * SECONDARY_MUSCLE_WEIGHT,
+        )
       }
 
       const subMuscleKey = mg.name
@@ -156,6 +212,13 @@ export function computeWeeklyProgressFromExercises(options: {
         completedSets: floor0(sub.completedSets),
       }))
 
+      const exerciseContributions = Object.values(
+        exerciseContributionsByGroup[group],
+      ).sort(
+        (a, b) =>
+          b.weightedSets - a.weightedSets || b.rawSets - a.rawSets,
+      )
+
       return {
         muscleGroup: group,
         completedSets: floor0(progress.completedSets),
@@ -163,6 +226,7 @@ export function computeWeeklyProgressFromExercises(options: {
         percentage: round1(percentage),
         lastTrained: progress.lastTrained?.toISOString() || null,
         subMuscles,
+        exerciseContributions,
       }
     },
   )

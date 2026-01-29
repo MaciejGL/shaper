@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useUser } from '@/context/user-context'
 import { useWeeklyMuscleProgressQuery } from '@/generated/graphql-client'
 
+import type { MuscleProgressData } from './types'
+
 export function useMuscleHeatmap(externalWeekOffset?: number) {
   const { user } = useUser()
   const [internalWeekOffset, setInternalWeekOffset] = useState(0)
@@ -31,16 +33,7 @@ export function useMuscleHeatmap(externalWeekOffset?: number) {
 
   // Convert muscle progress to intensity map for body view (0-1 scale based on percentage)
   const muscleIntensity: Record<string, number> = {}
-  const muscleProgress: Record<
-    string,
-    {
-      completedSets: number
-      targetSets: number
-      percentage: number
-      lastTrained: string | null
-      subMuscles: { name: string; alias: string; completedSets: number }[]
-    }
-  > = {}
+  const muscleProgress: Record<string, MuscleProgressData> = {}
 
   if (weeklyProgress?.muscleProgress) {
     weeklyProgress.muscleProgress.forEach((progress) => {
@@ -52,6 +45,7 @@ export function useMuscleHeatmap(externalWeekOffset?: number) {
         percentage: progress.percentage,
         lastTrained: progress.lastTrained || null,
         subMuscles: progress.subMuscles || [],
+        exerciseContributions: progress.exerciseContributions || [],
       }
     })
   }

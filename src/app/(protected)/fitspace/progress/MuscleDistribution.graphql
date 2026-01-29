@@ -57,6 +57,13 @@ query WeeklyMuscleProgress(
         alias
         completedSets
       }
+      exerciseContributions {
+        exerciseId
+        exerciseName
+        contributionType
+        rawSets
+        weightedSets
+      }
     }
   }
 }

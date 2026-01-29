@@ -35,6 +35,19 @@ type SubMuscleProgress {
   completedSets: Int!
 }
 
+enum MuscleContributionType {
+  PRIMARY
+  SECONDARY
+}
+
+type MuscleExerciseContribution {
+  exerciseId: ID!
+  exerciseName: String!
+  contributionType: MuscleContributionType!
+  rawSets: Int!
+  weightedSets: Float!
+}
+
 # Weekly Muscle Progress for Gamification
 type WeeklyMuscleProgress {
   muscleGroup: String!
@@ -43,6 +56,7 @@ type WeeklyMuscleProgress {
   percentage: Float!
   lastTrained: String
   subMuscles: [SubMuscleProgress!]!
+  exerciseContributions: [MuscleExerciseContribution!]!
 }
 
 type WeeklyProgressSummary {
