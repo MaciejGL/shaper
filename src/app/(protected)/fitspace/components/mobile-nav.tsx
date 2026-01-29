@@ -186,9 +186,9 @@ export function MobileNav({
 
       {/* Modern floating navbar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 ">
-        <nav className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-lg border-t border-white/20 dark:border-white/10 mx-auto max-w-md">
+        <nav className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-lg mx-auto max-w-md">
           <div
-            className="grid items-stretch px-2 safe-area-bottom-content"
+            className="grid items-stretch px-2"
             style={{
               gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))`,
             }}
@@ -203,31 +203,28 @@ export function MobileNav({
                 clickedItem={clickedItem}
                 setClickedItem={setClickedItem}
                 setPendingNavigation={setPendingNavigation}
+                suppressHighlight={isMoreOpen}
               />
             ))}
 
-            {/* More button - uses separate indicator (no shared layoutId) */}
+            {/* More button - shared active indicator */}
             <button
               ref={moreButtonRef}
               type="button"
               onClick={handleMoreToggle}
               data-onboarding-id="nav-more"
               className={cn(
-                'relative flex flex-col items-center justify-center min-h-12 rounded-[20px] transition-all active:scale-95',
+                'relative flex flex-col items-center justify-center min-h-12 pb-3 pt-4 rounded-[20px] transition-all',
                 isMoreOpen ? 'text-primary' : 'text-muted-foreground',
               )}
             >
-              <AnimatePresence>
-                {isMoreOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute inset-1 bg-primary/8 rounded-[20px]"
-                  />
-                )}
-              </AnimatePresence>
+              {isMoreOpen && (
+                <motion.div
+                  layoutId="nav-active-pill"
+                  transition={{ type: 'spring', bounce: 0.15, duration: 0.3 }}
+                  className="absolute top-0 h-[5px] w-[80%] bg-primary/80 rounded-b-[20px]"
+                />
+              )}
               <FiMoreHorizontal className="size-6 mb-0.5 relative z-10" />
               <span className="text-[10px] font-medium relative z-10">
                 More
@@ -248,6 +245,7 @@ interface NavLinkProps {
   clickedItem: string | null
   setClickedItem: (v: string | null) => void
   setPendingNavigation: (v: string | null) => void
+  suppressHighlight?: boolean
 }
 
 function NavLink({
@@ -258,13 +256,14 @@ function NavLink({
   clickedItem,
   setClickedItem,
   setPendingNavigation,
+  suppressHighlight = false,
 }: NavLinkProps) {
   const Icon = item.icon
   const itemPath = item.href.split('?')[0]
   const isActive = pathname.startsWith(itemPath) && !pendingNavigation
   const isClicked =
     (clickedItem === item.label || pendingNavigation === item.href) && !isActive
-  const isHighlighted = isActive || isClicked
+  const isHighlighted = (isActive || isClicked) && !suppressHighlight
 
   const shouldUseDeepLink = useDeepLinks
   const navigationHref = shouldUseDeepLink
@@ -291,15 +290,15 @@ function NavLink({
       onClick={handleClick}
       data-onboarding-id={item.onboardingId}
       className={cn(
-        'relative flex flex-col items-center justify-center min-h-12 py-3 rounded-2xl transition-all active:scale-95',
+        'relative flex flex-col items-center justify-center min-h-12 pb-3 pt-4 rounded-2xl transition-all',
         isHighlighted ? 'text-primary' : 'text-muted-foreground',
       )}
     >
       {isHighlighted && (
         <motion.div
           layoutId="nav-active-pill"
-          className="absolute inset-1 bg-primary/8 rounded-[20px]"
-          transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+          className="absolute top-0 h-[5px] w-[80%] bg-primary/80 rounded-b-[20px]"
+          transition={{ type: 'spring', bounce: 0.15, duration: 0.3 }}
         />
       )}
       <Icon className="size-5 mb-0.5 relative z-10" />
@@ -365,7 +364,7 @@ function NavBubble({
       )}
     >
       <Icon className="size-5" />
-      <span className="text-sm font-medium whitespace-nowrap">
+      <span className="text-base font-medium whitespace-nowrap">
         {item.label}
       </span>
     </NavComponent>
