@@ -99,8 +99,9 @@ function Day({ day, isSelected }: { day: NavigationDay; isSelected: boolean }) {
             className={cn(
               'absolute inset-0',
               'h-1 rounded-full transition-all',
+              day.exercisesCount === 0 && !isDayCompleted && 'bg-muted/60',
+              day.exercisesCount > 0 && !isDayCompleted && 'bg-amber-500',
               isDayCompleted && 'bg-green-500',
-              !day.completedAt && 'bg-amber-500',
               completionRate > 0 && completionRate < 1 && `bg-green-500`,
             )}
             style={{
