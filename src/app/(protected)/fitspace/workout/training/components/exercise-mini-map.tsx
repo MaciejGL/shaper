@@ -388,7 +388,7 @@ export function WorkoutSmartPill({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-32 left-4 right-4 z-45 max-h-[calc(100dvh-9rem)] overflow-y-auto hide-scrollbar flex flex-col gap-2 pb-4"
+            className="fixed bottom-[calc(50px+84px+var(--safe-area-inset-bottom))] left-4 right-4 z-45 max-h-[calc(100dvh-8.5rem)] overflow-y-auto hide-scrollbar flex flex-col gap-2 py-4"
           >
             {exercises.map((exercise, i) => (
               <motion.div
