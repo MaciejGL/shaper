@@ -37,8 +37,7 @@ export default function AccountManagementPage() {
       setAuthToken('')
     }
     queryClient.clear()
-    await signOut({ callbackUrl: '/login', redirect: false })
-    window.location.replace('/login')
+    await signOut({ callbackUrl: '/login', redirect: true })
   }
 
   return (

@@ -27,8 +27,7 @@ export function MinimalAccountNavbar() {
 
   const handleLogout = async () => {
     queryClient.clear()
-    await signOut({ callbackUrl: '/login', redirect: false })
-    window.location.replace('/login')
+    await signOut({ callbackUrl: '/login', redirect: true })
   }
 
   return (

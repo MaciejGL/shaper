@@ -32,7 +32,7 @@ export function ExistingSessionHandoff({
     setLoading(true)
 
     // Sign out current session
-    await signOut({ redirect: false })
+    await signOut({ redirect: true, callbackUrl: '/login' })
     if (isNativeApp) {
       setAuthToken('')
     }

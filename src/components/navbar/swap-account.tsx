@@ -33,9 +33,9 @@ export function SwapAccountButton() {
     }
     await signIn('account-swap', {
       email,
-      redirect: false,
+      redirect: true,
+      callbackUrl: '/fitspace/workout',
     })
-    window.location.reload()
   }
 
   const CLIENTS = clientEmails.map((email) => ({
