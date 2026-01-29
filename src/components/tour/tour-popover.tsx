@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, X } from 'lucide-react'
+import Image from 'next/image'
 import type { ReactNode } from 'react'
 import { forwardRef } from 'react'
 
@@ -9,9 +10,12 @@ import { SimpleLogo } from '@/components/simple-logo'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+import type { TourStepImage } from './types'
+
 interface TourPopoverProps {
   title: string
   description: string[]
+  image?: TourStepImage
   stepId: string
   position: { top: number; left: number }
   currentStep: number
@@ -34,6 +38,7 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
     {
       title,
       description,
+      image,
       stepId,
       position,
       currentStep,
@@ -112,6 +117,21 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
             />
           )}
         </div>
+
+        {image && (
+          <div className="mb-4 px-4">
+            <Image
+              src={image.src}
+              alt={image.alt}
+              width={340}
+              height={200}
+              className={cn('mx-auto h-auto', image.widthClassName)}
+              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              priority={true}
+              quality={100}
+            />
+          </div>
+        )}
 
         {/* Description */}
         <div className="mb-5 px-4">

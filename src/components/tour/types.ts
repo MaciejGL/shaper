@@ -1,5 +1,11 @@
 import { ReactNode } from 'react'
 
+export interface TourStepImage {
+  src: string
+  alt: string
+  widthClassName?: string
+}
+
 export interface TourStep {
   /** Unique identifier for the step */
   id: string
@@ -9,6 +15,8 @@ export interface TourStep {
   title: string
   /** Description paragraphs */
   description: string[]
+  /** Optional image shown in the popover */
+  image?: TourStepImage
   /** Popover placement relative to target */
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'center'
   /** Custom footer content (replaces default navigation) */

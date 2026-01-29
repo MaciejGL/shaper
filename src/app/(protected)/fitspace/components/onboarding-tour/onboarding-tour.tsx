@@ -23,11 +23,11 @@ import { useOnboardingTour } from './use-onboarding-tour'
 
 const TOUR_CONTENT = {
   welcome: {
-    title: "You're set — quick tour (30 sec)",
+    title: "You're set - quick tour",
     description: [
       'I’m Mats from the Hypro team.',
       'This app is built to remove guesswork: follow a plan, hit the right weekly volume, and track progress as you train.',
-      'I’ll show you the 4 places you’ll actually use — then you’ll start your first workout.',
+      'I’ll show you the 4 places you’ll actually use - then you’ll start your first workout.',
     ],
   },
 
@@ -36,7 +36,6 @@ const TOUR_CONTENT = {
     description: [
       'This is where training happens — open today’s session and start.',
       'Follow your active plan day by day, or build a custom workout anytime.',
-      'Log sets while you lift — you’ll see progress over time, not just random sessions.',
     ],
   },
 
@@ -54,7 +53,6 @@ const TOUR_CONTENT = {
     description: [
       'Choose what you want to prioritize (e.g. Upper Body, Glutes) and how hard you want to push.',
       'We’ll highlight the muscles that matter and help you keep weekly volume on track over time.',
-      'You can change this anytime in Progress → Muscle heatmap.',
     ],
   },
 
@@ -238,6 +236,11 @@ export function OnboardingTour() {
         target: '[data-onboarding-id="nav-workout"]',
         title: TOUR_CONTENT.workout.title,
         description: TOUR_CONTENT.workout.description,
+        image: {
+          src: '/onboarding-tour/workout.png',
+          alt: 'Workout tab preview',
+          widthClassName: 'w-full',
+        },
         placement: 'top',
       },
       // Step 3: Plans tab
@@ -249,23 +252,30 @@ export function OnboardingTour() {
         placement: 'top',
       },
       // Step 4: Volume goal (only if not set)
-      ...(!hasVolumeGoal
-        ? ([
-            {
-              id: 'volume-goal',
-              target: '[data-onboarding-id="nav-progress"]',
-              title: TOUR_CONTENT.volumeGoal.title,
-              description: TOUR_CONTENT.volumeGoal.description,
-              placement: 'top',
-            } satisfies TourStep,
-          ] as TourStep[])
-        : []),
+
+      {
+        id: 'volume-goal',
+        target: '[data-onboarding-id="nav-progress"]',
+        title: TOUR_CONTENT.volumeGoal.title,
+        description: TOUR_CONTENT.volumeGoal.description,
+        image: {
+          src: '/onboarding-tour/progress.png',
+          alt: 'Weekly volume goal preview',
+          widthClassName: 'w-full',
+        },
+        placement: 'top',
+      },
       // Step 5: Explore tab
       {
         id: 'explore',
         target: '[data-onboarding-id="nav-explore"]',
         title: TOUR_CONTENT.explore.title,
         description: TOUR_CONTENT.explore.description,
+        image: {
+          src: '/onboarding-tour/discover.png',
+          alt: 'Discover tab preview',
+          widthClassName: 'w-full',
+        },
         placement: 'top',
       },
       // Step 5: Chat icon

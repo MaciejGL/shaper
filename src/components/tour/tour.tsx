@@ -380,6 +380,7 @@ export function Tour({
           ref={popoverRef}
           title={currentStep.title}
           description={currentStep.description}
+          image={currentStep.image}
           stepId={currentStep.id}
           position={popoverPosition}
           currentStep={currentStepIndex + 1}

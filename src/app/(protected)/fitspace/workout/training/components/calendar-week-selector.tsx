@@ -212,13 +212,13 @@ export function CalendarWeekSelector({
             completed: cn(
               '[&_button]:relative',
               '[&_button]:after:absolute [&_button]:after:bottom-1 [&_button]:after:left-1/2 [&_button]:after:-translate-x-1/2',
-              '[&_button]:after:size-1.5 [&_button]:after:rounded-full [&_button]:after:bg-green-500 [&_button]:dark:after:bg-green-400',
+              '[&_button]:after:h-1 [&_button]:after:w-1/3 [&_button]:after:rounded-full [&_button]:after:bg-green-500 [&_button]:dark:after:bg-green-400',
               '[&_button[data-selected=true]]:after:hidden',
             ),
             pending: cn(
               '[&_button]:relative',
               '[&_button]:after:absolute [&_button]:after:bottom-1 [&_button]:after:left-1/2 [&_button]:after:-translate-x-1/2',
-              '[&_button]:after:size-1.5 [&_button]:after:rounded-full [&_button]:after:bg-amber-500 [&_button]:dark:after:bg-amber-400',
+              '[&_button]:after:h-1 [&_button]:after:w-1/3 [&_button]:after:rounded-full [&_button]:after:bg-amber-500 [&_button]:dark:after:bg-amber-400',
               '[&_button[data-selected=true]]:after:hidden',
             ),
             restDay: cn(
