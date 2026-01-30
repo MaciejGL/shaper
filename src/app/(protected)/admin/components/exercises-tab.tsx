@@ -418,7 +418,10 @@ export function ExercisesTab() {
         const statsData = await statsResponse.json()
 
         // Skip already processed exercises (for processAll mode)
-        if (statsData.nextExercise && processedIds.has(statsData.nextExercise.id)) {
+        if (
+          statsData.nextExercise &&
+          processedIds.has(statsData.nextExercise.id)
+        ) {
           processedIds.add(statsData.nextExercise.id) // ensure it's tracked
           continue
         }
@@ -449,22 +452,30 @@ export function ExercisesTab() {
             },
           )
 
-          if (!suggestionResponse.ok) throw new Error('Failed to generate suggestion')
+          if (!suggestionResponse.ok)
+            throw new Error('Failed to generate suggestion')
 
           suggestion = await suggestionResponse.json()
 
           if (suggestion.verifierApproved) {
             // Auto-save if verified (unless dry run)
             if (!dryRun) {
-              const saveResponse = await fetch('/api/admin/exercises/generate-muscles', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  exerciseId: suggestion.exerciseId,
-                  primaryMuscleIds: suggestion.suggestedPrimary.map((m: { id: string }) => m.id),
-                  secondaryMuscleIds: suggestion.suggestedSecondary.map((m: { id: string }) => m.id),
-                }),
-              })
+              const saveResponse = await fetch(
+                '/api/admin/exercises/generate-muscles',
+                {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    exerciseId: suggestion.exerciseId,
+                    primaryMuscleIds: suggestion.suggestedPrimary.map(
+                      (m: { id: string }) => m.id,
+                    ),
+                    secondaryMuscleIds: suggestion.suggestedSecondary.map(
+                      (m: { id: string }) => m.id,
+                    ),
+                  }),
+                },
+              )
               if (!saveResponse.ok) throw new Error('Failed to save')
             }
 
@@ -478,23 +489,37 @@ export function ExercisesTab() {
           } else {
             // Verifier rejected - retry
             retries++
-            setMuscleGeneration((prev) => ({ ...prev, rejected: prev.rejected + 1 }))
+            setMuscleGeneration((prev) => ({
+              ...prev,
+              rejected: prev.rejected + 1,
+            }))
           }
         }
 
         // If max retries hit without approval, still save but log for review
-        if (retries >= MAX_RETRIES && suggestion && !suggestion.verifierApproved) {
+        if (
+          retries >= MAX_RETRIES &&
+          suggestion &&
+          !suggestion.verifierApproved
+        ) {
           // Save anyway (unless dry run)
           if (!dryRun) {
-            const saveResponse = await fetch('/api/admin/exercises/generate-muscles', {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                exerciseId: suggestion.exerciseId,
-                primaryMuscleIds: suggestion.suggestedPrimary.map((m: { id: string }) => m.id),
-                secondaryMuscleIds: suggestion.suggestedSecondary.map((m: { id: string }) => m.id),
-              }),
-            })
+            const saveResponse = await fetch(
+              '/api/admin/exercises/generate-muscles',
+              {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  exerciseId: suggestion.exerciseId,
+                  primaryMuscleIds: suggestion.suggestedPrimary.map(
+                    (m: { id: string }) => m.id,
+                  ),
+                  secondaryMuscleIds: suggestion.suggestedSecondary.map(
+                    (m: { id: string }) => m.id,
+                  ),
+                }),
+              },
+            )
             if (!saveResponse.ok) throw new Error('Failed to save')
           }
 
@@ -507,11 +532,21 @@ export function ExercisesTab() {
                 exerciseId: suggestion.exerciseId,
                 exerciseName: suggestion.exerciseName,
                 // Picker's original suggestion
-                pickerPrimary: suggestion.pickerPrimary?.map((m: { alias: string }) => m.alias) || [],
-                pickerSecondary: suggestion.pickerSecondary?.map((m: { alias: string }) => m.alias) || [],
+                pickerPrimary:
+                  suggestion.pickerPrimary?.map(
+                    (m: { alias: string }) => m.alias,
+                  ) || [],
+                pickerSecondary:
+                  suggestion.pickerSecondary?.map(
+                    (m: { alias: string }) => m.alias,
+                  ) || [],
                 // Verifier's corrected version (what was saved)
-                savedPrimary: suggestion.suggestedPrimary.map((m: { alias: string }) => m.alias),
-                savedSecondary: suggestion.suggestedSecondary.map((m: { alias: string }) => m.alias),
+                savedPrimary: suggestion.suggestedPrimary.map(
+                  (m: { alias: string }) => m.alias,
+                ),
+                savedSecondary: suggestion.suggestedSecondary.map(
+                  (m: { alias: string }) => m.alias,
+                ),
                 pickerReasoning: suggestion.pickerReasoning,
                 verifierReasoning: suggestion.verifierReasoning,
                 retries: MAX_RETRIES,
@@ -538,7 +573,8 @@ export function ExercisesTab() {
       setMuscleGeneration((prev) => ({
         ...prev,
         isLoading: false,
-        error: err instanceof Error ? err.message : 'Failed to fetch suggestion',
+        error:
+          err instanceof Error ? err.message : 'Failed to fetch suggestion',
       }))
     }
   }
@@ -1230,8 +1266,12 @@ export function ExercisesTab() {
             </CardTitle>
             {muscleStats && (
               <div className="flex gap-3 text-xs">
-                <span className="text-red-600">{muscleStats.exercisesNeedingMuscles} todo</span>
-                <span className="text-green-600">{muscleStats.percentageComplete}% done</span>
+                <span className="text-red-600">
+                  {muscleStats.exercisesNeedingMuscles} todo
+                </span>
+                <span className="text-green-600">
+                  {muscleStats.percentageComplete}% done
+                </span>
               </div>
             )}
           </div>
@@ -1243,15 +1283,23 @@ export function ExercisesTab() {
               muscleGeneration.skipped > 0 ||
               muscleGeneration.rejected > 0) && (
               <div className="flex gap-3 text-xs text-muted-foreground">
-                <span className="text-green-600">✓ {muscleGeneration.approved} saved</span>
-                <span className="text-yellow-600">⚠️ {muscleGeneration.skipped} need review</span>
-                <span className="text-muted-foreground">↺ {muscleGeneration.rejected} retries</span>
+                <span className="text-green-600">
+                  ✓ {muscleGeneration.approved} saved
+                </span>
+                <span className="text-yellow-600">
+                  ⚠️ {muscleGeneration.skipped} need review
+                </span>
+                <span className="text-muted-foreground">
+                  ↺ {muscleGeneration.rejected} retries
+                </span>
               </div>
             )}
 
             {/* Status */}
             {muscleGeneration.error && (
-              <div className={`text-sm ${muscleGeneration.error === 'All done!' ? 'text-green-600' : 'text-red-600'}`}>
+              <div
+                className={`text-sm ${muscleGeneration.error === 'All done!' ? 'text-green-600' : 'text-red-600'}`}
+              >
                 {muscleGeneration.error}
               </div>
             )}
@@ -1265,7 +1313,7 @@ export function ExercisesTab() {
             )}
 
             {/* Start Button - compact */}
-            {!muscleGeneration.suggestion && (
+            {!muscleGeneration.isLoading && (
               <div className="flex items-center gap-4">
                 <Button
                   onClick={fetchNextSuggestion}
@@ -1280,7 +1328,12 @@ export function ExercisesTab() {
                   <input
                     type="checkbox"
                     checked={muscleGeneration.processAll}
-                    onChange={(e) => setMuscleGeneration((prev) => ({ ...prev, processAll: e.target.checked }))}
+                    onChange={(e) =>
+                      setMuscleGeneration((prev) => ({
+                        ...prev,
+                        processAll: e.target.checked,
+                      }))
+                    }
                     disabled={muscleGeneration.isLoading}
                     className="h-3 w-3"
                   />
@@ -1290,7 +1343,12 @@ export function ExercisesTab() {
                   <input
                     type="checkbox"
                     checked={muscleGeneration.dryRun}
-                    onChange={(e) => setMuscleGeneration((prev) => ({ ...prev, dryRun: e.target.checked }))}
+                    onChange={(e) =>
+                      setMuscleGeneration((prev) => ({
+                        ...prev,
+                        dryRun: e.target.checked,
+                      }))
+                    }
                     disabled={muscleGeneration.isLoading}
                     className="h-3 w-3"
                   />
