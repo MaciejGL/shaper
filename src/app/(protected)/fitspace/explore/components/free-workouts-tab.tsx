@@ -9,10 +9,12 @@ import { startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { BiggyIcon } from '@/components/biggy-icon'
+import { Loader } from '@/components/loader'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   GQLDifficulty,
+  GQLWorkoutType,
   useStartFreeWorkoutDayMutation,
 } from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
@@ -255,5 +257,100 @@ function FreeWorkoutDayCard({ day, onClick }: FreeWorkoutDayCardProps) {
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+/**
+ * Compact version for onboarding - uses pre-calculated values instead of fetching
+ */
+export interface CompactWorkoutCardData {
+  id: string
+  heroImageUrl: string
+  workoutType: GQLWorkoutType
+  planTitle: string
+  exercisesCount: number
+  estimatedMinutes: number
+  difficulty: GQLDifficulty
+}
+
+interface CompactWorkoutCardProps {
+  workout: CompactWorkoutCardData
+  onClick: () => void
+  isLoading?: boolean
+}
+
+export function CompactWorkoutCard({
+  workout,
+  onClick,
+  isLoading,
+}: CompactWorkoutCardProps) {
+  return (
+    <motion.div
+      whileTap={{ scale: 0.97 }}
+      animate={
+        isLoading ? { scale: 0.98, opacity: 0.8 } : { scale: 1, opacity: 1 }
+      }
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+    >
+      <Card
+        className={cn(
+          'cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative dark',
+          'rounded-lg shadow-none',
+          'bg-cover bg-center',
+          'relative',
+          isLoading && 'pointer-events-none',
+        )}
+        onClick={onClick}
+      >
+        {workout.heroImageUrl && (
+          <Image
+            src={workout.heroImageUrl}
+            alt={`${formatWorkoutType(workout.workoutType) || 'Workout'} cover`}
+            fill
+            className="object-cover"
+            quality={80}
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        )}
+        {workout.heroImageUrl && (
+          <div className="absolute -inset-[0.5px] bg-linear-to-r from-black via-black/60 to-transparent" />
+        )}
+
+        <CardHeader className="relative dark py-2 px-3">
+          <div className="space-y-0.5">
+            <CardTitle className="text-lg text-foreground">
+              {formatWorkoutType(workout.workoutType) || 'Workout'}
+            </CardTitle>
+            <p className="text-xs text-muted-foreground font-medium">
+              from <span className="text-foreground">{workout.planTitle}</span>
+            </p>
+          </div>
+        </CardHeader>
+        <CardContent className="relative dark py-2 px-3 pt-0">
+          <div className="flex items-center gap-3 text-xs text-foreground">
+            <span className="flex items-center gap-1">
+              <Dumbbell className="size-3.5" />
+              {workout.exercisesCount}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="size-3.5" />~{workout.estimatedMinutes}m
+            </span>
+            <Badge
+              variant={difficultyVariantMap[workout.difficulty]}
+              className="capitalize ml-auto"
+              size="sm"
+            >
+              {workout.difficulty.toLowerCase()}
+            </Badge>
+          </div>
+        </CardContent>
+        {isLoading ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            {' '}
+            <Loader size="md" />{' '}
+          </div>
+        ) : null}
+      </Card>
+    </motion.div>
   )
 }

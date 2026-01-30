@@ -56,6 +56,8 @@ export function ExploreClient({
     },
   )
 
+  console.log(workouts)
+
   return (
     <ExtendHeader
       headerChildren={<div />}
