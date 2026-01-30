@@ -18,7 +18,7 @@ interface LogQueryParams {
 
 // Enhanced version that logs Prisma's built-in events if available
 export function createDetailedQueryLogger() {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV !== 'development') {
     return Prisma.defineExtension({
       name: 'detailed-query-logger-disabled',
     })
