@@ -33,11 +33,50 @@ export const PREMIUM_FEATURES = [
     category: 'progress',
     copy: {
       short: 'Advanced tracking',
-      medium: 'Advanced progress tracking & analytics',
+      medium: 'Historical progress charts & analytics',
       long: 'See exactly how you are progressing with heatmaps, check-ins and detailed workout logs.',
     },
     includeIn: {
       email: true,
+      pricing: true,
+    },
+  },
+  {
+    id: 'smart_load_suggestions',
+    category: 'training',
+    copy: {
+      short: 'Load suggestions',
+      medium: 'Smart load suggestions per set',
+      long: 'Get personalized weight recommendations based on your previous performance.',
+    },
+    includeIn: {
+      email: false,
+      pricing: true,
+    },
+  },
+  {
+    id: 'rep_max_calculator',
+    category: 'training',
+    copy: {
+      short: 'Rep max estimates',
+      medium: 'Estimated max weights for any rep range',
+      long: 'See your estimated max for different rep ranges based on your training data.',
+    },
+    includeIn: {
+      email: false,
+      pricing: true,
+    },
+  },
+  {
+    id: 'muscle_recovery_tracking',
+    category: 'progress',
+    copy: {
+      short: 'Recovery tracking',
+      medium: 'Muscle recovery status tracking',
+      long: 'See which muscles are recovered and ready to train again.',
+    },
+    includeIn: {
+      email: false,
       pricing: true,
     },
   },

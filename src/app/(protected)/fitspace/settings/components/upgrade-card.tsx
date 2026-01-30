@@ -69,39 +69,9 @@ export function UpgradeCard({
         <PremiumBenefitsList benefits={PREMIUM_BENEFITS} variant="secondary" />
       </div>
 
-      {/* Pricing Options */}
+      {/* Pricing Options - Yearly first for price anchoring */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-md:gap-8 mt-8">
-        {/* Monthly Plan */}
-        {monthlyPackage && (
-          <Card className="h-full bg-card-on-card rounded-lg text-white mb-6 flex flex-col relative outline-1 outline-blue-500 bg-gradient-to-br from-blue-500/5 to-blue-600/10 hover:from-blue-500/10 hover:to-blue-600/15 transition-all">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
-                Most Flexible
-              </div>
-            </div>
-            <CardContent className="text-center grow flex-center flex-col pt-6">
-              <h6 className="text-lg font-medium text-center">Monthly</h6>
-              <PackagePriceDisplay
-                stripeLookupKey={monthlyPackage.stripeLookupKey}
-              />
-              <p className="text-xs text-blue-400 mt-2">
-                Cancel anytime, no commitment
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button
-                onClick={() => onUpgrade(monthlyPackage.id)}
-                disabled={isUpgrading}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                loading={isUpgrading}
-              >
-                Subscribe Monthly
-              </Button>
-            </CardFooter>
-          </Card>
-        )}
-
-        {/* Yearly Plan */}
+        {/* Yearly Plan - First (left on desktop) */}
         {yearlyPackage && (
           <Card className="h-full bg-card-on-card rounded-lg text-white mb-6 flex flex-col relative outline-1 outline-amber-500 bg-gradient-to-br from-amber-500/5 to-amber-600/10 hover:from-amber-500/10 hover:to-amber-600/15 transition-all">
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -132,6 +102,36 @@ export function UpgradeCard({
                 variant="gradient"
               >
                 Subscribe Annually
+              </Button>
+            </CardFooter>
+          </Card>
+        )}
+
+        {/* Monthly Plan - Second (right on desktop) */}
+        {monthlyPackage && (
+          <Card className="h-full bg-card-on-card rounded-lg text-white mb-6 flex flex-col relative outline-1 outline-blue-500 bg-gradient-to-br from-blue-500/5 to-blue-600/10 hover:from-blue-500/10 hover:to-blue-600/15 transition-all">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
+                Most Flexible
+              </div>
+            </div>
+            <CardContent className="text-center grow flex-center flex-col pt-6">
+              <h6 className="text-lg font-medium text-center">Monthly</h6>
+              <PackagePriceDisplay
+                stripeLookupKey={monthlyPackage.stripeLookupKey}
+              />
+              <p className="text-xs text-blue-400 mt-2">
+                Cancel anytime, no commitment
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={() => onUpgrade(monthlyPackage.id)}
+                disabled={isUpgrading}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                loading={isUpgrading}
+              >
+                Subscribe Monthly
               </Button>
             </CardFooter>
           </Card>
