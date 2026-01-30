@@ -1,0 +1,989 @@
+[
+  {
+    "exerciseId": "11f34f82-dbd4-4e4c-9194-53233e509bfc",
+    "exerciseName": "Barbell Front Raise",
+    "pickerPrimary": [
+      "Front Delts"
+    ],
+    "pickerSecondary": [
+      "Side Delts",
+      "Triceps",
+      "Forearms"
+    ],
+    "savedPrimary": [
+      "Front Delts"
+    ],
+    "savedSecondary": [
+      "Side Delts"
+    ],
+    "pickerReasoning": "The barbell front raise mainly targets the Deltoid Anterior (Front Delts) as the primary mover responsible for lifting the bar straight in front of the body. The Deltoid Lateral (Side Delts) assist with stabilization and abduction. The Triceps Brachii (Triceps) and Forearm Flexors (Forearms) contribute as stabilizers by supporting elbow extension and gripping the bar during the movement.",
+    "verifierReasoning": "The primary driver for barbell front raises is the anterior deltoid (Front Delts). The lateral deltoid (Side Delts) can assist but typically does not contribute substantially compared to the front delts. The triceps are not a significant mover and should not be listed as a secondary muscle here. Forearms may be minimally involved in grip but are not a meaningful secondary mover. Correct secondary: Side Delts (slight involvement).",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:49:39.625Z"
+  },
+  {
+    "exerciseId": "cmbgyu8j7007duhebyskxl83b",
+    "exerciseName": "Bayesian Cable Curl",
+    "pickerPrimary": [
+      "Biceps"
+    ],
+    "pickerSecondary": [
+      "Brachialis",
+      "Brachioradialis",
+      "Forearms",
+      "Front Delts"
+    ],
+    "savedPrimary": [
+      "Biceps"
+    ],
+    "savedSecondary": [
+      "Brachialis",
+      "Brachioradialis",
+      "Forearms"
+    ],
+    "pickerReasoning": "The Bayesian Cable Curl's primary mover is the biceps brachii since it is a curl pattern with the arm starting in slight extension, emphasizing biceps stretch and activation. The brachialis and brachioradialis are secondary elbow flexors aiding the movement; forearm flexors assist in gripping the handle. The anterior deltoid (front delts) acts as a stabilizer, especially given the shoulder extension starting position.",
+    "verifierReasoning": "The 'Front Delts' (Deltoid Anterior) should not be listed as a secondary muscle for a cable curl, which primarily targets the biceps and secondarily works the brachialis, brachioradialis, and forearm flexors. The deltoid anterior is minimally involved if at all.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:50:47.679Z"
+  },
+  {
+    "exerciseId": "291bf84b-8053-43e8-bae7-ca96b7a3a011",
+    "exerciseName": "Bench Dips",
+    "pickerPrimary": [
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Chest",
+      "Front Delts"
+    ],
+    "savedPrimary": [
+      "Triceps"
+    ],
+    "savedSecondary": [
+      "Chest",
+      "Front Delts"
+    ],
+    "pickerReasoning": "Bench dips primarily target the triceps because they are the main movers for elbow extension in the dip motion. The pectoralis major (chest) and anterior deltoid (front delts) assist in shoulder flexion and stabilize the upper body during the movement, so they are secondary muscles engaged during the exercise.",
+    "verifierReasoning": "For Bench Dips, the Triceps are the primary muscle worked, but the Chest (Pectoralis Major) and Front Delts (Deltoid Anterior) act as secondary movers. The current proposal incorrectly lists the Triceps as primary only, when they should be primary, with Chest and Front Delts as secondary.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:51:41.312Z"
+  },
+  {
+    "exerciseId": "cmb9n9djx001juhfuz3r84iiz",
+    "exerciseName": "Bench Press (Narrow Grip)",
+    "pickerPrimary": [
+      "Chest",
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Rear Delts",
+      "Pec Minor"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Triceps",
+      "Front Delts",
+      "Pec Minor"
+    ],
+    "pickerReasoning": "The narrow grip bench press places greater emphasis on the triceps (as the elbows are kept closer to the body, increasing elbow extension demand) while still primarily engaging the pectoralis major as the main pressing muscle. Anterior deltoids contribute as secondary movers (shoulder flexion); rear delts and pec minor stabilize the upper arm and shoulder during the press.",
+    "verifierReasoning": "Triceps should be secondary, not primary, in all pressing movements. Chest (Pectoralis Major) is always the main mover. Rear Delts are not a significant secondary muscle in the bench press. Front Delts and Pec Minor are reasonable as secondary.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:52:08.348Z"
+  },
+  {
+    "exerciseId": "c7d028d2-4587-47bc-8749-975bc346394c",
+    "exerciseName": "Cable Front Raise (Single Arm)",
+    "pickerPrimary": [
+      "Front Delts"
+    ],
+    "pickerSecondary": [
+      "Side Delts",
+      "Triceps"
+    ],
+    "savedPrimary": [
+      "Front Delts"
+    ],
+    "savedSecondary": [
+      "Side Delts"
+    ],
+    "pickerReasoning": "The cable front raise primarily targets the Deltoid Anterior (Front Delts) due to the forward raising motion. The Deltoid Lateral (Side Delts) assists in shoulder abduction and stabilization, while the Triceps Brachii (Triceps) and Rectus Abdominis (Abs) provide stabilization throughout the lift by helping with arm control and maintaining torso posture, respectively.",
+    "verifierReasoning": "The primary mover in the cable front raise is the anterior deltoid (Front Delts), which is correctly listed. The side delts (lateral deltoid) can participate as a secondary stabilizer. However, triceps do not play a significant role in the front raise movement, as the elbows are mostly locked and triceps are not executing meaningful extension. Triceps should not be listed as secondary.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:55:09.936Z"
+  },
+  {
+    "exerciseId": "00bd157a-ea2a-4ac3-800d-4a49095bb43a",
+    "exerciseName": "Cable Lateral Raise",
+    "pickerPrimary": [
+      "Side Delts"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Glute Med",
+      "Rotator Cuff"
+    ],
+    "savedPrimary": [
+      "Side Delts"
+    ],
+    "savedSecondary": [
+      "Front Delts",
+      "Rotator Cuff"
+    ],
+    "pickerReasoning": "The cable lateral raise targets the Deltoid Lateral (Side Delts) as the primary muscle because it is responsible for shoulder abduction, the main movement in this exercise. The Deltoid Anterior (Front Delts) and Gluteus Medius (Glute Med) can play a stabilizing role, especially when standing. The Rotator Cuff also assists with shoulder stability throughout the movement.",
+    "verifierReasoning": "Primary muscle (Side Delts) is correct. Front Delts and Rotator Cuff can be considered secondary. However, Glute Medius is incorrect; it does not have relevant activation in this exercise.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:56:00.914Z"
+  },
+  {
+    "exerciseId": "5c6ff560-4144-4388-b5f6-bb56b355d3bc",
+    "exerciseName": "Cable Lat Pullover",
+    "pickerPrimary": [
+      "Lats"
+    ],
+    "pickerSecondary": [
+      "Serratus",
+      "Traps",
+      "Triceps"
+    ],
+    "savedPrimary": [
+      "Lats"
+    ],
+    "savedSecondary": [
+      "Serratus",
+      "Pec Minor"
+    ],
+    "pickerReasoning": "The cable lat pullover is primarily a latissimus dorsi (lats) dominant isolation exercise, especially when performed with proper form focusing on shoulder extension and minimizing elbow flexion. The serratus anterior assists in scapular protraction, the trapezius (especially lower fibers) assists with scapular stability, and the triceps contribute as synergists during the movement but are not the primary mover.",
+    "verifierReasoning": "Traps are not significantly involved in the movement, and triceps are not a prime secondary muscle in pullovers. The serratus anterior is appropriate, as well as possible involvement of the pec minor due to the overhead motion, but not triceps or traps.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:56:31.794Z"
+  },
+  {
+    "exerciseId": "ff36ebdc-366c-4690-8885-5b142685adfd",
+    "exerciseName": "Cable Lat Pullover (Narrow Grip)",
+    "pickerPrimary": [
+      "Lats"
+    ],
+    "pickerSecondary": [
+      "Triceps",
+      "Traps",
+      "Deep Core",
+      "Abs"
+    ],
+    "savedPrimary": [
+      "Lats"
+    ],
+    "savedSecondary": [
+      "Abs",
+      "Deep Core",
+      "Rhomboids"
+    ],
+    "pickerReasoning": "The cable lat pullover primarily targets the Latissimus Dorsi (Lats) due to the shoulder extension movement and the arcing path of the arms from overhead to hips. The Triceps Brachii assist in stabilizing the elbow joint, though they are not the main mover. The Trapezius provides upper-back stability, while the core muscles (Rectus Abdominis and Transverse Abdominis) help maintain posture and resist excessive arching of the back during the pullover motion.",
+    "verifierReasoning": "The primary muscle (Lats) is correct. Triceps are not significantly involved in a lat pullover and should not be listed as secondary. Abs and Deep Core are stabilizers and may be secondary, but Traps are only very minimally involved. The main secondary muscles should include core stabilizers (Abs, Deep Core), and possibly the Pectoralis Minor (for scapular movement) and the Teres major/rhomboids for a very minor contribution (from the available list, Rhomboids).",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:56:57.447Z"
+  },
+  {
+    "exerciseId": "9c123d0c-1fe3-41e1-acfe-00cd6ea15a32",
+    "exerciseName": "Cable Triceps Extension with Supinated Grip (Single Arm)",
+    "pickerPrimary": [
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Forearm Extensors",
+      "Brachioradialis",
+      "Front Delts",
+      "Abs"
+    ],
+    "savedPrimary": [
+      "Triceps"
+    ],
+    "savedSecondary": [
+      "Abs"
+    ],
+    "pickerReasoning": "The primary mover in the cable triceps extension (supinated, single-arm) is the Triceps Brachii, which is responsible for elbow extension. The supinated grip increases forearm (especially forearm extensor and brachioradialis) involvement for grip and stabilization. The anterior deltoid (front delts) helps stabilize the shoulder, and the core (rectus abdominis) stabilizes the torso during the movement.",
+    "verifierReasoning": "The primary muscle (Triceps) is correct. However, the secondary muscles should not include Forearm Extensors, Brachioradialis, or Front Delts—these are not significantly involved in the triceps extension with supinated grip. Core (Abs) can be stabilizers, so that makes sense. If secondary muscles are to be listed, only core stabilizers are minimally involved. Otherwise, no major secondary muscles are necessary.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:58:31.867Z"
+  },
+  {
+    "exerciseId": "c28a8602-da85-46a8-bdb3-1c4402487241",
+    "exerciseName": "Chest Supported Lateral Raise",
+    "pickerPrimary": [
+      "Rear Delts",
+      "Rhomboids"
+    ],
+    "pickerSecondary": [
+      "Side Delts",
+      "Traps",
+      "Lats"
+    ],
+    "savedPrimary": [
+      "Side Delts"
+    ],
+    "savedSecondary": [
+      "Rear Delts",
+      "Traps",
+      "Rhomboids"
+    ],
+    "pickerReasoning": "The primary movers in the chest supported lateral raise are the Deltoid Posterior (Rear Delts) and Rhomboids due to their major involvement in horizontal abduction and scapular retraction. Deltoid Lateral (side delts) assist the raise, while Trapezius (Traps) and Latissimus Dorsi (Lats) contribute as stabilizers and scapular movers.",
+    "verifierReasoning": "Chest Supported Lateral Raise primarily targets the Side Delts (Deltoid Lateral). Rear Delts and Rhomboids can be involved but are not primary. Traps are commonly secondary. Lats are minimally involved, not a typical secondary muscle.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T12:59:43.907Z"
+  },
+  {
+    "exerciseId": "cmb9sh6oe001vuhqrsl7lg22c",
+    "exerciseName": "Close Grip Push-Ups",
+    "pickerPrimary": [
+      "Triceps",
+      "Chest"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Abs"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Triceps",
+      "Front Delts",
+      "Abs"
+    ],
+    "pickerReasoning": "Close grip push-ups shift much of the load to the Triceps Brachii (Triceps) due to the narrow hand stance, making them a primary mover along with the Pectoralis Major (Chest), which still contributes significantly to the push movement. The Deltoid Anterior (Front Delts) assists in shoulder flexion, and the Rectus Abdominis (Abs) stabilize the torso, so these are included as secondary muscles.",
+    "verifierReasoning": "In close grip push-ups, the chest (Pectoralis Major) remains the primary mover, while the triceps are heavily engaged but should be secondary. Front delts and core stabilizers (abs) are appropriate as secondary muscles.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:00:30.867Z"
+  },
+  {
+    "exerciseId": "cmb9rkqu2001euhkp0dcasa29",
+    "exerciseName": "Decline Dumbbell Fly",
+    "pickerPrimary": [
+      "Chest"
+    ],
+    "pickerSecondary": [
+      "Pec Minor",
+      "Front Delts",
+      "Triceps"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Pec Minor",
+      "Front Delts"
+    ],
+    "pickerReasoning": "The decline dumbbell fly primarily targets the Pectoralis Major (Chest) [cmb6zr9kx0002uhmhqmgb01cy], emphasizing the lower fibers due to bench angle. The Pectoralis Minor [cmb6zr9v70004uhmhhanl6im1] and Deltoid Anterior (Front Delts) [cmb6zrcud0010uhmhok7xvy58] act as secondary stabilizers and assisters, and the Triceps Brachii [cmb6zrb6n000iuhmhseibwmiy] support stabilization but are not prime movers as the movement is isolation-based and elbows remain relatively fixed.",
+    "verifierReasoning": "Triceps should not be secondary for dumbbell flyes, as this exercise isolates the chest and minimally involves the triceps. The secondary muscles should be anterior deltoid (Front Delts) and pec minor due to their stabilizing and assisting role, not triceps.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:02:05.608Z"
+  },
+  {
+    "exerciseId": "9aa3a88c-98a9-476c-ae01-5c50043d83d1",
+    "exerciseName": "Diamond Push-Ups",
+    "pickerPrimary": [
+      "Chest",
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Pec Minor",
+      "Deep Core",
+      "Front Delts"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Triceps",
+      "Front Delts",
+      "Pec Minor",
+      "Deep Core"
+    ],
+    "pickerReasoning": "Diamond push-ups emphasize the Pectoralis Major (chest) but due to the narrow hand placement, they significantly increase activation of the Triceps Brachii, making triceps a primary mover alongside chest. Secondary involvement comes from the Pectoralis Minor (assists shoulder protraction), Transverse Abdominis (deep core stabilization), and Deltoid Anterior for shoulder stability during the movement.",
+    "verifierReasoning": "For Diamond Push-Ups, the main target is the chest (Pectoralis Major), but triceps should be secondary as they're highly involved, not primary. The primary muscle should be Chest. Triceps and Front Delts should be secondary. Pec Minor and Deep Core are stabilizers and can be secondary if included.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:02:33.686Z"
+  },
+  {
+    "exerciseId": "272f2832-eb83-413d-b778-a0be27aad99f",
+    "exerciseName": "Dips",
+    "pickerPrimary": [
+      "Triceps",
+      "Chest"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Pec Minor",
+      "Serratus"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Triceps",
+      "Front Delts"
+    ],
+    "pickerReasoning": "Dips receive primary activation from the Triceps Brachii, which is the main mover in elbow extension, as well as significant movement from the Pectoralis Major (Chest) for shoulder horizontal adduction and flexion. Secondary muscles include the Deltoid Anterior (Front Delts), which assists in shoulder flexion, the Pectoralis Minor for scapular stabilization, and the Serratus Anterior, which helps with scapular protraction and stability throughout the movement.",
+    "verifierReasoning": "Triceps should not be listed as a primary muscle for Dips—chest (Pectoralis Major) is the main prime mover, with triceps as secondary. Pectoralis Minor and Serratus Anterior are overly specific and usually not included. The correct assignment is: Pectoralis Major (primary), Triceps and Anterior Deltoid (secondary).",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:02:58.931Z"
+  },
+  {
+    "exerciseId": "b325887b-11e7-48df-aa7e-786743c731c5",
+    "exerciseName": "Dips Machine",
+    "pickerPrimary": [
+      "Chest",
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Rear Delts",
+      "Biceps"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Triceps",
+      "Front Delts"
+    ],
+    "pickerReasoning": "The dips machine allows a horizontal pushing motion primarily targeting the Pectoralis Major (Chest) and Triceps Brachii (Triceps), responsible for pressing the body up. The Deltoid Anterior (Front Delts) serves as a key secondary mover in shoulder flexion/stabilization, Rear Delts contribute to shoulder stabilization, and the Biceps Brachii minorly assist with elbow stabilization during the movement. This machine eliminates much stability demand, so lats and core play a reduced role.",
+    "verifierReasoning": "Triceps should be listed as a secondary muscle group for the dips machine, not as a primary. Chest is the main primary muscle. Shoulders (front delts) are often involved as secondary. Rear delts and biceps are not primary or strong secondary movers in dips.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:03:29.070Z"
+  },
+  {
+    "exerciseId": "cmb9qq3xe002ouhbnenc6ua63",
+    "exerciseName": "Dumbbell Front Raises",
+    "pickerPrimary": [
+      "Front Delts"
+    ],
+    "pickerSecondary": [
+      "Side Delts",
+      "Chest",
+      "Rotator Cuff"
+    ],
+    "savedPrimary": [
+      "Front Delts"
+    ],
+    "savedSecondary": [
+      "Side Delts"
+    ],
+    "pickerReasoning": "The primary muscle trained is the Deltoid Anterior (Front Delts), since dumbbell front raises strongly target the front of the shoulders. The Deltoid Lateral (Side Delts) contribute as secondary movers for shoulder stabilization and abduction. The Pectoralis Major (Chest) provides minor assistance during shoulder flexion, especially in the clavicular head (upper chest). The Rotator Cuff stabilizes the shoulder joint during the lift.",
+    "verifierReasoning": "Dumbbell Front Raises target the front delts as primary. Side delts can be a minor secondary, but chest is not significantly involved as primary or secondary—the front delts do most of the work. Rotator cuff involvement is minimal and typically not a secondary in this movement.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:05:06.043Z"
+  },
+  {
+    "exerciseId": "cmb9sh40k001quhqrsotv3u2f",
+    "exerciseName": "Dumbbell Skullcrusher",
+    "pickerPrimary": [
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Chest",
+      "Abs"
+    ],
+    "savedPrimary": [
+      "Triceps"
+    ],
+    "savedSecondary": [],
+    "pickerReasoning": "The main action of the dumbbell skullcrusher is elbow extension, primarily recruiting the Triceps Brachii [cmb6zrb6n000iuhmhseibwmiy]. Stabilizing the upper arm and dumbbells requires some assistance from the Deltoid Anterior [cmb6zrcud0010uhmhok7xvy58] and Pectoralis Major [cmb6zr9kx0002uhmhqmgb01cy]. The Rectus Abdominis [cmb6zrdgy0017uhmhira269ib] helps stabilize the torso when lying on the bench, especially with heavier weights. All other muscles play a minimal or indirect role.",
+    "verifierReasoning": "The skullcrusher is an isolation exercise, primarily working the triceps. There is minimal or no meaningful activation of the chest, front delts, or abs, beyond general stabilization. No secondary muscle should be listed unless notable synergist involvement; in skullcrusher, this is not typical.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:05:53.305Z"
+  },
+  {
+    "exerciseId": "f8c1f465-82cc-47e8-b084-66a9e71fe4dc",
+    "exerciseName": "Dumbbell Wrist Curl",
+    "pickerPrimary": [
+      "Forearms"
+    ],
+    "pickerSecondary": [
+      "Brachioradialis"
+    ],
+    "savedPrimary": [
+      "Forearms"
+    ],
+    "savedSecondary": [],
+    "pickerReasoning": "The dumbbell wrist curl primarily targets the forearm flexors, as the movement isolates and strengthens the muscles responsible for wrist flexion. The brachioradialis acts as a secondary muscle because it assists in flexing the forearm at the elbow and stabilizes the wrist during the movement, although it is less targeted compared to the forearm flexors.",
+    "verifierReasoning": "The primary muscle in a dumbbell wrist curl is the forearm flexors. The brachioradialis is less involved, as it primarily assists in elbow flexion, not wrist flexion. No significant secondary muscle is recruited in a standard wrist curl focused on flexors; the action isolates the forearm flexors almost exclusively.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:06:22.839Z"
+  },
+  {
+    "exerciseId": "cbd1303a-5ab1-405d-ad88-44d345b346c4",
+    "exerciseName": "High Cable Fly",
+    "pickerPrimary": [
+      "Chest"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Triceps",
+      "Pec Minor"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Front Delts",
+      "Pec Minor"
+    ],
+    "pickerReasoning": "The high cable fly primarily targets the Pectoralis Major (Chest) since the motion involves adduction of the arms and squeezing the chest fibers (particularly upper and inner portions). The Deltoid Anterior (Front Delts) are secondary as they assist with shoulder flexion and stabilization. Triceps Brachii serve as secondary stabilizers during arm extension, and the Pectoralis Minor contributes to scapular stabilization and protraction during the movement.",
+    "verifierReasoning": "Triceps should not be included, even as secondary, for cable flys since their involvement is minimal compared to chest, anterior delts, and pec minor. The fly is not a pressing motion. Triceps should be removed.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:10:10.238Z"
+  },
+  {
+    "exerciseId": "cmb9sh6gs001uuhqrmg3o9u20",
+    "exerciseName": "High Cable Overhead Triceps Extension",
+    "pickerPrimary": [
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Rear Delts",
+      "Rotator Cuff",
+      "Biceps"
+    ],
+    "savedPrimary": [
+      "Triceps"
+    ],
+    "savedSecondary": [
+      "Forearms",
+      "Rotator Cuff"
+    ],
+    "pickerReasoning": "The High Cable Overhead Triceps Extension primarily targets the Triceps Brachii [cmb6zrb6n000iuhmhseibwmiy], as elbow extension against resistance is the main action. Secondary muscles include the Deltoid Anterior [cmb6zrcud0010uhmhok7xvy58] and Deltoid Posterior [cmb6zrd5l0014uhmh89wgphh8] for overhead stability, Rotator Cuff [a4d9c7e8-1e3b-0a5d-ec2f-7b8d9e0a1f2c] for shoulder stabilization, and the Biceps Brachii [cmb6zrb14000guhmhn1oykc26] as an antagonist stabilizer at the elbow.",
+    "verifierReasoning": "The primary muscle (triceps) is correct. However, the secondary muscles are incorrect: biceps are not involved in extension (they are an antagonist), and rear delts are not significantly involved. If anything, the forearms (for gripping), rotator cuff (stabilization), and potentially front/side delts (small stabilization) could be secondary. Typically, only the triceps should be primary, and forearm flexors and rotator cuff can be secondary at most.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:10:33.708Z"
+  },
+  {
+    "exerciseId": "cmb9rkqiq001duhkpia6yw8vj",
+    "exerciseName": "Incline Bench Dumbbell Fly",
+    "pickerPrimary": [
+      "Chest"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Triceps",
+      "Pec Minor"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Front Delts",
+      "Pec Minor"
+    ],
+    "pickerReasoning": "The incline bench dumbbell fly primarily targets the Pectoralis Major (Chest), with an emphasis on the upper fibers due to the incline position. The Deltoid Anterior (Front Delts) assists with the movement, especially during shoulder flexion. The Triceps Brachii are involved as stabilizers, though less so than in a pressing motion, and the Pectoralis Minor (Pec Minor) aids in scapular stabilization and motion.",
+    "verifierReasoning": "Triceps should not be listed as a secondary muscle for flye variations since elbow extension is minimal. Instead, the anterior deltoid and pectoralis minor are correct as secondary, along with possible inclusion of the serratus anterior. Triceps involvement is negligible in dumbbell flyes.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:11:36.865Z"
+  },
+  {
+    "exerciseId": "9c3ec89c-d500-41fb-8742-9e7e4414e9f8",
+    "exerciseName": "Incline Smith Machine Bench Press (Close Grip)",
+    "pickerPrimary": [
+      "Chest",
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Serratus",
+      "Pec Minor"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Triceps",
+      "Front Delts",
+      "Serratus",
+      "Pec Minor"
+    ],
+    "pickerReasoning": "The incline position and close grip increase activation of the Pectoralis Major (upper/inner chest focus) and make the Triceps Brachii a primary mover. The Deltoid Anterior assists in shoulder flexion, Serratus Anterior stabilizes the scapula, and Pectoralis Minor contributes to scapular protraction, thus are secondary.",
+    "verifierReasoning": "Triceps should only be listed as secondary for pressing movements. The primary should be Chest. Triceps and Front Delts are secondary, along with Serratus and Pec Minor as appropriate.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:12:28.162Z"
+  },
+  {
+    "exerciseId": "567ac01c-7c50-4044-9994-abdfd92695ae",
+    "exerciseName": "Low Cable Chest Fly",
+    "pickerPrimary": [
+      "Chest"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Triceps",
+      "Pec Minor",
+      "Serratus"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Front Delts",
+      "Pec Minor",
+      "Serratus"
+    ],
+    "pickerReasoning": "The low cable chest fly primarily targets the Pectoralis Major (Chest) as the main driver of horizontal adduction. The anterior deltoid assists in shoulder flexion, the triceps stabilize the elbow joint (but do not extend it), and the pectoralis minor and serratus anterior help stabilize and control scapular movement throughout the fly motion. These muscles combine to produce the intended chest emphasis while supporting joint integrity and smooth cable movement.",
+    "verifierReasoning": "Triceps are not significantly involved in the Low Cable Chest Fly and should not be listed as secondary. Correct secondary muscles are anterior deltoid, pectoralis minor, and serratus anterior, which contribute to shoulder flexion, stabilization, and scapular movement. Triceps are not an agonist or strong stabilizer here.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:13:39.206Z"
+  },
+  {
+    "exerciseId": "cmbhpojq300iauhebfhf33zvy",
+    "exerciseName": "Overhead Cable Curl (Single Arm)",
+    "pickerPrimary": [
+      "Biceps"
+    ],
+    "pickerSecondary": [
+      "Brachioradialis",
+      "Forearms",
+      "Front Delts",
+      "Abs"
+    ],
+    "savedPrimary": [
+      "Biceps"
+    ],
+    "savedSecondary": [
+      "Brachialis",
+      "Brachioradialis",
+      "Forearms"
+    ],
+    "pickerReasoning": "The overhead cable curl primarily targets the biceps because the main movement is elbow flexion against resistance. The brachioradialis and forearm flexors are secondary as they assist in flexing the elbow and grip stabilization. The anterior deltoid is engaged to help stabilize the arm in the overhead position, and the rectus abdominis is active for core stabilization during the unilateral standing movement.",
+    "verifierReasoning": "The Overhead Cable Curl (Single Arm) primarily targets the biceps. Secondary muscles include the brachialis and brachioradialis (elbow flexors), possibly forearm flexors, but not the front delts or abs to any significant degree. Abs and deltoids don't significantly contribute to the flexion, and while mild stabilization may occur, those should not be classified as secondary muscles for a curl.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:15:04.713Z"
+  },
+  {
+    "exerciseId": "cmbhpcrfc00i0uhebwf6lijk1",
+    "exerciseName": "Paused Assisted Dip",
+    "pickerPrimary": [
+      "Chest",
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Pec Minor"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Triceps",
+      "Front Delts",
+      "Pec Minor"
+    ],
+    "pickerReasoning": "The dip, even with assistance and a pause, primarily targets the Pectoralis Major (chest) and Triceps Brachii (triceps) due to the vertical pushing movement against gravity. The Deltoid Anterior (front delts) are strong dynamic stabilizers but are not the main movers, thus are secondary. The Pectoralis Minor assists with scapular stabilization and depression during the dip, so it is included as a secondary muscle.",
+    "verifierReasoning": "For a dip (including paused or assisted dips), the primary muscle should be Chest (Pectoralis Major). Triceps are important but are best assigned as secondary, since the dip is mostly a chest exercise with notable contribution from triceps. Front Delts and Pec Minor are appropriately listed as secondary muscles.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:15:52.600Z"
+  },
+  {
+    "exerciseId": "cmb9n9btl001cuhfu9fwazts3",
+    "exerciseName": "Pec Deck Machine",
+    "pickerPrimary": [
+      "Chest"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Triceps"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Front Delts"
+    ],
+    "pickerReasoning": "The pec deck machine primarily isolates the Pectoralis Major (Chest) as the main target, which is the key muscle responsible for horizontal shoulder adduction. The Deltoid Anterior (Front Delts) assists in this movement, particularly in shoulder flexion and stabilization during the fly action. The Triceps Brachii (Triceps) are activated to a minor degree as dynamic stabilizers, but do not perform the prime movement. No back, lat, or core muscles are strongly engaged in this isolated machine exercise.",
+    "verifierReasoning": "Triceps should not be a secondary muscle for the pec deck machine because they are not significantly activated in this isolation chest exercise. The primary movers are the pecs (chest), and the front delts may assist slightly, but triceps involvement is minimal.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:16:16.033Z"
+  },
+  {
+    "exerciseId": "08cc1ba3-20f5-470c-a66a-0c06332a89c0",
+    "exerciseName": "Pullover Machine",
+    "pickerPrimary": [
+      "Lats"
+    ],
+    "pickerSecondary": [
+      "Rhomboids",
+      "Chest",
+      "Abs",
+      "Triceps"
+    ],
+    "savedPrimary": [
+      "Lats"
+    ],
+    "savedSecondary": [
+      "Rhomboids",
+      "Chest"
+    ],
+    "pickerReasoning": "The pullover machine primarily targets the Latissimus Dorsi, as the main movement is shoulder extension/adduction, which is their principal function. The Rhomboids act as secondary upper back stabilizers and assist slightly in retraction. The Pectoralis Major assists due to its involvement in shoulder flexion and horizontal adduction during a portion of the movement, especially in certain machine designs. The Rectus Abdominis provides core stability during the arc, and the Triceps may act as secondary movers through long head involvement in shoulder extension. This profile reflects the typical muscle activation seen in machine pullovers.",
+    "verifierReasoning": "Triceps are not significantly involved in a pullover machine; they should not be secondary. Core (Abs) may have some stabilizing role but are not a major secondary mover. Chest (Pectoralis Major) and Rhomboids are good secondary muscles, with Lats correctly as primary.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:17:33.120Z"
+  },
+  {
+    "exerciseId": "2aece15b-1c6b-49c7-b3cc-ae9948bf3f13",
+    "exerciseName": "Reverse Grip Pullover",
+    "pickerPrimary": [
+      "Lats",
+      "Chest"
+    ],
+    "pickerSecondary": [
+      "Rear Delts",
+      "Rhomboids",
+      "Triceps"
+    ],
+    "savedPrimary": [
+      "Lats"
+    ],
+    "savedSecondary": [
+      "Chest",
+      "Rhomboids",
+      "Rear Delts"
+    ],
+    "pickerReasoning": "The reverse grip pullover with cable primarily targets the Latissimus Dorsi (Lats) due to the shoulder extension movement, and the Pectoralis Major (Chest) due to the pullover motion and reverse grip emphasizing chest involvement. Secondarily, the Rear Delts (for shoulder extension and stabilization), Rhomboids (scapular retraction and stability), and Triceps (elbow stability and slight extension) assist and stabilize during the exercise.",
+    "verifierReasoning": "Reverse Grip Pullover targets the lats as primary. Pectoralis major (chest) works but usually secondary, especially with a reverse grip. Rear delts and rhomboids can be secondary stabilizers/movers. Triceps are minimally involved, more as stabilizers, not a main secondary. Correction: make lats primary, chest and upper back muscles secondary.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:18:38.527Z"
+  },
+  {
+    "exerciseId": "cmb9sh7d4001yuhqrktypnp94",
+    "exerciseName": "Reverse Grip Triceps Pushdown",
+    "pickerPrimary": [
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Forearms",
+      "Brachioradialis",
+      "Front Delts"
+    ],
+    "savedPrimary": [
+      "Triceps"
+    ],
+    "savedSecondary": [
+      "Forearms",
+      "Brachioradialis"
+    ],
+    "pickerReasoning": "The Reverse Grip Triceps Pushdown primarily targets the Triceps Brachii (elbow extension against resistance). The reverse (supinated) grip increases engagement of the forearm flexors and the brachioradialis for grip control and wrist stabilization. The front delts (deltoid anterior) assist in shoulder stabilization during the cable movement. Core engagement exists for posture but is minimal.",
+    "verifierReasoning": "Reverse grip triceps pushdown primarily targets the triceps. The forearm muscles (forearm flexors and brachioradialis) may be slightly engaged due to the grip, but Front Delts should not be listed as secondary—they are minimally involved, if at all. Only list forearm muscles as secondary.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:19:00.541Z"
+  },
+  {
+    "exerciseId": "cmbgyx44v007huhebyk3nrtkg",
+    "exerciseName": "Roman Chair Leg Raises",
+    "pickerPrimary": [
+      "Abs"
+    ],
+    "pickerSecondary": [
+      "Obliques",
+      "Deep Core",
+      "Hams"
+    ],
+    "savedPrimary": [
+      "Abs"
+    ],
+    "savedSecondary": [
+      "Obliques",
+      "Deep Core"
+    ],
+    "pickerReasoning": "The primary muscle targeted by Roman Chair Leg Raises is the rectus abdominis (abs), responsible for trunk flexion and stabilizing the pelvis as you lift your legs. The obliques help with stability and any rotational control, making them secondary. The transverse abdominis (deep core) assists with intra-abdominal pressure and stabilization. The hip flexors, particularly the rectus femoris portion of the quadriceps (quads), also act as secondary muscles as they are highly involved in lifting the legs.",
+    "verifierReasoning": "Hamstrings are not directly involved as primary or significant secondary muscles in the Roman Chair Leg Raise. The hip flexors are engaged, but Hamstrings are not. The primary mover is the Rectus Abdominis, and the Obliques and Transverse Abdominis (Deep Core) act as stabilizers/secondaries.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:19:34.956Z"
+  },
+  {
+    "exerciseId": "ef220d0f-4511-4896-957a-2de021d08407",
+    "exerciseName": "Rope Pullover",
+    "pickerPrimary": [
+      "Lats"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Rear Delts",
+      "Triceps",
+      "Obliques"
+    ],
+    "savedPrimary": [
+      "Lats"
+    ],
+    "savedSecondary": [
+      "Rear Delts",
+      "Chest",
+      "Obliques"
+    ],
+    "pickerReasoning": "The cable rope pullover primarily targets the Latissimus Dorsi (Lats) because the movement focuses on shoulder extension with elbows slightly bent. The Deltoid Anterior (Front Delts) and Deltoid Posterior (Rear Delts) assist with shoulder positioning and stabilization, while the Triceps Brachii help maintain arm extension during the pull. The Obliques play a minor stabilizing role, especially if performed standing. The lats are the main driver, with the others supporting or stabilizing the movement.",
+    "verifierReasoning": "Triceps should not be listed as secondary in a pullover; they are not significantly involved. Instead, secondary muscles for a rope pullover are typically the long head of the triceps (minimally), but more appropriately the chest (pecs), especially if a stretch is emphasized, and rear delts can be involved for stabilization. Core can be included for stabilization. Obliques play a minor stabilization role but are not a main mover. The current proposal is close but Triceps as a secondary muscle is misleading for this movement.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:20:10.585Z"
+  },
+  {
+    "exerciseId": "0a1e45fa-98bc-46c1-ac7c-abe3bb86bb05",
+    "exerciseName": "Shoulder Press Machine",
+    "pickerPrimary": [
+      "Front Delts",
+      "Side Delts"
+    ],
+    "pickerSecondary": [
+      "Rear Delts",
+      "Triceps",
+      "Chest",
+      "Traps"
+    ],
+    "savedPrimary": [
+      "Front Delts",
+      "Side Delts"
+    ],
+    "savedSecondary": [
+      "Triceps",
+      "Chest",
+      "Traps",
+      "Rear Delts"
+    ],
+    "pickerReasoning": "The main movement in the shoulder press is shoulder abduction and flexion, making the anterior (front) and lateral (side) deltoids the primary movers. The posterior deltoid assists with overall shoulder stability, as does the trapezius. The triceps brachii are key in elbow extension during the press, acting as secondary movers. The pectoralis major (upper chest fibers) also assists during the pressing movement, especially at the bottom range. The machine provides support and guides the motion, reducing the requirement for smaller stabilizers.",
+    "verifierReasoning": "Primary should include Front Delts and Side Delts. Secondary should include Triceps (as this is a pressing movement), and optionally Chest, Traps, and Rear Delts if it's a machine variation that involves those muscles actively. However, Triceps should NOT be a primary muscle. The current proposal, though not entirely wrong, slightly overstates the involvement of Rear Delts and undervalues Triceps as secondary. Chest (Pectoralis Major) can be included as secondary if machine enables some clavicular engagement. Traps usually act as stabilizers.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:21:17.503Z"
+  },
+  {
+    "exerciseId": "cmb9qq1bo002cuhbnzcy89c8f",
+    "exerciseName": "Single Leg Cable Kickbacks",
+    "pickerPrimary": [
+      "Glutes"
+    ],
+    "pickerSecondary": [
+      "Glute Med",
+      "Glute Min",
+      "Quads",
+      "Abs"
+    ],
+    "savedPrimary": [
+      "Glutes"
+    ],
+    "savedSecondary": [
+      "Glute Med",
+      "Glute Min",
+      "Hams"
+    ],
+    "pickerReasoning": "The primary mover in single leg cable kickbacks is the Gluteus Maximus, responsible for hip extension. The Gluteus Medius and Gluteus Minimus assist with pelvic stabilization and abduction during the one-leg balance. The Quadriceps help stabilize the standing leg and core (Rectus Abdominis) stabilizes the torso against cable resistance and dynamic movement.",
+    "verifierReasoning": "Quads are not significantly involved in hip extension (the action in kickbacks), and rectus abdominis (abs) activation is minimal/only as core stabilization, not as a main secondary. Instead, hamstrings should be secondary due to their assistance in hip extension. Glute Med and Glute Min are acceptable as secondary since they stabilize the hip (especially if abduction is present).",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:21:51.239Z"
+  },
+  {
+    "exerciseId": "433e5b14-e761-4e68-b626-a5ea95496680",
+    "exerciseName": "Smith Machine Bench Press (Close Grip)",
+    "pickerPrimary": [
+      "Triceps",
+      "Chest"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Pec Minor"
+    ],
+    "savedPrimary": [
+      "Chest"
+    ],
+    "savedSecondary": [
+      "Triceps",
+      "Front Delts",
+      "Pec Minor"
+    ],
+    "pickerReasoning": "A close-grip bench press on the Smith machine increases triceps involvement significantly compared to a standard bench due to the narrow grip. The chest remains a major mover—specifically the pectoralis major—with emphasis on the inner portion. The anterior deltoids assist, especially in the initial phase of the press, while the pectoralis minor stabilizes. The Smith machine’s stability means less need for additional stabilizing muscles.",
+    "verifierReasoning": "For the close grip Smith Machine Bench Press, the Chest (Pectoralis Major) should be the PRIMARY muscle, with Triceps and Front Delts as SECONDARY. Triceps are heavily involved but are not the main prime mover for any bench press variant.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:23:10.203Z"
+  },
+  {
+    "exerciseId": "cmb9rkvev001ruhkp0vgdlxpd",
+    "exerciseName": "Trap Bar Deadlift",
+    "pickerPrimary": [
+      "Quads",
+      "Glutes"
+    ],
+    "pickerSecondary": [
+      "Hams",
+      "Lower Back",
+      "Abs"
+    ],
+    "savedPrimary": [
+      "Quads",
+      "Glutes",
+      "Hams",
+      "Lower Back"
+    ],
+    "savedSecondary": [
+      "Abs"
+    ],
+    "pickerReasoning": "The trap bar deadlift differs from a conventional deadlift by emphasizing knee flexion, so the quadriceps and gluteus maximus are the primary movers. The hamstrings assist with hip extension. The lower back (erector spinae) and abs provide trunk stability and anti-flexion support throughout the lift.",
+    "verifierReasoning": "Trap Bar Deadlifts emphasize both quads and glutes, but also heavily involve hamstrings and lower back as primary movers. Core and abs are secondary as stabilizers. Hamstrings and lower back should be primary, not only secondary.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:26:32.899Z"
+  },
+  {
+    "exerciseId": "cmbhpp4nz00ibuhebgfvnoc7f",
+    "exerciseName": "Triceps Diverging Pressdown (Rope)",
+    "pickerPrimary": [
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Forearms",
+      "Abs"
+    ],
+    "savedPrimary": [
+      "Triceps"
+    ],
+    "savedSecondary": [
+      "Forearms"
+    ],
+    "pickerReasoning": "The Triceps Diverging Pressdown (Rope) is focused on extension of the elbow joint against resistance, making the triceps the primary mover. The rope attachment allows some external rotation at the end of the movement, possibly increasing triceps activation. The anterior deltoids stabilize the shoulder, the forearm flexors help grip and stabilize the rope, and the core (rectus abdominis) lightly stabilizes the torso during the pressdown.",
+    "verifierReasoning": "The primary muscle for a triceps pressdown is correct (triceps). However, the proposed secondary muscles are not accurate: the anterior deltoid and rectus abdominis are not significantly involved in this isolation exercise, and forearm flexors may be slightly engaged for grip but not as key secondary muscles. This exercise primarily isolates the triceps, with very minimal secondary activation elsewhere (occasionally some forearm involvement for grip stabilization, but not a major mover).",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:26:57.091Z"
+  },
+  {
+    "exerciseId": "558e2464-bc6b-4425-b46e-983d5c0a9214",
+    "exerciseName": "Triceps Pressdown (EZ-Bar)",
+    "pickerPrimary": [
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Forearms",
+      "Abs"
+    ],
+    "savedPrimary": [
+      "Triceps"
+    ],
+    "savedSecondary": [
+      "Forearm Extensors",
+      "Brachioradialis"
+    ],
+    "pickerReasoning": "The triceps pressdown primarily targets the Triceps Brachii (Triceps) as the main mover responsible for elbow extension. The Deltoid Anterior (Front Delts) can act as a stabilizer to keep the upper arm in place, the Forearm Flexors (Forearms) grip the bar and maintain wrist stability, and the Rectus Abdominis (Abs) stabilizes the torso during the movement. These muscle groups fulfill the main anti-pattern rules for a pressdown exercise.",
+    "verifierReasoning": "The primary muscle is correctly assigned to Triceps Brachii. However, the secondary muscles are not accurate: Front Delts and Abs are minimally involved; core activation is low for this isolation movement. Forearms (especially forearm extensors and brachioradialis) can act as stabilizers; typically, no shoulder or abs assignment. Correct secondary is Forearm Extensors or Brachioradialis.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:27:18.696Z"
+  },
+  {
+    "exerciseId": "10bdb05f-d196-4bf7-8968-6df085bffb30",
+    "exerciseName": "Triceps Pushdown (Straight Bar)",
+    "pickerPrimary": [
+      "Triceps"
+    ],
+    "pickerSecondary": [
+      "Front Delts",
+      "Forearms",
+      "Brachioradialis"
+    ],
+    "savedPrimary": [
+      "Triceps"
+    ],
+    "savedSecondary": [
+      "Forearms"
+    ],
+    "pickerReasoning": "The Triceps Pushdown isolates the Triceps Brachii (primary mover). The Deltoid Anterior assists in stabilization of the shoulder joint as the upper arm is kept close to the torso. The forearm muscles (Forearm Flexors, Brachioradialis) assist in gripping and controlling the bar during the pushdown motion.",
+    "verifierReasoning": "Triceps pushdown primarily targets the triceps. Forearms and brachioradialis may be involved as stabilizers, but anterior deltoid involvement is minimal and shouldn't be secondary. Forearms are reasonable as secondary, but brachioradialis is much less involved in this movement. The most correct secondary is forearm muscles (especially forearm extensors/flexors, as stabilizers). Only 'Forearm Flexors' should be secondary from those listed.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:27:55.497Z"
+  },
+  {
+    "exerciseId": "9d1529b6-31af-4f1e-be16-3ff64c0f1141",
+    "exerciseName": "Wide Grip Pullover",
+    "pickerPrimary": [
+      "Lats"
+    ],
+    "pickerSecondary": [
+      "Chest",
+      "Rear Delts",
+      "Triceps",
+      "Traps"
+    ],
+    "savedPrimary": [
+      "Lats"
+    ],
+    "savedSecondary": [
+      "Chest",
+      "Rear Delts",
+      "Traps",
+      "Serratus"
+    ],
+    "pickerReasoning": "The wide grip cable pullover primarily targets the Latissimus Dorsi (Lats) since the main movement involves shoulder extension and adduction, making the lats the main mover. The Pectoralis Major (Chest) provides significant secondary assistance in the opening phase, while the Deltoid Posterior (Rear Delts) and Trapezius (Traps) assist in shoulder stabilization and movement, especially with a wide grip. The Triceps Brachii also stabilize the arms during the pullover but are not primary movers.",
+    "verifierReasoning": "Triceps should not be a secondary muscle for pullovers; their involvement is minimal. Serratus Anterior is typically engaged strongly as a secondary muscle, as are chest, rear delts, and possibly traps. Lats as primary is correct.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:28:35.770Z"
+  },
+  {
+    "exerciseId": "17ba9ce0-2db2-494b-be7c-3b0a8aef9e1e",
+    "exerciseName": "Wide Grip Pull-Up",
+    "pickerPrimary": [
+      "Lats",
+      "Traps"
+    ],
+    "pickerSecondary": [
+      "Biceps",
+      "Rhomboids",
+      "Chest"
+    ],
+    "savedPrimary": [
+      "Lats"
+    ],
+    "savedSecondary": [
+      "Traps",
+      "Rhomboids",
+      "Biceps"
+    ],
+    "pickerReasoning": "The wide grip pull-up primarily targets the Latissimus Dorsi (Lats) for the main pulling action, and the Trapezius (Traps) as a key upper back muscle stabilized strongly with a wide grip. Secondary muscles include the Biceps Brachii (Biceps) for elbow flexion, the Rhomboids for scapular retraction, and the Pectoralis Major (Chest) which assists minimally for shoulder adduction and stabilization during the movement.",
+    "verifierReasoning": "The primary muscles for a wide grip pull-up are the lats. The upper back (rhomboids), traps, and biceps are secondary. The chest is not significantly involved and should not be included. Traps should be secondary, not primary.",
+    "retries": 3,
+    "autoSaved": true,
+    "timestamp": "2026-01-30T13:28:54.415Z"
+  }
+]

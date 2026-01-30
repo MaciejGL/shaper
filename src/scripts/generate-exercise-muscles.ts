@@ -1,4 +1,7 @@
 #!/usr/bin/env ts-node
+import { stdin as input, stdout as output } from 'node:process'
+import { createInterface } from 'node:readline/promises'
+
 import { EQUIPMENT_OPTIONS } from '@/config/equipment'
 import { MUSCLES } from '@/config/muscles'
 import { prisma } from '@/lib/db'
@@ -11,6 +14,7 @@ let generationProgress: {
   total: number
   processed: number
   successful: number
+  skipped: number
   failed: number
   currentExercise: string | null
   startedAt: Date | null
@@ -19,6 +23,7 @@ let generationProgress: {
   total: 0,
   processed: 0,
   successful: 0,
+  skipped: 0,
   failed: 0,
   currentExercise: null,
   startedAt: null,
@@ -66,6 +71,11 @@ interface GeneratedMuscles {
   reasoning: string
 }
 
+interface VerificationResult {
+  approved: boolean
+  reasoning: string
+}
+
 // Group muscles by display group for AI context
 const MUSCLES_BY_GROUP = MUSCLES.reduce(
   (acc, m) => {
@@ -106,8 +116,40 @@ const MUSCLE_SELECTION_SCHEMA = {
   additionalProperties: false,
 } as const
 
+const MUSCLE_VERIFICATION_SCHEMA = {
+  type: 'object',
+  properties: {
+    approved: {
+      type: 'boolean',
+      description:
+        'Return true only if the proposed primary/secondary muscles are correct for the exercise',
+    },
+    reasoning: {
+      type: 'string',
+      description:
+        'Brief explanation of why the proposed muscles are correct or incorrect',
+    },
+  },
+  required: ['approved', 'reasoning'],
+  additionalProperties: false,
+} as const
+
+const MUSCLE_BY_ID = new Map(MUSCLES.map((m) => [m.id, m]))
+
+const formatMuscleIds = (ids: string[]) => {
+  if (ids.length === 0) return 'None'
+  return ids
+    .map((id) => {
+      const muscle = MUSCLE_BY_ID.get(id)
+      const label = muscle?.alias || muscle?.name || id
+      return `${label} [${id}]`
+    })
+    .join(', ')
+}
+
 class ExerciseMuscleGenerator {
   private config: GenerationConfig
+  private promptInterface: ReturnType<typeof createInterface> | null = null
 
   constructor(config: Partial<GenerationConfig> = {}) {
     this.config = {
@@ -137,9 +179,17 @@ class ExerciseMuscleGenerator {
       total: 0,
       processed: 0,
       successful: 0,
+      skipped: 0,
       failed: 0,
       currentExercise: null,
       startedAt: new Date(),
+    }
+
+    // Check for TTY upfront so we fail fast
+    if (!process.stdin.isTTY) {
+      throw new Error(
+        'Interactive mode requires a TTY terminal. Run this script directly in your terminal: npx ts-node src/scripts/generate-exercise-muscles.ts',
+      )
     }
 
     console.info('💪 Starting exercise muscle group generation...\n')
@@ -200,32 +250,135 @@ class ExerciseMuscleGenerator {
           generationProgress.currentExercise = exercise.name
 
           try {
+            const currentPrimary =
+              exercise.muscleGroups.length > 0
+                ? exercise.muscleGroups.map((m) => m.name).join(', ')
+                : 'None'
+            const currentSecondary =
+              exercise.secondaryMuscleGroups.length > 0
+                ? exercise.secondaryMuscleGroups.map((m) => m.name).join(', ')
+                : 'None'
+
             console.info(`  💪 Analyzing: ${exercise.name}`)
+            console.info(`    Current Primary: ${currentPrimary}`)
+            console.info(`    Current Secondary: ${currentSecondary}`)
 
-            const muscles = await this.generateMusclesForExercise(exercise)
+            let completed = false
 
-            if (this.config.dryRun) {
-              const primaryNames = muscles.primaryMuscleIds
-                .map((id) => MUSCLES.find((m) => m.id === id)?.alias || id)
-                .join(', ')
-              const secondaryNames = muscles.secondaryMuscleIds
-                .map((id) => MUSCLES.find((m) => m.id === id)?.alias || id)
-                .join(', ')
+            while (!completed) {
+              if (signal.aborted) {
+                console.info('\n⏹️ Generation aborted by user')
+                aborted = true
+                break
+              }
 
-              console.info(`    [DRY RUN] Would update with:`)
-              console.info(`      Primary: ${primaryNames}`)
-              console.info(`      Secondary: ${secondaryNames || 'None'}`)
-              console.info(`      Reasoning: ${muscles.reasoning}\n`)
-              skipped++
-            } else {
-              await this.updateExerciseMuscles(exercise.id, muscles)
-              console.info(`    ✅ Updated successfully`)
-              successful++
-              generationProgress.successful = successful
+              let muscles: GeneratedMuscles
+              let verification: VerificationResult
+              try {
+                muscles = await this.pickMusclesForExercise(exercise)
+                verification = await this.verifyMusclesForExercise(
+                  exercise,
+                  muscles,
+                )
+              } catch (error) {
+                console.info(
+                  `    ❌ AI call failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                )
+                let action: 'retry' | 'skip'
+                try {
+                  action = await this.promptRetryAction(signal)
+                } catch (promptError) {
+                  if (signal.aborted) {
+                    aborted = true
+                    break
+                  }
+                  throw promptError
+                }
+                if (action === 'retry') {
+                  await this.delay(1000)
+                  continue
+                }
+                console.info('    ⏭️  Skipped\n')
+                skipped++
+                generationProgress.skipped = skipped
+                completed = true
+                continue
+              }
+
+              // Always show what the picker suggested
+              console.info(
+                `    Suggested Primary: ${formatMuscleIds(muscles.primaryMuscleIds)}`,
+              )
+              console.info(
+                `    Suggested Secondary: ${formatMuscleIds(muscles.secondaryMuscleIds)}`,
+              )
+              console.info(`    Picker reasoning: ${muscles.reasoning}`)
+
+              if (!verification.approved) {
+                console.info(
+                  `    ⚠️  Verifier rejected: ${verification.reasoning}`,
+                )
+                let action: 'retry' | 'skip'
+                try {
+                  action = await this.promptRetryAction(signal)
+                } catch (promptError) {
+                  if (signal.aborted) {
+                    aborted = true
+                    break
+                  }
+                  throw promptError
+                }
+                if (action === 'retry') {
+                  console.info('    🔁 Re-running analysis...\n')
+                  await this.delay(1000)
+                  continue
+                }
+                console.info('    ⏭️  Skipped\n')
+                skipped++
+                generationProgress.skipped = skipped
+                completed = true
+                continue
+              }
+
+              console.info(`    ✅ Verifier approved: ${verification.reasoning}`)
+
+              let action: 'approve' | 'reject' | 'skip'
+              try {
+                action = await this.promptApprovalAction(signal)
+              } catch (promptError) {
+                if (signal.aborted) {
+                  aborted = true
+                  break
+                }
+                throw promptError
+              }
+              if (action === 'approve') {
+                if (this.config.dryRun) {
+                  console.info(`    [DRY RUN] Approved (no changes saved)\n`)
+                } else {
+                  await this.updateExerciseMuscles(exercise.id, muscles)
+                  console.info(`    ✅ Saved successfully\n`)
+                }
+                successful++
+                generationProgress.successful = successful
+                completed = true
+              } else if (action === 'reject') {
+                console.info('    🔁 Re-running analysis...\n')
+                await this.delay(1000)
+              } else {
+                console.info('    ⏭️  Skipped\n')
+                skipped++
+                generationProgress.skipped = skipped
+                completed = true
+              }
             }
 
-            processed++
-            generationProgress.processed = processed
+            if (aborted) break
+
+            if (completed) {
+              processed++
+              generationProgress.processed = processed
+            }
 
             if (i + batch.indexOf(exercise) < exercises.length - 1) {
               await this.delay(this.config.delayBetweenRequests)
@@ -244,8 +397,8 @@ class ExerciseMuscleGenerator {
       console.info(`\n📊 GENERATION ${aborted ? 'STOPPED' : 'COMPLETE'}\n`)
       console.info(`Results:`)
       console.info(`  • Total processed: ${processed}`)
-      console.info(`  • Successful: ${successful}`)
-      console.info(`  • Skipped (dry run): ${skipped}`)
+      console.info(`  • Approved: ${successful}`)
+      console.info(`  • Skipped: ${skipped}`)
       console.info(`  • Failed: ${failed}`)
       if (aborted) console.info(`  • Status: Aborted by user`)
 
@@ -254,6 +407,7 @@ class ExerciseMuscleGenerator {
       console.error('❌ Error in generation process:', error)
       throw error
     } finally {
+      this.closePrompt()
       generationProgress.isRunning = false
       generationProgress.currentExercise = null
       currentAbortController = null
@@ -298,7 +452,7 @@ class ExerciseMuscleGenerator {
     })
   }
 
-  private async generateMusclesForExercise(
+  private async pickMusclesForExercise(
     exercise: ExerciseForGeneration,
   ): Promise<GeneratedMuscles> {
     const prompt = this.buildPrompt(exercise)
@@ -372,6 +526,65 @@ class ExerciseMuscleGenerator {
     )
   }
 
+  private async verifyMusclesForExercise(
+    exercise: ExerciseForGeneration,
+    muscles: GeneratedMuscles,
+  ): Promise<VerificationResult> {
+    const prompt = this.buildVerificationPrompt(exercise, muscles)
+
+    let lastError: Error | null = null
+
+    for (let attempt = 1; attempt <= this.config.maxRetries; attempt++) {
+      try {
+        const response = await openai.chat.completions.create({
+          model: 'gpt-5.1',
+          messages: [
+            {
+              role: 'system',
+              content: this.buildVerificationSystemPrompt(),
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          max_completion_tokens: 8000,
+          reasoning_effort: 'high',
+          verbosity: 'low',
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'muscle_verification',
+              strict: true,
+              schema: MUSCLE_VERIFICATION_SCHEMA,
+            },
+          },
+        })
+
+        const content = response.choices[0]?.message?.content
+        if (!content) {
+          throw new Error('No content received from OpenAI')
+        }
+
+        const parsed = JSON.parse(content) as VerificationResult
+        return parsed
+      } catch (error) {
+        lastError = error as Error
+        console.warn(
+          `    ⚠️  Verification attempt ${attempt} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        )
+
+        if (attempt < this.config.maxRetries) {
+          await this.delay(1000 * attempt)
+        }
+      }
+    }
+
+    throw new Error(
+      `Verification failed after ${this.config.maxRetries} attempts. Last error: ${lastError?.message}`,
+    )
+  }
+
   private buildSystemPrompt(): string {
     const muscleList = Object.entries(MUSCLES_BY_GROUP)
       .map(([group, muscles]) => `${group}:\n  ${muscles.join('\n  ')}`)
@@ -424,6 +637,26 @@ If you titled this exercise "[Muscle] Builder", which muscle would it be?
 IMPORTANT: You must return the exact muscle IDs from the list above. Do not invent new IDs.`
   }
 
+  private buildVerificationSystemPrompt(): string {
+    const muscleList = Object.entries(MUSCLES_BY_GROUP)
+      .map(([group, muscles]) => `${group}:\n  ${muscles.join('\n  ')}`)
+      .join('\n\n')
+
+    return `You are a strict verifier for exercise muscle assignments.
+
+Your job is to evaluate whether the proposed primary and secondary muscles are correct.
+
+AVAILABLE MUSCLES (exact IDs only):
+
+${muscleList}
+
+VERIFICATION RULES:
+1. PRIMARY muscles must match the true training intent (1-2 muscles).
+2. SECONDARY muscles are assistants/stabilizers (0-4 muscles).
+3. Approve ONLY if the proposed selection is correct and complete.
+4. If anything is off, set approved=false and explain why.`
+  }
+
   private buildPrompt(exercise: ExerciseForGeneration): string {
     const equipmentLabel =
       EQUIPMENT_OPTIONS.find((e) => e.value === exercise.equipment)?.label ||
@@ -452,6 +685,30 @@ CURRENT ASSIGNMENT (may be incorrect or incomplete):
 Based on biomechanics and muscle activation patterns, select the correct primary and secondary muscles using EXACT muscle IDs from the provided list.`
   }
 
+  private buildVerificationPrompt(
+    exercise: ExerciseForGeneration,
+    muscles: GeneratedMuscles,
+  ): string {
+    const equipmentLabel =
+      EQUIPMENT_OPTIONS.find((e) => e.value === exercise.equipment)?.label ||
+      exercise.equipment ||
+      'Bodyweight'
+
+    return `Verify the proposed muscle selection for this exercise:
+
+EXERCISE: ${exercise.name}
+EQUIPMENT: ${equipmentLabel}
+
+${exercise.description ? `DESCRIPTION:\n${exercise.description}\n` : ''}
+${exercise.instructions?.length ? `INSTRUCTIONS:\n${exercise.instructions.map((i, idx) => `${idx + 1}. ${i}`).join('\n')}\n` : ''}
+${exercise.tips?.length ? `TIPS:\n${exercise.tips.map((t) => `• ${t}`).join('\n')}\n` : ''}
+
+PROPOSED PRIMARY: ${formatMuscleIds(muscles.primaryMuscleIds)}
+PROPOSED SECONDARY: ${formatMuscleIds(muscles.secondaryMuscleIds)}
+
+Pick approved=true ONLY if the proposal is correct.`
+  }
+
   private async updateExerciseMuscles(
     exerciseId: string,
     muscles: GeneratedMuscles,
@@ -471,6 +728,61 @@ Based on biomechanics and muscle activation patterns, select the correct primary
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms))
+  }
+
+  private getPromptInterface() {
+    if (!this.promptInterface) {
+      if (!process.stdin.isTTY) {
+        throw new Error(
+          'Interactive approval requires a TTY terminal. Run this from a terminal session.',
+        )
+      }
+      this.promptInterface = createInterface({ input, output })
+    }
+    return this.promptInterface
+  }
+
+  private closePrompt() {
+    this.promptInterface?.close()
+    this.promptInterface = null
+  }
+
+  private async promptInput(
+    question: string,
+    signal: AbortSignal,
+  ): Promise<string> {
+    const rl = this.getPromptInterface()
+    const answer = await rl.question(question, { signal })
+    return answer.trim().toLowerCase()
+  }
+
+  private async promptApprovalAction(
+    signal: AbortSignal,
+  ): Promise<'approve' | 'reject' | 'skip'> {
+    while (true) {
+      const answer = await this.promptInput(
+        '    Approve muscles? (a=approve, r=reject, s=skip): ',
+        signal,
+      )
+      if (answer === 'a' || answer === 'approve') return 'approve'
+      if (answer === 'r' || answer === 'reject') return 'reject'
+      if (answer === 's' || answer === 'skip') return 'skip'
+      console.info('    Invalid choice. Use a/r/s.')
+    }
+  }
+
+  private async promptRetryAction(
+    signal: AbortSignal,
+  ): Promise<'retry' | 'skip'> {
+    while (true) {
+      const answer = await this.promptInput(
+        '    Retry AI analysis? (r=retry, s=skip): ',
+        signal,
+      )
+      if (answer === 'r' || answer === 'retry') return 'retry'
+      if (answer === 's' || answer === 'skip') return 'skip'
+      console.info('    Invalid choice. Use r/s.')
+    }
   }
 }
 

@@ -62,16 +62,6 @@ interface DescriptionGenerationState {
   error: string | null
 }
 
-interface GenerationProgress {
-  isRunning: boolean
-  total: number
-  processed: number
-  successful: number
-  failed: number
-  currentExercise: string | null
-  startedAt: string | null
-}
-
 interface MuscleStats {
   totalPublicExercises: number
   exercisesWithoutPrimary: number
@@ -79,15 +69,16 @@ interface MuscleStats {
   exercisesNeedingMuscles: number
   exercisesFullyAssigned: number
   percentageComplete: number
-  progress?: GenerationProgress
 }
 
 interface MuscleGenerationState {
-  isRunning: boolean
-  isDryRun: boolean
-  progress: string | null
+  isLoading: boolean
   error: string | null
   processAll: boolean
+  dryRun: boolean
+  approved: number
+  skipped: number // "needs review" count
+  rejected: number // retry count
 }
 
 interface BaseIdRewriteState {
@@ -162,11 +153,13 @@ export function ExercisesTab() {
   const [muscleStats, setMuscleStats] = useState<MuscleStats | null>(null)
   const [muscleGeneration, setMuscleGeneration] =
     useState<MuscleGenerationState>({
-      isRunning: false,
-      isDryRun: false,
-      progress: null,
+      isLoading: false,
       error: null,
       processAll: false,
+      dryRun: false,
+      approved: 0,
+      skipped: 0,
+      rejected: 0,
     })
 
   const [baseIdRewrite, setBaseIdRewrite] = useState<BaseIdRewriteState>({
@@ -397,78 +390,155 @@ export function ExercisesTab() {
     }
   }
 
-  const generateMuscles = async (dryRun: boolean = false) => {
+  const MAX_RETRIES = 3
+
+  const fetchNextSuggestion = async () => {
+    // Capture current settings at start (avoid stale closure)
+    const processAll = muscleGeneration.processAll
+    const dryRun = muscleGeneration.dryRun
+    const processedIds = new Set<string>()
+
     try {
       setMuscleGeneration((prev) => ({
         ...prev,
-        isRunning: true,
-        isDryRun: dryRun,
-        progress: 'Starting AI muscle group analysis...',
+        isLoading: true,
         error: null,
       }))
 
-      const response = await fetch('/api/admin/exercises/generate-muscles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dryRun,
-          batchSize: 10,
-          skipExisting: !muscleGeneration.processAll,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(
-          errorData.error ||
-            `Failed to generate muscle groups: ${response.statusText}`,
+      // Keep processing exercises automatically
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        // Get next exercise
+        const skipParam = processAll ? processedIds.size : 0
+        const statsResponse = await fetch(
+          `/api/admin/exercises/generate-muscles?next=true&skipExisting=${!processAll}&skip=${skipParam}`,
         )
-      }
+        if (!statsResponse.ok) throw new Error('Failed to fetch next exercise')
 
-      const result = await response.json()
+        const statsData = await statsResponse.json()
 
-      setMuscleGeneration((prev) => ({
-        ...prev,
-        isRunning: false,
-        isDryRun: dryRun,
-        progress: result.message,
-        error: null,
-      }))
+        // Skip already processed exercises (for processAll mode)
+        if (statsData.nextExercise && processedIds.has(statsData.nextExercise.id)) {
+          processedIds.add(statsData.nextExercise.id) // ensure it's tracked
+          continue
+        }
 
-      // Refresh stats after generation (without showing loading)
-      if (!dryRun) {
-        await fetchStats(false)
+        if (!statsData.nextExercise) {
+          setMuscleGeneration((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: 'All done!',
+          }))
+          await fetchStats(false)
+          return
+        }
+
+        const exerciseId = statsData.nextExercise.id
+        processedIds.add(exerciseId) // track as processed
+        let retries = 0
+        let suggestion = null
+
+        // Retry loop for same exercise until verified or max retries
+        while (retries < MAX_RETRIES) {
+          const suggestionResponse = await fetch(
+            '/api/admin/exercises/generate-muscles',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ exerciseId }),
+            },
+          )
+
+          if (!suggestionResponse.ok) throw new Error('Failed to generate suggestion')
+
+          suggestion = await suggestionResponse.json()
+
+          if (suggestion.verifierApproved) {
+            // Auto-save if verified (unless dry run)
+            if (!dryRun) {
+              const saveResponse = await fetch('/api/admin/exercises/generate-muscles', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  exerciseId: suggestion.exerciseId,
+                  primaryMuscleIds: suggestion.suggestedPrimary.map((m: { id: string }) => m.id),
+                  secondaryMuscleIds: suggestion.suggestedSecondary.map((m: { id: string }) => m.id),
+                }),
+              })
+              if (!saveResponse.ok) throw new Error('Failed to save')
+            }
+
+            setMuscleGeneration((prev) => ({
+              ...prev,
+              approved: prev.approved + 1,
+            }))
+
+            // Continue to next exercise
+            break
+          } else {
+            // Verifier rejected - retry
+            retries++
+            setMuscleGeneration((prev) => ({ ...prev, rejected: prev.rejected + 1 }))
+          }
+        }
+
+        // If max retries hit without approval, still save but log for review
+        if (retries >= MAX_RETRIES && suggestion && !suggestion.verifierApproved) {
+          // Save anyway (unless dry run)
+          if (!dryRun) {
+            const saveResponse = await fetch('/api/admin/exercises/generate-muscles', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                exerciseId: suggestion.exerciseId,
+                primaryMuscleIds: suggestion.suggestedPrimary.map((m: { id: string }) => m.id),
+                secondaryMuscleIds: suggestion.suggestedSecondary.map((m: { id: string }) => m.id),
+              }),
+            })
+            if (!saveResponse.ok) throw new Error('Failed to save')
+          }
+
+          // Log to file for manual review later
+          await fetch('/api/admin/exercises/generate-muscles', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              failure: {
+                exerciseId: suggestion.exerciseId,
+                exerciseName: suggestion.exerciseName,
+                // Picker's original suggestion
+                pickerPrimary: suggestion.pickerPrimary?.map((m: { alias: string }) => m.alias) || [],
+                pickerSecondary: suggestion.pickerSecondary?.map((m: { alias: string }) => m.alias) || [],
+                // Verifier's corrected version (what was saved)
+                savedPrimary: suggestion.suggestedPrimary.map((m: { alias: string }) => m.alias),
+                savedSecondary: suggestion.suggestedSecondary.map((m: { alias: string }) => m.alias),
+                pickerReasoning: suggestion.pickerReasoning,
+                verifierReasoning: suggestion.verifierReasoning,
+                retries: MAX_RETRIES,
+                autoSaved: !dryRun,
+              },
+            }),
+          })
+
+          setMuscleGeneration((prev) => ({
+            ...prev,
+            approved: prev.approved + 1,
+            skipped: prev.skipped + 1, // track as "needs review"
+          }))
+
+          // Continue to next exercise (don't stop)
+        }
+
+        // Refresh stats every 10 exercises
+        if (processedIds.size % 10 === 0) {
+          await fetchStats(false)
+        }
       }
     } catch (err) {
       setMuscleGeneration((prev) => ({
         ...prev,
-        isRunning: false,
-        isDryRun: dryRun,
-        progress: null,
-        error: err instanceof Error ? err.message : 'Generation failed',
-      }))
-    }
-  }
-
-  const stopMuscleGeneration = async () => {
-    try {
-      const response = await fetch('/api/admin/exercises/generate-muscles', {
-        method: 'DELETE',
-      })
-
-      const result = await response.json()
-
-      setMuscleGeneration((prev) => ({
-        ...prev,
-        isRunning: false,
-        progress: result.message,
-      }))
-
-      await fetchStats(false)
-    } catch (err) {
-      setMuscleGeneration((prev) => ({
-        ...prev,
-        error: err instanceof Error ? err.message : 'Failed to stop generation',
+        isLoading: false,
+        error: err instanceof Error ? err.message : 'Failed to fetch suggestion',
       }))
     }
   }
@@ -528,56 +598,6 @@ export function ExercisesTab() {
   useEffect(() => {
     fetchStats()
   }, [])
-
-  // Poll for progress when generation is running
-  useEffect(() => {
-    const serverIsRunning = muscleStats?.progress?.isRunning
-
-    // Sync local state with server state on mount/refresh
-    if (serverIsRunning && !muscleGeneration.isRunning) {
-      setMuscleGeneration((prev) => ({
-        ...prev,
-        isRunning: true,
-        progress: `Resuming... ${muscleStats.progress?.processed ?? 0}/${muscleStats.progress?.total ?? 0}`,
-      }))
-    }
-
-    if (!serverIsRunning && !muscleGeneration.isRunning) return
-
-    const pollProgress = async () => {
-      try {
-        const response = await fetch(
-          '/api/admin/exercises/generate-muscles?progress=true',
-        )
-        if (response.ok) {
-          const data = await response.json()
-          const progress = data.progress as GenerationProgress
-
-          if (progress.isRunning) {
-            setMuscleGeneration((prev) => ({
-              ...prev,
-              isRunning: true,
-              progress: `Analyzing: ${progress.currentExercise || '...'} (${progress.processed}/${progress.total})`,
-            }))
-          } else {
-            // Generation finished
-            setMuscleGeneration((prev) => ({
-              ...prev,
-              isRunning: false,
-              progress: `Complete! ${progress.successful} updated, ${progress.failed} failed`,
-            }))
-            // Refresh full stats
-            await fetchStats(false)
-          }
-        }
-      } catch {
-        // Ignore polling errors
-      }
-    }
-
-    const interval = setInterval(pollProgress, 2000)
-    return () => clearInterval(interval)
-  }, [muscleStats?.progress?.isRunning, muscleGeneration.isRunning])
 
   const formatNumber = (num: number) => num.toLocaleString()
 
@@ -1200,191 +1220,84 @@ export function ExercisesTab() {
         </CardContent>
       </Card>
 
-      {/* AI Muscle Group Generation */}
+      {/* AI Muscle Group Generation - Compact */}
       <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Dumbbell className="h-5 w-5" />
-            AI Muscle Group Analysis
-          </CardTitle>
-          <CardDescription>
-            Use AI to analyze exercises and assign correct primary/secondary
-            muscle groups
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {/* Muscle Stats */}
+        <CardHeader className="py-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Dumbbell className="h-4 w-4" />
+              AI Muscle Analysis
+            </CardTitle>
             {muscleStats && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 rounded-lg bg-card-on-card">
-                  <div className="text-2xl font-bold text-red-600">
-                    {formatNumber(muscleStats.exercisesWithoutPrimary)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Missing Primary
-                  </p>
-                </div>
-
-                <div className="text-center p-4 rounded-lg bg-card-on-card">
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {formatNumber(muscleStats.exercisesWithoutSecondary)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Missing Secondary
-                  </p>
-                </div>
-
-                <div className="text-center p-4 rounded-lg bg-card-on-card">
-                  <div className="text-2xl font-bold text-orange-600">
-                    {formatNumber(muscleStats.exercisesNeedingMuscles)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">Need Review</p>
-                </div>
-
-                <div className="text-center p-4 rounded-lg bg-card-on-card">
-                  <div className="text-2xl font-bold text-green-600">
-                    {muscleStats.percentageComplete}%
-                  </div>
-                  <p className="text-sm text-muted-foreground">Complete</p>
-                </div>
+              <div className="flex gap-3 text-xs">
+                <span className="text-red-600">{muscleStats.exercisesNeedingMuscles} todo</span>
+                <span className="text-green-600">{muscleStats.percentageComplete}% done</span>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="space-y-3">
+            {/* Session Stats - inline */}
+            {(muscleGeneration.approved > 0 ||
+              muscleGeneration.skipped > 0 ||
+              muscleGeneration.rejected > 0) && (
+              <div className="flex gap-3 text-xs text-muted-foreground">
+                <span className="text-green-600">✓ {muscleGeneration.approved} saved</span>
+                <span className="text-yellow-600">⚠️ {muscleGeneration.skipped} need review</span>
+                <span className="text-muted-foreground">↺ {muscleGeneration.rejected} retries</span>
               </div>
             )}
 
-            {/* Generation Progress */}
-            {muscleGeneration.progress && (
-              <Alert
-                className={`mb-6 ${muscleGeneration.error ? 'border-red-200' : 'border-blue-200'}`}
-              >
-                <Bot className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="flex items-center gap-2">
-                    {muscleGeneration.isRunning && (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    )}
-                    <span>{muscleGeneration.progress}</span>
-                    {muscleGeneration.isDryRun && (
-                      <Badge variant="outline" className="ml-2">
-                        DRY RUN
-                      </Badge>
-                    )}
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Generation Error */}
+            {/* Status */}
             {muscleGeneration.error && (
-              <Alert variant="destructive" className="mb-6">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{muscleGeneration.error}</AlertDescription>
-              </Alert>
+              <div className={`text-sm ${muscleGeneration.error === 'All done!' ? 'text-green-600' : 'text-red-600'}`}>
+                {muscleGeneration.error}
+              </div>
             )}
 
-            {/* Generation Actions */}
-            <div className="space-y-4">
-              {/* Process All Toggle */}
-              <div className="flex items-center gap-3 p-4 border rounded-lg bg-muted/30">
-                <input
-                  type="checkbox"
-                  id="processAll"
-                  checked={muscleGeneration.processAll}
-                  onChange={(e) =>
-                    setMuscleGeneration((prev) => ({
-                      ...prev,
-                      processAll: e.target.checked,
-                    }))
-                  }
-                  disabled={muscleGeneration.isRunning}
-                  className="h-4 w-4 rounded border-gray-300"
-                />
-                <Label htmlFor="processAll" className="flex-1 cursor-pointer">
-                  <span className="font-medium">Re-analyze all exercises</span>
-                  <span className="text-sm text-muted-foreground block">
-                    {muscleGeneration.processAll
-                      ? `Process all ${muscleStats?.totalPublicExercises ?? '...'} public exercises (overwrite existing assignments)`
-                      : `Process only ${muscleStats?.exercisesNeedingMuscles ?? '...'} exercises missing muscle assignments`}
-                  </span>
-                </Label>
+            {/* Loading indicator */}
+            {muscleGeneration.isLoading && (
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Processing... (auto-saves all, logs rejections for review)
               </div>
+            )}
 
-              <div className="grid md:grid-cols-2 gap-4">
-                {/* Dry Run */}
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h5 className="font-medium text-blue-600">
-                      Preview Analysis
-                    </h5>
-                    <p className="text-sm text-muted-foreground">
-                      Test AI muscle analysis without saving changes
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => generateMuscles(true)}
-                    variant="outline"
-                    disabled={muscleGeneration.isRunning}
-                  >
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    {muscleGeneration.isRunning && muscleGeneration.isDryRun
-                      ? 'Running...'
-                      : 'Preview'}
-                  </Button>
-                </div>
-
-                {/* Full Generation */}
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h5 className="font-medium text-green-600">
-                      Update Muscle Groups
-                    </h5>
-                    <p className="text-sm text-muted-foreground">
-                      {muscleGeneration.processAll
-                        ? 'Re-analyze ALL exercises with AI'
-                        : 'Analyze exercises missing muscles'}
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => generateMuscles(false)}
-                    disabled={muscleGeneration.isRunning}
-                    loading={
-                      muscleGeneration.isRunning && !muscleGeneration.isDryRun
-                    }
-                  >
-                    <Bot className="h-4 w-4 mr-2" />
-                    {muscleGeneration.isRunning && !muscleGeneration.isDryRun
-                      ? 'Analyzing...'
-                      : muscleGeneration.processAll
-                        ? 'Re-analyze All'
-                        : 'Analyze Missing'}
-                  </Button>
-                </div>
+            {/* Start Button - compact */}
+            {!muscleGeneration.suggestion && (
+              <div className="flex items-center gap-4">
+                <Button
+                  onClick={fetchNextSuggestion}
+                  loading={muscleGeneration.isLoading}
+                  size="sm"
+                  variant={muscleGeneration.dryRun ? 'outline' : 'default'}
+                >
+                  <Bot className="h-3 w-3 mr-1" />
+                  Start
+                </Button>
+                <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={muscleGeneration.processAll}
+                    onChange={(e) => setMuscleGeneration((prev) => ({ ...prev, processAll: e.target.checked }))}
+                    disabled={muscleGeneration.isLoading}
+                    className="h-3 w-3"
+                  />
+                  All exercises
+                </label>
+                <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={muscleGeneration.dryRun}
+                    onChange={(e) => setMuscleGeneration((prev) => ({ ...prev, dryRun: e.target.checked }))}
+                    disabled={muscleGeneration.isLoading}
+                    className="h-3 w-3"
+                  />
+                  Dry run
+                </label>
               </div>
-
-              {/* Stop Button */}
-              {muscleGeneration.isRunning && (
-                <div className="flex justify-center">
-                  <Button
-                    onClick={stopMuscleGeneration}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    Stop Generation
-                  </Button>
-                </div>
-              )}
-
-              {/* Information Alert */}
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>How it works:</strong> AI analyzes each exercise using
-                  its name, description, instructions, and equipment. It selects
-                  1-3 primary muscles (main movers) and 0-4 secondary muscles
-                  (assisters/stabilizers) from the 32 available muscle groups.
-                  Uses GPT-5.1 with deep reasoning for anatomy analysis.
-                </AlertDescription>
-              </Alert>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
