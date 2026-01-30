@@ -140,7 +140,10 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
               initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : 0.18,
+                ease: 'easeOut',
+              }}
               className="text-sm text-muted-foreground leading-relaxed text-pretty"
             >
               {description.map((p, idx) => (

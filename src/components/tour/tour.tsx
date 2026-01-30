@@ -358,7 +358,10 @@ export function Tour({
         aria-hidden="true"
         initial={false}
         animate={{ opacity: targetRect ? 0 : 1 }}
-        transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+        transition={{
+          duration: shouldReduceMotion ? 0 : 0.18,
+          ease: 'easeOut',
+        }}
       />
 
       {/* Cutout overlay (rounded hole) for spotlight steps. Uses transform (x,y) for GPU acceleration. */}
@@ -381,7 +384,10 @@ export function Tour({
               y,
             }}
             transition={{
-              opacity: { duration: shouldReduceMotion ? 0 : 0.18, ease: 'easeOut' },
+              opacity: {
+                duration: shouldReduceMotion ? 0 : 0.18,
+                ease: 'easeOut',
+              },
               x: { duration: transitionDuration, ease: 'easeOut' },
               y: { duration: transitionDuration, ease: 'easeOut' },
             }}
