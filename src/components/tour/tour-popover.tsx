@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, X } from 'lucide-react'
 import Image from 'next/image'
 import type { ReactNode } from 'react'
@@ -55,27 +55,30 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
     },
     ref,
   ) {
+    const shouldReduceMotion = useReducedMotion()
     const isWelcomeStep = stepId === 'welcome'
+
+    const transitionDuration = shouldReduceMotion ? 0 : 0.28
 
     return (
       <motion.div
         ref={ref}
         layout="size"
         className={cn(
-          'fixed w-[340px] max-w-[calc(100vw-32px)] rounded-2xl border border-border bg-card py-4 shadow-2xl',
+          'fixed top-0 left-0 w-[340px] max-w-[calc(100vw-32px)] rounded-2xl border border-border bg-card py-4 shadow-2xl will-change-transform',
           className,
         )}
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{
           opacity: 1,
           scale: 1,
-          top: position.top,
-          left: position.left,
+          x: position.left,
+          y: position.top,
         }}
         transition={{
-          duration: 0.28,
+          duration: transitionDuration,
           ease: 'easeOut',
-          layout: { duration: 0.28, ease: 'easeOut' },
+          layout: { duration: transitionDuration, ease: 'easeOut' },
         }}
       >
         {/* Header */}
@@ -84,9 +87,7 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
             {showProgress && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                 {!isWelcomeStep && (
-                  <motion.div layoutId="hypro-tour-logo">
-                    <SimpleLogo size={16} className="text-muted-foreground" />
-                  </motion.div>
+                  <SimpleLogo size={16} className="text-muted-foreground" />
                 )}
                 <span>
                   {currentStep} of {totalSteps}
@@ -96,9 +97,7 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
 
             {isWelcomeStep && (
               <div className="flex justify-center my-6">
-                <motion.div layoutId="hypro-tour-logo">
-                  <SimpleLogo size={56} className="text-primary" />
-                </motion.div>
+                <SimpleLogo size={56} className="text-primary" />
               </div>
             )}
 
@@ -133,29 +132,24 @@ export const TourPopover = forwardRef<HTMLDivElement, TourPopoverProps>(
           </div>
         )}
 
-        {/* Description */}
+        {/* Description - animate container only for better performance */}
         <div className="mb-5 px-4">
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={stepId}
-              layout
-              initial={{ opacity: 0, y: 6 }}
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: 'easeOut' }}
               className="text-sm text-muted-foreground leading-relaxed text-pretty"
             >
               {description.map((p, idx) => (
-                <motion.p
+                <p
                   key={`${stepId}-${idx}`}
                   className="whitespace-pre-wrap mt-2"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
                 >
                   {p}
-                </motion.p>
+                </p>
               ))}
             </motion.div>
           </AnimatePresence>

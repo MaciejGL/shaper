@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import {
   useCallback,
   useEffect,
@@ -170,6 +170,8 @@ export function Tour({
   const popoverRef = useRef<HTMLDivElement>(null)
   const [popoverSize, setPopoverSize] = useState({ width: 340, height: 200 })
   const [lastCutoutRect, setLastCutoutRect] = useState<TargetRect | null>(null)
+  const rafRef = useRef<number | null>(null)
+  const shouldReduceMotion = useReducedMotion()
 
   const currentStep = steps[currentStepIndex]
   const isFirstStep = currentStepIndex === 0
@@ -189,16 +191,24 @@ export function Tour({
     }
   }, [currentStep, open])
 
-  // Keep target rect updated on scroll/resize.
+  // Keep target rect updated on scroll/resize with RAF batching for performance.
   useEffect(() => {
     if (!open || !currentStep?.target) return
 
     const updateRect = () => {
-      const rect = getTargetRect(currentStep.target!)
-      setTargetRect(rect)
-      if (rect) {
-        setLastCutoutRect(rect)
+      // Cancel any pending RAF to avoid stacking
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
       }
+
+      rafRef.current = requestAnimationFrame(() => {
+        const rect = getTargetRect(currentStep.target!)
+        setTargetRect(rect)
+        if (rect) {
+          setLastCutoutRect(rect)
+        }
+        rafRef.current = null
+      })
     }
 
     window.addEventListener('resize', updateRect)
@@ -206,6 +216,9 @@ export function Tour({
     return () => {
       window.removeEventListener('resize', updateRect)
       window.removeEventListener('scroll', updateRect)
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
+      }
     }
   }, [currentStep?.target, open])
 
@@ -335,6 +348,8 @@ export function Tour({
 
   if (!open || !mounted || !currentStep) return null
 
+  const transitionDuration = shouldReduceMotion ? 0 : 0.22
+
   return createPortal(
     <div className="fixed inset-0 z-9999">
       {/* Overlay (always mounted). Full-screen dim for centered steps. */}
@@ -343,28 +358,37 @@ export function Tour({
         aria-hidden="true"
         initial={false}
         animate={{ opacity: targetRect ? 0 : 1 }}
-        transition={{ duration: 0.18, ease: 'easeOut' }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.18, ease: 'easeOut' }}
       />
 
-      {/* Cutout overlay (rounded hole) for spotlight steps. Keeps last rect to avoid \"fly-in\". */}
+      {/* Cutout overlay (rounded hole) for spotlight steps. Uses transform (x,y) for GPU acceleration. */}
       {(() => {
         const rect = targetRect ?? lastCutoutRect
         if (!rect) return null
+        const x = rect.left - CUTOUT_PADDING
+        const y = rect.top - CUTOUT_PADDING
+        const width = rect.width + CUTOUT_PADDING * 2
+        const height = rect.height + CUTOUT_PADDING * 2
+
         return (
           <motion.div
-            className="fixed pointer-events-none"
+            className="fixed top-0 left-0 pointer-events-none will-change-transform"
             aria-hidden="true"
             initial={false}
             animate={{
               opacity: targetRect ? 1 : 0,
-              top: rect.top - CUTOUT_PADDING,
-              left: rect.left - CUTOUT_PADDING,
-              width: rect.width + CUTOUT_PADDING * 2,
-              height: rect.height + CUTOUT_PADDING * 2,
-              borderRadius: CUTOUT_RADIUS,
+              x,
+              y,
             }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
+            transition={{
+              opacity: { duration: shouldReduceMotion ? 0 : 0.18, ease: 'easeOut' },
+              x: { duration: transitionDuration, ease: 'easeOut' },
+              y: { duration: transitionDuration, ease: 'easeOut' },
+            }}
             style={{
+              width,
+              height,
+              borderRadius: CUTOUT_RADIUS,
               boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6)',
             }}
           />

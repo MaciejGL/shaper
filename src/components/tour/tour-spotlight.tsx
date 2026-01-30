@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 
@@ -23,36 +23,34 @@ export function TourSpotlight({
   padding = 2,
   borderRadius = 16,
 }: TourSpotlightProps) {
-  const top = rect.top - padding
-  const left = rect.left - padding
+  const shouldReduceMotion = useReducedMotion()
+
+  const x = rect.left - padding
+  const y = rect.top - padding
   const width = rect.width + padding * 2
   const height = rect.height + padding * 2
+
+  // Use transform-based positioning (x, y) for GPU acceleration
+  // Width/height set via style to avoid layout thrashing
+  const transitionDuration = shouldReduceMotion ? 0 : 0.22
 
   return (
     <motion.div
       className={cn(
-        'fixed pointer-events-none',
+        'fixed top-0 left-0 pointer-events-none will-change-transform',
         'ring-4 ring-ring rounded-2xl outline-2 outline-[invert(1)] shadow-2xl',
       )}
-      initial={{
-        opacity: 0,
-        top,
-        left,
-        width,
-        height,
-        borderRadius,
-      }}
-      animate={{
-        opacity: 1,
-        top,
-        left,
-        width,
-        height,
-        borderRadius,
-      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, x, y }}
       transition={{
-        opacity: { duration: 0.12, ease: 'easeOut' },
-        default: { duration: 0.22, ease: 'easeOut' },
+        opacity: { duration: shouldReduceMotion ? 0 : 0.12, ease: 'easeOut' },
+        x: { duration: transitionDuration, ease: 'easeOut' },
+        y: { duration: transitionDuration, ease: 'easeOut' },
+      }}
+      style={{
+        width,
+        height,
+        borderRadius,
       }}
     />
   )
