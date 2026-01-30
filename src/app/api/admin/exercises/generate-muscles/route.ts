@@ -1,7 +1,6 @@
 import * as fs from 'fs'
-import * as path from 'path'
-
 import { NextRequest, NextResponse } from 'next/server'
+import * as path from 'path'
 
 import { EQUIPMENT_OPTIONS } from '@/config/equipment'
 import { MUSCLES } from '@/config/muscles'
@@ -75,7 +74,12 @@ const MUSCLE_VERIFICATION_SCHEMA = {
       items: { type: 'string' },
     },
   },
-  required: ['approved', 'reasoning', 'correctedPrimaryMuscleIds', 'correctedSecondaryMuscleIds'],
+  required: [
+    'approved',
+    'reasoning',
+    'correctedPrimaryMuscleIds',
+    'correctedSecondaryMuscleIds',
+  ],
   additionalProperties: false,
 } as const
 
@@ -153,12 +157,14 @@ function logExercise(
     SAVED: '💾',
     REVIEW: '⚠️',
   }[status]
-  
+
   const nameCol = name.slice(0, 30).padEnd(30)
   const primaryCol = fmt(primary).slice(0, 20).padEnd(20)
   const secondaryCol = fmt(secondary).slice(0, 25).padEnd(25)
-  
-  console.log(`${statusIcon} ${status.padEnd(8)} | ${nameCol} | P: ${primaryCol} | S: ${secondaryCol}`)
+
+  console.info(
+    `${statusIcon} ${status.padEnd(8)} | ${nameCol} | P: ${primaryCol} | S: ${secondaryCol}`,
+  )
 }
 
 async function pickMuscles(exercise: ExerciseForAnalysis) {
@@ -262,12 +268,12 @@ If wrong: approved=false, provide your corrected muscle IDs.`
 
   // Validate corrected IDs
   const validIds = new Set(MUSCLES.map((m) => m.id))
-  result.correctedPrimaryMuscleIds = (result.correctedPrimaryMuscleIds || []).filter((id) =>
-    validIds.has(id),
-  )
-  result.correctedSecondaryMuscleIds = (result.correctedSecondaryMuscleIds || []).filter((id) =>
-    validIds.has(id),
-  )
+  result.correctedPrimaryMuscleIds = (
+    result.correctedPrimaryMuscleIds || []
+  ).filter((id) => validIds.has(id))
+  result.correctedSecondaryMuscleIds = (
+    result.correctedSecondaryMuscleIds || []
+  ).filter((id) => validIds.has(id))
 
   return result
 }
@@ -309,7 +315,12 @@ export async function POST(request: NextRequest) {
 
     // Pick muscles
     const suggestion = await pickMuscles(exercise)
-    logExercise(exercise.name, suggestion.primaryMuscleIds, suggestion.secondaryMuscleIds, 'PICK')
+    logExercise(
+      exercise.name,
+      suggestion.primaryMuscleIds,
+      suggestion.secondaryMuscleIds,
+      'PICK',
+    )
 
     // Verify
     const verification = await verifyMuscles(exercise, suggestion)
@@ -321,9 +332,10 @@ export async function POST(request: NextRequest) {
     )
 
     // Use verifier's corrected muscles (they provide corrections whether approving or rejecting)
-    const finalPrimaryIds = verification.correctedPrimaryMuscleIds.length > 0
-      ? verification.correctedPrimaryMuscleIds
-      : suggestion.primaryMuscleIds
+    const finalPrimaryIds =
+      verification.correctedPrimaryMuscleIds.length > 0
+        ? verification.correctedPrimaryMuscleIds
+        : suggestion.primaryMuscleIds
     const finalSecondaryIds = verification.correctedSecondaryMuscleIds
 
     // Log the final result if different from picker
@@ -393,7 +405,12 @@ export async function PUT(request: NextRequest) {
       select: { name: true },
     })
 
-    logExercise(exercise.name, primaryMuscleIds, secondaryMuscleIds || [], 'SAVED')
+    logExercise(
+      exercise.name,
+      primaryMuscleIds,
+      secondaryMuscleIds || [],
+      'SAVED',
+    )
 
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -417,7 +434,10 @@ export async function PATCH(request: NextRequest) {
     const { failure } = body
 
     if (!failure) {
-      return NextResponse.json({ error: 'failure data required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'failure data required' },
+        { status: 400 },
+      )
     }
 
     // Read existing failures
@@ -446,7 +466,9 @@ export async function PATCH(request: NextRequest) {
       failure.suggestedSecondary || [],
       'REVIEW',
     )
-    console.log(`   └─ ${failure.autoSaved ? 'Saved but' : 'Not saved,'} logged for review (${failures.length} total)`)
+    console.info(
+      `   └─ ${failure.autoSaved ? 'Saved but' : 'Not saved,'} logged for review (${failures.length} total)`,
+    )
 
     return NextResponse.json({ success: true, totalFailures: failures.length })
   } catch (error) {
@@ -537,9 +559,11 @@ export async function GET(request: NextRequest) {
     })
 
     if (nextExercise) {
-      console.log(`\n📋 QUEUE: ${nextExercise.name} (${exercisesNeedingMuscles} remaining)`)
+      console.info(
+        `\n📋 QUEUE: ${nextExercise.name} (${exercisesNeedingMuscles} remaining)`,
+      )
     } else {
-      console.log(`\n🎉 ALL DONE! No more exercises to process.`)
+      console.info(`\n🎉 ALL DONE! No more exercises to process.`)
     }
 
     return NextResponse.json({

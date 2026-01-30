@@ -343,7 +343,7 @@ export function ExerciseSets({
       </div>
 
       {/* Sets Rows */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <AnimatePresence initial={!isFirstRender} mode="popLayout">
           {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
             const previousWeightLog = getPreviousSetValue(set.order, 'weight')

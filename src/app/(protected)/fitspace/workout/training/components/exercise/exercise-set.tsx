@@ -133,8 +133,8 @@ export function ExerciseSet({
       )}
       <div
         className={cn(
-          'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 items-center pb-2',
-          'border-b border-border',
+          'relative grid grid-cols-[1.5rem_minmax(3rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)_2rem] gap-2 px-2 items-center pb-1.5',
+          'border-b border-border/60',
         )}
       >
         {/* Set Number */}
