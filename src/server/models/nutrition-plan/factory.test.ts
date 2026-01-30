@@ -162,6 +162,7 @@ describe('updateNutritionPlanMealIngredient', () => {
     )
 
     expect(mockPrisma.nutritionPlanMealIngredient.upsert).toHaveBeenCalledWith({
+      relationLoadStrategy: 'query',
       where: {
         nutritionPlanMealId_mealIngredientId: {
           nutritionPlanMealId: mockPlanMealId,
