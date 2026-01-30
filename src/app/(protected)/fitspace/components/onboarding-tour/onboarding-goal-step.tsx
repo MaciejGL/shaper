@@ -3,9 +3,11 @@
 import { motion } from 'framer-motion'
 import { Dumbbell, Sparkles, Target } from 'lucide-react'
 
+import {
+  ONBOARDING_GOALS,
+  type OnboardingGoal,
+} from '@/config/onboarding-workouts'
 import { cn } from '@/lib/utils'
-
-import { ONBOARDING_GOALS, type OnboardingGoal } from '@/config/onboarding-workouts'
 
 const GOAL_ICONS: Record<string, React.ElementType> = {
   'upper-body': Dumbbell,
@@ -41,7 +43,9 @@ export function OnboardingGoalStep({ onSelect }: OnboardingGoalStepProps) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-foreground">{goal.label}</p>
-              <p className="text-sm text-muted-foreground">{goal.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {goal.description}
+              </p>
             </div>
           </motion.button>
         )

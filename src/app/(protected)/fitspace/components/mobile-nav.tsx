@@ -185,8 +185,8 @@ export function MobileNav({
       </AnimatePresence>
 
       {/* Modern floating navbar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 ">
-        <nav className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-lg mx-auto max-w-md">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-lg">
+        <nav className=" mx-auto max-w-md">
           <div
             className="grid items-stretch px-2"
             style={{

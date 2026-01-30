@@ -1,8 +1,9 @@
 'use client'
 
-import { TrendingDown, TrendingUp } from 'lucide-react'
+import { Crown, TrendingDown, TrendingUp } from 'lucide-react'
 
 import { OneRmBarChart } from '@/components/exercise-stats/one-rm-bar-chart'
+import { PremiumUpgradeNote } from '@/components/premium-upgrade-note'
 import { StatsItem } from '@/components/stats-item'
 import { ChartConfig } from '@/components/ui/chart'
 import { formatNumber } from '@/lib/utils'
@@ -15,6 +16,7 @@ export function OneRmProgressCard({
   oneRmChangePercent,
   weightUnit,
   sessionsCount,
+  hasPremium = true,
 }: {
   chartId: string
   chartConfig: ChartConfig
@@ -23,6 +25,7 @@ export function OneRmProgressCard({
   oneRmChangePercent: number
   weightUnit: 'kg' | 'lbs'
   sessionsCount: number
+  hasPremium?: boolean
 }) {
   return (
     <div className="space-y-3">
@@ -30,7 +33,11 @@ export function OneRmProgressCard({
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium">1RM progress</p>
           <p className="text-xs text-muted-foreground tabular-nums">
-            {sessionsCount ? `${sessionsCount} sessions` : 'No data'}
+            {hasPremium
+              ? sessionsCount
+                ? `${sessionsCount} sessions`
+                : 'No data'
+              : 'Current session'}
           </p>
         </div>
 
@@ -47,17 +54,25 @@ export function OneRmProgressCard({
           <StatsItem
             label="Change"
             value={
-              <span className="tabular-nums">
-                {formatNumber(oneRmChangePercent, 1)}%
-              </span>
+              hasPremium ? (
+                <span className="tabular-nums">
+                  {formatNumber(oneRmChangePercent, 1)}%
+                </span>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )
             }
             icon={
-              oneRmChangePercent > 0 ? (
-                <TrendingUp className="size-4 text-green-500" />
-              ) : oneRmChangePercent < 0 ? (
-                <TrendingDown className="size-4 text-red-500" />
+              hasPremium ? (
+                oneRmChangePercent > 0 ? (
+                  <TrendingUp className="size-4 text-green-500" />
+                ) : oneRmChangePercent < 0 ? (
+                  <TrendingDown className="size-4 text-red-500" />
+                ) : (
+                  <TrendingUp className="size-4 text-muted-foreground" />
+                )
               ) : (
-                <TrendingUp className="size-4 text-muted-foreground" />
+                <Crown className="size-4 text-amber-500" />
               )
             }
           />
@@ -69,7 +84,12 @@ export function OneRmProgressCard({
         series={oneRmSeries}
         weightUnit={weightUnit}
         chartConfig={chartConfig}
+        showOnlyLast={!hasPremium}
       />
+
+      {!hasPremium && (
+        <PremiumUpgradeNote>Upgrade to view full history</PremiumUpgradeNote>
+      )}
     </div>
   )
 }

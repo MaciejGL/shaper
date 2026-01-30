@@ -1,9 +1,10 @@
 'use client'
 
-import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
+import { BarChart3, Crown, TrendingDown, TrendingUp } from 'lucide-react'
 import { useMemo } from 'react'
 import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts'
 
+import { PremiumUpgradeNote } from '@/components/premium-upgrade-note'
 import { StatsItem } from '@/components/stats-item'
 import {
   ChartConfig,
@@ -20,6 +21,7 @@ export function WeeklyVolumeCard({
   lastWeekVolume,
   volumeChangePercent,
   weightUnit,
+  hasPremium = true,
 }: {
   chartId: string
   chartConfig: ChartConfig
@@ -27,11 +29,25 @@ export function WeeklyVolumeCard({
   lastWeekVolume: number
   volumeChangePercent: number
   weightUnit: 'kg' | 'lbs'
+  hasPremium?: boolean
 }) {
   const gradientId = `exercise-volume-gradient-${chartId}`
 
   const series = useMemo(() => {
     const TARGET_POINTS = 6
+
+    // For non-premium: show empty placeholders + last data point
+    if (!hasPremium && volumeSeries.length > 0) {
+      const lastPoint = volumeSeries[volumeSeries.length - 1]
+      const emptyCount = Math.max(TARGET_POINTS - 1, volumeSeries.length - 1)
+      return [
+        ...Array.from({ length: emptyCount }, () => ({
+          label: '',
+          volume: 0,
+        })),
+        lastPoint,
+      ]
+    }
 
     if (volumeSeries.length >= TARGET_POINTS) return volumeSeries
 
@@ -42,7 +58,7 @@ export function WeeklyVolumeCard({
         volume: 0,
       })),
     ]
-  }, [volumeSeries])
+  }, [volumeSeries, hasPremium])
 
   const showValuesOnXAxis = useMemo(() => {
     return volumeSeries.length < 10
@@ -54,7 +70,11 @@ export function WeeklyVolumeCard({
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium">Weekly volume</p>
           <p className="text-xs text-muted-foreground tabular-nums">
-            {volumeSeries.length ? `${volumeSeries.length} weeks` : 'No data'}
+            {hasPremium
+              ? volumeSeries.length
+                ? `${volumeSeries.length} weeks`
+                : 'No data'
+              : 'Current week'}
           </p>
         </div>
         <div className="mt-2 grid grid-cols-2 gap-2">
@@ -70,17 +90,25 @@ export function WeeklyVolumeCard({
           <StatsItem
             label="Change"
             value={
-              <span className="tabular-nums">
-                {formatNumber(volumeChangePercent, 1)}%
-              </span>
+              hasPremium ? (
+                <span className="tabular-nums">
+                  {formatNumber(volumeChangePercent, 1)}%
+                </span>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )
             }
             icon={
-              volumeChangePercent > 0 ? (
-                <TrendingUp className="size-4 text-green-500" />
-              ) : volumeChangePercent < 0 ? (
-                <TrendingDown className="size-4 text-red-500" />
+              hasPremium ? (
+                volumeChangePercent > 0 ? (
+                  <TrendingUp className="size-4 text-green-500" />
+                ) : volumeChangePercent < 0 ? (
+                  <TrendingDown className="size-4 text-red-500" />
+                ) : (
+                  <TrendingUp className="size-4 text-muted-foreground" />
+                )
               ) : (
-                <TrendingUp className="size-4 text-muted-foreground" />
+                <Crown className="size-4 text-amber-500" />
               )
             }
           />
@@ -179,6 +207,10 @@ export function WeeklyVolumeCard({
           )}
         </ChartContainer>
       </div>
+
+      {!hasPremium && (
+        <PremiumUpgradeNote>Upgrade to view full history</PremiumUpgradeNote>
+      )}
     </div>
   )
 }

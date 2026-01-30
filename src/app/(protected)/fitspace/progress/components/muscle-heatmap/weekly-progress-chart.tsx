@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { useId, useMemo } from 'react'
 import { Bar, BarChart, LabelList, ReferenceLine, XAxis, YAxis } from 'recharts'
 
+import { PremiumUpgradeNote } from '@/components/premium-upgrade-note'
 import {
   ChartConfig,
   ChartContainer,
@@ -23,7 +24,7 @@ const chartConfig: ChartConfig = {
 }
 
 export function WeeklyProgressChart() {
-  const { user } = useUser()
+  const { user, hasPremium } = useUser()
   const chartId = useId()
   const gradientId = `weekly-progress-gradient-${chartId}`
 
@@ -48,6 +49,24 @@ export function WeeklyProgressChart() {
   // Pad to minimum 6 data points
   const paddedChartData = useMemo(() => {
     const TARGET_POINTS = 6
+
+    // For non-premium: show empty placeholders + last data point only
+    if (!hasPremium && chartData.length > 0) {
+      const lastPoint = chartData[chartData.length - 1]
+      const emptyCount = Math.max(TARGET_POINTS - 1, chartData.length - 1)
+      return [
+        ...Array.from({ length: emptyCount }, (_, i) => ({
+          index: i,
+          label: '',
+          percentage: 0,
+          totalSets: 0,
+          focusPreset: null,
+          weekStartDate: '',
+        })),
+        { ...lastPoint, index: emptyCount },
+      ]
+    }
+
     if (chartData.length >= TARGET_POINTS) return chartData
 
     return [
@@ -61,7 +80,7 @@ export function WeeklyProgressChart() {
         weekStartDate: '',
       })),
     ]
-  }, [chartData])
+  }, [chartData, hasPremium])
 
   // Find goal change points for reference lines
   const goalChangePoints = useMemo(() => {
@@ -89,7 +108,11 @@ export function WeeklyProgressChart() {
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium">Weekly Progress</p>
         <p className="text-xs text-muted-foreground tabular-nums">
-          {chartData.length ? `${chartData.length} weeks` : 'No data'}
+          {hasPremium
+            ? chartData.length
+              ? `${chartData.length} weeks`
+              : 'No data'
+            : 'Current week'}
         </p>
       </div>
 
@@ -184,8 +207,8 @@ export function WeeklyProgressChart() {
                 strokeOpacity={0.5}
                 isFront
               /> */}
-              {/* Goal change markers */}
-              {goalChangePoints.map((change, idx) => (
+              {/* Goal change markers - only for premium */}
+              {hasPremium && goalChangePoints.map((change, idx) => (
                 <ReferenceLine
                   key={change.index}
                   x={change.index - 0.5}
@@ -226,10 +249,14 @@ export function WeeklyProgressChart() {
         </ChartContainer>
       </div>
 
-      {goalChangePoints.length > 0 && (
+      {hasPremium && goalChangePoints.length > 0 && (
         <p className="text-[10px] text-muted-foreground">
           Dashed red lines indicate goal changes
         </p>
+      )}
+
+      {!hasPremium && (
+        <PremiumUpgradeNote>Upgrade to view full history</PremiumUpgradeNote>
       )}
     </div>
   )

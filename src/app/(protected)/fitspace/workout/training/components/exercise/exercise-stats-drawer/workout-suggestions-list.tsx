@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react'
 
+import { PremiumUpgradeNote } from '@/components/premium-upgrade-note'
+import { SUBSCRIPTION_LIMITS } from '@/config/subscription-limits'
 import { convertToKg } from '@/lib/weight-utils'
 
 import { getSuggestedLoadRangeDisplay } from './suggested-load'
@@ -19,7 +21,11 @@ export function WorkoutSuggestionsList({
   equipment,
   onApplySuggested,
   isApplyingSuggested = false,
-}: WorkoutSuggestionsListProps) {
+  hasPremium = true,
+}: WorkoutSuggestionsListProps & { hasPremium?: boolean }) {
+  const hasMaxReps = sets[0]?.maxReps !== null
+  const hasMinReps = sets[0]?.minReps !== null
+  const hasTargetReps = hasMaxReps || hasMinReps
   const allRows = useMemo<WorkoutSuggestionRowModel[]>(() => {
     return sets
       .slice()
@@ -78,6 +84,8 @@ export function WorkoutSuggestionsList({
 
   const [applyingKey, setApplyingKey] = useState<string | null>(null)
 
+  if (!hasTargetReps) return null
+
   const applyForSet = async (setId: string, deltaDisplay: number) => {
     if (!onApplySuggested || isApplyingSuggested) return
 
@@ -105,25 +113,42 @@ export function WorkoutSuggestionsList({
 
   if (!hasRows) return null
 
+  // For non-premium users, only show limited suggestions
+  const freeLimit = SUBSCRIPTION_LIMITS.FREE.SET_SUGGESTIONS
+  const visibleRows = hasPremium ? rows : rows.slice(0, freeLimit)
+  const hasMoreRows = !hasPremium && rows.length > freeLimit
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-baseline justify-between">
         <p className="text-lg font-medium">Suggested load</p>
+        {!hasPremium && rows.length > freeLimit && (
+          <p className="text-xs text-muted-foreground">
+            {freeLimit} of {rows.length} sets
+          </p>
+        )}
       </div>
 
-      <div className="overflow-hidden space-y-2">
-        {rows.map((row) => (
+      <div className="space-y-2">
+        {visibleRows.map((row) => (
           <WorkoutSuggestionRow
             key={row.order}
             row={row}
             weightUnit={weightUnit}
-            canMutate={canMutate}
+            canMutate={hasPremium && canMutate}
             isApplyingSuggested={isApplyingSuggested}
             applyingKey={applyingKey}
             onApplyDelta={applyForSet}
           />
         ))}
       </div>
+
+      {/* Simple upgrade note for non-premium users */}
+      {hasMoreRows && (
+        <PremiumUpgradeNote>
+          Upgrade to see all {rows.length} set suggestions
+        </PremiumUpgradeNote>
+      )}
     </div>
   )
 }

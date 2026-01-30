@@ -27,7 +27,7 @@ import { WeekNavigator } from './week-navigator'
 import { WeeklyProgressChart } from './weekly-progress-chart'
 
 export function MuscleHeatmapSection() {
-  const { user } = useUser()
+  const { user, hasPremium } = useUser()
   const searchParams = useSearchParams()
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'heatmap' | 'recovery'>('heatmap')
@@ -125,6 +125,7 @@ export function MuscleHeatmapSection() {
                         weekOffset={weekOffset}
                         onPrevious={goToPreviousWeek}
                         onNext={goToNextWeek}
+                        hasPremium={hasPremium}
                       />
                     </div>
 

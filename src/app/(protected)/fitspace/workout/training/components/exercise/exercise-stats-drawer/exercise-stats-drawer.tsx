@@ -7,6 +7,7 @@ import { useId, useState } from 'react'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import { useUser } from '@/context/user-context'
 import type { GQLEquipment } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
@@ -56,6 +57,7 @@ export function ExerciseStatsDrawer({
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('3months')
   const chartId = useId().replace(/:/g, '')
 
+  const { hasPremium } = useUser()
   const { weightUnit, toDisplayWeight } = useWeightConversion()
   const { exercise, isLoading } = useExerciseStatsQuery({
     baseExerciseId,
@@ -98,7 +100,7 @@ export function ExerciseStatsDrawer({
         className="max-h-[92vh] "
         grabberAbsolute
       >
-        <div className="flex flex-col min-h-0 ">
+        <div className="flex flex-col min-h-0 pt-4">
           <ExerciseStatsHeader
             exerciseName={exerciseName}
             lastPerformedLabel={lastPerformedLabel}
@@ -114,6 +116,7 @@ export function ExerciseStatsDrawer({
                 equipment={equipment ?? null}
                 onApplySuggested={onApplySuggested}
                 isApplyingSuggested={isApplyingSuggested}
+                hasPremium={hasPremium}
               />
             ) : null}
 
@@ -137,6 +140,7 @@ export function ExerciseStatsDrawer({
                   oneRmChangePercent={oneRmChangePercent}
                   weightUnit={weightUnit}
                   sessionsCount={oneRmSeries.length}
+                  hasPremium={hasPremium}
                 />
               </div>
               <WeeklyVolumeCard
@@ -146,12 +150,14 @@ export function ExerciseStatsDrawer({
                 lastWeekVolume={lastWeekVolume}
                 volumeChangePercent={volumeChangePercent}
                 weightUnit={weightUnit}
+                hasPremium={hasPremium}
               />
             </div>
             <RepMaxGrid
               latestOneRMKg={latestOneRMKg}
               weightUnit={weightUnit}
               suggestions={repMaxSuggestions}
+              hasPremium={hasPremium}
             />
           </div>
         </div>

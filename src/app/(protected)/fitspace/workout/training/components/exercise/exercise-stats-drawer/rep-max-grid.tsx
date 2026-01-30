@@ -3,7 +3,9 @@
 import { useMemo } from 'react'
 import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts'
 
+import { PremiumUpgradeNote } from '@/components/premium-upgrade-note'
 import { type ChartConfig, ChartContainer } from '@/components/ui/chart'
+import { SUBSCRIPTION_LIMITS } from '@/config/subscription-limits'
 import { formatNumber } from '@/lib/utils'
 
 import type { RepMaxConfidence } from './types'
@@ -19,18 +21,25 @@ export function RepMaxGrid({
   latestOneRMKg,
   weightUnit,
   suggestions,
+  hasPremium = true,
 }: {
   latestOneRMKg: number | null
   weightUnit: 'kg' | 'lbs'
   suggestions: Suggestion[]
+  hasPremium?: boolean
 }) {
+  const freeLimit = SUBSCRIPTION_LIMITS.FREE.REP_MAX_ESTIMATES
+  const visibleSuggestions = hasPremium
+    ? suggestions
+    : suggestions.slice(0, freeLimit)
+
   const chartData = useMemo(
     () =>
-      suggestions.map((s) => ({
+      visibleSuggestions.map((s) => ({
         label: `${s.reps}`,
         weight: s.displayWeight,
       })),
-    [suggestions],
+    [visibleSuggestions],
   )
 
   const chartConfig = useMemo(
@@ -65,7 +74,7 @@ export function RepMaxGrid({
       <div className="w-full bg-card-on-card dark:bg-black/40 py-4 rounded-2xl">
         <ChartContainer
           config={chartConfig}
-          style={{ height: suggestions.length * 36 }}
+          style={{ height: visibleSuggestions.length * 36 }}
           className="w-full"
         >
           <BarChart
@@ -118,6 +127,12 @@ export function RepMaxGrid({
           </BarChart>
         </ChartContainer>
       </div>
+
+      {!hasPremium && suggestions.length > freeLimit && (
+        <PremiumUpgradeNote>
+          Upgrade to see all {suggestions.length} rep estimates
+        </PremiumUpgradeNote>
+      )}
     </div>
   )
 }

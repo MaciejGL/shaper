@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { HeaderTab } from '@/components/header-tab'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
+import { UsageLimitIndicator } from '@/components/usage-limit-indicator'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
@@ -246,11 +247,11 @@ export function CustomPlansTab() {
       <div className="flex justify-between items-center gap-2 mb-4 mt-8">
         <div>
           <p className="text-base font-semibold">Custom plans</p>
-          <p className="text-sm text-muted-foreground">
-            {hasPremium
-              ? `${foldersList.length} plans · ${totalWorkoutCount} days`
-              : `${foldersList.length}/${subscription?.favouriteFolderLimit ?? 1} plans · ${totalWorkoutCount}/${subscription?.favouriteWorkoutLimit ?? 3} days`}
-          </p>
+          {hasPremium ? (
+            <p className="text-sm text-muted-foreground">
+              {foldersList.length} plans · {totalWorkoutCount} days
+            </p>
+          ) : null}
         </div>
         <PremiumButtonWrapper
           hasPremium={hasPremium}
@@ -268,6 +269,22 @@ export function CustomPlansTab() {
           </Button>
         </PremiumButtonWrapper>
       </div>
+
+      {/* Usage limits for non-premium users */}
+      {!hasPremium && (
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <UsageLimitIndicator
+            current={foldersList.length}
+            limit={subscription?.favouriteFolderLimit ?? 1}
+            label="Plans"
+          />
+          <UsageLimitIndicator
+            current={totalWorkoutCount}
+            limit={subscription?.favouriteWorkoutLimit ?? 3}
+            label="Days"
+          />
+        </div>
+      )}
 
       {isLoadingFavourites || isLoadingFolders ? (
         <div className="space-y-3">

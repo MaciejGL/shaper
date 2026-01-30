@@ -4,7 +4,6 @@
  * Maps training goals to curated free workouts for the onboarding flow.
  * Users select a goal, then see 2 recommended workouts to start immediately.
  */
-
 import type { CompactWorkoutCardData } from '@/app/(protected)/fitspace/explore/components/free-workouts-tab'
 import { GQLDifficulty, GQLWorkoutType } from '@/generated/graphql-client'
 

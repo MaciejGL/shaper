@@ -238,9 +238,9 @@ export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
             {/* Notes List */}
             {notes.length > 0 && (
               <div className="space-y-4">
-                {notes.map((note) => (
+                {notes.map((note, index) => (
                   <ExerciseNote
-                    key={note.id}
+                    key={`${note.text}-${index}`}
                     note={note}
                     isEditing={editingNoteId === note.id}
                     editingText={editingText}
@@ -419,7 +419,7 @@ function ExerciseNote({
                 />
 
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center space-x-2 border border-border pl-2 pr-3 py-1 rounded-full">
+                  <div className="flex items-center space-x-2 rounded-full">
                     <Switch
                       id="share-edit-note-trainer"
                       checked={editingShareWithTrainer}
@@ -427,7 +427,7 @@ function ExerciseNote({
                     />
                     <Label
                       htmlFor="share-edit-note-trainer"
-                      className="text-sm"
+                      className="text-xs"
                     >
                       Share with trainer
                     </Label>

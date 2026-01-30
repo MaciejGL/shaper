@@ -17,6 +17,7 @@ interface OneRmBarChartProps {
   weightUnit: 'kg' | 'lbs'
   className?: string
   chartConfig?: ChartConfig
+  showOnlyLast?: boolean
 }
 
 export function OneRmBarChart({
@@ -25,6 +26,7 @@ export function OneRmBarChart({
   weightUnit,
   className,
   chartConfig,
+  showOnlyLast = false,
 }: OneRmBarChartProps) {
   const gradientId = `one-rm-gradient-${id}`
 
@@ -37,6 +39,19 @@ export function OneRmBarChart({
   const series = useMemo(() => {
     const TARGET_POINTS = 6
 
+    // If showOnlyLast, show empty placeholders for history + last data point
+    if (showOnlyLast && rawSeries.length > 0) {
+      const lastPoint = rawSeries[rawSeries.length - 1]
+      const emptyCount = Math.max(TARGET_POINTS - 1, rawSeries.length - 1)
+      return [
+        ...Array.from({ length: emptyCount }, () => ({
+          label: '',
+          oneRM: 0,
+        })),
+        lastPoint,
+      ]
+    }
+
     if (rawSeries.length >= TARGET_POINTS) return rawSeries
 
     return [
@@ -46,7 +61,7 @@ export function OneRmBarChart({
         oneRM: 0,
       })),
     ]
-  }, [rawSeries])
+  }, [rawSeries, showOnlyLast])
 
   const showValuesOnXAxis = useMemo(() => {
     return rawSeries.length < 15

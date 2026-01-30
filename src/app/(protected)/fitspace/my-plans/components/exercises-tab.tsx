@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 
 import { HeaderTab } from '@/components/header-tab'
 import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
+import { UsageLimitIndicator } from '@/components/usage-limit-indicator'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -128,6 +129,16 @@ export function ExercisesTab() {
         description="Create exercises you can reuse in workouts and templates."
       />
 
+      {/* Usage limit for non-premium users */}
+      {!hasPremium && (
+        <UsageLimitIndicator
+          current={sorted.length}
+          limit={SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES}
+          label="Custom exercises"
+          className="mb-4"
+        />
+      )}
+
       <div className="flex items-center justify-between gap-3">
         {shouldShowCreateButton ? (
           <div
@@ -136,12 +147,6 @@ export function ExercisesTab() {
               shouldShowFilters ? 'justify-between' : 'justify-end',
             )}
           >
-            {!hasPremium ? (
-              <p className="text-xs text-muted-foreground tabular-nums flex-1">
-                {sorted.length}/{SUBSCRIPTION_LIMITS.FREE.CUSTOM_EXERCISES}{' '}
-                exercises
-              </p>
-            ) : null}
             {shouldShowFilters ? (
               <Popover>
                 <PopoverTrigger asChild>

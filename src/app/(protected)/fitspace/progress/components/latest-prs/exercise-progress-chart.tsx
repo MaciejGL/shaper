@@ -1,9 +1,10 @@
 'use client'
 
-import { TrendingUp } from 'lucide-react'
+import { Crown, TrendingUp } from 'lucide-react'
 import { useMemo } from 'react'
 import { CartesianGrid, LabelList, Line, LineChart, XAxis } from 'recharts'
 
+import { PremiumUpgradeNote } from '@/components/premium-upgrade-note'
 import {
   Card,
   CardContent,
@@ -34,7 +35,7 @@ export function ExerciseProgressChart({
   exercisePRs,
   exerciseId,
 }: ExerciseProgressChartProps) {
-  const { user } = useUser()
+  const { user, hasPremium } = useUser()
   const { toDisplayWeight, weightUnit } = useWeightConversion()
 
   // Fetch exercise historical logs
@@ -84,6 +85,10 @@ export function ExerciseProgressChart({
     return chartData
   }, [exercisePRs, exerciseLogsData, exerciseId, toDisplayWeight])
 
+  // For non-premium users, only show the most recent data point
+  const displayChartData = hasPremium ? chartData : chartData.slice(-1)
+  const hasHistoricalData = chartData.length > 1
+
   const chartConfig = {
     estimated1RM: {
       label: 'Estimated 1RM',
@@ -119,21 +124,23 @@ export function ExerciseProgressChart({
       <div>
         <CardTitle>1 Rep Max</CardTitle>
         <CardDescription>
-          Estimated 1RM over time ({weightUnit})
+          {hasPremium
+            ? `Estimated 1RM over time (${weightUnit})`
+            : `Current session (${weightUnit})`}
         </CardDescription>
       </div>
       <CardContent className="bg-black/90 dark:bg-black/20 py-2 mt-4 mb-2 rounded-lg">
         <ChartContainer id={`exercise-pr-${exerciseId}`} config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={chartData}
+            data={displayChartData}
             margin={{
               top: 20,
               left: 28,
               right: 28,
             }}
           >
-            <CartesianGrid vertical={false} className="!stroke-border/20" />
+            <CartesianGrid vertical={false} className="stroke-border/20" />
             <XAxis
               dataKey="date"
               tickLine={false}
@@ -155,7 +162,9 @@ export function ExerciseProgressChart({
                     cy={props.cy}
                     r={payload?.isPR ? 4 : 4}
                     fill={payload?.isPR ? 'var(--chart-1)' : 'var(--chart-2)'}
-                    stroke={payload?.isPR ? 'var(--chart-1)' : 'var(--chart-2)'}
+                    stroke={
+                      payload?.isPR ? 'var(--chart-1)' : 'var(--chart-2)'
+                    }
                     strokeWidth={2}
                   />
                 )
@@ -177,22 +186,43 @@ export function ExerciseProgressChart({
           </LineChart>
         </ChartContainer>
       </CardContent>
+
       <CardFooter className="items-baseline gap-2 text-sm justify-end">
         <div className="text-muted-foreground leading-none">
-          From {firstData?.estimated1RM?.toFixed(1) || 0} to{' '}
-          {latestData?.estimated1RM?.toFixed(1) || 0} {weightUnit}
-        </div>
-        <div
-          className={cn(
-            'flex gap-1 leading-none font-medium text-base',
-            progressPercentage > 0 ? 'text-amber-500' : 'text-muted-foreground',
+          {hasPremium ? (
+            <>
+              From {firstData?.estimated1RM?.toFixed(1) || 0} to{' '}
+              {latestData?.estimated1RM?.toFixed(1) || 0} {weightUnit}
+            </>
+          ) : (
+            <>
+              Current: {latestData?.estimated1RM?.toFixed(1) || 0} {weightUnit}
+            </>
           )}
-        >
-          {progressPercentage > 0 ? '+' : ''}
-          {progressPercentage.toFixed(1)}%
-          {progressPercentage > 0 && <TrendingUp className="size-6" />}
         </div>
+        {hasPremium ? (
+          <div
+            className={cn(
+              'flex gap-1 leading-none font-medium text-base',
+              progressPercentage > 0
+                ? 'text-amber-500'
+                : 'text-muted-foreground',
+            )}
+          >
+            {progressPercentage > 0 ? '+' : ''}
+            {progressPercentage.toFixed(1)}%
+            {progressPercentage > 0 && <TrendingUp className="size-6" />}
+          </div>
+        ) : (
+          <Crown className="size-4 text-amber-500" />
+        )}
       </CardFooter>
+
+      {!hasPremium && hasHistoricalData && (
+        <PremiumUpgradeNote className="mt-2">
+          Upgrade to view historical progress
+        </PremiumUpgradeNote>
+      )}
     </div>
   )
 }

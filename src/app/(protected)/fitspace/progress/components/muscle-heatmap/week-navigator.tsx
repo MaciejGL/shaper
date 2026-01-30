@@ -3,6 +3,7 @@
 import { format, parseISO } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 
 interface WeekNavigatorProps {
@@ -11,6 +12,7 @@ interface WeekNavigatorProps {
   weekOffset: number
   onPrevious: () => void
   onNext: () => void
+  hasPremium?: boolean
 }
 
 export function WeekNavigator({
@@ -19,6 +21,7 @@ export function WeekNavigator({
   weekOffset,
   onPrevious,
   onNext,
+  hasPremium = true,
 }: WeekNavigatorProps) {
   const formatWeekRange = () => {
     if (!weekStartDate || !weekEndDate) return 'This Week'
@@ -42,13 +45,19 @@ export function WeekNavigator({
 
   return (
     <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="icon-md"
-        iconOnly={<ChevronLeft className="!size-5" />}
-        onClick={onPrevious}
-        aria-label="Previous week"
-      />
+      <PremiumButtonWrapper
+        hasPremium={hasPremium}
+        tooltipText="View past weeks with Premium"
+      >
+        <Button
+          variant="outline"
+          size="icon-md"
+          iconOnly={<ChevronLeft className="!size-5" />}
+          onClick={hasPremium ? onPrevious : undefined}
+          disabled={!hasPremium}
+          aria-label="Previous week"
+        />
+      </PremiumButtonWrapper>
       <span className="min-w-[80px] text-center text-sm font-medium flex flex-col items-center justify-center">
         {formatWeekRange()}
       </span>
