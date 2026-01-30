@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
 
     const [plans, total] = await Promise.all([
       prisma.trainingPlan.findMany({
+        relationLoadStrategy: 'query',
         where: whereClause,
         include: {
           createdBy: {

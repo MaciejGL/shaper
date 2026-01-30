@@ -15,7 +15,7 @@ export const createUserLoaders = () => ({
   // STANDARDIZED: Use same include pattern as userBasic for batching
   getCurrentUser: new DataLoader(async (emails: readonly string[]) => {
     const users = await prisma.user.findMany({
-      relationLoadStrategy: 'join',
+      relationLoadStrategy: 'query',
       where: { email: { in: emails as string[] } },
       select: {
         id: true,
@@ -41,7 +41,7 @@ export const createUserLoaders = () => ({
 
   authSession: new DataLoader(async (emails: readonly string[]) => {
     const user = await prisma.user.findMany({
-      relationLoadStrategy: 'join',
+      relationLoadStrategy: 'query',
       where: { email: { in: emails as string[] } },
       include: {
         sessions: {
@@ -63,7 +63,7 @@ export const createUserLoaders = () => ({
       `⚠️ [USER-LOADER] userById (with bodyMeasures) loading ${ids.length} users - consider using userBasic instead`,
     )
     const users = await prisma.user.findMany({
-      relationLoadStrategy: 'join',
+      relationLoadStrategy: 'query',
       where: { id: { in: ids as string[] } },
       include: {
         profile: {
@@ -80,7 +80,7 @@ export const createUserLoaders = () => ({
   // STANDARDIZED: Standard user data by ID (profile + trainer) - PREFERRED for most use cases
   userBasic: new DataLoader(async (ids: readonly string[]) => {
     const users = await prisma.user.findMany({
-      relationLoadStrategy: 'join',
+      relationLoadStrategy: 'query',
       where: { id: { in: ids as string[] } },
       include: {
         profile: true, // Include full profile (bodyMeasures will be lazy-loaded if needed)
@@ -93,7 +93,7 @@ export const createUserLoaders = () => ({
   // UserProfile DataLoader by userId to eliminate UserProfile N+1 queries
   userProfileByUserId: new DataLoader(async (userIds: readonly string[]) => {
     const userProfiles = await prisma.userProfile.findMany({
-      relationLoadStrategy: 'join',
+      relationLoadStrategy: 'query',
       where: { userId: { in: userIds as string[] } },
       include: {
         user: true,

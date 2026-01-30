@@ -21,6 +21,7 @@ export async function getFavouriteWorkouts(
   context: GQLContext,
 ): Promise<FavouriteWorkout[]> {
   const favouriteWorkouts = await prisma.favouriteWorkout.findMany({
+    relationLoadStrategy: 'query',
     where: {
       createdById: userId,
     },
@@ -58,6 +59,7 @@ export async function getFavouriteWorkout(
   context: GQLContext,
 ): Promise<FavouriteWorkout | null> {
   const favouriteWorkout = await prisma.favouriteWorkout.findFirst({
+    relationLoadStrategy: 'query',
     where: {
       id,
       createdById: userId,
@@ -118,6 +120,7 @@ export async function createFavouriteWorkout(
   }
 
   const favouriteWorkout = await prisma.favouriteWorkout.create({
+    relationLoadStrategy: 'query',
     data: {
       title: input.title,
       description: input.description,
@@ -256,6 +259,7 @@ export async function updateFavouriteWorkout(
 
     // Return updated workout with all relations
     return await tx.favouriteWorkout.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: input.id },
       include: {
         exercises: {
@@ -295,6 +299,7 @@ export async function updateFavouriteExerciseSets(
 
   // Verify ownership and get current sets
   const exercise = await prisma.favouriteWorkoutExercise.findFirst({
+    relationLoadStrategy: 'query',
     where: {
       id: exerciseId,
       favouriteWorkout: {
@@ -359,6 +364,7 @@ export async function updateFavouriteExercisesOrder(
 ): Promise<boolean> {
   // Verify ownership
   const favourite = await prisma.favouriteWorkout.findFirst({
+    relationLoadStrategy: 'query',
     where: {
       id: favouriteId,
       createdById: userId,
@@ -449,6 +455,7 @@ export async function startWorkoutFromFavourite(
 
   // Get the favourite workout with all its exercises and sets
   const favouriteWorkout = await prisma.favouriteWorkout.findFirst({
+    relationLoadStrategy: 'query',
     where: {
       id: favouriteWorkoutId,
       createdById: userId,
@@ -471,6 +478,7 @@ export async function startWorkoutFromFavourite(
 
   // Get or create the user's quick workout plan
   let quickWorkoutPlan = await prisma.trainingPlan.findFirst({
+    relationLoadStrategy: 'query',
     where: {
       createdById: userId,
       assignedToId: userId,
@@ -520,6 +528,7 @@ export async function startWorkoutFromFavourite(
 
     // Reload the plan with weeks
     quickWorkoutPlan = await prisma.trainingPlan.findFirst({
+      relationLoadStrategy: 'query',
       where: {
         createdById: userId,
         assignedToId: userId,
@@ -542,6 +551,7 @@ export async function startWorkoutFromFavourite(
   if (dayId) {
     // User specified a particular day - find it directly
     targetDay = await prisma.trainingDay.findFirst({
+      relationLoadStrategy: 'query',
       where: {
         id: dayId,
         week: {
@@ -610,6 +620,7 @@ export async function startWorkoutFromFavourite(
 
     // Always reload the plan with days after week handling
     const planWithDays = await prisma.trainingPlan.findFirst({
+      relationLoadStrategy: 'query',
       where: {
         createdById: userId,
         assignedToId: userId,
@@ -728,6 +739,7 @@ export async function getFavouriteWorkoutFolders(
   context: GQLContext,
 ): Promise<FavouriteWorkoutFolder[]> {
   const folders = await prisma.favouriteWorkoutFolder.findMany({
+    relationLoadStrategy: 'query',
     where: {
       createdById: userId,
     },
@@ -768,6 +780,7 @@ export async function createFavouriteWorkoutFolder(
   }
 
   const folder = await prisma.favouriteWorkoutFolder.create({
+    relationLoadStrategy: 'query',
     data: {
       name: input.name,
       createdById: userId,
@@ -797,6 +810,7 @@ export async function updateFavouriteWorkoutFolder(
   }
 
   const folder = await prisma.favouriteWorkoutFolder.update({
+    relationLoadStrategy: 'query',
     where: { id: input.id },
     data: {
       name: input.name ?? existingFolder.name,

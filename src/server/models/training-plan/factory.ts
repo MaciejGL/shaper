@@ -153,8 +153,8 @@ export async function getTemplates(
   }
 
   const templates = await prisma.trainingPlan.findMany({
-    where,
     relationLoadStrategy: 'query',
+    where,
     orderBy: {
       createdAt: 'desc',
     },
@@ -205,6 +205,7 @@ export async function getPublicTrainingPlans(
   }
 
   const publicPlans = await prisma.trainingPlan.findMany({
+    relationLoadStrategy: 'query',
     where,
     orderBy: {
       createdAt: 'desc', // Order by creation date for now
@@ -312,6 +313,7 @@ export async function getClientActivePlan(
   }
 
   const plan = await prisma.trainingPlan.findFirst({
+    relationLoadStrategy: 'query',
     where: {
       assignedToId: clientId,
       createdById: {
@@ -364,6 +366,7 @@ export async function getMyPlansOverview(context: GQLContext) {
   }
   const [plans, quickWorkoutPlan] = await Promise.all([
     prisma.trainingPlan.findMany({
+      relationLoadStrategy: 'query',
       where: {
         assignedToId: user.user.id,
         createdById: {
@@ -414,6 +417,7 @@ export async function getMyPlansOverview(context: GQLContext) {
     }),
 
     prisma.trainingPlan.findFirst({
+      relationLoadStrategy: 'query',
       where: {
         assignedToId: user.user.id,
         createdById: user.user.id,
@@ -494,6 +498,7 @@ export async function getMyPlansOverviewLite(context: GQLContext) {
   // Only fetch basic plan data without nested relations
   const [plans, quickWorkoutPlan] = await Promise.all([
     prisma.trainingPlan.findMany({
+      relationLoadStrategy: 'query',
       where: {
         assignedToId: user.user.id,
         createdById: {
@@ -519,6 +524,7 @@ export async function getMyPlansOverviewLite(context: GQLContext) {
     }),
 
     prisma.trainingPlan.findFirst({
+      relationLoadStrategy: 'query',
       where: {
         assignedToId: user.user.id,
         createdById: user.user.id,
@@ -572,6 +578,7 @@ export async function getMyPlansOverviewFull(context: GQLContext) {
 
   const [plans, quickWorkoutPlan] = await Promise.all([
     prisma.trainingPlan.findMany({
+      relationLoadStrategy: 'query',
       where: {
         assignedToId: user.user.id,
         createdById: {
@@ -623,6 +630,7 @@ export async function getMyPlansOverviewFull(context: GQLContext) {
     }),
 
     prisma.trainingPlan.findFirst({
+      relationLoadStrategy: 'query',
       where: {
         assignedToId: user.user.id,
         createdById: user.user.id,
@@ -819,6 +827,7 @@ export async function updateTrainingPlan(
       if (input.weeks) {
         // Get existing weeks to determine what to update/create/delete
         const existingWeeks = await tx.trainingWeek.findMany({
+          relationLoadStrategy: 'query',
           where: { planId: input.id },
           include: {
             days: {
@@ -2051,7 +2060,7 @@ export async function getWorkoutDay(
       // Query TrainingDay directly using planId (uses @@index([planId, scheduledAt, isRestDay]))
       // First: Try to find today's scheduled day
       day = await prisma.trainingDay.findFirst({
-        relationLoadStrategy: 'join',
+        relationLoadStrategy: 'query',
         where: {
           planId: activePlanId,
           scheduledAt: {
@@ -2066,7 +2075,7 @@ export async function getWorkoutDay(
       // Second: Find next upcoming incomplete day (closest to today)
       if (!day) {
         day = await prisma.trainingDay.findFirst({
-          relationLoadStrategy: 'join',
+          relationLoadStrategy: 'query',
           where: {
             planId: activePlanId,
             scheduledAt: { gte: todayUTC },
@@ -2092,7 +2101,7 @@ export async function getWorkoutDay(
 
       if (selfPlanId) {
         day = await prisma.trainingDay.findFirst({
-          relationLoadStrategy: 'join',
+          relationLoadStrategy: 'query',
           where: {
             planId: selfPlanId,
             scheduledAt: {
@@ -2163,6 +2172,7 @@ export async function getWorkoutDay(
   // First, try to find exercises within the same plan
   // LIMIT to last 50 exercises to prevent memory issues with long training history
   const allPreviousExercises = await prisma.trainingExercise.findMany({
+    relationLoadStrategy: 'query',
     where: {
       baseId: { in: exerciseBaseIds },
       id: { notIn: exerciseIds },
@@ -2244,6 +2254,7 @@ export async function getWorkoutDay(
 
   if (missingBaseIds.length > 0) {
     const fallbackExercises = await prisma.trainingExercise.findMany({
+      relationLoadStrategy: 'query',
       where: {
         baseId: { in: missingBaseIds },
         id: { notIn: exerciseIds },
@@ -2367,6 +2378,7 @@ async function fetchPreviousExercisesByBaseIds({
 
   // Step 1: Fetch from current plan(s)
   const currentPlanExercises = await prisma.trainingExercise.findMany({
+    relationLoadStrategy: 'query',
     where: {
       baseId: { in: baseIds },
       completedAt: { not: null },
@@ -2391,6 +2403,7 @@ async function fetchPreviousExercisesByBaseIds({
 
   if (missingBaseIds.length > 0) {
     const fallbackExercises = await prisma.trainingExercise.findMany({
+      relationLoadStrategy: 'query',
       where: {
         baseId: { in: missingBaseIds },
         completedAt: { not: null },
@@ -2638,6 +2651,7 @@ export async function getQuickWorkoutDay(
     weekEnd.setUTCDate(weekEnd.getUTCDate() + 7)
 
     day = await prisma.trainingDay.findFirst({
+      relationLoadStrategy: 'query',
       where: {
         week: {
           planId: quickWorkoutPlan.id,
@@ -2762,6 +2776,7 @@ export async function getQuickWorkoutDay(
   // Find all previous exercises with matching baseIds
   // LIMIT to last 50 exercises to prevent memory issues
   const allPreviousExercises = await prisma.trainingExercise.findMany({
+    relationLoadStrategy: 'query',
     where: {
       baseId: { in: exerciseBaseIds },
       id: { notIn: exerciseIds },
@@ -3302,6 +3317,7 @@ async function getPersonalRecordsForPlan(
 
   // Get all PRs for this user within the plan timeframe
   const prs = await prisma.personalRecord.findMany({
+    relationLoadStrategy: 'query',
     where: {
       userId,
       achievedAt: {

@@ -29,6 +29,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     }
 
     const note = await prisma.note.findUnique({
+      relationLoadStrategy: 'query',
       where: {
         id,
         relatedToId: relatedTo,
@@ -415,6 +416,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         : undefined
 
     const newNote = await prisma.note.create({
+      relationLoadStrategy: 'query',
       data: {
         text: note,
         relatedToId: relatedTo,
@@ -436,6 +438,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       if (hasAccess) {
         // Get client details for notification
         const client = await prisma.user.findUnique({
+          relationLoadStrategy: 'query',
           where: { id: relatedTo },
           include: { profile: true },
         })
@@ -479,6 +482,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Verify the exercise belongs to the user's training plans and get trainer info
     const exercise = await prisma.trainingExercise.findFirst({
+      relationLoadStrategy: 'query',
       where: {
         id: exerciseId,
         day: {
@@ -531,6 +535,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         : undefined
 
     const newNote = await prisma.note.create({
+      relationLoadStrategy: 'query',
       data: {
         text: note,
         relatedToId: exerciseId,
@@ -604,6 +609,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Get client details
     const client = await prisma.user.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: clientId },
       include: { profile: true },
     })
@@ -636,6 +642,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       shareWithClient !== undefined ? { shareWithClient } : undefined
 
     const newNote = await prisma.note.create({
+      relationLoadStrategy: 'query',
       data: {
         text: note,
         relatedToId: exerciseId,
@@ -686,6 +693,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Get the parent note to verify access and get related exercise
     const parentNote = await prisma.note.findUnique({
+      relationLoadStrategy: 'query',
       where: { id: parentNoteId },
       include: {
         createdBy: true,
@@ -747,6 +755,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     const metadata = { parentNoteId }
 
     const reply = await prisma.note.create({
+      relationLoadStrategy: 'query',
       data: {
         text,
         relatedToId: parentNote.relatedToId, // Same exercise as parent
@@ -845,6 +854,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     }
 
     const newNote = await prisma.note.update({
+      relationLoadStrategy: 'query',
       where: { id },
       data: updateData,
       include: {
@@ -870,6 +880,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       if (hasAccess) {
         // Get client details for notification
         const client = await prisma.user.findUnique({
+          relationLoadStrategy: 'query',
           where: { id: existingNote.relatedToId },
           include: { profile: true },
         })

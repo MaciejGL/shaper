@@ -7,6 +7,7 @@ export const createPlanLoaders = () => ({
   // LIGHTWEIGHT: Basic plan info for listings and navigation
   trainingPlanBasic: new DataLoader(async (planIds: readonly string[]) => {
     const plans = await prisma.trainingPlan.findMany({
+      relationLoadStrategy: 'query',
       where: { id: { in: planIds as string[] } },
       include: {
         createdBy: {
@@ -40,6 +41,7 @@ export const createPlanLoaders = () => ({
       planIds[0],
     )
     const plans = await prisma.trainingPlan.findMany({
+      relationLoadStrategy: 'query',
       where: { id: { in: planIds as string[] } },
       include: {
         weeks: {
@@ -148,6 +150,7 @@ export const createPlanLoaders = () => ({
 
   weeksByPlanId: new DataLoader(async (planIds: readonly string[]) => {
     const allWeeks = await prisma.trainingWeek.findMany({
+      relationLoadStrategy: 'query',
       where: {
         planId: { in: planIds as string[] },
       },
@@ -161,6 +164,7 @@ export const createPlanLoaders = () => ({
   }),
   reviewsByPlanId: new DataLoader(async (planIds: readonly string[]) => {
     const reviews = await prisma.review.findMany({
+      relationLoadStrategy: 'query',
       where: { trainingPlanId: { in: planIds as string[] } },
       include: { createdBy: { include: { profile: true } } },
     })

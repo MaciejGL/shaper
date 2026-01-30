@@ -162,6 +162,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // 1️⃣ Fetch all logs at once
     const logs = await prisma.exerciseSetLog.findMany({
+      relationLoadStrategy: 'query',
       where: {
         ExerciseSet: {
           exercise: {

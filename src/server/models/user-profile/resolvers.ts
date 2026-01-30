@@ -60,6 +60,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       )
 
       userProfile = await prisma.userProfile.create({
+        relationLoadStrategy: 'query',
         data: {
           userId: userSession.user.id,
           firstName: '',
@@ -383,6 +384,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     // Get exercises where the day is SCHEDULED in the target week
     // This counts sets based on when the workout was planned, not when it was logged
     const exercisesWithCompletedSets = await prisma.trainingExercise.findMany({
+      relationLoadStrategy: 'query',
       where: {
         day: {
           scheduledAt: {
@@ -443,42 +445,39 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     const now = new Date()
     const isCurrentWeek = !targetDate && weekOffset === 0
     if (isCurrentWeek) {
+      // Batch fetch all 12 weeks of streak history in one query (avoid N+1)
+      const streakStartDate = startOfWeek(subWeeks(now, 12), { weekStartsOn })
+      const streakEndDate = endOfWeek(subWeeks(now, 1), { weekStartsOn })
+
+      const allStreakExercises = await prisma.trainingExercise.findMany({
+        relationLoadStrategy: 'query',
+        where: {
+          day: {
+            scheduledAt: { gte: streakStartDate, lte: streakEndDate },
+            week: { plan: { assignedToId: userId } },
+          },
+          sets: { some: { completedAt: { not: null } } },
+        },
+        include: {
+          day: { select: { scheduledAt: true } },
+          base: { include: { muscleGroups: true } },
+          sets: { where: { completedAt: { not: null } } },
+        },
+      })
+
       // Check previous weeks for streak (based on scheduled dates, not completion dates)
       for (let i = 1; i <= 12; i++) {
         const prevWeekStart = startOfWeek(subWeeks(now, i), { weekStartsOn })
         const prevWeekEnd = endOfWeek(subWeeks(now, i), { weekStartsOn })
 
-        const prevWeekExercises = await prisma.trainingExercise.findMany({
-          where: {
-            day: {
-              scheduledAt: {
-                gte: prevWeekStart,
-                lte: prevWeekEnd,
-              },
-              week: {
-                plan: {
-                  assignedToId: userId,
-                },
-              },
-            },
-            sets: {
-              some: {
-                completedAt: { not: null },
-              },
-            },
-          },
-          include: {
-            base: {
-              include: {
-                muscleGroups: true,
-              },
-            },
-            sets: {
-              where: {
-                completedAt: { not: null },
-              },
-            },
-          },
+        // Filter exercises for this week from the batch (in-memory grouping)
+        const prevWeekExercises = allStreakExercises.filter((ex) => {
+          const scheduledAt = ex.day?.scheduledAt
+          return (
+            scheduledAt &&
+            scheduledAt >= prevWeekStart &&
+            scheduledAt <= prevWeekEnd
+          )
         })
 
         // Calculate that week's overall percentage
@@ -634,7 +633,34 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       orderBy: { startedAt: 'desc' },
     })
 
-    // Process each week
+    // Calculate full date range once (oldest to newest)
+    const oldestWeekStart = startOfWeek(subWeeks(now, weekCount - 1), {
+      weekStartsOn,
+    })
+    const newestWeekEnd = endOfWeek(now, { weekStartsOn })
+
+    // Single query for ALL weeks (batch fetch to avoid N+1)
+    const allExercises = await prisma.trainingExercise.findMany({
+      relationLoadStrategy: 'query',
+      where: {
+        day: {
+          scheduledAt: { gte: oldestWeekStart, lte: newestWeekEnd },
+          week: { plan: { assignedToId: userId } },
+        },
+        sets: { some: { completedAt: { not: null } } },
+      },
+      include: {
+        day: { select: { scheduledAt: true } },
+        base: {
+          include: { muscleGroups: true, secondaryMuscleGroups: true },
+        },
+        sets: { where: { completedAt: { not: null } } },
+      },
+    })
+
+    const trackedMuscleGroups = [...TRACKED_DISPLAY_GROUPS]
+
+    // Process each week by filtering from the batch
     for (let i = 0; i < weekCount; i++) {
       const targetWeek = subWeeks(now, i)
       const weekStart = startOfWeek(targetWeek, { weekStartsOn })
@@ -661,24 +687,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         )
       }
 
-      // Get exercises for this week
-      const exercises = await prisma.trainingExercise.findMany({
-        where: {
-          day: {
-            scheduledAt: { gte: weekStart, lte: weekEnd },
-            week: { plan: { assignedToId: userId } },
-          },
-          sets: { some: { completedAt: { not: null } } },
-        },
-        include: {
-          base: {
-            include: { muscleGroups: true, secondaryMuscleGroups: true },
-          },
-          sets: { where: { completedAt: { not: null } } },
-        },
+      // Filter exercises for this week from the batch (in-memory grouping)
+      const exercises = allExercises.filter((ex) => {
+        const scheduledAt = ex.day?.scheduledAt
+        return scheduledAt && scheduledAt >= weekStart && scheduledAt <= weekEnd
       })
-
-      const trackedMuscleGroups = [...TRACKED_DISPLAY_GROUPS]
 
       const computed = computeWeeklyProgressFromExercises({
         exercises,
@@ -827,6 +840,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Use upsert to create profile if it doesn't exist (handles legacy users)
     const userProfile = await prisma.userProfile.upsert({
+      relationLoadStrategy: 'query',
       where: { userId: user.id },
       create: {
         userId: user.id,

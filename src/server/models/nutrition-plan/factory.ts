@@ -77,6 +77,7 @@ export async function getNutritionPlanById(id: string): Promise<
   }
 > {
   const nutritionPlan = await prisma.nutritionPlan.findUnique({
+    relationLoadStrategy: 'query',
     where: { id },
     include: {
       trainer: {
@@ -165,6 +166,7 @@ export async function getTrainerNutritionPlans(
   }
 
   return await prisma.nutritionPlan.findMany({
+    relationLoadStrategy: 'query',
     where,
     include: {
       client: {
@@ -207,6 +209,7 @@ export async function getClientNutritionPlans(clientId: string): Promise<
   })[]
 > {
   return await prisma.nutritionPlan.findMany({
+    relationLoadStrategy: 'query',
     where: {
       clientId,
       isSharedWithClient: true,
@@ -357,6 +360,7 @@ export async function createNutritionPlan(
   await ensureTrainerClientAccess(trainerId, input.clientId)
 
   const nutritionPlan = await prisma.nutritionPlan.create({
+    relationLoadStrategy: 'query',
     data: {
       name: input.name.trim(),
       description: input.description?.trim(),
@@ -433,6 +437,7 @@ export async function updateNutritionPlan(
   }
 
   return await prisma.nutritionPlan.update({
+    relationLoadStrategy: 'query',
     where: { id },
     data: {
       name: input.name?.trim(),
@@ -514,6 +519,7 @@ export async function shareNutritionPlanWithClient(
   }
 
   return await prisma.nutritionPlan.update({
+    relationLoadStrategy: 'query',
     where: { id },
     data: {
       isSharedWithClient: true,
@@ -581,6 +587,7 @@ export async function unshareNutritionPlanFromClient(
   }
 
   return await prisma.nutritionPlan.update({
+    relationLoadStrategy: 'query',
     where: { id },
     data: {
       isSharedWithClient: false,
@@ -648,6 +655,7 @@ export async function copyNutritionPlan(
 
   // Create new plan with copied data
   return await prisma.nutritionPlan.create({
+    relationLoadStrategy: 'query',
     data: {
       name: options.name || `${sourcePlan.name} (Copy)`,
       description: options.description || sourcePlan.description,
@@ -776,6 +784,7 @@ export async function addDayToNutritionPlan(
   }
 
   return await prisma.nutritionPlanDay.create({
+    relationLoadStrategy: 'query',
     data: {
       nutritionPlanId,
       dayNumber,
@@ -841,6 +850,7 @@ export async function updateNutritionPlanDay(
 
   // Check access through plan
   const day = await prisma.nutritionPlanDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     include: {
       nutritionPlan: {
@@ -856,6 +866,7 @@ export async function updateNutritionPlanDay(
   }
 
   return await prisma.nutritionPlanDay.update({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     data: {
       name: input.name.trim(),
@@ -898,6 +909,7 @@ export async function removeDayFromNutritionPlan(
 ): Promise<boolean> {
   // Check access through plan
   const day = await prisma.nutritionPlanDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     include: {
       nutritionPlan: {
@@ -942,6 +954,7 @@ export async function addMealToNutritionPlanDay(
 > {
   // Check access through plan
   const day = await prisma.nutritionPlanDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     include: {
       nutritionPlan: {
@@ -971,6 +984,7 @@ export async function addMealToNutritionPlanDay(
   })
 
   return await prisma.nutritionPlanMeal.create({
+    relationLoadStrategy: 'query',
     data: {
       nutritionPlanDayId: dayId,
       mealId,
@@ -1029,6 +1043,7 @@ export async function updateNutritionPlanMealIngredient(
 
   // Check access through plan
   const planMeal = await prisma.nutritionPlanMeal.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: planMealId },
     include: {
       nutritionPlanDay: {
@@ -1064,6 +1079,7 @@ export async function updateNutritionPlanMealIngredient(
 
   // Upsert the ingredient override
   return await prisma.nutritionPlanMealIngredient.upsert({
+    relationLoadStrategy: 'query',
     where: {
       nutritionPlanMealId_mealIngredientId: {
         nutritionPlanMealId: planMealId,
@@ -1097,6 +1113,7 @@ export async function removeMealFromNutritionPlanDay(
 ): Promise<boolean> {
   // Check access through plan
   const planMeal = await prisma.nutritionPlanMeal.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: planMealId },
     include: {
       nutritionPlanDay: {
@@ -1144,6 +1161,7 @@ export async function reorderNutritionPlanDayMeals(
 > {
   // Check access through plan
   const day = await prisma.nutritionPlanDay.findUnique({
+    relationLoadStrategy: 'query',
     where: { id: dayId },
     include: {
       nutritionPlan: {
@@ -1183,6 +1201,7 @@ export async function reorderNutritionPlanDayMeals(
 
   // Return updated meals
   return await prisma.nutritionPlanMeal.findMany({
+    relationLoadStrategy: 'query',
     where: { nutritionPlanDayId: dayId },
     orderBy: { orderIndex: 'asc' },
     include: {

@@ -19,6 +19,7 @@ export const createChatLoaders = () => ({
       `🔍 [CHAT-LOADER] chatBasic loading ${chatIds.length} chats by ID`,
     )
     const chats = await prisma.chat.findMany({
+      relationLoadStrategy: 'query',
       where: { id: { in: chatIds as string[] } },
       include: {
         trainer: {
@@ -70,6 +71,7 @@ export const createChatLoaders = () => ({
       })
 
       const chats = await prisma.chat.findMany({
+        relationLoadStrategy: 'query',
         where: {
           OR: parsed.map(({ trainerId, clientId }) => ({
             trainerId,
