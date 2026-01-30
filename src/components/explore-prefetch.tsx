@@ -10,9 +10,6 @@ const PREFETCH_DELAY_MS = 2000
 export function ExplorePrefetch() {
   const router = useRouter()
   const hasPrefetchedRef = useRef(false)
-  console.info(
-    'Hey Champ! Explore our plans and enjoyt your workouts! You are top!',
-  )
 
   const { data, isLoading } = useFitspaceGetActivePlanIdQuery()
   const hasActivePlan = !!data?.getActivePlanId
