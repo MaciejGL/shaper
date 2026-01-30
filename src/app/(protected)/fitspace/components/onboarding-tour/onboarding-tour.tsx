@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
   startTransition,
@@ -11,8 +12,6 @@ import {
   useState,
 } from 'react'
 import { toast } from 'sonner'
-
-import { ArrowLeft } from 'lucide-react'
 
 import { Tour, type TourStep } from '@/components/tour'
 import { Button } from '@/components/ui/button'
@@ -41,8 +40,7 @@ const TOUR_CONTENT = {
     title: "You're set - quick tour",
     description: [
       "I'm Mats from the Hypro team.",
-      'This app is built to remove guesswork: follow a plan, hit the right weekly volume, and track progress as you train.',
-      "I'll show you the 4 places you'll actually use - then you'll start your first workout.",
+      "Quick tour of the 4 places you'll use — then your first workout.",
     ],
   },
 
@@ -57,18 +55,16 @@ const TOUR_CONTENT = {
   plans: {
     title: 'My Plans',
     description: [
-      "Everything you'll train from lives here.",
-      'Plans from a trainer, plans you activated from our collection, and your own plans when you\'re ready.',
-      "Pick one plan and stay consistent — that's how progress becomes measurable.",
+      'Your training plans live here.',
+      "Pick one and stay consistent — that's how progress becomes measurable.",
     ],
   },
 
   progress: {
     title: 'Progress (track what matters)',
     description: [
-      'See your weekly volume by muscle group — how many sets you actually hit.',
-      'Set a volume goal based on your focus, and the app tracks whether you are on pace.',
-      'Over time, you will see trends that show real progress — not just workouts logged.',
+      "Weekly volume by muscle group — see if you're hitting your targets.",
+      'Set a goal based on your focus, track trends over time.',
     ],
   },
 
@@ -80,9 +76,8 @@ const TOUR_CONTENT = {
   explore: {
     title: 'Discover (find what fits you)',
     description: [
-      'Free workouts: selected sessions from our full plans — perfect to try right now.',
-      'Coach-built plans: choose by goal and schedule (or use the plan finder).',
-      'Work with a certified trainer for personal guidance — first meeting and assessment is free and non-binding.',
+      'Free workouts to try now, coach-built plans by goal.',
+      'Or connect with a certified trainer — first assessment is free.',
     ],
   },
 
