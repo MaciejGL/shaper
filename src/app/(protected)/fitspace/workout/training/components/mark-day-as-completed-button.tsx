@@ -186,7 +186,7 @@ export function MarkDayAsCompletedButton({
       variant="secondary"
       size="md"
       iconStart={allExercisesCompleted ? <RotateCcw /> : <CheckCheck />}
-      className="flex-1"
+      className="flex-1 rounded-full"
       onClick={handleClick}
       disabled={isPending}
       loading={isPending}
