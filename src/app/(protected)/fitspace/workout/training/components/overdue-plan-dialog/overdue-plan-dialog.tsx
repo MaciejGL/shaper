@@ -45,13 +45,14 @@ export function OverduePlanDialog({
   }, [weeks])
 
   const { mutate: closePlan } = useClosePlanMutation({
-    onSuccess: async () => {
-      await Promise.all([
+    onSuccess: () => {
+      // Navigate first for instant feedback
+      router.push('/fitspace/my-plans')
+      // Invalidations run in background
+      Promise.all([
         revalidatePlanPages(),
         queryInvalidation.planStateChange(queryClient),
-      ])
-      router.refresh()
-      router.push('/fitspace/my-plans')
+      ]).then(() => router.refresh())
     },
     onError: () => {
       setIsCompleting(false)

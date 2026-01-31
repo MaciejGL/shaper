@@ -33,15 +33,16 @@ export function PlanCompletionDialog({
   const hasTrainer = !!user?.trainerId
 
   const { mutate: closePlan, isPending: isClosing } = useClosePlanMutation({
-    onSuccess: async () => {
-      await Promise.all([
-        revalidatePlanPages(),
-        queryInvalidation.planStateChange(queryClient),
-      ])
-      router.refresh()
+    onSuccess: () => {
+      // Navigate first for instant feedback
       onComplete()
       onOpenChange(false)
       router.push('/fitspace/my-plans')
+      // Invalidations run in background
+      Promise.all([
+        revalidatePlanPages(),
+        queryInvalidation.planStateChange(queryClient),
+      ]).then(() => router.refresh())
     },
   })
 

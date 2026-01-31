@@ -273,7 +273,8 @@ function NavLink({
   const handleClick = () => {
     setClickedItem(item.label)
     setPendingNavigation(item.href)
-    window.scrollTo(0, 0)
+    // Scroll after navigation starts to avoid blocking
+    requestAnimationFrame(() => window.scrollTo(0, 0))
     if (shouldUseDeepLink) {
       window.location.href = navigationHref
     }
@@ -338,7 +339,8 @@ function NavBubble({
   const handleClick = () => {
     setClickedItem(item.label)
     setPendingNavigation(item.href)
-    window.scrollTo(0, 0)
+    // Scroll after navigation starts to avoid blocking
+    requestAnimationFrame(() => window.scrollTo(0, 0))
     if (shouldUseDeepLink) {
       window.location.href = navigationHref
     }

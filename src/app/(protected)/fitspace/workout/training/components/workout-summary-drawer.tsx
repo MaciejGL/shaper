@@ -182,13 +182,15 @@ export function WorkoutSummaryDrawer({
   ])
 
   const handleCompleteWorkout = async () => {
+    if (!dayId) {
+      return
+    }
+    // Navigate immediately for instant feedback
+    onComplete?.()
+    router.push('/fitspace/my-plans')
+    // Mutation runs in background
     try {
-      if (!dayId) {
-        return
-      }
       await markWorkoutAsCompleted({ dayId: dayId! })
-      onComplete?.()
-      router.push('/fitspace/my-plans')
     } catch (error) {
       console.error(error)
     }

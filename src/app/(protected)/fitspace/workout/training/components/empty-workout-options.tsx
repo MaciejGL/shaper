@@ -8,7 +8,7 @@ import {
   ClipboardCheck,
   Dumbbell,
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useState } from 'react'
 
 import { HeaderTab } from '@/components/header-tab'
@@ -38,7 +38,6 @@ interface EmptyWorkoutOptionsProps {
 }
 
 export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
-  const router = useRouter()
   const [showFavourites, setShowFavourites] = useState(false)
   const [showExerciseDrawer, setShowExerciseDrawer] = useState(false)
 
@@ -53,12 +52,10 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
 
   const handleStartPlanClick = () => {
     analyticsEvents.todayEmptyStartPlanTap(eventProperties)
-    router.push('/fitspace/explore?tab=premium-plans')
   }
 
   const handleQuickWorkoutClick = () => {
     analyticsEvents.todayEmptyQuickWorkoutTap(eventProperties)
-    router.push('/fitspace/explore?tab=free-workouts')
   }
 
   const handleBuildOwnClick = () => {
@@ -212,11 +209,11 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
               </div>
 
               <div className="space-y-2">
-                <button
-                  type="button"
+                <Link
+                  href="/fitspace/explore?tab=free-workouts"
                   onClick={handleQuickWorkoutClick}
                   aria-label="Browse coach workouts"
-                  className="w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40 rounded-2xl border border-border overflow-hidden"
+                  className="block w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40 rounded-2xl border border-border overflow-hidden"
                 >
                   <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <SectionIcon
@@ -227,12 +224,12 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                     <span className="font-medium">Single Sessions</span>
                     <ChevronRight className="size-5 text-muted-foreground" />
                   </div>
-                </button>
-                <button
-                  type="button"
+                </Link>
+                <Link
+                  href="/fitspace/explore?tab=premium-plans"
                   onClick={handleStartPlanClick}
                   aria-label="Browse coach programs"
-                  className="w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40 rounded-2xl border border-border overflow-hidden"
+                  className="block w-full text-left px-4 py-3 transition-colors hover:bg-accent/30 active:bg-accent/40 rounded-2xl border border-border overflow-hidden"
                 >
                   <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <SectionIcon
@@ -243,7 +240,7 @@ export function EmptyWorkoutOptions({ day }: EmptyWorkoutOptionsProps) {
                     <span className="font-medium">Full Programs</span>
                     <ChevronRight className="size-5 text-muted-foreground" />
                   </div>
-                </button>
+                </Link>
               </div>
             </div>
           </motion.div>

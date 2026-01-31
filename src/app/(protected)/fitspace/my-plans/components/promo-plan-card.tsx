@@ -1,18 +1,16 @@
 import { ChevronRight } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
 
 export function PromoPlanCard() {
-  const router = useRouter()
-
   return (
-    <Card
-      onClick={() => router.push('/fitspace/explore?tab=premium-plans')}
-      className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-video"
-      variant="tertiary"
-    >
+    <Link href="/fitspace/explore?tab=premium-plans" className="block">
+      <Card
+        className="cursor-pointer hover:border-primary/50 transition-all overflow-hidden group relative aspect-video"
+        variant="tertiary"
+      >
       <CardContent className="relative flex gap-2 justify-between items-center h-full">
         <div className="flex flex-col items-center justify-center grow gap-6">
           <SectionIcon icon={ChevronRight} variant="indigo" size="lg" />
@@ -25,5 +23,6 @@ export function PromoPlanCard() {
         </div>
       </CardContent>
     </Card>
+    </Link>
   )
 }
